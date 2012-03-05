@@ -11,9 +11,6 @@ import java.util.Set;
 
 import javax.crypto.Cipher;
 
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.util.encoders.Hex;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.fenritz.safecamera.util.AESCrypt;
+import com.fenritz.safecamera.util.AESCryptException;
 
 public class SafeCameraActivity extends Activity {
     /** Called when the activity is first created. */
@@ -57,7 +55,7 @@ public class SafeCameraActivity extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		catch (CryptoException e) {
+		catch (AESCryptException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -125,7 +123,7 @@ public class SafeCameraActivity extends Activity {
 				setupAES();
 				EditText text = (EditText)findViewById(R.id.text);
 				
-				String clearText = crypto.decrypt(Hex.decode(text.getText().toString()));
+				String clearText = crypto.decrypt(AESCrypt.hexToByte(text.getText().toString()));
 				if(clearText != null){
 					text.setText(clearText);
 				}

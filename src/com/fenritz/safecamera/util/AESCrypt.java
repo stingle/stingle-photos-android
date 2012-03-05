@@ -18,9 +18,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.util.encoders.Hex;
-
 public class AESCrypt {
 	Cipher encryptionCipher;
 	Cipher decryptionCipher;
@@ -57,9 +54,7 @@ public class AESCrypt {
 		}
 	}
 
-	public AESCrypt(String stringKey) throws NoSuchAlgorithmException, NoSuchProviderException, CryptoException {
-		// key = new SecretKeySpec(getHash(stringKey), "AES");
-		//byte[] salt = generateSalt();
+	public AESCrypt(String stringKey) throws NoSuchAlgorithmException, NoSuchProviderException, AESCryptException {
 		byte[] salt = getHash(stringKey);
 		key = getSecretKey(stringKey, salt);
 		this.setupCrypto();
@@ -145,8 +140,8 @@ public class AESCrypt {
 	public String encrypt(String plaintext) {
 		try {
 			byte[] ciphertext = encryptionCipher.doFinal(plaintext.getBytes("UTF-8"));
-			String ivHexString = new String(Hex.encode(iv));
-			String cipherHexString = new String(Hex.encode(ciphertext));
+			String ivHexString = new String(byteToHex(iv));
+			String cipherHexString = new String(byteToHex(ciphertext));
 			return ivHexString.concat(cipherHexString);
 		}
 		catch (Exception e) {
@@ -165,11 +160,11 @@ public class AESCrypt {
 			String ivHexText = hexCipherText.substring(0, 32);
 			hexCipherText = hexCipherText.substring(32);
 			
-			iv = Hex.decode(ivHexText);
+			iv = hexToByte(ivHexText);
 			setupCrypto(iv);
 			
 			try {
-				String plaintext = new String(decryptionCipher.doFinal(Hex.decode(hexCipherText)), "UTF-8");
+				String plaintext = new String(decryptionCipher.doFinal(hexToByte(hexCipherText)), "UTF-8");
 				return plaintext;
 			}
 			catch (Exception e) {
@@ -203,23 +198,22 @@ public class AESCrypt {
 			return iv;
 		}
 		catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return new byte[IV_LENGTH];
 	}
 
-	private byte[] getHash(String password) throws CryptoException {
+	private byte[] getHash(String password) throws AESCryptException {
 		try {
 			MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
 			return md.digest(password.getBytes("UTF-8"));
 		}
 		catch (Exception e) {
-			throw new CryptoException("Unable to get hash");
+			throw new AESCryptException("Unable to get hash");
 		}
 	}
 
-	private SecretKey getSecretKey(String password, byte[] salt) throws CryptoException {
+	private SecretKey getSecretKey(String password, byte[] salt) throws AESCryptException {
 		try {
 			PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), salt, PBE_ITERATION_COUNT, 256);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(PBE_ALGORITHM, PROVIDER);
@@ -228,22 +222,43 @@ public class AESCrypt {
 			return secret;
 		}
 		catch (Exception e) {
-			throw new CryptoException("Unable to get secret key");
+			throw new AESCryptException("Unable to get secret key");
 		}
 	}
 	
-	private byte[] generateSalt() throws CryptoException {
+	@SuppressWarnings("unused")
+	private byte[] generateSalt() throws AESCryptException {
 		try {
 			SecureRandom random = SecureRandom.getInstance(RANDOM_ALGORITHM);
 			byte[] salt = new byte[SALT_LENGTH];
 			random.nextBytes(salt);
-			//String saltHex = new String(Hex.encode(salt));
-			//return saltHex;
 			return salt;
 		}
 		catch (Exception e) {
-			throw new CryptoException("Unable to generate salt");
+			throw new AESCryptException("Unable to generate salt");
 		}
 	}
 	
+	static final String HEXES = "0123456789ABCDEF";
+
+    public static String byteToHex( byte [] raw ) {
+        if ( raw == null ) {
+          return null;
+        }
+        final StringBuilder hex = new StringBuilder( 2 * raw.length );
+        for ( final byte b : raw ) {
+          hex.append(HEXES.charAt((b & 0xF0) >> 4))
+             .append(HEXES.charAt((b & 0x0F)));
+        }
+        return hex.toString();
+    }
+
+    public static byte[] hexToByte( String hexString){
+        int len = hexString.length();
+        byte[] ba = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            ba[i/2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i+1), 16));
+        }
+        return ba;
+    }
 }
