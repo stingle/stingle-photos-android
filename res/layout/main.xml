@@ -8,17 +8,44 @@
         android:id="@+id/pass"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="top"
-        android:text="govno" >
+        android:hint="@string/password"
+        android:text="govno" />
 
-        <requestFocus />
-    </EditText>
-
-    <EditText
-        android:id="@+id/text"
+    <LinearLayout
+        android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:gravity="right|center_vertical"
+        android:orientation="horizontal" >
 
+        <FrameLayout
+            android:id="@+id/camera_preview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" />
+		
+        <LinearLayout
+	        android:id="@+id/linearLayout1"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical" >
+	        <Button
+	            android:id="@+id/take_photo"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center"
+	            android:drawableTop="@android:drawable/ic_menu_camera" />
+	        <Button
+	            android:id="@+id/decrypt"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center"
+	            android:drawableTop="@android:drawable/ic_menu_gallery" />
+		</LinearLayout>
+    </LinearLayout>
+
+    <!--
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
@@ -38,33 +65,6 @@
             android:layout_weight="1.00"
             android:text="Decrypt" />
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-
-        <Button
-            android:id="@+id/encText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Encrypt text" />
-
-        <Button
-            android:id="@+id/decText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Decrypt Text" />
-
-        <Button
-            android:id="@+id/decTextB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Decrypt Bytes" />
-
-    </LinearLayout>
+    -->
 
 </LinearLayout>

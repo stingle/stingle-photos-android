@@ -109,6 +109,21 @@ public class AESCrypt {
 			e.printStackTrace();
 		}
 	}
+	
+	public void encrypt(byte[] data, OutputStream out) {
+		try {
+			out.write(iv, 0, iv.length);
+
+			// Bytes written to out will be encrypted
+			out = new CipherOutputStream(out, encryptionCipher);
+
+			out.write(data);
+			out.close();
+		}
+		catch (java.io.IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 
 	public void decrypt(InputStream in, OutputStream out) {
