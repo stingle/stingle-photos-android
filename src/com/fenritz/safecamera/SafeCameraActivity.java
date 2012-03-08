@@ -1,6 +1,5 @@
 package com.fenritz.safecamera;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -15,10 +14,11 @@ import java.util.Set;
 import javax.crypto.Cipher;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -31,13 +31,15 @@ import android.widget.FrameLayout;
 import com.fenritz.safecamera.util.AESCrypt;
 import com.fenritz.safecamera.util.AESCryptException;
 import com.fenritz.safecamera.util.CameraPreview;
+import com.fenritz.safecamera.util.Helpers;
 
 public class SafeCameraActivity extends Activity {
 	/** Called when the activity is first created. */
 	AESCrypt crypto;
-	File sdcard;
 	Camera mCamera;
 	CameraPreview mPreview;
+	
+	public final static String password = "";
 
 	public final static int REQUEST_FROM_CAMERA = 0;
 	private static final String JPEG_FILE_PREFIX = "IMG_";
@@ -48,9 +50,7 @@ public class SafeCameraActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
-
-		sdcard = Environment.getExternalStorageDirectory();
+		setContentView(R.layout.take_photo);
 
 		// ((Button)findViewById(R.id.encrypt)).setOnClickListener(encrypt());
 		// ((Button)findViewById(R.id.decrypt)).setOnClickListener(decrypt());
@@ -132,16 +132,10 @@ public class SafeCameraActivity extends Activity {
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
-				try {
-					setupAES();
-
-					FileOutputStream out = new FileOutputStream(sdcard.toString() + "/SafeCamera/" + getFilename() + ".jpg.sc");
-					crypto.encrypt(data, out);
-				}
-				catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				new EncryptData().execute(data);
+				
+				Handler myHandler = new ResumePreview();
+				myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
 			}
 		};
 	}
@@ -172,9 +166,6 @@ public class SafeCameraActivity extends Activity {
 
 					mCamera.takePicture(null, null, getPictureCallback());
 					mPreviewState = CAM_STATE_FROZEN;
-					
-					Handler myHandler = new ResumePreview();
-					myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
 				}
 			}
 		};
@@ -185,8 +176,8 @@ public class SafeCameraActivity extends Activity {
 			public void onClick(View v) {
 				try {
 					setupAES();
-					FileInputStream in = new FileInputStream(sdcard.toString() + "/SafeCamera/2.jpg");
-					FileOutputStream out = new FileOutputStream(sdcard.toString() + "/SafeCamera/1.jpg.sc");
+					FileInputStream in = new FileInputStream(Helpers.getMainDir() + "2.jpg");
+					FileOutputStream out = new FileOutputStream(Helpers.getMainDir() + "1.jpg.sc");
 					crypto.encrypt(in, out);
 				}
 				catch (FileNotFoundException e) {
@@ -204,17 +195,38 @@ public class SafeCameraActivity extends Activity {
 	private OnClickListener decrypt() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				try {
+				Intent intent = new Intent();
+				intent.setClass(SafeCameraActivity.this, Gallery.class);
+				startActivity(intent);
+				/*try {
 					setupAES();
-					crypto.decrypt(new FileInputStream(sdcard.toString() + "/SafeCamera/IMG_20120307_010025.jpg.sc"),
-							new FileOutputStream(sdcard.toString() + "/SafeCamera/IMG_20120307_010025.jpg"));
+					crypto.decrypt(new FileInputStream(Helpers.getMainDir() + "IMG_20120307_010025.jpg.sc"),
+							new FileOutputStream(Helpers.getMainDir() + "IMG_20120307_010025.jpg"));
 				}
 				catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 			}
 		};
+	}
+	
+	private class EncryptData extends AsyncTask<byte[], Void, Void> {
+		
+		@Override
+		protected Void doInBackground(byte[]... params) {
+			setupAES();
+
+			try {
+				FileOutputStream out = new FileOutputStream(Helpers.getMainDir() + getFilename() + ".jpg.sc");
+				crypto.encrypt(params[0], out);
+			} 
+			catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
 	}
 
 	public static void printMaxKeySizes() {

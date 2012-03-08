@@ -1,5 +1,6 @@
 package com.fenritz.safecamera.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
@@ -145,6 +146,30 @@ public class AESCrypt {
 		catch (java.io.IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public byte[] decrypt(InputStream in) {
+		try {
+			in.read(iv, 0, iv.length);
+			this.setupCrypto(iv);
+
+			// Bytes read from in will be decrypted
+			in = new CipherInputStream(in, decryptionCipher);
+
+			// Read in the decrypted bytes and write the cleartext to out
+			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+			int numRead = 0;
+			while ((numRead = in.read(buf)) >= 0) {
+				byteBuffer.write(buf, 0, numRead);
+			}
+			
+			return byteBuffer.toByteArray();
+		}
+		catch (java.io.IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 	/**

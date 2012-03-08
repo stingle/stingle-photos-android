@@ -23,6 +23,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Gallery"
+            android:name="Gallery" >
+        </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="View Image"
+            android:name="ViewImage" >
+        </activity>
     </application>
 
 </manifest>
