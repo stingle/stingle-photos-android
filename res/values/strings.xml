@@ -4,5 +4,9 @@
     <string name="hello">Hello World, SafeCameraActivity!</string>
     <string name="app_name">SafeCamera</string>
     <string name="password">Password</string>
+    <string name="enter_password">Please enter master password</string>
+    <string name="ok">Ok</string>
+    <string name="unexpected_error">Unexpected error %s</string>
+    <string name="file_not_found">File not found!</string>
 
 </resources>

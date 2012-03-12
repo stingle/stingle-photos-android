@@ -11,14 +11,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fenritz.safecamera.util.Helpers;
 
-public class Gallery extends Activity {
+public class GalleryActivity extends Activity {
 
 	String currentPath;
 	File[] files;
@@ -49,11 +48,10 @@ public class Gallery extends Activity {
 		return new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Toast.makeText(Gallery.this, files[position].getName(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(GalleryActivity.this, files[position].getName(), Toast.LENGTH_SHORT).show();
 				Intent intent = new Intent();
-				intent.setClass(Gallery.this, ViewImage.class);
+				intent.setClass(GalleryActivity.this, ViewImageActivity.class);
 				intent.putExtra("EXTRA_IMAGE_PATH", files[position].getPath());
-				intent.putExtra("EXTRA_PASS", ((EditText) findViewById(R.id.pass)).getText().toString());
 				startActivity(intent);
 			}
 		};
@@ -74,7 +72,7 @@ public class Gallery extends Activity {
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView text = new TextView(Gallery.this);
+			TextView text = new TextView(GalleryActivity.this);
 			text.setText(files[position].getName().toString());
 			return text;
 		}

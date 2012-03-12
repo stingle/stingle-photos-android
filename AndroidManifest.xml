@@ -15,23 +15,28 @@
         android:label="@string/app_name" >
         <activity
             android:name=".SafeCameraActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+         <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Camera"
+            android:name=".CameraActivity"
+            android:screenOrientation="landscape" >
+        </activity>
         <activity
             android:configChanges="keyboardHidden|orientation"
             android:label="Gallery"
-            android:name="Gallery" >
+            android:name=".GalleryActivity" >
         </activity>
         <activity
             android:configChanges="keyboardHidden|orientation"
             android:label="View Image"
-            android:name="ViewImage" >
+            android:name=".ViewImageActivity" >
         </activity>
     </application>
 
