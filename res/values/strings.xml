@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, SafeCameraActivity!</string>
     <string name="app_name">SafeCamera</string>
     <string name="password">Password</string>
     <string name="enter_password">Please enter master password</string>
     <string name="ok">Ok</string>
     <string name="unexpected_error">Unexpected error %s</string>
     <string name="file_not_found">File not found!</string>
+    <string name="setup_info">Please choose your master password. You can set it to anything, but for true security we suggest you to choose password that contain minimum 12 characters, lowercase and uppercase letters, digits and some special symbols. If you fail to choose secure password your encrypted files will be exposed to brute force attacks.</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="save">Save</string>
+    <string name="password_not_match">Passwords not match. Please enter same password twice correctly.</string>
+    <string name="password_empty">Password can\'t be empty.</string>
+    <string name="incorrect_password">Incorrect password specified</string>
+    <string name="home_folder">Home folder</string>
+    <string name="settings">Settings</string>
+    <string name="home_folder_desc">Folder on SD card to store encrypted files</string>
 
 </resources>

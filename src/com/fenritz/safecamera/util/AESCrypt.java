@@ -243,7 +243,7 @@ public class AESCrypt {
 		return new byte[IV_LENGTH];
 	}
 
-	private byte[] getHash(String password) throws AESCryptException {
+	public static byte[] getHash(String password) throws AESCryptException {
 		try {
 			MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
 			return md.digest(password.getBytes("UTF-8"));

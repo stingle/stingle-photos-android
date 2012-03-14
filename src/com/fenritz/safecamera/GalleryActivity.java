@@ -19,7 +19,6 @@ import com.fenritz.safecamera.util.Helpers;
 
 public class GalleryActivity extends Activity {
 
-	String currentPath;
 	File[] files;
 	
 	@Override
@@ -27,12 +26,10 @@ public class GalleryActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery);
 
-		File dir = new File(Helpers.getMainDir()); 
+		File dir = new File(Helpers.getHomeDir(this)); 
 		files = dir.listFiles();
 		
 		Arrays.sort(files);
-		
-		currentPath = Helpers.getMainDir();
 		
 		ListView filesList = (ListView)findViewById(R.id.files);
 		FilesAdapter adapter = new FilesAdapter();

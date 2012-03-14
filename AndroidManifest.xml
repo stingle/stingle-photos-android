@@ -38,6 +38,16 @@
             android:label="View Image"
             android:name=".ViewImageActivity" >
         </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="SetUp"
+            android:name=".SetUpActivity" >
+        </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Settings"
+            android:name=".SettingsActivity" >
+        </activity>
     </application>
 
 </manifest>

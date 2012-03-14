@@ -1,10 +1,13 @@
 package com.fenritz.safecamera;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.AsyncTask;
@@ -122,7 +125,10 @@ public class CameraActivity extends Activity{
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
-				new EncryptAndWriteFile().execute(data);
+				String filename = Helpers.getFilename(Helpers.JPEG_FILE_PREFIX);
+				
+				new EncryptAndWriteFile(filename).execute(data);
+				new EncryptAndWriteThumb(filename).execute(data);
 				
 				Handler myHandler = new ResumePreview();
 				myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
@@ -144,10 +150,25 @@ public class CameraActivity extends Activity{
 	
 	private class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
 		
+		private final String filename;
+		
+		public EncryptAndWriteFile(){
+			this(null);
+		}
+
+		public EncryptAndWriteFile(String pFilename){
+			super();
+			if(pFilename == null){
+				pFilename = Helpers.getFilename(Helpers.JPEG_FILE_PREFIX);
+			}
+			
+			filename = pFilename;
+		}
+		
 		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
-				FileOutputStream out = new FileOutputStream(Helpers.getMainDir() + Helpers.getFilename(Helpers.JPEG_FILE_PREFIX) + ".jpg.sc");
+				FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(CameraActivity.this) + "/" + filename);
 				SafeCameraActivity.crypto.encrypt(params[0], out);
 			} 
 			catch (FileNotFoundException e) {
@@ -155,6 +176,72 @@ public class CameraActivity extends Activity{
 			}
 			return null;
 		}
+	}
+	
+	private class EncryptAndWriteThumb extends AsyncTask<byte[], Void, Void> {
+		
+		private final String filename;
+		
+		public EncryptAndWriteThumb(){
+			this(null);
+		}
+		
+		public EncryptAndWriteThumb(String pFilename){
+			super();
+			if(pFilename == null){
+				pFilename = Helpers.getFilename(Helpers.JPEG_FILE_PREFIX);
+			}
+			
+			filename = pFilename;
+		}
+		
+		@Override
+		protected Void doInBackground(byte[]... params) {
+			try {
+				Bitmap bitmap = getThumbFromBitmap(BitmapFactory.decodeByteArray(params[0], 0, params[0].length), Integer.valueOf(getString(R.string.thumb_size)));
+				
+				ByteArrayOutputStream stream = new ByteArrayOutputStream();
+				bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+				byte[] imageByteArray = stream.toByteArray();
+				
+				FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(CameraActivity.this) + "/" + filename);
+				SafeCameraActivity.crypto.encrypt(imageByteArray, out);
+				//out.write(imageByteArray);
+				//out.close();
+				
+			} 
+			catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			/*catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			return null;
+		}
+	}
+	
+	private Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide){
+	    int imgWidth = bitmap.getWidth();
+	    int imgHeight = bitmap.getHeight();
+	    
+	    int cropX, cropY, cropWidth, cropHeight;
+	    if(imgWidth >= imgHeight){
+	    	cropX = imgWidth/2 - imgHeight/2;
+	    	cropY = 0;
+	    	cropWidth = imgHeight;
+	    	cropHeight = imgHeight;
+	    }
+	    else{
+	    	cropX = 0;
+	    	cropY = imgHeight/2 - imgWidth/2;
+	    	cropWidth = imgWidth;
+	    	cropHeight = imgWidth;
+	    }
+	    
+	    Bitmap cropedImg = Bitmap.createBitmap(bitmap, cropX, cropY, cropWidth, cropHeight);
+	    
+	    return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
 	}
 	
 }
