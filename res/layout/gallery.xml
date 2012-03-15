@@ -4,12 +4,16 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
     
-    <ListView
-        android:id="@+id/files"
+    <GridView
+        android:id="@+id/photosGrid"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1" >
-    </ListView>
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:columnWidth="140dp"
+        android:verticalSpacing="1dip"
+		android:horizontalSpacing="1dip">
+    </GridView>
 
     
 

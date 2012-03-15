@@ -125,10 +125,10 @@ public class CameraActivity extends Activity{
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
-				String filename = Helpers.getFilename(Helpers.JPEG_FILE_PREFIX);
+				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 				
 				new EncryptAndWriteFile(filename).execute(data);
-				new EncryptAndWriteThumb(filename).execute(data);
+				//new EncryptAndWriteThumb(filename).execute(data);
 				
 				Handler myHandler = new ResumePreview();
 				myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
@@ -159,7 +159,7 @@ public class CameraActivity extends Activity{
 		public EncryptAndWriteFile(String pFilename){
 			super();
 			if(pFilename == null){
-				pFilename = Helpers.getFilename(Helpers.JPEG_FILE_PREFIX);
+				pFilename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 			}
 			
 			filename = pFilename;
@@ -174,8 +174,10 @@ public class CameraActivity extends Activity{
 			catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+			new EncryptAndWriteThumb(filename).execute(params[0]);
 			return null;
 		}
+		
 	}
 	
 	private class EncryptAndWriteThumb extends AsyncTask<byte[], Void, Void> {
@@ -189,7 +191,7 @@ public class CameraActivity extends Activity{
 		public EncryptAndWriteThumb(String pFilename){
 			super();
 			if(pFilename == null){
-				pFilename = Helpers.getFilename(Helpers.JPEG_FILE_PREFIX);
+				pFilename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 			}
 			
 			filename = pFilename;
@@ -198,25 +200,20 @@ public class CameraActivity extends Activity{
 		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
-				Bitmap bitmap = getThumbFromBitmap(BitmapFactory.decodeByteArray(params[0], 0, params[0].length), Integer.valueOf(getString(R.string.thumb_size)));
+				BitmapFactory.Options bitmapOptions=new BitmapFactory.Options();
+				bitmapOptions.inSampleSize = 4;
+				Bitmap bitmap = getThumbFromBitmap(BitmapFactory.decodeByteArray(params[0], 0, params[0].length, bitmapOptions), Integer.valueOf(getString(R.string.thumb_size)));
 				
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+				bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 				byte[] imageByteArray = stream.toByteArray();
 				
 				FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(CameraActivity.this) + "/" + filename);
 				SafeCameraActivity.crypto.encrypt(imageByteArray, out);
-				//out.write(imageByteArray);
-				//out.close();
-				
 			} 
 			catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			/*catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
 			return null;
 		}
 	}

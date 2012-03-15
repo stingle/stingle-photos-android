@@ -35,7 +35,7 @@ public class AESCrypt {
 	private static final String HASH_ALGORITHM = "SHA-512";
 	private static final String PBE_ALGORITHM = "PBEWithSHA256And256BitAES-CBC-BC";
 	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
-	private static final String SECRET_KEY_ALGORITHM = "AES";;
+	private static final String SECRET_KEY_ALGORITHM = "AES";
 
 	/**
 	 * Input a string that will be md5 hashed to create the key.
@@ -78,7 +78,7 @@ public class AESCrypt {
 		try {
 			encryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM, PROVIDER);
 			decryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM, PROVIDER);
-
+			
 			// CBC requires an initialization vector
 			encryptionCipher.init(Cipher.ENCRYPT_MODE, key, ivParamSpec);
 			decryptionCipher.init(Cipher.DECRYPT_MODE, key, ivParamSpec);

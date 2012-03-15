@@ -28,7 +28,9 @@ public class ViewImageActivity extends Activity {
 			byte[] decryptedData = SafeCameraActivity.crypto.decrypt(input);
 
 			if (decryptedData != null) {
-				Bitmap bMap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length);
+				BitmapFactory.Options opts=new BitmapFactory.Options();
+				opts.inSampleSize = 4;
+				Bitmap bMap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length, opts);
 				ImageView image = (ImageView) findViewById(R.id.image);
 				image.setImageBitmap(bMap);
 			}
@@ -40,7 +42,6 @@ public class ViewImageActivity extends Activity {
 			Helpers.showAlertDialog(ViewImageActivity.this, getString(R.string.file_not_found));
 			e.printStackTrace();
 		}
-
 	}
 
 }

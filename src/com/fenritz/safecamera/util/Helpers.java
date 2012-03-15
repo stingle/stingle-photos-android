@@ -43,11 +43,11 @@ public class Helpers {
 		return null;
 	}
 
-	public static String getFilename(String prefix) {
+	public static String getFilename(Context context, String prefix) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = prefix + timeStamp;
 
-		return imageFileName + ".jpg.sc";
+		return imageFileName + ".jpg" + context.getString(R.string.file_extension);
 	}
 
 	public static void printMaxKeySizes() {
