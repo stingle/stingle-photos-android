@@ -56,11 +56,19 @@ public class AESCrypt {
 	}
 
 	public AESCrypt(String stringKey) throws NoSuchAlgorithmException, NoSuchProviderException, AESCryptException {
-		byte[] salt = getHash(stringKey);
-		key = getSecretKey(stringKey, salt);
+		key = getSecretKey(stringKey);
+		this.setupCrypto();
+	}
+	
+	public AESCrypt(SecretKey pKey) throws NoSuchAlgorithmException, NoSuchProviderException, AESCryptException {
+		key = pKey;
 		this.setupCrypto();
 	}
 
+	public static SecretKey getSecretKey(String stringKey) throws NoSuchAlgorithmException, NoSuchProviderException, AESCryptException{
+		return getSecretKey(stringKey, getHash(stringKey));
+	}
+	
 	private void setupCrypto() throws NoSuchAlgorithmException, NoSuchProviderException {
 		this.setupCrypto(null);
 	}
@@ -92,16 +100,27 @@ public class AESCrypt {
 	byte[] buf = new byte[1024];
 
 	public void encrypt(InputStream in, OutputStream out) {
+		this.encrypt(in, out, null);
+	}
+	public void encrypt(InputStream in, OutputStream out, CryptoProgress progress) {
 		try {
 			out.write(iv, 0, iv.length);
+			if(progress != null){
+				progress.setProgress(iv.length);
+			}
 
 			// Bytes written to out will be encrypted
 			out = new CipherOutputStream(out, encryptionCipher);
 
 			// Read in the cleartext bytes and write to out to encrypt
+			long totalRead = iv.length;
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {
 				out.write(buf, 0, numRead);
+				if(progress != null){
+					totalRead += numRead;
+					progress.setProgress(totalRead);
+				}
 			}
 			out.close();
 			in.close();
@@ -128,17 +147,28 @@ public class AESCrypt {
 
 
 	public void decrypt(InputStream in, OutputStream out) {
+		this.decrypt(in, out, null);
+	}
+	public void decrypt(InputStream in, OutputStream out, CryptoProgress progress) {
 		try {
 			in.read(iv, 0, iv.length);
 			this.setupCrypto(iv);
+			if(progress != null){
+				progress.setProgress(iv.length);
+			}
 
 			// Bytes read from in will be decrypted
 			in = new CipherInputStream(in, decryptionCipher);
 
 			// Read in the decrypted bytes and write the cleartext to out
+			long totalRead = iv.length;
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {
 				out.write(buf, 0, numRead);
+				if(progress != null){
+					totalRead += numRead;
+					progress.setProgress(totalRead);
+				}
 			}
 			out.close();
 			in.close();
@@ -149,9 +179,15 @@ public class AESCrypt {
 	}
 	
 	public byte[] decrypt(InputStream in) {
+		return this.decrypt(in, (CryptoProgress)null);
+	}
+	public byte[] decrypt(InputStream in, CryptoProgress progress) {
 		try {
 			in.read(iv, 0, iv.length);
 			this.setupCrypto(iv);
+			if(progress != null){
+				progress.setProgress(iv.length);
+			}
 
 			// Bytes read from in will be decrypted
 			in = new CipherInputStream(in, decryptionCipher);
@@ -161,6 +197,9 @@ public class AESCrypt {
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {
 				byteBuffer.write(buf, 0, numRead);
+				if(progress != null){
+					progress.setProgress(byteBuffer.size() + iv.length);
+				}
 			}
 			
 			return byteBuffer.toByteArray();
@@ -253,7 +292,7 @@ public class AESCrypt {
 		}
 	}
 
-	private SecretKey getSecretKey(String password, byte[] salt) throws AESCryptException {
+	private static SecretKey getSecretKey(String password, byte[] salt) throws AESCryptException {
 		try {
 			PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), salt, PBE_ITERATION_COUNT, 256);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(PBE_ALGORITHM, PROVIDER);
@@ -300,5 +339,25 @@ public class AESCrypt {
             ba[i/2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i+1), 16));
         }
         return ba;
+    }
+    
+    public static class CryptoProgress{
+    	private long total = 0;
+    	private long current = 0;
+    	
+    	public CryptoProgress(long pTotal){
+    		total = pTotal;
+    	}
+    	
+    	public void setProgress(long pCurrent){
+    		current = pCurrent;
+    	}
+    	
+    	public int getProgress(){
+    		if(total == 0){
+    			return 0;
+    		}
+    		return (int) (current * 100 / total);
+    	}
     }
 }

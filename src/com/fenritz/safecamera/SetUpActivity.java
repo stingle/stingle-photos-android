@@ -49,7 +49,7 @@ public class SetUpActivity  extends Activity{
 					e.printStackTrace();
 				}
 				
-				SafeCameraActivity.crypto = Helpers.getAESCrypt(SetUpActivity.this, password1);
+				Helpers.key = Helpers.getAESKey(SetUpActivity.this, password1);
 				
 				Intent intent = new Intent();
 				intent.setClass(SetUpActivity.this, CameraActivity.class);

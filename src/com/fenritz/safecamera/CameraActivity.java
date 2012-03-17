@@ -169,7 +169,7 @@ public class CameraActivity extends Activity{
 		protected Void doInBackground(byte[]... params) {
 			try {
 				FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(CameraActivity.this) + "/" + filename);
-				SafeCameraActivity.crypto.encrypt(params[0], out);
+				Helpers.getAESCrypt().encrypt(params[0], out);
 			} 
 			catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -209,7 +209,7 @@ public class CameraActivity extends Activity{
 				byte[] imageByteArray = stream.toByteArray();
 				
 				FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(CameraActivity.this) + "/" + filename);
-				SafeCameraActivity.crypto.encrypt(imageByteArray, out);
+				Helpers.getAESCrypt().encrypt(imageByteArray, out);
 			} 
 			catch (FileNotFoundException e) {
 				e.printStackTrace();

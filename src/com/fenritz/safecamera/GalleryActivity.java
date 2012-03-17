@@ -1,28 +1,29 @@
 package com.fenritz.safecamera;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import com.fenritz.safecamera.util.DecryptAndShowImage;
 import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecamera.util.MemoryCache;
 
 public class GalleryActivity extends Activity {
 
+	public MemoryCache memCache = new MemoryCache();
 	ArrayList<File> files = new ArrayList<File>();
+	//private final ImageLoader imgLoader=new ImageLoader(this);
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -77,31 +78,23 @@ public class GalleryActivity extends Activity {
     		
 			final File file = files.get(position); 
 			
-			ImageView image = new ImageView(activity);
-			image.setImageResource(R.drawable.no);
+			LinearLayout layout = new LinearLayout(activity);
 			
 			String thumbPath = Helpers.getThumbsDir(activity) + "/" + file.getName();
-			File thumbFile = new File(thumbPath);
-			if(thumbFile.exists() && thumbFile.isFile()) {
-				try {
-					
-					FileInputStream input = new FileInputStream(thumbPath);
-					byte[] decryptedData = SafeCameraActivity.crypto.decrypt(input);
-	
-					if (decryptedData != null) {
-						Bitmap bitmap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length);
-						if(bitmap != null){
-							image.setImageBitmap(bitmap);
-						}
-						
-					}
-					else{
-						Log.d("sc", "Unable to decrypt: " + thumbPath);
-					}
-					
+			
+			OnClickListener onClick = new View.OnClickListener() {
+				
+				public void onClick(View v) {
+					Intent intent = new Intent();
+					intent.setClass(GalleryActivity.this, ViewImageActivity.class);
+					intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
+					startActivity(intent);
 				}
-				catch (FileNotFoundException e) { }
-			}
+			};
+			
+			new DecryptAndShowImage(thumbPath, layout, onClick, memCache).execute();
+			
+			/*imgLoader.DisplayImage(thumbPath, activity, image, R.drawable.no);
 			
 			image.setOnClickListener(new View.OnClickListener() {
 				
@@ -111,9 +104,9 @@ public class GalleryActivity extends Activity {
 					intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
 					startActivity(intent);
 				}
-			});
+			});*/
 			
-			return image;
+			return layout;
 	    }
 	}    
 	

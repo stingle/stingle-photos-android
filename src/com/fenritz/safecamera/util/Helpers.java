@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Set;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,11 +22,30 @@ import android.util.Log;
 import com.fenritz.safecamera.R;
 
 public class Helpers {
-	public static final String JPEG_FILE_PREFIX = "IMG_";
+	public static SecretKey key;
 
-	public static AESCrypt getAESCrypt(Activity activity, String password) {
+	public static final String JPEG_FILE_PREFIX = "IMG_";
+	
+	public static AESCrypt getAESCrypt() {
 		try {
-			return new AESCrypt(password);
+			return new AESCrypt(key);
+		}
+		catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		catch (NoSuchProviderException e) {
+			e.printStackTrace();
+		}
+		catch (AESCryptException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public static SecretKey getAESKey(Activity activity, String password) {
+		try {
+			return AESCrypt.getSecretKey(password);
 		}
 		catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();

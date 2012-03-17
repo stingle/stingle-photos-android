@@ -1,17 +1,11 @@
 package com.fenritz.safecamera;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
-import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecamera.util.DecryptAndShowImage;
 
 public class ViewImageActivity extends Activity {
 
@@ -23,9 +17,14 @@ public class ViewImageActivity extends Activity {
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
 
-		try {
+		new DecryptAndShowImage(imagePath, ((LinearLayout)findViewById(R.id.parent_layout))).execute();
+		
+		/*ImageView image = (ImageView) findViewById(R.id.image);
+		ImageLoader imgLoader=new ImageLoader(this);
+		imgLoader.DisplayImage(imagePath, this, image, R.drawable.no);*/
+		/*try {
 			FileInputStream input = new FileInputStream(imagePath);
-			byte[] decryptedData = SafeCameraActivity.crypto.decrypt(input);
+			byte[] decryptedData = Helpers.getAESCrypt().decrypt(input);
 
 			if (decryptedData != null) {
 				BitmapFactory.Options opts=new BitmapFactory.Options();
@@ -41,7 +40,7 @@ public class ViewImageActivity extends Activity {
 		catch (FileNotFoundException e) {
 			Helpers.showAlertDialog(ViewImageActivity.this, getString(R.string.file_not_found));
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 }

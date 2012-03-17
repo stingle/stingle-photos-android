@@ -23,7 +23,7 @@ import com.fenritz.safecamera.util.Helpers;
 
 public class SafeCameraActivity extends Activity {
 
-	public static AESCrypt crypto;
+	
 
 	public static final String DEFAULT_PREFS = "default_prefs";
 	public static final String PASSWORD = "password";
@@ -76,7 +76,7 @@ public class SafeCameraActivity extends Activity {
 				return;
 			}
 
-			crypto = Helpers.getAESCrypt(SafeCameraActivity.this, enteredPassword);
+			Helpers.key = Helpers.getAESKey(SafeCameraActivity.this, enteredPassword);
 
 			Intent intent = new Intent();
 			intent.setClass(SafeCameraActivity.this, CameraActivity.class);
