@@ -76,9 +76,17 @@ public class GalleryActivity extends Activity {
 
 		public View getView(int position, View convertView, ViewGroup parent){
     		
-			final File file = files.get(position); 
+			final File file = files.get(position);
 			
-			LinearLayout layout = new LinearLayout(activity);
+			LinearLayout layout;
+			if (convertView == null) {
+				layout = new LinearLayout(activity);
+				
+				layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer.valueOf(getString(R.string.thumb_size))));
+	        } 
+			else {
+	        	layout = (LinearLayout) convertView;
+	        }
 			
 			String thumbPath = Helpers.getThumbsDir(activity) + "/" + file.getName();
 			
@@ -92,44 +100,10 @@ public class GalleryActivity extends Activity {
 				}
 			};
 			
-			new DecryptAndShowImage(thumbPath, layout, onClick, memCache).execute();
-			
-			/*imgLoader.DisplayImage(thumbPath, activity, image, R.drawable.no);
-			
-			image.setOnClickListener(new View.OnClickListener() {
-				
-				public void onClick(View v) {
-					Intent intent = new Intent();
-					intent.setClass(GalleryActivity.this, ViewImageActivity.class);
-					intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
-					startActivity(intent);
-				}
-			});*/
+			new DecryptAndShowImage(thumbPath, layout, onClick, memCache, false).execute();
 			
 			return layout;
 	    }
 	}    
 	
-	/*public class FilesAdapter extends BaseAdapter{
-
-		public int getCount() {
-			return files.length;
-		}
-
-		public Object getItem(int position) {
-			return files[position];
-		}
-
-		public long getItemId(int position) {
-			return position;
-		}
-
-		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView text = new TextView(GalleryActivity.this);
-			text.setText(files[position].getName().toString());
-			return text;
-		}
-
-		
-	}*/
 }

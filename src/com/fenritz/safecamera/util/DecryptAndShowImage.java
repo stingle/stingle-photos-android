@@ -18,6 +18,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
 
 import com.fenritz.safecamera.util.AESCrypt.CryptoProgress;
+import com.fenritz.safecamera.widget.TouchImageView;
 
 public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	
@@ -28,25 +29,27 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	private ProgressBar progressBar;
 	private final OnClickListener onClickListener;
 	private final MemoryCache memCache;
+	private boolean zoomable = false;
 	
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent){
-		this(pFilePath, pParent, null, null);
+		this(pFilePath, pParent, null, null, false);
 	}
 	
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, MemoryCache pMemCache){
-		this(pFilePath, pParent, null, pMemCache);
+		this(pFilePath, pParent, null, pMemCache, false);
 	}
 	
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener){
-		this(pFilePath, pParent, pOnClickListener, null);
+		this(pFilePath, pParent, pOnClickListener, null, false);
 	}
 	
-	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, MemoryCache pMemCache){
+	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, MemoryCache pMemCache, boolean pZoomable){
 		super();
 		filePath = pFilePath;
 		parent = pParent;
 		onClickListener = pOnClickListener;
 		memCache = pMemCache;
+		zoomable = pZoomable;
 	}
 	
 	@Override
@@ -67,44 +70,46 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	
 	@Override
 	protected Bitmap doInBackground(Void... params) {
-		Bitmap cachedBitmap;
-		if (memCache != null && (cachedBitmap = memCache.get(filePath)) != null) {
-			return cachedBitmap;
+		if (memCache != null) {
+			Bitmap cachedBitmap = memCache.get(filePath);
+			if(cachedBitmap != null){
+				Log.d("sc", "returned " + filePath);
+				return cachedBitmap;
+			}
 		}
-		else{
-			File thumbFile = new File(filePath);
-			if(thumbFile.exists() && thumbFile.isFile()) {
-				try {
-					FileInputStream input = new FileInputStream(filePath);
-					AESCrypt.CryptoProgress progress = new CryptoProgress(input.getChannel().size()){
-						@Override
-						public void setProgress(long pCurrent) {
-							super.setProgress(pCurrent);
-							int newProgress = this.getProgress();
-							publishProgress(newProgress);
-						}
-					};
-					byte[] decryptedData = Helpers.getAESCrypt().decrypt(input, progress);
-	
-					if (decryptedData != null) {
-						Bitmap bitmap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length);
-						if(bitmap != null){
-							if(memCache != null){
-								memCache.put(filePath, bitmap);
-							}
-							return bitmap;
-						}
-						
+		Log.d("sc", "generated " + filePath);
+		File thumbFile = new File(filePath);
+		if(thumbFile.exists() && thumbFile.isFile()) {
+			try {
+				FileInputStream input = new FileInputStream(filePath);
+				AESCrypt.CryptoProgress progress = new CryptoProgress(input.getChannel().size()){
+					@Override
+					public void setProgress(long pCurrent) {
+						super.setProgress(pCurrent);
+						int newProgress = this.getProgress();
+						publishProgress(newProgress);
 					}
-					else{
-						Log.d("sc", "Unable to decrypt: " + filePath);
+				};
+				byte[] decryptedData = Helpers.getAESCrypt().decrypt(input, progress);
+
+				if (decryptedData != null) {
+					Bitmap bitmap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length);
+					if(bitmap != null){
+						if(memCache != null){
+							memCache.put(filePath, bitmap);
+						}
+						return bitmap;
 					}
 					
 				}
-				catch (FileNotFoundException e) { }
-				catch (IOException e) {
-					e.printStackTrace();
+				else{
+					Log.d("sc", "Unable to decrypt: " + filePath);
 				}
+				
+			}
+			catch (FileNotFoundException e) { }
+			catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 		return null;
@@ -114,13 +119,25 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	protected void onPostExecute(Bitmap bitmap) {
 		super.onPostExecute(bitmap);
 		
-		ImageView image = new ImageView(context);
+		ImageView image;
+		if(zoomable){
+			image = new TouchImageView(context);
+		}
+		else{
+			image = new ImageView(context);
+		}
 		
 		image.setImageBitmap(bitmap);
 		
 		if(onClickListener != null){
 			image.setOnClickListener(onClickListener);
 		}
+		
+		/*if(zoomable){
+			image.setOnTouchListener(new ZoomTouchListener());
+			image.setScaleType(ScaleType.MATRIX);
+			//image.setAdjustViewBounds(true);
+		}*/
 		
 		parent.removeView(progressBar);
 		parent.addView(image);
