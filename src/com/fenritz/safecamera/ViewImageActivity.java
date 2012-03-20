@@ -11,6 +11,8 @@ import com.fenritz.safecamera.util.DecryptAndShowImage;
 
 public class ViewImageActivity extends Activity {
 
+	DecryptAndShowImage task;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -21,7 +23,14 @@ public class ViewImageActivity extends Activity {
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
 
-		new DecryptAndShowImage(imagePath, ((LinearLayout)findViewById(R.id.parent_layout)), null, null, true).execute();
+		task = new DecryptAndShowImage(imagePath, ((LinearLayout)findViewById(R.id.parent_layout)), null, null, true);
+		task.execute();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		task.cancel(true);
 	}
 
 }

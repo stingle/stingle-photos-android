@@ -152,6 +152,7 @@ public class CameraActivity extends Activity{
 		
 		private final String filename;
 		
+		@SuppressWarnings("unused")
 		public EncryptAndWriteFile(){
 			this(null);
 		}
@@ -184,6 +185,7 @@ public class CameraActivity extends Activity{
 		
 		private final String filename;
 		
+		@SuppressWarnings("unused")
 		public EncryptAndWriteThumb(){
 			this(null);
 		}

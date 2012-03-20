@@ -19,6 +19,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import android.os.AsyncTask;
+
 public class AESCrypt {
 	Cipher encryptionCipher;
 	Cipher decryptionCipher;
@@ -100,9 +102,12 @@ public class AESCrypt {
 	byte[] buf = new byte[1024];
 
 	public void encrypt(InputStream in, OutputStream out) {
-		this.encrypt(in, out, null);
+		this.encrypt(in, out, null, null);
 	}
 	public void encrypt(InputStream in, OutputStream out, CryptoProgress progress) {
+		this.encrypt(in, out, progress, null);
+	}
+	public void encrypt(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			out.write(iv, 0, iv.length);
 			if(progress != null){
@@ -120,6 +125,11 @@ public class AESCrypt {
 				if(progress != null){
 					totalRead += numRead;
 					progress.setProgress(totalRead);
+				}
+				if(task != null){
+					if(task.isCancelled()){
+						break;
+					}
 				}
 			}
 			out.close();
@@ -147,9 +157,12 @@ public class AESCrypt {
 
 
 	public void decrypt(InputStream in, OutputStream out) {
-		this.decrypt(in, out, null);
+		this.decrypt(in, out, null, null);
 	}
 	public void decrypt(InputStream in, OutputStream out, CryptoProgress progress) {
+		this.decrypt(in, out, progress, null);
+	}
+	public void decrypt(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			in.read(iv, 0, iv.length);
 			this.setupCrypto(iv);
@@ -169,6 +182,11 @@ public class AESCrypt {
 					totalRead += numRead;
 					progress.setProgress(totalRead);
 				}
+				if(task != null){
+					if(task.isCancelled()){
+						break;
+					}
+				}
 			}
 			out.close();
 			in.close();
@@ -179,9 +197,12 @@ public class AESCrypt {
 	}
 	
 	public byte[] decrypt(InputStream in) {
-		return this.decrypt(in, (CryptoProgress)null);
+		return this.decrypt(in, (CryptoProgress)null, null);
 	}
 	public byte[] decrypt(InputStream in, CryptoProgress progress) {
+		return this.decrypt(in, progress, null);
+	}
+	public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			in.read(iv, 0, iv.length);
 			this.setupCrypto(iv);
@@ -199,6 +220,11 @@ public class AESCrypt {
 				byteBuffer.write(buf, 0, numRead);
 				if(progress != null){
 					progress.setProgress(byteBuffer.size() + iv.length);
+				}
+				if(task != null){
+					if(task.isCancelled()){
+						return null;
+					}
 				}
 			}
 			

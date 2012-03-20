@@ -22,6 +22,8 @@ import com.fenritz.safecamera.widget.TouchImageView;
 
 public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	
+	public static final int IMAGE_ID = 10001;
+	
 	private final String filePath;
 	
 	private Context context; 
@@ -88,7 +90,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 						publishProgress(newProgress);
 					}
 				};
-				byte[] decryptedData = Helpers.getAESCrypt().decrypt(input, progress);
+				byte[] decryptedData = Helpers.getAESCrypt().decrypt(input, progress, this);
 
 				if (decryptedData != null) {
 					Bitmap bitmap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length);
@@ -125,6 +127,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 			image = new ImageView(context);
 		}
 		
+		image.setId(IMAGE_ID);
 		image.setImageBitmap(bitmap);
 		
 		if(onClickListener != null){
