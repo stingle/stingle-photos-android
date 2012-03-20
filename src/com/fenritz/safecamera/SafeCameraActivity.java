@@ -1,9 +1,12 @@
 package com.fenritz.safecamera;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -69,26 +72,62 @@ public class SafeCameraActivity extends Activity {
 	private void doLogin() {
 		String savedHash = preferences.getString(PASSWORD, "");
 		String enteredPassword = ((EditText) findViewById(R.id.password)).getText().toString();
-		try {
+		try{
 			String enteredPasswordHash = AESCrypt.byteToHex(AESCrypt.getHash(enteredPassword));
 			if (!enteredPasswordHash.equals(savedHash)) {
 				Helpers.showAlertDialog(SafeCameraActivity.this, getString(R.string.incorrect_password));
 				return;
 			}
 
-			Helpers.key = Helpers.getAESKey(SafeCameraActivity.this, enteredPassword);
-
-			Intent intent = new Intent();
-			intent.setClass(SafeCameraActivity.this, CameraActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(intent);
-			SafeCameraActivity.this.finish();
+			new Login().execute(enteredPassword);
 		}
 		catch (AESCryptException e) {
 			Helpers.showAlertDialog(SafeCameraActivity.this, String.format(getString(R.string.unexpected_error), "102"));
 			e.printStackTrace();
 		}
+	}
+	
+	private class Login extends AsyncTask<String, Void, Boolean> {
+		
+		private ProgressDialog progressDialog;
+		
+		@Override
+    	protected void onPreExecute() {
+    		super.onPreExecute();
+    		progressDialog = ProgressDialog.show(SafeCameraActivity.this, "", getString(R.string.generating_key), false, true, new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					
+				}
+			});
+    	}
+		
+		@Override
+		protected Boolean doInBackground(String... params) {
+			Helpers.key = Helpers.getAESKey(SafeCameraActivity.this, params[0]);
+			if(Helpers.key != null){
+				return true;
+			}
+			return false;
+		}
+		
+		@Override
+		protected void onPostExecute(Boolean result) {
+			super.onPostExecute(result);
+			
+			if(result == true){
+				Intent intent = new Intent();
+				intent.setClass(SafeCameraActivity.this, CameraActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				SafeCameraActivity.this.finish();
+			}
+			else{
+				Helpers.showAlertDialog(SafeCameraActivity.this, getString(R.string.incorrect_password));
+			}
+			progressDialog.dismiss();
+		}
+		
 	}
 	
 	@Override

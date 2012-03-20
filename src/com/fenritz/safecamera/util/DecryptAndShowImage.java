@@ -73,11 +73,9 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		if (memCache != null) {
 			Bitmap cachedBitmap = memCache.get(filePath);
 			if(cachedBitmap != null){
-				Log.d("sc", "returned " + filePath);
 				return cachedBitmap;
 			}
 		}
-		Log.d("sc", "generated " + filePath);
 		File thumbFile = new File(filePath);
 		if(thumbFile.exists() && thumbFile.isFile()) {
 			try {
@@ -132,12 +130,6 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		if(onClickListener != null){
 			image.setOnClickListener(onClickListener);
 		}
-		
-		/*if(zoomable){
-			image.setOnTouchListener(new ZoomTouchListener());
-			image.setScaleType(ScaleType.MATRIX);
-			//image.setAdjustViewBounds(true);
-		}*/
 		
 		parent.removeView(progressBar);
 		parent.addView(image);

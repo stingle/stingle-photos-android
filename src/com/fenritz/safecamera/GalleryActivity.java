@@ -23,87 +23,80 @@ public class GalleryActivity extends Activity {
 
 	public MemoryCache memCache = new MemoryCache();
 	ArrayList<File> files = new ArrayList<File>();
-	//private final ImageLoader imgLoader=new ImageLoader(this);
-	
+
+	// private final ImageLoader imgLoader=new ImageLoader(this);
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery);
 
-		File dir = new File(Helpers.getHomeDir(this)); 
+		File dir = new File(Helpers.getHomeDir(this));
 		File[] folderFiles = dir.listFiles();
-		
+
 		Arrays.sort(folderFiles);
-		
-		for(File file : folderFiles){
-			if(file.getName().endsWith(getString(R.string.file_extension))){
+
+		for (File file : folderFiles) {
+			if (file.getName().endsWith(getString(R.string.file_extension))) {
 				files.add(file);
 			}
 		}
-		
-		Log.d("sc", String.valueOf(files.size()) + " files");
-		GridView photosGrid = (GridView)findViewById(R.id.photosGrid);
+
+		GridView photosGrid = (GridView) findViewById(R.id.photosGrid);
 		photosGrid.setAdapter(new GalleryAdapter(GalleryActivity.this, files));
-		
-		/*ListView filesList = (ListView)findViewById(R.id.files);
-		FilesAdapter adapter = new FilesAdapter();
-		filesList.setAdapter(adapter);
-		
-		filesList.setOnItemClickListener(FilesClick());*/
 	}
 
-	
-	public class GalleryAdapter extends BaseAdapter{
-	    private final Activity activity;
-	    protected final ArrayList<File> files;
+	public class GalleryAdapter extends BaseAdapter {
+		private final Activity activity;
+		protected final ArrayList<File> files;
 
-	    public GalleryAdapter(Activity pActivity, ArrayList<File> pFiles){
-	    	activity = pActivity;
-	    	files = pFiles;
-	    }
+		public GalleryAdapter(Activity pActivity, ArrayList<File> pFiles) {
+			activity = pActivity;
+			files = pFiles;
+		}
 
 		public int getCount() {
-	        return files.size();
-	    }
+			return files.size();
+		}
 
 		public Object getItem(int position) {
-	        return files.get(position);
-	    }
+			return files.get(position);
+		}
 
 		public long getItemId(int position) {
-	        return position;
-	    }
+			return position;
+		}
 
-		public View getView(int position, View convertView, ViewGroup parent){
-    		
+		public View getView(int position, View convertView, ViewGroup parent) {
 			final File file = files.get(position);
-			
+
 			LinearLayout layout;
 			if (convertView == null) {
+				Log.d("qaq", file.getPath());
 				layout = new LinearLayout(activity);
+
+				layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer
+						.valueOf(getString(R.string.thumb_size))));
 				
-				layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer.valueOf(getString(R.string.thumb_size))));
-	        } 
+				String thumbPath = Helpers.getThumbsDir(activity) + "/" + file.getName();
+
+				OnClickListener onClick = new View.OnClickListener() {
+					public void onClick(View v) {
+						Intent intent = new Intent();
+						intent.setClass(GalleryActivity.this, ViewImageActivity.class);
+						intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
+						startActivity(intent);
+					}
+				};
+
+				new DecryptAndShowImage(thumbPath, layout, onClick, null, false).execute();
+			}
 			else {
-	        	layout = (LinearLayout) convertView;
-	        }
-			
-			String thumbPath = Helpers.getThumbsDir(activity) + "/" + file.getName();
-			
-			OnClickListener onClick = new View.OnClickListener() {
-				
-				public void onClick(View v) {
-					Intent intent = new Intent();
-					intent.setClass(GalleryActivity.this, ViewImageActivity.class);
-					intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
-					startActivity(intent);
-				}
-			};
-			
-			new DecryptAndShowImage(thumbPath, layout, onClick, memCache, false).execute();
-			
+				layout = (LinearLayout) convertView;
+			}
+
 			return layout;
-	    }
-	}    
-	
+		}
+	}
+
 }
