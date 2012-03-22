@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -128,7 +129,7 @@ public class CameraActivity extends Activity{
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 				
 				new EncryptAndWriteFile(filename).execute(data);
-				//new EncryptAndWriteThumb(filename).execute(data);
+				new EncryptAndWriteThumb(filename).execute(data);
 				
 				Handler myHandler = new ResumePreview();
 				myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
@@ -151,6 +152,7 @@ public class CameraActivity extends Activity{
 	private class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
 		
 		private final String filename;
+		private ProgressDialog progressDialog;
 		
 		@SuppressWarnings("unused")
 		public EncryptAndWriteFile(){
@@ -167,6 +169,12 @@ public class CameraActivity extends Activity{
 		}
 		
 		@Override
+    	protected void onPreExecute() {
+    		super.onPreExecute();
+    		progressDialog = ProgressDialog.show(CameraActivity.this, "", getString(R.string.encrypting_photo), false, false);
+    	}
+		
+		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
 				FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(CameraActivity.this) + "/" + filename);
@@ -175,8 +183,14 @@ public class CameraActivity extends Activity{
 			catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			new EncryptAndWriteThumb(filename).execute(params[0]);
+			//new EncryptAndWriteThumb(filename).execute(params[0]);
 			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			progressDialog.dismiss();
 		}
 		
 	}

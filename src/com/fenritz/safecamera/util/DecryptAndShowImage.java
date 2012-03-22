@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
 
+import com.fenritz.safecamera.R;
 import com.fenritz.safecamera.util.AESCrypt.CryptoProgress;
 import com.fenritz.safecamera.widget.TouchImageView;
 
@@ -128,7 +129,12 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		}
 		
 		image.setId(IMAGE_ID);
-		image.setImageBitmap(bitmap);
+		if(bitmap != null){
+			image.setImageBitmap(bitmap);
+		}
+		else{
+			image.setImageResource(R.drawable.no);
+		}
 		image.setPadding(3, 3, 3, 3);
 		
 		if(onClickListener != null){

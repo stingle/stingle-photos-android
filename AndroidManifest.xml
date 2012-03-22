@@ -48,6 +48,11 @@
             android:label="Settings"
             android:name=".SettingsActivity" >
         </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Choose File"
+            android:name=".FileDialog" >
+        </activity>
     </application>
 
 </manifest>

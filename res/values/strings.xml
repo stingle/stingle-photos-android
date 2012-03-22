@@ -17,5 +17,25 @@
     <string name="settings">Settings</string>
     <string name="home_folder_desc">Folder on SD card to store encrypted files</string>
     <string name="generating_key">Generating cypher keys…</string>
+    <string name="deleting_files">Deleting files…</string>
+    <string name="encrypting_photo">Encrypting photo…</string>
+    <string name="confirm_delete_files">Do you really want delete %s files?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete">Delete</string>
+    <string name="decrypt">Decrypt</string>
+    
+    
+    <!-- File Dialog -->
+    <string name="location">Location</string>
+    <string name="cant_read_folder">folder can\'t be read!</string>
+    <string name="nnew">New</string>
+    <string name="select">Select</string>
+    <string name="file_name">File name:</string>
+    <string name="cancel">Cancel</string>
+    <string name="create">Save</string>
+    <string name="no_data">No Data</string>
+    <color name="gray">#ffff0000</color>
+    <string name="err">Error</string>
 
 </resources>
