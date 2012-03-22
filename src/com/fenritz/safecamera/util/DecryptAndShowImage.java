@@ -129,6 +129,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		
 		image.setId(IMAGE_ID);
 		image.setImageBitmap(bitmap);
+		image.setPadding(3, 3, 3, 3);
 		
 		if(onClickListener != null){
 			image.setOnClickListener(onClickListener);
