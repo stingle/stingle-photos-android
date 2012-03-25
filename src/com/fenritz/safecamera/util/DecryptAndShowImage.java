@@ -87,7 +87,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 					@Override
 					public void setProgress(long pCurrent) {
 						super.setProgress(pCurrent);
-						int newProgress = this.getProgress();
+						int newProgress = this.getProgressPercents();
 						publishProgress(newProgress);
 					}
 				};

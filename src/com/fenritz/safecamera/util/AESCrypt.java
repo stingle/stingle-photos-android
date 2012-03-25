@@ -3,6 +3,7 @@ package com.fenritz.safecamera.util;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -25,6 +26,9 @@ public class AESCrypt {
 	Cipher encryptionCipher;
 	Cipher decryptionCipher;
 
+	// Buffer used to transport the bytes from one stream to another
+	byte[] buf = new byte[1024*32];
+	
 	private byte[] iv;
 	private SecretKey key;
 
@@ -97,9 +101,6 @@ public class AESCrypt {
 			e.printStackTrace();
 		}
 	}
-
-	// Buffer used to transport the bytes from one stream to another
-	byte[] buf = new byte[1024];
 
 	public void encrypt(InputStream in, OutputStream out) {
 		this.encrypt(in, out, null, null);
@@ -278,15 +279,24 @@ public class AESCrypt {
 			}
 	}
 
-	public String decrypt(byte[] ciphertext) {
+	public String decryptForString(byte[] ciphertext) {
+		try {
+			return new String(decrypt(ciphertext), "UTF-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public byte[] decrypt(byte[] ciphertext) {
 		try {
 			System.arraycopy(ciphertext, 0, iv, 0, IV_LENGTH);
 			setupCrypto(iv);
 			byte[] cipherBytes = new byte[ciphertext.length-IV_LENGTH];
 			System.arraycopy(ciphertext, IV_LENGTH, cipherBytes, 0, ciphertext.length-IV_LENGTH);
 			
-			String plaintext = new String(decryptionCipher.doFinal(cipherBytes), "UTF-8");
-			return plaintext;
+			return decryptionCipher.doFinal(cipherBytes);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -379,11 +389,22 @@ public class AESCrypt {
     		current = pCurrent;
     	}
     	
-    	public int getProgress(){
+    	public long getTotal(){
+    		return total;
+    	}
+    	
+    	public int getProgressPercents(){
     		if(total == 0){
     			return 0;
     		}
     		return (int) (current * 100 / total);
+    	}
+    	
+    	public long getProgress(){
+    		if(total == 0){
+    			return 0;
+    		}
+    		return current;
     	}
     }
 }

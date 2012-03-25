@@ -1,6 +1,10 @@
 package com.fenritz.safecamera;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -12,7 +16,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -21,6 +24,8 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.fenritz.safecamera.util.AESCrypt;
+import com.fenritz.safecamera.util.AESCrypt.CryptoProgress;
 import com.fenritz.safecamera.util.DecryptAndShowImage;
 import com.fenritz.safecamera.util.Helpers;
 import com.fenritz.safecamera.util.MemoryCache;
@@ -33,9 +38,10 @@ public class GalleryActivity extends Activity {
 	private final static int MULTISELECT_OFF = 0;
 	private final static int MULTISELECT_ON = 1;
 
-	protected static final int REQUEST_SAVE = 0;
+	protected static final int REQUEST_DECRYPT = 0;
 
-	private static final int REQUEST_LOAD = 0;
+	protected static final int REQUEST_ENCRYPT = 1;
+	
 	private int multiSelectMode = MULTISELECT_OFF;
 	
 	private GridView photosGrid;
@@ -58,6 +64,7 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.multi_select).setOnClickListener(multiSelectClick());
 		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
 		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
+		findViewById(R.id.encryptFiles).setOnClickListener(encryptFilesClick());
 	}
 
 	private void fillFilesList(){
@@ -100,7 +107,6 @@ public class GalleryActivity extends Activity {
 					AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 			        builder.setMessage(String.format(getString(R.string.confirm_delete_files), String.valueOf(selectedFiles.size())));
 			        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-			            @SuppressWarnings("unchecked")
 						public void onClick(DialogInterface dialog, int whichButton) {
 			            	new DeleteFiles().execute(selectedFiles);
 			            }
@@ -119,7 +125,6 @@ public class GalleryActivity extends Activity {
 	private OnClickListener decryptSelectedClick(){
 		return new OnClickListener() {
 			
-			@SuppressWarnings("unchecked")
 			public void onClick(View v) {
 				if(multiSelectMode == MULTISELECT_ON){
 					Intent intent = new Intent(getBaseContext(), FileDialog.class);
@@ -132,26 +137,46 @@ public class GalleryActivity extends Activity {
 	                //alternatively you can set file filter
 	                //intent.putExtra(FileDialog.FORMAT_FILTER, new String[] { "png" });
 	                
-	                startActivityForResult(intent, REQUEST_SAVE);
+	                startActivityForResult(intent, REQUEST_DECRYPT);
 				}
 			}
 		};
 	}
 	
+	private OnClickListener encryptFilesClick(){
+		return new OnClickListener() {
+			
+			public void onClick(View v) {
+				/*if(multiSelectMode == MULTISELECT_ON){
+					Intent intent = new Intent(getBaseContext(), FileDialog.class);
+					intent.putExtra(FileDialog.START_PATH, Helpers.getHomeDir(GalleryActivity.this));
+					
+					//can user select directories or not
+					intent.putExtra(FileDialog.CAN_SELECT_FILE, false);
+					intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
+					
+					//alternatively you can set file filter
+					//intent.putExtra(FileDialog.FORMAT_FILTER, new String[] { "png" });
+					
+					startActivityForResult(intent, REQUEST_ENCRYPT);
+				}*/
+			}
+		};
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void onActivityResult(final int requestCode,
             int resultCode, final Intent data) {
 
             if (resultCode == Activity.RESULT_OK) {
 
-                    if (requestCode == REQUEST_SAVE) {
-                            System.out.println("Saving...");
-                    } else if (requestCode == REQUEST_LOAD) {
-                            System.out.println("Loading...");
-                    }
-                    
-                    String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-                    Log.d("qaq", filePath);
+			if (requestCode == REQUEST_DECRYPT) {
+				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+				File destinationFolder = new File(filePath);
+				destinationFolder.mkdirs();
+				new DecryptFiles(filePath).execute(selectedFiles);
+			}
 
             } else if (resultCode == Activity.RESULT_CANCELED) {
                     //Logger.getLogger().log(Level.WARNING, "file not selected");
@@ -167,6 +192,99 @@ public class GalleryActivity extends Activity {
 			((CheckableLayout)photosGrid.getChildAt(i)).setChecked(false);
 		}
 			
+	}
+	
+	private class DecryptFiles extends AsyncTask<ArrayList<File>, Integer, Void> {
+		
+		private ProgressDialog progressDialog;
+		private final String destinationFolder;
+		
+		public DecryptFiles(String pDestinationFolder){
+			destinationFolder = pDestinationFolder;
+		}
+		
+		@Override
+    	protected void onPreExecute() {
+    		super.onPreExecute();
+    		progressDialog = new ProgressDialog(GalleryActivity.this);
+    		progressDialog.setCancelable(true);
+    		progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					DecryptFiles.this.cancel(false);
+				}
+			});
+    		progressDialog.setMessage(getString(R.string.decrypting_files));
+    		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+    		progressDialog.show();
+    	}
+		
+		@Override
+		protected Void doInBackground(ArrayList<File>... params) {
+			ArrayList<File> filesToDecrypt = params[0];
+			
+			progressDialog.setMax(filesToDecrypt.size() * 100);
+			
+			for(int i=0;i<filesToDecrypt.size();i++){
+				File file = filesToDecrypt.get(i);
+				if(file.exists() && file.isFile()){
+					String destFileName = file.getName();
+					if(destFileName.substring(destFileName.length()-3).equalsIgnoreCase(getString(R.string.file_extension))){
+						destFileName = destFileName.substring(0, destFileName.length()-3);
+					}
+					
+					try {
+						FileInputStream inputStream = new FileInputStream(file);
+						FileOutputStream outputStream = new FileOutputStream(new File(destinationFolder, destFileName));
+						
+						final int currentIteration = i;
+						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()){
+							@Override
+							public void setProgress(long pCurrent) {
+								super.setProgress(pCurrent);
+								int progress = this.getProgressPercents();
+								int newProgress = progress + (currentIteration * 100);
+								publishProgress(newProgress);
+							}
+						};
+					
+						Helpers.getAESCrypt().decrypt(inputStream, outputStream, progress, this);
+					}
+					catch (FileNotFoundException e) { }
+					catch (IOException e) { }
+				}
+				
+				if(isCancelled()){
+					break;
+				}
+			}
+			
+			return null;
+		}
+		
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+			
+			this.onPostExecute(null);
+		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+			
+			progressDialog.setProgress(values[0]);
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			
+			progressDialog.dismiss();
+			fillFilesList();
+			galleryAdapter.notifyDataSetChanged();
+			clearMutliSelect();
+		}
+		
 	}
 	
 	private class DeleteFiles extends AsyncTask<ArrayList<File>, Integer, Void> {
