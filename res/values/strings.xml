@@ -19,6 +19,7 @@
     <string name="generating_key">Generating cypher keys…</string>
     <string name="deleting_files">Deleting files…</string>
     <string name="decrypting_files">Decrypting files…</string>
+    <string name="encrypting_files">Encrypting files…</string>
     <string name="encrypting_photo">Encrypting photo…</string>
     <string name="confirm_delete_files">Do you really want delete %s files?</string>
     <string name="yes">Yes</string>

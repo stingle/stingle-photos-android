@@ -1,14 +1,12 @@
 package com.fenritz.safecamera;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.AsyncTask;
@@ -129,7 +127,7 @@ public class CameraActivity extends Activity{
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 				
 				new EncryptAndWriteFile(filename).execute(data);
-				new EncryptAndWriteThumb(filename).execute(data);
+				new EncryptAndWriteThumb(CameraActivity.this, filename).execute(data);
 				
 				Handler myHandler = new ResumePreview();
 				myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
@@ -149,7 +147,7 @@ public class CameraActivity extends Activity{
 		super.onPause();
 	}
 	
-	private class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
+	public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
 		
 		private final String filename;
 		private ProgressDialog progressDialog;
@@ -195,66 +193,35 @@ public class CameraActivity extends Activity{
 		
 	}
 	
-	private class EncryptAndWriteThumb extends AsyncTask<byte[], Void, Void> {
+	public class EncryptAndWriteThumb extends AsyncTask<byte[], Void, Void> {
 		
-		private final String filename;
+		private final String fileName;
+		private final Context context;
 		
-		@SuppressWarnings("unused")
-		public EncryptAndWriteThumb(){
-			this(null);
+		public EncryptAndWriteThumb(Context pContext){
+			this(pContext, null);
 		}
 		
-		public EncryptAndWriteThumb(String pFilename){
+		public EncryptAndWriteThumb(Context pContext, String pFilename){
 			super();
+			context = pContext;
 			if(pFilename == null){
-				pFilename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
+				pFilename = Helpers.getFilename(context, Helpers.JPEG_FILE_PREFIX);
 			}
 			
-			filename = pFilename;
+			fileName = pFilename;
 		}
 		
 		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
-				BitmapFactory.Options bitmapOptions=new BitmapFactory.Options();
-				bitmapOptions.inSampleSize = 4;
-				Bitmap bitmap = getThumbFromBitmap(BitmapFactory.decodeByteArray(params[0], 0, params[0].length, bitmapOptions), Integer.valueOf(getString(R.string.thumb_size)));
-				
-				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-				byte[] imageByteArray = stream.toByteArray();
-				
-				FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(CameraActivity.this) + "/" + filename);
-				Helpers.getAESCrypt().encrypt(imageByteArray, out);
+				Helpers.generateThumbnail(context, params[0], fileName);
 			} 
 			catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 			return null;
 		}
-	}
-	
-	private Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide){
-	    int imgWidth = bitmap.getWidth();
-	    int imgHeight = bitmap.getHeight();
-	    
-	    int cropX, cropY, cropWidth, cropHeight;
-	    if(imgWidth >= imgHeight){
-	    	cropX = imgWidth/2 - imgHeight/2;
-	    	cropY = 0;
-	    	cropWidth = imgHeight;
-	    	cropHeight = imgHeight;
-	    }
-	    else{
-	    	cropX = 0;
-	    	cropY = imgHeight/2 - imgWidth/2;
-	    	cropWidth = imgWidth;
-	    	cropHeight = imgWidth;
-	    }
-	    
-	    Bitmap cropedImg = Bitmap.createBitmap(bitmap, cropX, cropY, cropWidth, cropHeight);
-	    
-	    return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
 	}
 	
 }

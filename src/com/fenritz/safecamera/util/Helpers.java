@@ -1,6 +1,9 @@
 package com.fenritz.safecamera.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
@@ -15,6 +18,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -106,5 +111,44 @@ public class Helpers {
 		if(!dir.exists() || !dir.isDirectory()) {
 		    dir.mkdirs();
 		}
+	}
+	
+	public static void generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException{
+		BitmapFactory.Options bitmapOptions=new BitmapFactory.Options();
+		bitmapOptions.inSampleSize = 4;
+		Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
+		if(bitmap != null){
+			Bitmap thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));
+		
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+			byte[] imageByteArray = stream.toByteArray();
+			
+			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
+			Helpers.getAESCrypt().encrypt(imageByteArray, out);
+		}
+	}
+	
+	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide){
+	    int imgWidth = bitmap.getWidth();
+	    int imgHeight = bitmap.getHeight();
+	    
+	    int cropX, cropY, cropWidth, cropHeight;
+	    if(imgWidth >= imgHeight){
+	    	cropX = imgWidth/2 - imgHeight/2;
+	    	cropY = 0;
+	    	cropWidth = imgHeight;
+	    	cropHeight = imgHeight;
+	    }
+	    else{
+	    	cropX = 0;
+	    	cropY = imgHeight/2 - imgWidth/2;
+	    	cropWidth = imgWidth;
+	    	cropHeight = imgWidth;
+	    }
+	    
+	    Bitmap cropedImg = Bitmap.createBitmap(bitmap, cropX, cropY, cropWidth, cropHeight);
+	    
+	    return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
 	}
 }

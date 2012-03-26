@@ -8,8 +8,10 @@
         android:id="@+id/topPanel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
-        android:background="@android:color/darker_gray" >
+        android:background="@android:color/darker_gray"
+        android:gravity="center_vertical|right"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="2dp" >
 
         <ImageButton
             android:id="@+id/multi_select"
@@ -39,7 +41,10 @@
         android:id="@+id/bottomPanel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray" >
+        android:background="@android:color/darker_gray"
+        android:gravity="center_vertical"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="2dp" >
 
         <ImageButton
             android:id="@+id/deleteSelected"
