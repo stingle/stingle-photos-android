@@ -22,10 +22,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-         <activity
+        <activity
             android:configChanges="keyboardHidden|orientation"
             android:label="Camera"
             android:name=".CameraActivity"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Camera"
+            android:name=".CameraPreview"
             android:screenOrientation="landscape" >
         </activity>
         <activity

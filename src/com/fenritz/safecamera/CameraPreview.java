@@ -13,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -21,47 +20,43 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
-import com.fenritz.safecamera.util.CameraPreview;
 import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecamera.util.Preview;
 
-public class CameraActivity extends Activity{
-	
-	Camera mCamera;
-	CameraPreview mPreview;
-	
-	public final static int REQUEST_FROM_CAMERA = 0;
-	protected static final int CAM_STATE_PREVIEW = 0;
-	protected static final int CAM_STATE_FROZEN = 1;
-	private int mPreviewState = CAM_STATE_PREVIEW;
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
+public class CameraPreview extends Activity {
+    private Preview mPreview;
+    Camera mCamera;
+    int numberOfCameras;
+    int cameraCurrentlyLocked;
+    FrameLayout.LayoutParams origParams;
+
+    // The first rear facing camera
+    int defaultCameraId;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Hide the window title.
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // Create a RelativeLayout container that will hold a SurfaceView,
+        // and set it as the content of our activity.
+        
 		setContentView(R.layout.camera);
 
 		((ImageButton) findViewById(R.id.take_photo)).setOnClickListener(takePhoto());
 		((ImageButton) findViewById(R.id.decrypt)).setOnClickListener(openGallery());
-	}
-	
-	class ResumePreview extends Handler {
-		@Override
-		public void handleMessage(Message msg) {
-			if (mCamera != null) {
-				mCamera.startPreview();
-				mPreviewState = CAM_STATE_PREVIEW;
-			}
-		}
-	}
-	
-	private OnClickListener openGallery() {
+		
+		mPreview = ((Preview)findViewById(R.id.camera_preview));
+    }
+    
+    private OnClickListener openGallery() {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				Intent intent = new Intent();
-				intent.setClass(CameraActivity.this, GalleryActivity.class);
+				intent.setClass(CameraPreview.this, GalleryActivity.class);
 				startActivity(intent);
 			}
 		};
@@ -70,91 +65,70 @@ public class CameraActivity extends Activity{
 	private OnClickListener takePhoto() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				if (mCamera != null && mPreviewState == CAM_STATE_PREVIEW) {
-
+				if (mCamera != null) {
 					mCamera.takePicture(null, null, getPictureCallback());
-					mPreviewState = CAM_STATE_FROZEN;
+					FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)mPreview.getLayoutParams();
+					origParams = params;
+					params.width = 1024;
+					params.height = 768;
+					
+					mPreview.setLayoutParams(params);
 				}
 			}
 		};
 	}
 	
-	public Camera getCameraInstance() {
-		Camera c = null;
-		try {
-			c = Camera.open(); // attempt to get a Camera instance
-			
-			// get Camera parameters
-			Camera.Parameters params = c.getParameters();
-			// set the focus mode
-			params.setPreviewSize(320, 240);
-			// set Camera parameters
-			c.setParameters(params);
-		}
-		catch (Exception e) {
-			Log.e("camera", "Error openning camera!");
-			e.printStackTrace();
-		}
-		return c; // returns null if camera is unavailable
-	}
-
-	public void getCameraAndPreview() {
-		// releaseCameraAndPreview();
-		if (mCamera == null) {
-			mCamera = getCameraInstance();
+	class ResumePreview extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
 			if (mCamera != null) {
-				// Create our Preview view and set it as the content of our
-				// activity.
-				mPreview = new CameraPreview(this, mCamera);
-				FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-				preview.addView(mPreview);
-
+				mPreview.setLayoutParams(origParams);
+				mCamera.startPreview();
 			}
 		}
 	}
-
-	public void releaseCameraAndPreview() {
-		if (mPreview != null) {
-			mPreview.release();
-		}
-		if (mCamera != null) {
-			mCamera.stopPreview();
-			mCamera.release();
-			mCamera = null;
-			mPreview = null;
-			((FrameLayout) findViewById(R.id.camera_preview)).removeViewAt(0);
-		}
-	}
-
+	
 	private PictureCallback getPictureCallback() {
 
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
-				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
+				String filename = Helpers.getFilename(CameraPreview.this, Helpers.JPEG_FILE_PREFIX);
 				
 				new EncryptAndWriteFile(filename).execute(data);
-				new EncryptAndWriteThumb(CameraActivity.this, filename).execute(data);
+				new EncryptAndWriteThumb(CameraPreview.this, filename).execute(data);
 				
 				Handler myHandler = new ResumePreview();
 				myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
 			}
 		};
 	}
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-	@Override
-	protected void onResume() {
-		getCameraAndPreview();
-		super.onResume();
-	}
+        // Open the default i.e. the first rear facing camera.
+        mCamera = Camera.open();
+        cameraCurrentlyLocked = defaultCameraId;
+        mPreview.setCamera(mCamera);
+    }
 
-	@Override
-	protected void onPause() {
-		releaseCameraAndPreview();
-		super.onPause();
-	}
-	
-	public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Because the Camera object is a shared resource, it's very
+        // important to release it when the activity is paused.
+        if (mCamera != null) {
+            mPreview.setCamera(null);
+            mCamera.release();
+            mCamera = null;
+        }
+    }
+    
+    
+    public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
 		
 		private final String filename;
 		private ProgressDialog progressDialog;
@@ -167,7 +141,7 @@ public class CameraActivity extends Activity{
 		public EncryptAndWriteFile(String pFilename){
 			super();
 			if(pFilename == null){
-				pFilename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
+				pFilename = Helpers.getFilename(CameraPreview.this, Helpers.JPEG_FILE_PREFIX);
 			}
 			
 			filename = pFilename;
@@ -176,13 +150,13 @@ public class CameraActivity extends Activity{
 		@Override
     	protected void onPreExecute() {
     		super.onPreExecute();
-    		progressDialog = ProgressDialog.show(CameraActivity.this, "", getString(R.string.encrypting_photo), false, false);
+    		progressDialog = ProgressDialog.show(CameraPreview.this, "", getString(R.string.encrypting_photo), false, false);
     	}
 		
 		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
-				FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(CameraActivity.this) + "/" + filename);
+				FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(CameraPreview.this) + "/" + filename);
 				Helpers.getAESCrypt().encrypt(params[0], out);
 			} 
 			catch (FileNotFoundException e) {
@@ -230,5 +204,5 @@ public class CameraActivity extends Activity{
 			return null;
 		}
 	}
-	
+
 }
