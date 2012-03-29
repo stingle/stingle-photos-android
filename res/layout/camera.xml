@@ -3,10 +3,11 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-   <com.fenritz.safecamera.util.Preview
+	<com.fenritz.safecamera.util.CameraPreview
 		android:id="@+id/camera_preview"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent" />
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="left" />
 
     <RelativeLayout
         android:layout_width="fill_parent"

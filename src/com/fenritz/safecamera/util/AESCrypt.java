@@ -27,7 +27,7 @@ public class AESCrypt {
 	Cipher decryptionCipher;
 
 	// Buffer used to transport the bytes from one stream to another
-	byte[] buf = new byte[1024*32];
+	byte[] buf = new byte[1024*4];
 	
 	private byte[] iv;
 	private SecretKey key;
@@ -229,6 +229,8 @@ public class AESCrypt {
 				}
 			}
 			
+			in.close();
+			
 			return byteBuffer.toByteArray();
 		}
 		catch (java.io.IOException e) {
@@ -237,6 +239,56 @@ public class AESCrypt {
 		
 		return null;
 	}
+	/*public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
+		try {
+			in.read(iv, 0, iv.length);
+			this.setupCrypto(iv);
+			if(progress != null){
+				progress.setProgress(iv.length);
+			}
+			
+			
+			// Read in the decrypted bytes and write the cleartext to out
+			BufferedInputStream inb = new BufferedInputStream(in, 1024*32);
+			
+			
+			byte[] out = new byte[0];
+			int bufLen = 32 * 1024;
+			byte[] buf = new byte[bufLen];
+			byte[] tmp = null;
+			int len = 0;
+			
+			while ((len = inb.read(buf, 0, bufLen)) != -1) {
+				// extend array
+				tmp = new byte[out.length + len];
+				
+				// copy data
+				System.arraycopy(out, 0, tmp, 0, out.length);
+				System.arraycopy(buf, 0, tmp, out.length, len);
+				out = tmp;
+				tmp = null;
+			}
+			
+			byte[] decryptedData = decryptionCipher.doFinal(out);
+			//byteBuffer.close();
+			inb.close();
+			
+			return decryptedData;
+		}
+		catch (java.io.IOException e) {
+			e.printStackTrace();
+		}
+		catch (IllegalBlockSizeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (BadPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}*/
 
 	/**
 	 * Input is a string to encrypt.

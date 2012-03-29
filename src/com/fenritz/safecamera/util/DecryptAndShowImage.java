@@ -96,6 +96,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 
 				if (decryptedData != null) {
 					Bitmap bitmap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length);
+					decryptedData = null;
 					if(bitmap != null){
 						if(memCache != null){
 							memCache.put(filePath, bitmap);

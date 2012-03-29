@@ -573,7 +573,9 @@ public class GalleryActivity extends Activity {
 						FileInputStream inputStream = new FileInputStream(file);
 						byte[] decryptedData = Helpers.getAESCrypt().decrypt(inputStream, null, this);
 						
-						Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName());
+						if(decryptedData != null){
+							Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName());
+						}
 						
 						publishProgress(++i);
 			

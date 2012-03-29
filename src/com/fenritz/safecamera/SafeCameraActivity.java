@@ -116,7 +116,7 @@ public class SafeCameraActivity extends Activity {
 			
 			if(result == true){
 				Intent intent = new Intent();
-				intent.setClass(SafeCameraActivity.this, CameraPreview.class);
+				intent.setClass(SafeCameraActivity.this, CameraActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
