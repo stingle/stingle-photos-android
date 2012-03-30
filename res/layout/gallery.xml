@@ -34,6 +34,9 @@
         android:horizontalSpacing="1dp"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
+        android:smoothScrollbar="true"
+        android:saveEnabled="true"
+        android:persistentDrawingCache="all"
         android:verticalSpacing="1dp" >
     </GridView>
     

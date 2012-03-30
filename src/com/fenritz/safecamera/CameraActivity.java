@@ -7,7 +7,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,6 +26,9 @@ import com.fenritz.safecamera.util.CameraPreview;
 import com.fenritz.safecamera.util.Helpers;
 
 public class CameraActivity extends Activity {
+	
+	public static final String FLASH_MODE = "flash_mode";
+	
     private CameraPreview mPreview;
     Camera mCamera;
     int numberOfCameras;
@@ -48,6 +53,7 @@ public class CameraActivity extends Activity {
 
 		((ImageButton) findViewById(R.id.take_photo)).setOnClickListener(takePhoto());
 		((ImageButton) findViewById(R.id.decrypt)).setOnClickListener(openGallery());
+		((ImageButton) findViewById(R.id.flashButton)).setOnClickListener(toggleFlash());
 		
 		mPreview = ((CameraPreview)findViewById(R.id.camera_preview));
     }
@@ -58,6 +64,30 @@ public class CameraActivity extends Activity {
 				Intent intent = new Intent();
 				intent.setClass(CameraActivity.this, GalleryActivity.class);
 				startActivity(intent);
+			}
+		};
+	}
+    
+    private OnClickListener toggleFlash() {
+		return new OnClickListener() {
+			public void onClick(View v) {
+				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
+				
+				if(flashMode.equals(Parameters.FLASH_MODE_OFF)){
+					flashMode = Parameters.FLASH_MODE_ON;
+					((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_on);
+				}
+				else if(flashMode.equals(Parameters.FLASH_MODE_ON)){
+					flashMode = Parameters.FLASH_MODE_OFF;
+					((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_off);
+				}
+
+				Camera.Parameters parameters = mCamera.getParameters();
+	        	parameters.setFlashMode(flashMode);
+	        	mCamera.setParameters(parameters);
+	        	
+	        	preferences.edit().putString(CameraActivity.FLASH_MODE, flashMode).commit();
 			}
 		};
 	}
@@ -112,6 +142,21 @@ public class CameraActivity extends Activity {
         mCamera = Camera.open();
         cameraCurrentlyLocked = defaultCameraId;
         mPreview.setCamera(mCamera);
+        
+        // Set flash mode from preferences and update button accordingly
+        SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
+		
+		if(flashMode.equals(Parameters.FLASH_MODE_OFF)){
+			((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_off);
+		}
+		else if(flashMode.equals(Parameters.FLASH_MODE_ON)){
+			((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_on);
+		}
+
+		Camera.Parameters parameters = mCamera.getParameters();
+    	parameters.setFlashMode(flashMode);
+    	mCamera.setParameters(parameters);
     }
 
     @Override

@@ -16,7 +16,7 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:layout_gravity="center_vertical|right"
             android:layout_marginRight="5dp"
             android:orientation="vertical"
@@ -24,16 +24,34 @@
 			android:layout_alignParentTop="true" >
 
             <ImageButton
-                android:id="@+id/take_photo"
+                android:id="@+id/flashButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_camera" />
-
+                android:layout_gravity="right|top"
+                android:layout_margin="10dp"
+                android:background="@null"
+                android:src="@drawable/flash_off" />
+            
+            <LinearLayout
+	            android:layout_width="wrap_content"
+	            android:layout_height="fill_parent"
+	            android:layout_weight="1">
+	            <ImageButton
+	                android:id="@+id/take_photo"
+	                android:layout_width="100dp"
+	                android:layout_height="100dp"
+	                android:scaleType="fitXY"
+	                android:background="@null"
+	                android:layout_gravity="center"
+	                android:src="@drawable/shutter_button" />
+			</LinearLayout>
             <ImageButton
                 android:id="@+id/decrypt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
+                android:layout_gravity="right|bottom"
+                android:background="@null"
+                android:layout_margin="10dp"
                 android:src="@android:drawable/ic_menu_gallery" />
         </LinearLayout>
     </RelativeLayout>

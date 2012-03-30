@@ -89,10 +89,8 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         // We purposely disregard child measurements because act as a
         // wrapper to a SurfaceView that centers the camera preview instead
         // of stretching it.
-        //final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
-        //final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
 
-        if (mSupportedPreviewSizes != null) {
+        if (mSupportedPreviewSizes != null && mCamera != null) {
         	Camera.Parameters parameters = mCamera.getParameters();
         	Camera.Size pictureSize = parameters.getPictureSize();
         	
@@ -106,6 +104,12 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
             //Log.d("qaqPictureSize", String.valueOf(pictureSize.width) + " - " + String.valueOf(pictureSize.height));
             //Log.d("qaqObjectSize", String.valueOf(mPreviewSize.width * screenSize.heightPixels / mPreviewSize.height) + " - " + String.valueOf(screenSize.heightPixels));
          }
+        else{
+        	final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+            final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
+            
+            setMeasuredDimension(width, height);
+        }
     }
 
     @Override
