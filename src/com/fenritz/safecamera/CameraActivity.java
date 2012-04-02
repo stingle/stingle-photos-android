@@ -2,19 +2,26 @@ package com.fenritz.safecamera;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.Size;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -28,7 +35,8 @@ import com.fenritz.safecamera.util.Helpers;
 public class CameraActivity extends Activity {
 	
 	public static final String FLASH_MODE = "flash_mode";
-	
+	public static final String PHOTO_SIZE = "photo_size";
+
     private CameraPreview mPreview;
     Camera mCamera;
     int numberOfCameras;
@@ -138,13 +146,16 @@ public class CameraActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+
         // Open the default i.e. the first rear facing camera.
         mCamera = Camera.open();
-        cameraCurrentlyLocked = defaultCameraId;
-        mPreview.setCamera(mCamera);
+        
+        List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
+		int photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
         
         // Set flash mode from preferences and update button accordingly
-        SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 		
 		if(flashMode.equals(Parameters.FLASH_MODE_OFF)){
@@ -156,7 +167,11 @@ public class CameraActivity extends Activity {
 
 		Camera.Parameters parameters = mCamera.getParameters();
     	parameters.setFlashMode(flashMode);
+    	parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
     	mCamera.setParameters(parameters);
+    	
+    	cameraCurrentlyLocked = defaultCameraId;
+        mPreview.setCamera(mCamera);
     }
 
     @Override
@@ -246,6 +261,56 @@ public class CameraActivity extends Activity {
 				e.printStackTrace();
 			}
 			return null;
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.settings:
+			if(mCamera == null){
+				return false;
+			}
+			
+			final List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
+			
+			CharSequence[] listEntries = new CharSequence[mSupportedPictureSizes.size()];
+			
+			for(int i=0;i<mSupportedPictureSizes.size();i++){
+				Camera.Size size = mSupportedPictureSizes.get(i);
+				listEntries[i] = String.valueOf(size.width) + "x" + String.valueOf(size.height);
+			}
+			
+			final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+			int photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+			
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		    builder.setTitle(getString(R.string.photo_size_choose));
+		    builder.setSingleChoiceItems(listEntries, photoSizeIndex, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int item) {
+		        	preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
+		        	
+		        	mPreview.setCamera(null);
+		        	
+		        	Camera.Parameters parameters = mCamera.getParameters();
+		        	parameters.setPictureSize(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
+		        	mCamera.setParameters(parameters);
+		        	
+		            dialog.dismiss();
+		        }
+		    }).show();
+		    
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
 		}
 	}
 

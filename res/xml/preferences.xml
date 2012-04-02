@@ -23,5 +23,11 @@
     	    android:key="home_folder"
     	    android:summary="@string/home_folder_desc"
     	    android:title="@string/home_folder" />
+    	
+    	 <!-- <ListPreference
+                android:key="photo_size"
+                android:title="@string/photo_size"
+                android:summary="@string/photo_size_descr"
+                android:dialogTitle="@string/photo_size_choose" /> -->
 
 </PreferenceScreen>

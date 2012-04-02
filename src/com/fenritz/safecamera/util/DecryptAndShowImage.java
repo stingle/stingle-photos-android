@@ -61,6 +61,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		context = parent.getContext();
 		
 		progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
+		//progressBar = new ProgressBar(context);
 		progressBar.setProgress(0);
 		LayoutParams layoutParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		layoutParams.gravity = Gravity.CENTER;

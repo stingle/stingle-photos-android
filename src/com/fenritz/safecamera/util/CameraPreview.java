@@ -26,7 +26,6 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
     SurfaceHolder mHolder;
     Size mPreviewSize;
     List<Size> mSupportedPreviewSizes;
-    List<Size> mSupportedPictureSizes;
     Camera mCamera;
     DisplayMetrics screenSize;
 
@@ -57,7 +56,6 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         mCamera = camera;
         if (mCamera != null) {
             mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
-            mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
             requestLayout();
             
             /*for (Size size : mSupportedPreviewSizes) {

@@ -27,6 +27,9 @@
     <string name="delete">Delete</string>
     <string name="decrypt">Decrypt</string>
     <string name="encrypt_files">Encrypt Files</string>
+    <string name="photo_size">Photo Size</string>
+    <string name="photo_size_descr">Size of photos to take</string>
+    <string name="photo_size_choose">Please choose desired photo size</string>
     
     
     <!-- File Dialog -->

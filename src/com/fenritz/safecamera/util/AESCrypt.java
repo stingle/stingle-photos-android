@@ -160,9 +160,11 @@ public class AESCrypt {
 	public void decrypt(InputStream in, OutputStream out) {
 		this.decrypt(in, out, null, null);
 	}
+	
 	public void decrypt(InputStream in, OutputStream out, CryptoProgress progress) {
 		this.decrypt(in, out, progress, null);
 	}
+	
 	public void decrypt(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			in.read(iv, 0, iv.length);
@@ -203,6 +205,7 @@ public class AESCrypt {
 	public byte[] decrypt(InputStream in, CryptoProgress progress) {
 		return this.decrypt(in, progress, null);
 	}
+	
 	public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			in.read(iv, 0, iv.length);
@@ -239,6 +242,7 @@ public class AESCrypt {
 		
 		return null;
 	}
+	
 	/*public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			in.read(iv, 0, iv.length);
@@ -249,11 +253,11 @@ public class AESCrypt {
 			
 			
 			// Read in the decrypted bytes and write the cleartext to out
-			BufferedInputStream inb = new BufferedInputStream(in, 1024*32);
+			BufferedInputStream inb = new BufferedInputStream(in);
 			
 			
 			byte[] out = new byte[0];
-			int bufLen = 32 * 1024;
+			int bufLen = 128 * 1024;
 			byte[] buf = new byte[bufLen];
 			byte[] tmp = null;
 			int len = 0;
@@ -267,10 +271,18 @@ public class AESCrypt {
 				System.arraycopy(buf, 0, tmp, out.length, len);
 				out = tmp;
 				tmp = null;
+				if(task != null){
+					if(task.isCancelled()){
+						return null;
+					}
+				}
+				
+				if(progress != null){
+					progress.setProgress(out.length + iv.length);
+				}
 			}
 			
 			byte[] decryptedData = decryptionCipher.doFinal(out);
-			//byteBuffer.close();
 			inb.close();
 			
 			return decryptedData;
@@ -279,11 +291,9 @@ public class AESCrypt {
 			e.printStackTrace();
 		}
 		catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
