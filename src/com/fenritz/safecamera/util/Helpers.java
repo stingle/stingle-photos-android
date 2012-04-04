@@ -32,8 +32,17 @@ public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
 	
 	public static AESCrypt getAESCrypt() {
+		return getAESCrypt(null);
+	}
+	
+	public static AESCrypt getAESCrypt(SecretKey pKey) {
+		SecretKey keyToUse = key;
+		if(pKey != null){
+			keyToUse = pKey;
+		}
+		
 		try {
-			return new AESCrypt(key);
+			return new AESCrypt(keyToUse);
 		}
 		catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();

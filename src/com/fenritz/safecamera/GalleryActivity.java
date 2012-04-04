@@ -18,6 +18,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -498,18 +501,26 @@ public class GalleryActivity extends Activity {
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			final CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
-			layout.setGravity(Gravity.CENTER);
-			layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer
-					.valueOf(getString(R.string.thumb_size))));
+			CheckableLayout layout;
+			/*if(convertView != null){
+				layout = (CheckableLayout)convertView;
+				layout.removeAllViews();
+			}
+			else{*/
+				layout = new CheckableLayout(GalleryActivity.this);
+				layout.setGravity(Gravity.CENTER);
+				layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer
+						.valueOf(getString(R.string.thumb_size))));
+			//}
 
 			final File file = files.get(position);
 
+			final CheckableLayout layoutForOnClick = layout;
 			OnClickListener onClick = new View.OnClickListener() {
 				public void onClick(View v) {
 					if (multiSelectMode == MULTISELECT_ON) {
-						layout.toggle();
-						if (layout.isChecked()) {
+						layoutForOnClick.toggle();
+						if (layoutForOnClick.isChecked()) {
 							selectedFiles.add(file);
 						}
 						else {
@@ -613,6 +624,28 @@ public class GalleryActivity extends Activity {
 			galleryAdapter.notifyDataSetChanged();
 		}
 
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.gallery_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.change_password:
+			Intent intent = new Intent();
+			intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);
+			startActivity(intent);
+		    
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 }

@@ -60,6 +60,11 @@
             android:label="Choose File"
             android:name=".FileDialog" >
         </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Change Password"
+            android:name=".ChangePasswordActivity" >
+        </activity>
     </application>
 
 </manifest>

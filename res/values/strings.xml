@@ -30,6 +30,9 @@
     <string name="photo_size">Photo Size</string>
     <string name="photo_size_descr">Size of photos to take</string>
     <string name="photo_size_choose">Please choose desired photo size</string>
+    <string name="change_password">Change Password</string>
+    <string name="changing_password">Changing password on files…</string>
+    <string name="success_change_pass">Successfully changed password</string>
     
     
     <!-- File Dialog -->
@@ -43,5 +46,9 @@
     <string name="no_data">No Data</string>
     <color name="gray">#ffff0000</color>
     <string name="err">Error</string>
+    <string name="change">Change</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="change_password_warning">Warning!!! Changing password means that we need to decrypt all your encrypted photos and reencrypt them with new password. Any encrypted photos that are moved away from device previously are still encrypted with old password. To change their password too you need to move them to device firstly.</string>
 
 </resources>

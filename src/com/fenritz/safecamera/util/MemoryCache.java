@@ -1,53 +1,58 @@
 package com.fenritz.safecamera.util;
 
-import java.lang.ref.SoftReference;
-import java.util.Collections;
-import java.util.Map;
-
 import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 
 
 public class MemoryCache {
-    //private final HashMap<String, SoftReference<Bitmap>> cache=new HashMap<String, SoftReference<Bitmap>>();
-    static int CACHE_SIZE = 2 * 1024 * 1024; 
-    static Map cache = Collections.synchronizedMap(new LruCacheLinkedHashMap(CACHE_SIZE));
+	private static int CACHE_SIZE = 4*1024*1024;
+    private LruCache<String, Bitmap> cache;
+    
+    public MemoryCache(){
+    	cache = new LruCache<String, Bitmap>(CACHE_SIZE) {
+			@Override
+			protected int sizeOf(String key, Bitmap value) {
+				return value.getRowBytes() * value.getHeight();
+		   }
+		};
+    }
     
     public Bitmap get(String id){
-        if(!cache.containsKey(id)){
-            return null;
-        }
-        SoftReference softReferenceDrawable = (SoftReference)cache.get(id);
-        //SoftReference<Bitmap> ref=cache.get(id);
-        return (Bitmap)softReferenceDrawable.get();
+    	Bitmap bitmap;
+		synchronized(cache) {
+			bitmap = cache.get(id);
+		}
+    	
+        return bitmap;
     }
     
     public void put(String id, Bitmap bitmap){
-    	SoftReference softReferenceDrawable = new SoftReference(bitmap);
-    	cache.put(id, softReferenceDrawable); 
+        synchronized(cache) {
+		    cache.put(id, bitmap);
+		}
     }
 
     public void clear() {
-        cache.clear();
+        cache.evictAll();
     }
 }
 
-
 /*public class MemoryCache {
-    private final HashMap<String, SoftReference<Bitmap>> cache=new HashMap<String, SoftReference<Bitmap>>();
-    
-    public Bitmap get(String id){
-        if(!cache.containsKey(id)){
-            return null;
-        }
-        SoftReference<Bitmap> ref=cache.get(id);
-        return ref.get();
-    }
-    
-    public void put(String id, Bitmap bitmap){
-        cache.put(id, new SoftReference<Bitmap>(bitmap));
-    }
-
-    public void clear() {
-        cache.clear();
-    }
+	private final HashMap<String, SoftReference<Bitmap>> cache=new HashMap<String, SoftReference<Bitmap>>();
+	
+	public Bitmap get(String id){
+		if(!cache.containsKey(id)){
+			return null;
+		}
+		SoftReference<Bitmap> ref=cache.get(id);
+		return ref.get();
+	}
+	
+	public void put(String id, Bitmap bitmap){
+		cache.put(id, new SoftReference<Bitmap>(bitmap));
+	}
+	
+	public void clear() {
+		cache.clear();
+	}
 }*/
