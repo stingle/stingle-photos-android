@@ -32,6 +32,7 @@ public class ChangePasswordActivity extends Activity {
 		setContentView(R.layout.change_password);
 		
 		findViewById(R.id.change).setOnClickListener(changeClick());
+		findViewById(R.id.cancel).setOnClickListener(cancelClick());
 	}
 	
 	private OnClickListener changeClick() {
@@ -39,8 +40,40 @@ public class ChangePasswordActivity extends Activity {
 
 			public void onClick(View v) {
 				String currentPassword = ((EditText)findViewById(R.id.current_password)).getText().toString();
-				String newPassword = ((EditText)findViewById(R.id.new_password)).getText().toString();
-				new ReEncryptFiles().execute(newPassword);
+				
+				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				String savedHash = preferences.getString(SafeCameraActivity.PASSWORD, "");
+				
+				try {
+					String enteredPasswordHash = AESCrypt.byteToHex(AESCrypt.getHash(currentPassword));
+					if (!enteredPasswordHash.equals(savedHash)) {
+						Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.incorrect_password));
+						return;
+					}
+					
+					String newPassword = ((EditText)findViewById(R.id.new_password)).getText().toString();
+					String confirm_password = ((EditText)findViewById(R.id.confirm_password)).getText().toString();
+					
+					if(!newPassword.equals(confirm_password)){
+						Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.password_not_match));
+						return;
+					}
+						
+					new ReEncryptFiles().execute(newPassword);
+				}
+				catch (AESCryptException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+	}
+	
+	private OnClickListener cancelClick() {
+		return new OnClickListener() {
+
+			public void onClick(View v) {
+				ChangePasswordActivity.this.finish();
 			}
 		};
 	}

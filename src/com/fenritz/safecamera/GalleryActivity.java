@@ -7,6 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+
+import javax.crypto.SecretKey;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,17 +22,22 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.fenritz.safecamera.util.AESCrypt;
 import com.fenritz.safecamera.util.AESCrypt.CryptoProgress;
@@ -48,6 +57,8 @@ public class GalleryActivity extends Activity {
 
 	protected static final int REQUEST_ENCRYPT = 1;
 
+	protected static final int REQUEST_IMPORT = 2;
+
 	private int multiSelectMode = MULTISELECT_OFF;
 
 	private GridView photosGrid;
@@ -62,6 +73,7 @@ public class GalleryActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature( Window.FEATURE_NO_TITLE );
 		setContentView(R.layout.gallery);
 
 		fillFilesList();
@@ -74,6 +86,7 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
 		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
 		findViewById(R.id.encryptFiles).setOnClickListener(encryptFilesClick());
+		findViewById(R.id.import_btn).setOnClickListener(importClick());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -86,7 +99,7 @@ public class GalleryActivity extends Activity {
 		File dir = new File(Helpers.getHomeDir(this));
 		File[] folderFiles = dir.listFiles();
 
-		Arrays.sort(folderFiles);
+		Arrays.sort(folderFiles, Collections.reverseOrder());
 
 		files.clear();
 		for (File file : folderFiles) {
@@ -138,6 +151,26 @@ public class GalleryActivity extends Activity {
 					multiSelectMode = MULTISELECT_OFF;
 					clearMutliSelect();
 				}
+			}
+		};
+	}
+	
+	private OnClickListener importClick() {
+		return new OnClickListener() {
+
+			public void onClick(View v) {
+				Intent intent = new Intent(getBaseContext(), FileDialog.class);
+				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+				// can user select directories or not
+				intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
+				intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+
+				// alternatively you can set file filter
+				// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
+				// "png" });
+
+				startActivityForResult(intent, REQUEST_IMPORT);
 			}
 		};
 	}
@@ -222,6 +255,36 @@ public class GalleryActivity extends Activity {
 				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
 				new EncryptFiles().execute(filePath);
 			}
+			else if (requestCode == REQUEST_IMPORT) {
+				final String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+				
+				AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+				LayoutInflater layoutInflater = LayoutInflater.from(this);
+	            final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_import_password, null);
+
+	            dialog.setPositiveButton(getString(R.string.import_btn), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String importPassword = ((EditText)enterPasswordView.findViewById(R.id.password)).getText().toString();
+						Boolean deleteAfterImport = ((CheckBox)enterPasswordView.findViewById(R.id.deleteAfterImport)).isChecked();
+						
+						HashMap<String, Object> params = new HashMap<String, Object>();
+						
+						params.put("filePath", filePath);
+						params.put("password", importPassword);
+						params.put("deleteAfterImport", deleteAfterImport);
+						
+						new ImportFiles().execute(params);
+					}
+	            });
+	            
+	            dialog.setNegativeButton(getString(R.string.cancel), null);
+	            
+				dialog.setView(enterPasswordView);
+				dialog.setTitle(getString(R.string.enter_import_password));
+				
+				dialog.show();
+			}
 
 		}
 		else if (resultCode == Activity.RESULT_CANCELED) {
@@ -240,6 +303,118 @@ public class GalleryActivity extends Activity {
 
 	}
 
+	private class ImportFiles extends AsyncTask<HashMap<String, Object>, Integer, Integer> {
+
+		private final int STATUS_OK = 0;
+		private final int STATUS_FAIL = 1;
+		private final int STATUS_CANCEL = 2;
+		
+		private ProgressDialog progressDialog;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progressDialog = new ProgressDialog(GalleryActivity.this);
+			progressDialog.setCancelable(true);
+			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					ImportFiles.this.cancel(false);
+				}
+			});
+			progressDialog.setMessage(getString(R.string.importing_files));
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			progressDialog.show();
+		}
+
+		@Override
+		protected Integer doInBackground(HashMap<String, Object>... rparams) {
+			HashMap<String, Object> params = rparams[0];
+
+			String filePath = (String)params.get("filePath");
+			String password = (String)params.get("password");
+			Boolean deleteAfterImport = (Boolean)params.get("deleteAfterImport");
+			
+			File origFile = new File(filePath);
+			
+			if (origFile.exists() && origFile.isFile()) {
+				try {
+					SecretKey newKey = Helpers.getAESKey(GalleryActivity.this, password);
+					AESCrypt newCrypt = Helpers.getAESCrypt(newKey);
+					
+					FileInputStream inputStream = new FileInputStream(origFile);
+					progressDialog.setMax((int) inputStream.getChannel().size());
+
+					
+					AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
+						@Override
+						public void setProgress(long pCurrent) {
+							super.setProgress(pCurrent);
+							publishProgress((int)this.getProgress());
+						}
+					};
+					
+					byte[] decryptedData = newCrypt.decrypt(inputStream, progress, this);
+
+					if(decryptedData != null){
+						String destFilePath = Helpers.getHomeDir(GalleryActivity.this) + "/" + origFile.getName();
+						
+						// TODO: Add checking for destination file already exists
+						FileOutputStream outputStream = new FileOutputStream(destFilePath);
+						Helpers.getAESCrypt().encrypt(decryptedData, outputStream);
+						
+						if(deleteAfterImport){
+							origFile.delete();
+						}
+						
+						return STATUS_OK;
+					}
+				}
+				catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			return STATUS_FAIL;
+		}
+
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+
+			this.onPostExecute(STATUS_CANCEL);
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+
+			progressDialog.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			super.onPostExecute(result);
+
+			progressDialog.dismiss();
+			fillFilesList();
+			galleryAdapter.notifyDataSetChanged();
+			clearMutliSelect();
+			
+			switch(result){
+				case STATUS_OK:
+					Toast.makeText(GalleryActivity.this, getString(R.string.success_import), Toast.LENGTH_LONG).show();
+					break;
+				case STATUS_FAIL:
+					Toast.makeText(GalleryActivity.this, getString(R.string.import_fialed), Toast.LENGTH_LONG).show();
+					break;
+			}
+		}
+
+	}
+	
 	private class EncryptFiles extends AsyncTask<String, Integer, Void> {
 
 		private ProgressDialog progressDialog;

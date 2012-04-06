@@ -138,6 +138,7 @@ public class AESCrypt {
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
+			return;
 		}
 	}
 	
@@ -153,6 +154,7 @@ public class AESCrypt {
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
+			return;
 		}
 	}
 
@@ -196,6 +198,7 @@ public class AESCrypt {
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
+			return;
 		}
 	}
 	
@@ -238,9 +241,8 @@ public class AESCrypt {
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
+			return null;
 		}
-		
-		return null;
 	}
 	
 	/*public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {

@@ -33,6 +33,13 @@
     <string name="change_password">Change Password</string>
     <string name="changing_password">Changing password on files…</string>
     <string name="success_change_pass">Successfully changed password</string>
+    <string name="import_desc">Import</string>
+    <string name="enter_import_password">Please enter password for file to import</string>
+    <string name="delete_after_import">Delete imported files</string>
+    <string name="import_btn">Import</string>
+    <string name="importing_files">Importing files…</string>
+    <string name="success_import">Successfully imported</string>
+    <string name="import_fialed">Import failed! Possible reasons are incorrect password was specified or file is corrupted</string>
     
     
     <!-- File Dialog -->
