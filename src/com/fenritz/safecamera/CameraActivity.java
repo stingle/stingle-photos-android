@@ -11,10 +11,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +28,7 @@ import android.os.Message;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -42,6 +49,17 @@ public class CameraActivity extends Activity {
     int numberOfCameras;
     int cameraCurrentlyLocked;
     FrameLayout.LayoutParams origParams;
+    private int mOrientation =  -1;
+    private OrientationEventListener mOrientationEventListener;
+    
+    private static final int ORIENTATION_PORTRAIT_NORMAL =  1;
+    private static final int ORIENTATION_PORTRAIT_INVERTED =  2;
+    private static final int ORIENTATION_LANDSCAPE_NORMAL =  3;
+    private static final int ORIENTATION_LANDSCAPE_INVERTED =  4;
+    
+    private ImageButton takePhotoButton;
+    private ImageButton flashButton;
+    private ImageButton galleryButton;
 
     // The first rear facing camera
     int defaultCameraId;
@@ -59,9 +77,14 @@ public class CameraActivity extends Activity {
         
 		setContentView(R.layout.camera);
 
-		((ImageButton) findViewById(R.id.take_photo)).setOnClickListener(takePhoto());
-		((ImageButton) findViewById(R.id.decrypt)).setOnClickListener(openGallery());
-		((ImageButton) findViewById(R.id.flashButton)).setOnClickListener(toggleFlash());
+		takePhotoButton = (ImageButton)findViewById(R.id.take_photo);
+		takePhotoButton.setOnClickListener(takePhoto());
+		
+		galleryButton = (ImageButton) findViewById(R.id.gallery);
+		galleryButton.setOnClickListener(openGallery());
+		
+		flashButton = (ImageButton) findViewById(R.id.flashButton);
+		flashButton.setOnClickListener(toggleFlash());
 		
 		mPreview = ((CameraPreview)findViewById(R.id.camera_preview));
     }
@@ -168,12 +191,104 @@ public class CameraActivity extends Activity {
 		Camera.Parameters parameters = mCamera.getParameters();
     	parameters.setFlashMode(flashMode);
     	parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
+    	//parameters.set("orientation", "landscape");
+    	//parameters.set("rotation", 90);
+    	//mCamera.setDisplayOrientation(90);
+    	if (mOrientationEventListener == null) {            
+            mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+
+                @Override
+                public void onOrientationChanged(int orientation) {
+
+                    // determine our orientation based on sensor response
+                    int lastOrientation = mOrientation;
+
+                    if (orientation >= 315 || orientation < 45) {
+                        if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {                          
+                            mOrientation = ORIENTATION_PORTRAIT_NORMAL;
+                        }
+                    }
+                    else if (orientation < 315 && orientation >= 225) {
+                        if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
+                            mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
+                        }                       
+                    }
+                    else if (orientation < 225 && orientation >= 135) {
+                        if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
+                            mOrientation = ORIENTATION_PORTRAIT_INVERTED;
+                        }                       
+                    }
+                    else { // orientation <135 && orientation > 45
+                        if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
+                            mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
+                        }                       
+                    }   
+
+                    if (lastOrientation != mOrientation) {
+                    	Camera.Parameters parameters = mCamera.getParameters();
+                    	parameters.setRotation(changeRotation(mOrientation, lastOrientation));
+                    	mCamera.setParameters(parameters);
+                    }
+                }
+            };
+        }
+        if (mOrientationEventListener.canDetectOrientation()) {
+            mOrientationEventListener.enable();
+        }
     	mCamera.setParameters(parameters);
     	
     	cameraCurrentlyLocked = defaultCameraId;
         mPreview.setCamera(mCamera);
     }
 
+    /**
+     * Performs required action to accommodate new orientation
+     * @param orientation
+     * @param lastOrientation
+     */
+    private int changeRotation(int orientation, int lastOrientation) {
+    	int rotation = 0;
+        switch (orientation) {
+            case ORIENTATION_PORTRAIT_NORMAL:
+                galleryButton.setImageDrawable(getRotatedImage(android.R.drawable.ic_menu_gallery, 270));
+                flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 270));
+                rotation = 90;
+                break;
+            case ORIENTATION_LANDSCAPE_NORMAL:
+            	galleryButton.setImageResource(android.R.drawable.ic_menu_gallery);
+                flashButton.setImageResource(R.drawable.flash_off);
+                rotation = 0;
+                break;
+            case ORIENTATION_PORTRAIT_INVERTED:
+            	galleryButton.setImageDrawable(getRotatedImage(android.R.drawable.ic_menu_gallery, 90));
+                flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 90));
+                rotation = 270;
+                break;
+            case ORIENTATION_LANDSCAPE_INVERTED:
+            	galleryButton.setImageDrawable(getRotatedImage(android.R.drawable.ic_menu_gallery, 180));
+                flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 180));
+                rotation = 180;
+                break;
+        }
+        
+        return rotation;
+    }
+    
+    /**
+     * Rotates given Drawable
+     * @param drawableId    Drawable Id to rotate
+     * @param degrees       Rotate drawable by Degrees
+     * @return              Rotated Drawable
+     */
+    private Drawable getRotatedImage(int drawableId, int degrees) {
+        Bitmap original = BitmapFactory.decodeResource(getResources(), drawableId);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degrees);
+
+        Bitmap rotated = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
+        return new BitmapDrawable(rotated);
+    }
+    
     @Override
     protected void onPause() {
         super.onPause();
