@@ -2,5 +2,5 @@
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:title="@string/change_password" android:id="@+id/change_password" android:icon="@android:drawable/ic_menu_manage"></item>
-    
+    <item android:title="@string/settings" android:id="@+id/settings" android:icon="@android:drawable/ic_menu_preferences"></item>
 </menu>

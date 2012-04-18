@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="lockTimes">
+        <item name="10">10</item>
+        <item name="30">@string/seconds30</item>
+        <item name="60">@string/minute1</item>
+        <item name="300">@string/minutes5</item>
+        <item name="600">@string/minutes10</item>
+        <item name="1800">@string/minutes30</item>
+        <item name="3600">@string/hour1</item>
+    </string-array>
+    
+    <string-array name="lockTimesValues">
+        <item name="10">10</item>
+        <item name="30">30</item>
+        <item name="60">60</item>
+        <item name="300">300</item>
+        <item name="600">600</item>
+        <item name="1800">1800</item>
+        <item name="3600">3600</item>
+    </string-array>
+</resources>

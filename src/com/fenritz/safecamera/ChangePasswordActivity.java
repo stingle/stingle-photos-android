@@ -11,7 +11,11 @@ import javax.crypto.SecretKey;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,6 +30,8 @@ import com.fenritz.safecamera.util.Helpers;
 
 public class ChangePasswordActivity extends Activity {
 
+	private BroadcastReceiver receiver;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -33,6 +39,22 @@ public class ChangePasswordActivity extends Activity {
 		
 		findViewById(R.id.change).setOnClickListener(changeClick());
 		findViewById(R.id.cancel).setOnClickListener(cancelClick());
+		
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		receiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				finish();
+			}
+		};
+		registerReceiver(receiver, intentFilter);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		unregisterReceiver(receiver);
 	}
 	
 	private OnClickListener changeClick() {
@@ -102,7 +124,7 @@ public class ChangePasswordActivity extends Activity {
 			String newPassword = params[0];
 
 			SecretKey newKey = Helpers.getAESKey(ChangePasswordActivity.this, newPassword);
-			AESCrypt newCrypt = Helpers.getAESCrypt(newKey);
+			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, ChangePasswordActivity.this);
 			
 			
 			File dir = new File(Helpers.getHomeDir(ChangePasswordActivity.this));
@@ -129,7 +151,7 @@ public class ChangePasswordActivity extends Activity {
 			for(File file : files){
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
-					byte[] decryptedData = Helpers.getAESCrypt().decrypt(inputStream, null, this);
+					byte[] decryptedData = Helpers.getAESCrypt(ChangePasswordActivity.this).decrypt(inputStream, null, this);
 
 					if(decryptedData != null){
 						String origFilePath = file.getPath();
@@ -157,7 +179,7 @@ public class ChangePasswordActivity extends Activity {
 				e.printStackTrace();
 			}
 			
-			Helpers.key = newKey;
+			((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(newKey);
 
 			return null;
 		}
@@ -179,5 +201,20 @@ public class ChangePasswordActivity extends Activity {
 			ChangePasswordActivity.this.finish();
 		}
 
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		Helpers.setLockedTime(this);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		Helpers.checkLoginedState(this);
+		Helpers.disableLockTimer(this);
 	}
 }

@@ -40,6 +40,18 @@
     <string name="importing_files">Importing files…</string>
     <string name="success_import">Successfully imported</string>
     <string name="import_fialed">Import failed! Possible reasons are incorrect password was specified or file is corrupted</string>
+    <string name="seconds">seconds</string>
+    <string name="minute">minute</string>
+    <string name="minutes">minutes</string>
+    <string name="hour">hour</string>
+    <string name="lock_time">Lock app after</string>
+    <string name="lock_time_desc">Lock app if inactive for specified amount of time</string>
+    <string name="seconds30">30 seconds</string>
+    <string name="minute1">1 minute</string>
+    <string name="minutes5">5 minutes</string>
+    <string name="minutes10">10 minutes</string>
+    <string name="minutes30">30 minutes</string>
+    <string name="hour1">1 hour</string>
     
     
     <!-- File Dialog -->

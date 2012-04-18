@@ -24,10 +24,12 @@
     	    android:summary="@string/home_folder_desc"
     	    android:title="@string/home_folder" />
     	
-    	 <!-- <ListPreference
-                android:key="photo_size"
-                android:title="@string/photo_size"
-                android:summary="@string/photo_size_descr"
-                android:dialogTitle="@string/photo_size_choose" /> -->
+    	 <ListPreference 
+            android:key="lock_time"
+            android:title="@string/lock_time"
+            android:summary="@string/lock_time_desc"
+            android:defaultValue="300" 
+            android:entries="@array/lockTimes"
+            android:entryValues="@array/lockTimesValues" />
 
 </PreferenceScreen>

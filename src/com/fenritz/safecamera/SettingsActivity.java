@@ -1,7 +1,10 @@
 package com.fenritz.safecamera;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+
+import com.fenritz.safecamera.util.Helpers;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -30,6 +33,15 @@ public class SettingsActivity extends PreferenceActivity {
 		listPref.setValueIndex(0);
 	    listPref.setEntryValues(entries);*/
 		
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		Helpers.disableLockTimer(this);
 	}
 
 }

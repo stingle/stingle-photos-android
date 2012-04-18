@@ -1,5 +1,7 @@
 package com.fenritz.safecamera;
 
+import javax.crypto.SecretKey;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -69,6 +71,23 @@ public class SafeCameraActivity extends Activity {
 		};
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		Helpers.disableLockTimer(this);
+		
+		SecretKey key = ((SafeCameraApplication) this.getApplicationContext()).getKey();
+		if(key != null){
+			Intent intent = new Intent();
+			intent.setClass(SafeCameraActivity.this, CameraActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+			finish();
+		}
+	}
+	
 	private void doLogin() {
 		String savedHash = preferences.getString(PASSWORD, "");
 		String enteredPassword = ((EditText) findViewById(R.id.password)).getText().toString();
@@ -103,8 +122,9 @@ public class SafeCameraActivity extends Activity {
 		
 		@Override
 		protected Boolean doInBackground(String... params) {
-			Helpers.key = Helpers.getAESKey(SafeCameraActivity.this, params[0]);
-			if(Helpers.key != null){
+			SecretKey key = Helpers.getAESKey(SafeCameraActivity.this, params[0]);
+			if(key != null){
+				((SafeCameraApplication) SafeCameraActivity.this.getApplication()).setKey(key);
 				return true;
 			}
 			return false;

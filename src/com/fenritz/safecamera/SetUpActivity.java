@@ -1,5 +1,7 @@
 package com.fenritz.safecamera;
 
+import javax.crypto.SecretKey;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -49,7 +51,8 @@ public class SetUpActivity  extends Activity{
 					e.printStackTrace();
 				}
 				
-				Helpers.key = Helpers.getAESKey(SetUpActivity.this, password1);
+				SecretKey key = Helpers.getAESKey(SetUpActivity.this, password1);
+				((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(key);
 				
 				Intent intent = new Intent();
 				intent.setClass(SetUpActivity.this, CameraActivity.class);

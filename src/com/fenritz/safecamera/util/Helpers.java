@@ -16,7 +16,10 @@ import javax.crypto.SecretKey;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,18 +28,81 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.fenritz.safecamera.R;
+import com.fenritz.safecamera.SafeCameraActivity;
+import com.fenritz.safecamera.SafeCameraApplication;
 
 public class Helpers {
-	public static SecretKey key;
-
 	public static final String JPEG_FILE_PREFIX = "IMG_";
 	
-	public static AESCrypt getAESCrypt() {
-		return getAESCrypt(null);
+	public static void checkLoginedState(Activity activity){
+		SecretKey key = ((SafeCameraApplication) activity.getApplicationContext()).getKey();
+		
+		if(key == null){
+			redirectToLogin(activity);
+			return;
+		}
+		
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
+		int lockTimeout = Integer.valueOf(sharedPrefs.getString("lock_time", "300")) * 1000;
+		
+		long currentTimestamp = System.currentTimeMillis();
+		long lockedTime = ((SafeCameraApplication) activity.getApplicationContext()).getLockedTime();
+		
+		Log.d("lockedTime", String.valueOf(lockedTime));
+		Log.d("currentTimestamp", String.valueOf(currentTimestamp));
+		Log.d("lockTimeout", String.valueOf(lockTimeout));
+		
+		if(lockedTime != 0){
+			Log.d("timestampDiff", String.valueOf(currentTimestamp - lockedTime));
+			if(currentTimestamp - lockedTime > lockTimeout){
+				redirectToLogin(activity);
+			}
+		}
 	}
 	
-	public static AESCrypt getAESCrypt(SecretKey pKey) {
-		SecretKey keyToUse = key;
+	
+	public static void setLockedTime(Context context){
+		Log.d("setLock", context.getClass().getName());
+		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(System.currentTimeMillis());
+	}
+	
+	public static void disableLockTimer(Context context){
+		Log.d("disableLock", context.getClass().getName());
+		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(0);
+	}
+	
+	private static void redirectToLogin(Activity activity){
+		((SafeCameraApplication) activity.getApplicationContext()).setKey(null);
+		
+		Log.d("qaq", activity.getClass().getName());
+		Intent intent = new Intent();
+		intent.setClass(activity, SafeCameraActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		activity.startActivity(intent);
+		
+		Intent broadcastIntent = new Intent();
+		broadcastIntent.setAction("com.package.ACTION_LOGOUT");
+		activity.sendBroadcast(broadcastIntent);
+	}
+	
+	public static void registerForBroadcastReceiver(final Activity activity){
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		activity.registerReceiver(new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				activity.finish();
+			}
+		}, intentFilter);
+	}
+	
+	public static AESCrypt getAESCrypt(Context context) {
+		return getAESCrypt(null, context);
+	}
+	
+	public static AESCrypt getAESCrypt(SecretKey pKey, Context context) {
+		SecretKey keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
 		if(pKey != null){
 			keyToUse = pKey;
 		}
@@ -134,7 +200,7 @@ public class Helpers {
 			byte[] imageByteArray = stream.toByteArray();
 			
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
-			Helpers.getAESCrypt().encrypt(imageByteArray, out);
+			Helpers.getAESCrypt(context).encrypt(imageByteArray, out);
 		}
 	}
 	
@@ -160,4 +226,5 @@ public class Helpers {
 	    
 	    return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
 	}
+	
 }

@@ -15,8 +15,12 @@ import javax.crypto.SecretKey;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -70,6 +74,8 @@ public class GalleryActivity extends Activity {
 	
 	private GenerateThumbs thumbGenTask;
 
+	private BroadcastReceiver receiver;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,8 +93,27 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
 		findViewById(R.id.encryptFiles).setOnClickListener(encryptFilesClick());
 		findViewById(R.id.import_btn).setOnClickListener(importClick());
+		
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+		
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		receiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				finish();
+			}
+		};
+		registerReceiver(receiver, intentFilter);
 	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		unregisterReceiver(receiver);
+	}
+	
 	@SuppressWarnings("unchecked")
 	private void fillFilesList() {
 		if(thumbGenTask != null){
@@ -122,6 +147,9 @@ public class GalleryActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		
+		Helpers.setLockedTime(this);
+		
 		if(thumbGenTask != null){
 			thumbGenTask.cancel(true);
 			thumbGenTask = null;
@@ -132,6 +160,10 @@ public class GalleryActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		Helpers.checkLoginedState(this);
+		Helpers.disableLockTimer(this);
+		
 		if(thumbGenTask == null){
 			thumbGenTask = new GenerateThumbs();
 			thumbGenTask.execute(toGenerateThumbs);
@@ -339,7 +371,7 @@ public class GalleryActivity extends Activity {
 			if (origFile.exists() && origFile.isFile()) {
 				try {
 					SecretKey newKey = Helpers.getAESKey(GalleryActivity.this, password);
-					AESCrypt newCrypt = Helpers.getAESCrypt(newKey);
+					AESCrypt newCrypt = Helpers.getAESCrypt(newKey, GalleryActivity.this);
 					
 					FileInputStream inputStream = new FileInputStream(origFile);
 					progressDialog.setMax((int) inputStream.getChannel().size());
@@ -360,7 +392,7 @@ public class GalleryActivity extends Activity {
 						
 						// TODO: Add checking for destination file already exists
 						FileOutputStream outputStream = new FileOutputStream(destFilePath);
-						Helpers.getAESCrypt().encrypt(decryptedData, outputStream);
+						Helpers.getAESCrypt(GalleryActivity.this).encrypt(decryptedData, outputStream);
 						
 						if(deleteAfterImport){
 							origFile.delete();
@@ -456,7 +488,7 @@ public class GalleryActivity extends Activity {
 						}
 					};
 
-					Helpers.getAESCrypt().encrypt(inputStream, outputStream, progress, this);
+					Helpers.getAESCrypt(GalleryActivity.this).encrypt(inputStream, outputStream, progress, this);
 				}
 				catch (FileNotFoundException e) {
 					e.printStackTrace();
@@ -548,7 +580,7 @@ public class GalleryActivity extends Activity {
 							}
 						};
 
-						Helpers.getAESCrypt().decrypt(inputStream, outputStream, progress, this);
+						Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, outputStream, progress, this);
 					}
 					catch (FileNotFoundException e) {
 					}
@@ -757,7 +789,7 @@ public class GalleryActivity extends Activity {
 				if (file.exists() && file.isFile()) {
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
-						byte[] decryptedData = Helpers.getAESCrypt().decrypt(inputStream, null, this);
+						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 						
 						if(decryptedData != null){
 							Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName());
@@ -811,15 +843,18 @@ public class GalleryActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
+		Intent intent = new Intent();
 		switch (item.getItemId()) {
-		case R.id.change_password:
-			Intent intent = new Intent();
-			intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);
-			startActivity(intent);
-		    
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
+			case R.id.change_password:
+				intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);
+				startActivity(intent);
+				return true;
+			case R.id.settings:
+				intent.setClass(GalleryActivity.this, SettingsActivity.class);
+				startActivity(intent);
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 

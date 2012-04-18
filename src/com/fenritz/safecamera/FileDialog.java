@@ -8,7 +8,11 @@ import java.util.TreeMap;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -20,6 +24,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import com.fenritz.safecamera.util.Helpers;
 
 /**
  * Activity para escolha de arquivos/diretorios.
@@ -102,6 +108,9 @@ public class FileDialog extends ListActivity {
 	private File selectedFile;
 	private final HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
 
+	
+	private BroadcastReceiver receiver;
+	
 	/**
 	 * Called when the activity is first created. Configura todos os parametros
 	 * de entrada e das VIEWS..
@@ -112,6 +121,17 @@ public class FileDialog extends ListActivity {
 		setResult(RESULT_CANCELED, getIntent());
 
 		setContentView(R.layout.file_dialog_main);
+		
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		receiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				finish();
+			}
+		};
+		registerReceiver(receiver, intentFilter);
+		
 		myPath = (TextView) findViewById(R.id.path);
 		mFileName = (EditText) findViewById(R.id.fdEditTextFile);
 
@@ -184,6 +204,12 @@ public class FileDialog extends ListActivity {
 			selectButton.setEnabled(true);
 		}
 		getDir(startPath);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		unregisterReceiver(receiver);
 	}
 
 	private void getDir(String dirPath) {
@@ -384,5 +410,20 @@ public class FileDialog extends ListActivity {
 
 		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		selectButton.setEnabled(false);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		Helpers.setLockedTime(this);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		Helpers.checkLoginedState(this);
+		Helpers.disableLockTimer(this);
 	}
 }
