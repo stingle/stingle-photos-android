@@ -29,7 +29,7 @@ public class ViewImageActivity extends Activity {
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
 
-		task = new DecryptAndShowImage(imagePath, ((LinearLayout)findViewById(R.id.parent_layout)), null, null, true);
+		task = new DecryptAndShowImage(imagePath, ((LinearLayout)findViewById(R.id.parent_layout)), null, null, null, true);
 		task.execute();
 		
 		IntentFilter intentFilter = new IntentFilter();

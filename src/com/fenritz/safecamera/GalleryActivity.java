@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -32,6 +33,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.BaseAdapter;
@@ -62,6 +64,10 @@ public class GalleryActivity extends Activity {
 	protected static final int REQUEST_ENCRYPT = 1;
 
 	protected static final int REQUEST_IMPORT = 2;
+	
+	protected static final int ACTION_DECRYPT = 0;
+	protected static final int ACTION_SHARE = 1;
+	protected static final int ACTION_DELETE = 2;
 
 	private int multiSelectMode = MULTISELECT_OFF;
 
@@ -93,6 +99,7 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
 		findViewById(R.id.encryptFiles).setOnClickListener(encryptFilesClick());
 		findViewById(R.id.import_btn).setOnClickListener(importClick());
+		findViewById(R.id.share).setOnClickListener(shareClick());
 		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -206,6 +213,40 @@ public class GalleryActivity extends Activity {
 			}
 		};
 	}
+	
+	private OnClickListener shareClick() {
+		return new OnClickListener() {
+
+			public void onClick(View v) {
+				if (multiSelectMode == MULTISELECT_ON) {
+					shareSelected();
+					clearMutliSelect();
+				}
+			}
+		};
+	}
+	
+	private void shareSelected(){
+		if(selectedFiles.size() == 1){
+			Intent share = new Intent(Intent.ACTION_SEND);
+			share.setType("*/*");
+
+			share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + selectedFiles.get(0).getPath()));
+			startActivity(Intent.createChooser(share, "Share Image"));
+		}
+		else if(selectedFiles.size() > 1){
+			Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
+			share.setType("*/*");
+
+			ArrayList<Uri> uris = new ArrayList<Uri>();
+			for (int i = 0; i < selectedFiles.size(); i++) {
+				uris.add(Uri.parse("file://" + selectedFiles.get(i).getPath()));
+			}
+
+			share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+			startActivity(Intent.createChooser(share, getString(R.string.share)));
+		}
+	}
 
 	private OnClickListener deleteSelectedClick() {
 		return new OnClickListener() {
@@ -213,20 +254,24 @@ public class GalleryActivity extends Activity {
 			@SuppressWarnings("unchecked")
 			public void onClick(View v) {
 				if (multiSelectMode == MULTISELECT_ON) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-					builder.setMessage(String.format(getString(R.string.confirm_delete_files), String.valueOf(selectedFiles.size())));
-					builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int whichButton) {
-							new DeleteFiles().execute(selectedFiles);
-						}
-					});
-					builder.setNegativeButton(getString(R.string.no), null);
-					AlertDialog dialog = builder.create();
-					dialog.show();
+					deleteSelected();
 
 				}
 			}
 		};
+	}
+	
+	private void deleteSelected(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+		builder.setMessage(String.format(getString(R.string.confirm_delete_files), String.valueOf(selectedFiles.size())));
+		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				new DeleteFiles().execute(selectedFiles);
+			}
+		});
+		builder.setNegativeButton(getString(R.string.no), null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 
 	private OnClickListener decryptSelectedClick() {
@@ -234,21 +279,25 @@ public class GalleryActivity extends Activity {
 
 			public void onClick(View v) {
 				if (multiSelectMode == MULTISELECT_ON) {
-					Intent intent = new Intent(getBaseContext(), FileDialog.class);
-					intent.putExtra(FileDialog.START_PATH, Helpers.getHomeDir(GalleryActivity.this));
-
-					// can user select directories or not
-					intent.putExtra(FileDialog.CAN_SELECT_FILE, false);
-					intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
-
-					// alternatively you can set file filter
-					// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-					// "png" });
-
-					startActivityForResult(intent, REQUEST_DECRYPT);
+					decryptSelected();
 				}
 			}
 		};
+	}
+	
+	private void decryptSelected(){
+		Intent intent = new Intent(getBaseContext(), FileDialog.class);
+		intent.putExtra(FileDialog.START_PATH, Helpers.getHomeDir(GalleryActivity.this));
+
+		// can user select directories or not
+		intent.putExtra(FileDialog.CAN_SELECT_FILE, false);
+		intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
+
+		// alternatively you can set file filter
+		// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
+		// "png" });
+
+		startActivityForResult(intent, REQUEST_DECRYPT);
 	}
 
 	private OnClickListener encryptFilesClick() {
@@ -742,6 +791,36 @@ public class GalleryActivity extends Activity {
 					}
 				}
 			};
+			
+			OnLongClickListener longClick = new View.OnLongClickListener() {
+				public boolean onLongClick(View v) {
+					CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
+					
+					AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+					builder.setTitle(getString(R.string.actions));
+					builder.setItems(listEntries, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int item) {
+							selectedFiles.clear();
+							selectedFiles.add(file);
+							
+							switch(item){
+								case ACTION_DECRYPT:
+									decryptSelected();
+									break;
+								case ACTION_SHARE:
+									shareSelected();
+									break;
+								case ACTION_DELETE:
+									deleteSelected();
+									break;
+							}
+							dialog.dismiss();
+						}
+					}).show();
+					
+					return true;
+				}
+			};
 
 			String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
 
@@ -750,13 +829,14 @@ public class GalleryActivity extends Activity {
 				ImageView imageView = new ImageView(GalleryActivity.this);
 				imageView.setImageBitmap(image);
 				imageView.setOnClickListener(onClick);
+				imageView.setOnLongClickListener(longClick);
 				imageView.setPadding(3, 3, 3, 3);
 				layout.addView(imageView);
 			}
 			else {
 				File thumb = new File(thumbPath);
 				if(thumb.exists() && thumb.isFile()){
-					new DecryptAndShowImage(thumbPath, layout, onClick, memCache, false).execute();
+					new DecryptAndShowImage(thumbPath, layout, onClick, longClick, memCache, false).execute();
 				}
 				else{
 					if(toGenerateThumbs.contains(file)){
@@ -768,6 +848,7 @@ public class GalleryActivity extends Activity {
 						fileImage.setImageResource(R.drawable.fileb);
 						fileImage.setPadding(3, 3, 3, 3);
 						fileImage.setOnClickListener(onClick);
+						fileImage.setOnLongClickListener(longClick);
 						layout.addView(fileImage);
 					}
 				}

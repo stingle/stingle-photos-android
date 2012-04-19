@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="lockTimes">
-        <item name="10">10</item>
+        <item name="10">@string/seconds10</item>
         <item name="30">@string/seconds30</item>
         <item name="60">@string/minute1</item>
         <item name="300">@string/minutes5</item>
@@ -18,5 +18,17 @@
         <item name="600">600</item>
         <item name="1800">1800</item>
         <item name="3600">3600</item>
+    </string-array>
+    
+    <string-array name="galleryItemActions">
+        <item name="decrypt">@string/decrypt</item>
+        <item name="share">@string/share</item>
+        <item name="delete">@string/delete</item>
+    </string-array>
+    
+    <string-array name="galleryItemActionsVals">
+        <item name="decrypt">decrypt</item>
+        <item name="share">share</item>
+        <item name="delete">delete</item>
     </string-array>
 </resources>

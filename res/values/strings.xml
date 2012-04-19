@@ -46,12 +46,15 @@
     <string name="hour">hour</string>
     <string name="lock_time">Lock app after</string>
     <string name="lock_time_desc">Lock app if inactive for specified amount of time</string>
+    <string name="seconds10">10 seconds</string>
     <string name="seconds30">30 seconds</string>
     <string name="minute1">1 minute</string>
     <string name="minutes5">5 minutes</string>
     <string name="minutes10">10 minutes</string>
     <string name="minutes30">30 minutes</string>
     <string name="hour1">1 hour</string>
+    <string name="share">Share</string>
+    <string name="actions">Actions</string>
     
     
     <!-- File Dialog -->

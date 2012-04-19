@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
@@ -31,26 +32,28 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	private final ViewGroup parent;
 	private ProgressBar progressBar;
 	private final OnClickListener onClickListener;
+	private final OnLongClickListener onLongClickListener;
 	private final MemoryCache memCache;
 	private boolean zoomable = false;
 	
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent){
-		this(pFilePath, pParent, null, null, false);
+		this(pFilePath, pParent, null, null, null, false);
 	}
 	
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, MemoryCache pMemCache){
-		this(pFilePath, pParent, null, pMemCache, false);
+		this(pFilePath, pParent, null, null, pMemCache, false);
 	}
 	
-	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener){
-		this(pFilePath, pParent, pOnClickListener, null, false);
+	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, OnLongClickListener pOnLongClickListener){
+		this(pFilePath, pParent, pOnClickListener, pOnLongClickListener, null, false);
 	}
 	
-	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, MemoryCache pMemCache, boolean pZoomable){
+	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, OnLongClickListener pOnLongClickListener, MemoryCache pMemCache, boolean pZoomable){
 		super();
 		filePath = pFilePath;
 		parent = pParent;
 		onClickListener = pOnClickListener;
+		onLongClickListener = pOnLongClickListener;
 		memCache = pMemCache;
 		zoomable = pZoomable;
 	}
@@ -142,6 +145,10 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		
 		if(onClickListener != null){
 			image.setOnClickListener(onClickListener);
+		}
+		
+		if(onLongClickListener != null){
+			image.setOnLongClickListener(onLongClickListener);
 		}
 		
 		parent.removeView(progressBar);

@@ -215,15 +215,16 @@ public class CameraActivity extends Activity {
 		Camera.Parameters parameters = mCamera.getParameters();
 		parameters.setFlashMode(flashMode);
 		parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
-		// parameters.set("orientation", "landscape");
-		// parameters.set("rotation", 90);
-		// mCamera.setDisplayOrientation(90);
+
 		if (mOrientationEventListener == null) {
 			mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
 
 				@Override
 				public void onOrientationChanged(int orientation) {
-
+					if (orientation == ORIENTATION_UNKNOWN){
+						return;
+					}
+					
 					// determine our orientation based on sensor response
 					int lastOrientation = mOrientation;
 
@@ -272,8 +273,10 @@ public class CameraActivity extends Activity {
 		Helpers.checkLoginedState(this);
 		Helpers.setLockedTime(this);
 
-		mOrientationEventListener.disable();
-		mOrientationEventListener = null;
+		if (mOrientationEventListener != null) {
+			mOrientationEventListener.disable();
+			mOrientationEventListener = null;
+		}
 
 		// Because the Camera object is a shared resource, it's very
 		// important to release it when the activity is paused.
