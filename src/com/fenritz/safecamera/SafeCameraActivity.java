@@ -42,6 +42,8 @@ public class SafeCameraActivity extends Activity {
 
 		Helpers.createFolders(this);
 		
+		Helpers.deleteTmpDir(SafeCameraActivity.this);
+		
 		preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 		if (!preferences.contains(SafeCameraActivity.PASSWORD)) {
 			Intent intent = new Intent();

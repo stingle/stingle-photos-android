@@ -68,6 +68,10 @@ public class GalleryActivity extends Activity {
 	protected static final int ACTION_DECRYPT = 0;
 	protected static final int ACTION_SHARE = 1;
 	protected static final int ACTION_DELETE = 2;
+	
+	protected static final int SHARE_AS_IS = 0;
+	protected static final int SHARE_REENCRYPT = 1;
+	protected static final int SHARE_DECRYPT = 2;
 
 	private int multiSelectMode = MULTISELECT_OFF;
 
@@ -220,42 +224,119 @@ public class GalleryActivity extends Activity {
 			public void onClick(View v) {
 				if (multiSelectMode == MULTISELECT_ON) {
 					shareSelected();
-					clearMutliSelect();
 				}
 			}
 		};
 	}
 	
 	private void shareSelected(){
-		if(selectedFiles.size() == 1){
+		CharSequence[] listEntries = getResources().getStringArray(R.array.beforeShareActions);
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+		builder.setTitle(getString(R.string.before_sharing));
+		builder.setItems(listEntries, new DialogInterface.OnClickListener() {
+			@SuppressWarnings("unchecked")
+			public void onClick(DialogInterface dialog, int item) {
+				switch(item){
+					case SHARE_AS_IS:
+						shareFiles(selectedFiles);
+						break;
+					case SHARE_REENCRYPT:
+						AlertDialog.Builder passwordDialog = new AlertDialog.Builder(GalleryActivity.this);
+
+						LayoutInflater layoutInflater = LayoutInflater.from(GalleryActivity.this);
+			            final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_reencrypt_password, null);
+
+			            passwordDialog.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								String password = ((EditText)enterPasswordView.findViewById(R.id.password)).getText().toString();
+								String password2 = ((EditText)enterPasswordView.findViewById(R.id.password2)).getText().toString();
+								
+								if(password.equals(password2)){
+									HashMap<String, Object> params = new HashMap<String, Object>();
+									
+									params.put("newPassword", password);
+									params.put("files", selectedFiles);
+									
+									OnCryptoTaskFinish onReencrypt = new OnCryptoTaskFinish(){
+										@Override
+										public void onFinish(java.util.ArrayList<File> processedFiles) {
+											if(processedFiles != null && processedFiles.size() > 0){
+												shareFiles(processedFiles);
+											}
+										};
+									};
+									
+									new ReEncryptFiles(onReencrypt).execute(params);
+								}
+								else{
+									Toast.makeText(GalleryActivity.this, getString(R.string.password_not_match), Toast.LENGTH_LONG).show();
+								}
+							}
+			            });
+			            
+			            passwordDialog.setNegativeButton(getString(R.string.cancel), null);
+			            
+			            passwordDialog.setView(enterPasswordView);
+			            passwordDialog.setTitle(getString(R.string.enter_reencrypt_password));
+						
+			            passwordDialog.show();
+						
+						break;
+					case SHARE_DECRYPT:
+						String filePath = Helpers.getHomeDir(GalleryActivity.this) + "/" + ".tmp";
+						File destinationFolder = new File(filePath);
+						destinationFolder.mkdirs();
+						
+						OnCryptoTaskFinish onDecrypt = new OnCryptoTaskFinish(){
+							@Override
+							public void onFinish(java.util.ArrayList<File> processedFiles) {
+								if(processedFiles != null && processedFiles.size() > 0){
+									shareFiles(processedFiles);
+								}
+							};
+						};
+						new DecryptFiles(filePath, onDecrypt).execute(selectedFiles);
+						
+						break;
+				}
+				
+				
+				
+				dialog.dismiss();
+			}
+		}).show();
+	}
+
+	@SuppressWarnings("unused")
+	private void shareFiles(ArrayList<File> fileToShare){
+		if(fileToShare.size() == 1){
 			Intent share = new Intent(Intent.ACTION_SEND);
 			share.setType("*/*");
 
-			share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + selectedFiles.get(0).getPath()));
+			share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + fileToShare.get(0).getPath()));
 			startActivity(Intent.createChooser(share, "Share Image"));
 		}
-		else if(selectedFiles.size() > 1){
+		else if(fileToShare.size() > 1){
 			Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
 			share.setType("*/*");
 
 			ArrayList<Uri> uris = new ArrayList<Uri>();
-			for (int i = 0; i < selectedFiles.size(); i++) {
-				uris.add(Uri.parse("file://" + selectedFiles.get(i).getPath()));
+			for (int i = 0; i < fileToShare.size(); i++) {
+				uris.add(Uri.parse("file://" + fileToShare.get(i).getPath()));
 			}
 
 			share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 			startActivity(Intent.createChooser(share, getString(R.string.share)));
 		}
 	}
-
+	
 	private OnClickListener deleteSelectedClick() {
 		return new OnClickListener() {
 
-			@SuppressWarnings("unchecked")
 			public void onClick(View v) {
 				if (multiSelectMode == MULTISELECT_ON) {
 					deleteSelected();
-
 				}
 			}
 		};
@@ -265,6 +346,7 @@ public class GalleryActivity extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 		builder.setMessage(String.format(getString(R.string.confirm_delete_files), String.valueOf(selectedFiles.size())));
 		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+			@SuppressWarnings("unchecked")
 			public void onClick(DialogInterface dialog, int whichButton) {
 				new DeleteFiles().execute(selectedFiles);
 			}
@@ -384,6 +466,89 @@ public class GalleryActivity extends Activity {
 
 	}
 
+	private class ReEncryptFiles extends AsyncTask<HashMap<String, Object>, Integer, ArrayList<File>> {
+
+		private ProgressDialog progressDialog;
+		private final OnCryptoTaskFinish finishListener;
+		
+		public ReEncryptFiles(OnCryptoTaskFinish pFinishListener){
+			finishListener = pFinishListener;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progressDialog = new ProgressDialog(GalleryActivity.this);
+			progressDialog.setCancelable(true);
+			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					ReEncryptFiles.this.cancel(false);
+				}
+			});
+			progressDialog.setMessage(getString(R.string.reencrypting_files));
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			progressDialog.show();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected ArrayList<File> doInBackground(HashMap<String, Object>... params) {
+			String newPassword = params[0].get("newPassword").toString();
+			ArrayList<File> files = (ArrayList<File>)params[0].get("files");
+			
+			SecretKey newKey = Helpers.getAESKey(GalleryActivity.this, newPassword);
+			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, GalleryActivity.this);
+			
+			
+			progressDialog.setMax(files.size());
+			
+			ArrayList<File> reencryptedFiles = new ArrayList<File>();
+			
+			int counter = 0;
+			for(File file : files){
+				try {
+					FileInputStream inputStream = new FileInputStream(file);
+					byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
+
+					if(decryptedData != null){
+						String tmpFilePath = Helpers.getHomeDir(GalleryActivity.this) + "/.tmp/" + file.getName();
+						
+						File tmpFile = new File(tmpFilePath);
+						FileOutputStream outputStream = new FileOutputStream(tmpFile);
+						newCrypt.encrypt(decryptedData, outputStream);
+						
+						reencryptedFiles.add(tmpFile);
+					}
+					publishProgress(++counter);
+				}
+				catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			return reencryptedFiles;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+
+			progressDialog.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<File> reencryptedFiles) {
+			super.onPostExecute(reencryptedFiles);
+
+			if(finishListener != null){
+				finishListener.onFinish(reencryptedFiles);
+			}
+			
+			progressDialog.dismiss();
+		}
+
+	}
+	
 	private class ImportFiles extends AsyncTask<HashMap<String, Object>, Integer, Integer> {
 
 		private final int STATUS_OK = 0;
@@ -576,13 +741,19 @@ public class GalleryActivity extends Activity {
 
 	}
 
-	private class DecryptFiles extends AsyncTask<ArrayList<File>, Integer, Void> {
+	private class DecryptFiles extends AsyncTask<ArrayList<File>, Integer, ArrayList<File>> {
 
 		private ProgressDialog progressDialog;
 		private final String destinationFolder;
+		private final OnCryptoTaskFinish finishListener;
 
 		public DecryptFiles(String pDestinationFolder) {
+			this(pDestinationFolder, null);
+		}
+		
+		public DecryptFiles(String pDestinationFolder, OnCryptoTaskFinish pFinishListener) {
 			destinationFolder = pDestinationFolder;
+			finishListener = pFinishListener;
 		}
 
 		@Override
@@ -601,9 +772,10 @@ public class GalleryActivity extends Activity {
 		}
 
 		@Override
-		protected Void doInBackground(ArrayList<File>... params) {
+		protected ArrayList<File> doInBackground(ArrayList<File>... params) {
 			ArrayList<File> filesToDecrypt = params[0];
-
+			ArrayList<File> decryptedFiles = new ArrayList<File>();
+			
 			progressDialog.setMax(filesToDecrypt.size() * 100);
 
 			for (int i = 0; i < filesToDecrypt.size(); i++) {
@@ -630,6 +802,8 @@ public class GalleryActivity extends Activity {
 						};
 
 						Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, outputStream, progress, this);
+						
+						decryptedFiles.add(new File(destinationFolder + "/" + destFileName));
 					}
 					catch (FileNotFoundException e) {
 					}
@@ -642,7 +816,7 @@ public class GalleryActivity extends Activity {
 				}
 			}
 
-			return null;
+			return decryptedFiles;
 		}
 
 		@Override
@@ -660,9 +834,13 @@ public class GalleryActivity extends Activity {
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
+		protected void onPostExecute(ArrayList<File> decryptedFiles) {
+			super.onPostExecute(decryptedFiles);
 
+			if(finishListener != null){
+				finishListener.onFinish(decryptedFiles);
+			}
+			
 			progressDialog.dismiss();
 			fillFilesList();
 			galleryAdapter.notifyDataSetChanged();
@@ -938,5 +1116,9 @@ public class GalleryActivity extends Activity {
 				return super.onOptionsItemSelected(item);
 		}
 	}
+	
+	public static class OnCryptoTaskFinish{
+    	public void onFinish(ArrayList<File> processedFiles){}
+    }
 
 }

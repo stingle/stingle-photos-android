@@ -48,12 +48,7 @@ public class Helpers {
 		long currentTimestamp = System.currentTimeMillis();
 		long lockedTime = ((SafeCameraApplication) activity.getApplicationContext()).getLockedTime();
 		
-		Log.d("lockedTime", String.valueOf(lockedTime));
-		Log.d("currentTimestamp", String.valueOf(currentTimestamp));
-		Log.d("lockTimeout", String.valueOf(lockTimeout));
-		
 		if(lockedTime != 0){
-			Log.d("timestampDiff", String.valueOf(currentTimestamp - lockedTime));
 			if(currentTimestamp - lockedTime > lockTimeout){
 				redirectToLogin(activity);
 			}
@@ -62,19 +57,16 @@ public class Helpers {
 	
 	
 	public static void setLockedTime(Context context){
-		Log.d("setLock", context.getClass().getName());
 		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(System.currentTimeMillis());
 	}
 	
 	public static void disableLockTimer(Context context){
-		Log.d("disableLock", context.getClass().getName());
 		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(0);
 	}
 	
 	private static void redirectToLogin(Activity activity){
 		((SafeCameraApplication) activity.getApplicationContext()).setKey(null);
 		
-		Log.d("qaq", activity.getClass().getName());
 		Intent intent = new Intent();
 		intent.setClass(activity, SafeCameraActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -84,6 +76,18 @@ public class Helpers {
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setAction("com.package.ACTION_LOGOUT");
 		activity.sendBroadcast(broadcastIntent);
+		
+		deleteTmpDir(activity);
+	}
+	
+	public static void deleteTmpDir(Context context){
+		File dir = new File(Helpers.getHomeDir(context) + "/" + ".tmp");
+		if (dir.isDirectory()) {
+	        String[] children = dir.list();
+	        for (int i = 0; i < children.length; i++) {
+	            new File(dir, children[i]).delete();
+	        }
+	    }
 	}
 	
 	public static void registerForBroadcastReceiver(final Activity activity){

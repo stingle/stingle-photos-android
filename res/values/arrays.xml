@@ -26,9 +26,9 @@
         <item name="delete">@string/delete</item>
     </string-array>
     
-    <string-array name="galleryItemActionsVals">
-        <item name="decrypt">decrypt</item>
-        <item name="share">share</item>
-        <item name="delete">delete</item>
+    <string-array name="beforeShareActions">
+        <item name="as_is">@string/share_as_is</item>
+        <item name="reencrypt">@string/share_reencrypt</item>
+        <item name="decrypt">@string/share_decrypt</item>
     </string-array>
 </resources>

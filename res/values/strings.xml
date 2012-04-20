@@ -55,6 +55,12 @@
     <string name="hour1">1 hour</string>
     <string name="share">Share</string>
     <string name="actions">Actions</string>
+    <string name="share_as_is">Share as is</string>
+    <string name="share_reencrypt">Reencrypt with different password</string>
+    <string name="share_decrypt">Decrypt before sharing</string>
+    <string name="before_sharing">Before sharing</string>
+    <string name="enter_reencrypt_password">Please enter password for reencryption</string>
+    <string name="reencrypting_files">Reencrypting files…</string>
     
     
     <!-- File Dialog -->
