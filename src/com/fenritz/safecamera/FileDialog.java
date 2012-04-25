@@ -39,6 +39,9 @@ public class FileDialog extends ListActivity {
 
 	public static final int MODE_OPEN = 1;
 	
+	public static final int MODE_SINGLE = 0;
+	public static final int MODE_MULTIPLE = 1;
+	
 	/**
 	 * Chave de um item da lista de paths.
 	 */
@@ -77,6 +80,8 @@ public class FileDialog extends ListActivity {
 	 * @see {@link SelectionMode}
 	 */
 	public static final String SELECTION_MODE = "SELECTION_MODE";
+	
+	public static final String FILE_SELECTION_MODE = "FILE_SELECTION_MODE";
 
 	/**
 	 * Parametro de entrada da Activity: se e permitido escolher diretorios.
@@ -99,12 +104,14 @@ public class FileDialog extends ListActivity {
 	private String currentPath = ROOT;
 
 	private int selectionMode = MODE_CREATE;
+	private int fileSelectionMode = MODE_SINGLE;
 
 	private String[] formatFilter = null;
 
 	private boolean canSelectFile = true;
 	private boolean canSelectDir = false;
 
+	private final ArrayList<File> selectedFiles = new ArrayList<File>();
 	private File selectedFile;
 	private final HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
 
@@ -142,8 +149,18 @@ public class FileDialog extends ListActivity {
 		selectButton.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
-				if (selectedFile != null) {
+				if(fileSelectionMode == MODE_SINGLE && selectedFile != null){
 					getIntent().putExtra(RESULT_PATH, selectedFile.getPath());
+					setResult(RESULT_OK, getIntent());
+					finish();
+				}
+				else if(fileSelectionMode == MODE_MULTIPLE && selectedFiles.size() > 0){
+					String[] filePaths = new String[selectedFiles.size()];
+					int counter = 0;
+					for(File selectedFile : selectedFiles){
+						filePaths[counter++] = selectedFile.getPath();
+					}
+					getIntent().putExtra(RESULT_PATH, filePaths);
 					setResult(RESULT_OK, getIntent());
 					finish();
 				}
@@ -162,6 +179,7 @@ public class FileDialog extends ListActivity {
 		});
 
 		selectionMode = getIntent().getIntExtra(SELECTION_MODE, MODE_CREATE);
+		fileSelectionMode = getIntent().getIntExtra(FILE_SELECTION_MODE, MODE_SINGLE);
 
 		formatFilter = getIntent().getStringArrayExtra(FORMAT_FILTER);
 
@@ -169,7 +187,7 @@ public class FileDialog extends ListActivity {
 		canSelectDir = getIntent().getBooleanExtra(CAN_SELECT_DIR, false);
 
 		if (selectionMode == MODE_OPEN) {
-			newButton.setEnabled(false);
+			newButton.setVisibility(View.GONE);
 		}
 
 		layoutSelect = (LinearLayout) findViewById(R.id.fdLinearLayoutSelect);
@@ -358,9 +376,28 @@ public class FileDialog extends ListActivity {
 			}
 		} else if (canSelectFile) {
 			setSelectVisible(v);
-			selectedFile = file;
-			v.setSelected(true);
-			selectButton.setEnabled(true);
+			if(fileSelectionMode == MODE_SINGLE){
+				selectedFile = file;
+				v.setSelected(true);
+				selectButton.setEnabled(true);
+			}
+			else if(fileSelectionMode == MODE_MULTIPLE){
+				if(selectedFiles.contains(file)){
+					selectedFiles.remove(file);
+					((TextView)v.findViewById(R.id.fdrowtext)).setTextColor(getResources().getColor(R.color.file_manager_text));
+				}
+				else{
+					selectedFiles.add(file);
+					((TextView)v.findViewById(R.id.fdrowtext)).setTextColor(getResources().getColor(R.color.file_manager_selected));
+				}
+				if(selectedFiles.size() > 0){
+					selectButton.setEnabled(true);
+				}
+				else{
+					selectButton.setEnabled(false);
+				}
+			}
+			
 		}
 	}
 

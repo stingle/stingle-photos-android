@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.SecretKey;
 
@@ -208,6 +210,8 @@ public class GalleryActivity extends Activity {
 				// can user select directories or not
 				intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
 				intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+				intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
+				intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
 
 				// alternatively you can set file filter
 				// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
@@ -308,7 +312,6 @@ public class GalleryActivity extends Activity {
 		}).show();
 	}
 
-	@SuppressWarnings("unused")
 	private void shareFiles(ArrayList<File> fileToShare){
 		if(fileToShare.size() == 1){
 			Intent share = new Intent(Intent.ACTION_SEND);
@@ -392,6 +395,8 @@ public class GalleryActivity extends Activity {
 				// can user select directories or not
 				intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
 				intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+				intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
+				intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
 
 				// alternatively you can set file filter
 				// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
@@ -415,11 +420,11 @@ public class GalleryActivity extends Activity {
 				new DecryptFiles(filePath).execute(selectedFiles);
 			}
 			else if (requestCode == REQUEST_ENCRYPT) {
-				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-				new EncryptFiles().execute(filePath);
+				String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
+				new EncryptFiles().execute(filePaths);
 			}
 			else if (requestCode == REQUEST_IMPORT) {
-				final String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+				final String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
 				
 				AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
@@ -433,7 +438,7 @@ public class GalleryActivity extends Activity {
 						
 						HashMap<String, Object> params = new HashMap<String, Object>();
 						
-						params.put("filePath", filePath);
+						params.put("filePaths", filePaths);
 						params.put("password", importPassword);
 						params.put("deleteAfterImport", deleteAfterImport);
 						
@@ -576,54 +581,58 @@ public class GalleryActivity extends Activity {
 		protected Integer doInBackground(HashMap<String, Object>... rparams) {
 			HashMap<String, Object> params = rparams[0];
 
-			String filePath = (String)params.get("filePath");
+			String[] filePaths = (String[])params.get("filePaths");
 			String password = (String)params.get("password");
 			Boolean deleteAfterImport = (Boolean)params.get("deleteAfterImport");
 			
-			File origFile = new File(filePath);
+			SecretKey newKey = Helpers.getAESKey(GalleryActivity.this, password);
+			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, GalleryActivity.this);
 			
-			if (origFile.exists() && origFile.isFile()) {
-				try {
-					SecretKey newKey = Helpers.getAESKey(GalleryActivity.this, password);
-					AESCrypt newCrypt = Helpers.getAESCrypt(newKey, GalleryActivity.this);
-					
-					FileInputStream inputStream = new FileInputStream(origFile);
-					progressDialog.setMax((int) inputStream.getChannel().size());
-
-					
-					AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
-						@Override
-						public void setProgress(long pCurrent) {
-							super.setProgress(pCurrent);
-							publishProgress((int)this.getProgress());
+			int returnStatus = STATUS_OK;
+			progressDialog.setMax(filePaths.length * 100);
+			for (int i = 0; i < filePaths.length; i++) {
+			
+				File origFile = new File(filePaths[i]);
+				
+				if (origFile.exists() && origFile.isFile()) {
+					try {
+						FileInputStream inputStream = new FileInputStream(origFile);
+						
+						final int currentIteration = i;
+						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
+							@Override
+							public void setProgress(long pCurrent) {
+								super.setProgress(pCurrent);
+								int progress = this.getProgressPercents();
+								int newProgress = progress + (currentIteration * 100);
+								publishProgress(newProgress);
+							}
+						};
+						
+						byte[] decryptedData = newCrypt.decrypt(inputStream, progress, this);
+	
+						if(decryptedData != null){
+							String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
+							
+							FileOutputStream outputStream = new FileOutputStream(destFilePath);
+							Helpers.getAESCrypt(GalleryActivity.this).encrypt(decryptedData, outputStream);
+							
+							if(deleteAfterImport){
+								origFile.delete();
+							}
+							
 						}
-					};
-					
-					byte[] decryptedData = newCrypt.decrypt(inputStream, progress, this);
-
-					if(decryptedData != null){
-						String destFilePath = Helpers.getHomeDir(GalleryActivity.this) + "/" + origFile.getName();
-						
-						// TODO: Add checking for destination file already exists
-						FileOutputStream outputStream = new FileOutputStream(destFilePath);
-						Helpers.getAESCrypt(GalleryActivity.this).encrypt(decryptedData, outputStream);
-						
-						if(deleteAfterImport){
-							origFile.delete();
-						}
-						
-						return STATUS_OK;
 					}
-				}
-				catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
+					catch (FileNotFoundException e) {
+						returnStatus = STATUS_FAIL;
+					}
+					catch (IOException e) {
+						returnStatus = STATUS_FAIL;
+					}
 				}
 			}
 
-			return STATUS_FAIL;
+			return returnStatus;
 		}
 
 		@Override
@@ -661,6 +670,35 @@ public class GalleryActivity extends Activity {
 
 	}
 	
+	private String findNewFileNameIfNeeded(String filePath, String fileName){
+		return findNewFileNameIfNeeded(filePath, fileName, null);
+	}
+	private String findNewFileNameIfNeeded(String filePath, String fileName, Integer number){
+		if(number == null){
+			number = 1;
+		}
+		
+		File file = new File(filePath + "/" + fileName);
+		if(file.exists()){
+			int lastDotIndex = fileName.lastIndexOf(".");
+			String fileNameWithoutExt;
+			if(lastDotIndex > 0){
+				fileNameWithoutExt = fileName.substring(0, lastDotIndex);
+			}
+			else{
+				fileNameWithoutExt = fileName;
+			}
+			
+			Pattern p = Pattern.compile("_\\d+$");
+			Matcher m = p.matcher(fileNameWithoutExt);
+			if (m.find()){
+				fileNameWithoutExt = fileNameWithoutExt.substring(0, fileName.lastIndexOf("_"));
+			}
+			return findNewFileNameIfNeeded(filePath, fileNameWithoutExt + "_" + String.valueOf(number) + getString(R.string.file_extension), ++number);
+		}
+		return filePath + "/" + fileName;
+	}
+	
 	private class EncryptFiles extends AsyncTask<String, Integer, Void> {
 
 		private ProgressDialog progressDialog;
@@ -682,33 +720,38 @@ public class GalleryActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(String... params) {
-			File origFile = new File(params[0]);
-
-			if (origFile.exists() && origFile.isFile()) {
-				FileInputStream inputStream;
-				try {
-					inputStream = new FileInputStream(origFile);
-					progressDialog.setMax((int) inputStream.getChannel().size());
-
-					String destFileName = origFile.getName() + getString(R.string.file_extension);
-
-					FileOutputStream outputStream = new FileOutputStream(new File(Helpers.getHomeDir(getApplicationContext()), destFileName));
-
-					AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
-						@Override
-						public void setProgress(long pCurrent) {
-							super.setProgress(pCurrent);
-							publishProgress((int)this.getProgress());
-						}
-					};
-
-					Helpers.getAESCrypt(GalleryActivity.this).encrypt(inputStream, outputStream, progress, this);
-				}
-				catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
+			progressDialog.setMax(params.length * 100);
+			for (int i = 0; i < params.length; i++) {
+				File origFile = new File(params[i]);
+	
+				if (origFile.exists() && origFile.isFile()) {
+					FileInputStream inputStream;
+					try {
+						inputStream = new FileInputStream(origFile);
+	
+						String destFileName = origFile.getName() + getString(R.string.file_extension);
+	
+						FileOutputStream outputStream = new FileOutputStream(new File(Helpers.getHomeDir(getApplicationContext()), destFileName));
+	
+						final int currentIteration = i;
+						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
+							@Override
+							public void setProgress(long pCurrent) {
+								super.setProgress(pCurrent);
+								int progress = this.getProgressPercents();
+								int newProgress = progress + (currentIteration * 100);
+								publishProgress(newProgress);
+							}
+						};
+	
+						Helpers.getAESCrypt(GalleryActivity.this).encrypt(inputStream, outputStream, progress, this);
+					}
+					catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+					catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 
@@ -975,7 +1018,7 @@ public class GalleryActivity extends Activity {
 					CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
 					
 					AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-					builder.setTitle(getString(R.string.actions));
+					builder.setTitle(file.getName());
 					builder.setItems(listEntries, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int item) {
 							selectedFiles.clear();

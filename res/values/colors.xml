@@ -15,4 +15,7 @@
   -->
 <resources>
     <color name="transparent_black">#90000000</color>
+    
+    <color name="file_manager_text">#f6f6f6</color>
+    <color name="file_manager_selected">#8aa6ff</color>
 </resources>
