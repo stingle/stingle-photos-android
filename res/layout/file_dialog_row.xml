@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical" >
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent">
+    <ImageView
+        android:id="@+id/fdrowimage"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_margin="5dp"
+        android:scaleType="centerCrop" >
+    </ImageView>
 
-	<ImageView android:layout_alignParentLeft="true" android:id="@+id/fdrowimage"
-		android:layout_height="35dp" android:layout_width="wrap_content"
-		android:paddingRight="5dp" android:paddingLeft="3dp"></ImageView>
+    <TextView
+        android:id="@+id/fdrowtext"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="5dp"
+        android:text="@+id/fdrowtext"
+        android:textColor="@color/file_manager_text"
+        android:textColorHighlight="@color/file_manager_selected"
+        android:textSize="18dp"
+        android:singleLine="true" >
+    </TextView>
 
-	<TextView
-	    android:id="@+id/fdrowtext"
-	    android:layout_width="wrap_content"
-	    android:layout_height="35dp"
-	    android:layout_alignBottom="@+id/fdrowimage"
-	    android:layout_alignTop="@+id/fdrowimage"
-	    android:layout_toRightOf="@+id/fdrowimage"
-	    android:gravity="center_vertical"
-	    android:text="@+id/fdrowtext"
-	    android:textColor="@color/file_manager_text"
-	    android:textColorHighlight="@color/file_manager_selected"
-	    android:textSize="23dp" >
-</TextView> 
-
-</RelativeLayout>
+</LinearLayout>

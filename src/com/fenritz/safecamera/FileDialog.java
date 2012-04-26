@@ -13,19 +13,30 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore.Video.Thumbnails;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
 import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecamera.util.MemoryCache;
 
 /**
  * Activity para escolha de arquivos/diretorios.
@@ -42,15 +53,18 @@ public class FileDialog extends ListActivity {
 	public static final int MODE_SINGLE = 0;
 	public static final int MODE_MULTIPLE = 1;
 	
+	private static final int TYPE_FOLDER = 0;
+	private static final int TYPE_FILE = 1;
+	
 	/**
 	 * Chave de um item da lista de paths.
 	 */
 	private static final String ITEM_KEY = "key";
-
+	
 	/**
 	 * Imagem de um item da lista de paths (diretorio ou arquivo).
 	 */
-	private static final String ITEM_IMAGE = "image";
+	private static final String ITEM_TYPE = "type";
 
 	/**
 	 * Diretorio raiz.
@@ -107,6 +121,12 @@ public class FileDialog extends ListActivity {
 	private int fileSelectionMode = MODE_SINGLE;
 
 	private String[] formatFilter = null;
+	
+	
+	private static final int SELECT_NONE = 0;
+	private static final int SELECT_ALL = 1;
+	
+	private int selectedMode = SELECT_NONE;
 
 	private boolean canSelectFile = true;
 	private boolean canSelectDir = false;
@@ -115,6 +135,7 @@ public class FileDialog extends ListActivity {
 	private File selectedFile;
 	private final HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
 
+	private final MemoryCache cache = new MemoryCache();
 	
 	private BroadcastReceiver receiver;
 	
@@ -194,6 +215,13 @@ public class FileDialog extends ListActivity {
 		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
 		layoutCreate.setVisibility(View.GONE);
 
+		if(fileSelectionMode == MODE_MULTIPLE){
+			findViewById(R.id.select_all).setOnClickListener(selectAllClick());
+		}
+		else{
+			findViewById(R.id.select_all).setVisibility(View.GONE);
+		}
+		
 		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
 		cancelButton.setOnClickListener(new OnClickListener() {
 
@@ -230,9 +258,50 @@ public class FileDialog extends ListActivity {
 		unregisterReceiver(receiver);
 	}
 
+	private OnClickListener selectAllClick() {
+		return new OnClickListener() {
+
+			public void onClick(View v) {
+				if (selectedMode == SELECT_NONE) {
+					selectAll();
+				}
+				else {
+					unSelectAll();
+				}
+			}
+		};
+	}
+	
+	private void selectAll(){
+		for(int i=0;i<path.size();i++){
+			File file = new File(path.get(i));
+			if(file.isFile()){
+				selectedFiles.add(file);
+			}
+		}
+		((BaseAdapter)getListView().getAdapter()).notifyDataSetChanged();
+		selectButton.setEnabled(true);
+		selectedMode = SELECT_ALL;
+		((ImageButton) findViewById(R.id.select_all)).setImageResource(R.drawable.checkbox_checked);
+	}
+	
+	private void unSelectAll(){
+		selectedFiles.clear();
+		
+		BaseAdapter adapter = ((BaseAdapter)getListView().getAdapter());
+		if(adapter != null){
+			adapter.notifyDataSetChanged();
+		}
+		selectButton.setEnabled(false);
+		selectedMode = SELECT_NONE;
+		((ImageButton) findViewById(R.id.select_all)).setImageResource(R.drawable.checkbox_unchecked);
+	}
+	
 	private void getDir(String dirPath) {
 
 		boolean useAutoSelection = dirPath.length() < currentPath.length();
+		
+		unSelectAll();
 
 		Integer position = lastPositions.get(parentPath);
 
@@ -269,12 +338,12 @@ public class FileDialog extends ListActivity {
 
 		if (!currentPath.equals(ROOT)) {
 
-			item.add(ROOT);
-			addItem(ROOT, R.drawable.folder);
-			path.add(ROOT);
+			/*item.add(ROOT);
+			addItem(ROOT, TYPE_FOLDER);
+			path.add(ROOT);*/
 
 			item.add("../");
-			addItem("../", R.drawable.folder);
+			addItem("../", TYPE_FOLDER);
 			path.add(f.getParent());
 			parentPath = f.getParent();
 
@@ -318,15 +387,19 @@ public class FileDialog extends ListActivity {
 		path.addAll(dirsPathMap.tailMap("").values());
 		path.addAll(filesPathMap.tailMap("").values());
 
-		SimpleAdapter fileList = new SimpleAdapter(this, mList, R.layout.file_dialog_row, new String[] {
-				ITEM_KEY, ITEM_IMAGE }, new int[] { R.id.fdrowtext, R.id.fdrowimage });
+		/*SimpleAdapter fileList = new SimpleAdapter(this, mList, R.layout.file_dialog_row, new String[] {
+				ITEM_KEY, ITEM_IMAGE }, new int[] { R.id.fdrowtext, R.id.fdrowimage });*/
+		
+		//fileList.setViewBinder(new BitmapViewBinder());
 
+		FilesAdapter fileList = new FilesAdapter(mList);
+		
 		for (String dir : dirsMap.tailMap("").values()) {
-			addItem(dir, R.drawable.folder);
+			addItem(dir, TYPE_FOLDER);
 		}
 
 		for (String file : filesMap.tailMap("").values()) {
-			addItem(file, R.drawable.file);
+			addItem(file, TYPE_FILE);
 		}
 
 		fileList.notifyDataSetChanged();
@@ -334,11 +407,118 @@ public class FileDialog extends ListActivity {
 		setListAdapter(fileList);
 
 	}
+	
+	public class FilesAdapter extends BaseAdapter {
+		private final ArrayList<HashMap<String,Object>> list;
+		
+		public FilesAdapter(ArrayList<HashMap<String,Object>> mList){
+			list = mList;
+		}
+		
+		public int getCount() {
+			return list.size();
+		}
 
-	private void addItem(String fileName, int imageId) {
+		public Object getItem(int position) {
+			return list.get(position);
+		}
+
+		public long getItemId(int position) {
+			return position;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			LayoutInflater layoutInflater = LayoutInflater.from(FileDialog.this);
+			View fileRow = layoutInflater.inflate(R.layout.file_dialog_row, null);
+			
+			HashMap<String,Object> fileArr = list.get(position);
+			String filePath = currentPath + "/" + fileArr.get(ITEM_KEY).toString();
+			File file = new File(filePath);
+			
+			
+			((TextView)fileRow.findViewById(R.id.fdrowtext)).setText(fileArr.get(ITEM_KEY).toString());
+			if(selectedFiles.contains(file) || (selectedFile != null && selectedFile.equals(file))){
+				((TextView)fileRow.findViewById(R.id.fdrowtext)).setTextColor(getResources().getColor(R.color.file_manager_selected));
+			}
+			
+			Integer type = (Integer)fileArr.get(ITEM_TYPE);
+			
+			ImageView image = (ImageView)fileRow.findViewById(R.id.fdrowimage);
+			
+			Bitmap fileIcon = BitmapFactory.decodeResource(getResources(), R.drawable.file);
+			switch(type){
+				case TYPE_FILE:
+					Bitmap cachedImage = cache.get(filePath);
+					if(cachedImage != null){
+						fileIcon = cachedImage;
+					}
+					else{
+						new ShowImageThumb(image).execute(file);
+					}
+					break;
+				case TYPE_FOLDER:
+					fileIcon = BitmapFactory.decodeResource(getResources(), R.drawable.folder);
+					break;
+			}
+			image.setImageBitmap(fileIcon);
+			return fileRow;
+		}
+	}
+	
+	private class ShowImageThumb extends AsyncTask<File, Void, Bitmap> {
+
+		private final ImageView imageView;
+		
+		public ShowImageThumb(ImageView pImageView){
+			imageView = pImageView;
+		}
+		
+		@Override
+		protected Bitmap doInBackground(File... params) {
+			Bitmap image = Helpers.decodeFile(params[0], 75);
+			
+			if(image != null){
+				cache.put(params[0].getPath(), image);
+				return image;
+			}
+			
+			image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MICRO_KIND);
+			
+			if(image != null){
+				cache.put(params[0].getPath(), image);
+				return image;
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			super.onPostExecute(result);
+			if(result != null){
+				imageView.setImageBitmap(result);
+			}
+		}
+
+	}
+
+	 public class BitmapViewBinder implements ViewBinder {
+         public boolean setViewValue(View view, Object data, String textRepresentation) {
+                 if( (view instanceof ImageView) & (data instanceof Bitmap) ) {
+                         ImageView iv = (ImageView) view;
+                         Bitmap bm = (Bitmap) data;     
+                         iv.setImageBitmap(bm); 
+                         return true;
+                 }
+                 return false;
+         }
+
+	 }
+	
+	private void addItem(String fileName, int type) {
 		HashMap<String, Object> item = new HashMap<String, Object>();
 		item.put(ITEM_KEY, fileName);
-		item.put(ITEM_IMAGE, imageId);
+		item.put(ITEM_TYPE, type);
 		mList.add(item);
 	}
 
@@ -384,12 +564,11 @@ public class FileDialog extends ListActivity {
 			else if(fileSelectionMode == MODE_MULTIPLE){
 				if(selectedFiles.contains(file)){
 					selectedFiles.remove(file);
-					((TextView)v.findViewById(R.id.fdrowtext)).setTextColor(getResources().getColor(R.color.file_manager_text));
 				}
 				else{
 					selectedFiles.add(file);
-					((TextView)v.findViewById(R.id.fdrowtext)).setTextColor(getResources().getColor(R.color.file_manager_selected));
 				}
+				
 				if(selectedFiles.size() > 0){
 					selectButton.setEnabled(true);
 				}
@@ -397,7 +576,7 @@ public class FileDialog extends ListActivity {
 					selectButton.setEnabled(false);
 				}
 			}
-			
+			((BaseAdapter)getListView().getAdapter()).notifyDataSetChanged();
 		}
 	}
 

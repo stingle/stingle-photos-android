@@ -2,6 +2,7 @@ package com.fenritz.safecamera.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
@@ -33,64 +34,63 @@ import com.fenritz.safecamera.SafeCameraApplication;
 
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
-	
-	public static void checkLoginedState(Activity activity){
+
+	public static void checkLoginedState(Activity activity) {
 		SecretKey key = ((SafeCameraApplication) activity.getApplicationContext()).getKey();
-		
-		if(key == null){
+
+		if (key == null) {
 			redirectToLogin(activity);
 			return;
 		}
-		
+
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
 		int lockTimeout = Integer.valueOf(sharedPrefs.getString("lock_time", "300")) * 1000;
-		
+
 		long currentTimestamp = System.currentTimeMillis();
 		long lockedTime = ((SafeCameraApplication) activity.getApplicationContext()).getLockedTime();
-		
-		if(lockedTime != 0){
-			if(currentTimestamp - lockedTime > lockTimeout){
+
+		if (lockedTime != 0) {
+			if (currentTimestamp - lockedTime > lockTimeout) {
 				redirectToLogin(activity);
 			}
 		}
 	}
-	
-	
-	public static void setLockedTime(Context context){
+
+	public static void setLockedTime(Context context) {
 		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(System.currentTimeMillis());
 	}
-	
-	public static void disableLockTimer(Context context){
+
+	public static void disableLockTimer(Context context) {
 		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(0);
 	}
-	
-	private static void redirectToLogin(Activity activity){
+
+	private static void redirectToLogin(Activity activity) {
 		((SafeCameraApplication) activity.getApplicationContext()).setKey(null);
-		
+
 		Intent intent = new Intent();
 		intent.setClass(activity, SafeCameraActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		activity.startActivity(intent);
-		
+
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setAction("com.package.ACTION_LOGOUT");
 		activity.sendBroadcast(broadcastIntent);
-		
+
 		deleteTmpDir(activity);
 	}
-	
-	public static void deleteTmpDir(Context context){
+
+	public static void deleteTmpDir(Context context) {
 		File dir = new File(Helpers.getHomeDir(context) + "/" + ".tmp");
 		if (dir.isDirectory()) {
-	        String[] children = dir.list();
-	        for (int i = 0; i < children.length; i++) {
-	            new File(dir, children[i]).delete();
-	        }
-	    }
+			String[] children = dir.list();
+			for (int i = 0; i < children.length; i++) {
+				new File(dir, children[i]).delete();
+			}
+		}
 	}
-	
-	public static void registerForBroadcastReceiver(final Activity activity){
+
+	public static void registerForBroadcastReceiver(final Activity activity) {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.package.ACTION_LOGOUT");
 		activity.registerReceiver(new BroadcastReceiver() {
@@ -100,17 +100,17 @@ public class Helpers {
 			}
 		}, intentFilter);
 	}
-	
+
 	public static AESCrypt getAESCrypt(Context context) {
 		return getAESCrypt(null, context);
 	}
-	
+
 	public static AESCrypt getAESCrypt(SecretKey pKey, Context context) {
 		SecretKey keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
-		if(pKey != null){
+		if (pKey != null) {
 			keyToUse = pKey;
 		}
-		
+
 		try {
 			return new AESCrypt(keyToUse);
 		}
@@ -123,10 +123,10 @@ public class Helpers {
 		catch (AESCryptException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	public static SecretKey getAESKey(Activity activity, String password) {
 		try {
 			return AESCrypt.getSecretKey(password);
@@ -143,7 +143,7 @@ public class Helpers {
 			e.printStackTrace();
 			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "102"));
 		}
-		
+
 		return null;
 	}
 
@@ -174,61 +174,82 @@ public class Helpers {
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
-	
-	public static String getHomeDir(Context context){
+
+	public static String getHomeDir(Context context) {
 		String sdcardPath = Environment.getExternalStorageDirectory().getPath();
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return sdcardPath + "/" + sharedPrefs.getString("home_folder", context.getString(R.string.default_home_folder_name));
 	}
-	
-	public static String getThumbsDir(Context context){
+
+	public static String getThumbsDir(Context context) {
 		return getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
 	}
-	
-	public static void createFolders(Context context){
+
+	public static void createFolders(Context context) {
 		File dir = new File(getThumbsDir(context));
-		if(!dir.exists() || !dir.isDirectory()) {
-		    dir.mkdirs();
+		if (!dir.exists() || !dir.isDirectory()) {
+			dir.mkdirs();
 		}
 	}
-	
-	public static void generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException{
-		BitmapFactory.Options bitmapOptions=new BitmapFactory.Options();
+
+	public static void generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
+		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 		bitmapOptions.inSampleSize = 4;
 		Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
-		if(bitmap != null){
+		if (bitmap != null) {
 			Bitmap thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));
-		
+
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 			byte[] imageByteArray = stream.toByteArray();
-			
+
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			Helpers.getAESCrypt(context).encrypt(imageByteArray, out);
 		}
 	}
-	
-	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide){
-	    int imgWidth = bitmap.getWidth();
-	    int imgHeight = bitmap.getHeight();
-	    
-	    int cropX, cropY, cropWidth, cropHeight;
-	    if(imgWidth >= imgHeight){
-	    	cropX = imgWidth/2 - imgHeight/2;
-	    	cropY = 0;
-	    	cropWidth = imgHeight;
-	    	cropHeight = imgHeight;
-	    }
-	    else{
-	    	cropX = 0;
-	    	cropY = imgHeight/2 - imgWidth/2;
-	    	cropWidth = imgWidth;
-	    	cropHeight = imgWidth;
-	    }
-	    
-	    Bitmap cropedImg = Bitmap.createBitmap(bitmap, cropX, cropY, cropWidth, cropHeight);
-	    
-	    return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
+
+	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide) {
+		int imgWidth = bitmap.getWidth();
+		int imgHeight = bitmap.getHeight();
+
+		int cropX, cropY, cropWidth, cropHeight;
+		if (imgWidth >= imgHeight) {
+			cropX = imgWidth / 2 - imgHeight / 2;
+			cropY = 0;
+			cropWidth = imgHeight;
+			cropHeight = imgHeight;
+		}
+		else {
+			cropX = 0;
+			cropY = imgHeight / 2 - imgWidth / 2;
+			cropWidth = imgWidth;
+			cropHeight = imgWidth;
+		}
+
+		Bitmap cropedImg = Bitmap.createBitmap(bitmap, cropX, cropY, cropWidth, cropHeight);
+
+		return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
 	}
-	
+
+	public static Bitmap decodeFile(File f, int requiredSize) {
+		try {
+			// Decode image size
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
+
+			// Find the correct scale value. It should be the power of 2.
+			int scale = 1;
+			while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
+				scale *= 2;
+			}
+
+			// Decode with inSampleSize
+			BitmapFactory.Options o2 = new BitmapFactory.Options();
+			o2.inSampleSize = scale;
+			return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+		}
+		catch (FileNotFoundException e) { }
+		return null;
+	}
 }

@@ -622,6 +622,9 @@ public class GalleryActivity extends Activity {
 							}
 							
 						}
+						else{
+							returnStatus = STATUS_FAIL;
+						}
 					}
 					catch (FileNotFoundException e) {
 						returnStatus = STATUS_FAIL;
@@ -730,6 +733,7 @@ public class GalleryActivity extends Activity {
 						inputStream = new FileInputStream(origFile);
 	
 						String destFileName = origFile.getName() + getString(R.string.file_extension);
+						//String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
 	
 						FileOutputStream outputStream = new FileOutputStream(new File(Helpers.getHomeDir(getApplicationContext()), destFileName));
 	
@@ -1066,7 +1070,7 @@ public class GalleryActivity extends Activity {
 					}
 					else{
 						ImageView fileImage = new ImageView(GalleryActivity.this);
-						fileImage.setImageResource(R.drawable.fileb);
+						fileImage.setImageResource(R.drawable.file);
 						fileImage.setPadding(3, 3, 3, 3);
 						fileImage.setOnClickListener(onClick);
 						fileImage.setOnLongClickListener(longClick);
