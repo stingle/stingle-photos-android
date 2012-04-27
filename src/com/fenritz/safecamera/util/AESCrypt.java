@@ -23,8 +23,8 @@ import javax.crypto.spec.SecretKeySpec;
 import android.os.AsyncTask;
 
 public class AESCrypt {
-	Cipher encryptionCipher;
-	Cipher decryptionCipher;
+	private Cipher encryptionCipher;
+	private Cipher decryptionCipher;
 
 	// Buffer used to transport the bytes from one stream to another
 	byte[] buf = new byte[1024*4];
@@ -101,6 +101,18 @@ public class AESCrypt {
 			e.printStackTrace();
 		}
 	}
+	
+	public Cipher getEncryptionCipher(){
+		return encryptionCipher;
+	}
+	
+	public Cipher getDecryptionCipher(){
+		return decryptionCipher;
+	}
+	
+	public byte[] getIV(){
+		return iv;
+	}
 
 	public void encrypt(InputStream in, OutputStream out) {
 		this.encrypt(in, out, null, null);
@@ -158,6 +170,48 @@ public class AESCrypt {
 		}
 	}
 
+	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt) {
+		this.reEncrypt(in, out, secondaryCrypt, null, null);
+	}
+	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress) {
+		this.reEncrypt(in, out, secondaryCrypt, progress, null);
+	}
+	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task) {
+		try {
+			/*byte[] sIV = secondaryCrypt.getIV();
+			out.write(sIV, 0, sIV.length);
+			if(progress != null){
+				progress.setProgress(sIV.length);
+			}*/
+
+			// Bytes written to out will be encrypted
+			in = new CipherInputStream(in, decryptionCipher);
+			out = new CipherOutputStream(out, secondaryCrypt.getEncryptionCipher());
+
+			// Read in the cleartext bytes and write to out to encrypt
+			//long totalRead = sIV.length;
+			long totalRead = 0;
+			int numRead = 0;
+			while ((numRead = in.read(buf)) >= 0) {
+				out.write(buf, 0, numRead);
+				if(progress != null){
+					totalRead += numRead;
+					progress.setProgress(totalRead);
+				}
+				if(task != null){
+					if(task.isCancelled()){
+						break;
+					}
+				}
+			}
+			out.close();
+			in.close();
+		}
+		catch (java.io.IOException e) {
+			e.printStackTrace();
+			return;
+		}
+	}
 
 	public void decrypt(InputStream in, OutputStream out) {
 		this.decrypt(in, out, null, null);

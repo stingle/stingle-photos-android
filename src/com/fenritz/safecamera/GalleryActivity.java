@@ -146,7 +146,8 @@ public class GalleryActivity extends Activity {
 				
 				String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
 				File thumb = new File(thumbPath);
-				if(!thumb.exists() || !thumb.isFile()){
+				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+				if((!thumb.exists() || !thumb.isFile()) && file.length() < maxFileSize){
 					toGenerateThumbs.add(file);
 				}
 			}
@@ -513,17 +514,14 @@ public class GalleryActivity extends Activity {
 			for(File file : files){
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
-					byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
-
-					if(decryptedData != null){
-						String tmpFilePath = Helpers.getHomeDir(GalleryActivity.this) + "/.tmp/" + file.getName();
-						
-						File tmpFile = new File(tmpFilePath);
-						FileOutputStream outputStream = new FileOutputStream(tmpFile);
-						newCrypt.encrypt(decryptedData, outputStream);
-						
-						reencryptedFiles.add(tmpFile);
-					}
+					String tmpFilePath = Helpers.getHomeDir(GalleryActivity.this) + "/.tmp/" + file.getName();
+					
+					File tmpFile = new File(tmpFilePath);
+					FileOutputStream outputStream = new FileOutputStream(tmpFile);
+					
+					Helpers.getAESCrypt(GalleryActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this);
+					
+					reencryptedFiles.add(tmpFile);
 					publishProgress(++counter);
 				}
 				catch (FileNotFoundException e) {

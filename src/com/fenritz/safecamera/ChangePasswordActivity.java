@@ -151,19 +151,18 @@ public class ChangePasswordActivity extends Activity {
 			for(File file : files){
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
-					byte[] decryptedData = Helpers.getAESCrypt(ChangePasswordActivity.this).decrypt(inputStream, null, this);
-
-					if(decryptedData != null){
-						String origFilePath = file.getPath();
-						String tmpFilePath = origFilePath + ".tmp";
-						
-						File tmpFile = new File(tmpFilePath);
-						FileOutputStream outputStream = new FileOutputStream(tmpFile);
-						newCrypt.encrypt(decryptedData, outputStream);
-						
-						file.delete();
-						tmpFile.renameTo(new File(origFilePath));
-					}
+					
+					String origFilePath = file.getPath();
+					String tmpFilePath = origFilePath + ".tmp";
+					
+					File tmpFile = new File(tmpFilePath);
+					FileOutputStream outputStream = new FileOutputStream(tmpFile);
+					
+					Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this);
+					
+					file.delete();
+					tmpFile.renameTo(new File(origFilePath));
+					
 					publishProgress(++counter);
 				}
 				catch (FileNotFoundException e) {

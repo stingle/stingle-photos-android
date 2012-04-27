@@ -18,5 +18,6 @@
     <string name="default_thumb_folder_name">.thumb</string>
     <string name="thumb_size">100</string>
     <string name="file_extension">.sc</string>
+    <string name="max_file_size">6</string>
     
 </resources>
