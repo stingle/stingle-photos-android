@@ -5,19 +5,22 @@
     android:versionName="1.0" >
 
     <uses-sdk android:minSdkVersion="3" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-feature android:name="android.hardware.camera" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    
+
     <application
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
         android:name="SafeCameraApplication"
-        android:debuggable="true" >
+        android:debuggable="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
         <activity
             android:name=".SafeCameraActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,46 +28,56 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".CameraActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="Camera"
-            android:name=".CameraActivity"
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name=".CameraActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="Camera"
-            android:name=".CameraActivity"
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name=".GalleryActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:label="Gallery"
-            android:name=".GalleryActivity" >
+            android:label="SafeCamera - Vault" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
         </activity>
         <activity
+            android:name=".ViewImageActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:label="View Image"
-            android:name=".ViewImageActivity" >
+            android:label="View Image" >
         </activity>
         <activity
+            android:name=".SetUpActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:label="SetUp"
-            android:name=".SetUpActivity" >
+            android:label="SetUp" >
         </activity>
         <activity
+            android:name=".SettingsActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:label="Settings"
-            android:name=".SettingsActivity" >
+            android:label="Settings" >
         </activity>
         <activity
+            android:name=".FileDialog"
             android:configChanges="keyboardHidden|orientation"
-            android:label="Choose File"
-            android:name=".FileDialog" >
+            android:label="Choose File" >
         </activity>
         <activity
+            android:name=".ChangePasswordActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:label="Change Password"
-            android:name=".ChangePasswordActivity" >
+            android:label="Change Password" >
         </activity>
     </application>
 

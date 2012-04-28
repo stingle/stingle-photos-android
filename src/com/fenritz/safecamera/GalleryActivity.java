@@ -66,11 +66,11 @@ public class GalleryActivity extends Activity {
 	protected static final int REQUEST_ENCRYPT = 1;
 
 	protected static final int REQUEST_IMPORT = 2;
-	
+
 	protected static final int ACTION_DECRYPT = 0;
 	protected static final int ACTION_SHARE = 1;
 	protected static final int ACTION_DELETE = 2;
-	
+
 	protected static final int SHARE_AS_IS = 0;
 	protected static final int SHARE_REENCRYPT = 1;
 	protected static final int SHARE_DECRYPT = 2;
@@ -83,16 +83,25 @@ public class GalleryActivity extends Activity {
 	private final ArrayList<File> selectedFiles = new ArrayList<File>();
 	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
 	private GalleryAdapter galleryAdapter;
-	
+
 	private GenerateThumbs thumbGenTask;
 
 	private BroadcastReceiver receiver;
 	
+	private boolean isWentToLogin = false;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature( Window.FEATURE_NO_TITLE );
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.gallery);
+
+		Bundle bundle = new Bundle();
+		bundle.putParcelable("intent", getIntent());
+		if(!Helpers.checkLoginedState(this, bundle)){
+			isWentToLogin = true;
+			return;
+		}
 
 		fillFilesList();
 
@@ -106,10 +115,10 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.encryptFiles).setOnClickListener(encryptFilesClick());
 		findViewById(R.id.import_btn).setOnClickListener(importClick());
 		findViewById(R.id.share).setOnClickListener(shareClick());
-		
+
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-		
+
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.package.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -119,6 +128,8 @@ public class GalleryActivity extends Activity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
+
+		handleIntentFilters(getIntent());
 	}
 
 	@Override
@@ -126,14 +137,69 @@ public class GalleryActivity extends Activity {
 		super.onDestroy();
 		unregisterReceiver(receiver);
 	}
+
+	void handleIntentFilters(Intent intent){
+		// Handle Intent filters
+		String action = intent.getAction();
+		String type = intent.getType();
+
+		if (!"text/plain".equals(type)) {
+			if (Intent.ACTION_SEND.equals(action) && type != null) {
+				handleSendSingle(intent);
+			}
+			else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
+				handleSendMulti(intent);
+			}
+			else {
+				// Handle other intents, such as being started from the home
+				// screen
+			}
+		}
+	}
+	
+	void handleSendSingle(Intent intent) {
+		Uri fileUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+		if (fileUri != null) {
+			String filePath;
+			if(new File(fileUri.getPath()).exists()){
+				filePath = fileUri.getPath();
+			}
+			else{
+				filePath = Helpers.getRealPathFromURI(this, fileUri);
+			}
+			
+			String[] filePaths = {filePath};
+			new EncryptFiles().execute(filePaths);
+		}
+	}
+	
+	void handleSendMulti(Intent intent) {
+		ArrayList<Uri> fileUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+		if (fileUris != null) {
+			String[] filePaths = new String[fileUris.size()];
+			int counter = 0;
+			for(Uri fileUri : fileUris){
+				String filePath;
+				if(new File(fileUri.getPath()).exists()){
+					filePath = fileUri.getPath();
+				}
+				else{
+					filePath = Helpers.getRealPathFromURI(this, fileUri);
+				}
+				
+				filePaths[counter++] = filePath;
+			}
+			new EncryptFiles().execute(filePaths);
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	private void fillFilesList() {
-		if(thumbGenTask != null){
+		if (thumbGenTask != null) {
 			thumbGenTask.cancel(true);
 			thumbGenTask = null;
 		}
-		
+
 		File dir = new File(Helpers.getHomeDir(this));
 		File[] folderFiles = dir.listFiles();
 
@@ -143,17 +209,16 @@ public class GalleryActivity extends Activity {
 		for (File file : folderFiles) {
 			if (file.getName().endsWith(getString(R.string.file_extension))) {
 				files.add(file);
-				
+
 				String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
 				File thumb = new File(thumbPath);
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-				if((!thumb.exists() || !thumb.isFile()) && file.length() < maxFileSize){
+				if ((!thumb.exists() || !thumb.isFile()) && file.length() < maxFileSize) {
 					toGenerateThumbs.add(file);
 				}
 			}
 		}
-		
-		
+
 		thumbGenTask = new GenerateThumbs();
 		thumbGenTask.execute(toGenerateThumbs);
 	}
@@ -161,29 +226,31 @@ public class GalleryActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
+
 		Helpers.setLockedTime(this);
-		
-		if(thumbGenTask != null){
+
+		if (thumbGenTask != null) {
 			thumbGenTask.cancel(true);
 			thumbGenTask = null;
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		Helpers.checkLoginedState(this);
-		Helpers.disableLockTimer(this);
-		
-		if(thumbGenTask == null){
-			thumbGenTask = new GenerateThumbs();
-			thumbGenTask.execute(toGenerateThumbs);
+
+		if(!isWentToLogin){
+			boolean logined = Helpers.checkLoginedState(this);
+			Helpers.disableLockTimer(this);
+	
+			if (logined && thumbGenTask == null) {
+				thumbGenTask = new GenerateThumbs();
+				thumbGenTask.execute(toGenerateThumbs);
+			}
 		}
 	}
-	
+
 	private OnClickListener multiSelectClick() {
 		return new OnClickListener() {
 
@@ -200,7 +267,7 @@ public class GalleryActivity extends Activity {
 			}
 		};
 	}
-	
+
 	private OnClickListener importClick() {
 		return new OnClickListener() {
 
@@ -222,7 +289,7 @@ public class GalleryActivity extends Activity {
 			}
 		};
 	}
-	
+
 	private OnClickListener shareClick() {
 		return new OnClickListener() {
 
@@ -233,16 +300,16 @@ public class GalleryActivity extends Activity {
 			}
 		};
 	}
-	
-	private void shareSelected(){
+
+	private void shareSelected() {
 		CharSequence[] listEntries = getResources().getStringArray(R.array.beforeShareActions);
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 		builder.setTitle(getString(R.string.before_sharing));
 		builder.setItems(listEntries, new DialogInterface.OnClickListener() {
 			@SuppressWarnings("unchecked")
 			public void onClick(DialogInterface dialog, int item) {
-				switch(item){
+				switch (item) {
 					case SHARE_AS_IS:
 						shareFiles(selectedFiles);
 						break;
@@ -250,78 +317,76 @@ public class GalleryActivity extends Activity {
 						AlertDialog.Builder passwordDialog = new AlertDialog.Builder(GalleryActivity.this);
 
 						LayoutInflater layoutInflater = LayoutInflater.from(GalleryActivity.this);
-			            final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_reencrypt_password, null);
+						final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_reencrypt_password, null);
 
-			            passwordDialog.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+						passwordDialog.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
-								String password = ((EditText)enterPasswordView.findViewById(R.id.password)).getText().toString();
-								String password2 = ((EditText)enterPasswordView.findViewById(R.id.password2)).getText().toString();
-								
-								if(password.equals(password2)){
+								String password = ((EditText) enterPasswordView.findViewById(R.id.password)).getText().toString();
+								String password2 = ((EditText) enterPasswordView.findViewById(R.id.password2)).getText().toString();
+
+								if (password.equals(password2)) {
 									HashMap<String, Object> params = new HashMap<String, Object>();
-									
+
 									params.put("newPassword", password);
 									params.put("files", selectedFiles);
-									
-									OnCryptoTaskFinish onReencrypt = new OnCryptoTaskFinish(){
+
+									OnCryptoTaskFinish onReencrypt = new OnCryptoTaskFinish() {
 										@Override
 										public void onFinish(java.util.ArrayList<File> processedFiles) {
-											if(processedFiles != null && processedFiles.size() > 0){
+											if (processedFiles != null && processedFiles.size() > 0) {
 												shareFiles(processedFiles);
 											}
 										};
 									};
-									
+
 									new ReEncryptFiles(onReencrypt).execute(params);
 								}
-								else{
+								else {
 									Toast.makeText(GalleryActivity.this, getString(R.string.password_not_match), Toast.LENGTH_LONG).show();
 								}
 							}
-			            });
-			            
-			            passwordDialog.setNegativeButton(getString(R.string.cancel), null);
-			            
-			            passwordDialog.setView(enterPasswordView);
-			            passwordDialog.setTitle(getString(R.string.enter_reencrypt_password));
-						
-			            passwordDialog.show();
-						
+						});
+
+						passwordDialog.setNegativeButton(getString(R.string.cancel), null);
+
+						passwordDialog.setView(enterPasswordView);
+						passwordDialog.setTitle(getString(R.string.enter_reencrypt_password));
+
+						passwordDialog.show();
+
 						break;
 					case SHARE_DECRYPT:
 						String filePath = Helpers.getHomeDir(GalleryActivity.this) + "/" + ".tmp";
 						File destinationFolder = new File(filePath);
 						destinationFolder.mkdirs();
-						
-						OnCryptoTaskFinish onDecrypt = new OnCryptoTaskFinish(){
+
+						OnCryptoTaskFinish onDecrypt = new OnCryptoTaskFinish() {
 							@Override
 							public void onFinish(java.util.ArrayList<File> processedFiles) {
-								if(processedFiles != null && processedFiles.size() > 0){
+								if (processedFiles != null && processedFiles.size() > 0) {
 									shareFiles(processedFiles);
 								}
 							};
 						};
 						new DecryptFiles(filePath, onDecrypt).execute(selectedFiles);
-						
+
 						break;
 				}
-				
-				
-				
+
 				dialog.dismiss();
 			}
 		}).show();
 	}
 
-	private void shareFiles(ArrayList<File> fileToShare){
-		if(fileToShare.size() == 1){
+	private void shareFiles(ArrayList<File> fileToShare) {
+		if (fileToShare.size() == 1) {
 			Intent share = new Intent(Intent.ACTION_SEND);
 			share.setType("*/*");
 
 			share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + fileToShare.get(0).getPath()));
 			startActivity(Intent.createChooser(share, "Share Image"));
 		}
-		else if(fileToShare.size() > 1){
+		else if (fileToShare.size() > 1) {
 			Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
 			share.setType("*/*");
 
@@ -334,7 +399,7 @@ public class GalleryActivity extends Activity {
 			startActivity(Intent.createChooser(share, getString(R.string.share)));
 		}
 	}
-	
+
 	private OnClickListener deleteSelectedClick() {
 		return new OnClickListener() {
 
@@ -345,8 +410,8 @@ public class GalleryActivity extends Activity {
 			}
 		};
 	}
-	
-	private void deleteSelected(){
+
+	private void deleteSelected() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 		builder.setMessage(String.format(getString(R.string.confirm_delete_files), String.valueOf(selectedFiles.size())));
 		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
@@ -370,8 +435,8 @@ public class GalleryActivity extends Activity {
 			}
 		};
 	}
-	
-	private void decryptSelected(){
+
+	private void decryptSelected() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
 		intent.putExtra(FileDialog.START_PATH, Helpers.getHomeDir(GalleryActivity.this));
 
@@ -426,35 +491,34 @@ public class GalleryActivity extends Activity {
 			}
 			else if (requestCode == REQUEST_IMPORT) {
 				final String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
-				
+
 				AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
 				LayoutInflater layoutInflater = LayoutInflater.from(this);
-	            final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_import_password, null);
+				final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_import_password, null);
 
-	            dialog.setPositiveButton(getString(R.string.import_btn), new DialogInterface.OnClickListener() {
+				dialog.setPositiveButton(getString(R.string.import_btn), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						String importPassword = ((EditText)enterPasswordView.findViewById(R.id.password)).getText().toString();
-						Boolean deleteAfterImport = ((CheckBox)enterPasswordView.findViewById(R.id.deleteAfterImport)).isChecked();
-						
+						String importPassword = ((EditText) enterPasswordView.findViewById(R.id.password)).getText().toString();
+						Boolean deleteAfterImport = ((CheckBox) enterPasswordView.findViewById(R.id.deleteAfterImport)).isChecked();
+
 						HashMap<String, Object> params = new HashMap<String, Object>();
-						
+
 						params.put("filePaths", filePaths);
 						params.put("password", importPassword);
 						params.put("deleteAfterImport", deleteAfterImport);
-						
+
 						new ImportFiles().execute(params);
 					}
-	            });
-	            
-	            dialog.setNegativeButton(getString(R.string.cancel), null);
-	            
+				});
+
+				dialog.setNegativeButton(getString(R.string.cancel), null);
+
 				dialog.setView(enterPasswordView);
 				dialog.setTitle(getString(R.string.enter_import_password));
-				
+
 				dialog.show();
 			}
-
 		}
 		else if (resultCode == Activity.RESULT_CANCELED) {
 			// Logger.getLogger().log(Level.WARNING, "file not selected");
@@ -476,11 +540,11 @@ public class GalleryActivity extends Activity {
 
 		private ProgressDialog progressDialog;
 		private final OnCryptoTaskFinish finishListener;
-		
-		public ReEncryptFiles(OnCryptoTaskFinish pFinishListener){
+
+		public ReEncryptFiles(OnCryptoTaskFinish pFinishListener) {
 			finishListener = pFinishListener;
 		}
-		
+
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -500,27 +564,26 @@ public class GalleryActivity extends Activity {
 		@Override
 		protected ArrayList<File> doInBackground(HashMap<String, Object>... params) {
 			String newPassword = params[0].get("newPassword").toString();
-			ArrayList<File> files = (ArrayList<File>)params[0].get("files");
-			
+			ArrayList<File> files = (ArrayList<File>) params[0].get("files");
+
 			SecretKey newKey = Helpers.getAESKey(GalleryActivity.this, newPassword);
 			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, GalleryActivity.this);
-			
-			
+
 			progressDialog.setMax(files.size());
-			
+
 			ArrayList<File> reencryptedFiles = new ArrayList<File>();
-			
+
 			int counter = 0;
-			for(File file : files){
+			for (File file : files) {
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
 					String tmpFilePath = Helpers.getHomeDir(GalleryActivity.this) + "/.tmp/" + file.getName();
-					
+
 					File tmpFile = new File(tmpFilePath);
 					FileOutputStream outputStream = new FileOutputStream(tmpFile);
-					
+
 					Helpers.getAESCrypt(GalleryActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this);
-					
+
 					reencryptedFiles.add(tmpFile);
 					publishProgress(++counter);
 				}
@@ -528,7 +591,7 @@ public class GalleryActivity extends Activity {
 					e.printStackTrace();
 				}
 			}
-			
+
 			return reencryptedFiles;
 		}
 
@@ -543,21 +606,21 @@ public class GalleryActivity extends Activity {
 		protected void onPostExecute(ArrayList<File> reencryptedFiles) {
 			super.onPostExecute(reencryptedFiles);
 
-			if(finishListener != null){
+			if (finishListener != null) {
 				finishListener.onFinish(reencryptedFiles);
 			}
-			
+
 			progressDialog.dismiss();
 		}
 
 	}
-	
+
 	private class ImportFiles extends AsyncTask<HashMap<String, Object>, Integer, Integer> {
 
 		private final int STATUS_OK = 0;
 		private final int STATUS_FAIL = 1;
 		private final int STATUS_CANCEL = 2;
-		
+
 		private ProgressDialog progressDialog;
 
 		@Override
@@ -579,23 +642,23 @@ public class GalleryActivity extends Activity {
 		protected Integer doInBackground(HashMap<String, Object>... rparams) {
 			HashMap<String, Object> params = rparams[0];
 
-			String[] filePaths = (String[])params.get("filePaths");
-			String password = (String)params.get("password");
-			Boolean deleteAfterImport = (Boolean)params.get("deleteAfterImport");
-			
+			String[] filePaths = (String[]) params.get("filePaths");
+			String password = (String) params.get("password");
+			Boolean deleteAfterImport = (Boolean) params.get("deleteAfterImport");
+
 			SecretKey newKey = Helpers.getAESKey(GalleryActivity.this, password);
 			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, GalleryActivity.this);
-			
+
 			int returnStatus = STATUS_OK;
 			progressDialog.setMax(filePaths.length * 100);
 			for (int i = 0; i < filePaths.length; i++) {
-			
+
 				File origFile = new File(filePaths[i]);
-				
+
 				if (origFile.exists() && origFile.isFile()) {
 					try {
 						FileInputStream inputStream = new FileInputStream(origFile);
-						
+
 						final int currentIteration = i;
 						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
 							@Override
@@ -606,21 +669,21 @@ public class GalleryActivity extends Activity {
 								publishProgress(newProgress);
 							}
 						};
-						
+
 						byte[] decryptedData = newCrypt.decrypt(inputStream, progress, this);
-	
-						if(decryptedData != null){
+
+						if (decryptedData != null) {
 							String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
-							
+
 							FileOutputStream outputStream = new FileOutputStream(destFilePath);
 							Helpers.getAESCrypt(GalleryActivity.this).encrypt(decryptedData, outputStream);
-							
-							if(deleteAfterImport){
+
+							if (deleteAfterImport) {
 								origFile.delete();
 							}
-							
+
 						}
-						else{
+						else {
 							returnStatus = STATUS_FAIL;
 						}
 					}
@@ -658,8 +721,8 @@ public class GalleryActivity extends Activity {
 			fillFilesList();
 			galleryAdapter.notifyDataSetChanged();
 			clearMutliSelect();
-			
-			switch(result){
+
+			switch (result) {
 				case STATUS_OK:
 					Toast.makeText(GalleryActivity.this, getString(R.string.success_import), Toast.LENGTH_LONG).show();
 					break;
@@ -670,36 +733,37 @@ public class GalleryActivity extends Activity {
 		}
 
 	}
-	
-	private String findNewFileNameIfNeeded(String filePath, String fileName){
+
+	private String findNewFileNameIfNeeded(String filePath, String fileName) {
 		return findNewFileNameIfNeeded(filePath, fileName, null);
 	}
-	private String findNewFileNameIfNeeded(String filePath, String fileName, Integer number){
-		if(number == null){
+
+	private String findNewFileNameIfNeeded(String filePath, String fileName, Integer number) {
+		if (number == null) {
 			number = 1;
 		}
-		
+
 		File file = new File(filePath + "/" + fileName);
-		if(file.exists()){
+		if (file.exists()) {
 			int lastDotIndex = fileName.lastIndexOf(".");
 			String fileNameWithoutExt;
-			if(lastDotIndex > 0){
+			if (lastDotIndex > 0) {
 				fileNameWithoutExt = fileName.substring(0, lastDotIndex);
 			}
-			else{
+			else {
 				fileNameWithoutExt = fileName;
 			}
-			
+
 			Pattern p = Pattern.compile("_\\d+$");
 			Matcher m = p.matcher(fileNameWithoutExt);
-			if (m.find()){
+			if (m.find()) {
 				fileNameWithoutExt = fileNameWithoutExt.substring(0, fileName.lastIndexOf("_"));
 			}
 			return findNewFileNameIfNeeded(filePath, fileNameWithoutExt + "_" + String.valueOf(number) + getString(R.string.file_extension), ++number);
 		}
 		return filePath + "/" + fileName;
 	}
-	
+
 	private class EncryptFiles extends AsyncTask<String, Integer, Void> {
 
 		private ProgressDialog progressDialog;
@@ -724,17 +788,19 @@ public class GalleryActivity extends Activity {
 			progressDialog.setMax(params.length * 100);
 			for (int i = 0; i < params.length; i++) {
 				File origFile = new File(params[i]);
-	
+
 				if (origFile.exists() && origFile.isFile()) {
 					FileInputStream inputStream;
 					try {
 						inputStream = new FileInputStream(origFile);
-	
+
 						String destFileName = origFile.getName() + getString(R.string.file_extension);
-						//String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
-	
+						// String destFilePath =
+						// findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this),
+						// origFile.getName());
+
 						FileOutputStream outputStream = new FileOutputStream(new File(Helpers.getHomeDir(getApplicationContext()), destFileName));
-	
+
 						final int currentIteration = i;
 						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
 							@Override
@@ -745,7 +811,7 @@ public class GalleryActivity extends Activity {
 								publishProgress(newProgress);
 							}
 						};
-	
+
 						Helpers.getAESCrypt(GalleryActivity.this).encrypt(inputStream, outputStream, progress, this);
 					}
 					catch (FileNotFoundException e) {
@@ -795,7 +861,7 @@ public class GalleryActivity extends Activity {
 		public DecryptFiles(String pDestinationFolder) {
 			this(pDestinationFolder, null);
 		}
-		
+
 		public DecryptFiles(String pDestinationFolder, OnCryptoTaskFinish pFinishListener) {
 			destinationFolder = pDestinationFolder;
 			finishListener = pFinishListener;
@@ -820,7 +886,7 @@ public class GalleryActivity extends Activity {
 		protected ArrayList<File> doInBackground(ArrayList<File>... params) {
 			ArrayList<File> filesToDecrypt = params[0];
 			ArrayList<File> decryptedFiles = new ArrayList<File>();
-			
+
 			progressDialog.setMax(filesToDecrypt.size() * 100);
 
 			for (int i = 0; i < filesToDecrypt.size(); i++) {
@@ -847,7 +913,7 @@ public class GalleryActivity extends Activity {
 						};
 
 						Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, outputStream, progress, this);
-						
+
 						decryptedFiles.add(new File(destinationFolder + "/" + destFileName));
 					}
 					catch (FileNotFoundException e) {
@@ -882,10 +948,10 @@ public class GalleryActivity extends Activity {
 		protected void onPostExecute(ArrayList<File> decryptedFiles) {
 			super.onPostExecute(decryptedFiles);
 
-			if(finishListener != null){
+			if (finishListener != null) {
 				finishListener.onFinish(decryptedFiles);
 			}
-			
+
 			progressDialog.dismiss();
 			fillFilesList();
 			galleryAdapter.notifyDataSetChanged();
@@ -981,16 +1047,15 @@ public class GalleryActivity extends Activity {
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			CheckableLayout layout;
-			/*if(convertView != null){
-				layout = (CheckableLayout)convertView;
-				layout.removeAllViews();
-			}
-			else{*/
-				layout = new CheckableLayout(GalleryActivity.this);
-				layout.setGravity(Gravity.CENTER);
-				layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer
-						.valueOf(getString(R.string.thumb_size))));
-			//}
+			/*
+			 * if(convertView != null){ layout = (CheckableLayout)convertView;
+			 * layout.removeAllViews(); } else{
+			 */
+			layout = new CheckableLayout(GalleryActivity.this);
+			layout.setGravity(Gravity.CENTER);
+			layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer
+					.valueOf(getString(R.string.thumb_size))));
+			// }
 
 			final File file = files.get(position);
 
@@ -1014,19 +1079,19 @@ public class GalleryActivity extends Activity {
 					}
 				}
 			};
-			
+
 			OnLongClickListener longClick = new View.OnLongClickListener() {
 				public boolean onLongClick(View v) {
 					CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
-					
+
 					AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 					builder.setTitle(file.getName());
 					builder.setItems(listEntries, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int item) {
 							selectedFiles.clear();
 							selectedFiles.add(file);
-							
-							switch(item){
+
+							switch (item) {
 								case ACTION_DECRYPT:
 									decryptSelected();
 									break;
@@ -1040,7 +1105,7 @@ public class GalleryActivity extends Activity {
 							dialog.dismiss();
 						}
 					}).show();
-					
+
 					return true;
 				}
 			};
@@ -1058,15 +1123,15 @@ public class GalleryActivity extends Activity {
 			}
 			else {
 				File thumb = new File(thumbPath);
-				if(thumb.exists() && thumb.isFile()){
+				if (thumb.exists() && thumb.isFile()) {
 					new DecryptAndShowImage(thumbPath, layout, onClick, longClick, memCache, false).execute();
 				}
-				else{
-					if(toGenerateThumbs.contains(file)){
+				else {
+					if (toGenerateThumbs.contains(file)) {
 						ProgressBar progress = new ProgressBar(GalleryActivity.this);
 						layout.addView(progress);
 					}
-					else{
+					else {
 						ImageView fileImage = new ImageView(GalleryActivity.this);
 						fileImage.setImageResource(R.drawable.file);
 						fileImage.setPadding(3, 3, 3, 3);
@@ -1080,27 +1145,27 @@ public class GalleryActivity extends Activity {
 			return layout;
 		}
 	}
-	
+
 	private class GenerateThumbs extends AsyncTask<ArrayList<File>, Integer, Void> {
 
 		@Override
 		protected Void doInBackground(ArrayList<File>... params) {
-			
-			int i=0;
-			while(toGenerateThumbs.size() > 0){
+
+			int i = 0;
+			while (toGenerateThumbs.size() > 0) {
 				File file = toGenerateThumbs.get(0);
-				
+
 				if (file.exists() && file.isFile()) {
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
 						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
-						
-						if(decryptedData != null){
+
+						if (decryptedData != null) {
 							Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName());
 						}
-						
+
 						publishProgress(++i);
-			
+
 						if (isCancelled()) {
 							break;
 						}
@@ -1110,9 +1175,9 @@ public class GalleryActivity extends Activity {
 					}
 					toGenerateThumbs.remove(file);
 				}
-				
+
 			}
-			
+
 			return null;
 		}
 
@@ -1124,7 +1189,7 @@ public class GalleryActivity extends Activity {
 		@Override
 		protected void onProgressUpdate(Integer... values) {
 			super.onProgressUpdate(values);
-			
+
 			galleryAdapter.notifyDataSetChanged();
 		}
 
@@ -1136,7 +1201,7 @@ public class GalleryActivity extends Activity {
 		}
 
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -1161,9 +1226,10 @@ public class GalleryActivity extends Activity {
 				return super.onOptionsItemSelected(item);
 		}
 	}
-	
-	public static class OnCryptoTaskFinish{
-    	public void onFinish(ArrayList<File> processedFiles){}
-    }
+
+	public static class OnCryptoTaskFinish {
+		public void onFinish(ArrayList<File> processedFiles) {
+		}
+	}
 
 }

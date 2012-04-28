@@ -32,8 +32,13 @@ public class SafeCameraActivity extends Activity {
 
 	public static final String DEFAULT_PREFS = "default_prefs";
 	public static final String PASSWORD = "password";
+	public static final String ACTION_JUST_LOGIN = "just_login";
+	public static final String PARAM_EXTRA_DATA = "extra_data";
 
 	private SharedPreferences preferences;
+	
+	private boolean justLogin = false;
+	private Bundle extraData;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,9 @@ public class SafeCameraActivity extends Activity {
 		Helpers.createFolders(this);
 		
 		Helpers.deleteTmpDir(SafeCameraActivity.this);
+		
+		justLogin = getIntent().getBooleanExtra(ACTION_JUST_LOGIN, false);
+		extraData = getIntent().getBundleExtra(PARAM_EXTRA_DATA);
 		
 		preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 		if (!preferences.contains(SafeCameraActivity.PASSWORD)) {
@@ -137,11 +145,17 @@ public class SafeCameraActivity extends Activity {
 			super.onPostExecute(result);
 			
 			if(result == true){
-				Intent intent = new Intent();
-				intent.setClass(SafeCameraActivity.this, CameraActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
+				if(justLogin && extraData != null){
+					Intent intent = extraData.getParcelable("intent");
+					startActivity(intent);
+				}
+				else{
+					Intent intent = new Intent();
+					intent.setClass(SafeCameraActivity.this, CameraActivity.class);
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(intent);
+				}
 				SafeCameraActivity.this.finish();
 			}
 			else{

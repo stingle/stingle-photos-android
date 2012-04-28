@@ -22,10 +22,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.fenritz.safecamera.R;
@@ -35,12 +39,21 @@ import com.fenritz.safecamera.SafeCameraApplication;
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
 
-	public static void checkLoginedState(Activity activity) {
+	public static boolean checkLoginedState(Activity activity) {
+		return checkLoginedState(activity, null, true);
+	}
+	public static boolean checkLoginedState(Activity activity, Bundle extraData) {
+		return checkLoginedState(activity, extraData, true);
+	}
+	public static boolean checkLoginedState(Activity activity, Bundle extraData, boolean redirect) {
 		SecretKey key = ((SafeCameraApplication) activity.getApplicationContext()).getKey();
 
 		if (key == null) {
-			redirectToLogin(activity);
-			return;
+			if(redirect){
+				doLogout(activity);
+				redirectToLogin(activity, extraData);
+			}
+			return false;
 		}
 
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -51,9 +64,15 @@ public class Helpers {
 
 		if (lockedTime != 0) {
 			if (currentTimestamp - lockedTime > lockTimeout) {
-				redirectToLogin(activity);
+				doLogout(activity);
+				if(redirect){
+					redirectToLogin(activity, extraData);
+				}
+				return false;
 			}
 		}
+		
+		return true;
 	}
 
 	public static void setLockedTime(Context context) {
@@ -64,19 +83,23 @@ public class Helpers {
 		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(0);
 	}
 
-	private static void redirectToLogin(Activity activity) {
-		((SafeCameraApplication) activity.getApplicationContext()).setKey(null);
-
+	private static void redirectToLogin(Activity activity, Bundle extraData) {
 		Intent intent = new Intent();
 		intent.setClass(activity, SafeCameraActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.putExtra(SafeCameraActivity.ACTION_JUST_LOGIN, true);
+		intent.putExtra(SafeCameraActivity.PARAM_EXTRA_DATA, extraData);
 		activity.startActivity(intent);
-
+	}
+	
+	private static void doLogout(Activity activity) {
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setAction("com.package.ACTION_LOGOUT");
 		activity.sendBroadcast(broadcastIntent);
 
+		((SafeCameraApplication) activity.getApplication()).setKey(null);
+		
 		deleteTmpDir(activity);
 	}
 
@@ -252,4 +275,12 @@ public class Helpers {
 		catch (FileNotFoundException e) { }
 		return null;
 	}
+	
+	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
 }
