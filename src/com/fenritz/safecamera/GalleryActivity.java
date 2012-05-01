@@ -438,7 +438,7 @@ public class GalleryActivity extends Activity {
 
 	private void decryptSelected() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-		intent.putExtra(FileDialog.START_PATH, Helpers.getHomeDir(GalleryActivity.this));
+		intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
 
 		// can user select directories or not
 		intent.putExtra(FileDialog.CAN_SELECT_FILE, false);

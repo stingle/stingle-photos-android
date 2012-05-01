@@ -431,6 +431,11 @@ public class CameraActivity extends Activity {
 				intent.setClass(CameraActivity.this, SettingsActivity.class);
 				startActivity(intent);
 				return true;
+			case R.id.test:
+				intent = new Intent();
+				intent.setClass(CameraActivity.this, TestActivity.class);
+				startActivity(intent);
+				return true;
 			case R.id.photo_size:
 				if (mCamera == null) {
 					return false;
