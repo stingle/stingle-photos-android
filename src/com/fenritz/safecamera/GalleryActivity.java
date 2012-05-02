@@ -1123,21 +1123,23 @@ public class GalleryActivity extends Activity {
 			}
 			else {
 				File thumb = new File(thumbPath);
-				if (thumb.exists() && thumb.isFile()) {
-					new DecryptAndShowImage(thumbPath, layout, onClick, longClick, memCache, false).execute();
-				}
-				else {
-					if (toGenerateThumbs.contains(file)) {
-						ProgressBar progress = new ProgressBar(GalleryActivity.this);
-						layout.addView(progress);
+				synchronized (thumb) {
+					if (thumb.exists() && thumb.isFile()) {
+						new DecryptAndShowImage(thumbPath, layout, onClick, longClick, memCache, false).execute();
 					}
 					else {
-						ImageView fileImage = new ImageView(GalleryActivity.this);
-						fileImage.setImageResource(R.drawable.file);
-						fileImage.setPadding(3, 3, 3, 3);
-						fileImage.setOnClickListener(onClick);
-						fileImage.setOnLongClickListener(longClick);
-						layout.addView(fileImage);
+						if (toGenerateThumbs.contains(file)) {
+							ProgressBar progress = new ProgressBar(GalleryActivity.this);
+							layout.addView(progress);
+						}
+						else {
+							ImageView fileImage = new ImageView(GalleryActivity.this);
+							fileImage.setImageResource(R.drawable.file);
+							fileImage.setPadding(3, 3, 3, 3);
+							fileImage.setOnClickListener(onClick);
+							fileImage.setOnLongClickListener(longClick);
+							layout.addView(fileImage);
+						}
 					}
 				}
 			}

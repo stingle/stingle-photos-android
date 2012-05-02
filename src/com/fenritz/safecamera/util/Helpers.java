@@ -280,14 +280,14 @@ public class Helpers {
 		// Decode image size
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inJustDecodeBounds = true;
-		BitmapFactory.decodeByteArray(data, 0, 8192, o);
+		BitmapFactory.decodeByteArray(data, 0, data.length, o);
 
 		// Find the correct scale value. It should be the power of 2.
 		int scale = 1;
 		while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
 			scale *= 2;
 		}
-
+		
 		// Decode with inSampleSize
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = scale;
