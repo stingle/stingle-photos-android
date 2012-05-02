@@ -276,6 +276,24 @@ public class Helpers {
 		return null;
 	}
 	
+	public static Bitmap decodeBitmap(byte[] data, int requiredSize) {
+		// Decode image size
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inJustDecodeBounds = true;
+		BitmapFactory.decodeByteArray(data, 0, 8192, o);
+
+		// Find the correct scale value. It should be the power of 2.
+		int scale = 1;
+		while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
+			scale *= 2;
+		}
+
+		// Decode with inSampleSize
+		BitmapFactory.Options o2 = new BitmapFactory.Options();
+		o2.inSampleSize = scale;
+		return BitmapFactory.decodeByteArray(data, 0, data.length, o2);
+	}
+	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
         Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
