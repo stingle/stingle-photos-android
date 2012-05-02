@@ -432,8 +432,12 @@ public class CameraActivity extends Activity {
 				startActivity(intent);
 				return true;
 			case R.id.test:
-				intent = new Intent();
+				/*intent = new Intent();
 				intent.setClass(CameraActivity.this, TestActivity.class);
+				startActivity(intent);*/
+				intent = new Intent();
+				intent.setClass(CameraActivity.this, ViewImageActivity.class);
+				intent.putExtra("EXTRA_IMAGE_PATH", "/sdcard/SafeCamera/.thumb/IMG_20120503_003732.jpg.sc");
 				startActivity(intent);
 				return true;
 			case R.id.photo_size:
