@@ -40,7 +40,7 @@ public class AESCrypt {
 	private static final String RANDOM_ALGORITHM = "SHA1PRNG";
 	private static final String HASH_ALGORITHM = "SHA-512";
 	private static final String PBE_ALGORITHM = "PBEWithSHA256And256BitAES-CBC-BC";
-	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
+	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
 	private static final String SECRET_KEY_ALGORITHM = "AES";
 
 	/**
