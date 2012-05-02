@@ -272,7 +272,7 @@ public class AESCrypt {
 			}
 
 			// Bytes read from in will be decrypted
-			in = new CipherInputStream(in, decryptionCipher);
+			in = new OptimizedCipherInputStream(in, decryptionCipher);
 
 			// Read in the decrypted bytes and write the cleartext to out
 			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();

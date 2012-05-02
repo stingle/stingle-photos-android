@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Gravity;
@@ -99,7 +98,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 				byte[] decryptedData = Helpers.getAESCrypt(parent.getContext()).decrypt(input, progress, this);
 
 				if (decryptedData != null) {
-					Bitmap bitmap = BitmapFactory.decodeByteArray(decryptedData, 0, decryptedData.length);
+					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, 300);
 					decryptedData = null;
 					if(bitmap != null){
 						if(memCache != null){
@@ -134,6 +133,9 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 			image = new ImageView(context);
 		}
 		
+		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+		image.setLayoutParams(params);
+		
 		image.setId(IMAGE_ID);
 		if(bitmap != null){
 			image.setImageBitmap(bitmap);
@@ -153,6 +155,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		
 		parent.removeView(progressBar);
 		parent.addView(image);
+		this.cancel(true);
 	}
 	
 	@Override
