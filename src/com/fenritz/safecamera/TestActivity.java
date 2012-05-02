@@ -48,8 +48,7 @@ public class TestActivity  extends Activity{
 		//FileInputStream inputStream = new FileInputStream(filePath);
 		//byte[] dec = Helpers.getAESCrypt(TestActivity.this).decrypt(inputStream);
 		
-		DecryptAndShowImage task = new DecryptAndShowImage(filePath, ((LinearLayout)findViewById(R.id.layout1)), null, null, null, true);
-		task.execute();
+		new DecryptAndShowImage(filePath, ((LinearLayout)findViewById(R.id.layout1))).execute();
 		//((ImageView)findViewById(R.id.imageView)).setImageBitmap(BitmapFactory.decodeByteArray(dec, 0, dec.length));
 	}
 	
