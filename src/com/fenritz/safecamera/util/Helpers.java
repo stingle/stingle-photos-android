@@ -38,7 +38,7 @@ import com.fenritz.safecamera.SafeCameraApplication;
 
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
-
+	
 	public static boolean checkLoginedState(Activity activity) {
 		return checkLoginedState(activity, null, true);
 	}
@@ -153,14 +153,6 @@ public class Helpers {
 	public static SecretKey getAESKey(Activity activity, String password) {
 		try {
 			return AESCrypt.getSecretKey(password);
-		}
-		catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "100"));
-		}
-		catch (NoSuchProviderException e) {
-			e.printStackTrace();
-			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "101"));
 		}
 		catch (AESCryptException e) {
 			e.printStackTrace();
