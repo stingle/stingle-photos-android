@@ -1,13 +1,16 @@
 package com.fenritz.safecamera;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
-import com.fenritz.safecamera.util.DecryptAndShowImage;
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
+
 import com.fenritz.safecamera.util.Helpers;
 
 public class TestActivity  extends Activity{
@@ -20,7 +23,7 @@ public class TestActivity  extends Activity{
 		setContentView(R.layout.test);
 
 		
-		Intent intent = new Intent(getBaseContext(), FileDialog.class);
+		/*Intent intent = new Intent(getBaseContext(), FileDialog.class);
 		intent.putExtra(FileDialog.START_PATH, Helpers.getHomeDir(TestActivity.this));
 
 		// can user select directories or not
@@ -40,19 +43,22 @@ public class TestActivity  extends Activity{
 			}
 		});
 		
-		startActivityForResult(intent, GalleryActivity.REQUEST_DECRYPT);
+		startActivityForResult(intent, GalleryActivity.REQUEST_DECRYPT);*/
+		//IMG_20120307_020351.jpg.sc
 		
+		new DecryptImage(R.id.imageView1).execute("/sdcard/SafeCamera/IMG_20120307_024546.jpg.sc");
+		//new DecryptImage(R.id.imageView2).execute("/sdcard/SafeCamera/IMG_20120307_020351.jpg.sc");
 	}
 	
-	private void decrypt(){
+	/*private void decrypt(){
 		//FileInputStream inputStream = new FileInputStream(filePath);
 		//byte[] dec = Helpers.getAESCrypt(TestActivity.this).decrypt(inputStream);
 		
 		new DecryptAndShowImage(filePath, ((LinearLayout)findViewById(R.id.layout1))).execute();
 		//((ImageView)findViewById(R.id.imageView)).setImageBitmap(BitmapFactory.decodeByteArray(dec, 0, dec.length));
-	}
+	}*/
 	
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void onActivityResult(final int requestCode, int resultCode, final Intent data) {
 
@@ -63,5 +69,49 @@ public class TestActivity  extends Activity{
 				decrypt();
 			}
 		}
+	}*/
+	
+	public class DecryptImage extends AsyncTask<String, Void, Bitmap> {
+
+		int imageId;
+		
+		public DecryptImage(int pImageId){
+			imageId = pImageId;
+		}
+		
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			
+			try {
+				FileInputStream input = new FileInputStream(params[0]);
+
+				byte[] decryptedData = Helpers.getAESCrypt(getApplicationContext()).decrypt(input, (int)input.getChannel().size());
+	
+				if (decryptedData != null) {
+					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, 300);
+					decryptedData = null;
+					return bitmap;
+				}
+				else {
+					Log.d("sc", "Unable to decrypt: " + filePath);
+				}
+			}
+			catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap bitmap) {
+			super.onPostExecute(bitmap);
+
+			((ImageView)findViewById(imageId)).setImageBitmap(bitmap);
+		}
+
 	}
 }

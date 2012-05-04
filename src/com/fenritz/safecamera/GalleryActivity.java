@@ -56,7 +56,7 @@ import com.fenritz.safecamera.widget.CheckableLayout;
 
 public class GalleryActivity extends Activity {
 
-	public MemoryCache memCache = new MemoryCache();
+	public final MemoryCache memCache = new MemoryCache();
 
 	private final static int MULTISELECT_OFF = 0;
 	private final static int MULTISELECT_ON = 1;
@@ -79,10 +79,10 @@ public class GalleryActivity extends Activity {
 
 	private GridView photosGrid;
 
-	private final ArrayList<File> files = new ArrayList<File>();
+	private File[] files;
 	private final ArrayList<File> selectedFiles = new ArrayList<File>();
 	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
-	private GalleryAdapter galleryAdapter;
+	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
 	private GenerateThumbs thumbGenTask;
 
@@ -106,7 +106,6 @@ public class GalleryActivity extends Activity {
 		fillFilesList();
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
-		galleryAdapter = new GalleryAdapter();
 		photosGrid.setAdapter(galleryAdapter);
 
 		findViewById(R.id.multi_select).setOnClickListener(multiSelectClick());
@@ -204,12 +203,15 @@ public class GalleryActivity extends Activity {
 		File[] folderFiles = dir.listFiles();
 
 		Arrays.sort(folderFiles, Collections.reverseOrder());
-
-		files.clear();
+		
+		int fileCount = folderFiles.length;
+		int cnt = 0;
+		files = new File[fileCount];
 		for (File file : folderFiles) {
 			if (file.getName().endsWith(getString(R.string.file_extension))) {
-				files.add(file);
-
+				files[cnt] = file;
+				cnt++;
+				
 				String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
 				File thumb = new File(thumbPath);
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
@@ -670,7 +672,7 @@ public class GalleryActivity extends Activity {
 							}
 						};
 
-						byte[] decryptedData = newCrypt.decrypt(inputStream, progress, this);
+						byte[] decryptedData = newCrypt.decrypt(inputStream, (int)inputStream.getChannel().size(), progress, this);
 
 						if (decryptedData != null) {
 							String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
@@ -1034,30 +1036,32 @@ public class GalleryActivity extends Activity {
 	public class GalleryAdapter extends BaseAdapter {
 
 		public int getCount() {
-			return files.size();
+			return files.length;
 		}
 
 		public Object getItem(int position) {
-			return files.get(position);
+			return files[position];
 		}
 
 		public long getItemId(int position) {
 			return position;
 		}
 
-		public View getView(int position, View convertView, ViewGroup parent) {
-			CheckableLayout layout;
+		synchronized public View getView(int position, View convertView, ViewGroup parent) {
 			/*
 			 * if(convertView != null){ layout = (CheckableLayout)convertView;
 			 * layout.removeAllViews(); } else{
 			 */
-			layout = new CheckableLayout(GalleryActivity.this);
+			
+			final File file = files[position];
+			
+			
+			CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
 			layout.setGravity(Gravity.CENTER);
 			layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer
 					.valueOf(getString(R.string.thumb_size))));
 			// }
 
-			final File file = files.get(position);
 
 			final CheckableLayout layoutForOnClick = layout;
 			OnClickListener onClick = new View.OnClickListener() {
@@ -1110,8 +1114,8 @@ public class GalleryActivity extends Activity {
 				}
 			};
 
+			
 			String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
-
 			Bitmap image = memCache.get(thumbPath);
 			if (image != null) {
 				ImageView imageView = new ImageView(GalleryActivity.this);
@@ -1158,7 +1162,7 @@ public class GalleryActivity extends Activity {
 				if (file.exists() && file.isFile()) {
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
-						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
+						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, (int)inputStream.getChannel().size(), null, this);
 
 						if (decryptedData != null) {
 							Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName());
@@ -1171,6 +1175,10 @@ public class GalleryActivity extends Activity {
 						}
 					}
 					catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+					catch (IOException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					toGenerateThumbs.remove(file);

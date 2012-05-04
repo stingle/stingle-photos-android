@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <Button
+   <!--  <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,6 +16,21 @@
         android:layout_height="fill_parent"
         android:layout_weight="1"
         android:orientation="vertical" >
-    </LinearLayout>
 
+        
+
+    </LinearLayout> -->
+	<ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/add" />
+
+       <ImageView
+           android:id="@+id/imageView2"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_weight="1"
+           android:src="@drawable/add" />
 </LinearLayout>
