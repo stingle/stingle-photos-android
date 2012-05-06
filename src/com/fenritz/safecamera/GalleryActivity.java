@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -50,7 +51,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.fenritz.safecamera.util.AESCrypt;
-import com.fenritz.safecamera.util.AESCrypt.CryptoProgress;
 import com.fenritz.safecamera.util.Helpers;
 import com.fenritz.safecamera.util.MemoryCache;
 import com.fenritz.safecamera.widget.CheckableLayout;
@@ -80,7 +80,7 @@ public class GalleryActivity extends Activity {
 
 	private GridView photosGrid;
 
-	private File[] files;
+	private final ArrayList<File> files = new ArrayList<File>();
 	private final ArrayList<File> selectedFiles = new ArrayList<File>();
 	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
@@ -212,14 +212,11 @@ public class GalleryActivity extends Activity {
 		File[] folderFiles = dir.listFiles();
 
 		Arrays.sort(folderFiles, Collections.reverseOrder());
-		
-		int fileCount = folderFiles.length;
-		int cnt = 0;
-		files = new File[fileCount];
+		files.clear();
+		Log.d("qaq", "files clear");
 		for (File file : folderFiles) {
 			if (file.getName().endsWith(getString(R.string.file_extension))) {
-				files[cnt] = file;
-				cnt++;
+				files.add(file);
 				
 				String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
 				File thumb = new File(thumbPath);
@@ -661,7 +658,7 @@ public class GalleryActivity extends Activity {
 			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, GalleryActivity.this);
 
 			int returnStatus = STATUS_OK;
-			progressDialog.setMax(filePaths.length * 100);
+			progressDialog.setMax(filePaths.length);
 			for (int i = 0; i < filePaths.length; i++) {
 
 				File origFile = new File(filePaths[i]);
@@ -670,18 +667,7 @@ public class GalleryActivity extends Activity {
 					try {
 						FileInputStream inputStream = new FileInputStream(origFile);
 
-						final int currentIteration = i;
-						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
-							@Override
-							public void setProgress(long pCurrent) {
-								super.setProgress(pCurrent);
-								int progress = this.getProgressPercents();
-								int newProgress = progress + (currentIteration * 100);
-								publishProgress(newProgress);
-							}
-						};
-
-						byte[] decryptedData = newCrypt.decrypt(inputStream, progress, this);
+						byte[] decryptedData = newCrypt.decrypt(inputStream, null, this);
 
 						if (decryptedData != null) {
 							String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
@@ -692,7 +678,7 @@ public class GalleryActivity extends Activity {
 							if (deleteAfterImport) {
 								origFile.delete();
 							}
-
+							publishProgress(i+1);
 						}
 						else {
 							returnStatus = STATUS_FAIL;
@@ -796,7 +782,7 @@ public class GalleryActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(String... params) {
-			progressDialog.setMax(params.length * 100);
+			progressDialog.setMax(params.length);
 			for (int i = 0; i < params.length; i++) {
 				File origFile = new File(params[i]);
 
@@ -805,30 +791,17 @@ public class GalleryActivity extends Activity {
 					try {
 						inputStream = new FileInputStream(origFile);
 
-						String destFileName = origFile.getName() + getString(R.string.file_extension);
+						String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
 						// String destFilePath =
 						// findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this),
 						// origFile.getName());
 
-						FileOutputStream outputStream = new FileOutputStream(new File(Helpers.getHomeDir(getApplicationContext()), destFileName));
+						FileOutputStream outputStream = new FileOutputStream(destFilePath);
 
-						final int currentIteration = i;
-						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
-							@Override
-							public void setProgress(long pCurrent) {
-								super.setProgress(pCurrent);
-								int progress = this.getProgressPercents();
-								int newProgress = progress + (currentIteration * 100);
-								publishProgress(newProgress);
-							}
-						};
-
-						Helpers.getAESCrypt(GalleryActivity.this).encrypt(inputStream, outputStream, progress, this);
+						Helpers.getAESCrypt(GalleryActivity.this).encrypt(inputStream, outputStream, null, this);
+						publishProgress(i+1);
 					}
 					catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
-					catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
@@ -898,7 +871,7 @@ public class GalleryActivity extends Activity {
 			ArrayList<File> filesToDecrypt = params[0];
 			ArrayList<File> decryptedFiles = new ArrayList<File>();
 
-			progressDialog.setMax(filesToDecrypt.size() * 100);
+			progressDialog.setMax(filesToDecrypt.size());
 
 			for (int i = 0; i < filesToDecrypt.size(); i++) {
 				File file = filesToDecrypt.get(i);
@@ -912,19 +885,9 @@ public class GalleryActivity extends Activity {
 						FileInputStream inputStream = new FileInputStream(file);
 						FileOutputStream outputStream = new FileOutputStream(new File(destinationFolder, destFileName));
 
-						final int currentIteration = i;
-						AESCrypt.CryptoProgress progress = new CryptoProgress(inputStream.getChannel().size()) {
-							@Override
-							public void setProgress(long pCurrent) {
-								super.setProgress(pCurrent);
-								int progress = this.getProgressPercents();
-								int newProgress = progress + (currentIteration * 100);
-								publishProgress(newProgress);
-							}
-						};
+						Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, outputStream, null, this);
 
-						Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, outputStream, progress, this);
-
+						publishProgress(i+1);
 						decryptedFiles.add(new File(destinationFolder + "/" + destFileName));
 					}
 					catch (FileNotFoundException e) {
@@ -1045,11 +1008,11 @@ public class GalleryActivity extends Activity {
 	public class GalleryAdapter extends BaseAdapter {
 
 		public int getCount() {
-			return files.length;
+			return files.size();
 		}
 
 		public Object getItem(int position) {
-			return files[position];
+			return files.get(position);
 		}
 
 		public long getItemId(int position) {
@@ -1113,10 +1076,13 @@ public class GalleryActivity extends Activity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			final CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
 			
-			final File file = files[position];
+			final File file = files.get(position);
 			
 			if(file != null){
 				int thumbSize = Integer.valueOf(getString(R.string.thumb_size));
+				if(selectedFiles.contains(file)){
+					layout.setChecked(true);
+				}
 				layout.setGravity(Gravity.CENTER);
 				layout.setLayoutParams(new GridView.LayoutParams(thumbSize, thumbSize)); 
 	
@@ -1135,21 +1101,20 @@ public class GalleryActivity extends Activity {
 				}
 				else {
 					int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-					if (toGenerateThumbs.contains(file) && (new File(thumbPath)).length() < maxFileSize) {
+					if (toGenerateThumbs.contains(file) && file.length() < maxFileSize) {
 						ProgressBar progress = new ProgressBar(GalleryActivity.this);
 						progress.setOnClickListener(onClick);
 						progress.setOnLongClickListener(onLongClick);
 						layout.addView(progress);
 					}
 					else {
-						/*if((new File(thumbPath)).length() < maxFileSize){
+						if((new File(thumbPath)).length() < maxFileSize && position>= photosGrid.getFirstVisiblePosition() && position <= photosGrid.getLastVisiblePosition()){
 							if(fillCacheTask == null){
-								Log.d("qaq", "exec - " + thumbPath);
-								int[] params = {pageNumber * itemsPerPage, itemsPerPage};
+								int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
 								fillCacheTask = new FillCache();
 								fillCacheTask.execute(params);
 							}
-						}*/
+						}
 						ImageView fileImage = new ImageView(GalleryActivity.this);
 						fileImage.setImageResource(R.drawable.file);
 						fileImage.setPadding(3, 3, 3, 3);
@@ -1216,24 +1181,38 @@ public class GalleryActivity extends Activity {
 				int offset = params[0][0];
 				int length = params[0][1];
 				
+				Log.d("qaq", "e - " + String.valueOf(offset) + " - " + String.valueOf(length));
+				
 				boolean reverse = false;
 				if(params[0].length == 3 && params[0][2] == 1){
 					reverse = true;
 				}
 				
 				Context appContext = getApplicationContext(); 
-				File[] slicedArray = new File[length];
-				if(offset+length > files.length){
-					length = files.length - offset;
+				if(offset+length > files.size()){
+					length = files.size() - offset - 1;
 				}
-				System.arraycopy(files, offset, slicedArray, 0, length);
+				
 				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
 				
-				if(reverse){
-					Arrays.sort(slicedArray);
-				}
+				/*if(reverse){
+					Collections.sort(slicedArray);
+				}*/
 				
-				for(File file : slicedArray){
+				int start;
+				int end;
+				if(!reverse){
+					start = offset;
+					end = offset+length;
+				}
+				else{
+					start = offset+length;
+					end = offset;
+				}
+				//Log.d("qaq", String.valueOf(start) + " - " + String.valueOf(end));
+				int i = start;
+				while(true){
+					File file = files.get(i);
 					if(file != null){
 						try {
 							String thumbPath = thumbsDir + file.getName();
@@ -1243,6 +1222,16 @@ public class GalleryActivity extends Activity {
 							publishProgress();
 						}
 						catch (FileNotFoundException e) { }
+					}
+					//Log.d("qaq", String.valueOf(i));
+					if(i==end){
+						break;
+					}
+					if(!reverse){
+						i++;
+					}
+					else{
+						i--;
 					}
 				}
 			}
@@ -1278,11 +1267,13 @@ public class GalleryActivity extends Activity {
 
 				if (file.exists() && file.isFile()) {
 					try {
+						Log.d("qaq", "t - " + String.valueOf(file.getPath()));
 						FileInputStream inputStream = new FileInputStream(file);
 						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 
 						if (decryptedData != null) {
-							Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName());
+							String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
+							memCache.put(thumbsDir + file.getName(), Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName()));
 						}
 
 						publishProgress(++i);
@@ -1292,10 +1283,6 @@ public class GalleryActivity extends Activity {
 						}
 					}
 					catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
-					catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					toGenerateThumbs.remove(file);

@@ -207,12 +207,13 @@ public class Helpers {
 		}
 	}
 
-	public static void generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
 		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 		bitmapOptions.inSampleSize = 4;
 		Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
+		Bitmap thumbBitmap = null;
 		if (bitmap != null) {
-			Bitmap thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));
+			thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));
 
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -221,6 +222,7 @@ public class Helpers {
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			Helpers.getAESCrypt(context).encrypt(imageByteArray, out);
 		}
+		return thumbBitmap;
 	}
 
 	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide) {

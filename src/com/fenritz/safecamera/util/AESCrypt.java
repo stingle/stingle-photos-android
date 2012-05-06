@@ -12,7 +12,6 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
@@ -102,10 +101,12 @@ public class AESCrypt {
 	}
 	
 	public Cipher getEncryptionCipher(){
+		setupCrypto();
 		return encryptionCipher;
 	}
 	
 	public Cipher getDecryptionCipher(){
+		setupCrypto();
 		return decryptionCipher;
 	}
 	
@@ -207,7 +208,7 @@ public class AESCrypt {
 			}*/
 
 			// Bytes written to out will be encrypted
-			in = new CipherInputStream(in, decryptionCipher);
+			in = new OptimizedCipherInputStream(in, decryptionCipher);
 			out = new CipherOutputStream(out, secondaryCrypt.getEncryptionCipher());
 
 			// Read in the cleartext bytes and write to out to encrypt
@@ -289,16 +290,15 @@ public class AESCrypt {
 		try {
 			in.read(iv, 0, iv.length);
 			this.setupCrypto(iv);
-			if(progress != null){
-				progress.setProgress(iv.length);
-			}
 
 			//long currentTimestamp = System.currentTimeMillis();
+			//Log.d("qaq", "dec - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
 			
 			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 			int numRead = 0;
 			if(progress != null){
 				in = new OptimizedCipherInputStream(in, decryptionCipher);
+				progress.setProgress(iv.length);
 				while ((numRead = in.read(buf)) >= 0) {
 					byteBuffer.write(buf, 0, numRead);
 					if(progress != null){
@@ -320,7 +320,6 @@ public class AESCrypt {
 				in.close();
 				return decryptionCipher.doFinal(byteBuffer.toByteArray());
 			}
-			//Log.d("qaq", "dec - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
