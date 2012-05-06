@@ -85,7 +85,7 @@ public class TestActivity  extends Activity{
 			try {
 				FileInputStream input = new FileInputStream(params[0]);
 
-				byte[] decryptedData = Helpers.getAESCrypt(getApplicationContext()).decrypt(input, (int)input.getChannel().size());
+				byte[] decryptedData = Helpers.getAESCrypt(getApplicationContext()).decrypt(input);
 	
 				if (decryptedData != null) {
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, 300);

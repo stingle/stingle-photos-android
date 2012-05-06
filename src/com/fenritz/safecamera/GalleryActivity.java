@@ -38,6 +38,8 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -49,7 +51,6 @@ import android.widget.Toast;
 
 import com.fenritz.safecamera.util.AESCrypt;
 import com.fenritz.safecamera.util.AESCrypt.CryptoProgress;
-import com.fenritz.safecamera.util.DecryptAndShowImage;
 import com.fenritz.safecamera.util.Helpers;
 import com.fenritz.safecamera.util.MemoryCache;
 import com.fenritz.safecamera.widget.CheckableLayout;
@@ -85,10 +86,15 @@ public class GalleryActivity extends Activity {
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
 	private GenerateThumbs thumbGenTask;
+	private FillCache fillCacheTask = new FillCache();
 
 	private BroadcastReceiver receiver;
 	
 	private boolean isWentToLogin = false;
+	
+	private int pageNumber = 1;
+	private final int itemsPerPage = 50;
+	private final int loadThreshold = 5;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -104,9 +110,12 @@ public class GalleryActivity extends Activity {
 		}
 
 		fillFilesList();
+		int[] params = {0, itemsPerPage};
+		fillCacheTask.execute(params);
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
 		photosGrid.setAdapter(galleryAdapter);
+		photosGrid.setOnScrollListener(getOnScrollListener());
 
 		findViewById(R.id.multi_select).setOnClickListener(multiSelectClick());
 		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
@@ -672,7 +681,7 @@ public class GalleryActivity extends Activity {
 							}
 						};
 
-						byte[] decryptedData = newCrypt.decrypt(inputStream, (int)inputStream.getChannel().size(), progress, this);
+						byte[] decryptedData = newCrypt.decrypt(inputStream, progress, this);
 
 						if (decryptedData != null) {
 							String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
@@ -1047,28 +1056,12 @@ public class GalleryActivity extends Activity {
 			return position;
 		}
 
-		synchronized public View getView(int position, View convertView, ViewGroup parent) {
-			/*
-			 * if(convertView != null){ layout = (CheckableLayout)convertView;
-			 * layout.removeAllViews(); } else{
-			 */
-			
-			final File file = files[position];
-			
-			
-			CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
-			layout.setGravity(Gravity.CENTER);
-			layout.setLayoutParams(new GridView.LayoutParams(Integer.valueOf(getString(R.string.thumb_size)), Integer
-					.valueOf(getString(R.string.thumb_size))));
-			// }
-
-
-			final CheckableLayout layoutForOnClick = layout;
-			OnClickListener onClick = new View.OnClickListener() {
+		private OnClickListener getOnClickListener(final CheckableLayout layout, final File file){
+			 return new View.OnClickListener() {
 				public void onClick(View v) {
 					if (multiSelectMode == MULTISELECT_ON) {
-						layoutForOnClick.toggle();
-						if (layoutForOnClick.isChecked()) {
+						layout.toggle();
+						if (layout.isChecked()) {
 							selectedFiles.add(file);
 						}
 						else {
@@ -1083,8 +1076,10 @@ public class GalleryActivity extends Activity {
 					}
 				}
 			};
-
-			OnLongClickListener longClick = new View.OnLongClickListener() {
+		}
+		
+		private OnLongClickListener getOnLingClickListener(final File file){
+			return new View.OnLongClickListener() {
 				public boolean onLongClick(View v) {
 					CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
 
@@ -1113,43 +1108,165 @@ public class GalleryActivity extends Activity {
 					return true;
 				}
 			};
-
+		}
+		
+		public View getView(int position, View convertView, ViewGroup parent) {
+			final CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
 			
-			String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
-			Bitmap image = memCache.get(thumbPath);
-			if (image != null) {
-				ImageView imageView = new ImageView(GalleryActivity.this);
-				imageView.setImageBitmap(image);
-				imageView.setOnClickListener(onClick);
-				imageView.setOnLongClickListener(longClick);
-				imageView.setPadding(3, 3, 3, 3);
-				layout.addView(imageView);
-			}
-			else {
-				File thumb = new File(thumbPath);
-				if (thumb.exists() && thumb.isFile()) {
-					new DecryptAndShowImage(thumbPath, layout, onClick, longClick, memCache, false).execute();
+			final File file = files[position];
+			
+			if(file != null){
+				int thumbSize = Integer.valueOf(getString(R.string.thumb_size));
+				layout.setGravity(Gravity.CENTER);
+				layout.setLayoutParams(new GridView.LayoutParams(thumbSize, thumbSize)); 
+	
+				OnClickListener onClick = getOnClickListener(layout, file);
+				OnLongClickListener onLongClick = getOnLingClickListener(file);
+	
+				String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
+				Bitmap image = memCache.get(thumbPath);
+				if (image != null) {
+					ImageView imageView = new ImageView(GalleryActivity.this);
+					imageView.setImageBitmap(image);
+					imageView.setOnClickListener(onClick);
+					imageView.setOnLongClickListener(onLongClick);
+					imageView.setPadding(3, 3, 3, 3);
+					layout.addView(imageView);
 				}
 				else {
-					if (toGenerateThumbs.contains(file)) {
+					int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+					if (toGenerateThumbs.contains(file) && (new File(thumbPath)).length() < maxFileSize) {
 						ProgressBar progress = new ProgressBar(GalleryActivity.this);
+						progress.setOnClickListener(onClick);
+						progress.setOnLongClickListener(onLongClick);
 						layout.addView(progress);
 					}
 					else {
+						/*if((new File(thumbPath)).length() < maxFileSize){
+							if(fillCacheTask == null){
+								Log.d("qaq", "exec - " + thumbPath);
+								int[] params = {pageNumber * itemsPerPage, itemsPerPage};
+								fillCacheTask = new FillCache();
+								fillCacheTask.execute(params);
+							}
+						}*/
 						ImageView fileImage = new ImageView(GalleryActivity.this);
 						fileImage.setImageResource(R.drawable.file);
 						fileImage.setPadding(3, 3, 3, 3);
 						fileImage.setOnClickListener(onClick);
-						fileImage.setOnLongClickListener(longClick);
+						fileImage.setOnLongClickListener(onLongClick);
 						layout.addView(fileImage);
 					}
 				}
 			}
-
 			return layout;
 		}
 	}
 
+	private OnScrollListener getOnScrollListener(){
+		return new OnScrollListener() {
+			
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				
+			}
+			
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+				
+				int lastVisiblePosition = firstVisibleItem + visibleItemCount;
+				
+				int pagedPosition = pageNumber * itemsPerPage;
+				
+				if(pagedPosition - lastVisiblePosition < loadThreshold){
+					if(fillCacheTask == null){
+						int[] params = {pageNumber * itemsPerPage, itemsPerPage};
+						fillCacheTask = new FillCache();
+						fillCacheTask.execute(params);
+						pageNumber++;
+					}
+				}
+				
+				
+				pagedPosition = (pageNumber-1) * itemsPerPage;
+				if(pageNumber > 1 && lastVisiblePosition - pagedPosition + loadThreshold * 2  < loadThreshold){
+					if(fillCacheTask == null){
+						pageNumber--;
+						int[] params = {(pageNumber - 1) * itemsPerPage, itemsPerPage, 1};
+						fillCacheTask = new FillCache();
+						fillCacheTask.execute(params);
+					}
+				}
+				
+			}
+		};
+	}
+	
+	private class FillCache extends AsyncTask<int[], Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			((ProgressBar)findViewById(R.id.progressBar)).setVisibility(View.VISIBLE);
+		}
+		
+		
+		@Override
+		protected Void doInBackground(int[]... params) {
+			
+			if(params[0].length >= 2){
+				int offset = params[0][0];
+				int length = params[0][1];
+				
+				boolean reverse = false;
+				if(params[0].length == 3 && params[0][2] == 1){
+					reverse = true;
+				}
+				
+				Context appContext = getApplicationContext(); 
+				File[] slicedArray = new File[length];
+				if(offset+length > files.length){
+					length = files.length - offset;
+				}
+				System.arraycopy(files, offset, slicedArray, 0, length);
+				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
+				
+				if(reverse){
+					Arrays.sort(slicedArray);
+				}
+				
+				for(File file : slicedArray){
+					if(file != null){
+						try {
+							String thumbPath = thumbsDir + file.getName();
+							if(memCache.get(thumbPath) == null){
+								memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(appContext).decrypt(new FileInputStream(thumbPath)), 300));
+							}
+							publishProgress();
+						}
+						catch (FileNotFoundException e) { }
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			super.onProgressUpdate(values);
+
+			galleryAdapter.notifyDataSetChanged();
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+
+			galleryAdapter.notifyDataSetChanged();
+			fillCacheTask = null;
+			((ProgressBar)findViewById(R.id.progressBar)).setVisibility(View.GONE);
+		}
+
+	}
+	
 	private class GenerateThumbs extends AsyncTask<ArrayList<File>, Integer, Void> {
 
 		@Override
@@ -1162,7 +1279,7 @@ public class GalleryActivity extends Activity {
 				if (file.exists() && file.isFile()) {
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
-						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, (int)inputStream.getChannel().size(), null, this);
+						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 
 						if (decryptedData != null) {
 							Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName());

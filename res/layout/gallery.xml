@@ -4,14 +4,23 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/topPanel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:gravity="center_vertical|right"
         android:fadingEdge="vertical"
         android:fadingEdgeLength="2dp" >
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/multi_select"
@@ -20,10 +29,12 @@
             android:scaleType="fitCenter"
             android:layout_margin="2dp"
             android:padding="0dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:background="@null"
             android:src="@drawable/checkbox_unchecked" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <GridView
         android:id="@+id/photosGrid"
