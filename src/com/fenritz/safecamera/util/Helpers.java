@@ -38,7 +38,7 @@ import com.fenritz.safecamera.SafeCameraApplication;
 
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
-
+	
 	public static boolean checkLoginedState(Activity activity) {
 		return checkLoginedState(activity, null, true);
 	}
@@ -154,14 +154,6 @@ public class Helpers {
 		try {
 			return AESCrypt.getSecretKey(password);
 		}
-		catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "100"));
-		}
-		catch (NoSuchProviderException e) {
-			e.printStackTrace();
-			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "101"));
-		}
 		catch (AESCryptException e) {
 			e.printStackTrace();
 			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "102"));
@@ -215,12 +207,13 @@ public class Helpers {
 		}
 	}
 
-	public static void generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
 		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 		bitmapOptions.inSampleSize = 4;
 		Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
+		Bitmap thumbBitmap = null;
 		if (bitmap != null) {
-			Bitmap thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));
+			thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));
 
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -229,6 +222,7 @@ public class Helpers {
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			Helpers.getAESCrypt(context).encrypt(imageByteArray, out);
 		}
+		return thumbBitmap;
 	}
 
 	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide) {
@@ -287,6 +281,7 @@ public class Helpers {
 		while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
 			scale *= 2;
 		}
+		
 		// Decode with inSampleSize
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = scale;

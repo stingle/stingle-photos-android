@@ -5,7 +5,7 @@ import android.support.v4.util.LruCache;
 
 
 public class MemoryCache {
-	private static int CACHE_SIZE = 4*1024*1024;
+	private static int CACHE_SIZE = 4 * 1024 * 1024;
     private LruCache<String, Bitmap> cache;
     
     public MemoryCache(){
