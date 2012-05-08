@@ -7,7 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,7 +28,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -211,9 +210,19 @@ public class GalleryActivity extends Activity {
 		File dir = new File(Helpers.getHomeDir(this));
 		File[] folderFiles = dir.listFiles();
 
-		Arrays.sort(folderFiles, Collections.reverseOrder());
+		Arrays.sort(folderFiles, new Comparator<File>() {
+			public int compare(File lhs, File rhs) {
+				if(rhs.lastModified() > lhs.lastModified()){
+					return 1;
+				}
+				else if(rhs.lastModified() < lhs.lastModified()){
+					return -1;
+				}
+				return 0;
+			}
+		});
+		
 		files.clear();
-		Log.d("qaq", "files clear");
 		for (File file : folderFiles) {
 			if (file.getName().endsWith(getString(R.string.file_extension))) {
 				files.add(file);
@@ -241,6 +250,10 @@ public class GalleryActivity extends Activity {
 			thumbGenTask.cancel(true);
 			thumbGenTask = null;
 		}
+		if(fillCacheTask != null){
+			fillCacheTask.cancel(true);
+			fillCacheTask = null;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -252,9 +265,16 @@ public class GalleryActivity extends Activity {
 			boolean logined = Helpers.checkLoginedState(this);
 			Helpers.disableLockTimer(this);
 	
-			if (logined && thumbGenTask == null) {
-				thumbGenTask = new GenerateThumbs();
-				thumbGenTask.execute(toGenerateThumbs);
+			if (logined){
+				if(thumbGenTask == null) {
+					thumbGenTask = new GenerateThumbs();
+					thumbGenTask.execute(toGenerateThumbs);
+				}
+				if(fillCacheTask == null){
+					int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
+					fillCacheTask = new FillCache();
+					fillCacheTask.execute(params);
+				}
 			}
 		}
 	}
@@ -687,9 +707,6 @@ public class GalleryActivity extends Activity {
 					catch (FileNotFoundException e) {
 						returnStatus = STATUS_FAIL;
 					}
-					catch (IOException e) {
-						returnStatus = STATUS_FAIL;
-					}
 				}
 			}
 
@@ -740,23 +757,42 @@ public class GalleryActivity extends Activity {
 			number = 1;
 		}
 
-		File file = new File(filePath + "/" + fileName);
+		File file;
+		boolean isEncryptedFile = false;
+		if(fileName.endsWith(getString(R.string.file_extension))){
+			file = new File(filePath + "/" + fileName);
+			isEncryptedFile = true;
+		}
+		else{
+			file = new File(filePath + "/" + fileName + getString(R.string.file_extension));
+		}
 		if (file.exists()) {
 			int lastDotIndex = fileName.lastIndexOf(".");
 			String fileNameWithoutExt;
+			String originalExtension = ""; 
 			if (lastDotIndex > 0) {
 				fileNameWithoutExt = fileName.substring(0, lastDotIndex);
+				if(!isEncryptedFile){
+					originalExtension = fileName.substring(lastDotIndex);
+				}
 			}
 			else {
 				fileNameWithoutExt = fileName;
 			}
 
-			Pattern p = Pattern.compile("_\\d+$");
+			Pattern p = Pattern.compile(".+_\\d{1,3}$");
 			Matcher m = p.matcher(fileNameWithoutExt);
 			if (m.find()) {
 				fileNameWithoutExt = fileNameWithoutExt.substring(0, fileName.lastIndexOf("_"));
 			}
-			return findNewFileNameIfNeeded(filePath, fileNameWithoutExt + "_" + String.valueOf(number) + getString(R.string.file_extension), ++number);
+			String finalFilaname;
+			if(isEncryptedFile){
+				finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension + getString(R.string.file_extension);
+			}
+			else{
+				finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension;
+			}
+			return findNewFileNameIfNeeded(filePath, finalFilaname, ++number);
 		}
 		return filePath + "/" + fileName;
 	}
@@ -791,7 +827,7 @@ public class GalleryActivity extends Activity {
 					try {
 						inputStream = new FileInputStream(origFile);
 
-						String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName());
+						String destFilePath = findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this), origFile.getName())  + getString(R.string.file_extension);
 						// String destFilePath =
 						// findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this),
 						// origFile.getName());
@@ -1181,8 +1217,6 @@ public class GalleryActivity extends Activity {
 				int offset = params[0][0];
 				int length = params[0][1];
 				
-				Log.d("qaq", "e - " + String.valueOf(offset) + " - " + String.valueOf(length));
-				
 				boolean reverse = false;
 				if(params[0].length == 3 && params[0][2] == 1){
 					reverse = true;
@@ -1209,7 +1243,6 @@ public class GalleryActivity extends Activity {
 					start = offset+length;
 					end = offset;
 				}
-				//Log.d("qaq", String.valueOf(start) + " - " + String.valueOf(end));
 				int i = start;
 				while(true){
 					File file = files.get(i);
@@ -1217,13 +1250,15 @@ public class GalleryActivity extends Activity {
 						try {
 							String thumbPath = thumbsDir + file.getName();
 							if(memCache.get(thumbPath) == null){
-								memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(appContext).decrypt(new FileInputStream(thumbPath)), 300));
+								memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(appContext).decrypt(new FileInputStream(thumbPath), this), 300));
+							}
+							if(isCancelled()){
+								break;
 							}
 							publishProgress();
 						}
 						catch (FileNotFoundException e) { }
 					}
-					//Log.d("qaq", String.valueOf(i));
 					if(i==end){
 						break;
 					}
@@ -1267,7 +1302,6 @@ public class GalleryActivity extends Activity {
 
 				if (file.exists() && file.isFile()) {
 					try {
-						Log.d("qaq", "t - " + String.valueOf(file.getPath()));
 						FileInputStream inputStream = new FileInputStream(file);
 						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 

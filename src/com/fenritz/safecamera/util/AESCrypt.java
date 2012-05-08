@@ -286,6 +286,10 @@ public class AESCrypt {
 		return this.decrypt(in, progress, null);
 	}
 	
+	public byte[] decrypt(InputStream in, AsyncTask<?,?,?> task) {
+		return this.decrypt(in, null, task);
+	}
+	
 	public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			in.read(iv, 0, iv.length);

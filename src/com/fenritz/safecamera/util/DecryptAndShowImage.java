@@ -99,7 +99,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 				byte[] decryptedData = Helpers.getAESCrypt(parent.getContext()).decrypt(input, progress, this);
 
 				if (decryptedData != null) {
-					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, 300);
+					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, 200);
 					decryptedData = null;
 					if (bitmap != null) {
 						if (memCache != null) {

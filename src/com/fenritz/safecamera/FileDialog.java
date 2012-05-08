@@ -336,6 +336,12 @@ public class FileDialog extends ListActivity {
 		}
 		myPath.setText(getText(R.string.location) + ": " + currentPath);
 
+		/*Arrays.sort(files, new Comparator<File>() {
+			public int compare(File lhs, File rhs) {
+				return lhs.getName().compareToIgnoreCase(rhs.getName());
+			}
+		});*/
+		
 		if (!currentPath.equals(ROOT)) {
 
 			/*item.add(ROOT);
@@ -349,10 +355,10 @@ public class FileDialog extends ListActivity {
 
 		}
 
-		TreeMap<String, String> dirsMap = new TreeMap<String, String>();
-		TreeMap<String, String> dirsPathMap = new TreeMap<String, String>();
-		TreeMap<String, String> filesMap = new TreeMap<String, String>();
-		TreeMap<String, String> filesPathMap = new TreeMap<String, String>();
+		TreeMap<String, String> dirsMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+		TreeMap<String, String> dirsPathMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+		TreeMap<String, String> filesMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+		TreeMap<String, String> filesPathMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
 		for (File file : files) {
 			if (file.isDirectory()) {
 				String dirName = file.getName();
@@ -475,7 +481,7 @@ public class FileDialog extends ListActivity {
 		
 		@Override
 		protected Bitmap doInBackground(File... params) {
-			Bitmap image = Helpers.decodeFile(params[0], 75);
+			Bitmap image = Helpers.decodeFile(params[0], 50);
 			
 			if(image != null){
 				cache.put(params[0].getPath(), image);
