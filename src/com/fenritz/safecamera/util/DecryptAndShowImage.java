@@ -62,6 +62,13 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	protected void onPreExecute() {
 		super.onPreExecute();
 		context = parent.getContext();
+		
+		if (memCache != null) {
+			Bitmap cachedBitmap = memCache.get(filePath);
+			if (cachedBitmap != null) {
+				return;
+			}
+		}
 
 		progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
 		// progressBar = new ProgressBar(context);
@@ -80,9 +87,11 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		if (memCache != null) {
 			Bitmap cachedBitmap = memCache.get(filePath);
 			if (cachedBitmap != null) {
+				Log.d("qaq", "from cache - " + filePath);
 				return cachedBitmap;
 			}
 		}
+		Log.d("qaq", "decrypt - " + filePath);
 		File thumbFile = new File(filePath);
 		if (thumbFile.exists() && thumbFile.isFile()) {
 			try {
@@ -115,6 +124,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 
 			}
 			catch (FileNotFoundException e) {
+				e.printStackTrace();
 			}
 			catch (IOException e) {
 				e.printStackTrace();
@@ -155,14 +165,28 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 			image.setOnLongClickListener(onLongClickListener);
 		}
 
-		parent.removeView(progressBar);
+		if(progressBar != null){
+			parent.removeView(progressBar);
+		}
 		parent.addView(image);
+		
+		onFinish();
 	}
 
+	@Override
+	protected void onCancelled() {
+		super.onCancelled();
+		onFinish();
+	}
+	
 	@Override
 	protected void onProgressUpdate(Integer... values) {
 		super.onProgressUpdate(values);
 
 		progressBar.setProgress(values[0]);
+	}
+	
+	protected void onFinish(){
+		
 	}
 }

@@ -70,6 +70,12 @@ public class TouchImageView extends ImageView {
             public boolean onTouch(View v, MotionEvent event) {
             	mScaleDetector.onTouchEvent(event);
 
+            	if(saveScale == 1f && mode != ZOOM){
+            		if(getParent() != null && getParent().getParent() != null && getParent().getParent() instanceof GalleryStopping){
+            			return ((GalleryStopping)getParent().getParent()).onTouchEvent(event);
+            		}
+            	}
+            	
             	matrix.getValues(m);
             	float x = m[Matrix.MTRANS_X];
             	float y = m[Matrix.MTRANS_Y];
@@ -208,7 +214,6 @@ public class TouchImageView extends ImageView {
             	}
         	}
 	        return true;
-	        
 	    }
 	}
     
