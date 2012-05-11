@@ -1,9 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:id="@+id/parent_layout"
-    android:gravity="center" >
-
-</LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/topPanel"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="5dp"
+        android:background="@android:color/transparent" >
+        
+	<LinearLayout 
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:orientation="vertical"
+	    android:id="@+id/parent_layout"
+	    android:gravity="center" >
+	
+	</LinearLayout>
+    
+    <ImageButton
+            android:id="@+id/previousButton"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:scaleType="centerCrop"
+            android:layout_alignParentBottom="true"
+            android:padding="0dp"
+            android:background="@null"
+            android:contentDescription="@string/decrypt"
+            android:src="@drawable/left_button" />
+    <ImageButton
+            android:id="@+id/nextButton"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:scaleType="centerCrop"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:padding="0dp"
+            android:background="@null"
+            android:contentDescription="@string/decrypt"
+            android:src="@drawable/right_button" />
+</RelativeLayout>
