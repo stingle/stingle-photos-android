@@ -9,11 +9,7 @@ public class MemoryCache {
     private LruCache<String, Bitmap> cache;
     
     public MemoryCache(){
-    	this(CACHE_SIZE);
-    }
-    
-    public MemoryCache(int cacheSize){
-    	cache = new LruCache<String, Bitmap>(cacheSize) {
+    	cache = new LruCache<String, Bitmap>(CACHE_SIZE) {
 			@Override
 			protected int sizeOf(String key, Bitmap value) {
 				return value.getRowBytes() * value.getHeight();
