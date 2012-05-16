@@ -11,15 +11,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.fenritz.safecamera.util.DecryptAndShowImage;
 import com.fenritz.safecamera.util.Helpers;
@@ -32,12 +36,21 @@ public class ViewImageActivity extends Activity {
 	private BroadcastReceiver receiver;
 	private int currentPosition = 0;
 	
+	private static final int SWIPE_MIN_DISTANCE = 100;
+    private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+	
+    private GestureDetector gestureDetector;
+    private View.OnTouchListener gestureListener;
+    
+    private final Handler handler = new Handler();
+    
+    private final ArrayList<View> viewsHideShow = new ArrayList<View>();
+    
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature( Window.FEATURE_NO_TITLE );
 		setContentView(R.layout.view_photo);
-		getWindow().addFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN );
 
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
@@ -47,12 +60,20 @@ public class ViewImageActivity extends Activity {
 		File photo = new File(imagePath);
 		
 		currentPosition = files.indexOf(photo);
-		showImage(photo);
+		
 		
 		((ImageButton)findViewById(R.id.previousButton)).setOnClickListener(navigateLeft());
 		((ImageButton)findViewById(R.id.nextButton)).setOnClickListener(navigateRight());
-		((LinearLayout)findViewById(R.id.parent_layout)).setOnTouchListener(imageTouchListener());
 		
+		gestureDetector = new GestureDetector(new SwipeGestureDetector());
+		gestureListener = new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        };
+        //((LinearLayout)findViewById(R.id.parent_layout)).setOnTouchListener(gestureListener);
+        showImage(photo);
+        
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.package.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -62,6 +83,12 @@ public class ViewImageActivity extends Activity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
+		
+		viewsHideShow.add(findViewById(R.id.topPanel)); 
+		viewsHideShow.add(findViewById(R.id.countLabel)); 
+		viewsHideShow.add(findViewById(R.id.previousButton)); 
+		viewsHideShow.add(findViewById(R.id.nextButton)); 
+		
 	}
 	
 	@Override
@@ -86,24 +113,8 @@ public class ViewImageActivity extends Activity {
 		
 		Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
-	}
-	
-	private OnTouchListener imageTouchListener(){
-		return new OnTouchListener() {
-			
-			public boolean onTouch(View v, MotionEvent event) {
-				Log.d("qaq", "mtav");
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						Log.d("qaq", "down");
-						break;
-					case MotionEvent.ACTION_MOVE:
-						Log.d("qaq", "move");
-						break;
-				}
-				return false;
-			}
-		};
+		
+		hideViews();
 	}
 	
 	private OnClickListener navigateLeft(){
@@ -111,6 +122,7 @@ public class ViewImageActivity extends Activity {
 			public void onClick(View v) {
 				if(currentPosition > 0){
 					showImage(files.get(--currentPosition));
+					showViews();
 				}
 			}
 		};
@@ -121,18 +133,77 @@ public class ViewImageActivity extends Activity {
 			public void onClick(View v) {
 				if(currentPosition < files.size()-1){
 					showImage(files.get(++currentPosition));
+					showViews();
 				}
 			}
 		};
 	}
 	
+	class SwipeGestureDetector extends SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            try {
+                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH){
+                    return false;
+                }
+                
+                if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                	if(currentPosition < files.size()-1){
+    					showImage(files.get(++currentPosition));
+    				}
+                }  
+                else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                	if(currentPosition > 0){
+    					showImage(files.get(--currentPosition));
+    				}
+                }
+            } catch (Exception e) { }
+            return false;
+        }
+
+    }
+	
+	
+	private OnClickListener showControls(){
+		return new OnClickListener() {
+			public void onClick(View v) {
+				showViews();
+			}
+		};
+	}
+	
+	private void hideViews(){
+		handler.postDelayed(new Runnable() {
+		  public void run() {
+			  for(View view : viewsHideShow){
+				    if(view.getVisibility() == View.VISIBLE) {
+				    	view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_out));
+				    	view.setVisibility(View.INVISIBLE);
+				    }
+				}
+		  }
+		}, 4000);
+	}
+	
+	private void showViews(){
+		handler.removeCallbacksAndMessages(null);
+		for(View view : viewsHideShow){
+		    if(view.getVisibility() != View.VISIBLE) {
+		    	view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_in));
+		    	view.setVisibility(View.VISIBLE);
+		    }
+		}
+		hideViews();
+	}
+	
 	private void showImage(File photo){
 		if(task != null){
-			task.cancel(true);
+			task.cancel(false);
 			task = null;
 		}
 		
-		task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), null, null, null, true){
+		// XIMIA!
+		task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener){
 			@Override
 			protected void onFinish() {
 				super.onFinish();
@@ -140,6 +211,9 @@ public class ViewImageActivity extends Activity {
 			}
 		};
 		task.execute();
+		
+		((TextView)findViewById(R.id.title)).setText(photo.getName());
+		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
 	}
 	
 	private void fillFilesList() {
@@ -165,6 +239,32 @@ public class ViewImageActivity extends Activity {
 			if (file.getName().endsWith(getString(R.string.file_extension)) && file.length() < maxFileSize) {
 				files.add(file);
 			}
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.view_photo_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		Intent intent = new Intent();
+		switch (item.getItemId()) {
+			case R.id.delete:
+				
+				return true;
+			case R.id.decrypt:
+				
+				return true;
+			case R.id.share:
+				
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 

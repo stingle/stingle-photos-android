@@ -17,7 +17,6 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 public class TouchImageView extends ImageView {
 
@@ -46,6 +45,7 @@ public class TouchImageView extends ImageView {
 	ScaleGestureDetector mScaleDetector;
 
 	Context context;
+	View.OnTouchListener touchListener;
 
 	public TouchImageView(Context context) {
 		super(context);
@@ -57,6 +57,10 @@ public class TouchImageView extends ImageView {
 		sharedConstructing(context);
 	}
 
+	public void setTouchListener(View.OnTouchListener listener){
+		touchListener = listener;
+	}
+	
 	private void sharedConstructing(Context context) {
 		super.setClickable(true);
 		this.context = context;
@@ -72,8 +76,8 @@ public class TouchImageView extends ImageView {
 				mScaleDetector.onTouchEvent(event);
 
 				if (saveScale == 1f) {
-					if (getParent() != null && getParent() instanceof LinearLayout) {
-						return ((LinearLayout) getParent()).onTouchEvent(event);
+					if (touchListener != null) {
+						return touchListener.onTouch(v, event);
 					}
 				}
 

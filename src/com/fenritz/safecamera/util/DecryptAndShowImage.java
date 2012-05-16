@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
@@ -34,21 +35,23 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	private final OnLongClickListener onLongClickListener;
 	private final MemoryCache memCache;
 	private boolean zoomable = false;
+	private final View.OnTouchListener touchListener;
+	
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent) {
-		this(pFilePath, pParent, null, null, null, false);
+		this(pFilePath, pParent, null, null, null, false, null);
 	}
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, MemoryCache pMemCache) {
-		this(pFilePath, pParent, null, null, pMemCache, false);
+		this(pFilePath, pParent, null, null, pMemCache, false, null);
 	}
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, OnLongClickListener pOnLongClickListener) {
-		this(pFilePath, pParent, pOnClickListener, pOnLongClickListener, null, false);
+		this(pFilePath, pParent, pOnClickListener, pOnLongClickListener, null, false, null);
 	}
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, OnLongClickListener pOnLongClickListener,
-			MemoryCache pMemCache, boolean pZoomable) {
+			MemoryCache pMemCache, boolean pZoomable, View.OnTouchListener pTouchListener) {
 		super();
 		filePath = pFilePath;
 		parent = pParent;
@@ -56,6 +59,8 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		onLongClickListener = pOnLongClickListener;
 		memCache = pMemCache;
 		zoomable = pZoomable;
+		zoomable = pZoomable;
+		touchListener = pTouchListener;
 	}
 
 	@Override
@@ -77,6 +82,13 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		layoutParams.gravity = Gravity.CENTER;
 		layoutParams.setMargins(10, 10, 10, 10);
 		progressBar.setLayoutParams(layoutParams);
+		
+		if (onClickListener != null) {
+			progressBar.setOnClickListener(onClickListener);
+		}
+		if (onLongClickListener != null) {
+			progressBar.setOnLongClickListener(onLongClickListener);
+		}
 
 		parent.removeAllViews();
 		parent.addView(progressBar);
@@ -140,9 +152,15 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		ImageView image;
 		if (zoomable) {
 			image = new TouchImageView(context);
+			if(touchListener != null){
+				((TouchImageView)image).setTouchListener(touchListener);
+			}
 		}
 		else {
 			image = new ImageView(context);
+			if(touchListener != null){
+				image.setOnTouchListener(touchListener);
+			}
 		}
 
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
@@ -176,6 +194,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	@Override
 	protected void onCancelled() {
 		super.onCancelled();
+		parent.removeAllViews();
 		onFinish();
 	}
 	
