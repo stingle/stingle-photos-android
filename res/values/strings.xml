@@ -22,6 +22,7 @@
     <string name="encrypting_files">Encrypting files…</string>
     <string name="encrypting_photo">Encrypting photo…</string>
     <string name="confirm_delete_files">Do you really want delete %s files?</string>
+    <string name="confirm_delete_photo">Do you really want delete this photo?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="delete">Delete</string>

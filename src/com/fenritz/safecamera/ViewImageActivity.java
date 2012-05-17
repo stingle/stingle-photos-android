@@ -6,8 +6,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -25,6 +27,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.fenritz.safecamera.util.AsyncTasks.DeleteFiles;
+import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecamera.util.DecryptAndShowImage;
 import com.fenritz.safecamera.util.Helpers;
 
@@ -64,6 +68,7 @@ public class ViewImageActivity extends Activity {
 		
 		((ImageButton)findViewById(R.id.previousButton)).setOnClickListener(navigateLeft());
 		((ImageButton)findViewById(R.id.nextButton)).setOnClickListener(navigateRight());
+		((ImageButton)findViewById(R.id.delete)).setOnClickListener(deleteClick());
 		
 		gestureDetector = new GestureDetector(new SwipeGestureDetector());
 		gestureListener = new View.OnTouchListener() {
@@ -71,7 +76,7 @@ public class ViewImageActivity extends Activity {
                 return gestureDetector.onTouchEvent(event);
             }
         };
-        //((LinearLayout)findViewById(R.id.parent_layout)).setOnTouchListener(gestureListener);
+        
         showImage(photo);
         
 		IntentFilter intentFilter = new IntentFilter();
@@ -135,6 +140,43 @@ public class ViewImageActivity extends Activity {
 					showImage(files.get(++currentPosition));
 					showViews();
 				}
+			}
+		};
+	}
+	
+	private OnClickListener deleteClick(){
+		return new OnClickListener() {
+			@SuppressWarnings("unchecked")
+			public void onClick(View v) {
+				final ArrayList<File> selectedFiles = new ArrayList<File>();
+				selectedFiles.add(files.get(currentPosition));
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
+				builder.setMessage(getString(R.string.confirm_delete_photo));
+				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						new DeleteFiles(ViewImageActivity.this, new OnAsyncTaskFinish() {
+							@Override
+							public void onFinish() {
+								super.onFinish();
+								
+								fillFilesList();
+								if(currentPosition > 0){
+									--currentPosition;
+								}
+								showImage(files.get(currentPosition));
+								showViews();
+								
+								Intent resultIntent = new Intent();
+								resultIntent.putExtra("needToRefresh", true);
+								setResult(RESULT_OK, resultIntent);
+							}
+						}).execute(selectedFiles);
+					}
+				});
+				builder.setNegativeButton(getString(R.string.no), null);
+				AlertDialog dialog = builder.create();
+				dialog.show();
 			}
 		};
 	}

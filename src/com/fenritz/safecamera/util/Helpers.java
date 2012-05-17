@@ -11,6 +11,8 @@ import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -295,4 +297,53 @@ public class Helpers {
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
+	
+	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
+		return findNewFileNameIfNeeded(context, filePath, fileName, null);
+	}
+	
+	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName, Integer number) {
+		if (number == null) {
+			number = 1;
+		}
+
+		File file;
+		boolean isEncryptedFile = false;
+		if(fileName.endsWith(context.getString(R.string.file_extension))){
+			file = new File(filePath + "/" + fileName);
+			isEncryptedFile = true;
+		}
+		else{
+			file = new File(filePath + "/" + fileName + context.getString(R.string.file_extension));
+		}
+		if (file.exists()) {
+			int lastDotIndex = fileName.lastIndexOf(".");
+			String fileNameWithoutExt;
+			String originalExtension = ""; 
+			if (lastDotIndex > 0) {
+				fileNameWithoutExt = fileName.substring(0, lastDotIndex);
+				if(!isEncryptedFile){
+					originalExtension = fileName.substring(lastDotIndex);
+				}
+			}
+			else {
+				fileNameWithoutExt = fileName;
+			}
+
+			Pattern p = Pattern.compile(".+_\\d{1,3}$");
+			Matcher m = p.matcher(fileNameWithoutExt);
+			if (m.find()) {
+				fileNameWithoutExt = fileNameWithoutExt.substring(0, fileName.lastIndexOf("_"));
+			}
+			String finalFilaname;
+			if(isEncryptedFile){
+				finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension + context.getString(R.string.file_extension);
+			}
+			else{
+				finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension;
+			}
+			return findNewFileNameIfNeeded(context, filePath, finalFilaname, ++number);
+		}
+		return filePath + "/" + fileName;
+	}
 }

@@ -27,13 +27,7 @@
 		    android:layout_weight="1"
 		    android:gravity="center_vertical"
 		    android:padding="5dp"
-		    android:singleLine="true"
-		    android:ellipsize="marquee" 
-		    android:marqueeRepeatLimit="marquee_forever"
-		    android:scrollHorizontally="true"
-		    android:focusable="true" 
-		    android:focusableInTouchMode="true" 
-		    android:freezesText="true" />
+		    android:singleLine="true" />
 	    
         <ImageButton
             android:id="@+id/decrypt"
