@@ -34,6 +34,7 @@
     <string name="change_password">Change Password</string>
     <string name="changing_password">Changing password on files…</string>
     <string name="success_change_pass">Successfully changed password</string>
+    <string name="success_decrypt">Successfully decrypted</string>
     <string name="import_desc">Import</string>
     <string name="enter_import_password">Please enter password for file to import</string>
     <string name="delete_after_import">Delete imported files</string>

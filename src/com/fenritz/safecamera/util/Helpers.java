@@ -9,7 +9,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +23,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -33,13 +36,22 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.fenritz.safecamera.R;
 import com.fenritz.safecamera.SafeCameraActivity;
 import com.fenritz.safecamera.SafeCameraApplication;
+import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecamera.util.AsyncTasks.ReEncryptFiles;
 
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
+	protected static final int SHARE_AS_IS = 0;
+	protected static final int SHARE_REENCRYPT = 1;
+	protected static final int SHARE_DECRYPT = 2;
 	
 	public static boolean checkLoginedState(Activity activity) {
 		return checkLoginedState(activity, null, true);
@@ -345,5 +357,108 @@ public class Helpers {
 			return findNewFileNameIfNeeded(context, filePath, finalFilaname, ++number);
 		}
 		return filePath + "/" + fileName;
+	}
+	
+	public static void share(final Activity activity, final ArrayList<File> files, final OnAsyncTaskFinish onDecrypt) {
+		CharSequence[] listEntries = activity.getResources().getStringArray(R.array.beforeShareActions);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setTitle(activity.getString(R.string.before_sharing));
+		builder.setItems(listEntries, new DialogInterface.OnClickListener() {
+			@SuppressWarnings("unchecked")
+			public void onClick(DialogInterface dialog, int item) {
+				switch (item) {
+					case SHARE_AS_IS:
+						shareFiles(activity, files);
+						break;
+					case SHARE_REENCRYPT:
+						AlertDialog.Builder passwordDialog = new AlertDialog.Builder(activity);
+
+						LayoutInflater layoutInflater = LayoutInflater.from(activity);
+						final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_reencrypt_password, null);
+
+						passwordDialog.setPositiveButton(activity.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								String password = ((EditText) enterPasswordView.findViewById(R.id.password)).getText().toString();
+								String password2 = ((EditText) enterPasswordView.findViewById(R.id.password2)).getText().toString();
+
+								if (password.equals(password2)) {
+									HashMap<String, Object> params = new HashMap<String, Object>();
+
+									params.put("newPassword", password);
+									params.put("files", files);
+
+									OnAsyncTaskFinish onReencrypt = new OnAsyncTaskFinish() {
+										@Override
+										public void onFinish(java.util.ArrayList<File> processedFiles) {
+											if (processedFiles != null && processedFiles.size() > 0) {
+												shareFiles(activity, processedFiles);
+											}
+										};
+									};
+
+									new ReEncryptFiles(activity, onReencrypt).execute(params);
+								}
+								else {
+									Toast.makeText(activity, activity.getString(R.string.password_not_match), Toast.LENGTH_LONG).show();
+								}
+							}
+						});
+
+						passwordDialog.setNegativeButton(activity.getString(R.string.cancel), null);
+
+						passwordDialog.setView(enterPasswordView);
+						passwordDialog.setTitle(activity.getString(R.string.enter_reencrypt_password));
+
+						passwordDialog.show();
+
+						break;
+					case SHARE_DECRYPT:
+						String filePath = Helpers.getHomeDir(activity) + "/" + ".tmp";
+						File destinationFolder = new File(filePath);
+						destinationFolder.mkdirs();
+
+						AsyncTasks.OnAsyncTaskFinish finalOnDecrypt = new AsyncTasks.OnAsyncTaskFinish() {
+							@Override
+							public void onFinish(java.util.ArrayList<File> processedFiles) {
+								if (processedFiles != null && processedFiles.size() > 0) {
+									shareFiles(activity, processedFiles);
+								}
+								if(onDecrypt != null){
+									onDecrypt.onFinish();
+								}
+							};
+						};
+						
+						new AsyncTasks.DecryptFiles(activity, filePath, finalOnDecrypt).execute(files);
+
+						break;
+				}
+
+				dialog.dismiss();
+			}
+		}).show();
+	}
+	
+	public static void shareFiles(Activity activity, ArrayList<File> fileToShare) {
+		if (fileToShare.size() == 1) {
+			Intent share = new Intent(Intent.ACTION_SEND);
+			share.setType("*/*");
+
+			share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + fileToShare.get(0).getPath()));
+			activity.startActivity(Intent.createChooser(share, "Share Image"));
+		}
+		else if (fileToShare.size() > 1) {
+			Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
+			share.setType("*/*");
+
+			ArrayList<Uri> uris = new ArrayList<Uri>();
+			for (int i = 0; i < fileToShare.size(); i++) {
+				uris.add(Uri.parse("file://" + fileToShare.get(i).getPath()));
+			}
+
+			share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+			activity.startActivity(Intent.createChooser(share, activity.getString(R.string.share)));
+		}
 	}
 }

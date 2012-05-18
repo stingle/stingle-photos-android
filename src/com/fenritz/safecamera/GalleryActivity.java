@@ -46,7 +46,6 @@ import com.fenritz.safecamera.util.AsyncTasks;
 import com.fenritz.safecamera.util.AsyncTasks.EncryptFiles;
 import com.fenritz.safecamera.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecamera.util.AsyncTasks.ReEncryptFiles;
 import com.fenritz.safecamera.util.Helpers;
 import com.fenritz.safecamera.util.MemoryCache;
 import com.fenritz.safecamera.widget.CheckableLayout;
@@ -66,11 +65,6 @@ public class GalleryActivity extends Activity {
 	protected static final int ACTION_DECRYPT = 0;
 	protected static final int ACTION_SHARE = 1;
 	protected static final int ACTION_DELETE = 2;
-
-	protected static final int SHARE_AS_IS = 0;
-	protected static final int SHARE_REENCRYPT = 1;
-	protected static final int SHARE_DECRYPT = 2;
-
 
 	private int multiSelectMode = MULTISELECT_OFF;
 
@@ -338,112 +332,18 @@ public class GalleryActivity extends Activity {
 
 			public void onClick(View v) {
 				if (multiSelectMode == MULTISELECT_ON) {
-					shareSelected();
+					Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							fillFilesList();
+							galleryAdapter.notifyDataSetChanged();
+							clearMutliSelect();
+						}
+					});
 				}
 			}
 		};
-	}
-
-	private void shareSelected() {
-		CharSequence[] listEntries = getResources().getStringArray(R.array.beforeShareActions);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-		builder.setTitle(getString(R.string.before_sharing));
-		builder.setItems(listEntries, new DialogInterface.OnClickListener() {
-			@SuppressWarnings("unchecked")
-			public void onClick(DialogInterface dialog, int item) {
-				switch (item) {
-					case SHARE_AS_IS:
-						shareFiles(selectedFiles);
-						break;
-					case SHARE_REENCRYPT:
-						AlertDialog.Builder passwordDialog = new AlertDialog.Builder(GalleryActivity.this);
-
-						LayoutInflater layoutInflater = LayoutInflater.from(GalleryActivity.this);
-						final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_reencrypt_password, null);
-
-						passwordDialog.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								String password = ((EditText) enterPasswordView.findViewById(R.id.password)).getText().toString();
-								String password2 = ((EditText) enterPasswordView.findViewById(R.id.password2)).getText().toString();
-
-								if (password.equals(password2)) {
-									HashMap<String, Object> params = new HashMap<String, Object>();
-
-									params.put("newPassword", password);
-									params.put("files", selectedFiles);
-
-									OnAsyncTaskFinish onReencrypt = new OnAsyncTaskFinish() {
-										@Override
-										public void onFinish(java.util.ArrayList<File> processedFiles) {
-											if (processedFiles != null && processedFiles.size() > 0) {
-												shareFiles(processedFiles);
-											}
-										};
-									};
-
-									new ReEncryptFiles(GalleryActivity.this, onReencrypt).execute(params);
-								}
-								else {
-									Toast.makeText(GalleryActivity.this, getString(R.string.password_not_match), Toast.LENGTH_LONG).show();
-								}
-							}
-						});
-
-						passwordDialog.setNegativeButton(getString(R.string.cancel), null);
-
-						passwordDialog.setView(enterPasswordView);
-						passwordDialog.setTitle(getString(R.string.enter_reencrypt_password));
-
-						passwordDialog.show();
-
-						break;
-					case SHARE_DECRYPT:
-						String filePath = Helpers.getHomeDir(GalleryActivity.this) + "/" + ".tmp";
-						File destinationFolder = new File(filePath);
-						destinationFolder.mkdirs();
-
-						AsyncTasks.OnAsyncTaskFinish onDecrypt = new AsyncTasks.OnAsyncTaskFinish() {
-							@Override
-							public void onFinish(java.util.ArrayList<File> processedFiles) {
-								if (processedFiles != null && processedFiles.size() > 0) {
-									shareFiles(processedFiles);
-								}
-								fillFilesList();
-								galleryAdapter.notifyDataSetChanged();
-								clearMutliSelect();
-							};
-						};
-						new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath, onDecrypt).execute(selectedFiles);
-
-						break;
-				}
-
-				dialog.dismiss();
-			}
-		}).show();
-	}
-
-	private void shareFiles(ArrayList<File> fileToShare) {
-		if (fileToShare.size() == 1) {
-			Intent share = new Intent(Intent.ACTION_SEND);
-			share.setType("*/*");
-
-			share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + fileToShare.get(0).getPath()));
-			startActivity(Intent.createChooser(share, "Share Image"));
-		}
-		else if (fileToShare.size() > 1) {
-			Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
-			share.setType("*/*");
-
-			ArrayList<Uri> uris = new ArrayList<Uri>();
-			for (int i = 0; i < fileToShare.size(); i++) {
-				uris.add(Uri.parse("file://" + fileToShare.get(i).getPath()));
-			}
-
-			share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-			startActivity(Intent.createChooser(share, getString(R.string.share)));
-		}
 	}
 
 	private OnClickListener deleteSelectedClick() {
@@ -665,7 +565,15 @@ public class GalleryActivity extends Activity {
 									decryptSelected();
 									break;
 								case ACTION_SHARE:
-									shareSelected();
+									Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
+										@Override
+										public void onFinish() {
+											super.onFinish();
+											fillFilesList();
+											galleryAdapter.notifyDataSetChanged();
+											clearMutliSelect();
+										}
+									});
 									break;
 								case ACTION_DELETE:
 									deleteSelected();
