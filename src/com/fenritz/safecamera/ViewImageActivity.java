@@ -50,6 +50,7 @@ public class ViewImageActivity extends Activity {
     private View.OnTouchListener gestureListener;
     
     private final Handler handler = new Handler();
+    private String currentPath;
     
     private final ArrayList<View> viewsHideShow = new ArrayList<View>();
     
@@ -60,6 +61,13 @@ public class ViewImageActivity extends Activity {
 
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
+		
+		if(intent.hasExtra("EXTRA_CURRENT_PATH")){
+			currentPath = intent.getStringExtra("EXTRA_CURRENT_PATH");
+		}
+		else{
+			currentPath = Helpers.getHomeDir(this);
+		}
 
 		fillFilesList();
 		
@@ -312,7 +320,7 @@ public class ViewImageActivity extends Activity {
 	}
 	
 	private void fillFilesList() {
-		File dir = new File(Helpers.getHomeDir(this));
+		File dir = new File(currentPath);
 		File[] folderFiles = dir.listFiles();
 
 		Arrays.sort(folderFiles, new Comparator<File>() {

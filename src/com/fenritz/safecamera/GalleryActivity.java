@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -21,7 +22,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,7 +42,9 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fenritz.safecamera.util.AsyncTasks;
@@ -71,8 +76,10 @@ public class GalleryActivity extends Activity {
 	private GridView photosGrid;
 
 	private final ArrayList<File> files = new ArrayList<File>();
+	
 	private final ArrayList<File> selectedFiles = new ArrayList<File>();
 	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
+	private final ArrayList<File> noThumbs = new ArrayList<File>();
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
 	private GenerateThumbs thumbGenTask;
@@ -81,6 +88,8 @@ public class GalleryActivity extends Activity {
 	private BroadcastReceiver receiver;
 	
 	private boolean isWentToLogin = false;
+	
+	private String currentPath;
 	
 	private int pageNumber = 1;
 	private final int itemsPerPage = 50;
@@ -99,6 +108,7 @@ public class GalleryActivity extends Activity {
 			return;
 		}
 
+		currentPath = Helpers.getHomeDir(this);
 		fillFilesList();
 		int[] params = {0, itemsPerPage};
 		fillCacheTask.execute(params);
@@ -216,9 +226,14 @@ public class GalleryActivity extends Activity {
 			thumbGenTask = null;
 		}
 
-		File dir = new File(Helpers.getHomeDir(this));
+		ArrayList<File> folders = new ArrayList<File>();
+		ArrayList<File> files = new ArrayList<File>();
+		
+		File dir = new File(currentPath);
 		File[] folderFiles = dir.listFiles();
 
+		int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+		
 		Arrays.sort(folderFiles, new Comparator<File>() {
 			public int compare(File lhs, File rhs) {
 				if(rhs.lastModified() > lhs.lastModified()){
@@ -231,22 +246,64 @@ public class GalleryActivity extends Activity {
 			}
 		});
 		
-		files.clear();
+		this.files.clear();
+		toGenerateThumbs.clear();
+		noThumbs.clear();
+		
 		for (File file : folderFiles) {
-			if (file.getName().endsWith(getString(R.string.file_extension))) {
+			if(file.isDirectory() && !file.getName().startsWith(".")){
+				folders.add(file);
+			}
+			else if(file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
 				files.add(file);
 				
-				String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
-				File thumb = new File(thumbPath);
-				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-				if ((!thumb.exists() || !thumb.isFile()) && file.length() < maxFileSize) {
-					toGenerateThumbs.add(file);
+				if(file.length() >= maxFileSize){
+					noThumbs.add(file);
+				}
+				else{
+					String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
+					File thumb = new File(thumbPath);
+					if (!thumb.exists()) {
+						toGenerateThumbs.add(file);
+					}
 				}
 			}
 		}
 
+		Collections.sort(folders);
+		
+		this.files.addAll(folders);
+		this.files.addAll(files);
+		
 		thumbGenTask = new GenerateThumbs();
 		thumbGenTask.execute(toGenerateThumbs);
+	}
+	
+	private void changeDir(String newPath){
+		currentPath = newPath;
+		selectedFiles.clear();
+		pageNumber = 1;
+		fillFilesList();
+		galleryAdapter.notifyDataSetChanged();
+		
+		if(fillCacheTask != null){
+			fillCacheTask.cancel(true);
+			fillCacheTask = null;
+		}
+		int[] params = {0, itemsPerPage};
+		fillCacheTask = new FillCache();
+		fillCacheTask.execute(params);
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if(!currentPath.equals(Helpers.getHomeDir(this))){
+				changeDir((new File(currentPath)).getParent());
+				return true;
+			}
+		} 
+		return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -542,6 +599,7 @@ public class GalleryActivity extends Activity {
 						Intent intent = new Intent();
 						intent.setClass(GalleryActivity.this, ViewImageActivity.class);
 						intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
+						intent.putExtra("EXTRA_CURRENT_PATH", currentPath);
 						startActivityForResult(intent, REQUEST_VIEW_PHOTO);
 					}
 				}
@@ -551,92 +609,145 @@ public class GalleryActivity extends Activity {
 		private OnLongClickListener getOnLongClickListener(final File file){
 			return new View.OnLongClickListener() {
 				public boolean onLongClick(View v) {
-					CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
-
-					AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-					builder.setTitle(file.getName());
-					builder.setItems(listEntries, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
-							selectedFiles.clear();
-							selectedFiles.add(file);
-
-							switch (item) {
-								case ACTION_DECRYPT:
-									decryptSelected();
-									break;
-								case ACTION_SHARE:
-									Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
-										@Override
-										public void onFinish() {
-											super.onFinish();
-											fillFilesList();
-											galleryAdapter.notifyDataSetChanged();
-											clearMutliSelect();
-										}
-									});
-									break;
-								case ACTION_DELETE:
-									deleteSelected();
-									break;
-							}
-							dialog.dismiss();
-						}
-					}).show();
-
-					return true;
+					return doLongClick(file, v);
 				}
 			};
 		}
 		
+		private OnClickListener getOnClickListenerLongAction(final File file){
+			 return new View.OnClickListener() {
+				public void onClick(View v) {
+					doLongClick(file, v);
+				}
+			};
+		}
+		
+		private boolean doLongClick(final File file, View v) {
+			CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+			builder.setTitle(file.getName());
+			builder.setItems(listEntries, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int item) {
+					selectedFiles.clear();
+					selectedFiles.add(file);
+
+					switch (item) {
+						case ACTION_DECRYPT:
+							decryptSelected();
+							break;
+						case ACTION_SHARE:
+							Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
+								@Override
+								public void onFinish() {
+									super.onFinish();
+									fillFilesList();
+									galleryAdapter.notifyDataSetChanged();
+									clearMutliSelect();
+								}
+							});
+							break;
+						case ACTION_DELETE:
+							deleteSelected();
+							break;
+					}
+					dialog.dismiss();
+				}
+			}).show();
+
+			return true;
+		}
+		
+		private TextView getLabel(File file){
+			TextView label = new TextView(GalleryActivity.this);
+			label.setText(file.getName());
+			label.setEllipsize(TruncateAt.END);
+			label.setMaxLines(2);
+			
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER_HORIZONTAL;
+			params.topMargin = -15;
+			label.setLayoutParams(params);
+			
+			return label;
+		}
+		
 		public View getView(int position, View convertView, ViewGroup parent) {
 			final CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
+			int thumbSize = Integer.valueOf(getString(R.string.thumb_size));
+			layout.setGravity(Gravity.CENTER);
+			layout.setLayoutParams(new GridView.LayoutParams(thumbSize, thumbSize));
+			layout.setOrientation(LinearLayout.VERTICAL);
 			
 			final File file = files.get(position);
 			
 			if(file != null){
-				int thumbSize = Integer.valueOf(getString(R.string.thumb_size));
-				if(selectedFiles.contains(file)){
-					layout.setChecked(true);
-				}
-				layout.setGravity(Gravity.CENTER);
-				layout.setLayoutParams(new GridView.LayoutParams(thumbSize, thumbSize)); 
-	
-				OnClickListener onClick = getOnClickListener(layout, file);
-				OnLongClickListener onLongClick = getOnLongClickListener(file);
-	
-				String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
-				Bitmap image = memCache.get(thumbPath);
-				if (image != null) {
-					ImageView imageView = new ImageView(GalleryActivity.this);
-					imageView.setImageBitmap(image);
-					imageView.setOnClickListener(onClick);
-					imageView.setOnLongClickListener(onLongClick);
-					imageView.setPadding(3, 3, 3, 3);
-					layout.addView(imageView);
-				}
-				else {
-					int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-					if (toGenerateThumbs.contains(file) && file.length() < maxFileSize) {
-						ProgressBar progress = new ProgressBar(GalleryActivity.this);
-						progress.setOnClickListener(onClick);
-						progress.setOnLongClickListener(onLongClick);
-						layout.addView(progress);
+				if(file.isFile()){
+					if(selectedFiles.contains(file)){
+						layout.setChecked(true);
 					}
-					else {
-						if((new File(thumbPath)).length() < maxFileSize && position>= photosGrid.getFirstVisiblePosition() && position <= photosGrid.getLastVisiblePosition()){
-							if(fillCacheTask == null){
-								int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
-								fillCacheTask = new FillCache();
-								fillCacheTask.execute(params);
-							}
-						}
+		
+					OnClickListener onClick = getOnClickListener(layout, file);
+					OnLongClickListener onLongClick = getOnLongClickListener(file);
+		
+					if(noThumbs.contains(file)){
 						ImageView fileImage = new ImageView(GalleryActivity.this);
 						fileImage.setImageResource(R.drawable.file);
 						fileImage.setPadding(3, 3, 3, 3);
-						fileImage.setOnClickListener(onClick);
+						fileImage.setOnClickListener(getOnClickListenerLongAction(file));
 						fileImage.setOnLongClickListener(onLongClick);
 						layout.addView(fileImage);
+						layout.addView(getLabel(file));
 					}
+					else{
+						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
+						Bitmap image = memCache.get(thumbPath);
+						if (image != null) {
+							ImageView imageView = new ImageView(GalleryActivity.this);
+							imageView.setImageBitmap(image);
+							imageView.setOnClickListener(onClick);
+							imageView.setOnLongClickListener(onLongClick);
+							imageView.setPadding(3, 3, 3, 3);
+							layout.addView(imageView);
+						}
+						else {
+							if (toGenerateThumbs.contains(file)) {
+								ProgressBar progress = new ProgressBar(GalleryActivity.this);
+								progress.setOnClickListener(onClick);
+								progress.setOnLongClickListener(onLongClick);
+								layout.addView(progress);
+							}
+							else {
+								if(position>= photosGrid.getFirstVisiblePosition() && position <= photosGrid.getLastVisiblePosition()){
+									if(fillCacheTask == null){
+										int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
+										fillCacheTask = new FillCache();
+										fillCacheTask.execute(params);
+									}
+								}
+								ImageView fileImage = new ImageView(GalleryActivity.this);
+								fileImage.setImageResource(R.drawable.file);
+								fileImage.setPadding(3, 3, 3, 3);
+								fileImage.setOnClickListener(onClick);
+								fileImage.setOnLongClickListener(onLongClick);
+								layout.addView(fileImage);
+							}
+					}
+					}
+				}
+				else if(file.isDirectory()){
+					ImageView folderImage = new ImageView(GalleryActivity.this);
+					folderImage.setImageResource(R.drawable.folder);
+					folderImage.setPadding(3, 3, 3, 3);
+					folderImage.setOnClickListener(new OnClickListener() {
+						public void onClick(View v) {
+							changeDir(file.getPath());
+						}
+					});
+					//fileImage.setOnLongClickListener(onLongClick);
+					
+					layout.addView(folderImage);
+					layout.addView(getLabel(file));
 				}
 			}
 			return layout;
@@ -692,7 +803,7 @@ public class GalleryActivity extends Activity {
 		@Override
 		protected Void doInBackground(int[]... params) {
 			
-			if(params[0].length >= 2){
+			if(files.size() > 0 && params[0].length >= 2){
 				int offset = params[0][0];
 				int length = params[0][1];
 				
