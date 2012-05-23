@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/change_password" android:id="@+id/change_password" android:icon="@android:drawable/ic_menu_manage"></item>
-    <item android:title="@string/settings" android:id="@+id/settings" android:icon="@android:drawable/ic_menu_preferences"></item>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/importSelected"
+        android:icon="@drawable/import_button"
+        android:title="@string/import_btn" />
+    <item
+        android:id="@+id/change_password"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="@string/change_password" />
+    <item
+        android:id="@+id/settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/settings" />
+
 </menu>

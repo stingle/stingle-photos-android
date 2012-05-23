@@ -63,6 +63,15 @@
     <string name="before_sharing">Before sharing</string>
     <string name="enter_reencrypt_password">Please enter password for reencryption</string>
     <string name="reencrypting_files">Reencrypting files…</string>
+    <string name="new_folder">New folder</string>
+    <string name="move">Move</string>
+    <string name="enter_new_folder_name">Please enter new folder name</string>
+    <string name="success_created">Successfully created</string>
+    <string name="failed_create_dir">Failed to create folder</string>
+    <string name="choose_folder">Choose folder to move files to:</string>
+    <string name="moving_files">Moving files…</string>
+    <string name="failed_move_files">Failed to move files into given folder</string>
+    <string name="home_dir">--Home Folder--</string>
     
     
     <!-- File Dialog -->

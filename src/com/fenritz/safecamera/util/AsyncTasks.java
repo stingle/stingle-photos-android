@@ -105,6 +105,84 @@ public class AsyncTasks {
 		}
 	}
 	
+	public static class MoveFiles extends AsyncTask<ArrayList<File>, Integer, Void> {
+
+		private ProgressDialog progressDialog;
+		private final Activity activity;
+		private final File destination;
+		private final OnAsyncTaskFinish finishListener;
+
+		public MoveFiles(Activity activity, File destination){
+			this(activity, destination, null);
+		}
+		
+		public MoveFiles(Activity activity, File destination, OnAsyncTaskFinish finishListener){
+			this.activity = activity;
+			this.finishListener = finishListener;
+			this.destination = destination;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progressDialog = new ProgressDialog(activity);
+			progressDialog.setCancelable(true);
+			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					MoveFiles.this.cancel(false);
+				}
+			});
+			progressDialog.setMessage(activity.getString(R.string.moving_files));
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			progressDialog.show();
+		}
+
+		@Override
+		protected Void doInBackground(ArrayList<File>... params) {
+			ArrayList<File> filesToMove = params[0];
+			progressDialog.setMax(filesToMove.size());
+			for (int i = 0; i < filesToMove.size(); i++) {
+				File file = filesToMove.get(i);
+				if (file.exists() && file.isFile()) {
+					file.renameTo(new File(destination, file.getName()));
+				}
+
+				publishProgress(i + 1);
+
+				if (isCancelled()) {
+					break;
+				}
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+
+			this.onPostExecute(null);
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+
+			progressDialog.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+
+			progressDialog.dismiss();
+			
+			if (finishListener != null) {
+				finishListener.onFinish();
+			}
+		}
+	}
+	
 	public static class DecryptFiles extends AsyncTask<ArrayList<File>, Integer, ArrayList<File>> {
 
 		private ProgressDialog progressDialog;
