@@ -23,6 +23,10 @@
     <string-array name="galleryItemActions">
         <item name="decrypt">@string/decrypt</item>
         <item name="share">@string/share</item>
+        <item name="move">@string/move</item>
+        <item name="delete">@string/delete</item>
+    </string-array>
+     <string-array name="galleryFolderActions">
         <item name="delete">@string/delete</item>
     </string-array>
     

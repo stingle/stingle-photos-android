@@ -22,6 +22,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class AESCrypt {
 	private Cipher encryptionCipher;
@@ -310,6 +311,7 @@ public class AESCrypt {
 					}
 					if(task != null){
 						if(task.isCancelled()){
+							Log.d("qaq", "Canceled");
 							return null;
 						}
 					}

@@ -59,14 +59,19 @@ public class AsyncTasks {
 			progressDialog.setMax(filesToDelete.size());
 			for (int i = 0; i < filesToDelete.size(); i++) {
 				File file = filesToDelete.get(i);
-				if (file.exists() && file.isFile()) {
-					file.delete();
-				}
+				if (file.exists()){
+					if(file.isFile()) {
+						file.delete();
+						
+						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + file.getName());
 
-				File thumb = new File(Helpers.getThumbsDir(activity) + "/" + file.getName());
-
-				if (thumb.exists() && thumb.isFile()) {
-					thumb.delete();
+						if (thumb.exists() && thumb.isFile()) {
+							thumb.delete();
+						}
+					}
+					else if(file.isDirectory()){
+						deleteFileFolder(file);
+					}
 				}
 
 				publishProgress(i + 1);
@@ -77,6 +82,16 @@ public class AsyncTasks {
 			}
 
 			return null;
+		}
+		
+		private void deleteFileFolder(File fileOrDirectory) {
+		    if (fileOrDirectory.isDirectory()){
+		        for (File child : fileOrDirectory.listFiles()){
+		        	deleteFileFolder(child);
+		        }
+		    }
+
+		    fileOrDirectory.delete();
 		}
 
 		@Override

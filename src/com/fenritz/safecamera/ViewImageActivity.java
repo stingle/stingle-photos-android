@@ -34,7 +34,6 @@ import com.fenritz.safecamera.util.Helpers;
 
 public class ViewImageActivity extends Activity {
 
-	private DecryptAndShowImage task;
 	private final ArrayList<File> files = new ArrayList<File>();
 	
 	private BroadcastReceiver receiver;
@@ -51,6 +50,8 @@ public class ViewImageActivity extends Activity {
     
     private final Handler handler = new Handler();
     private String currentPath;
+    
+    private final ArrayList<DecryptAndShowImage> taskStack = new ArrayList<DecryptAndShowImage>();
     
     private final ArrayList<View> viewsHideShow = new ArrayList<View>();
     
@@ -119,9 +120,7 @@ public class ViewImageActivity extends Activity {
 		super.onPause();
 		
 		Helpers.setLockedTime(this);
-		if(task != null){
-			task.cancel(true);
-		}
+		cancelPendingTasks();
 	}
 	
 	@Override
@@ -138,6 +137,7 @@ public class ViewImageActivity extends Activity {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				if(currentPosition > 0){
+					cancelPendingTasks();
 					showImage(files.get(--currentPosition));
 					showViews();
 				}
@@ -149,11 +149,18 @@ public class ViewImageActivity extends Activity {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				if(currentPosition < files.size()-1){
+					cancelPendingTasks();
 					showImage(files.get(++currentPosition));
 					showViews();
 				}
 			}
 		};
+	}
+	
+	private void cancelPendingTasks(){
+		for(DecryptAndShowImage task : taskStack){
+			task.cancel(true);
+		}
 	}
 	
 	private OnClickListener deleteClick(){
@@ -252,11 +259,13 @@ public class ViewImageActivity extends Activity {
                 
                 if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 	if(currentPosition < files.size()-1){
+                		cancelPendingTasks();
     					showImage(files.get(++currentPosition));
     				}
                 }  
                 else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 	if(currentPosition > 0){
+                		cancelPendingTasks();
     					showImage(files.get(--currentPosition));
     				}
                 }
@@ -300,20 +309,16 @@ public class ViewImageActivity extends Activity {
 	}
 	
 	private void showImage(File photo){
-		if(task != null){
-			task.cancel(false);
-			task = null;
-		}
-		
-		// XIMIA!
-		task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener){
+		DecryptAndShowImage task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener){
 			@Override
 			protected void onFinish() {
 				super.onFinish();
-				task = null;
+				//task = null;
+				taskStack.remove(this);
 			}
 		};
 		task.execute();
+		taskStack.add(task);
 		
 		((TextView)findViewById(R.id.title)).setText(photo.getName());
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));

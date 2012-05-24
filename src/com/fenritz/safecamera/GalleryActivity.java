@@ -72,7 +72,10 @@ public class GalleryActivity extends Activity {
 
 	protected static final int ACTION_DECRYPT = 0;
 	protected static final int ACTION_SHARE = 1;
-	protected static final int ACTION_DELETE = 2;
+	protected static final int ACTION_MOVE = 2;
+	protected static final int ACTION_DELETE = 3;
+	
+	protected static final int ACTION_DELETE_FOLDER = 0;
 
 	private int multiSelectMode = MULTISELECT_OFF;
 
@@ -762,6 +765,9 @@ public class GalleryActivity extends Activity {
 								}
 							});
 							break;
+						case ACTION_MOVE:
+							moveSelected();
+							break;
 						case ACTION_DELETE:
 							deleteSelected();
 							break;
@@ -857,10 +863,44 @@ public class GalleryActivity extends Activity {
 					folderImage.setPadding(3, 3, 3, 3);
 					folderImage.setOnClickListener(new OnClickListener() {
 						public void onClick(View v) {
-							changeDir(file.getPath());
+							if (multiSelectMode == MULTISELECT_ON) {
+								layout.toggle();
+								if (layout.isChecked()) {
+									selectedFiles.add(file);
+								}
+								else {
+									selectedFiles.remove(file);
+								}
+							}
+							else {
+								changeDir(file.getPath());
+							}
 						}
 					});
-					//fileImage.setOnLongClickListener(onLongClick);
+					folderImage.setOnLongClickListener(new OnLongClickListener() {
+						
+						public boolean onLongClick(View v) {
+							CharSequence[] listEntries = getResources().getStringArray(R.array.galleryFolderActions);
+
+							AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+							builder.setTitle(file.getName());
+							builder.setItems(listEntries, new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int item) {
+									selectedFiles.clear();
+									selectedFiles.add(file);
+									
+									switch (item) {
+										case ACTION_DELETE_FOLDER:
+											deleteSelected();
+											break;
+									}
+									dialog.dismiss();
+								}
+							}).show();
+
+							return true;
+						}
+					});
 					
 					layout.addView(folderImage);
 					layout.addView(getLabel(file));

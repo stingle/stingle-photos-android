@@ -21,7 +21,7 @@
     <string name="decrypting_files">Decrypting files…</string>
     <string name="encrypting_files">Encrypting files…</string>
     <string name="encrypting_photo">Encrypting photo…</string>
-    <string name="confirm_delete_files">Do you really want delete %s files?</string>
+    <string name="confirm_delete_files">Do you really want delete %s items?</string>
     <string name="confirm_delete_photo">Do you really want delete this photo?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -65,7 +65,7 @@
     <string name="reencrypting_files">Reencrypting files…</string>
     <string name="new_folder">New folder</string>
     <string name="move">Move</string>
-    <string name="enter_new_folder_name">Please enter new folder name</string>
+    <string name="enter_new_folder_name">Please enter name for new folder</string>
     <string name="success_created">Successfully created</string>
     <string name="failed_create_dir">Failed to create folder</string>
     <string name="choose_folder">Choose folder to move files to:</string>
