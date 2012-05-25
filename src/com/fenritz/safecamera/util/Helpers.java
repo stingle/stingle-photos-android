@@ -97,6 +97,11 @@ public class Helpers {
 		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(0);
 	}
 
+	public static void logout(Activity activity){
+		doLogout(activity);
+		redirectToLogin(activity, null);
+	}
+	
 	private static void redirectToLogin(Activity activity, Bundle extraData) {
 		Intent intent = new Intent();
 		intent.setClass(activity, SafeCameraActivity.class);
@@ -222,9 +227,8 @@ public class Helpers {
 	}
 
 	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
-		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-		bitmapOptions.inSampleSize = 4;
-		Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
+		Bitmap bitmap = decodeBitmap(data, 75);
+		
 		Bitmap thumbBitmap = null;
 		if (bitmap != null) {
 			thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));

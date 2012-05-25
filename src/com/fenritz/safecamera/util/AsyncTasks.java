@@ -377,14 +377,16 @@ public class AsyncTasks {
 		private ProgressDialog progressDialog;
 		private final Activity activity;
 		private final OnAsyncTaskFinish finishListener;
+		private final String destinationFolder;
 
-		public EncryptFiles(Activity activity) {
-			this(activity, null);
+		public EncryptFiles(Activity activity, String destinationFolder) {
+			this(activity, destinationFolder, null);
 		}
 		
-		public EncryptFiles(Activity activity, OnAsyncTaskFinish pFinishListener) {
+		public EncryptFiles(Activity activity, String destinationFolder, OnAsyncTaskFinish pFinishListener) {
 			this.activity = activity;
 			finishListener = pFinishListener;
+			this.destinationFolder = destinationFolder;
 		}
 		
 		@Override
@@ -413,7 +415,7 @@ public class AsyncTasks {
 					try {
 						inputStream = new FileInputStream(origFile);
 
-						String destFilePath = Helpers.findNewFileNameIfNeeded(activity, Helpers.getHomeDir(activity), origFile.getName())  + activity.getString(R.string.file_extension);
+						String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName())  + activity.getString(R.string.file_extension);
 						// String destFilePath =
 						// findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this),
 						// origFile.getName());
@@ -467,14 +469,16 @@ public class AsyncTasks {
 		private ProgressDialog progressDialog;
 		private final Activity activity;
 		private final OnAsyncTaskFinish finishListener;
+		private final String destinationFolder;
 		
-		public ImportFiles(Activity activity){
-			this(activity, null);
+		public ImportFiles(Activity activity, String destinationFolder){
+			this(activity, destinationFolder, null);
 		}
 		
-		public ImportFiles(Activity activity, OnAsyncTaskFinish finishListener){
+		public ImportFiles(Activity activity, String destinationFolder, OnAsyncTaskFinish finishListener){
 			this.activity = activity;
 			this.finishListener = finishListener;
+			this.destinationFolder = destinationFolder;
 		}
 
 		@Override
@@ -516,7 +520,7 @@ public class AsyncTasks {
 						byte[] decryptedData = newCrypt.decrypt(inputStream, null, this);
 
 						if (decryptedData != null) {
-							String destFilePath = Helpers.findNewFileNameIfNeeded(activity, Helpers.getHomeDir(activity), origFile.getName());
+							String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName());
 
 							FileOutputStream outputStream = new FileOutputStream(destFilePath);
 							Helpers.getAESCrypt(activity).encrypt(decryptedData, outputStream);

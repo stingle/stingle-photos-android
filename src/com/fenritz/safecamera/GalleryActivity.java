@@ -35,6 +35,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
@@ -78,6 +79,8 @@ public class GalleryActivity extends Activity {
 	protected static final int ACTION_DELETE_FOLDER = 0;
 
 	private int multiSelectMode = MULTISELECT_OFF;
+	
+	private boolean multiSelectModeActive = false;
 
 	private GridView photosGrid;
 
@@ -127,6 +130,7 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
 		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
 		findViewById(R.id.encryptFiles).setOnClickListener(encryptFilesClick());
+		findViewById(R.id.importFiles).setOnClickListener(importClick());
 		findViewById(R.id.newFolder).setOnClickListener(newFolderClick());
 		findViewById(R.id.moveSelected).setOnClickListener(moveSelectedClick());
 		findViewById(R.id.share).setOnClickListener(shareClick());
@@ -184,7 +188,7 @@ public class GalleryActivity extends Activity {
 			}
 			
 			String[] filePaths = {filePath};
-			new EncryptFiles(GalleryActivity.this, new OnAsyncTaskFinish() {
+			new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
@@ -211,7 +215,7 @@ public class GalleryActivity extends Activity {
 				
 				filePaths[counter++] = filePath;
 			}
-			new EncryptFiles(GalleryActivity.this, new OnAsyncTaskFinish() {
+			new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
@@ -364,8 +368,24 @@ public class GalleryActivity extends Activity {
 			}
 		};
 	}
-
-	/*private OnClickListener importClick() {
+	
+	private void enterMultiSelect(){
+		findViewById(R.id.bottomPanel).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_out));
+		findViewById(R.id.bottomPanel).setVisibility(View.GONE);
+		
+	    findViewById(R.id.bottomPanelMultiSelect).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_in));
+	    findViewById(R.id.bottomPanelMultiSelect).setVisibility(View.VISIBLE);
+	}
+	
+	private void exitMultiSelect(){
+		findViewById(R.id.bottomPanelMultiSelect).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_out));
+	    findViewById(R.id.bottomPanelMultiSelect).setVisibility(View.GONE);
+	    
+	    findViewById(R.id.bottomPanel).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_in));
+	    findViewById(R.id.bottomPanel).setVisibility(View.VISIBLE);
+	}
+	
+	private OnClickListener importClick() {
 		return new OnClickListener() {
 
 			public void onClick(View v) {
@@ -385,7 +405,7 @@ public class GalleryActivity extends Activity {
 				startActivityForResult(intent, REQUEST_IMPORT);
 			}
 		};
-	}*/
+	}
 	
 	private OnClickListener newFolderClick() {
 		return new OnClickListener() {
@@ -531,6 +551,12 @@ public class GalleryActivity extends Activity {
 		fillFilesList();
 		galleryAdapter.notifyDataSetChanged();
 		clearMutliSelect();
+		
+		if(fillCacheTask == null){
+			int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
+			fillCacheTask = new FillCache();
+			fillCacheTask.execute(params);
+		}
 	}
 	
 	private void deleteSelected() {
@@ -613,12 +639,35 @@ public class GalleryActivity extends Activity {
 				new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath).execute(selectedFiles);
 			}
 			else if (requestCode == REQUEST_ENCRYPT) {
-				String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
-				new EncryptFiles(GalleryActivity.this, new OnAsyncTaskFinish() {
+				final String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
+				new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
 						refreshList();
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+						builder.setTitle(getString(R.string.delete_original_files));
+						builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								ArrayList<File> filesToDelete = new ArrayList<File>();
+								for(String filePath : filePaths){
+									File file = new File(filePath);
+									if(file.exists() && file.isFile()){
+										filesToDelete.add(file);
+									}
+								}
+								new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
+									@Override
+									public void onFinish() {
+										Toast.makeText(GalleryActivity.this, getString(R.string.success_delete_originals), Toast.LENGTH_LONG).show();
+									}
+								}).execute(filesToDelete);
+							}
+						});
+						builder.setNegativeButton(getString(R.string.no), null);
+						AlertDialog dialog = builder.create();
+						dialog.show();
 					}
 				}).execute(filePaths);
 			}
@@ -641,7 +690,7 @@ public class GalleryActivity extends Activity {
 						params.put("password", importPassword);
 						params.put("deleteAfterImport", deleteAfterImport);
 
-						new ImportFiles(GalleryActivity.this, new OnAsyncTaskFinish() {
+						new ImportFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
 							@Override
 							public void onFinish(Integer result) {
 								super.onFinish();
@@ -687,6 +736,10 @@ public class GalleryActivity extends Activity {
 			((CheckableLayout) photosGrid.getChildAt(i)).setChecked(false);
 		}
 
+		if(multiSelectModeActive){
+			exitMultiSelect();
+			multiSelectModeActive = false;
+		}
 	}
 
 	public class GalleryAdapter extends BaseAdapter {
@@ -713,6 +766,15 @@ public class GalleryActivity extends Activity {
 						}
 						else {
 							selectedFiles.remove(file);
+						}
+						
+						if(selectedFiles.size() > 0 && !multiSelectModeActive){
+							enterMultiSelect();
+							multiSelectModeActive = true;
+						}
+						else if(selectedFiles.size() == 0 && multiSelectModeActive){
+							exitMultiSelect();
+							multiSelectModeActive = false;
 						}
 					}
 					else {
@@ -1106,22 +1168,6 @@ public class GalleryActivity extends Activity {
 		// Handle item selection
 		Intent intent = new Intent();
 		switch (item.getItemId()) {
-			case R.id.importSelected:
-				Intent newIntent = new Intent(getBaseContext(), FileDialog.class);
-				newIntent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-				// can user select directories or not
-				newIntent.putExtra(FileDialog.CAN_SELECT_FILE, true);
-				newIntent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-				newIntent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
-				newIntent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
-
-				// alternatively you can set file filter
-				// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-				// "png" });
-
-				startActivityForResult(newIntent, REQUEST_IMPORT);
-				return true;
 			case R.id.change_password:
 				intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);
 				startActivity(intent);
@@ -1129,6 +1175,9 @@ public class GalleryActivity extends Activity {
 			case R.id.settings:
 				intent.setClass(GalleryActivity.this, SettingsActivity.class);
 				startActivity(intent);
+				return true;
+			case R.id.logout:
+				Helpers.logout(GalleryActivity.this);
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);

@@ -431,15 +431,6 @@ public class CameraActivity extends Activity {
 				intent.setClass(CameraActivity.this, SettingsActivity.class);
 				startActivity(intent);
 				return true;
-			case R.id.test:
-				intent = new Intent();
-				intent.setClass(CameraActivity.this, TestActivity.class);
-				startActivity(intent);
-				/*intent = new Intent();
-				intent.setClass(CameraActivity.this, ViewImageActivity.class);
-				intent.putExtra("EXTRA_IMAGE_PATH", "/sdcard/SafeCamera/.thumb/IMG_20120503_003732.jpg.sc");
-				startActivity(intent);*/
-				return true;
 			case R.id.photo_size:
 				if (mCamera == null) {
 					return false;
@@ -473,6 +464,9 @@ public class CameraActivity extends Activity {
 					}
 				}).show();
 
+				return true;
+			case R.id.logout:
+				Helpers.logout(CameraActivity.this);
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
