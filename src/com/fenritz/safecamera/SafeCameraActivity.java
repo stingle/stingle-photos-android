@@ -90,7 +90,7 @@ public class SafeCameraActivity extends Activity {
 		SecretKey key = ((SafeCameraApplication) this.getApplicationContext()).getKey();
 		if(key != null){
 			Intent intent = new Intent();
-			intent.setClass(SafeCameraActivity.this, CameraActivity.class);
+			intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
@@ -151,7 +151,7 @@ public class SafeCameraActivity extends Activity {
 				}
 				else{
 					Intent intent = new Intent();
-					intent.setClass(SafeCameraActivity.this, CameraActivity.class);
+					intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					startActivity(intent);

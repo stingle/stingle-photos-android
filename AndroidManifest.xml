@@ -66,6 +66,11 @@
             android:label="SetUp" >
         </activity>
         <activity
+            android:name=".DashboardActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Dashboard" >
+        </activity>
+        <activity
             android:name=".SettingsActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="Settings" >

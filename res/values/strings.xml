@@ -75,6 +75,8 @@
     <string name="log_out">Log Out</string>
     <string name="delete_original_files">Do you want to delete original files?</string>
     <string name="success_delete_originals">Successfully deleted original files</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
     
     
     <!-- File Dialog -->
