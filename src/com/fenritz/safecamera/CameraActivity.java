@@ -1,7 +1,11 @@
 package com.fenritz.safecamera;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
@@ -37,7 +41,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
+import com.fenritz.safecamera.util.AsyncTasks.DecryptPopulateImage;
+import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecamera.util.CameraPreview;
 import com.fenritz.safecamera.util.Helpers;
 
@@ -61,7 +68,10 @@ public class CameraActivity extends Activity {
 
 	private ImageButton takePhotoButton;
 	private ImageButton flashButton;
-	private ImageButton galleryButton;
+	private ImageView galleryButton;
+	
+	private File lastFile;
+	private Drawable lastFileDrawable;
 
 	// The first rear facing camera
 	int defaultCameraId;
@@ -79,18 +89,21 @@ public class CameraActivity extends Activity {
 		// and set it as the content of our activity.
 
 		setContentView(R.layout.camera);
-
+		
 		takePhotoButton = (ImageButton) findViewById(R.id.take_photo);
 		takePhotoButton.setOnClickListener(takePhoto());
 
-		galleryButton = (ImageButton) findViewById(R.id.gallery);
+		galleryButton = (ImageView) findViewById(R.id.lastPhoto);
 		galleryButton.setOnClickListener(openGallery());
+		lastFileDrawable = galleryButton.getDrawable();
 
 		flashButton = (ImageButton) findViewById(R.id.flashButton);
 		flashButton.setOnClickListener(toggleFlash());
 
 		mPreview = ((CameraPreview) findViewById(R.id.camera_preview));
 
+		showLastPhotoThumb();
+		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.package.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -102,6 +115,49 @@ public class CameraActivity extends Activity {
 		registerReceiver(receiver, intentFilter);
 	}
 
+	private void showLastPhotoThumb(){
+		File dir = new File(Helpers.getHomeDir(CameraActivity.this));
+		final int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+		File[] folderFiles = dir.listFiles(new FileFilter() {
+			
+			public boolean accept(File file) {
+				File thumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + file.getName());
+				if(file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()){
+					return true;
+				}
+				return false;
+			}
+		});
+		
+		Arrays.sort(folderFiles, new Comparator<File>() {
+			public int compare(File lhs, File rhs) {
+				if(rhs.lastModified() > lhs.lastModified()){
+					return 1;
+				}
+				else if(rhs.lastModified() < lhs.lastModified()){
+					return -1;
+				}
+				return 0;
+			}
+		});
+		
+		lastFile = folderFiles[0];
+		final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + lastFile.getName());
+		
+		DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
+		task.setRatio(50);
+		task.setOnFinish(new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish() {
+				super.onFinish();
+				lastFileDrawable = galleryButton.getDrawable();
+				changeRotation(mOrientation);
+			}
+		});
+		task.execute();
+		
+	}
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -111,9 +167,13 @@ public class CameraActivity extends Activity {
 	private OnClickListener openGallery() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				Intent intent = new Intent();
-				intent.setClass(CameraActivity.this, GalleryActivity.class);
-				startActivity(intent);
+				if(lastFile != null && lastFile.isFile()){
+					Intent intent = new Intent();
+					intent.setClass(CameraActivity.this, ViewImageActivity.class);
+					intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
+					intent.putExtra("EXTRA_CURRENT_PATH", Helpers.getHomeDir(CameraActivity.this));
+					startActivityForResult(intent, GalleryActivity.REQUEST_VIEW_PHOTO);
+				}
 			}
 		};
 	}
@@ -178,7 +238,13 @@ public class CameraActivity extends Activity {
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 
 				new EncryptAndWriteFile(filename).execute(data);
-				new EncryptAndWriteThumb(CameraActivity.this, filename).execute(data);
+				new EncryptAndWriteThumb(CameraActivity.this, filename, new OnAsyncTaskFinish() {
+					@Override
+					public void onFinish() {
+						super.onFinish();
+						showLastPhotoThumb();
+					}
+				}).execute(data);
 
 				Handler myHandler = new ResumePreview();
 				myHandler.sendMessageDelayed(myHandler.obtainMessage(), 500);
@@ -251,7 +317,7 @@ public class CameraActivity extends Activity {
 
 					if (lastOrientation != mOrientation) {
 						Camera.Parameters parameters = mCamera.getParameters();
-						parameters.setRotation(changeRotation(mOrientation, lastOrientation));
+						parameters.setRotation(changeRotation(mOrientation));
 						mCamera.setParameters(parameters);
 					}
 				}
@@ -293,26 +359,26 @@ public class CameraActivity extends Activity {
 	 * @param orientation
 	 * @param lastOrientation
 	 */
-	private int changeRotation(int orientation, int lastOrientation) {
+	private int changeRotation(int orientation) {
 		int rotation = 0;
 		switch (orientation) {
 			case ORIENTATION_PORTRAIT_NORMAL:
-				galleryButton.setImageDrawable(getRotatedImage(android.R.drawable.ic_menu_gallery, 270));
+				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 270));
 				flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 270));
 				rotation = 90;
 				break;
 			case ORIENTATION_LANDSCAPE_NORMAL:
-				galleryButton.setImageResource(android.R.drawable.ic_menu_gallery);
+				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 0));
 				flashButton.setImageResource(R.drawable.flash_off);
 				rotation = 0;
 				break;
 			case ORIENTATION_PORTRAIT_INVERTED:
-				galleryButton.setImageDrawable(getRotatedImage(android.R.drawable.ic_menu_gallery, 90));
+				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 90));
 				flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 90));
 				rotation = 270;
 				break;
 			case ORIENTATION_LANDSCAPE_INVERTED:
-				galleryButton.setImageDrawable(getRotatedImage(android.R.drawable.ic_menu_gallery, 180));
+				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 180));
 				flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 180));
 				rotation = 180;
 				break;
@@ -332,6 +398,15 @@ public class CameraActivity extends Activity {
 	 */
 	private Drawable getRotatedImage(int drawableId, int degrees) {
 		Bitmap original = BitmapFactory.decodeResource(getResources(), drawableId);
+		Matrix matrix = new Matrix();
+		matrix.postRotate(degrees);
+
+		Bitmap rotated = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
+		return new BitmapDrawable(rotated);
+	}
+	
+	private Drawable getRotatedImage(Drawable drawable, int degrees) {
+		Bitmap original = ((BitmapDrawable)drawable).getBitmap();
 		Matrix matrix = new Matrix();
 		matrix.postRotate(degrees);
 
@@ -388,16 +463,24 @@ public class CameraActivity extends Activity {
 
 		private final String fileName;
 		private final Context context;
+		private OnAsyncTaskFinish onFinish;
 
 		public EncryptAndWriteThumb(Context pContext) {
-			this(pContext, null);
+			this(pContext, null, null);
 		}
 
 		public EncryptAndWriteThumb(Context pContext, String pFilename) {
+			this(pContext, pFilename, null);
+		}
+		
+		public EncryptAndWriteThumb(Context pContext, String pFilename, OnAsyncTaskFinish onFinish) {
 			super();
 			context = pContext;
 			if (pFilename == null) {
 				pFilename = Helpers.getFilename(context, Helpers.JPEG_FILE_PREFIX);
+			}
+			if(onFinish != null){
+				this.onFinish = onFinish;
 			}
 
 			fileName = pFilename;
@@ -412,6 +495,15 @@ public class CameraActivity extends Activity {
 				e.printStackTrace();
 			}
 			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
 		}
 	}
 

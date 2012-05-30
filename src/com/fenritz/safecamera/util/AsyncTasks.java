@@ -11,16 +11,88 @@ import javax.crypto.SecretKey;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.ImageView;
 
 import com.fenritz.safecamera.R;
 
 public class AsyncTasks {
 	public static abstract class OnAsyncTaskFinish {
 		public void onFinish(){}
-		public void onFinish(ArrayList<File> files){}
-		public void onFinish(Integer result){}
+		public void onFinish(ArrayList<File> files){
+			onFinish();
+		}
+		public void onFinish(Integer result){
+			onFinish();
+		}
+	}
+	
+	
+	public static class DecryptPopulateImage extends AsyncTask<Void, Integer, Bitmap> {
+
+		private final Context context;
+		private final String filePath;
+		private final ImageView image;
+		private OnAsyncTaskFinish onFinish;
+		private int ratio = 200;
+
+
+		public DecryptPopulateImage(Context context, String filePath, ImageView image) {
+			this.context = context;
+			this.filePath = filePath;
+			this.image = image;
+		}
+		
+		public void setRatio(int ratio){
+			this.ratio = ratio;
+		}
+		
+		public void setOnFinish(OnAsyncTaskFinish onFinish){
+			this.onFinish = onFinish;
+		}
+
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			File file = new File(filePath);
+			if (file.exists() && file.isFile()) {
+				try {
+					FileInputStream input = new FileInputStream(file);
+					byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, null, this);
+
+					if (decryptedData != null) {
+						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, ratio);
+						decryptedData = null;
+						if (bitmap != null) {
+							return bitmap;
+						}
+					}
+					else {
+						Log.d("sc", "Unable to decrypt: " + filePath);
+					}
+				}
+				catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap bitmap) {
+			super.onPostExecute(bitmap);
+
+			if (bitmap != null) {
+				image.setImageBitmap(bitmap);
+				
+				if(onFinish != null){
+					onFinish.onFinish();
+				}
+			}
+		}
 	}
 	
 	public static class DeleteFiles extends AsyncTask<ArrayList<File>, Integer, Void> {

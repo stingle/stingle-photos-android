@@ -27,7 +27,7 @@
                 android:id="@+id/flashButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right|top"
+                android:layout_gravity="center|top"
                 android:layout_margin="10dp"
                 android:background="@null"
                 android:src="@drawable/flash_off" />
@@ -45,14 +45,23 @@
 	                android:layout_gravity="center"
 	                android:src="@drawable/shutter_button" />
 			</LinearLayout>
-            <ImageButton
-                android:id="@+id/gallery"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right|bottom"
-                android:background="@null"
-                android:layout_margin="10dp"
-                android:src="@android:drawable/ic_menu_gallery" />
+			
+			<LinearLayout
+			    android:id="@+id/lastPhotoContainer"
+	            android:layout_width="80dp"
+	            android:layout_height="80dp"
+	            android:layout_margin="10dp"
+	            android:padding="1dp"
+	            android:layout_gravity="right"
+	            android:background="#000">
+	            <ImageView
+	                android:id="@+id/lastPhoto"
+	                android:layout_width="fill_parent"
+	                android:layout_height="fill_parent"
+	                android:layout_gravity="center"
+	                
+	                android:src="@android:drawable/ic_menu_gallery" />
+            </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
 
