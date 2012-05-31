@@ -77,6 +77,8 @@
     <string name="success_delete_originals">Successfully deleted original files</string>
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="add_files">Add Files</string>
     
     
     <!-- File Dialog -->

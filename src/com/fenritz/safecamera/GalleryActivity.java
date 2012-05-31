@@ -134,6 +134,8 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.newFolder).setOnClickListener(newFolderClick());
 		findViewById(R.id.moveSelected).setOnClickListener(moveSelectedClick());
 		findViewById(R.id.share).setOnClickListener(shareClick());
+		findViewById(R.id.gotoHome).setOnClickListener(gotoHome());
+		findViewById(R.id.gotoCamera).setOnClickListener(gotoCamera());
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -155,6 +157,30 @@ public class GalleryActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(receiver);
+	}
+	
+	private OnClickListener gotoHome() {
+		return new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(GalleryActivity.this, DashboardActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				finish();
+			}
+		};
+	}
+	
+	private OnClickListener gotoCamera() {
+		return new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(GalleryActivity.this, CameraActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+				startActivity(intent);
+				finish();
+			}
+		};
 	}
 
 	void handleIntentFilters(Intent intent){
