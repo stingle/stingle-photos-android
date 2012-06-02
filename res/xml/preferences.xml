@@ -18,7 +18,7 @@
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android">
 
-    	<EditTextPreference
+    	 <EditTextPreference
     	    android:defaultValue="SafeCamera"
     	    android:key="home_folder"
     	    android:summary="@string/home_folder_desc"
@@ -31,5 +31,19 @@
             android:defaultValue="300" 
             android:entries="@array/lockTimes"
             android:entryValues="@array/lockTimesValues" />
+    	 
+		<CheckBoxPreference
+    	    android:key="volume_take_photo"
+    	    android:title="@string/volume_take_photo"
+    	    android:summary="@string/volume_take_photo_desc"
+    	    android:defaultValue="false" />
+		
+		<ListPreference 
+            android:key="timerDuration"
+            android:title="@string/timer_duration"
+            android:summary="@string/timer_duartion_desc"
+            android:defaultValue="10" 
+            android:entries="@array/timerDurations"
+            android:entryValues="@array/timerDurationValues" />
 
 </PreferenceScreen>

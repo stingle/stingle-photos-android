@@ -20,6 +20,20 @@
         <item name="3600">3600</item>
     </string-array>
     
+    <string-array name="timerDurations">
+        <item name="5">@string/seconds5</item>
+        <item name="10">@string/seconds10</item>
+        <item name="15">@string/seconds15</item>
+        <item name="20">@string/seconds20</item>
+    </string-array>
+    
+    <string-array name="timerDurationValues">
+        <item name="5">5</item>
+        <item name="10">10</item>
+        <item name="15">15</item>
+        <item name="20">20</item>
+    </string-array>
+    
     <string-array name="galleryItemActions">
         <item name="decrypt">@string/decrypt</item>
         <item name="share">@string/share</item>

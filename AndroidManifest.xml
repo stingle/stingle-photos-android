@@ -85,11 +85,6 @@
             android:configChanges="keyboardHidden|orientation"
             android:label="Change Password" >
         </activity>
-        <activity
-            android:name=".TestActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:label="Test" >
-        </activity>
     </application>
 
 </manifest>

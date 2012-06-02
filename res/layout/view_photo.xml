@@ -17,7 +17,7 @@
 	    android:orientation="horizontal"
 	    android:gravity="right|center_vertical"
 	    android:id="@+id/topPanel"
-	    android:background="#33FFFFFF"
+	    android:background="#000"
 	    android:layout_alignParentTop="true" >
 	    
 	    <TextView

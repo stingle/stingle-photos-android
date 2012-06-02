@@ -9,11 +9,52 @@
 		android:layout_height="wrap_content"
 		android:gravity="left" />
 
+	<LinearLayout
+	    android:id="@+id/timerLabelContainer"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+	    android:background="#000"
+	    android:gravity="center"
+		android:visibility="gone" >
+		<TextView
+	        android:id="@+id/timerLabel"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center"
+	        android:textSize="30dp" />
+	</LinearLayout>
+	
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="left|center_vertical" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center_vertical|left"
+            android:layout_marginRight="5dp"
+            android:orientation="vertical"
+            android:visibility="visible"
+			android:layout_alignParentTop="true" >
+
+            <ImageButton
+                android:id="@+id/timerButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="centerInside"
+                android:layout_gravity="center|top"
+                android:layout_margin="10dp"
+                android:background="@null"
+                android:src="@drawable/timer_disabled" />
+        </LinearLayout>
+    </RelativeLayout>
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:gravity="right|center_vertical" >
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
@@ -25,8 +66,9 @@
 
             <ImageButton
                 android:id="@+id/flashButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="centerInside"
                 android:layout_gravity="center|top"
                 android:layout_margin="10dp"
                 android:background="@null"

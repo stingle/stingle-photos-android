@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -31,6 +33,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -42,6 +46,8 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.fenritz.safecamera.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
@@ -51,6 +57,7 @@ import com.fenritz.safecamera.util.Helpers;
 public class CameraActivity extends Activity {
 
 	public static final String FLASH_MODE = "flash_mode";
+	public static final String TIMER_MODE = "timer_mode";
 	public static final String PHOTO_SIZE = "photo_size";
 
 	private CameraPreview mPreview;
@@ -65,10 +72,17 @@ public class CameraActivity extends Activity {
 	private static final int ORIENTATION_PORTRAIT_INVERTED = 2;
 	private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
 	private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
+	
+	private boolean isFlashOn = false; 
+	private boolean isTimerOn = false; 
 
 	private ImageButton takePhotoButton;
 	private ImageButton flashButton;
+	private ImageButton timerButton;
 	private ImageView galleryButton;
+	
+	private int timerTotalSeconds = 10; 
+	private int timerTimePassed = 0;
 	
 	private File lastFile;
 	private Drawable lastFileDrawable;
@@ -91,7 +105,7 @@ public class CameraActivity extends Activity {
 		setContentView(R.layout.camera);
 		
 		takePhotoButton = (ImageButton) findViewById(R.id.take_photo);
-		takePhotoButton.setOnClickListener(takePhoto());
+		takePhotoButton.setOnClickListener(takePhotoClick());
 
 		galleryButton = (ImageView) findViewById(R.id.lastPhoto);
 		galleryButton.setOnClickListener(openGallery());
@@ -99,6 +113,9 @@ public class CameraActivity extends Activity {
 
 		flashButton = (ImageButton) findViewById(R.id.flashButton);
 		flashButton.setOnClickListener(toggleFlash());
+		
+		timerButton = (ImageButton) findViewById(R.id.timerButton);
+		timerButton.setOnClickListener(toggleTimer());
 
 		mPreview = ((CameraPreview) findViewById(R.id.camera_preview));
 
@@ -164,6 +181,24 @@ public class CameraActivity extends Activity {
 		unregisterReceiver(receiver);
 	}
 	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+			takePhoto();
+			return true;
+		}
+		
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
+		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", false);
+		
+		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+			takePhoto();
+			return true;
+		}
+		
+		return super.onKeyDown(keyCode, event);
+	}
+	
 	private OnClickListener openGallery() {
 		return new OnClickListener() {
 			public void onClick(View v) {
@@ -186,11 +221,13 @@ public class CameraActivity extends Activity {
 
 				if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
 					flashMode = Parameters.FLASH_MODE_ON;
-					((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_on);
+					flashButton.setImageResource(R.drawable.flash_on);
+					isFlashOn = true;
 				}
 				else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
 					flashMode = Parameters.FLASH_MODE_OFF;
-					((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_off);
+					flashButton.setImageResource(R.drawable.flash_off);
+					isFlashOn = false;
 				}
 
 				Camera.Parameters parameters = mCamera.getParameters();
@@ -198,26 +235,78 @@ public class CameraActivity extends Activity {
 				mCamera.setParameters(parameters);
 
 				preferences.edit().putString(CameraActivity.FLASH_MODE, flashMode).commit();
+				changeRotation(mOrientation);
+			}
+		};
+	}
+	
+	private OnClickListener toggleTimer() {
+		return new OnClickListener() {
+			public void onClick(View v) {
+				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				
+				if (isTimerOn) {
+					timerButton.setImageResource(R.drawable.timer_disabled);
+					isTimerOn = false;
+				}
+				else{
+					timerButton.setImageResource(R.drawable.timer);
+					isTimerOn = true;
+				}
+				
+				preferences.edit().putBoolean(CameraActivity.TIMER_MODE, isTimerOn).commit();
+				changeRotation(mOrientation);
 			}
 		};
 	}
 
-	private OnClickListener takePhoto() {
+	private OnClickListener takePhotoClick() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				if (mCamera != null) {
-					mCamera.takePicture(null, null, getPictureCallback());
-					/*
-					 * FrameLayout.LayoutParams params =
-					 * (FrameLayout.LayoutParams)mPreview.getLayoutParams();
-					 * origParams = params; params.width = 1024; params.height =
-					 * 768;
-					 * 
-					 * mPreview.setLayoutParams(params);
-					 */
-				}
+				takePhoto();
 			}
 		};
+	}
+	
+	private void takePhoto() {
+		if (mCamera != null) {
+			if(isTimerOn){
+				((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf(timerTotalSeconds));
+				((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.VISIBLE);
+				timerTimePassed = 0;
+				
+				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
+				timerTotalSeconds = Integer.valueOf(sharedPrefs.getString("timerDuration", "10"));
+				
+				final Timer timer = new Timer();
+				timer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						runOnUiThread(
+								new Runnable() {
+									public void run() {
+										((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf((timerTotalSeconds-timerTimePassed)+1));
+										if(timerTimePassed > timerTotalSeconds){
+											((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
+										}
+									}
+								}
+						);
+						
+						if(timerTimePassed > timerTotalSeconds){
+							mCamera.takePicture(null, null, getPictureCallback());
+							this.cancel();
+							timer.cancel();
+						}
+						
+						timerTimePassed++;
+					}
+				}, 0, 1000);
+			}
+			else{
+				mCamera.takePicture(null, null, getPictureCallback());
+			}
+		}
 	}
 
 	class ResumePreview extends Handler {
@@ -272,9 +361,31 @@ public class CameraActivity extends Activity {
 		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 
 		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
+			isFlashOn = false;
+			flashButton.setImageResource(R.drawable.flash_off);
+		}
+		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
+			isFlashOn = true;
+			flashButton.setImageResource(R.drawable.flash_on);
+		}
+		
+		boolean timerMode = preferences.getBoolean(CameraActivity.TIMER_MODE, false);
+		
+		if(timerMode){
+			isTimerOn = true;
+			timerButton.setImageResource(R.drawable.timer);
+		}
+		else{
+			isTimerOn = false;
+			timerButton.setImageResource(R.drawable.timer_disabled);
+		}
+
+		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
+			isFlashOn = false;
 			((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_off);
 		}
 		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
+			isFlashOn = true;
 			((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_on);
 		}
 
@@ -330,6 +441,8 @@ public class CameraActivity extends Activity {
 
 		cameraCurrentlyLocked = defaultCameraId;
 		mPreview.setCamera(mCamera);
+		
+		showLastPhotoThumb();
 	}
 
 	@Override
@@ -364,22 +477,79 @@ public class CameraActivity extends Activity {
 		switch (orientation) {
 			case ORIENTATION_PORTRAIT_NORMAL:
 				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 270));
-				flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 270));
+				
+				if(isFlashOn){
+					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_on, 270));
+				}
+				else{
+					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 270));
+				}
+				
+				if(isTimerOn){
+					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer, 270));
+				}
+				else{
+					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 270));
+				}
+				
 				rotation = 90;
+				
 				break;
 			case ORIENTATION_LANDSCAPE_NORMAL:
 				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 0));
-				flashButton.setImageResource(R.drawable.flash_off);
+				
+				if(isFlashOn){
+					flashButton.setImageResource(R.drawable.flash_on);
+				}
+				else{
+					flashButton.setImageResource(R.drawable.flash_off);
+				}
+				
+				if(isTimerOn){
+					timerButton.setImageResource(R.drawable.timer);
+				}
+				else{
+					timerButton.setImageResource(R.drawable.timer_disabled);
+				}
+				
 				rotation = 0;
 				break;
 			case ORIENTATION_PORTRAIT_INVERTED:
 				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 90));
-				flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 90));
+				
+				if(isFlashOn){
+					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_on, 90));
+				}
+				else{
+					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 90));
+				}
+				
+				if(isTimerOn){
+					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer, 90));
+				}
+				else{
+					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 90));
+				}
+				
 				rotation = 270;
 				break;
 			case ORIENTATION_LANDSCAPE_INVERTED:
 				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 180));
-				flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 180));
+				
+				if(isFlashOn){
+					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_on, 180));
+				}
+				else{
+					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 180));
+				}
+				
+				if(isTimerOn){
+					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer, 180));
+				}
+				else{
+					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 180));
+				}
+				
 				rotation = 180;
 				break;
 		}
@@ -517,11 +687,17 @@ public class CameraActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
+		Intent intent = new Intent();
 		switch (item.getItemId()) {
 			case R.id.settings:
-				Intent intent = new Intent();
 				intent.setClass(CameraActivity.this, SettingsActivity.class);
 				startActivity(intent);
+				return true;
+			case R.id.gotoGallery:
+				intent.setClass(CameraActivity.this, GalleryActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+				startActivity(intent);
+				finish();
 				return true;
 			case R.id.photo_size:
 				if (mCamera == null) {
