@@ -158,21 +158,22 @@ public class CameraActivity extends Activity {
 			}
 		});
 		
-		lastFile = folderFiles[0];
-		final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + lastFile.getName());
-		
-		DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
-		task.setRatio(50);
-		task.setOnFinish(new OnAsyncTaskFinish() {
-			@Override
-			public void onFinish() {
-				super.onFinish();
-				lastFileDrawable = galleryButton.getDrawable();
-				changeRotation(mOrientation);
-			}
-		});
-		task.execute();
-		
+		if(folderFiles.length > 0){
+			lastFile = folderFiles[0];
+			final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + lastFile.getName());
+			
+			DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
+			task.setRatio(50);
+			task.setOnFinish(new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					lastFileDrawable = galleryButton.getDrawable();
+					changeRotation(mOrientation);
+				}
+			});
+			task.execute();
+		}
 	}
 	
 	@Override

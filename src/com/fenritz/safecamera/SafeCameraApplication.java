@@ -1,19 +1,17 @@
 package com.fenritz.safecamera;
 
-import javax.crypto.SecretKey;
-
 import android.app.Application;
 
 public class SafeCameraApplication extends Application{
 
-	private SecretKey key;
+	private String key;
 	private long lockedTime = 0;
 	
-	public SecretKey getKey(){
+	public String getKey(){
 		return key;
 	}
 	
-	public void setKey(SecretKey pKey){
+	public void setKey(String pKey){
 		key = pKey;
 	}
 	

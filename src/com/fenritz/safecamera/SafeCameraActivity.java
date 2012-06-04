@@ -1,7 +1,5 @@
 package com.fenritz.safecamera;
 
-import javax.crypto.SecretKey;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -87,7 +85,7 @@ public class SafeCameraActivity extends Activity {
 		
 		Helpers.disableLockTimer(this);
 		
-		SecretKey key = ((SafeCameraApplication) this.getApplicationContext()).getKey();
+		String key = ((SafeCameraApplication) this.getApplicationContext()).getKey();
 		if(key != null){
 			Intent intent = new Intent();
 			intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
@@ -132,12 +130,8 @@ public class SafeCameraActivity extends Activity {
 		
 		@Override
 		protected Boolean doInBackground(String... params) {
-			SecretKey key = Helpers.getAESKey(SafeCameraActivity.this, params[0]);
-			if(key != null){
-				((SafeCameraApplication) SafeCameraActivity.this.getApplication()).setKey(key);
-				return true;
-			}
-			return false;
+			((SafeCameraApplication) SafeCameraActivity.this.getApplication()).setKey(params[0]);
+			return true;
 		}
 		
 		@Override

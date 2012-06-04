@@ -7,8 +7,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.crypto.SecretKey;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -123,8 +121,7 @@ public class ChangePasswordActivity extends Activity {
 		protected Void doInBackground(String... params) {
 			String newPassword = params[0];
 
-			SecretKey newKey = Helpers.getAESKey(ChangePasswordActivity.this, newPassword);
-			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, ChangePasswordActivity.this);
+			AESCrypt newCrypt = Helpers.getAESCrypt(newPassword, ChangePasswordActivity.this);
 			
 			
 			File dir = new File(Helpers.getHomeDir(ChangePasswordActivity.this));
@@ -178,7 +175,7 @@ public class ChangePasswordActivity extends Activity {
 				e.printStackTrace();
 			}
 			
-			((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(newKey);
+			((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(newPassword);
 
 			return null;
 		}

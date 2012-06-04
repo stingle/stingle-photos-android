@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -60,7 +58,7 @@ public class Helpers {
 		return checkLoginedState(activity, extraData, true);
 	}
 	public static boolean checkLoginedState(Activity activity, Bundle extraData, boolean redirect) {
-		SecretKey key = ((SafeCameraApplication) activity.getApplicationContext()).getKey();
+		String key = ((SafeCameraApplication) activity.getApplicationContext()).getKey();
 
 		if (key == null) {
 			if(redirect){
@@ -147,38 +145,13 @@ public class Helpers {
 		return getAESCrypt(null, context);
 	}
 
-	public static AESCrypt getAESCrypt(SecretKey pKey, Context context) {
-		SecretKey keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
+	public static AESCrypt getAESCrypt(String pKey, Context context) {
+		String keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
 		if (pKey != null) {
 			keyToUse = pKey;
 		}
 
-		try {
-			return new AESCrypt(keyToUse);
-		}
-		catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		catch (NoSuchProviderException e) {
-			e.printStackTrace();
-		}
-		catch (AESCryptException e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	public static SecretKey getAESKey(Activity activity, String password) {
-		try {
-			return AESCrypt.getSecretKey(password);
-		}
-		catch (AESCryptException e) {
-			e.printStackTrace();
-			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "102"));
-		}
-
-		return null;
+		return new AESCrypt(keyToUse);
 	}
 
 	public static String getFilename(Context context, String prefix) {

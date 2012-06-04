@@ -7,8 +7,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.crypto.SecretKey;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -395,8 +393,7 @@ public class AsyncTasks {
 			String newPassword = params[0].get("newPassword").toString();
 			ArrayList<File> files = (ArrayList<File>) params[0].get("files");
 
-			SecretKey newKey = Helpers.getAESKey(activity, newPassword);
-			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, activity);
+			AESCrypt newCrypt = Helpers.getAESCrypt(newPassword, activity);
 
 			progressDialog.setMax(files.size());
 
@@ -576,8 +573,7 @@ public class AsyncTasks {
 			String password = (String) params.get("password");
 			Boolean deleteAfterImport = (Boolean) params.get("deleteAfterImport");
 
-			SecretKey newKey = Helpers.getAESKey(activity, password);
-			AESCrypt newCrypt = Helpers.getAESCrypt(newKey, activity);
+			AESCrypt newCrypt = Helpers.getAESCrypt(password, activity);
 
 			int returnStatus = STATUS_OK;
 			progressDialog.setMax(filePaths.length);
