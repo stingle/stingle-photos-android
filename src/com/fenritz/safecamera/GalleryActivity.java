@@ -813,6 +813,33 @@ public class GalleryActivity extends Activity {
 				}
 			};
 		}
+		private OnClickListener getNoThumbClickListener(final CheckableLayout layout, final File file){
+			return new View.OnClickListener() {
+				public void onClick(View v) {
+					if (multiSelectMode == MULTISELECT_ON) {
+						layout.toggle();
+						if (layout.isChecked()) {
+							selectedFiles.add(file);
+						}
+						else {
+							selectedFiles.remove(file);
+						}
+						
+						if(selectedFiles.size() > 0 && !multiSelectModeActive){
+							enterMultiSelect();
+							multiSelectModeActive = true;
+						}
+						else if(selectedFiles.size() == 0 && multiSelectModeActive){
+							exitMultiSelect();
+							multiSelectModeActive = false;
+						}
+					}
+					else {
+						doLongClick(file, v);
+					}
+				}
+			};
+		}
 		
 		private OnLongClickListener getOnLongClickListener(final File file){
 			return new View.OnLongClickListener() {
@@ -849,6 +876,7 @@ public class GalleryActivity extends Activity {
 								@Override
 								public void onFinish() {
 									super.onFinish();
+									selectedFiles.clear();
 									refreshList();
 								}
 							});
@@ -860,6 +888,7 @@ public class GalleryActivity extends Activity {
 							deleteSelected();
 							break;
 					}
+					
 					dialog.dismiss();
 				}
 			}).show();
@@ -903,7 +932,7 @@ public class GalleryActivity extends Activity {
 						ImageView fileImage = new ImageView(GalleryActivity.this);
 						fileImage.setImageResource(R.drawable.file);
 						fileImage.setPadding(3, 3, 3, 3);
-						fileImage.setOnClickListener(getOnClickListenerLongAction(file));
+						fileImage.setOnClickListener(getNoThumbClickListener(layout, file));
 						fileImage.setOnLongClickListener(onLongClick);
 						layout.addView(fileImage);
 						layout.addView(getLabel(file));

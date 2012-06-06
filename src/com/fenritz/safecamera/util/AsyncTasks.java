@@ -404,7 +404,7 @@ public class AsyncTasks {
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
 					String tmpFilePath = Helpers.getHomeDir(activity) + "/.tmp/" + file.getName();
-
+					
 					File tmpFile = new File(tmpFilePath);
 					FileOutputStream outputStream = new FileOutputStream(tmpFile);
 
@@ -585,22 +585,15 @@ public class AsyncTasks {
 					try {
 						FileInputStream inputStream = new FileInputStream(origFile);
 
-						byte[] decryptedData = newCrypt.decrypt(inputStream, null, this);
+						String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName());
 
-						if (decryptedData != null) {
-							String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName());
+						FileOutputStream outputStream = new FileOutputStream(destFilePath);
+						Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this, true);
 
-							FileOutputStream outputStream = new FileOutputStream(destFilePath);
-							Helpers.getAESCrypt(activity).encrypt(decryptedData, outputStream);
-
-							if (deleteAfterImport) {
-								origFile.delete();
-							}
-							publishProgress(i+1);
+						if (deleteAfterImport) {
+							origFile.delete();
 						}
-						else {
-							returnStatus = STATUS_FAIL;
-						}
+						publishProgress(i+1);
 					}
 					catch (FileNotFoundException e) {
 						returnStatus = STATUS_FAIL;

@@ -199,32 +199,46 @@ public class AESCrypt {
 	}
 
 	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt) {
-		this.reEncrypt(in, out, secondaryCrypt, null, null);
+		this.reEncrypt(in, out, secondaryCrypt, null, null, false);
 	}
 	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress) {
-		this.reEncrypt(in, out, secondaryCrypt, progress, null);
+		this.reEncrypt(in, out, secondaryCrypt, progress, null, false);
 	}
-	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task) {
+	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task){
+		this.reEncrypt(in, out, secondaryCrypt, progress, task, false);
+	}
+	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task, boolean encryptionIsMy) {
 		try {
-			in.read(iv, 0, iv.length);
-			in.read(salt, 0, salt.length);
-			this.setupCrypto(iv, salt);
-			/*byte[] sIV = secondaryCrypt.getIV();
-			out.write(sIV, 0, sIV.length);
-			if(progress != null){
-				progress.setProgress(sIV.length);
-			}*/
-			
-			Cipher encryptionCipher = secondaryCrypt.getEncryptionCipher();
-			//out.write(secondaryCrypt.getIV());
-			//out.write(secondaryCrypt.getSalt());
 			
 			// Bytes written to out will be encrypted
-			in = new OptimizedCipherInputStream(in, decryptionCipher);
-			out = new CipherOutputStream(out, encryptionCipher);
+			if(encryptionIsMy){
+				byte[] decIV = new byte[IV_LENGTH];
+				byte[] decSalt = new byte[SALT_LENGTH];
+				in.read(decIV, 0, decIV.length);
+				in.read(decSalt, 0, decSalt.length);
+				
+				this.setupCrypto();
+				
+				out.write(iv, 0, iv.length);
+				out.write(salt, 0, salt.length);
+				
+				in = new OptimizedCipherInputStream(in, secondaryCrypt.getDecryptionCipher(decIV, decSalt));
+				out = new CipherOutputStream(out, encryptionCipher);
+			}
+			else{
+				in.read(iv, 0, iv.length);
+				in.read(salt, 0, salt.length);
+				this.setupCrypto(iv, salt);
+				
+				Cipher encryptionCipher = secondaryCrypt.getEncryptionCipher();
+				out.write(secondaryCrypt.getIV(), 0, secondaryCrypt.getIV().length);
+				out.write(secondaryCrypt.getSalt(), 0, secondaryCrypt.getSalt().length);
+				
+				in = new OptimizedCipherInputStream(in, decryptionCipher);
+				out = new CipherOutputStream(out, encryptionCipher);
+			}
 
 			// Read in the cleartext bytes and write to out to encrypt
-			//long totalRead = sIV.length;
 			long totalRead = iv.length + salt.length;
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {

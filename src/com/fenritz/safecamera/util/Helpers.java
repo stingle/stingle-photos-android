@@ -146,9 +146,13 @@ public class Helpers {
 	}
 
 	public static AESCrypt getAESCrypt(String pKey, Context context) {
-		String keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
+		String keyToUse;
 		if (pKey != null) {
 			keyToUse = pKey;
+		}
+		else{
+			// Lilitiky dmboya
+			keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
 		}
 
 		return new AESCrypt(keyToUse);
@@ -196,6 +200,11 @@ public class Helpers {
 		File dir = new File(getThumbsDir(context));
 		if (!dir.exists() || !dir.isDirectory()) {
 			dir.mkdirs();
+		}
+		
+		File tmpFile = new File(Helpers.getHomeDir(context) + "/.tmp/");
+		if (!tmpFile.exists() || !tmpFile.isDirectory()) {
+			tmpFile.mkdirs();
 		}
 	}
 
@@ -373,7 +382,6 @@ public class Helpers {
 											}
 										};
 									};
-
 									new ReEncryptFiles(activity, onReencrypt).execute(params);
 								}
 								else {

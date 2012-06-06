@@ -21,6 +21,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -41,8 +42,10 @@ import android.view.MenuItem;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -86,6 +89,9 @@ public class CameraActivity extends Activity {
 	
 	private File lastFile;
 	private Drawable lastFileDrawable;
+	
+	private int photoSizeIndex = 0;
+	private int firstEnabledIndex = -1;
 
 	// The first rear facing camera
 	int defaultCameraId;
@@ -355,7 +361,19 @@ public class CameraActivity extends Activity {
 		mCamera = Camera.open();
 
 		List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
-		int photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+		photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+		
+		if(getString(R.string.is_demo).equals("1")){
+			for(int i=0;i<mSupportedPictureSizes.size();i++){
+				if(mSupportedPictureSizes.get(i).width <= 640){
+					firstEnabledIndex = i;
+					break;
+				}
+			}
+			if(photoSizeIndex < firstEnabledIndex){
+				photoSizeIndex = firstEnabledIndex;
+			}
+		}
 		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
 
 		// Set flash mode from preferences and update button accordingly
@@ -715,11 +733,12 @@ public class CameraActivity extends Activity {
 				}
 
 				final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-				int photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(getString(R.string.photo_size_choose));
-				builder.setSingleChoiceItems(listEntries, photoSizeIndex, new DialogInterface.OnClickListener() {
+				builder.setSingleChoiceItems(new PhotoSizeAdapter(CameraActivity.this, android.R.layout.simple_list_item_single_choice, listEntries), 
+						photoSizeIndex, 
+						new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
 						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
 
@@ -740,6 +759,45 @@ public class CameraActivity extends Activity {
 			default:
 				return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	private class PhotoSizeAdapter extends ArrayAdapter<CharSequence> {
+
+	    public PhotoSizeAdapter(Context context, int textViewResId, CharSequence[] strings) {
+	        super(context, textViewResId, strings);
+	    }
+
+	    @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = super.getView(position, convertView, parent);
+
+            TextView textView=(TextView) view.findViewById(android.R.id.text1);
+
+            /*YOUR CHOICE OF COLOR*/
+            if(firstEnabledIndex != -1 && firstEnabledIndex > position){
+            	textView.setTextColor(Color.GRAY);
+            }
+            else{
+            	textView.setTextColor(Color.BLACK);
+            }
+
+            return view;
+        }
+	    
+	    @Override
+		public boolean areAllItemsEnabled() {
+	        return false;
+	    }
+
+	    @Override
+		public boolean isEnabled(int position) {
+	    	if(firstEnabledIndex != -1 && firstEnabledIndex > position){
+            	return false;
+            }
+            else{
+            	return true;
+            }
+	    }
 	}
 
 }
