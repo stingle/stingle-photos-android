@@ -86,9 +86,12 @@ public class CameraActivity extends Activity {
 	
 	private int timerTotalSeconds = 10; 
 	private int timerTimePassed = 0;
+	private boolean isTimerRunning = false;
 	
 	private File lastFile;
 	private Drawable lastFileDrawable;
+	
+	private Timer timer;
 	
 	private int photoSizeIndex = 0;
 	private int firstEnabledIndex = -1;
@@ -277,38 +280,51 @@ public class CameraActivity extends Activity {
 	
 	private void takePhoto() {
 		if (mCamera != null) {
+			Camera.Parameters parameters = mCamera.getParameters();
+			parameters.setRotation(changeRotation(mOrientation));
+			mCamera.setParameters(parameters);
+			
 			if(isTimerOn){
-				((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf(timerTotalSeconds));
-				((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.VISIBLE);
-				timerTimePassed = 0;
-				
-				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
-				timerTotalSeconds = Integer.valueOf(sharedPrefs.getString("timerDuration", "10"));
-				
-				final Timer timer = new Timer();
-				timer.schedule(new TimerTask() {
-					@Override
-					public void run() {
-						runOnUiThread(
-								new Runnable() {
-									public void run() {
-										((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf((timerTotalSeconds-timerTimePassed)+1));
-										if(timerTimePassed > timerTotalSeconds){
-											((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
+				if(!isTimerRunning){
+					((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf(timerTotalSeconds));
+					((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.VISIBLE);
+					timerTimePassed = 0;
+					
+					SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
+					timerTotalSeconds = Integer.valueOf(sharedPrefs.getString("timerDuration", "10"));
+					
+					isTimerRunning = true;
+					timer = new Timer();
+					timer.schedule(new TimerTask() {
+						@Override
+						public void run() {
+							runOnUiThread(
+									new Runnable() {
+										public void run() {
+											((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf((timerTotalSeconds-timerTimePassed)+1));
+											if(timerTimePassed > timerTotalSeconds){
+												((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
+											}
 										}
 									}
-								}
-						);
-						
-						if(timerTimePassed > timerTotalSeconds){
-							mCamera.takePicture(null, null, getPictureCallback());
-							this.cancel();
-							timer.cancel();
+							);
+							
+							if(timerTimePassed > timerTotalSeconds){
+								mCamera.takePicture(null, null, getPictureCallback());
+								this.cancel();
+								timer.cancel();
+								isTimerRunning = false;
+							}
+							
+							timerTimePassed++;
 						}
-						
-						timerTimePassed++;
-					}
-				}, 0, 1000);
+					}, 0, 1000);
+				}
+				else if(timer != null){
+					timer.cancel();
+					((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
+					isTimerRunning = false;
+				}
 			}
 			else{
 				mCamera.takePicture(null, null, getPictureCallback());
@@ -372,6 +388,7 @@ public class CameraActivity extends Activity {
 			}
 			if(photoSizeIndex < firstEnabledIndex){
 				photoSizeIndex = firstEnabledIndex;
+				preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
 			}
 		}
 		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
@@ -411,6 +428,7 @@ public class CameraActivity extends Activity {
 		Camera.Parameters parameters = mCamera.getParameters();
 		parameters.setFlashMode(flashMode);
 		parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
+		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 
 		if (mOrientationEventListener == null) {
 			mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
@@ -733,6 +751,7 @@ public class CameraActivity extends Activity {
 				}
 
 				final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(getString(R.string.photo_size_choose));
@@ -740,6 +759,7 @@ public class CameraActivity extends Activity {
 						photoSizeIndex, 
 						new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
+						
 						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
 
 						mPreview.setCamera(null);
@@ -748,6 +768,9 @@ public class CameraActivity extends Activity {
 						parameters.setPictureSize(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
 						mCamera.setParameters(parameters);
 
+						mPreview.setCamera(mCamera);
+						mPreview.requestLayout();
+						
 						dialog.dismiss();
 					}
 				}).show();

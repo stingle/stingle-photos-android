@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -1165,6 +1166,9 @@ public class GalleryActivity extends Activity {
 
 				if (file.exists() && file.isFile()) {
 					try {
+						if(file.getPath().equals("/mnt/sdcard/SafeCamera/IMG_20120607_203926.jpg.sc")){
+							Log.d("qaq", file.getPath());
+						}
 						FileInputStream inputStream = new FileInputStream(file);
 						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 

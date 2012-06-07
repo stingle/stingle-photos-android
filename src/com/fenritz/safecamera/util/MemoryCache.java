@@ -32,7 +32,9 @@ public class MemoryCache {
     
     public void put(String id, Bitmap bitmap){
         synchronized(cache) {
-		    cache.put(id, bitmap);
+        	if(bitmap != null){
+        		cache.put(id, bitmap);
+        	}
 		}
     }
 
