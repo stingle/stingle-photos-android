@@ -56,6 +56,9 @@ import com.fenritz.safecamera.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecamera.util.CameraPreview;
 import com.fenritz.safecamera.util.Helpers;
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 public class CameraActivity extends Activity {
 
@@ -99,6 +102,7 @@ public class CameraActivity extends Activity {
 	// The first rear facing camera
 	int defaultCameraId;
 	private BroadcastReceiver receiver;
+	private AdView adView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +143,14 @@ public class CameraActivity extends Activity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
+		
+		if(Helpers.isDemo(CameraActivity.this)){
+			// Create the adView
+		    adView = new AdView(this, AdSize.BANNER, getString(R.string.ad_publisher_id));
+		    LinearLayout layout = (LinearLayout)findViewById(R.id.adHolder);
+		    layout.addView(adView);
+		    adView.loadAd(new AdRequest());
+		}
 	}
 
 	private void showLastPhotoThumb(){
@@ -187,8 +199,11 @@ public class CameraActivity extends Activity {
 	
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+		if (adView != null){
+			adView.destroy();
+		}
 		unregisterReceiver(receiver);
+		super.onDestroy();
 	}
 	
 	@Override
@@ -368,118 +383,120 @@ public class CameraActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 
-		Helpers.checkLoginedState(this);
+		boolean logined = Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
 
-		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-
-		// Open the default i.e. the first rear facing camera.
-		mCamera = Camera.open();
-
-		List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
-		photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
-		
-		if(getString(R.string.is_demo).equals("1")){
-			for(int i=0;i<mSupportedPictureSizes.size();i++){
-				if(mSupportedPictureSizes.get(i).width <= 640){
-					firstEnabledIndex = i;
-					break;
-				}
-			}
-			if(photoSizeIndex < firstEnabledIndex){
-				photoSizeIndex = firstEnabledIndex;
-				preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
-			}
-		}
-		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
-
-		// Set flash mode from preferences and update button accordingly
-		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
-
-		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
-			isFlashOn = false;
-			flashButton.setImageResource(R.drawable.flash_off);
-		}
-		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
-			isFlashOn = true;
-			flashButton.setImageResource(R.drawable.flash_on);
-		}
-		
-		boolean timerMode = preferences.getBoolean(CameraActivity.TIMER_MODE, false);
-		
-		if(timerMode){
-			isTimerOn = true;
-			timerButton.setImageResource(R.drawable.timer);
-		}
-		else{
-			isTimerOn = false;
-			timerButton.setImageResource(R.drawable.timer_disabled);
-		}
-
-		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
-			isFlashOn = false;
-			((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_off);
-		}
-		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
-			isFlashOn = true;
-			((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_on);
-		}
-
-		Camera.Parameters parameters = mCamera.getParameters();
-		parameters.setFlashMode(flashMode);
-		parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
-		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-
-		if (mOrientationEventListener == null) {
-			mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
-
-				@Override
-				public void onOrientationChanged(int orientation) {
-					if (orientation == ORIENTATION_UNKNOWN){
-						return;
-					}
-					
-					// determine our orientation based on sensor response
-					int lastOrientation = mOrientation;
-
-					if (orientation >= 315 || orientation < 45) {
-						if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {
-							mOrientation = ORIENTATION_PORTRAIT_NORMAL;
-						}
-					}
-					else if (orientation < 315 && orientation >= 225) {
-						if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
-							mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
-						}
-					}
-					else if (orientation < 225 && orientation >= 135) {
-						if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
-							mOrientation = ORIENTATION_PORTRAIT_INVERTED;
-						}
-					}
-					else { // orientation <135 && orientation > 45
-						if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
-							mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
-						}
-					}
-
-					if (lastOrientation != mOrientation) {
-						Camera.Parameters parameters = mCamera.getParameters();
-						parameters.setRotation(changeRotation(mOrientation));
-						mCamera.setParameters(parameters);
+		if(logined){
+			final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+	
+			// Open the default i.e. the first rear facing camera.
+			mCamera = Camera.open();
+	
+			List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+			
+			if(Helpers.isDemo(CameraActivity.this)){
+				for(int i=0;i<mSupportedPictureSizes.size();i++){
+					if(mSupportedPictureSizes.get(i).width <= 640){
+						firstEnabledIndex = i;
+						break;
 					}
 				}
-			};
+				if(photoSizeIndex < firstEnabledIndex){
+					photoSizeIndex = firstEnabledIndex;
+					preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
+				}
+			}
+			Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
+	
+			// Set flash mode from preferences and update button accordingly
+			String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
+	
+			if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
+				isFlashOn = false;
+				flashButton.setImageResource(R.drawable.flash_off);
+			}
+			else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
+				isFlashOn = true;
+				flashButton.setImageResource(R.drawable.flash_on);
+			}
+			
+			boolean timerMode = preferences.getBoolean(CameraActivity.TIMER_MODE, false);
+			
+			if(timerMode){
+				isTimerOn = true;
+				timerButton.setImageResource(R.drawable.timer);
+			}
+			else{
+				isTimerOn = false;
+				timerButton.setImageResource(R.drawable.timer_disabled);
+			}
+	
+			if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
+				isFlashOn = false;
+				((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_off);
+			}
+			else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
+				isFlashOn = true;
+				((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_on);
+			}
+	
+			Camera.Parameters parameters = mCamera.getParameters();
+			parameters.setFlashMode(flashMode);
+			parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
+			parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+	
+			if (mOrientationEventListener == null) {
+				mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+	
+					@Override
+					public void onOrientationChanged(int orientation) {
+						if (orientation == ORIENTATION_UNKNOWN){
+							return;
+						}
+						
+						// determine our orientation based on sensor response
+						int lastOrientation = mOrientation;
+	
+						if (orientation >= 315 || orientation < 45) {
+							if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {
+								mOrientation = ORIENTATION_PORTRAIT_NORMAL;
+							}
+						}
+						else if (orientation < 315 && orientation >= 225) {
+							if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
+								mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
+							}
+						}
+						else if (orientation < 225 && orientation >= 135) {
+							if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
+								mOrientation = ORIENTATION_PORTRAIT_INVERTED;
+							}
+						}
+						else { // orientation <135 && orientation > 45
+							if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
+								mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
+							}
+						}
+	
+						if (lastOrientation != mOrientation) {
+							Camera.Parameters parameters = mCamera.getParameters();
+							parameters.setRotation(changeRotation(mOrientation));
+							mCamera.setParameters(parameters);
+						}
+					}
+				};
+			}
+			if (mOrientationEventListener.canDetectOrientation()) {
+				mOrientationEventListener.enable();
+			}
+			mCamera.setParameters(parameters);
+	
+			cameraCurrentlyLocked = defaultCameraId;
+			mPreview.setCamera(mCamera);
+			
+			showLastPhotoThumb();
 		}
-		if (mOrientationEventListener.canDetectOrientation()) {
-			mOrientationEventListener.enable();
-		}
-		mCamera.setParameters(parameters);
-
-		cameraCurrentlyLocked = defaultCameraId;
-		mPreview.setCamera(mCamera);
-		
-		showLastPhotoThumb();
 	}
 
 	@Override
@@ -796,7 +813,6 @@ public class CameraActivity extends Activity {
 
             TextView textView=(TextView) view.findViewById(android.R.id.text1);
 
-            /*YOUR CHOICE OF COLOR*/
             if(firstEnabledIndex != -1 && firstEnabledIndex > position){
             	textView.setTextColor(Color.GRAY);
             }

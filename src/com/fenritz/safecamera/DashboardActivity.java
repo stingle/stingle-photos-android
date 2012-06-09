@@ -11,12 +11,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.LinearLayout;
 
 import com.fenritz.safecamera.util.Helpers;
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 public class DashboardActivity extends Activity {
 	
 	private BroadcastReceiver receiver;
+	private AdView adView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,14 @@ public class DashboardActivity extends Activity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
+		
+		if(Helpers.isDemo(DashboardActivity.this)){
+			// Create the adView
+		    adView = new AdView(this, AdSize.BANNER, getString(R.string.ad_publisher_id));
+		    LinearLayout layout = (LinearLayout)findViewById(R.id.adHolder);
+		    layout.addView(adView);
+		    adView.loadAd(new AdRequest());
+		}
 	}
 	
 	@Override
@@ -69,8 +82,11 @@ public class DashboardActivity extends Activity {
 	
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+		if (adView != null){
+			adView.destroy();
+		}
 		unregisterReceiver(receiver);
+		super.onDestroy();
 	}
 	
 	@Override

@@ -46,6 +46,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -308,6 +309,13 @@ public class GalleryActivity extends Activity {
 		
 		this.files.addAll(folders);
 		this.files.addAll(files);
+		
+		if(this.files.size() == 0){
+			findViewById(R.id.no_files).setVisibility(View.VISIBLE);
+		}
+		else{
+			findViewById(R.id.no_files).setVisibility(View.GONE);
+		}
 		
 		thumbGenTask = new GenerateThumbs();
 		thumbGenTask.execute(toGenerateThumbs);
@@ -947,6 +955,7 @@ public class GalleryActivity extends Activity {
 							imageView.setOnClickListener(onClick);
 							imageView.setOnLongClickListener(onLongClick);
 							imageView.setPadding(3, 3, 3, 3);
+							imageView.setScaleType(ScaleType.FIT_CENTER);
 							layout.addView(imageView);
 						}
 						else {
@@ -1109,28 +1118,30 @@ public class GalleryActivity extends Activity {
 				}
 				int i = start;
 				while(true){
-					File file = files.get(i);
-					if(file != null){
-						try {
-							String thumbPath = thumbsDir + file.getName();
-							if(memCache.get(thumbPath) == null){
-								memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(appContext).decrypt(new FileInputStream(thumbPath), this), 300));
+					if(files.size() > i){
+						File file = files.get(i);
+						if(file != null){
+							try {
+								String thumbPath = thumbsDir + file.getName();
+								if(memCache.get(thumbPath) == null){
+									memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(appContext).decrypt(new FileInputStream(thumbPath), this), 300));
+								}
+								if(isCancelled()){
+									break;
+								}
+								publishProgress();
 							}
-							if(isCancelled()){
-								break;
-							}
-							publishProgress();
+							catch (FileNotFoundException e) { }
 						}
-						catch (FileNotFoundException e) { }
-					}
-					if(i==end){
-						break;
-					}
-					if(!reverse){
-						i++;
-					}
-					else{
-						i--;
+						if(i==end){
+							break;
+						}
+						if(!reverse){
+							i++;
+						}
+						else{
+							i--;
+						}
 					}
 				}
 			}
@@ -1227,6 +1238,27 @@ public class GalleryActivity extends Activity {
 		// Handle item selection
 		Intent intent = new Intent();
 		switch (item.getItemId()) {
+			case R.id.select_all:
+				if (multiSelectMode == MULTISELECT_OFF) {
+					((ImageButton) findViewById(R.id.multi_select)).setImageResource(R.drawable.checkbox_checked);
+					multiSelectMode = MULTISELECT_ON;
+				}
+				enterMultiSelect();
+				selectedFiles.clear();
+				selectedFiles.addAll(files);
+				galleryAdapter.notifyDataSetChanged();
+				return true;
+			case R.id.deselect_all:
+				if (multiSelectMode == MULTISELECT_ON) {
+					((ImageButton) findViewById(R.id.multi_select)).setImageResource(R.drawable.checkbox_unchecked);
+					multiSelectMode = MULTISELECT_OFF;
+					clearMutliSelect();
+				}
+				exitMultiSelect();
+				selectedFiles.clear();
+				galleryAdapter.notifyDataSetChanged();
+				
+				return true;
 			case R.id.change_password:
 				intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);
 				startActivity(intent);

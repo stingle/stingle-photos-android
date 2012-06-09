@@ -10,6 +10,14 @@
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/settings" />
     <item
+        android:id="@+id/select_all"
+        android:icon="@android:drawable/ic_notification_clear_all"
+        android:title="@string/select_all" />
+    <item
+        android:id="@+id/deselect_all"
+        android:icon="@android:drawable/ic_notification_clear_all"
+        android:title="@string/deselect_all" />
+    <item
         android:id="@+id/logout"
         android:icon="@android:drawable/ic_lock_power_off"
         android:title="@string/log_out" />

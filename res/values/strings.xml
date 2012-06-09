@@ -86,6 +86,9 @@
     <string name="volume_take_photo_desc">Volume Up/Down takes picture</string>
     <string name="timer_duration">Timer Duration</string>
     <string name="timer_duartion_desc">Camera Timer Duration</string>
+    <string name="select_all">Select All</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="no_files">No files in this folder</string>
     
     
     <!-- File Dialog -->

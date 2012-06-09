@@ -17,6 +17,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -117,21 +118,15 @@ public class ChangePasswordActivity extends Activity {
 			progressDialog.show();
 		}
 
-		@Override
-		protected Void doInBackground(String... params) {
-			String newPassword = params[0];
-
-			AESCrypt newCrypt = Helpers.getAESCrypt(newPassword, ChangePasswordActivity.this);
-			
-			
-			File dir = new File(Helpers.getHomeDir(ChangePasswordActivity.this));
+		private ArrayList<File> getFilesList(String path){
+			File dir = new File(path);
 			File[] folderFiles = dir.listFiles();
 
 			Arrays.sort(folderFiles);
 
 			ArrayList<File> files = new ArrayList<File>();
 			for (File file : folderFiles) {
-				if (file.getName().endsWith(getString(R.string.file_extension))) {
+				if (file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
 					files.add(file);
 					
 					String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + file.getName();
@@ -140,12 +135,27 @@ public class ChangePasswordActivity extends Activity {
 						files.add(thumb);
 					}
 				}
+				else if(file.isDirectory() && !file.getName().startsWith(".")){
+					files.addAll(getFilesList(file.getPath()));
+				}
 			}
+			
+			return files;
+		}
+		
+		@Override
+		protected Void doInBackground(String... params) {
+			String newPassword = params[0];
+
+			AESCrypt newCrypt = Helpers.getAESCrypt(newPassword, ChangePasswordActivity.this);
+			
+			ArrayList<File> files = getFilesList(Helpers.getHomeDir(ChangePasswordActivity.this));
 			
 			progressDialog.setMax(files.size());
 			
 			int counter = 0;
 			for(File file : files){
+				Log.d("qaq", file.getPath());
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
 					

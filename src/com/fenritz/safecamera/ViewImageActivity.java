@@ -17,6 +17,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -347,6 +350,29 @@ public class ViewImageActivity extends Activity {
 			if (file.getName().endsWith(getString(R.string.file_extension)) && file.length() < maxFileSize) {
 				files.add(file);
 			}
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.view_photo_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		Intent intent = new Intent();
+		switch (item.getItemId()) {
+			case R.id.gotoGallery:
+				intent.setClass(ViewImageActivity.this, GalleryActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+				startActivity(intent);
+				finish();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 	

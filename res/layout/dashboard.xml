@@ -1,31 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.fenritz.safecamera.widget.DashboardLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:id="@+id/parentLayout" >
+    
+    <LinearLayout 
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical"
+    	android:id="@+id/adHolder" >
+    </LinearLayout>
 
-	<ImageButton
-       android:id="@+id/gotoCamera"
-       android:layout_height="fill_parent"
-       android:layout_width="fill_parent"
-       android:scaleType="centerInside"
-       android:layout_weight="1"
-       android:layout_margin="50dp"
-       android:padding="0dp"
-       android:background="@null"
-       android:contentDescription="@string/camera"
-       android:src="@drawable/camera" />
+    <com.fenritz.safecamera.widget.DashboardLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1" >
 
-	<ImageButton
-       android:id="@+id/gotoGallery"
-       android:layout_height="fill_parent"
-       android:layout_width="fill_parent"
-       android:scaleType="centerInside"
-       android:layout_margin="50dp"
-       android:layout_weight="1"
-       android:padding="0dp"
-       android:background="@null"
-       android:contentDescription="@string/gallery"
-       android:src="@drawable/gallery" />
-		
-</com.fenritz.safecamera.widget.DashboardLayout>
+        <ImageButton
+            android:id="@+id/gotoCamera"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="50dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:contentDescription="@string/camera"
+            android:padding="30dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/camera" />
+
+        <ImageButton
+            android:id="@+id/gotoGallery"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="50dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:contentDescription="@string/gallery"
+            android:padding="30dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/gallery" />
+    </com.fenritz.safecamera.widget.DashboardLayout>
+
+</LinearLayout>

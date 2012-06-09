@@ -25,6 +25,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -50,6 +51,14 @@ public class Helpers {
 	protected static final int SHARE_AS_IS = 0;
 	protected static final int SHARE_REENCRYPT = 1;
 	protected static final int SHARE_DECRYPT = 2;
+	
+	public static boolean isDemo(Context context){
+		PackageManager manager = context.getPackageManager();
+		if(manager.checkSignatures(context.getString(R.string.main_package_name), context.getString(R.string.key_package_name)) == PackageManager.SIGNATURE_MATCH) {
+		    return false;
+		}
+		return true;
+	}
 	
 	public static boolean checkLoginedState(Activity activity) {
 		return checkLoginedState(activity, null, true);
@@ -271,21 +280,24 @@ public class Helpers {
 	}
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize) {
-		// Decode image size
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inJustDecodeBounds = true;
-		BitmapFactory.decodeByteArray(data, 0, data.length, o);
-
-		// Find the correct scale value. It should be the power of 2.
-		int scale = 1;
-		while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
-			scale *= 2;
+		if(data != null){
+			// Decode image size
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeByteArray(data, 0, data.length, o);
+	
+			// Find the correct scale value. It should be the power of 2.
+			int scale = 1;
+			while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
+				scale *= 2;
+			}
+			
+			// Decode with inSampleSize
+			BitmapFactory.Options o2 = new BitmapFactory.Options();
+			o2.inSampleSize = scale;
+			return BitmapFactory.decodeByteArray(data, 0, data.length, o2);
 		}
-		
-		// Decode with inSampleSize
-		BitmapFactory.Options o2 = new BitmapFactory.Options();
-		o2.inSampleSize = scale;
-		return BitmapFactory.decodeByteArray(data, 0, data.length, o2);
+		return null;
 	}
 	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {

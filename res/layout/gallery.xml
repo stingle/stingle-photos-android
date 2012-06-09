@@ -60,6 +60,14 @@
 
     </RelativeLayout>
 
+    <TextView 
+        android:id="@+id/no_files"
+        android:text="@string/no_files"
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:visibility="gone" />
+    
     <GridView
         android:id="@+id/photosGrid"
         android:layout_width="fill_parent"

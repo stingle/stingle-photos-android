@@ -26,8 +26,6 @@ import com.fenritz.safecamera.util.Helpers;
 
 public class SafeCameraActivity extends Activity {
 
-	
-
 	public static final String DEFAULT_PREFS = "default_prefs";
 	public static final String PASSWORD = "password";
 	public static final String ACTION_JUST_LOGIN = "just_login";

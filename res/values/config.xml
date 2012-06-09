@@ -16,9 +16,13 @@
 <resources>
     <string name="default_home_folder_name">SafeCamera</string>
     <string name="default_thumb_folder_name">.thumb</string>
-    <string name="thumb_size">100</string>
+    <string name="thumb_size">150</string>
     <string name="file_extension">.sc</string>
     <string name="max_file_size">6</string>
-    <string name="is_demo">0</string>
+    
+    <string name="main_package_name">com.fenritz.safecamera</string>
+    <string name="key_package_name">com.fenritz.safecamerapro</string>
+    
+    <string name="ad_publisher_id">a14fd39119f39e8</string>
     
 </resources>
