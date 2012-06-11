@@ -32,9 +32,9 @@ public class AESCrypt {
 	private final String password;
 
 	public static final String PROVIDER = "BC";
-	public static final int SALT_LENGTH = 20;
+	public static final int SALT_LENGTH = 32;
 	public static final int IV_LENGTH = 16;
-	public static final int PBE_ITERATION_COUNT = 1000;
+	public static final int PBE_ITERATION_COUNT = 4096;
 
 	private static final String RANDOM_ALGORITHM = "SHA1PRNG";
 	private static final String HASH_ALGORITHM = "SHA-512";
@@ -198,16 +198,16 @@ public class AESCrypt {
 		}
 	}
 
-	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt) {
-		this.reEncrypt(in, out, secondaryCrypt, null, null, false);
+	public boolean reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt) {
+		return this.reEncrypt(in, out, secondaryCrypt, null, null, false);
 	}
-	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress) {
-		this.reEncrypt(in, out, secondaryCrypt, progress, null, false);
+	public boolean reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress) {
+		return this.reEncrypt(in, out, secondaryCrypt, progress, null, false);
 	}
-	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task){
-		this.reEncrypt(in, out, secondaryCrypt, progress, task, false);
+	public boolean reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task){
+		return this.reEncrypt(in, out, secondaryCrypt, progress, task, false);
 	}
-	public void reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task, boolean encryptionIsMy) {
+	public boolean reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task, boolean encryptionIsMy) {
 		try {
 			
 			// Bytes written to out will be encrypted
@@ -256,10 +256,12 @@ public class AESCrypt {
 			out.close();
 			in.close();
 		}
-		catch (java.io.IOException e) {
+		catch (Exception e) {
 			e.printStackTrace();
-			return;
+			return false;
 		}
+		
+		return false;
 	}
 
 	public void decrypt(InputStream in, OutputStream out) {

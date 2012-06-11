@@ -170,6 +170,7 @@ public class ViewImageActivity extends Activity {
 		return new OnClickListener() {
 			@SuppressWarnings("unchecked")
 			public void onClick(View v) {
+				cancelPendingTasks();
 				final ArrayList<File> selectedFiles = new ArrayList<File>();
 				selectedFiles.add(files.get(currentPosition));
 				
@@ -186,12 +187,18 @@ public class ViewImageActivity extends Activity {
 								if(currentPosition > 0){
 									--currentPosition;
 								}
-								showImage(files.get(currentPosition));
-								showViews();
 								
 								Intent resultIntent = new Intent();
 								resultIntent.putExtra("needToRefresh", true);
 								setResult(RESULT_OK, resultIntent);
+								
+								if(files.size() > 0){
+									showImage(files.get(currentPosition));
+									showViews();
+								}
+								else{
+									ViewImageActivity.this.finish();
+								}
 							}
 						}).execute(selectedFiles);
 					}

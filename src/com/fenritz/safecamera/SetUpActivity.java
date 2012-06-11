@@ -49,10 +49,16 @@ public class SetUpActivity  extends Activity{
 					e.printStackTrace();
 				}
 				
-				((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(password1);
+				try {
+					((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(AESCrypt.byteToHex(AESCrypt.getHash(password1)));
+				}
+				catch (AESCryptException e) {
+					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.unexpected_error));
+					return;
+				}
 				
 				Intent intent = new Intent();
-				intent.setClass(SetUpActivity.this, CameraActivity.class);
+				intent.setClass(SetUpActivity.this, DashboardActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);

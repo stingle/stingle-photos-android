@@ -104,7 +104,7 @@ public class SafeCameraActivity extends Activity {
 				return;
 			}
 
-			new Login().execute(enteredPassword);
+			new Login().execute(enteredPasswordHash);
 		}
 		catch (AESCryptException e) {
 			Helpers.showAlertDialog(SafeCameraActivity.this, String.format(getString(R.string.unexpected_error), "102"));

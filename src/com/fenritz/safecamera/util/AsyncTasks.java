@@ -588,10 +588,13 @@ public class AsyncTasks {
 						String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName());
 
 						FileOutputStream outputStream = new FileOutputStream(destFilePath);
-						Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this, true);
-
-						if (deleteAfterImport) {
-							origFile.delete();
+						if(Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this, true)){
+							if (deleteAfterImport) {
+								origFile.delete();
+							}
+						}
+						else{
+							returnStatus = STATUS_FAIL;
 						}
 						publishProgress(i+1);
 					}

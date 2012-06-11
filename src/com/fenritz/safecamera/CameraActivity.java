@@ -194,6 +194,10 @@ public class CameraActivity extends Activity {
 				}
 			});
 			task.execute();
+			findViewById(R.id.lastPhotoContainer).setVisibility(View.VISIBLE);
+		}
+		else{
+			findViewById(R.id.lastPhotoContainer).setVisibility(View.INVISIBLE);
 		}
 	}
 	
