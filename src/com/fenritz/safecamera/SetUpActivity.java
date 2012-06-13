@@ -42,7 +42,8 @@ public class SetUpActivity  extends Activity{
 				
 				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 				try {
-					preferences.edit().putString(SafeCameraActivity.PASSWORD, AESCrypt.byteToHex(AESCrypt.getHash(password1))).commit();
+					String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(AESCrypt.byteToHex(AESCrypt.getHash(password1)) + password1));
+					preferences.edit().putString(SafeCameraActivity.PASSWORD, loginHash).commit();
 				}
 				catch (AESCryptException e) {
 					Helpers.showAlertDialog(SetUpActivity.this, String.format(getString(R.string.unexpected_error), "102"));

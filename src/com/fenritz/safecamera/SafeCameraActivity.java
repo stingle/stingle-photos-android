@@ -99,7 +99,9 @@ public class SafeCameraActivity extends Activity {
 		String enteredPassword = ((EditText) findViewById(R.id.password)).getText().toString();
 		try{
 			String enteredPasswordHash = AESCrypt.byteToHex(AESCrypt.getHash(enteredPassword));
-			if (!enteredPasswordHash.equals(savedHash)) {
+			String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(AESCrypt.byteToHex(AESCrypt.getHash(enteredPassword)) + enteredPassword));
+			
+			if (!loginHash.equals(savedHash)) {
 				Helpers.showAlertDialog(SafeCameraActivity.this, getString(R.string.incorrect_password));
 				return;
 			}

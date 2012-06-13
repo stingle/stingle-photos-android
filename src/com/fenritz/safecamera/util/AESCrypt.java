@@ -1,6 +1,7 @@
 package com.fenritz.safecamera.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -41,9 +42,13 @@ public class AESCrypt {
 	private static final String PBE_ALGORITHM = "PBEWithSHA256And256BitAES-CBC-BC";
 	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
 	private static final String SECRET_KEY_ALGORITHM = "AES";
+	
+	private static final int VERSION = 1;
+	private static final String HEADER = "SCAES";
 
 	private byte[] iv = new byte[IV_LENGTH];
 	private byte[] salt = new byte[SALT_LENGTH];
+	private int currentVersion = 1;
 	/**
 	 * Input a string that will be md5 hashed to create the key.
 	 * 
@@ -118,6 +123,32 @@ public class AESCrypt {
 		return salt;
 	}
 
+	private void writeHeader(OutputStream out, byte[] pIv, byte[] pSalt) throws IOException{
+		out.write(HEADER.getBytes());
+		out.write(VERSION);
+		out.write(pIv);
+		out.write(pSalt);
+	}
+	
+	private int readHeader(InputStream in, byte[] pIv, byte[] pSalt) throws IOException{
+		byte[] header = new byte[HEADER.length()];
+		in.read(header);
+		
+		if (!new String(header, "UTF-8").equals(HEADER)) {
+			throw new IOException("Invalid file header");
+		}
+
+		currentVersion = in.read();
+		if (currentVersion != VERSION) {
+			throw new IOException("Unsupported version number: " + currentVersion);
+		}
+		
+		in.read(pIv);
+		in.read(pSalt);
+		
+		return header.length + 1 + pIv.length + pSalt.length;
+	}
+	
 	public void encrypt(InputStream in, OutputStream out) {
 		this.encrypt(in, out, null, null);
 	}
@@ -127,8 +158,8 @@ public class AESCrypt {
 	public void encrypt(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			this.setupCrypto();
-			out.write(iv, 0, iv.length);
-			out.write(salt, 0, salt.length);
+			writeHeader(out, iv, salt);
+			
 			if(progress != null){
 				progress.setProgress(iv.length+salt.length);
 			}
@@ -151,50 +182,29 @@ public class AESCrypt {
 					}
 				}
 			}
+			
 			out.close();
 			in.close();
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
-			return;
 		}
 	}
 	
 	public void encrypt(byte[] data, OutputStream out) {
-		
-		/*try {
-			long currentTimestamp = System.currentTimeMillis();
-			byte[] enc = encryptionCipher.doFinal(data);
-			Log.d("qaq", "enc - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
-			
-			currentTimestamp = System.currentTimeMillis();
-			byte[] dec = decryptionCipher.doFinal(enc);
-			Log.d("qaq", "dec - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
-		}
-		catch (IllegalBlockSizeException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		catch (BadPaddingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}*/
-		
-		
 		try {
 			this.setupCrypto();
-			out.write(iv, 0, iv.length);
-			out.write(salt, 0, salt.length);
+			writeHeader(out, iv, salt);
 
 			// Bytes written to out will be encrypted
 			out = new CipherOutputStream(out, encryptionCipher);
 
 			out.write(data);
+			
 			out.close();
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
-			return;
 		}
 	}
 
@@ -209,37 +219,32 @@ public class AESCrypt {
 	}
 	public boolean reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task, boolean encryptionIsMy) {
 		try {
-			
+			long totalRead;
 			// Bytes written to out will be encrypted
 			if(encryptionIsMy){
 				byte[] decIV = new byte[IV_LENGTH];
 				byte[] decSalt = new byte[SALT_LENGTH];
-				in.read(decIV, 0, decIV.length);
-				in.read(decSalt, 0, decSalt.length);
+				totalRead = readHeader(in, decIV, decSalt);
 				
 				this.setupCrypto();
 				
-				out.write(iv, 0, iv.length);
-				out.write(salt, 0, salt.length);
+				writeHeader(out, iv, salt);
 				
 				in = new OptimizedCipherInputStream(in, secondaryCrypt.getDecryptionCipher(decIV, decSalt));
 				out = new CipherOutputStream(out, encryptionCipher);
 			}
 			else{
-				in.read(iv, 0, iv.length);
-				in.read(salt, 0, salt.length);
+				totalRead = readHeader(in, iv, salt);
 				this.setupCrypto(iv, salt);
 				
-				Cipher encryptionCipher = secondaryCrypt.getEncryptionCipher();
-				out.write(secondaryCrypt.getIV(), 0, secondaryCrypt.getIV().length);
-				out.write(secondaryCrypt.getSalt(), 0, secondaryCrypt.getSalt().length);
+				Cipher secEncryptionCipher = secondaryCrypt.getEncryptionCipher();
+				writeHeader(out, secondaryCrypt.getIV(), secondaryCrypt.getSalt());
 				
 				in = new OptimizedCipherInputStream(in, decryptionCipher);
-				out = new CipherOutputStream(out, encryptionCipher);
+				out = new CipherOutputStream(out, secEncryptionCipher);
 			}
 
 			// Read in the cleartext bytes and write to out to encrypt
-			long totalRead = iv.length + salt.length;
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {
 				out.write(buf, 0, numRead);
@@ -253,6 +258,7 @@ public class AESCrypt {
 					}
 				}
 			}
+			
 			out.close();
 			in.close();
 		}
@@ -261,7 +267,7 @@ public class AESCrypt {
 			return false;
 		}
 		
-		return false;
+		return true;
 	}
 
 	public void decrypt(InputStream in, OutputStream out) {
@@ -274,8 +280,7 @@ public class AESCrypt {
 	
 	public void decrypt(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
-			in.read(iv, 0, iv.length);
-			in.read(salt, 0, salt.length);
+			long totalRead = readHeader(in, iv, salt);
 			this.setupCrypto(iv, salt);
 			if(progress != null){
 				progress.setProgress(iv.length+salt.length);
@@ -285,12 +290,11 @@ public class AESCrypt {
 			in = new OptimizedCipherInputStream(in, decryptionCipher);
 
 			// Read in the decrypted bytes and write the cleartext to out
-			long totalRead = iv.length+salt.length;
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {
+				totalRead += numRead;
 				out.write(buf, 0, numRead);
 				if(progress != null){
-					totalRead += numRead;
 					progress.setProgress(totalRead);
 				}
 				if(task != null){
@@ -299,12 +303,12 @@ public class AESCrypt {
 					}
 				}
 			}
+			
 			out.close();
 			in.close();
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
-			return;
 		}
 	}
 	
@@ -321,39 +325,38 @@ public class AESCrypt {
 	
 	public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
-			in.read(iv, 0, iv.length);
-			in.read(salt, 0, salt.length);
+			long totalRead = readHeader(in, iv, salt);
 			this.setupCrypto(iv, salt);
 
-			//long currentTimestamp = System.currentTimeMillis();
-			//Log.d("qaq", "dec - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
-			
 			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 			int numRead = 0;
 			if(progress != null){
 				in = new OptimizedCipherInputStream(in, decryptionCipher);
-				progress.setProgress(iv.length+salt.length);
-				while ((numRead = in.read(buf)) >= 0) {
-					byteBuffer.write(buf, 0, numRead);
-					if(progress != null){
-						progress.setProgress(byteBuffer.size() + iv.length + salt.length);
-					}
-					if(task != null){
-						if(task.isCancelled()){
-							return null;
-						}
+				progress.setProgress(totalRead);
+			}
+			
+			while ((numRead = in.read(buf)) >= 0) {
+				byteBuffer.write(buf, 0, numRead);
+				
+				if(task != null){
+					if(task.isCancelled()){
+						return null;
 					}
 				}
+				if(progress != null){
+					totalRead += numRead;
+					progress.setProgress(totalRead);
+				}
+			}
+			in.close();
+			
+			if(progress != null){
 				return byteBuffer.toByteArray();
 			}
 			else{
-				while ((numRead = in.read(buf)) >= 0) {
-					byteBuffer.write(buf, 0, numRead);
-				}
-			
-				in.close();
 				return decryptionCipher.doFinal(byteBuffer.toByteArray());
 			}
+				
 		}
 		catch (java.io.IOException e) {
 			e.printStackTrace();
@@ -367,178 +370,6 @@ public class AESCrypt {
 		return null;
 	}
 	
-	/*public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
-		long currentTimestamp = System.currentTimeMillis();
-		try {
-			in = new BufferedInputStream(in, 32*1024);
-			in.read(iv, 0, iv.length);
-			this.setupCrypto(iv);
-			if(progress != null){
-				progress.setProgress(iv.length);
-			}
-
-			// Bytes read from in will be decrypted
-
-			// Read in the decrypted bytes and write the cleartext to out
-			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-			int numRead = 0;
-			while ((numRead = in.read(buf)) >= 0) {
-				byteBuffer.write(buf, 0, numRead);
-				if(progress != null){
-					progress.setProgress(byteBuffer.size() + iv.length);
-				}
-				if(task != null){
-					if(task.isCancelled()){
-						return null;
-					}
-				}
-			}
-			in.close();
-			Log.d("qaq", "file - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
-			
-			currentTimestamp = System.currentTimeMillis();
-			byte[] dec = byteBuffer.toByteArray();
-			Log.d("qaq", "byteArray - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
-			
-			currentTimestamp = System.currentTimeMillis();
-			byte[] decryptedData = decryptionCipher.doFinal(dec);
-			
-			Log.d("qaq", "dec - " + String.valueOf(System.currentTimeMillis()-currentTimestamp));
-			return decryptedData;
-		}
-		catch (java.io.IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-		catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return null;
-	}*/
-	
-	/*public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
-		try {
-			//in = new BufferedInputStream(in, 8192);
-			
-			in.read(iv, 0, iv.length);
-			this.setupCrypto(iv);
-			if(progress != null){
-				progress.setProgress(iv.length);
-			}
-
-			// Bytes read from in will be decrypted
-			//in = new CipherInputStream(in, decryptionCipher);
-			// Read in the decrypted bytes and write the cleartext to out
-			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-			
-			byte[] inBytes = new byte[8192];
-			int numRead = 0;
-			while ((numRead = in.read(inBytes)) == inBytes.length){
-				if(task != null){
-					if(task.isCancelled()){
-						return null;
-					}
-				}
-	        	if(progress != null){
-					progress.setProgress(byteBuffer.size() + iv.length);
-				}
-	        	byte[] decyptedChunk = decryptionCipher.update(inBytes);
-	            byteBuffer.write(decyptedChunk, 0, decyptedChunk.length);
-	            Log.d("qaq", String.valueOf(numRead) + " - " + String.valueOf(decyptedChunk.length));
-	        }
-			if(numRead > 0){
-				byte[] lastChunk = decryptionCipher.doFinal(inBytes, 0, inBytes.length);
-				byteBuffer.write(lastChunk, 0, numRead);
-			}
-			else{
-				decryptionCipher.doFinal();
-			}
-			
-			in.close();
-			
-			FileOutputStream fl = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getPath() + "/tmp/qaq.jpg"));
-			fl.write(byteBuffer.toByteArray());
-			fl.close();
-			
-			return byteBuffer.toByteArray();
-			
-		}
-		catch (java.io.IOException e) {
-			e.printStackTrace();
-		}
-		catch (IllegalBlockSizeException e) {
-			e.printStackTrace();
-		}
-		catch (BadPaddingException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}*/
-	
-	/*public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
-		try {
-			in.read(iv, 0, iv.length);
-			this.setupCrypto(iv);
-			if(progress != null){
-				progress.setProgress(iv.length);
-			}
-			
-			
-			// Read in the decrypted bytes and write the cleartext to out
-			BufferedInputStream inb = new BufferedInputStream(in);
-			
-			
-			byte[] out = new byte[0];
-			int bufLen = 128 * 1024;
-			byte[] buf = new byte[bufLen];
-			byte[] tmp = null;
-			int len = 0;
-			
-			while ((len = inb.read(buf, 0, bufLen)) != -1) {
-				// extend array
-				tmp = new byte[out.length + len];
-				
-				// copy data
-				System.arraycopy(out, 0, tmp, 0, out.length);
-				System.arraycopy(buf, 0, tmp, out.length, len);
-				out = tmp;
-				tmp = null;
-				if(task != null){
-					if(task.isCancelled()){
-						return null;
-					}
-				}
-				
-				if(progress != null){
-					progress.setProgress(out.length + iv.length);
-				}
-			}
-			
-			byte[] decryptedData = decryptionCipher.doFinal(out);
-			inb.close();
-			
-			return decryptedData;
-		}
-		catch (java.io.IOException e) {
-			e.printStackTrace();
-		}
-		catch (IllegalBlockSizeException e) {
-			e.printStackTrace();
-		}
-		catch (BadPaddingException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}*/
-
 	/**
 	 * Input is a string to encrypt.
 	 * 
@@ -639,15 +470,13 @@ public class AESCrypt {
 			PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), salt, PBE_ITERATION_COUNT, 256);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(PBE_ALGORITHM, PROVIDER);
 			SecretKey tmp = factory.generateSecret(pbeKeySpec);
-			SecretKey secret = new SecretKeySpec(tmp.getEncoded(), SECRET_KEY_ALGORITHM);
-			return secret;
+			return new SecretKeySpec(tmp.getEncoded(), SECRET_KEY_ALGORITHM);
 		}
 		catch (Exception e) {
 			throw new AESCryptException("Unable to get secret key");
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private byte[] generateSalt() throws AESCryptException {
 		try {
 			SecureRandom random = SecureRandom.getInstance(RANDOM_ALGORITHM);

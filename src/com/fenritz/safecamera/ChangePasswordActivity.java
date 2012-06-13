@@ -66,7 +66,7 @@ public class ChangePasswordActivity extends Activity {
 				String savedHash = preferences.getString(SafeCameraActivity.PASSWORD, "");
 				
 				try {
-					String enteredPasswordHash = AESCrypt.byteToHex(AESCrypt.getHash(currentPassword));
+					String enteredPasswordHash = AESCrypt.byteToHex(AESCrypt.getHash(AESCrypt.byteToHex(AESCrypt.getHash(currentPassword)) + currentPassword));
 					if (!enteredPasswordHash.equals(savedHash)) {
 						Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.incorrect_password));
 						return;
@@ -83,7 +83,6 @@ public class ChangePasswordActivity extends Activity {
 					new ReEncryptFiles().execute(newPassword);
 				}
 				catch (AESCryptException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -146,47 +145,49 @@ public class ChangePasswordActivity extends Activity {
 		@Override
 		protected Void doInBackground(String... params) {
 			String newPassword = params[0];
-
-			AESCrypt newCrypt = Helpers.getAESCrypt(newPassword, ChangePasswordActivity.this);
-			
-			ArrayList<File> files = getFilesList(Helpers.getHomeDir(ChangePasswordActivity.this));
-			
-			progressDialog.setMax(files.size());
-			
-			int counter = 0;
-			for(File file : files){
-				Log.d("qaq", file.getPath());
-				try {
-					FileInputStream inputStream = new FileInputStream(file);
-					
-					String origFilePath = file.getPath();
-					String tmpFilePath = origFilePath + ".tmp";
-					
-					File tmpFile = new File(tmpFilePath);
-					FileOutputStream outputStream = new FileOutputStream(tmpFile);
-					
-					Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this);
-					
-					file.delete();
-					tmpFile.renameTo(new File(origFilePath));
-					
-					publishProgress(++counter);
-				}
-				catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 			try {
-				preferences.edit().putString(SafeCameraActivity.PASSWORD, AESCrypt.byteToHex(AESCrypt.getHash(newPassword))).commit();
+				String passwordHash = AESCrypt.byteToHex(AESCrypt.getHash(newPassword));
+	
+				AESCrypt newCrypt = Helpers.getAESCrypt(passwordHash, ChangePasswordActivity.this);
+				
+				ArrayList<File> files = getFilesList(Helpers.getHomeDir(ChangePasswordActivity.this));
+				
+				progressDialog.setMax(files.size());
+				
+				int counter = 0;
+				for(File file : files){
+					Log.d("qaq", file.getPath());
+					try {
+						FileInputStream inputStream = new FileInputStream(file);
+						
+						String origFilePath = file.getPath();
+						String tmpFilePath = origFilePath + ".tmp";
+						
+						File tmpFile = new File(tmpFilePath);
+						FileOutputStream outputStream = new FileOutputStream(tmpFile);
+						
+						Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this);
+						
+						file.delete();
+						tmpFile.renameTo(new File(origFilePath));
+						
+						publishProgress(++counter);
+					}
+					catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(passwordHash + newPassword));
+				preferences.edit().putString(SafeCameraActivity.PASSWORD, loginHash).commit();
+				
+				((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(passwordHash);
 			}
-			catch (AESCryptException e) {
-				e.printStackTrace();
+			catch (AESCryptException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			
-			((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(newPassword);
-
 			return null;
 		}
 
