@@ -132,7 +132,6 @@ public class GalleryActivity extends Activity {
 		findViewById(R.id.multi_select).setOnClickListener(multiSelectClick());
 		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
 		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
-		findViewById(R.id.encryptFiles).setOnClickListener(encryptFilesClick());
 		findViewById(R.id.importFiles).setOnClickListener(importClick());
 		findViewById(R.id.newFolder).setOnClickListener(newFolderClick());
 		findViewById(R.id.moveSelected).setOnClickListener(moveSelectedClick());
@@ -425,20 +424,52 @@ public class GalleryActivity extends Activity {
 		return new OnClickListener() {
 
 			public void onClick(View v) {
-				Intent intent = new Intent(getBaseContext(), FileDialog.class);
-				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+				AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+				builder.setTitle(getString(R.string.import_desc));
+				
+				CharSequence[] items = {getString(R.string.import_unencrypted), getString(R.string.import_encrypted)};
+				
+				builder.setItems(items, new DialogInterface.OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						Intent intent = new Intent(getBaseContext(), FileDialog.class);
+						switch (which){
+							case 0:
+								
+								intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
 
-				// can user select directories or not
-				intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
-				intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-				intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
-				intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
+								// can user select directories or not
+								intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
+								intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+								intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
+								intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
 
-				// alternatively you can set file filter
-				// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-				// "png" });
+								// alternatively you can set file filter
+								// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
+								// "png" });
 
-				startActivityForResult(intent, REQUEST_IMPORT);
+								startActivityForResult(intent, REQUEST_ENCRYPT);
+								break;
+							case 1:
+								intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+								// can user select directories or not
+								intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
+								intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+								intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
+								intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
+
+								// alternatively you can set file filter
+								// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
+								// "png" });
+
+								startActivityForResult(intent, REQUEST_IMPORT);
+						}
+					}
+				});
+				
+				AlertDialog dialog = builder.create();
+				dialog.show();
 			}
 		};
 	}
@@ -638,28 +669,6 @@ public class GalleryActivity extends Activity {
 		// "png" });
 
 		startActivityForResult(intent, REQUEST_DECRYPT);
-	}
-
-	private OnClickListener encryptFilesClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				Intent intent = new Intent(getBaseContext(), FileDialog.class);
-				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-				// can user select directories or not
-				intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
-				intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-				intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
-				intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
-
-				// alternatively you can set file filter
-				// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-				// "png" });
-
-				startActivityForResult(intent, REQUEST_ENCRYPT);
-			}
-		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1134,7 +1143,6 @@ public class GalleryActivity extends Activity {
 								publishProgress();
 							}
 							catch (FileNotFoundException e) { }
-							catch (IOException e) { }
 						}
 						if(i==end){
 							break;

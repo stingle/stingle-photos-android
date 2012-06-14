@@ -40,6 +40,11 @@ public class SetUpActivity  extends Activity{
 					return;
 				}
 				
+				if(password1.length() < Integer.valueOf(getString(R.string.min_pass_length))){
+					Helpers.showAlertDialog(SetUpActivity.this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
+					return;
+				}
+				
 				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 				try {
 					String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(AESCrypt.byteToHex(AESCrypt.getHash(password1)) + password1));

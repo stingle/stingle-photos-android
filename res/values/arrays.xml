@@ -49,4 +49,5 @@
         <item name="reencrypt">@string/share_reencrypt</item>
         <item name="decrypt">@string/share_decrypt</item>
     </string-array>
+    
 </resources>

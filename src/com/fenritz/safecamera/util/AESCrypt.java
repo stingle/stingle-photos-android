@@ -35,7 +35,7 @@ public class AESCrypt {
 	public static final String PROVIDER = "BC";
 	public static final int SALT_LENGTH = 32;
 	public static final int IV_LENGTH = 16;
-	public static final int PBE_ITERATION_COUNT = 4096;
+	public static final int PBE_ITERATION_COUNT = 2048;
 
 	private static final String RANDOM_ALGORITHM = "SHA1PRNG";
 	private static final String HASH_ALGORITHM = "SHA-512";
@@ -292,9 +292,9 @@ public class AESCrypt {
 			// Read in the decrypted bytes and write the cleartext to out
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {
-				totalRead += numRead;
 				out.write(buf, 0, numRead);
 				if(progress != null){
+					totalRead += numRead;
 					progress.setProgress(totalRead);
 				}
 				if(task != null){

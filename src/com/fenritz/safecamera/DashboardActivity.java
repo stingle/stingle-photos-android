@@ -105,6 +105,10 @@ public class DashboardActivity extends Activity {
 				intent.setClass(DashboardActivity.this, SettingsActivity.class);
 				startActivity(intent);
 				return true;
+			case R.id.change_password:
+				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
+				startActivity(intent);
+				return true;
 			case R.id.logout:
 				Helpers.logout(DashboardActivity.this);
 				return true;

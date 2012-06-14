@@ -22,7 +22,8 @@
         android:label="@string/app_name" >
         <activity
             android:name=".SafeCameraActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -70,6 +71,7 @@
         <activity
             android:name=".DashboardActivity"
             android:configChanges="keyboardHidden|orientation"
+            android:theme="@android:style/Theme.NoTitleBar"
             android:label="Dashboard" >
         </activity>
         <activity

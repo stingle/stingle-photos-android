@@ -79,6 +79,11 @@ public class ChangePasswordActivity extends Activity {
 						Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.password_not_match));
 						return;
 					}
+					
+					if(newPassword.length() < Integer.valueOf(getString(R.string.min_pass_length))){
+						Helpers.showAlertDialog(ChangePasswordActivity.this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
+						return;
+					}
 						
 					new ReEncryptFiles().execute(newPassword);
 				}

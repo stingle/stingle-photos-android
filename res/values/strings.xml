@@ -89,6 +89,9 @@
     <string name="select_all">Select All</string>
     <string name="deselect_all">Deselect All</string>
     <string name="no_files">No files in this folder</string>
+    <string name="password_short">Password have to be at least %s characters long</string>
+    <string name="import_unencrypted">New files</string>
+    <string name="import_encrypted">Encrypted files</string>
     
     
     <!-- File Dialog -->
