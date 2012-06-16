@@ -92,6 +92,9 @@
     <string name="password_short">Password have to be at least %s characters long</string>
     <string name="import_unencrypted">New files</string>
     <string name="import_encrypted">Encrypted files</string>
+    <string name="flash">Flash</string>
+    <string name="timer">Timer</string>
+    <string name="get_pro">Get Pro Version</string>
     
     
     <!-- File Dialog -->

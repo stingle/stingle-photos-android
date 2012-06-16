@@ -17,7 +17,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -161,7 +160,6 @@ public class ChangePasswordActivity extends Activity {
 				
 				int counter = 0;
 				for(File file : files){
-					Log.d("qaq", file.getPath());
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
 						

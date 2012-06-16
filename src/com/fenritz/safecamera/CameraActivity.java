@@ -191,10 +191,11 @@ public class CameraActivity extends Activity {
 					super.onFinish();
 					lastFileDrawable = galleryButton.getDrawable();
 					changeRotation(mOrientation);
+					findViewById(R.id.lastPhotoContainer).setVisibility(View.VISIBLE);
 				}
 			});
 			task.execute();
-			findViewById(R.id.lastPhotoContainer).setVisibility(View.VISIBLE);
+			
 		}
 		else{
 			findViewById(R.id.lastPhotoContainer).setVisibility(View.INVISIBLE);

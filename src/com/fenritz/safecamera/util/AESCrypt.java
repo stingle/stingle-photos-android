@@ -59,11 +59,16 @@ public class AESCrypt {
 		this.password = password;
 	}
 	
-	public void setupCrypto(){
-		this.setupCrypto(null, null);
+	public boolean setupCrypto(){
+		return this.setupCrypto(null, null);
 	}
 
-	private void setupCrypto(byte[] paramIv, byte[] paramSalt){
+	private boolean setupCrypto(byte[] paramIv, byte[] paramSalt){
+		
+		if(password == null){
+			return false;
+		}
+		
 		// Create an 8-byte initialization vector
 		if (paramIv != null) {
 			iv = paramIv;
@@ -77,7 +82,7 @@ public class AESCrypt {
 				this.key = getSecretKey(password, paramSalt);
 			}
 			catch (AESCryptException e) {
-				return;
+				return false;
 			}
 		}
 		else{
@@ -86,7 +91,7 @@ public class AESCrypt {
 				this.key = getSecretKey(password, this.salt);
 			}
 			catch (AESCryptException e) {
-				return;
+				return false;
 			}
 		}
 		
@@ -101,17 +106,23 @@ public class AESCrypt {
 			decryptionCipher.init(Cipher.DECRYPT_MODE, key, ivParamSpec);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			return false;
 		}
+		
+		return true;
 	}
 	
 	public Cipher getEncryptionCipher(){
-		setupCrypto();
+		if(!setupCrypto()){
+			return null;
+		}
 		return encryptionCipher;
 	}
 	
 	public Cipher getDecryptionCipher(byte[] paramIv, byte[] salt){
-		setupCrypto(paramIv, salt);
+		if(!setupCrypto(paramIv, salt)){
+			return null; 
+		}
 		return decryptionCipher;
 	}
 	
@@ -157,7 +168,9 @@ public class AESCrypt {
 	}
 	public void encrypt(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
-			this.setupCrypto();
+			if(!this.setupCrypto()){
+				return;
+			}
 			writeHeader(out, iv, salt);
 			
 			if(progress != null){
@@ -182,7 +195,6 @@ public class AESCrypt {
 					}
 				}
 			}
-			
 			out.close();
 			in.close();
 		}
@@ -193,19 +205,18 @@ public class AESCrypt {
 	
 	public void encrypt(byte[] data, OutputStream out) {
 		try {
-			this.setupCrypto();
+			if(!this.setupCrypto()){
+				return;
+			}
 			writeHeader(out, iv, salt);
 
 			// Bytes written to out will be encrypted
 			out = new CipherOutputStream(out, encryptionCipher);
 
 			out.write(data);
-			
 			out.close();
 		}
-		catch (java.io.IOException e) {
-			e.printStackTrace();
-		}
+		catch (java.io.IOException e) { }
 	}
 
 	public boolean reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt) {
@@ -226,7 +237,9 @@ public class AESCrypt {
 				byte[] decSalt = new byte[SALT_LENGTH];
 				totalRead = readHeader(in, decIV, decSalt);
 				
-				this.setupCrypto();
+				if(!this.setupCrypto()){
+					return false;
+				}
 				
 				writeHeader(out, iv, salt);
 				
@@ -235,7 +248,9 @@ public class AESCrypt {
 			}
 			else{
 				totalRead = readHeader(in, iv, salt);
-				this.setupCrypto(iv, salt);
+				if(!this.setupCrypto(iv, salt)){
+					return false;
+				}
 				
 				Cipher secEncryptionCipher = secondaryCrypt.getEncryptionCipher();
 				writeHeader(out, secondaryCrypt.getIV(), secondaryCrypt.getSalt());
@@ -281,7 +296,9 @@ public class AESCrypt {
 	public void decrypt(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			long totalRead = readHeader(in, iv, salt);
-			this.setupCrypto(iv, salt);
+			if(!this.setupCrypto(iv, salt)){
+				return;
+			}
 			if(progress != null){
 				progress.setProgress(iv.length+salt.length);
 			}
@@ -307,9 +324,7 @@ public class AESCrypt {
 			out.close();
 			in.close();
 		}
-		catch (java.io.IOException e) {
-			e.printStackTrace();
-		}
+		catch (java.io.IOException e) { }
 	}
 	
 	public byte[] decrypt(InputStream in) {
@@ -326,7 +341,9 @@ public class AESCrypt {
 	public byte[] decrypt(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) {
 		try {
 			long totalRead = readHeader(in, iv, salt);
-			this.setupCrypto(iv, salt);
+			if(!this.setupCrypto(iv, salt)){
+				return null;
+			}
 
 			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 			int numRead = 0;
@@ -377,7 +394,9 @@ public class AESCrypt {
 	 */
 	public String encrypt(String plaintext) {
 		try {
-			this.setupCrypto();
+			if(!this.setupCrypto()){
+				return null;
+			}
 			byte[] ciphertext = encryptionCipher.doFinal(plaintext.getBytes("UTF-8"));
 			String ivHexString = new String(byteToHex(iv));
 			String saltHexString = new String(byteToHex(salt));
@@ -429,7 +448,11 @@ public class AESCrypt {
 		try {
 			System.arraycopy(ciphertext, 0, iv, 0, IV_LENGTH);
 			System.arraycopy(ciphertext, IV_LENGTH, salt, 0, SALT_LENGTH);
-			setupCrypto(iv, salt);
+			
+			if(!setupCrypto(iv, salt)){
+				return null;
+			}
+			
 			byte[] cipherBytes = new byte[ciphertext.length-IV_LENGTH-SALT_LENGTH];
 			System.arraycopy(ciphertext, IV_LENGTH+SALT_LENGTH, cipherBytes, 0, ciphertext.length-IV_LENGTH);
 			

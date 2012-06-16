@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,6 +47,40 @@ public class DashboardActivity extends Activity {
 			}
 		});
 		
+		findViewById(R.id.gotoChangePass).setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
+				startActivity(intent);
+			}
+		});
+		
+		findViewById(R.id.gotoSettings).setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(DashboardActivity.this, SettingsActivity.class);
+				startActivity(intent);
+			}
+		});
+		
+		findViewById(R.id.logOut).setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Helpers.logout(DashboardActivity.this);
+			}
+		});
+		
+		findViewById(R.id.goPro).setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setData(Uri.parse("market://details?id=" + getString(R.string.key_package_name)));
+				startActivity(intent);
+			}
+		});
+		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.package.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -62,6 +97,11 @@ public class DashboardActivity extends Activity {
 		    LinearLayout layout = (LinearLayout)findViewById(R.id.adHolder);
 		    layout.addView(adView);
 		    adView.loadAd(new AdRequest());
+		    
+		    findViewById(R.id.goProContainer).setVisibility(View.VISIBLE);
+		}
+		else{
+			findViewById(R.id.goProContainer).setVisibility(View.GONE);
 		}
 	}
 	
