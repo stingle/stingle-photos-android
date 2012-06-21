@@ -231,7 +231,8 @@ public class AESCrypt {
 	public boolean reEncrypt(InputStream in, OutputStream out, AESCrypt secondaryCrypt, CryptoProgress progress, AsyncTask<?,?,?> task, boolean encryptionIsMy) {
 		try {
 			long totalRead;
-			// Bytes written to out will be encrypted
+			
+			// Decrypt other's file and reencrypt to our key
 			if(encryptionIsMy){
 				byte[] decIV = new byte[IV_LENGTH];
 				byte[] decSalt = new byte[SALT_LENGTH];
@@ -246,6 +247,7 @@ public class AESCrypt {
 				in = new OptimizedCipherInputStream(in, secondaryCrypt.getDecryptionCipher(decIV, decSalt));
 				out = new CipherOutputStream(out, encryptionCipher);
 			}
+			// Decrypt our file and reencrypt to their key
 			else{
 				totalRead = readHeader(in, iv, salt);
 				if(!this.setupCrypto(iv, salt)){

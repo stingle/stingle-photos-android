@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1190,9 +1189,14 @@ public class GalleryActivity extends Activity {
 						FileInputStream inputStream = new FileInputStream(file);
 						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 
+						String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
+						String key = thumbsDir + file.getName();
 						if (decryptedData != null) {
-							String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
-							memCache.put(thumbsDir + file.getName(), Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName()));
+							memCache.put(key, Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName()));
+						}
+						
+						if(memCache.get(key) == null){
+							noThumbs.add(file);
 						}
 
 						publishProgress(++i);
@@ -1202,9 +1206,6 @@ public class GalleryActivity extends Activity {
 						}
 					}
 					catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
-					catch (IOException e) {
 						e.printStackTrace();
 					}
 					toGenerateThumbs.remove(file);
