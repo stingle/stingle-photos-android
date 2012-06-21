@@ -113,7 +113,11 @@ public class AESCrypt {
 	}
 	
 	public Cipher getEncryptionCipher(){
-		if(!setupCrypto()){
+		return getEncryptionCipher(null, null);
+	}
+	
+	public Cipher getEncryptionCipher(byte[] paramIv, byte[] salt){
+		if(!setupCrypto(paramIv, salt)){
 			return null;
 		}
 		return encryptionCipher;
