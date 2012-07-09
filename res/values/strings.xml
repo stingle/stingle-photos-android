@@ -95,6 +95,7 @@
     <string name="flash">Flash</string>
     <string name="timer">Timer</string>
     <string name="get_pro">Get Pro Version</string>
+    <string name="unable_to_connect_camera">Sorry, unable to connect to camera. Probably camera is busy right now.</string>
     
     
     <!-- File Dialog -->

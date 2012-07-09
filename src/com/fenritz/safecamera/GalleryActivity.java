@@ -338,7 +338,7 @@ public class GalleryActivity extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			if(!currentPath.equals(Helpers.getHomeDir(this))){
+			if(!currentPath.equals(Helpers.getHomeDir(this)) && currentPath != null){
 				changeDir((new File(currentPath)).getParent());
 				return true;
 			}

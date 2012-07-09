@@ -51,6 +51,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fenritz.safecamera.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
@@ -167,19 +168,19 @@ public class CameraActivity extends Activity {
 			}
 		});
 		
-		Arrays.sort(folderFiles, new Comparator<File>() {
-			public int compare(File lhs, File rhs) {
-				if(rhs.lastModified() > lhs.lastModified()){
-					return 1;
-				}
-				else if(rhs.lastModified() < lhs.lastModified()){
-					return -1;
-				}
-				return 0;
-			}
-		});
-		
 		if(folderFiles.length > 0){
+			Arrays.sort(folderFiles, new Comparator<File>() {
+				public int compare(File lhs, File rhs) {
+					if(rhs.lastModified() > lhs.lastModified()){
+						return 1;
+					}
+					else if(rhs.lastModified() < lhs.lastModified()){
+						return -1;
+					}
+					return 0;
+				}
+			});
+		
 			lastFile = folderFiles[0];
 			final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + lastFile.getName());
 			
@@ -330,7 +331,9 @@ public class CameraActivity extends Activity {
 							);
 							
 							if(timerTimePassed > timerTotalSeconds){
-								mCamera.takePicture(null, null, getPictureCallback());
+								if(mCamera != null){
+									mCamera.takePicture(null, null, getPictureCallback());
+								}
 								this.cancel();
 								timer.cancel();
 								isTimerRunning = false;
@@ -395,7 +398,14 @@ public class CameraActivity extends Activity {
 			final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 	
 			// Open the default i.e. the first rear facing camera.
-			mCamera = Camera.open();
+			try{
+				mCamera = Camera.open();
+			}
+			catch(RuntimeException e){
+				Toast.makeText(CameraActivity.this, getText(R.string.unable_to_connect_camera), Toast.LENGTH_LONG).show();
+				showLastPhotoThumb();
+				return;
+			}
 	
 			List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
 			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
