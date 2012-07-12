@@ -1,4 +1,4 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -52,13 +52,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecamera.util.AsyncTasks;
-import com.fenritz.safecamera.util.AsyncTasks.EncryptFiles;
-import com.fenritz.safecamera.util.AsyncTasks.ImportFiles;
-import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecamera.util.Helpers;
-import com.fenritz.safecamera.util.MemoryCache;
-import com.fenritz.safecamera.widget.CheckableLayout;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.AsyncTasks;
+import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.MemoryCache;
+import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
+import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
+import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.widget.CheckableLayout;
 
 public class GalleryActivity extends Activity {
 

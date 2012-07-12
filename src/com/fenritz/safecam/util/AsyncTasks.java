@@ -1,4 +1,4 @@
-package com.fenritz.safecamera.util;
+package com.fenritz.safecam.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,7 +17,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.fenritz.safecamera.R;
+import com.fenritz.safecam.R;
 
 public class AsyncTasks {
 	public static abstract class OnAsyncTaskFinish {

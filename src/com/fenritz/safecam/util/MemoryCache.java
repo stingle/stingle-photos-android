@@ -1,4 +1,4 @@
-package com.fenritz.safecamera.util;
+package com.fenritz.safecam.util;
 
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;

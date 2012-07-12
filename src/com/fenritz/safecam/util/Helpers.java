@@ -1,4 +1,4 @@
-package com.fenritz.safecamera.util;
+package com.fenritz.safecam.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,11 +40,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.fenritz.safecamera.R;
-import com.fenritz.safecamera.SafeCameraActivity;
-import com.fenritz.safecamera.SafeCameraApplication;
-import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecamera.util.AsyncTasks.ReEncryptFiles;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.SafeCameraActivity;
+import com.fenritz.safecam.SafeCameraApplication;
+import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.util.AsyncTasks.ReEncryptFiles;
 
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";

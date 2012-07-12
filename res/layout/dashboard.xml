@@ -43,7 +43,7 @@
 		    </LinearLayout>
         </LinearLayout>
     
-    <com.fenritz.safecamera.widget.DashboardLayout
+    <com.fenritz.safecam.widget.DashboardLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1" >
@@ -136,7 +136,7 @@
 	            android:textSize="12dp" />
 	    </LinearLayout>
 	        
-    </com.fenritz.safecamera.widget.DashboardLayout>
+    </com.fenritz.safecam.widget.DashboardLayout>
 
     <LinearLayout 
 	    android:layout_width="fill_parent"

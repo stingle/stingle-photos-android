@@ -1,4 +1,4 @@
-package com.fenritz.safecamera.util;
+package com.fenritz.safecam.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,9 +18,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
 
-import com.fenritz.safecamera.R;
-import com.fenritz.safecamera.util.AESCrypt.CryptoProgress;
-import com.fenritz.safecamera.widget.TouchImageView;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.AESCrypt.CryptoProgress;
+import com.fenritz.safecam.widget.TouchImageView;
 
 public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 

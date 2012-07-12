@@ -1,4 +1,4 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -14,7 +14,8 @@ import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 
-import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.Helpers;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;

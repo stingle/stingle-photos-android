@@ -23,7 +23,7 @@
  * have any questions.
  */
 
-package com.fenritz.safecamera.util;
+package com.fenritz.safecam.util;
 
 import java.io.FilterInputStream;
 import java.io.IOException;

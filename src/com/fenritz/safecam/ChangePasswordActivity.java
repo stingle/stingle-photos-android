@@ -1,4 +1,4 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,9 +22,10 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.fenritz.safecamera.util.AESCrypt;
-import com.fenritz.safecamera.util.AESCryptException;
-import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.AESCrypt;
+import com.fenritz.safecam.util.AESCryptException;
+import com.fenritz.safecam.util.Helpers;
 
 public class ChangePasswordActivity extends Activity {
 

@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     android:background="@drawable/background" >
 
-	<com.fenritz.safecamera.util.CameraPreview
+	<com.fenritz.safecam.util.CameraPreview
 		android:id="@+id/camera_preview"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"

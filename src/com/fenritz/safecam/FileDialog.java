@@ -1,4 +1,4 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,8 +35,9 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
-import com.fenritz.safecamera.util.Helpers;
-import com.fenritz.safecamera.util.MemoryCache;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.MemoryCache;
 
 /**
  * Activity para escolha de arquivos/diretorios.

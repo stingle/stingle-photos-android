@@ -1,4 +1,4 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -53,10 +53,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecamera.util.AsyncTasks.DecryptPopulateImage;
-import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecamera.util.CameraPreview;
-import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.AsyncTasks.DecryptPopulateImage;
+import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.util.CameraPreview;
+import com.fenritz.safecam.util.Helpers;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;

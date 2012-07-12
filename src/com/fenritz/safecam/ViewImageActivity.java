@@ -1,4 +1,4 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,11 +29,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecamera.util.AsyncTasks;
-import com.fenritz.safecamera.util.AsyncTasks.DeleteFiles;
-import com.fenritz.safecamera.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecamera.util.DecryptAndShowImage;
-import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.AsyncTasks;
+import com.fenritz.safecam.util.DecryptAndShowImage;
+import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
+import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 
 public class ViewImageActivity extends Activity {
 

@@ -1,4 +1,4 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,9 +9,10 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fenritz.safecamera.util.AESCrypt;
-import com.fenritz.safecamera.util.AESCryptException;
-import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.AESCrypt;
+import com.fenritz.safecam.util.AESCryptException;
+import com.fenritz.safecam.util.Helpers;
 
 public class SetUpActivity  extends Activity{
 

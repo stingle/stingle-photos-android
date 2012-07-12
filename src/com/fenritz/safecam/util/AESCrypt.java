@@ -1,4 +1,4 @@
-package com.fenritz.safecamera.util;
+package com.fenritz.safecam.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.fenritz.safecamera.widget;
+package com.fenritz.safecam.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;

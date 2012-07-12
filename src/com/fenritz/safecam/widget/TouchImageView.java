@@ -6,7 +6,7 @@
  * Extends Android ImageView to include pinch zooming and panning.
  */
 
-package com.fenritz.safecamera.widget;
+package com.fenritz.safecam.widget;
 
 import android.content.Context;
 import android.graphics.Bitmap;

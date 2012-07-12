@@ -1,10 +1,11 @@
-package com.fenritz.safecamera;
+package com.fenritz.safecam;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
-import com.fenritz.safecamera.util.Helpers;
+import com.fenritz.safecam.R;
+import com.fenritz.safecam.util.Helpers;
 
 public class SettingsActivity extends PreferenceActivity {
 
