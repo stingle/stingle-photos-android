@@ -22,7 +22,6 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
@@ -189,7 +188,6 @@ public class ChangePasswordActivity extends Activity {
 				((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(passwordHash);
 			}
 			catch (AESCryptException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			return null;

@@ -396,14 +396,21 @@ public class AsyncTasks {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected ArrayList<File> doInBackground(HashMap<String, Object>... params) {
+			ArrayList<File> reencryptedFiles = new ArrayList<File>();
 			String newPassword = params[0].get("newPassword").toString();
 			ArrayList<File> files = (ArrayList<File>) params[0].get("files");
 
+			try {
+				newPassword = AESCrypt.byteToHex(AESCrypt.getHash(newPassword));
+			}
+			catch (AESCryptException e1) {
+				return null;
+			}
+			
 			AESCrypt newCrypt = Helpers.getAESCrypt(newPassword, activity);
 
 			progressDialog.setMax(files.size());
 
-			ArrayList<File> reencryptedFiles = new ArrayList<File>();
 
 			int counter = 0;
 			for (File file : files) {
@@ -414,9 +421,9 @@ public class AsyncTasks {
 					File tmpFile = new File(tmpFilePath);
 					FileOutputStream outputStream = new FileOutputStream(tmpFile);
 
-					Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this);
-
-					reencryptedFiles.add(tmpFile);
+					if(Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
+						reencryptedFiles.add(tmpFile);
+					}
 					publishProgress(++counter);
 				}
 				catch (FileNotFoundException e) {
@@ -574,14 +581,22 @@ public class AsyncTasks {
 		@Override
 		protected Integer doInBackground(HashMap<String, Object>... rparams) {
 			HashMap<String, Object> params = rparams[0];
+			int returnStatus = STATUS_OK;
 
 			String[] filePaths = (String[]) params.get("filePaths");
 			String password = (String) params.get("password");
 			Boolean deleteAfterImport = (Boolean) params.get("deleteAfterImport");
 
+			try {
+				password = AESCrypt.byteToHex(AESCrypt.getHash(password));
+			}
+			catch (AESCryptException e1) {
+				returnStatus = STATUS_FAIL;
+				return returnStatus;
+			}
+			
 			AESCrypt newCrypt = Helpers.getAESCrypt(password, activity);
 
-			int returnStatus = STATUS_OK;
 			progressDialog.setMax(filePaths.length);
 			for (int i = 0; i < filePaths.length; i++) {
 

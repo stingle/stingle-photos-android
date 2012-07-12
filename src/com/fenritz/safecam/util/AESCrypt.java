@@ -79,6 +79,7 @@ public class AESCrypt {
 		
 		if(paramSalt != null){
 			try {
+				this.salt = paramSalt;
 				this.key = getSecretKey(password, paramSalt);
 			}
 			catch (AESCryptException e) {
@@ -265,7 +266,7 @@ public class AESCrypt {
 				out = new CipherOutputStream(out, secEncryptionCipher);
 			}
 
-			// Read in the cleartext bytes and write to out to encrypt
+			// Do reencrypt process
 			int numRead = 0;
 			while ((numRead = in.read(buf)) >= 0) {
 				out.write(buf, 0, numRead);
@@ -284,7 +285,6 @@ public class AESCrypt {
 			in.close();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
 			return false;
 		}
 		
