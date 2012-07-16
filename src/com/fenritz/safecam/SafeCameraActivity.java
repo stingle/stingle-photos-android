@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
@@ -31,6 +30,9 @@ public class SafeCameraActivity extends Activity {
 	public static final String PASSWORD = "password";
 	public static final String ACTION_JUST_LOGIN = "just_login";
 	public static final String PARAM_EXTRA_DATA = "extra_data";
+	public static final String LOGINS_COUNT_FOR_POPUP = "logins_count_fp";
+	public static final String DONT_SHOW_POPUP = "dont_show_popup";
+	public static final String POPUP_LATERS_COUNT = "laters_count";
 
 	private SharedPreferences preferences;
 	
@@ -145,10 +147,24 @@ public class SafeCameraActivity extends Activity {
 					startActivity(intent);
 				}
 				else{
+					
+					
 					Intent intent = new Intent();
 					intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					
+					boolean dontShowPopup = preferences.getBoolean(DONT_SHOW_POPUP, false);
+					
+					if(!dontShowPopup){
+						int loginsCount = preferences.getInt(LOGINS_COUNT_FOR_POPUP, 0);
+						loginsCount++;
+						if(loginsCount >= Integer.valueOf(getString(R.string.popup_logins_limit))){
+							intent.putExtra("showPopup", true);
+							loginsCount = 0;
+						}
+						preferences.edit().putInt(SafeCameraActivity.LOGINS_COUNT_FOR_POPUP, loginsCount).commit();
+					}
 					startActivity(intent);
 				}
 				SafeCameraActivity.this.finish();

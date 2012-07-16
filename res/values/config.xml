@@ -20,6 +20,10 @@
     <string name="file_extension">.sc</string>
     <string name="max_file_size">6</string>
     <string name="min_pass_length">6</string>
+    <string name="popup_logins_limit">5</string>
+    <string name="popup_laters_limit">3</string>
+    
+    <string name="security_page_link">http://www.safecamera.org/security</string>
     
     <string name="main_package_name">com.fenritz.safecam</string>
     <string name="key_package_name">com.fenritz.safecamerapro</string>

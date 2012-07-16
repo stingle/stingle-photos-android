@@ -10,6 +10,10 @@
         android:icon="@android:drawable/ic_menu_manage"
         android:title="@string/change_password" />
     <item
+        android:id="@+id/read_security"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="@string/read_security" />
+    <item
         android:id="@+id/logout"
         android:icon="@android:drawable/ic_lock_power_off"
         android:title="@string/log_out" />

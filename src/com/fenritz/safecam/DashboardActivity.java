@@ -1,10 +1,13 @@
 package com.fenritz.safecam;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,8 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.Helpers;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
@@ -92,6 +95,8 @@ public class DashboardActivity extends Activity {
 		};
 		registerReceiver(receiver, intentFilter);
 		
+		TextView freeVersionText = (TextView)findViewById(R.id.free_version_text);
+		
 		if(Helpers.isDemo(DashboardActivity.this)){
 			// Create the adView
 		    adView = new AdView(this, AdSize.BANNER, getString(R.string.ad_publisher_id));
@@ -100,10 +105,50 @@ public class DashboardActivity extends Activity {
 		    adView.loadAd(new AdRequest());
 		    
 		    findViewById(R.id.goProContainer).setVisibility(View.VISIBLE);
+		    if(freeVersionText != null){
+		    	freeVersionText.setVisibility(View.VISIBLE);
+		    }
 		}
 		else{
 			findViewById(R.id.goProContainer).setVisibility(View.GONE);
+			if(freeVersionText != null){
+				freeVersionText.setVisibility(View.GONE);
+			}
 		}
+		
+		boolean showPopup = getIntent().getBooleanExtra("showPopup", false);
+		if(showPopup){
+			showPopup();
+		}
+	}
+	
+	private void showPopup(){
+		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(DashboardActivity.this);
+		builder.setTitle(getString(R.string.popup_title));
+		builder.setMessage(getString(R.string.popup_text));
+		builder.setPositiveButton(getString(R.string.review), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setData(Uri.parse("market://details?id=" + getString(R.string.main_package_name)));
+				startActivity(intent);
+				preferences.edit().putBoolean(SafeCameraActivity.DONT_SHOW_POPUP, true).commit();
+			}
+		});
+		builder.setNegativeButton(getString(R.string.later), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				int latersCount = preferences.getInt(SafeCameraActivity.POPUP_LATERS_COUNT, 0);
+				latersCount++;
+				
+				if(latersCount >= Integer.valueOf(getString(R.string.popup_laters_limit))){
+					preferences.edit().putBoolean(SafeCameraActivity.DONT_SHOW_POPUP, true).commit();
+				}
+				preferences.edit().putInt(SafeCameraActivity.POPUP_LATERS_COUNT, latersCount).commit();
+			}
+		});
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 	
 	@Override
@@ -149,6 +194,10 @@ public class DashboardActivity extends Activity {
 			case R.id.change_password:
 				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
 				startActivity(intent);
+				return true;
+			case R.id.read_security:
+				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));
+				startActivity(browserIntent);
 				return true;
 			case R.id.logout:
 				Helpers.logout(DashboardActivity.this);

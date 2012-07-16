@@ -52,13 +52,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AsyncTasks;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.MemoryCache;
 import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
 import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.MemoryCache;
 import com.fenritz.safecam.widget.CheckableLayout;
 
 public class GalleryActivity extends Activity {
@@ -339,7 +338,7 @@ public class GalleryActivity extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			if(!currentPath.equals(Helpers.getHomeDir(this)) && currentPath != null){
+			if(currentPath != null && !currentPath.equals(Helpers.getHomeDir(this))){
 				changeDir((new File(currentPath)).getParent());
 				return true;
 			}
@@ -1278,6 +1277,10 @@ public class GalleryActivity extends Activity {
 			case R.id.settings:
 				intent.setClass(GalleryActivity.this, SettingsActivity.class);
 				startActivity(intent);
+				return true;
+			case R.id.read_security:
+				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));
+				startActivity(browserIntent);
 				return true;
 			case R.id.logout:
 				Helpers.logout(GalleryActivity.this);
