@@ -113,8 +113,12 @@ public class OptimizedCipherInputStream extends FilterInputStream {
             try {
                 obuffer = cipher.doFinal();
             }
-            catch (IllegalBlockSizeException e) {obuffer = null;}
-            catch (BadPaddingException e) {obuffer = null;}
+            catch (IllegalBlockSizeException e) {
+            	throw new IOException(e);
+            }
+            catch (BadPaddingException e) {
+            	throw new IOException(e);
+            }
             if (obuffer == null)
                 return -1;
             else {

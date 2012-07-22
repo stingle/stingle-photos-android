@@ -285,6 +285,11 @@ public class AESCrypt {
 			in.close();
 		}
 		catch (Exception e) {
+			try {
+				out.close();
+				in.close();
+			}
+			catch (IOException e1) { }
 			return false;
 		}
 		
@@ -330,7 +335,13 @@ public class AESCrypt {
 			out.close();
 			in.close();
 		}
-		catch (java.io.IOException e) { }
+		catch (java.io.IOException e) { 
+			try {
+				out.close();
+				in.close();
+			}
+			catch (IOException e1) { }
+		}
 	}
 	
 	public byte[] decrypt(InputStream in) {

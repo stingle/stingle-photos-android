@@ -169,10 +169,15 @@ public class ChangePasswordActivity extends Activity {
 						File tmpFile = new File(tmpFilePath);
 						FileOutputStream outputStream = new FileOutputStream(tmpFile);
 						
-						Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this);
-						
-						file.delete();
-						tmpFile.renameTo(new File(origFilePath));
+						if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
+							file.delete();
+							tmpFile.renameTo(new File(origFilePath));
+						}
+						else{
+							if(tmpFile.isFile()){
+								tmpFile.delete();
+							}
+						}
 						
 						publishProgress(++counter);
 					}

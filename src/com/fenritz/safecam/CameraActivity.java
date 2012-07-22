@@ -53,7 +53,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
@@ -169,7 +168,7 @@ public class CameraActivity extends Activity {
 			}
 		});
 		
-		if(folderFiles.length > 0){
+		if(folderFiles != null && folderFiles.length > 0){
 			Arrays.sort(folderFiles, new Comparator<File>() {
 				public int compare(File lhs, File rhs) {
 					if(rhs.lastModified() > lhs.lastModified()){

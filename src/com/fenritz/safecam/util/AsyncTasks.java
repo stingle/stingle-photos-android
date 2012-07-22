@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -73,12 +72,7 @@ public class AsyncTasks {
 						Log.d("sc", "Unable to decrypt: " + filePath);
 					}
 				}
-				catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
+				catch (FileNotFoundException e) { }
 			}
 			return null;
 		}
@@ -328,10 +322,7 @@ public class AsyncTasks {
 						publishProgress(i+1);
 						decryptedFiles.add(new File(destinationFolder + "/" + destFileName));
 					}
-					catch (FileNotFoundException e) {
-					}
-					catch (IOException e) {
-					}
+					catch (FileNotFoundException e) { }
 				}
 
 				if (isCancelled()) {
@@ -423,6 +414,11 @@ public class AsyncTasks {
 
 					if(Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
 						reencryptedFiles.add(tmpFile);
+					}
+					else{
+						if(tmpFile.isFile()){
+							tmpFile.delete();
+						}
 					}
 					publishProgress(++counter);
 				}
@@ -615,6 +611,10 @@ public class AsyncTasks {
 							}
 						}
 						else{
+							File dstFile = new File(destFilePath);
+							if(dstFile.isFile()){
+								dstFile.delete();
+							}
 							returnStatus = STATUS_FAIL;
 						}
 						publishProgress(i+1);
