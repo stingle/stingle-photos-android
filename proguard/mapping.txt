@@ -1,0 +1,2464 @@
+android.support.v4.app.BackStackRecord -> android.support.v4.app.a:
+    android.support.v4.app.FragmentManagerImpl mManager -> a
+    android.support.v4.app.BackStackRecord$Op mHead -> b
+    android.support.v4.app.BackStackRecord$Op mTail -> c
+    int mNumOp -> d
+    int mEnterAnim -> e
+    int mExitAnim -> f
+    int mPopEnterAnim -> g
+    int mPopExitAnim -> h
+    int mTransition -> i
+    int mTransitionStyle -> j
+    boolean mAddToBackStack -> k
+    boolean mAllowAddToBackStack -> l
+    java.lang.String mName -> m
+    boolean mCommitted -> n
+    int mIndex -> o
+    int mBreadCrumbTitleRes -> p
+    java.lang.CharSequence mBreadCrumbTitleText -> q
+    int mBreadCrumbShortTitleRes -> r
+    java.lang.CharSequence mBreadCrumbShortTitleText -> s
+    void dump$ec96877(java.lang.String,java.io.PrintWriter) -> a
+    void addOp(android.support.v4.app.BackStackRecord$Op) -> a
+    void bumpBackStackNesting(int) -> a
+    void run() -> run
+    void popFromBackStack$1385ff() -> a
+android.support.v4.app.BackStackRecord$Op -> android.support.v4.app.b:
+    android.support.v4.app.BackStackRecord$Op next -> a
+    android.support.v4.app.BackStackRecord$Op prev -> b
+    int cmd -> c
+    android.support.v4.app.Fragment fragment -> d
+    int enterAnim -> e
+    int exitAnim -> f
+    int popEnterAnim -> g
+    int popExitAnim -> h
+    java.util.ArrayList removed -> i
+android.support.v4.app.BackStackState -> android.support.v4.app.BackStackState:
+    int[] mOps -> a
+    int mTransition -> b
+    int mTransitionStyle -> c
+    java.lang.String mName -> d
+    int mIndex -> e
+    int mBreadCrumbTitleRes -> f
+    java.lang.CharSequence mBreadCrumbTitleText -> g
+    int mBreadCrumbShortTitleRes -> h
+    java.lang.CharSequence mBreadCrumbShortTitleText -> i
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    android.support.v4.app.BackStackRecord instantiate(android.support.v4.app.FragmentManagerImpl) -> a
+    int describeContents() -> describeContents
+    void writeToParcel(android.os.Parcel,int) -> writeToParcel
+android.support.v4.app.BackStackState$1 -> android.support.v4.app.c:
+    java.lang.Object[] newArray(int) -> newArray
+    java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+android.support.v4.app.Fragment -> android.support.v4.app.Fragment:
+    java.util.HashMap sClassMap -> N
+    int mState -> a
+    android.view.View mAnimatingAway -> b
+    int mStateAfterAnimating -> c
+    android.os.Bundle mSavedFragmentState -> d
+    android.util.SparseArray mSavedViewState -> e
+    int mIndex -> f
+    java.lang.String mWho -> g
+    android.os.Bundle mArguments -> h
+    android.support.v4.app.Fragment mTarget -> i
+    int mTargetIndex -> j
+    int mTargetRequestCode -> k
+    boolean mAdded -> l
+    boolean mRemoving -> m
+    boolean mResumed -> n
+    boolean mFromLayout -> o
+    boolean mInLayout -> p
+    boolean mRestored -> q
+    int mBackStackNesting -> r
+    android.support.v4.app.FragmentManagerImpl mFragmentManager -> s
+    android.support.v4.app.FragmentActivity mActivity -> t
+    int mFragmentId -> u
+    int mContainerId -> v
+    java.lang.String mTag -> w
+    boolean mHidden -> x
+    boolean mDetached -> y
+    boolean mRetainInstance -> z
+    boolean mRetaining -> A
+    boolean mHasMenu -> B
+    boolean mMenuVisible -> C
+    boolean mCalled -> D
+    int mNextAnim -> E
+    android.view.ViewGroup mContainer -> F
+    android.view.View mView -> G
+    android.view.View mInnerView -> H
+    boolean mDeferStart -> I
+    boolean mUserVisibleHint -> J
+    android.support.v4.app.LoaderManagerImpl mLoaderManager -> K
+    boolean mLoadersStarted -> L
+    boolean mCheckedForLoaderManager -> M
+    android.support.v4.app.Fragment instantiate(android.content.Context,java.lang.String) -> a
+    android.support.v4.app.Fragment instantiate(android.content.Context,java.lang.String,android.os.Bundle) -> a
+    void restoreViewState() -> a
+    void setIndex(int) -> a
+    boolean isInBackStack() -> b
+    boolean equals(java.lang.Object) -> equals
+    int hashCode() -> hashCode
+    java.lang.String toString() -> toString
+    void onHiddenChanged$1385ff() -> c
+    void onActivityResult$6eb84b52() -> d
+    android.view.LayoutInflater getLayoutInflater$2ee30c11() -> e
+    void onInflate$423a76cd() -> f
+    void onAttach$63a22f9() -> g
+    android.view.animation.Animation onCreateAnimation$24236ca7() -> h
+    void onCreate$79e5e33f() -> i
+    android.view.View onCreateView$469ccb8a() -> j
+    void onViewCreated$65f1d89() -> k
+    void onActivityCreated$79e5e33f() -> l
+    void onResume() -> m
+    void onSaveInstanceState$79e5e33f() -> n
+    void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
+    void onPause() -> o
+    void onLowMemory() -> onLowMemory
+    void onDestroy() -> p
+    void initState() -> q
+    void onDetach() -> r
+    void onCreateOptionsMenu$761f6f96() -> s
+    void onPrepareOptionsMenu$1eec55bd() -> t
+    void onDestroyOptionsMenu() -> u
+    boolean onOptionsItemSelected$1b88ab4c() -> v
+    void onOptionsMenuClosed$1eec55bd() -> w
+    void onCreateContextMenu(android.view.ContextMenu,android.view.View,android.view.ContextMenu$ContextMenuInfo) -> onCreateContextMenu
+    boolean onContextItemSelected$1b88ab4c() -> x
+    void dump$ec96877$79f041d6(java.lang.String,java.io.PrintWriter) -> a
+    void performStart() -> y
+    void performStop() -> z
+    void performReallyStop() -> A
+    void performDestroyView() -> B
+android.support.v4.app.Fragment$InstantiationException -> android.support.v4.app.d:
+android.support.v4.app.Fragment$SavedState -> android.support.v4.app.Fragment$SavedState:
+    android.os.Bundle mState -> a
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    int describeContents() -> describeContents
+    void writeToParcel(android.os.Parcel,int) -> writeToParcel
+android.support.v4.app.Fragment$SavedState$1 -> android.support.v4.app.e:
+    java.lang.Object[] newArray(int) -> newArray
+    java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+android.support.v4.app.FragmentActivity -> android.support.v4.app.FragmentActivity:
+    android.os.Handler mHandler -> a
+    android.support.v4.app.FragmentManagerImpl mFragments -> b
+    boolean mCreated -> c
+    boolean mResumed -> d
+    boolean mStopped -> e
+    boolean mReallyStopped -> f
+    boolean mRetaining -> g
+    boolean mOptionsMenuInvalidated -> h
+    boolean mCheckedForLoaderManager -> i
+    boolean mLoadersStarted -> j
+    android.support.v4.app.HCSparseArray mAllLoaderManagers -> k
+    android.support.v4.app.LoaderManagerImpl mLoaderManager -> l
+    void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    void onBackPressed() -> onBackPressed
+    void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
+    void onCreate(android.os.Bundle) -> onCreate
+    boolean onCreatePanelMenu(int,android.view.Menu) -> onCreatePanelMenu
+    android.view.View onCreateView(java.lang.String,android.content.Context,android.util.AttributeSet) -> onCreateView
+    void onDestroy() -> onDestroy
+    boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    void onLowMemory() -> onLowMemory
+    boolean onMenuItemSelected(int,android.view.MenuItem) -> onMenuItemSelected
+    void onPanelClosed(int,android.view.Menu) -> onPanelClosed
+    void onPause() -> onPause
+    void onResume() -> onResume
+    void onPostResume() -> onPostResume
+    boolean onPreparePanel(int,android.view.View,android.view.Menu) -> onPreparePanel
+    java.lang.Object onRetainNonConfigurationInstance() -> onRetainNonConfigurationInstance
+    void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
+    void onStart() -> onStart
+    void onStop() -> onStop
+    void supportInvalidateOptionsMenu() -> a
+    void dump(java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[]) -> dump
+    void doReallyStop(boolean) -> a
+    void onAttachFragment$65850823() -> b
+    void startActivityForResult(android.content.Intent,int) -> startActivityForResult
+    void invalidateSupportFragmentIndex(int) -> a
+    android.support.v4.app.LoaderManagerImpl getLoaderManager$3d2266e4(int) -> b
+android.support.v4.app.FragmentActivity$1 -> android.support.v4.app.f:
+    android.support.v4.app.FragmentActivity this$0 -> a
+    void handleMessage(android.os.Message) -> handleMessage
+android.support.v4.app.FragmentActivity$FragmentTag -> android.support.v4.app.g:
+    int[] Fragment -> a
+android.support.v4.app.FragmentActivity$NonConfigurationInstances -> android.support.v4.app.h:
+    java.lang.Object activity -> a
+    java.lang.Object custom -> b
+    java.util.HashMap children -> c
+    java.util.ArrayList fragments -> d
+    android.support.v4.app.HCSparseArray loaders -> e
+android.support.v4.app.FragmentManager -> android.support.v4.app.i:
+android.support.v4.app.FragmentManagerImpl -> android.support.v4.app.j:
+    boolean DEBUG -> a
+    boolean HONEYCOMB -> b
+    java.util.ArrayList mPendingActions -> c
+    java.lang.Runnable[] mTmpActions -> d
+    boolean mExecutingActions -> e
+    java.util.ArrayList mActive -> f
+    java.util.ArrayList mAdded -> g
+    java.util.ArrayList mAvailIndices -> h
+    java.util.ArrayList mBackStack -> i
+    java.util.ArrayList mCreatedMenus -> j
+    java.util.ArrayList mBackStackIndices -> k
+    java.util.ArrayList mAvailBackStackIndices -> l
+    java.util.ArrayList mBackStackChangeListeners -> m
+    int mCurState -> n
+    android.support.v4.app.FragmentActivity mActivity -> o
+    boolean mNeedMenuInvalidate -> p
+    boolean mStateSaved -> q
+    boolean mDestroyed -> r
+    java.lang.String mNoTransactionsBecause -> s
+    boolean mHavePendingDeferredStart -> t
+    android.os.Bundle mStateBundle -> u
+    android.util.SparseArray mStateArray -> v
+    java.lang.Runnable mExecCommit -> w
+    android.view.animation.Interpolator DECELERATE_QUINT -> x
+    android.view.animation.Interpolator DECELERATE_CUBIC -> y
+    android.view.animation.Interpolator ACCELERATE_QUINT -> z
+    android.view.animation.Interpolator ACCELERATE_CUBIC -> A
+    boolean popBackStackImmediate() -> a
+    java.lang.String toString() -> toString
+    void dump$ec96877(java.lang.String,java.io.FileDescriptor,java.io.PrintWriter) -> a
+    android.view.animation.Animation makeOpenCloseAnimation$376f30fd(float,float,float,float) -> a
+    android.view.animation.Animation makeFadeAnimation$424ea1bd(float,float) -> a
+    android.view.animation.Animation loadAnimation(android.support.v4.app.Fragment,int,boolean,int) -> a
+    void moveToState(android.support.v4.app.Fragment,int,int,int) -> a
+    void moveToState(android.support.v4.app.Fragment) -> a
+    void moveToState$2563266(int) -> d
+    void moveToState(int,int,int,boolean) -> a
+    void startPendingDeferredFragments() -> t
+    void addFragment(android.support.v4.app.Fragment,boolean) -> a
+    void removeFragment(android.support.v4.app.Fragment,int,int) -> a
+    void hideFragment(android.support.v4.app.Fragment,int,int) -> b
+    void showFragment(android.support.v4.app.Fragment,int,int) -> c
+    void detachFragment(android.support.v4.app.Fragment,int,int) -> d
+    void attachFragment(android.support.v4.app.Fragment,int,int) -> e
+    android.support.v4.app.Fragment findFragmentById(int) -> a
+    android.support.v4.app.Fragment findFragmentByTag(java.lang.String) -> a
+    void setBackStackIndex(int,android.support.v4.app.BackStackRecord) -> a
+    void freeBackStackIndex(int) -> b
+    boolean execPendingActions() -> b
+    void reportBackStackChanged() -> u
+    void addBackStackState(android.support.v4.app.BackStackRecord) -> a
+    java.util.ArrayList retainNonConfig() -> c
+    void saveFragmentViewState(android.support.v4.app.Fragment) -> b
+    android.os.Parcelable saveAllState() -> d
+    void restoreAllState(android.os.Parcelable,java.util.ArrayList) -> a
+    void attachActivity(android.support.v4.app.FragmentActivity) -> a
+    void noteStateNotSaved() -> e
+    void dispatchCreate() -> f
+    void dispatchActivityCreated() -> g
+    void dispatchStart() -> h
+    void dispatchResume() -> i
+    void dispatchPause() -> j
+    void dispatchStop() -> k
+    void dispatchReallyStop() -> l
+    void dispatchDestroy() -> m
+    void dispatchConfigurationChanged(android.content.res.Configuration) -> a
+    void dispatchLowMemory() -> n
+    boolean dispatchCreateOptionsMenu$761f6f92() -> o
+    boolean dispatchPrepareOptionsMenu$1eec55b9() -> p
+    boolean dispatchOptionsItemSelected$1b88ab4c() -> q
+    boolean dispatchContextItemSelected$1b88ab4c() -> r
+    void dispatchOptionsMenuClosed$1eec55bd() -> s
+    int reverseTransit(int) -> c
+android.support.v4.app.FragmentManagerImpl$1 -> android.support.v4.app.k:
+    android.support.v4.app.FragmentManagerImpl this$0 -> a
+    void run() -> run
+android.support.v4.app.FragmentManagerImpl$5 -> android.support.v4.app.l:
+    android.support.v4.app.Fragment val$fragment -> a
+    android.support.v4.app.FragmentManagerImpl this$0 -> b
+    void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
+    void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
+    void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
+android.support.v4.app.FragmentManagerState -> android.support.v4.app.FragmentManagerState:
+    android.support.v4.app.FragmentState[] mActive -> a
+    int[] mAdded -> b
+    android.support.v4.app.BackStackState[] mBackStack -> c
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    int describeContents() -> describeContents
+    void writeToParcel(android.os.Parcel,int) -> writeToParcel
+android.support.v4.app.FragmentManagerState$1 -> android.support.v4.app.m:
+    java.lang.Object[] newArray(int) -> newArray
+    java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+android.support.v4.app.FragmentState -> android.support.v4.app.FragmentState:
+    java.lang.String mClassName -> a
+    int mIndex -> b
+    boolean mFromLayout -> c
+    int mFragmentId -> d
+    int mContainerId -> e
+    java.lang.String mTag -> f
+    boolean mRetainInstance -> g
+    boolean mDetached -> h
+    android.os.Bundle mArguments -> i
+    android.os.Bundle mSavedFragmentState -> j
+    android.support.v4.app.Fragment mInstance -> k
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    android.support.v4.app.Fragment instantiate(android.support.v4.app.FragmentActivity) -> a
+    int describeContents() -> describeContents
+    void writeToParcel(android.os.Parcel,int) -> writeToParcel
+android.support.v4.app.FragmentState$1 -> android.support.v4.app.n:
+    java.lang.Object[] newArray(int) -> newArray
+    java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+android.support.v4.app.FragmentTransaction -> android.support.v4.app.o:
+android.support.v4.app.HCSparseArray -> android.support.v4.app.p:
+    java.lang.Object DELETED -> a
+    boolean mGarbage -> b
+    int[] mKeys -> c
+    java.lang.Object[] mValues -> d
+    int mSize -> e
+    java.lang.Object get(int) -> a
+    void remove(int) -> b
+    void removeAt(int) -> c
+    void gc() -> c
+    int size() -> a
+    int keyAt(int) -> d
+    java.lang.Object valueAt(int) -> e
+    void clear() -> b
+    int binarySearch$76412d8d(int[],int,int) -> a
+android.support.v4.app.LoaderManager -> android.support.v4.app.q:
+    boolean hasRunningLoaders() -> a
+android.support.v4.app.LoaderManager$LoaderCallbacks -> android.support.v4.app.r:
+    android.support.v4.content.Loader onCreateLoader$e57f803() -> a
+android.support.v4.app.LoaderManagerImpl -> android.support.v4.app.s:
+    boolean DEBUG -> a
+    android.support.v4.app.HCSparseArray mLoaders -> b
+    android.support.v4.app.HCSparseArray mInactiveLoaders -> c
+    android.support.v4.app.FragmentActivity mActivity -> d
+    boolean mStarted -> e
+    boolean mRetaining -> f
+    void updateActivity(android.support.v4.app.FragmentActivity) -> a
+    void doStart() -> b
+    void doStop() -> c
+    void doRetain() -> d
+    void finishRetain() -> e
+    void doReportNextStart() -> f
+    void doReportStart() -> g
+    void doDestroy() -> h
+    java.lang.String toString() -> toString
+    void dump$ec96877$79f041d6(java.lang.String,java.io.PrintWriter) -> a
+    boolean hasRunningLoaders() -> a
+android.support.v4.app.LoaderManagerImpl$LoaderInfo -> android.support.v4.app.t:
+    int mId -> a
+    android.os.Bundle mArgs -> b
+    android.support.v4.app.LoaderManager$LoaderCallbacks mCallbacks -> c
+    android.support.v4.content.Loader mLoader -> d
+    boolean mHaveData -> e
+    boolean mDeliveredData -> f
+    java.lang.Object mData -> g
+    boolean mStarted -> h
+    boolean mRetaining -> i
+    boolean mRetainingStarted -> j
+    boolean mReportNextStart -> k
+    boolean mDestroyed -> l
+    boolean mListenerRegistered -> m
+    android.support.v4.app.LoaderManagerImpl$LoaderInfo mPendingLoader -> n
+    android.support.v4.app.LoaderManagerImpl this$0 -> o
+    void stop() -> a
+    void destroy() -> b
+    void callOnLoadFinished(android.support.v4.content.Loader,java.lang.Object) -> a
+    java.lang.String toString() -> toString
+    void dump$ec96877$79f041d6(java.lang.String,java.io.PrintWriter) -> a
+android.support.v4.app.NoSaveStateFrameLayout -> android.support.v4.app.u:
+    android.view.ViewGroup wrap(android.view.View) -> a
+    void dispatchSaveInstanceState(android.util.SparseArray) -> dispatchSaveInstanceState
+    void dispatchRestoreInstanceState(android.util.SparseArray) -> dispatchRestoreInstanceState
+android.support.v4.app.SuperNotCalledException -> android.support.v4.app.v:
+android.support.v4.content.Loader -> android.support.v4.a.a:
+    int mId -> a
+    android.support.v4.content.Loader$OnLoadCompleteListener mListener -> b
+    boolean mStarted -> c
+    boolean mAbandoned -> d
+    boolean mReset -> e
+    boolean mContentChanged -> f
+    void registerListener(int,android.support.v4.content.Loader$OnLoadCompleteListener) -> a
+    void unregisterListener(android.support.v4.content.Loader$OnLoadCompleteListener) -> a
+    void startLoading() -> a
+    void stopLoading() -> b
+    void reset() -> c
+    java.lang.String toString() -> toString
+    void dump$ec96877(java.lang.String,java.io.PrintWriter) -> a
+android.support.v4.content.Loader$OnLoadCompleteListener -> android.support.v4.a.b:
+android.support.v4.os.ParcelableCompat -> android.support.v4.b.a:
+    android.os.Parcelable$Creator newCreator(android.support.v4.os.ParcelableCompatCreatorCallbacks) -> a
+android.support.v4.os.ParcelableCompat$CompatCreator -> android.support.v4.b.b:
+    android.support.v4.os.ParcelableCompatCreatorCallbacks mCallbacks -> a
+    java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+    java.lang.Object[] newArray(int) -> newArray
+android.support.v4.os.ParcelableCompatCreatorCallbacks -> android.support.v4.b.c:
+    java.lang.Object createFromParcel(android.os.Parcel,java.lang.ClassLoader) -> a
+    java.lang.Object[] newArray(int) -> a
+android.support.v4.os.ParcelableCompatCreatorHoneycombMR2 -> android.support.v4.b.d:
+    android.support.v4.os.ParcelableCompatCreatorCallbacks mCallbacks -> a
+    java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+    java.lang.Object createFromParcel(android.os.Parcel,java.lang.ClassLoader) -> createFromParcel
+    java.lang.Object[] newArray(int) -> newArray
+android.support.v4.util.DebugUtils -> android.support.v4.c.a:
+    void buildShortClassTag(java.lang.Object,java.lang.StringBuilder) -> a
+android.support.v4.util.LogWriter -> android.support.v4.c.b:
+    java.lang.String mTag -> a
+    java.lang.StringBuilder mBuilder -> b
+    void close() -> close
+    void flush() -> flush
+    void write(char[],int,int) -> write
+    void flushBuilder() -> a
+android.support.v4.util.LruCache -> android.support.v4.c.c:
+    java.util.LinkedHashMap map -> a
+    int size -> b
+    int maxSize -> c
+    int putCount -> d
+    int evictionCount -> e
+    int hitCount -> f
+    int missCount -> g
+    java.lang.Object get(java.lang.Object) -> a
+    java.lang.Object put(java.lang.Object,java.lang.Object) -> a
+    void trimToSize(int) -> a
+    int safeSizeOf(java.lang.Object,java.lang.Object) -> b
+    int sizeOf$2838e5a0(java.lang.Object) -> b
+    java.lang.String toString() -> toString
+android.support.v4.view.KeyEventCompat -> android.support.v4.view.a:
+    android.support.v4.view.KeyEventCompat$KeyEventVersionImpl IMPL -> a
+    boolean hasModifiers$79c6ddc0(android.view.KeyEvent) -> a
+    boolean hasNoModifiers(android.view.KeyEvent) -> b
+android.support.v4.view.KeyEventCompat$BaseKeyEventVersionImpl -> android.support.v4.view.b:
+    int metaStateFilterDirectionalModifiers$2e71581f(int,int,int,int) -> a
+    int normalizeMetaState(int) -> c
+    boolean metaStateHasModifiers$255f299(int) -> a
+    boolean metaStateHasNoModifiers(int) -> b
+android.support.v4.view.KeyEventCompat$HoneycombKeyEventVersionImpl -> android.support.v4.view.c:
+    boolean metaStateHasModifiers$255f299(int) -> a
+    boolean metaStateHasNoModifiers(int) -> b
+android.support.v4.view.KeyEventCompat$KeyEventVersionImpl -> android.support.v4.view.d:
+    boolean metaStateHasModifiers$255f299(int) -> a
+    boolean metaStateHasNoModifiers(int) -> b
+android.support.v4.view.MotionEventCompat -> android.support.v4.view.e:
+    android.support.v4.view.MotionEventCompat$MotionEventVersionImpl IMPL -> a
+    int getActionIndex(android.view.MotionEvent) -> a
+    int findPointerIndex(android.view.MotionEvent,int) -> a
+    int getPointerId(android.view.MotionEvent,int) -> b
+    float getX(android.view.MotionEvent,int) -> c
+    float getY(android.view.MotionEvent,int) -> d
+android.support.v4.view.MotionEventCompat$BaseMotionEventVersionImpl -> android.support.v4.view.f:
+    int findPointerIndex(android.view.MotionEvent,int) -> a
+    int getPointerId(android.view.MotionEvent,int) -> b
+    float getX(android.view.MotionEvent,int) -> c
+    float getY(android.view.MotionEvent,int) -> d
+android.support.v4.view.MotionEventCompat$EclairMotionEventVersionImpl -> android.support.v4.view.g:
+    int findPointerIndex(android.view.MotionEvent,int) -> a
+    int getPointerId(android.view.MotionEvent,int) -> b
+    float getX(android.view.MotionEvent,int) -> c
+    float getY(android.view.MotionEvent,int) -> d
+android.support.v4.view.MotionEventCompat$MotionEventVersionImpl -> android.support.v4.view.h:
+    int findPointerIndex(android.view.MotionEvent,int) -> a
+    int getPointerId(android.view.MotionEvent,int) -> b
+    float getX(android.view.MotionEvent,int) -> c
+    float getY(android.view.MotionEvent,int) -> d
+android.support.v4.view.PagerAdapter -> android.support.v4.view.i:
+    android.database.DataSetObservable mObservable -> a
+    int getCount() -> a
+    boolean isViewFromObject$171eb1dd() -> b
+    void registerDataSetObserver(android.database.DataSetObserver) -> a
+    void unregisterDataSetObserver(android.database.DataSetObserver) -> b
+android.support.v4.view.PagerTitleStrip -> android.support.v4.view.PagerTitleStrip:
+    android.support.v4.view.ViewPager mPager -> a
+    android.widget.TextView mPrevText -> b
+    android.widget.TextView mCurrText -> c
+    android.widget.TextView mNextText -> d
+    int mLastKnownCurrentPage -> e
+    float mLastKnownPositionOffset -> f
+    int mScaledTextSpacing -> g
+    boolean mUpdatingText -> h
+    boolean mUpdatingPositions -> i
+    android.support.v4.view.PagerTitleStrip$PageListener mPageListener -> j
+    int[] ATTRS -> k
+    void onAttachedToWindow() -> onAttachedToWindow
+    void onDetachedFromWindow() -> onDetachedFromWindow
+    void updateText$7a69ae8(int) -> a
+    void requestLayout() -> requestLayout
+    void updateAdapter(android.support.v4.view.PagerAdapter,android.support.v4.view.PagerAdapter) -> a
+    void updateTextPositions(int,float) -> a
+    void onMeasure(int,int) -> onMeasure
+    void onLayout(boolean,int,int,int,int) -> onLayout
+android.support.v4.view.PagerTitleStrip$PageListener -> android.support.v4.view.j:
+    int mScrollState -> b
+    android.support.v4.view.PagerTitleStrip this$0 -> a
+    void onPageScrolled$486775f1(int,float) -> a
+    void onPageSelected$13462e() -> a
+    void onPageScrollStateChanged(int) -> a
+    void onChanged() -> onChanged
+android.support.v4.view.VelocityTrackerCompat -> android.support.v4.view.k:
+    android.support.v4.view.VelocityTrackerCompat$VelocityTrackerVersionImpl IMPL -> a
+    float getXVelocity(android.view.VelocityTracker,int) -> a
+android.support.v4.view.VelocityTrackerCompat$BaseVelocityTrackerVersionImpl -> android.support.v4.view.l:
+    float getXVelocity(android.view.VelocityTracker,int) -> a
+android.support.v4.view.VelocityTrackerCompat$HoneycombVelocityTrackerVersionImpl -> android.support.v4.view.m:
+    float getXVelocity(android.view.VelocityTracker,int) -> a
+android.support.v4.view.VelocityTrackerCompat$VelocityTrackerVersionImpl -> android.support.v4.view.n:
+    float getXVelocity(android.view.VelocityTracker,int) -> a
+android.support.v4.view.ViewCompat -> android.support.v4.view.o:
+    android.support.v4.view.ViewCompat$ViewCompatImpl IMPL -> a
+    boolean canScrollHorizontally(android.view.View,int) -> a
+    int getOverScrollMode(android.view.View) -> a
+android.support.v4.view.ViewCompat$BaseViewCompatImpl -> android.support.v4.view.p:
+    boolean canScrollHorizontally(android.view.View,int) -> a
+    int getOverScrollMode(android.view.View) -> a
+android.support.v4.view.ViewCompat$GBViewCompatImpl -> android.support.v4.view.q:
+    int getOverScrollMode(android.view.View) -> a
+android.support.v4.view.ViewCompat$ICSViewCompatImpl -> android.support.v4.view.r:
+    boolean canScrollHorizontally(android.view.View,int) -> a
+android.support.v4.view.ViewCompat$ViewCompatImpl -> android.support.v4.view.s:
+    boolean canScrollHorizontally(android.view.View,int) -> a
+    int getOverScrollMode(android.view.View) -> a
+android.support.v4.view.ViewConfigurationCompat -> android.support.v4.view.t:
+    android.support.v4.view.ViewConfigurationCompat$ViewConfigurationVersionImpl IMPL -> a
+    int getScaledPagingTouchSlop(android.view.ViewConfiguration) -> a
+android.support.v4.view.ViewConfigurationCompat$BaseViewConfigurationVersionImpl -> android.support.v4.view.u:
+    int getScaledPagingTouchSlop(android.view.ViewConfiguration) -> a
+android.support.v4.view.ViewConfigurationCompat$FroyoViewConfigurationVersionImpl -> android.support.v4.view.v:
+    int getScaledPagingTouchSlop(android.view.ViewConfiguration) -> a
+android.support.v4.view.ViewConfigurationCompat$ViewConfigurationVersionImpl -> android.support.v4.view.w:
+    int getScaledPagingTouchSlop(android.view.ViewConfiguration) -> a
+android.support.v4.view.ViewPager -> android.support.v4.view.ViewPager:
+    int[] LAYOUT_ATTRS -> a
+    java.util.Comparator COMPARATOR -> b
+    android.view.animation.Interpolator sInterpolator -> c
+    java.util.ArrayList mItems -> d
+    android.support.v4.view.PagerAdapter mAdapter -> e
+    int mCurItem -> f
+    int mRestoredCurItem -> g
+    android.os.Parcelable mRestoredAdapterState -> h
+    java.lang.ClassLoader mRestoredClassLoader -> i
+    android.widget.Scroller mScroller -> j
+    int mPageMargin -> k
+    android.graphics.drawable.Drawable mMarginDrawable -> l
+    int mTopPageBounds -> m
+    int mBottomPageBounds -> n
+    int mChildWidthMeasureSpec -> o
+    int mChildHeightMeasureSpec -> p
+    boolean mInLayout -> q
+    boolean mScrollingCacheEnabled -> r
+    boolean mPopulatePending -> s
+    boolean mScrolling -> t
+    int mOffscreenPageLimit -> u
+    boolean mIsBeingDragged -> v
+    boolean mIsUnableToDrag -> w
+    int mTouchSlop -> x
+    float mInitialMotionX -> y
+    float mLastMotionX -> z
+    float mLastMotionY -> A
+    int mActivePointerId -> B
+    android.view.VelocityTracker mVelocityTracker -> C
+    int mMinimumVelocity -> D
+    int mMaximumVelocity -> E
+    int mFlingDistance -> F
+    boolean mFakeDragging -> G
+    android.support.v4.widget.EdgeEffectCompat mLeftEdge -> H
+    android.support.v4.widget.EdgeEffectCompat mRightEdge -> I
+    boolean mFirstLayout -> J
+    boolean mCalledSuper -> K
+    int mDecorChildCount -> L
+    android.support.v4.view.ViewPager$OnPageChangeListener mOnPageChangeListener -> M
+    android.support.v4.view.ViewPager$OnPageChangeListener mInternalPageChangeListener -> N
+    android.support.v4.view.ViewPager$OnAdapterChangeListener mAdapterChangeListener -> O
+    int mScrollState -> P
+    void setScrollState(int) -> a
+    android.support.v4.view.PagerAdapter getAdapter() -> a
+    void setOnAdapterChangeListener(android.support.v4.view.ViewPager$OnAdapterChangeListener) -> a
+    void setCurrentItem$2563266(int) -> b
+    int getCurrentItem() -> b
+    void setCurrentItemInternal(int,boolean,boolean) -> a
+    void setCurrentItemInternal(int,boolean,boolean,int) -> a
+    android.support.v4.view.ViewPager$OnPageChangeListener setInternalPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener) -> a
+    boolean verifyDrawable(android.graphics.drawable.Drawable) -> verifyDrawable
+    void drawableStateChanged() -> drawableStateChanged
+    void addNewItem$255f295(int) -> c
+    void populate() -> d
+    android.os.Parcelable onSaveInstanceState() -> onSaveInstanceState
+    void onRestoreInstanceState(android.os.Parcelable) -> onRestoreInstanceState
+    void addView(android.view.View,int,android.view.ViewGroup$LayoutParams) -> addView
+    android.support.v4.view.ViewPager$ItemInfo infoForChild$31e08638() -> e
+    android.support.v4.view.ViewPager$ItemInfo infoForAnyChild(android.view.View) -> a
+    void onAttachedToWindow() -> onAttachedToWindow
+    void onMeasure(int,int) -> onMeasure
+    void onSizeChanged(int,int,int,int) -> onSizeChanged
+    void onLayout(boolean,int,int,int,int) -> onLayout
+    void computeScroll() -> computeScroll
+    void pageScrolled(int) -> d
+    void completeScroll() -> f
+    boolean onInterceptTouchEvent(android.view.MotionEvent) -> onInterceptTouchEvent
+    boolean onTouchEvent(android.view.MotionEvent) -> onTouchEvent
+    void draw(android.graphics.Canvas) -> draw
+    void onDraw(android.graphics.Canvas) -> onDraw
+    void onSecondaryPointerUp(android.view.MotionEvent) -> a
+    void endDrag() -> g
+    void setScrollingCacheEnabled(boolean) -> a
+    boolean canScroll(android.view.View,boolean,int,int,int) -> a
+    boolean dispatchKeyEvent(android.view.KeyEvent) -> dispatchKeyEvent
+    boolean arrowScroll(int) -> e
+    boolean pageLeft() -> h
+    void addFocusables(java.util.ArrayList,int,int) -> addFocusables
+    void addTouchables(java.util.ArrayList) -> addTouchables
+    boolean onRequestFocusInDescendants(int,android.graphics.Rect) -> onRequestFocusInDescendants
+    boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent) -> dispatchPopulateAccessibilityEvent
+    android.view.ViewGroup$LayoutParams generateDefaultLayoutParams() -> generateDefaultLayoutParams
+    android.view.ViewGroup$LayoutParams generateLayoutParams(android.view.ViewGroup$LayoutParams) -> generateLayoutParams
+    boolean checkLayoutParams(android.view.ViewGroup$LayoutParams) -> checkLayoutParams
+    android.view.ViewGroup$LayoutParams generateLayoutParams(android.util.AttributeSet) -> generateLayoutParams
+    int[] access$100() -> c
+android.support.v4.view.ViewPager$1 -> android.support.v4.view.x:
+    int compare(java.lang.Object,java.lang.Object) -> compare
+android.support.v4.view.ViewPager$2 -> android.support.v4.view.y:
+    float getInterpolation(float) -> getInterpolation
+android.support.v4.view.ViewPager$Decor -> android.support.v4.view.z:
+android.support.v4.view.ViewPager$ItemInfo -> android.support.v4.view.aa:
+    java.lang.Object object -> a
+    int position -> b
+    boolean scrolling -> c
+android.support.v4.view.ViewPager$LayoutParams -> android.support.v4.view.ViewPager$LayoutParams:
+    boolean isDecor -> a
+    int gravity -> b
+android.support.v4.view.ViewPager$OnAdapterChangeListener -> android.support.v4.view.ab:
+android.support.v4.view.ViewPager$OnPageChangeListener -> android.support.v4.view.ac:
+    void onPageScrolled$486775f1(int,float) -> a
+    void onPageSelected$13462e() -> a
+    void onPageScrollStateChanged(int) -> a
+android.support.v4.view.ViewPager$SavedState -> android.support.v4.view.ViewPager$SavedState:
+    int position -> a
+    android.os.Parcelable adapterState -> b
+    java.lang.ClassLoader loader -> c
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    void writeToParcel(android.os.Parcel,int) -> writeToParcel
+    java.lang.String toString() -> toString
+android.support.v4.view.ViewPager$SavedState$1 -> android.support.v4.view.ad:
+    java.lang.Object[] newArray(int) -> a
+    java.lang.Object createFromParcel(android.os.Parcel,java.lang.ClassLoader) -> a
+android.support.v4.widget.EdgeEffectCompat -> android.support.v4.d.a:
+    java.lang.Object mEdgeEffect -> a
+    android.support.v4.widget.EdgeEffectCompat$EdgeEffectImpl IMPL -> b
+    void setSize(int,int) -> a
+    boolean isFinished() -> a
+    void finish() -> b
+    boolean onPull(float) -> a
+    boolean onRelease() -> c
+    boolean draw(android.graphics.Canvas) -> a
+android.support.v4.widget.EdgeEffectCompat$BaseEdgeEffectImpl -> android.support.v4.d.b:
+    java.lang.Object newEdgeEffect(android.content.Context) -> a
+    void setSize(java.lang.Object,int,int) -> a
+    boolean isFinished(java.lang.Object) -> a
+    void finish(java.lang.Object) -> b
+    boolean onPull(java.lang.Object,float) -> a
+    boolean onRelease(java.lang.Object) -> c
+    boolean draw(java.lang.Object,android.graphics.Canvas) -> a
+android.support.v4.widget.EdgeEffectCompat$EdgeEffectIcsImpl -> android.support.v4.d.c:
+    java.lang.Object newEdgeEffect(android.content.Context) -> a
+    void setSize(java.lang.Object,int,int) -> a
+    boolean isFinished(java.lang.Object) -> a
+    void finish(java.lang.Object) -> b
+    boolean onPull(java.lang.Object,float) -> a
+    boolean onRelease(java.lang.Object) -> c
+    boolean draw(java.lang.Object,android.graphics.Canvas) -> a
+android.support.v4.widget.EdgeEffectCompat$EdgeEffectImpl -> android.support.v4.d.d:
+    java.lang.Object newEdgeEffect(android.content.Context) -> a
+    void setSize(java.lang.Object,int,int) -> a
+    boolean isFinished(java.lang.Object) -> a
+    void finish(java.lang.Object) -> b
+    boolean onPull(java.lang.Object,float) -> a
+    boolean onRelease(java.lang.Object) -> c
+    boolean draw(java.lang.Object,android.graphics.Canvas) -> a
+com.fenritz.safecam.CameraActivity -> com.fenritz.safecam.CameraActivity:
+    com.fenritz.safecam.util.CameraPreview mPreview -> d
+    android.hardware.Camera mCamera -> a
+    int cameraCurrentlyLocked -> b
+    int mOrientation -> e
+    android.view.OrientationEventListener mOrientationEventListener -> f
+    boolean isFlashOn -> g
+    boolean isTimerOn -> h
+    android.widget.ImageButton takePhotoButton -> i
+    android.widget.ImageButton flashButton -> j
+    android.widget.ImageButton timerButton -> k
+    android.widget.ImageView galleryButton -> l
+    int timerTotalSeconds -> m
+    int timerTimePassed -> n
+    boolean isTimerRunning -> o
+    java.io.File lastFile -> p
+    android.graphics.drawable.Drawable lastFileDrawable -> q
+    java.util.Timer timer -> r
+    int photoSizeIndex -> s
+    int firstEnabledIndex -> t
+    int defaultCameraId -> c
+    android.content.BroadcastReceiver receiver -> u
+    com.google.ads.AdView adView -> v
+    void onCreate(android.os.Bundle) -> onCreate
+    void showLastPhotoThumb() -> a
+    void onDestroy() -> onDestroy
+    boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    void takePhoto() -> b
+    android.hardware.Camera$PictureCallback getPictureCallback() -> c
+    void onResume() -> onResume
+    void onPause() -> onPause
+    int changeRotation(int) -> a
+    android.graphics.drawable.Drawable getRotatedImage(int,int) -> a
+    android.graphics.drawable.Drawable getRotatedImage(android.graphics.drawable.Drawable,int) -> a
+    boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    int access$0(com.fenritz.safecam.CameraActivity) -> a
+    android.widget.ImageView access$1(com.fenritz.safecam.CameraActivity) -> b
+    void access$2(com.fenritz.safecam.CameraActivity,android.graphics.drawable.Drawable) -> a
+    int access$3(com.fenritz.safecam.CameraActivity) -> c
+    int access$4(com.fenritz.safecam.CameraActivity,int) -> a
+    java.io.File access$5(com.fenritz.safecam.CameraActivity) -> d
+    android.widget.ImageButton access$6(com.fenritz.safecam.CameraActivity) -> e
+    void access$7(com.fenritz.safecam.CameraActivity,boolean) -> a
+    boolean access$8(com.fenritz.safecam.CameraActivity) -> f
+    android.widget.ImageButton access$9(com.fenritz.safecam.CameraActivity) -> g
+    void access$10(com.fenritz.safecam.CameraActivity,boolean) -> b
+    void access$11(com.fenritz.safecam.CameraActivity) -> h
+    int access$12(com.fenritz.safecam.CameraActivity) -> i
+    int access$13(com.fenritz.safecam.CameraActivity) -> j
+    android.hardware.Camera$PictureCallback access$14(com.fenritz.safecam.CameraActivity) -> k
+    java.util.Timer access$15(com.fenritz.safecam.CameraActivity) -> l
+    void access$16$687b731e(com.fenritz.safecam.CameraActivity) -> m
+    void access$17(com.fenritz.safecam.CameraActivity,int) -> b
+    void access$18(com.fenritz.safecam.CameraActivity) -> n
+    void access$19(com.fenritz.safecam.CameraActivity,int) -> c
+    com.fenritz.safecam.util.CameraPreview access$20(com.fenritz.safecam.CameraActivity) -> o
+com.fenritz.safecam.CameraActivity$1 -> com.fenritz.safecam.a:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.CameraActivity$10 -> com.fenritz.safecam.b:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void run() -> run
+    com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$10) -> a
+com.fenritz.safecam.CameraActivity$10$1 -> com.fenritz.safecam.c:
+    com.fenritz.safecam.CameraActivity$10 this$1 -> a
+    void run() -> run
+com.fenritz.safecam.CameraActivity$11 -> com.fenritz.safecam.d:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onPictureTaken(byte[],android.hardware.Camera) -> onPictureTaken
+    com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$11) -> a
+com.fenritz.safecam.CameraActivity$11$1 -> com.fenritz.safecam.e:
+    com.fenritz.safecam.CameraActivity$11 this$1 -> a
+    void onFinish() -> a
+com.fenritz.safecam.CameraActivity$12 -> com.fenritz.safecam.f:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onOrientationChanged(int) -> onOrientationChanged
+com.fenritz.safecam.CameraActivity$13 -> com.fenritz.safecam.g:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    android.content.SharedPreferences val$preferences -> b
+    java.util.List val$mSupportedPictureSizes -> c
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.CameraActivity$2 -> com.fenritz.safecam.h:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    int val$maxFileSize -> b
+    boolean accept(java.io.File) -> accept
+com.fenritz.safecam.CameraActivity$3 -> com.fenritz.safecam.i:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.CameraActivity$4 -> com.fenritz.safecam.j:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onFinish() -> a
+com.fenritz.safecam.CameraActivity$5 -> com.fenritz.safecam.k:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$6 -> com.fenritz.safecam.l:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$7 -> com.fenritz.safecam.m:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$8 -> com.fenritz.safecam.n:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$9 -> com.fenritz.safecam.o:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$EncryptAndWriteFile -> com.fenritz.safecam.p:
+    java.lang.String filename -> b
+    android.app.ProgressDialog progressDialog -> c
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void onPreExecute() -> onPreExecute
+    java.lang.Void doInBackground(byte[][]) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb -> com.fenritz.safecam.q:
+    java.lang.String fileName -> b
+    android.content.Context context -> c
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish onFinish -> d
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    java.lang.Void doInBackground(byte[][]) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+com.fenritz.safecam.CameraActivity$PhotoSizeAdapter -> com.fenritz.safecam.r:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    boolean areAllItemsEnabled() -> areAllItemsEnabled
+    boolean isEnabled(int) -> isEnabled
+com.fenritz.safecam.CameraActivity$ResumePreview -> com.fenritz.safecam.s:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    void handleMessage(android.os.Message) -> handleMessage
+com.fenritz.safecam.ChangePasswordActivity -> com.fenritz.safecam.ChangePasswordActivity:
+    android.content.BroadcastReceiver receiver -> a
+    void onCreate(android.os.Bundle) -> onCreate
+    void onDestroy() -> onDestroy
+    void onPause() -> onPause
+    void onResume() -> onResume
+com.fenritz.safecam.ChangePasswordActivity$1 -> com.fenritz.safecam.t:
+    com.fenritz.safecam.ChangePasswordActivity this$0 -> a
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.ChangePasswordActivity$2 -> com.fenritz.safecam.u:
+    com.fenritz.safecam.ChangePasswordActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ChangePasswordActivity$3 -> com.fenritz.safecam.v:
+    com.fenritz.safecam.ChangePasswordActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles -> com.fenritz.safecam.w:
+    android.app.ProgressDialog progressDialog -> b
+    com.fenritz.safecam.ChangePasswordActivity this$0 -> a
+    void onPreExecute() -> onPreExecute
+    java.util.ArrayList getFilesList(java.lang.String) -> a
+    java.lang.Void doInBackground(java.lang.String[]) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles$1 -> com.fenritz.safecam.x:
+    com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.DashboardActivity -> com.fenritz.safecam.DashboardActivity:
+    android.content.BroadcastReceiver receiver -> a
+    com.google.ads.AdView adView -> b
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+    void onPause() -> onPause
+    void onDestroy() -> onDestroy
+    boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+com.fenritz.safecam.DashboardActivity$1 -> com.fenritz.safecam.y:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$2 -> com.fenritz.safecam.z:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$3 -> com.fenritz.safecam.aa:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$4 -> com.fenritz.safecam.ab:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$5 -> com.fenritz.safecam.ac:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$6 -> com.fenritz.safecam.ad:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$7 -> com.fenritz.safecam.ae:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.DashboardActivity$8 -> com.fenritz.safecam.af:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    android.content.SharedPreferences val$preferences -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.DashboardActivity$9 -> com.fenritz.safecam.ag:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    android.content.SharedPreferences val$preferences -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.FileDialog -> com.fenritz.safecam.FileDialog:
+    java.util.List path -> a
+    android.widget.TextView myPath -> b
+    android.widget.EditText mFileName -> c
+    java.util.ArrayList mList -> d
+    android.widget.Button selectButton -> e
+    android.widget.LinearLayout layoutSelect -> f
+    android.widget.LinearLayout layoutCreate -> g
+    android.view.inputmethod.InputMethodManager inputManager -> h
+    java.lang.String parentPath -> i
+    java.lang.String currentPath -> j
+    int selectionMode -> k
+    int fileSelectionMode -> l
+    java.lang.String[] formatFilter -> m
+    int selectedMode -> n
+    boolean canSelectFile -> o
+    boolean canSelectDir -> p
+    java.util.ArrayList selectedFiles -> q
+    java.io.File selectedFile -> r
+    java.util.HashMap lastPositions -> s
+    com.fenritz.safecam.util.MemoryCache cache -> t
+    android.content.BroadcastReceiver receiver -> u
+    void onCreate(android.os.Bundle) -> onCreate
+    void onDestroy() -> onDestroy
+    void unSelectAll() -> a
+    void getDir(java.lang.String) -> a
+    void addItem(java.lang.String,int) -> a
+    void onListItemClick(android.widget.ListView,android.view.View,int,long) -> onListItemClick
+    boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    void setSelectVisible(android.view.View) -> a
+    void onPause() -> onPause
+    void onResume() -> onResume
+    java.lang.String access$0(com.fenritz.safecam.FileDialog) -> a
+    java.util.ArrayList access$1(com.fenritz.safecam.FileDialog) -> b
+    java.io.File access$2(com.fenritz.safecam.FileDialog) -> c
+    com.fenritz.safecam.util.MemoryCache access$3(com.fenritz.safecam.FileDialog) -> d
+    int access$4(com.fenritz.safecam.FileDialog) -> e
+    void access$5(com.fenritz.safecam.FileDialog,android.view.View) -> a
+    android.widget.EditText access$6(com.fenritz.safecam.FileDialog) -> f
+    void access$7(com.fenritz.safecam.FileDialog,android.view.View) -> b
+    int access$8(com.fenritz.safecam.FileDialog) -> g
+    void access$9(com.fenritz.safecam.FileDialog) -> h
+    void access$10(com.fenritz.safecam.FileDialog) -> i
+com.fenritz.safecam.FileDialog$1 -> com.fenritz.safecam.ah:
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.FileDialog$2 -> com.fenritz.safecam.ai:
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.FileDialog$3 -> com.fenritz.safecam.aj:
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.FileDialog$4 -> com.fenritz.safecam.ak:
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.FileDialog$5 -> com.fenritz.safecam.al:
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.FileDialog$6 -> com.fenritz.safecam.am:
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.FileDialog$7 -> com.fenritz.safecam.an:
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.FileDialog$FilesAdapter -> com.fenritz.safecam.ao:
+    java.util.ArrayList list -> b
+    com.fenritz.safecam.FileDialog this$0 -> a
+    int getCount() -> getCount
+    java.lang.Object getItem(int) -> getItem
+    long getItemId(int) -> getItemId
+    android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+com.fenritz.safecam.FileDialog$ShowImageThumb -> com.fenritz.safecam.ap:
+    android.widget.ImageView imageView -> b
+    com.fenritz.safecam.FileDialog this$0 -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+com.fenritz.safecam.GalleryActivity -> com.fenritz.safecam.GalleryActivity:
+    com.fenritz.safecam.util.MemoryCache memCache -> a
+    int multiSelectMode -> b
+    boolean multiSelectModeActive -> c
+    android.widget.GridView photosGrid -> d
+    java.util.ArrayList files -> e
+    java.util.ArrayList selectedFiles -> f
+    java.util.ArrayList toGenerateThumbs -> g
+    java.util.ArrayList noThumbs -> h
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter galleryAdapter -> i
+    com.fenritz.safecam.GalleryActivity$GenerateThumbs thumbGenTask -> j
+    com.fenritz.safecam.GalleryActivity$FillCache fillCacheTask -> k
+    android.content.BroadcastReceiver receiver -> l
+    boolean isWentToLogin -> m
+    java.lang.String currentPath -> n
+    int pageNumber -> o
+    int itemsPerPage -> p
+    int loadThreshold -> q
+    void onCreate(android.os.Bundle) -> onCreate
+    void onDestroy() -> onDestroy
+    void handleSendMulti(android.content.Intent) -> a
+    void fillFilesList() -> a
+    void changeDir(java.lang.String) -> a
+    boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    void onPause() -> onPause
+    void onResume() -> onResume
+    void enterMultiSelect() -> b
+    void exitMultiSelect() -> c
+    void refreshList() -> d
+    void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    void clearMutliSelect() -> e
+    boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    java.util.ArrayList access$0(com.fenritz.safecam.GalleryActivity) -> a
+    int access$1(com.fenritz.safecam.GalleryActivity) -> b
+    java.util.ArrayList access$2(com.fenritz.safecam.GalleryActivity) -> c
+    boolean access$3(com.fenritz.safecam.GalleryActivity) -> d
+    void access$4(com.fenritz.safecam.GalleryActivity) -> e
+    void access$5(com.fenritz.safecam.GalleryActivity,boolean) -> a
+    void access$6(com.fenritz.safecam.GalleryActivity) -> f
+    java.lang.String access$7(com.fenritz.safecam.GalleryActivity) -> g
+    void access$8(com.fenritz.safecam.GalleryActivity) -> h
+    void access$9(com.fenritz.safecam.GalleryActivity) -> i
+    void access$10(com.fenritz.safecam.GalleryActivity) -> j
+    void access$11(com.fenritz.safecam.GalleryActivity) -> k
+    java.util.ArrayList access$12(com.fenritz.safecam.GalleryActivity) -> l
+    java.util.ArrayList access$13(com.fenritz.safecam.GalleryActivity) -> m
+    android.widget.GridView access$14(com.fenritz.safecam.GalleryActivity) -> n
+    com.fenritz.safecam.GalleryActivity$FillCache access$15(com.fenritz.safecam.GalleryActivity) -> o
+    int access$16(com.fenritz.safecam.GalleryActivity) -> p
+    void access$17(com.fenritz.safecam.GalleryActivity,com.fenritz.safecam.GalleryActivity$FillCache) -> a
+    void access$18(com.fenritz.safecam.GalleryActivity,java.lang.String) -> a
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter access$19(com.fenritz.safecam.GalleryActivity) -> q
+    void access$20(com.fenritz.safecam.GalleryActivity,int) -> a
+    void access$21(com.fenritz.safecam.GalleryActivity) -> r
+    void access$22(com.fenritz.safecam.GalleryActivity,int) -> b
+com.fenritz.safecam.GalleryActivity$1 -> com.fenritz.safecam.aq:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.GalleryActivity$10 -> com.fenritz.safecam.ar:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$11 -> com.fenritz.safecam.as:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    boolean accept(java.io.File) -> accept
+com.fenritz.safecam.GalleryActivity$12 -> com.fenritz.safecam.at:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.GalleryActivity$13 -> com.fenritz.safecam.au:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    boolean val$isInHome -> b
+    android.widget.Spinner val$spinner -> c
+    void onClick(android.content.DialogInterface,int) -> onClick
+    com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$13) -> a
+com.fenritz.safecam.GalleryActivity$13$1 -> com.fenritz.safecam.av:
+    com.fenritz.safecam.GalleryActivity$13 this$1 -> a
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$14 -> com.fenritz.safecam.aw:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+    com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$14) -> a
+com.fenritz.safecam.GalleryActivity$14$1 -> com.fenritz.safecam.ax:
+    com.fenritz.safecam.GalleryActivity$14 this$1 -> a
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$15 -> com.fenritz.safecam.ay:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$16 -> com.fenritz.safecam.az:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+    com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$16) -> a
+com.fenritz.safecam.GalleryActivity$16$1 -> com.fenritz.safecam.ba:
+    com.fenritz.safecam.GalleryActivity$16 this$1 -> a
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$17 -> com.fenritz.safecam.bb:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$18 -> com.fenritz.safecam.bc:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    java.lang.String[] val$filePaths -> b
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$18$1 -> com.fenritz.safecam.bd:
+    com.fenritz.safecam.GalleryActivity$18 this$1 -> a
+    java.lang.String[] val$filePaths -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+    com.fenritz.safecam.GalleryActivity$18 access$0(com.fenritz.safecam.GalleryActivity$18$1) -> a
+com.fenritz.safecam.GalleryActivity$18$1$1 -> com.fenritz.safecam.be:
+    com.fenritz.safecam.GalleryActivity$18$1 this$2 -> a
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$19 -> com.fenritz.safecam.bf:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    android.view.View val$enterPasswordView -> b
+    java.lang.String[] val$filePaths -> c
+    void onClick(android.content.DialogInterface,int) -> onClick
+    com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$19) -> a
+com.fenritz.safecam.GalleryActivity$19$1 -> com.fenritz.safecam.bg:
+    com.fenritz.safecam.GalleryActivity$19 this$1 -> a
+    void onFinish(java.lang.Integer) -> a
+com.fenritz.safecam.GalleryActivity$2 -> com.fenritz.safecam.bh:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$20 -> com.fenritz.safecam.bi:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
+    void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
+com.fenritz.safecam.GalleryActivity$3 -> com.fenritz.safecam.bj:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$4 -> com.fenritz.safecam.bk:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$5 -> com.fenritz.safecam.bl:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$6 -> com.fenritz.safecam.bm:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.GalleryActivity$7 -> com.fenritz.safecam.bn:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$8 -> com.fenritz.safecam.bo:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+    com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$8) -> a
+com.fenritz.safecam.GalleryActivity$8$1 -> com.fenritz.safecam.bp:
+    com.fenritz.safecam.GalleryActivity$8 this$1 -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.GalleryActivity$9 -> com.fenritz.safecam.bq:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+    com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$9) -> a
+com.fenritz.safecam.GalleryActivity$9$1 -> com.fenritz.safecam.br:
+    com.fenritz.safecam.GalleryActivity$9 this$1 -> a
+    android.widget.EditText val$input -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.GalleryActivity$FillCache -> com.fenritz.safecam.bs:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    void onPreExecute() -> onPreExecute
+    java.lang.Void doInBackground(int[][]) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.GalleryActivity$GalleryAdapter -> com.fenritz.safecam.bt:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    int getCount() -> getCount
+    java.lang.Object getItem(int) -> getItem
+    long getItemId(int) -> getItemId
+    android.widget.TextView getLabel(java.io.File) -> a
+    android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    boolean access$0$17e55af9(com.fenritz.safecam.GalleryActivity$GalleryAdapter,java.io.File) -> a
+    com.fenritz.safecam.GalleryActivity access$1(com.fenritz.safecam.GalleryActivity$GalleryAdapter) -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$1 -> com.fenritz.safecam.bu:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
+    com.fenritz.safecam.widget.CheckableLayout val$layout -> b
+    java.io.File val$file -> c
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$2 -> com.fenritz.safecam.bv:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
+    com.fenritz.safecam.widget.CheckableLayout val$layout -> b
+    java.io.File val$file -> c
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$3 -> com.fenritz.safecam.bw:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
+    java.io.File val$file -> b
+    boolean onLongClick(android.view.View) -> onLongClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$5 -> com.fenritz.safecam.bx:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
+    java.io.File val$file -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter access$0(com.fenritz.safecam.GalleryActivity$GalleryAdapter$5) -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$5$1 -> com.fenritz.safecam.by:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter$5 this$2 -> a
+    void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$6 -> com.fenritz.safecam.bz:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
+    com.fenritz.safecam.widget.CheckableLayout val$layout -> b
+    java.io.File val$file -> c
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$7 -> com.fenritz.safecam.ca:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
+    java.io.File val$file -> b
+    boolean onLongClick(android.view.View) -> onLongClick
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter access$0(com.fenritz.safecam.GalleryActivity$GalleryAdapter$7) -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$7$1 -> com.fenritz.safecam.cb:
+    com.fenritz.safecam.GalleryActivity$GalleryAdapter$7 this$2 -> a
+    java.io.File val$file -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.GalleryActivity$GenerateThumbs -> com.fenritz.safecam.cc:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    java.lang.Void doInBackground$3f6017d3() -> a
+    void onCancelled() -> onCancelled
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.SafeCameraActivity -> com.fenritz.safecam.SafeCameraActivity:
+    android.content.SharedPreferences preferences -> a
+    boolean justLogin -> b
+    android.os.Bundle extraData -> c
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+    boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    boolean access$0(com.fenritz.safecam.SafeCameraActivity) -> a
+    android.os.Bundle access$1(com.fenritz.safecam.SafeCameraActivity) -> b
+    android.content.SharedPreferences access$2(com.fenritz.safecam.SafeCameraActivity) -> c
+    void access$3(com.fenritz.safecam.SafeCameraActivity) -> d
+com.fenritz.safecam.SafeCameraActivity$1 -> com.fenritz.safecam.cd:
+    com.fenritz.safecam.SafeCameraActivity this$0 -> a
+    boolean onEditorAction(android.widget.TextView,int,android.view.KeyEvent) -> onEditorAction
+com.fenritz.safecam.SafeCameraActivity$2 -> com.fenritz.safecam.ce:
+    com.fenritz.safecam.SafeCameraActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.SafeCameraActivity$Login -> com.fenritz.safecam.cf:
+    android.app.ProgressDialog progressDialog -> b
+    com.fenritz.safecam.SafeCameraActivity this$0 -> a
+    void onPreExecute() -> onPreExecute
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+com.fenritz.safecam.SafeCameraActivity$Login$1 -> com.fenritz.safecam.cg:
+    com.fenritz.safecam.SafeCameraActivity$Login this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.SafeCameraApplication -> com.fenritz.safecam.SafeCameraApplication:
+    java.lang.String key -> a
+    long lockedTime -> b
+    java.lang.String getKey() -> a
+    void setKey(java.lang.String) -> a
+    long getLockedTime() -> b
+    void setLockedTime(long) -> a
+com.fenritz.safecam.SetUpActivity -> com.fenritz.safecam.SetUpActivity:
+    void onCreate(android.os.Bundle) -> onCreate
+com.fenritz.safecam.SetUpActivity$1 -> com.fenritz.safecam.ch:
+    com.fenritz.safecam.SetUpActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.SettingsActivity -> com.fenritz.safecam.SettingsActivity:
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+com.fenritz.safecam.ViewImageActivity -> com.fenritz.safecam.ViewImageActivity:
+    java.util.ArrayList files -> a
+    android.content.BroadcastReceiver receiver -> b
+    int currentPosition -> c
+    android.view.GestureDetector gestureDetector -> d
+    android.view.View$OnTouchListener gestureListener -> e
+    android.os.Handler handler -> f
+    java.lang.String currentPath -> g
+    java.util.ArrayList taskStack -> h
+    java.util.ArrayList viewsHideShow -> i
+    void onCreate(android.os.Bundle) -> onCreate
+    void onDestroy() -> onDestroy
+    void onPause() -> onPause
+    void onResume() -> onResume
+    void cancelPendingTasks() -> a
+    void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    void hideViews() -> b
+    void showImage(java.io.File) -> a
+    void fillFilesList() -> c
+    boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    int access$0(com.fenritz.safecam.ViewImageActivity) -> a
+    java.util.ArrayList access$1(com.fenritz.safecam.ViewImageActivity) -> b
+    void access$2(com.fenritz.safecam.ViewImageActivity) -> c
+    void access$3(com.fenritz.safecam.ViewImageActivity,int) -> a
+    void access$4(com.fenritz.safecam.ViewImageActivity,java.io.File) -> a
+    android.view.GestureDetector access$5(com.fenritz.safecam.ViewImageActivity) -> d
+    void access$6(com.fenritz.safecam.ViewImageActivity) -> e
+    void access$7(com.fenritz.safecam.ViewImageActivity) -> f
+    java.util.ArrayList access$8(com.fenritz.safecam.ViewImageActivity) -> g
+    java.util.ArrayList access$9(com.fenritz.safecam.ViewImageActivity) -> h
+com.fenritz.safecam.ViewImageActivity$1 -> com.fenritz.safecam.ci:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
+com.fenritz.safecam.ViewImageActivity$10 -> com.fenritz.safecam.cj:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void run() -> run
+com.fenritz.safecam.ViewImageActivity$11 -> com.fenritz.safecam.ck:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onFinish() -> a
+com.fenritz.safecam.ViewImageActivity$12 -> com.fenritz.safecam.cl:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.ViewImageActivity$2 -> com.fenritz.safecam.cm:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.ViewImageActivity$3 -> com.fenritz.safecam.cn:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$4 -> com.fenritz.safecam.co:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$5 -> com.fenritz.safecam.cp:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+    com.fenritz.safecam.ViewImageActivity access$0(com.fenritz.safecam.ViewImageActivity$5) -> a
+com.fenritz.safecam.ViewImageActivity$5$1 -> com.fenritz.safecam.cq:
+    com.fenritz.safecam.ViewImageActivity$5 this$1 -> a
+    java.util.ArrayList val$selectedFiles -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+    com.fenritz.safecam.ViewImageActivity$5 access$0(com.fenritz.safecam.ViewImageActivity$5$1) -> a
+com.fenritz.safecam.ViewImageActivity$5$1$1 -> com.fenritz.safecam.cr:
+    com.fenritz.safecam.ViewImageActivity$5$1 this$2 -> a
+    void onFinish() -> a
+com.fenritz.safecam.ViewImageActivity$6 -> com.fenritz.safecam.cs:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$7 -> com.fenritz.safecam.ct:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$8 -> com.fenritz.safecam.cu:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onFinish(java.util.ArrayList) -> a
+com.fenritz.safecam.ViewImageActivity$9 -> com.fenritz.safecam.cv:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$SwipeGestureDetector -> com.fenritz.safecam.cw:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    boolean onFling(android.view.MotionEvent,android.view.MotionEvent,float,float) -> onFling
+com.fenritz.safecam.util.AESCrypt -> com.fenritz.safecam.util.a:
+    javax.crypto.Cipher encryptionCipher -> b
+    javax.crypto.Cipher decryptionCipher -> c
+    byte[] buf -> a
+    javax.crypto.SecretKey key -> d
+    java.lang.String password -> e
+    byte[] iv -> f
+    byte[] salt -> g
+    int currentVersion -> h
+    boolean setupCrypto(byte[],byte[]) -> a
+    void writeHeader(java.io.OutputStream,byte[],byte[]) -> a
+    int readHeader(java.io.InputStream,byte[],byte[]) -> a
+    void encrypt$45f1a8cc(java.io.InputStream,java.io.OutputStream,android.os.AsyncTask) -> a
+    void encrypt(byte[],java.io.OutputStream) -> a
+    boolean reEncrypt$3b0656d5(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,android.os.AsyncTask) -> a
+    boolean reEncrypt$25c3d16f(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,android.os.AsyncTask,boolean) -> a
+    void decrypt$45f1a8cc(java.io.InputStream,java.io.OutputStream,android.os.AsyncTask) -> b
+    byte[] decrypt(java.io.InputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress,android.os.AsyncTask) -> a
+    byte[] generateIv() -> a
+    byte[] getHash(java.lang.String) -> a
+    javax.crypto.SecretKey getSecretKey(java.lang.String,byte[]) -> a
+    byte[] generateSalt() -> b
+    java.lang.String byteToHex(byte[]) -> a
+com.fenritz.safecam.util.AESCrypt$CryptoProgress -> com.fenritz.safecam.util.b:
+    long total -> a
+    long current -> b
+    void setProgress(long) -> a
+    int getProgressPercents() -> a
+com.fenritz.safecam.util.AESCryptException -> com.fenritz.safecam.util.c:
+com.fenritz.safecam.util.AsyncTasks -> com.fenritz.safecam.util.d:
+com.fenritz.safecam.util.AsyncTasks$DecryptFiles -> com.fenritz.safecam.util.e:
+    android.app.ProgressDialog progressDialog -> a
+    android.app.Activity activity -> b
+    java.lang.String destinationFolder -> c
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> d
+    void onPreExecute() -> onPreExecute
+    java.util.ArrayList doInBackground(java.util.ArrayList[]) -> a
+    void onCancelled() -> onCancelled
+    void onPostExecute(java.util.ArrayList) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.util.AsyncTasks$DecryptFiles$1 -> com.fenritz.safecam.util.f:
+    com.fenritz.safecam.util.AsyncTasks$DecryptFiles this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.util.AsyncTasks$DecryptPopulateImage -> com.fenritz.safecam.util.g:
+    android.content.Context context -> a
+    java.lang.String filePath -> b
+    android.widget.ImageView image -> c
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish onFinish -> d
+    int ratio -> e
+    void setRatio$13462e() -> a
+    void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
+    android.graphics.Bitmap doInBackground$2d4c763b() -> b
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+com.fenritz.safecam.util.AsyncTasks$DeleteFiles -> com.fenritz.safecam.util.h:
+    android.app.ProgressDialog progressDialog -> a
+    android.app.Activity activity -> b
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
+    void onPreExecute() -> onPreExecute
+    void deleteFileFolder(java.io.File) -> a
+    void onCancelled() -> onCancelled
+    void onPostExecute(java.lang.Void) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.util.AsyncTasks$DeleteFiles$1 -> com.fenritz.safecam.util.i:
+    com.fenritz.safecam.util.AsyncTasks$DeleteFiles this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.util.AsyncTasks$EncryptFiles -> com.fenritz.safecam.util.j:
+    android.app.ProgressDialog progressDialog -> a
+    android.app.Activity activity -> b
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
+    java.lang.String destinationFolder -> d
+    void onPreExecute() -> onPreExecute
+    java.lang.Void doInBackground(java.lang.String[]) -> a
+    void onCancelled() -> onCancelled
+    void onPostExecute(java.lang.Void) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.util.AsyncTasks$EncryptFiles$1 -> com.fenritz.safecam.util.k:
+    com.fenritz.safecam.util.AsyncTasks$EncryptFiles this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.util.AsyncTasks$ImportFiles -> com.fenritz.safecam.util.l:
+    android.app.ProgressDialog progressDialog -> a
+    android.app.Activity activity -> b
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
+    java.lang.String destinationFolder -> d
+    void onPreExecute() -> onPreExecute
+    java.lang.Integer doInBackground(java.util.HashMap[]) -> a
+    void onCancelled() -> onCancelled
+    void onPostExecute(java.lang.Integer) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.util.AsyncTasks$ImportFiles$1 -> com.fenritz.safecam.util.m:
+    com.fenritz.safecam.util.AsyncTasks$ImportFiles this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.util.AsyncTasks$MoveFiles -> com.fenritz.safecam.util.n:
+    android.app.ProgressDialog progressDialog -> a
+    android.app.Activity activity -> b
+    java.io.File destination -> c
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> d
+    void onPreExecute() -> onPreExecute
+    void onCancelled() -> onCancelled
+    void onPostExecute(java.lang.Void) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.util.AsyncTasks$MoveFiles$1 -> com.fenritz.safecam.util.o:
+    com.fenritz.safecam.util.AsyncTasks$MoveFiles this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish -> com.fenritz.safecam.util.p:
+    void onFinish() -> a
+    void onFinish(java.util.ArrayList) -> a
+    void onFinish(java.lang.Integer) -> a
+com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles -> com.fenritz.safecam.util.q:
+    android.app.ProgressDialog progressDialog -> a
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> b
+    android.app.Activity activity -> c
+    void onPreExecute() -> onPreExecute
+    java.util.ArrayList doInBackground(java.util.HashMap[]) -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles$1 -> com.fenritz.safecam.util.r:
+    com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles this$1 -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.fenritz.safecam.util.CameraPreview -> com.fenritz.safecam.util.CameraPreview:
+    java.lang.String TAG -> g
+    android.view.SurfaceView mSurfaceView -> a
+    android.view.SurfaceHolder mHolder -> b
+    android.hardware.Camera$Size mPreviewSize -> c
+    java.util.List mSupportedPreviewSizes -> d
+    android.hardware.Camera mCamera -> e
+    android.util.DisplayMetrics screenSize -> f
+    void init(android.content.Context) -> a
+    void setCamera(android.hardware.Camera) -> a
+    void onMeasure(int,int) -> onMeasure
+    void onLayout(boolean,int,int,int,int) -> onLayout
+    void surfaceCreated(android.view.SurfaceHolder) -> surfaceCreated
+    void surfaceDestroyed(android.view.SurfaceHolder) -> surfaceDestroyed
+    void surfaceChanged(android.view.SurfaceHolder,int,int,int) -> surfaceChanged
+com.fenritz.safecam.util.DecryptAndShowImage -> com.fenritz.safecam.util.s:
+    java.lang.String filePath -> a
+    android.content.Context context -> b
+    android.view.ViewGroup parent -> c
+    android.widget.ProgressBar progressBar -> d
+    android.view.View$OnClickListener onClickListener -> e
+    android.view.View$OnLongClickListener onLongClickListener -> f
+    com.fenritz.safecam.util.MemoryCache memCache -> g
+    boolean zoomable -> h
+    android.view.View$OnTouchListener touchListener -> i
+    void onPreExecute() -> onPreExecute
+    android.graphics.Bitmap doInBackground$2d4c763b() -> b
+    void onCancelled() -> onCancelled
+    void onFinish() -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
+    void access$3(com.fenritz.safecam.util.DecryptAndShowImage,java.lang.Object[]) -> a
+com.fenritz.safecam.util.DecryptAndShowImage$1 -> com.fenritz.safecam.util.t:
+    com.fenritz.safecam.util.DecryptAndShowImage this$0 -> a
+    void setProgress(long) -> a
+com.fenritz.safecam.util.Helpers -> com.fenritz.safecam.util.u:
+    boolean isDemo(android.content.Context) -> a
+    boolean checkLoginedState(android.app.Activity) -> a
+    boolean checkLoginedState$2dadfc0b(android.app.Activity,android.os.Bundle) -> a
+    void setLockedTime(android.content.Context) -> b
+    void disableLockTimer(android.content.Context) -> c
+    void logout(android.app.Activity) -> b
+    void redirectToLogin(android.app.Activity,android.os.Bundle) -> b
+    void doLogout(android.app.Activity) -> c
+    void deleteTmpDir(android.content.Context) -> d
+    com.fenritz.safecam.util.AESCrypt getAESCrypt(java.lang.String,android.content.Context) -> a
+    java.lang.String getFilename(android.content.Context,java.lang.String) -> a
+    void showAlertDialog(android.app.Activity,java.lang.String) -> a
+    java.lang.String getHomeDir(android.content.Context) -> e
+    java.lang.String getThumbsDir(android.content.Context) -> f
+    android.graphics.Bitmap generateThumbnail(android.content.Context,byte[],java.lang.String) -> a
+    android.graphics.Bitmap decodeFile$530881cb(java.io.File) -> a
+    android.graphics.Bitmap decodeBitmap(byte[],int) -> a
+    java.lang.String getRealPathFromURI(android.app.Activity,android.net.Uri) -> a
+    java.lang.String findNewFileNameIfNeeded(android.content.Context,java.lang.String,java.lang.String,java.lang.Integer) -> a
+    void share(android.app.Activity,java.util.ArrayList,com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
+    void shareFiles(android.app.Activity,java.util.ArrayList) -> a
+com.fenritz.safecam.util.Helpers$2 -> com.fenritz.safecam.util.v:
+    android.app.Activity val$activity -> a
+    java.util.ArrayList val$files -> b
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish val$onDecrypt -> c
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.util.Helpers$2$1 -> com.fenritz.safecam.util.w:
+    com.fenritz.safecam.util.Helpers$2 this$1 -> a
+    android.view.View val$enterPasswordView -> b
+    java.util.ArrayList val$files -> c
+    android.app.Activity val$activity -> d
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.util.Helpers$2$1$1 -> com.fenritz.safecam.util.x:
+    com.fenritz.safecam.util.Helpers$2$1 this$2 -> a
+    android.app.Activity val$activity -> b
+    void onFinish(java.util.ArrayList) -> a
+com.fenritz.safecam.util.Helpers$2$2 -> com.fenritz.safecam.util.y:
+    com.fenritz.safecam.util.Helpers$2 this$1 -> a
+    android.app.Activity val$activity -> b
+    com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish val$onDecrypt -> c
+    void onFinish(java.util.ArrayList) -> a
+com.fenritz.safecam.util.MemoryCache -> com.fenritz.safecam.util.z:
+    int CACHE_SIZE -> a
+    android.support.v4.util.LruCache cache -> b
+    android.graphics.Bitmap get(java.lang.String) -> a
+    void put(java.lang.String,android.graphics.Bitmap) -> a
+com.fenritz.safecam.util.MemoryCache$1 -> com.fenritz.safecam.util.aa:
+    com.fenritz.safecam.util.MemoryCache this$0 -> a
+    int sizeOf$2838e5a0(java.lang.Object) -> b
+com.fenritz.safecam.util.OptimizedCipherInputStream -> com.fenritz.safecam.util.ab:
+    javax.crypto.Cipher cipher -> a
+    java.io.InputStream input -> b
+    byte[] ibuffer -> c
+    boolean done -> d
+    byte[] obuffer -> e
+    int ostart -> f
+    int ofinish -> g
+    int getMoreData() -> a
+    int read() -> read
+    int read(byte[]) -> read
+    int read(byte[],int,int) -> read
+    long skip(long) -> skip
+    int available() -> available
+    void close() -> close
+    boolean markSupported() -> markSupported
+com.fenritz.safecam.widget.CheckableLayout -> com.fenritz.safecam.widget.CheckableLayout:
+    boolean mChecked -> a
+    void setChecked(boolean) -> setChecked
+    boolean isChecked() -> isChecked
+    void toggle() -> toggle
+com.fenritz.safecam.widget.DashboardLayout -> com.fenritz.safecam.widget.DashboardLayout:
+    int mMaxChildWidth -> a
+    int mMaxChildHeight -> b
+    void onMeasure(int,int) -> onMeasure
+    void onLayout(boolean,int,int,int,int) -> onLayout
+com.fenritz.safecam.widget.TouchImageView -> com.fenritz.safecam.widget.TouchImageView:
+    android.graphics.Matrix matrix -> a
+    int mode -> b
+    android.graphics.PointF last -> c
+    android.graphics.PointF start -> d
+    float minScale -> e
+    float maxScale -> f
+    float[] m -> g
+    float redundantXSpace -> h
+    float redundantYSpace -> i
+    float width -> j
+    float height -> k
+    float saveScale -> l
+    float right -> m
+    float bottom -> n
+    float origWidth -> o
+    float origHeight -> p
+    float bmWidth -> q
+    float bmHeight -> r
+    android.view.ScaleGestureDetector mScaleDetector -> s
+    android.content.Context context -> t
+    android.view.View$OnTouchListener touchListener -> u
+    void setTouchListener(android.view.View$OnTouchListener) -> a
+    void sharedConstructing(android.content.Context) -> a
+    void setImageBitmap(android.graphics.Bitmap) -> setImageBitmap
+    void onMeasure(int,int) -> onMeasure
+com.fenritz.safecam.widget.TouchImageView$1 -> com.fenritz.safecam.widget.a:
+    com.fenritz.safecam.widget.TouchImageView this$0 -> a
+    boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
+com.fenritz.safecam.widget.TouchImageView$ScaleListener -> com.fenritz.safecam.widget.b:
+    com.fenritz.safecam.widget.TouchImageView this$0 -> a
+    boolean onScaleBegin(android.view.ScaleGestureDetector) -> onScaleBegin
+    boolean onScale(android.view.ScaleGestureDetector) -> onScale
+com.google.ads.Ad -> com.google.ads.a:
+com.google.ads.AdActivity -> com.google.ads.AdActivity:
+    com.google.ads.internal.a a -> a
+    java.lang.Object b -> b
+    com.google.ads.AdActivity c -> c
+    com.google.ads.internal.d d -> d
+    com.google.ads.AdActivity e -> e
+    com.google.ads.AdActivity f -> f
+    com.google.ads.AdActivity$StaticMethodWrapper g -> g
+    com.google.ads.internal.AdWebView h -> h
+    android.view.ViewGroup i -> i
+    boolean j -> j
+    long k -> k
+    android.widget.RelativeLayout l -> l
+    com.google.ads.AdActivity m -> m
+    boolean n -> n
+    boolean o -> o
+    boolean p -> p
+    boolean q -> q
+    com.google.ads.internal.AdVideoView r -> r
+    void a(java.lang.String) -> a
+    void a(java.lang.String,java.lang.Throwable) -> a
+    com.google.ads.internal.AdVideoView getAdVideoView() -> a
+    com.google.ads.internal.AdWebView getOpeningAdWebView() -> b
+    boolean isShowing() -> c
+    void launchAdActivity(com.google.ads.internal.d,com.google.ads.internal.e) -> a
+    void a(com.google.ads.internal.d) -> b
+    void moveAdVideoView(int,int,int,int) -> a
+    void newAdVideoView(int,int,int,int) -> b
+    android.widget.RelativeLayout$LayoutParams a(int,int,int,int) -> c
+    void onClick(android.view.View) -> onClick
+    void onCreate(android.os.Bundle) -> onCreate
+    void a(com.google.ads.internal.AdWebView,boolean,int,boolean) -> a
+    void onDestroy() -> onDestroy
+    void onPause() -> onPause
+    void d() -> g
+    void onWindowFocusChanged(boolean) -> onWindowFocusChanged
+    void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    java.lang.Object a() -> d
+    com.google.ads.AdActivity b() -> e
+    com.google.ads.internal.d c() -> f
+    com.google.ads.internal.d b(com.google.ads.internal.d) -> a
+com.google.ads.AdActivity$StaticMethodWrapper -> com.google.ads.b:
+    boolean isShowing() -> a
+    void launchAdActivity(com.google.ads.internal.d,com.google.ads.internal.e) -> a
+com.google.ads.AdListener -> com.google.ads.c:
+com.google.ads.AdRequest -> com.google.ads.d:
+    java.text.SimpleDateFormat a -> b
+    java.lang.reflect.Method b -> c
+    java.lang.reflect.Method c -> d
+    com.google.ads.AdRequest$Gender d -> e
+    java.util.Date e -> f
+    java.util.Set f -> g
+    java.util.Map g -> h
+    java.util.Map h -> i
+    android.location.Location i -> j
+    boolean j -> k
+    boolean k -> l
+    java.lang.String TEST_EMULATOR -> a
+    java.util.Set l -> m
+    com.google.ads.AdRequest setKeywords(java.util.Set) -> a
+    com.google.ads.AdRequest setNetworkExtras(com.google.ads.mediation.NetworkExtras) -> a
+    java.lang.Object getNetworkExtras(java.lang.Class) -> a
+    java.util.Map getRequestMap(android.content.Context) -> a
+    com.google.ads.AdRequest setTestDevices(java.util.Set) -> b
+    boolean isTestDevice(android.content.Context) -> b
+com.google.ads.AdRequest$ErrorCode -> com.google.ads.e:
+    com.google.ads.AdRequest$ErrorCode INVALID_REQUEST -> a
+    com.google.ads.AdRequest$ErrorCode NO_FILL -> b
+    com.google.ads.AdRequest$ErrorCode NETWORK_ERROR -> c
+    com.google.ads.AdRequest$ErrorCode INTERNAL_ERROR -> d
+    java.lang.String a -> e
+    com.google.ads.AdRequest$ErrorCode[] b -> f
+    com.google.ads.AdRequest$ErrorCode[] values() -> values
+    com.google.ads.AdRequest$ErrorCode valueOf(java.lang.String) -> valueOf
+    java.lang.String toString() -> toString
+com.google.ads.AdRequest$Gender -> com.google.ads.f:
+    com.google.ads.AdRequest$Gender UNKNOWN -> a
+    com.google.ads.AdRequest$Gender MALE -> b
+    com.google.ads.AdRequest$Gender FEMALE -> c
+    com.google.ads.AdRequest$Gender[] a -> d
+    com.google.ads.AdRequest$Gender[] values() -> values
+    com.google.ads.AdRequest$Gender valueOf(java.lang.String) -> valueOf
+com.google.ads.AdSize -> com.google.ads.g:
+    com.google.ads.AdSize SMART_BANNER -> a
+    com.google.ads.AdSize BANNER -> b
+    com.google.ads.AdSize IAB_MRECT -> c
+    com.google.ads.AdSize IAB_BANNER -> d
+    com.google.ads.AdSize IAB_LEADERBOARD -> e
+    com.google.ads.AdSize IAB_WIDE_SKYSCRAPER -> f
+    int a -> g
+    int b -> h
+    boolean c -> i
+    boolean d -> j
+    boolean e -> k
+    java.lang.String f -> l
+    com.google.ads.AdSize createAdSize(com.google.ads.AdSize,android.content.Context) -> a
+    int getWidth() -> a
+    int getHeight() -> b
+    boolean a() -> f
+    boolean isFullWidth() -> c
+    boolean isAutoHeight() -> d
+    boolean isCustomAdSize() -> e
+    java.lang.String toString() -> toString
+com.google.ads.AdView -> com.google.ads.AdView:
+    com.google.ads.m a -> a
+    com.google.ads.internal.d b -> b
+    void a(android.content.Context,java.lang.String,int,com.google.ads.AdSize,android.util.AttributeSet) -> a
+    int a(android.content.Context,int) -> a
+    boolean a(android.content.Context,com.google.ads.AdSize,android.util.AttributeSet) -> a
+    boolean b(android.content.Context,com.google.ads.AdSize,android.util.AttributeSet) -> b
+    void destroy() -> a
+    void a(android.content.Context,java.lang.String,com.google.ads.AdSize,android.util.AttributeSet) -> a
+    java.lang.String a(java.lang.String,android.content.Context,android.util.AttributeSet,boolean,boolean) -> a
+    java.util.Set b$565bd434(java.lang.String,android.content.Context,android.util.AttributeSet) -> a
+    void a(android.app.Activity,com.google.ads.AdSize,java.lang.String) -> a
+    void loadAd(com.google.ads.AdRequest) -> a
+com.google.ads.InterstitialAd -> com.google.ads.h:
+com.google.ads.a -> com.google.ads.i:
+    java.lang.String a -> a
+    java.lang.String b -> b
+    java.util.List c -> c
+    java.util.HashMap d -> d
+    java.lang.String a() -> a
+    java.lang.String b() -> b
+    java.util.List c() -> c
+    java.util.HashMap d() -> d
+com.google.ads.aa -> com.google.ads.j:
+    android.content.Context a -> a
+    java.lang.String b -> b
+    void run() -> run
+com.google.ads.ab -> com.google.ads.k:
+    java.lang.ref.WeakReference a -> a
+    void run() -> run
+com.google.ads.ac -> com.google.ads.l:
+    android.net.Uri a -> a
+    android.net.Uri b -> b
+    java.lang.String[] c -> c
+    java.lang.String[] d -> d
+com.google.ads.ae -> com.google.ads.m:
+    com.google.ads.internal.a a -> a
+    void a(android.webkit.WebView,boolean) -> a
+    void a(android.webkit.WebView,java.lang.String) -> a
+    void a(android.app.Activity,android.webkit.WebView,java.lang.String) -> a
+    boolean a(android.content.Context,long) -> a
+    void a(android.app.Activity) -> a
+com.google.ads.ae$a -> com.google.ads.n:
+    java.lang.ref.WeakReference a -> a
+    android.content.SharedPreferences$Editor b -> b
+    void run() -> run
+com.google.ads.ae$b -> com.google.ads.o:
+    java.lang.ref.WeakReference a -> a
+    android.webkit.WebView b -> b
+    java.lang.String c -> c
+    void run() -> run
+com.google.ads.ae$c -> com.google.ads.p:
+    boolean a -> a
+    android.webkit.WebView b -> b
+    void run() -> run
+com.google.ads.af -> com.google.ads.q:
+    boolean a(android.content.Context) -> a
+    boolean a(android.content.Intent,android.content.Context) -> a
+com.google.ads.ag -> com.google.ads.r:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.ag$a -> com.google.ads.s:
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.ag$b -> com.google.ads.t:
+    com.google.ads.ag$b a -> a
+    com.google.ads.ag$b b -> b
+    java.lang.String c -> c
+    com.google.ads.ag$b[] d -> d
+    com.google.ads.ag$b[] values() -> values
+    com.google.ads.ag$b valueOf(java.lang.String) -> valueOf
+com.google.ads.ag$c -> com.google.ads.u:
+    com.google.ads.internal.d a -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.b -> com.google.ads.v:
+    java.math.BigInteger a -> a
+    java.math.BigInteger b -> b
+    com.google.ads.b c -> c
+    com.google.ads.b a() -> a
+    java.math.BigInteger b() -> b
+    java.math.BigInteger c() -> c
+    java.math.BigInteger d() -> d
+com.google.ads.c -> com.google.ads.w:
+    java.util.Map a -> a
+    java.lang.String b -> b
+    java.lang.String c -> c
+    java.util.List d -> d
+    java.lang.Integer e -> e
+    java.lang.Integer f -> f
+    java.util.List g -> g
+    java.util.List h -> h
+    java.util.List i -> i
+    com.google.ads.c a(java.lang.String) -> a
+    boolean a() -> a
+    int b() -> b
+    java.lang.String c() -> c
+    boolean d() -> d
+    int e() -> e
+    java.util.List f() -> f
+    java.util.List g() -> g
+    java.util.List h() -> h
+    java.util.List i() -> i
+    com.google.ads.a a(org.json.JSONObject) -> a
+    com.google.ads.internal.h j() -> j
+    java.util.List a(org.json.JSONObject,java.lang.String) -> a
+com.google.ads.c$1 -> com.google.ads.x:
+com.google.ads.d -> com.google.ads.y:
+    com.google.ads.c a -> a
+    long b -> b
+    boolean a() -> a
+    void a(com.google.ads.c,int) -> a
+    com.google.ads.c b() -> b
+com.google.ads.e -> com.google.ads.z:
+    com.google.ads.internal.d a -> a
+    com.google.ads.h b -> b
+    java.lang.Object c -> c
+    java.lang.Thread d -> d
+    java.lang.Object e -> e
+    boolean f -> f
+    java.lang.Object g -> g
+    boolean a() -> b
+    void b() -> a
+    void a(com.google.ads.c,com.google.ads.AdRequest) -> a
+    boolean d() -> c
+    boolean a(java.lang.String,android.app.Activity,com.google.ads.AdRequest,com.google.ads.f,java.util.HashMap,long) -> a
+    boolean e(com.google.ads.h) -> b
+    void d(com.google.ads.h) -> a
+    void a(com.google.ads.e,com.google.ads.c,com.google.ads.AdRequest) -> a
+    java.lang.Object a(com.google.ads.e) -> a
+    java.lang.Thread a$42ec7dd0(com.google.ads.e) -> b
+    com.google.ads.internal.d b(com.google.ads.e) -> c
+    boolean a(com.google.ads.e,com.google.ads.h) -> a
+com.google.ads.e$1 -> com.google.ads.aa:
+    com.google.ads.c a -> a
+    com.google.ads.AdRequest b -> b
+    com.google.ads.e c -> c
+    void run() -> run
+com.google.ads.e$7 -> com.google.ads.ab:
+    com.google.ads.c a -> a
+    com.google.ads.e b -> b
+    void run() -> run
+com.google.ads.e$8 -> com.google.ads.ac:
+    com.google.ads.h a -> a
+    android.view.View b -> b
+    com.google.ads.f c -> c
+    com.google.ads.e d -> d
+    void run() -> run
+com.google.ads.f -> com.google.ads.ad:
+    java.lang.String a -> a
+    java.lang.String b -> b
+    java.lang.String c -> c
+    java.util.List d -> d
+    java.util.List e -> e
+    java.util.List f -> f
+    java.lang.String a() -> a
+    java.lang.String b() -> b
+    java.lang.String c() -> c
+    java.util.List d() -> d
+com.google.ads.h -> com.google.ads.ae:
+    com.google.ads.internal.h a -> a
+    com.google.ads.f b -> b
+    boolean c -> c
+    boolean d -> d
+    com.google.ads.e e -> e
+    com.google.ads.mediation.MediationAdapter f -> f
+    boolean g -> g
+    boolean h -> h
+    android.view.View i -> i
+    android.os.Handler j -> j
+    java.lang.String k -> k
+    com.google.ads.AdRequest l -> l
+    java.util.HashMap m -> m
+    void a(android.app.Activity) -> a
+    void b() -> a
+    boolean c() -> b
+    boolean d() -> c
+    android.view.View e() -> d
+    java.lang.String g() -> e
+    void a$1385ff() -> f
+    void a(com.google.ads.mediation.MediationAdapter) -> a
+    void j() -> g
+    boolean k() -> h
+    com.google.ads.mediation.MediationAdapter a(com.google.ads.h) -> a
+com.google.ads.h$1 -> com.google.ads.af:
+    com.google.ads.h a -> a
+    void run() -> run
+com.google.ads.i -> com.google.ads.ag:
+    com.google.ads.h a -> a
+    java.lang.String b -> b
+    com.google.ads.AdRequest c -> c
+    java.util.HashMap d -> d
+    boolean e -> e
+    java.lang.ref.WeakReference f -> f
+    void run() -> run
+    void a(java.lang.String,java.lang.Throwable) -> a
+com.google.ads.i$a -> com.google.ads.ah:
+com.google.ads.internal.AdVideoView -> com.google.ads.a.a:
+    com.google.ads.internal.a b -> b
+    java.lang.ref.WeakReference c -> c
+    com.google.ads.internal.AdWebView d -> d
+    android.widget.MediaController a -> a
+    long e -> e
+    android.widget.VideoView f -> f
+    java.lang.String g -> g
+    void b() -> a
+    void setMediaControllerEnabled(boolean) -> a
+    void setSrc(java.lang.String) -> a
+    void onCompletion(android.media.MediaPlayer) -> onCompletion
+    boolean onError(android.media.MediaPlayer,int,int) -> onError
+    void onPrepared(android.media.MediaPlayer) -> onPrepared
+    void c() -> b
+    void d() -> c
+    void a(int) -> a
+    void a(android.view.MotionEvent) -> a
+    void e() -> d
+    void f() -> e
+com.google.ads.internal.AdVideoView$a -> com.google.ads.a.b:
+    java.lang.ref.WeakReference a -> a
+    android.os.Handler b -> b
+    void run() -> run
+    void a() -> a
+com.google.ads.internal.AdWebView -> com.google.ads.a.c:
+    java.lang.ref.WeakReference a -> a
+    com.google.ads.AdSize b -> b
+    boolean c -> c
+    boolean d -> d
+    void a() -> a
+    void b() -> b
+    void c() -> c
+    com.google.ads.AdActivity d() -> d
+    boolean e() -> e
+    void setAdActivity(com.google.ads.AdActivity) -> a
+    void loadDataWithBaseURL(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String) -> loadDataWithBaseURL
+    void loadUrl(java.lang.String) -> loadUrl
+    void stopLoading() -> stopLoading
+    void destroy() -> destroy
+    void onMeasure(int,int) -> onMeasure
+    void setIsExpandedMraid(boolean) -> a
+com.google.ads.internal.AdWebView$1 -> com.google.ads.a.d:
+    com.google.ads.internal.AdWebView a -> a
+    void onDownloadStart(java.lang.String,java.lang.String,java.lang.String,java.lang.String,long) -> onDownloadStart
+com.google.ads.internal.a -> com.google.ads.a.e:
+    com.google.ads.internal.a d -> d
+    com.google.ads.util.f a -> a
+    java.util.Map b -> b
+    java.util.Map c -> c
+    void a(com.google.ads.internal.d,java.util.Map,android.net.Uri,android.webkit.WebView) -> a
+    boolean a(android.net.Uri) -> a
+    boolean b(android.net.Uri) -> b
+    boolean c(android.net.Uri) -> c
+    void a(android.webkit.WebView,java.lang.String,java.lang.String) -> a
+    void a(android.webkit.WebView,java.lang.String) -> a
+    void a(android.webkit.WebView,java.util.Map) -> a
+    void a(android.webkit.WebView) -> a
+    void b(android.webkit.WebView) -> b
+    com.google.ads.internal.a a() -> a
+com.google.ads.internal.a$1 -> com.google.ads.a.f:
+com.google.ads.internal.a$2 -> com.google.ads.a.g:
+    java.lang.Object b() -> a
+com.google.ads.internal.a$3 -> com.google.ads.a.h:
+com.google.ads.internal.b -> com.google.ads.a.i:
+    boolean a -> a
+    void a(java.lang.String) -> a
+    void b(java.lang.String) -> b
+    java.lang.String c(java.lang.String) -> c
+com.google.ads.internal.c -> com.google.ads.a.j:
+    java.lang.String a -> a
+    java.lang.String b -> b
+    java.lang.String c -> c
+    java.lang.String d -> d
+    boolean e -> e
+    com.google.ads.internal.f f -> f
+    com.google.ads.internal.d g -> g
+    com.google.ads.AdRequest h -> h
+    android.webkit.WebView i -> i
+    java.lang.String j -> j
+    java.util.LinkedList k -> k
+    java.lang.String l -> l
+    boolean m -> m
+    boolean n -> n
+    com.google.ads.AdRequest$ErrorCode o -> o
+    boolean p -> p
+    int q -> q
+    java.lang.Thread r -> r
+    boolean s -> s
+    void a(java.lang.String) -> a
+    void a() -> a
+    void a(com.google.ads.AdRequest) -> a
+    void run() -> run
+    java.lang.String d() -> d
+    java.lang.String a(java.util.Map,android.app.Activity) -> a
+    void a(com.google.ads.AdRequest$ErrorCode,boolean) -> a
+    void a(boolean) -> a
+    void b(java.lang.String) -> b
+    void a(java.lang.String,java.lang.String) -> a
+    void c(java.lang.String) -> c
+    void d(java.lang.String) -> d
+    void e(java.lang.String) -> e
+    void a(com.google.ads.AdRequest$ErrorCode) -> a
+    void c() -> b
+    void b$1385ff() -> c
+    void a(int) -> a
+    void c(boolean) -> b
+    com.google.ads.internal.d a(com.google.ads.internal.c) -> a
+com.google.ads.internal.c$1 -> com.google.ads.a.k:
+    com.google.ads.c a -> a
+    com.google.ads.internal.c b -> b
+    void run() -> run
+com.google.ads.internal.c$a -> com.google.ads.a.l:
+    com.google.ads.internal.d a -> a
+    android.webkit.WebView b -> b
+    com.google.ads.internal.f c -> c
+    com.google.ads.AdRequest$ErrorCode d -> d
+    boolean e -> e
+    void run() -> run
+com.google.ads.internal.c$b -> com.google.ads.a.m:
+    com.google.ads.internal.c a -> a
+com.google.ads.internal.c$c -> com.google.ads.a.n:
+    java.lang.String b -> b
+    java.lang.String c -> c
+    android.webkit.WebView d -> d
+    com.google.ads.internal.c a -> a
+    void run() -> run
+com.google.ads.internal.c$d -> com.google.ads.a.o:
+    com.google.ads.internal.c a -> a
+com.google.ads.internal.c$e -> com.google.ads.a.p:
+    com.google.ads.internal.d a -> a
+    java.util.LinkedList b -> b
+    int c -> c
+    boolean d -> d
+    java.lang.String e -> e
+    void run() -> run
+com.google.ads.internal.d -> com.google.ads.a.q:
+    java.lang.Object a -> a
+    com.google.ads.m b -> b
+    com.google.ads.internal.c c -> c
+    com.google.ads.AdRequest d -> d
+    com.google.ads.internal.g e -> e
+    com.google.ads.internal.AdWebView f -> f
+    com.google.ads.internal.i g -> g
+    android.os.Handler h -> h
+    long i -> i
+    boolean j -> j
+    boolean k -> k
+    boolean l -> l
+    boolean m -> m
+    android.content.SharedPreferences n -> n
+    long o -> o
+    com.google.ads.ab p -> p
+    boolean q -> q
+    java.util.LinkedList r -> r
+    java.util.LinkedList s -> s
+    int t -> t
+    java.lang.Boolean u -> u
+    com.google.ads.d v -> v
+    com.google.ads.e w -> w
+    com.google.ads.f x -> x
+    java.lang.String y -> y
+    void a() -> a
+    void b() -> b
+    void a(java.lang.String) -> a
+    java.lang.String c() -> c
+    void d() -> d
+    void e() -> e
+    void f() -> f
+    com.google.ads.m g() -> g
+    com.google.ads.d h() -> h
+    com.google.ads.internal.c i() -> i
+    com.google.ads.internal.AdWebView j() -> j
+    com.google.ads.internal.i k() -> k
+    com.google.ads.internal.g l() -> l
+    void a(int) -> a
+    int m() -> m
+    long n() -> n
+    boolean o() -> w
+    boolean p() -> o
+    boolean r() -> p
+    void a(com.google.ads.AdRequest) -> a
+    void a(com.google.ads.AdRequest$ErrorCode) -> a
+    void a(com.google.ads.c) -> a
+    void a$413ecd99(android.view.View,com.google.ads.h,com.google.ads.f) -> a
+    void b(com.google.ads.c) -> b
+    void s() -> q
+    void t() -> r
+    void u() -> s
+    void v() -> t
+    void a(java.util.List,java.lang.String,java.lang.String,java.lang.String,java.lang.Boolean) -> a
+    void w() -> x
+    void a(java.lang.Runnable) -> a
+    void x() -> u
+    void a(long) -> a
+    void a(boolean) -> a
+    void a(android.view.View) -> a
+    void a(float) -> a
+    void b(long) -> b
+    void z() -> y
+    void A() -> z
+    void B() -> v
+    void b(java.lang.String) -> b
+    void a(java.util.LinkedList) -> a
+    void b(boolean) -> b
+com.google.ads.internal.e -> com.google.ads.a.r:
+    java.lang.String a -> a
+    java.util.HashMap b -> b
+    android.os.Bundle a() -> a
+    java.lang.String b() -> b
+    java.util.HashMap c() -> c
+com.google.ads.internal.f -> com.google.ads.a.s:
+    com.google.ads.internal.c a -> a
+    com.google.ads.internal.d b -> b
+    com.google.ads.internal.f$a c -> c
+    boolean d -> d
+    boolean e -> e
+    java.lang.String f -> f
+    java.lang.Thread g -> g
+    void a() -> a
+    void a(java.net.HttpURLConnection) -> a
+    void a(boolean) -> a
+    void a(java.lang.String) -> a
+    void run() -> run
+com.google.ads.internal.f$1 -> com.google.ads.a.t:
+    java.net.HttpURLConnection a(java.net.URL) -> a
+com.google.ads.internal.f$a -> com.google.ads.a.u:
+    java.net.HttpURLConnection a(java.net.URL) -> a
+com.google.ads.internal.g -> com.google.ads.a.v:
+    java.util.LinkedList b -> b
+    long c -> c
+    long d -> d
+    java.util.LinkedList e -> e
+    long f -> f
+    java.lang.String g -> g
+    long h -> h
+    boolean i -> i
+    boolean j -> j
+    java.lang.String a -> a
+    void a() -> a
+    void b() -> b
+    void c() -> c
+    void d() -> d
+    long e() -> e
+    java.lang.String f() -> f
+    java.lang.String g() -> g
+    long h() -> h
+    long i() -> i
+    java.lang.String j() -> j
+    void a(java.lang.String) -> a
+    boolean k() -> k
+    void l() -> l
+    boolean m() -> m
+    void n() -> n
+    void o() -> o
+    java.lang.String p() -> p
+    void b(java.lang.String) -> b
+    long q() -> q
+com.google.ads.internal.h -> com.google.ads.a.w:
+    com.google.ads.AdSize b -> b
+    boolean c -> c
+    com.google.ads.internal.h a -> a
+    com.google.ads.internal.h a(com.google.ads.AdSize,android.content.Context) -> a
+    com.google.ads.internal.h a(com.google.ads.AdSize) -> a
+    boolean a() -> a
+    com.google.ads.AdSize b() -> b
+com.google.ads.internal.i -> com.google.ads.a.x:
+    com.google.ads.internal.a c -> c
+    com.google.ads.internal.d a -> a
+    java.util.Map d -> d
+    boolean b -> b
+    boolean e -> e
+    boolean f -> f
+    boolean g -> g
+    boolean h -> h
+    com.google.ads.internal.i a(com.google.ads.internal.d,java.util.Map,boolean,boolean) -> a
+    boolean shouldOverrideUrlLoading(android.webkit.WebView,java.lang.String) -> shouldOverrideUrlLoading
+    void onPageFinished(android.webkit.WebView,java.lang.String) -> onPageFinished
+    void a$1385ff() -> a
+    void b$1385ff() -> b
+    void c$1385ff() -> c
+    void d$1385ff() -> d
+com.google.ads.internal.j -> com.google.ads.a.y:
+    byte[] a -> a
+    android.view.ViewGroup a(android.app.Activity,com.google.ads.internal.d) -> a
+com.google.ads.internal.j$a -> com.google.ads.a.z:
+    android.gesture.GestureStore a -> a
+    android.app.Activity b -> b
+    com.google.ads.internal.d c -> c
+    void onGesturePerformed(android.gesture.GestureOverlayView,android.gesture.Gesture) -> onGesturePerformed
+    android.app.Activity a(com.google.ads.internal.j$a) -> a
+com.google.ads.internal.j$a$1 -> com.google.ads.a.aa:
+    com.google.ads.internal.j$a a -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.internal.j$a$2 -> com.google.ads.a.ab:
+    java.lang.String a -> a
+    com.google.ads.internal.j$a b -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.j -> com.google.ads.ai:
+    com.google.ads.h a -> a
+com.google.ads.k -> com.google.ads.aj:
+    com.google.ads.h a -> a
+com.google.ads.l -> com.google.ads.ak:
+    com.google.ads.l b -> b
+    com.google.ads.util.i$b a -> a
+    com.google.ads.l a() -> a
+com.google.ads.l$a -> com.google.ads.al:
+    com.google.ads.util.i$c a -> a
+    com.google.ads.util.i$c b -> b
+    com.google.ads.util.i$c c -> c
+    com.google.ads.util.i$c d -> d
+    com.google.ads.util.i$c e -> e
+    com.google.ads.util.i$c f -> f
+    com.google.ads.util.i$c g -> g
+    com.google.ads.util.i$c h -> h
+    com.google.ads.util.i$c i -> i
+    com.google.ads.util.i$c j -> j
+    com.google.ads.util.i$c k -> k
+    com.google.ads.util.i$c l -> l
+com.google.ads.m -> com.google.ads.am:
+    com.google.ads.util.i$b a -> a
+    com.google.ads.util.i$b b -> b
+    com.google.ads.util.i$d c -> c
+    com.google.ads.util.i$b d -> d
+    com.google.ads.util.i$b e -> e
+    com.google.ads.util.i$b f -> f
+    com.google.ads.util.i$b g -> g
+    com.google.ads.util.i$b h -> h
+    com.google.ads.util.i$b i -> i
+    com.google.ads.util.i$c j -> j
+    boolean a() -> a
+    boolean b() -> b
+    com.google.ads.m a(com.google.ads.Ad,java.lang.String,android.app.Activity,android.view.ViewGroup,com.google.ads.AdSize) -> a
+com.google.ads.mediation.MediationAdRequest -> com.google.ads.b.a:
+    com.google.ads.AdRequest a -> a
+    boolean b -> b
+    boolean c -> c
+com.google.ads.mediation.MediationAdapter -> com.google.ads.b.b:
+    void destroy() -> a
+    java.lang.Class getAdditionalParametersType() -> b
+    java.lang.Class getServerParametersType() -> c
+com.google.ads.mediation.MediationBannerAdapter -> com.google.ads.b.c:
+    void requestBannerAd$3a67d0d9() -> d
+com.google.ads.mediation.MediationInterstitialAdapter -> com.google.ads.b.d:
+    void requestInterstitialAd$732d5d79() -> d
+com.google.ads.mediation.MediationServerParameters -> com.google.ads.b.e:
+    void load(java.util.Map) -> a
+com.google.ads.mediation.MediationServerParameters$MappingException -> com.google.ads.b.f:
+com.google.ads.mediation.MediationServerParameters$Parameter -> com.google.ads.b.g:
+    java.lang.String name() -> a
+    boolean required() -> b
+com.google.ads.mediation.NetworkExtras -> com.google.ads.b.h:
+com.google.ads.mediation.admob.AdMobAdapterExtras -> com.google.ads.b.a.a:
+    boolean a -> a
+    boolean b -> b
+    java.util.Map c -> c
+    boolean getPlusOneOptOut() -> a
+    java.util.Map getExtras() -> b
+com.google.ads.n -> com.google.ads.an:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.o -> com.google.ads.ao:
+    com.google.ads.internal.a a -> a
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.p -> com.google.ads.ap:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.q -> com.google.ads.aq:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.r -> com.google.ads.ar:
+    com.google.ads.internal.a a -> a
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.s -> com.google.ads.as:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.searchads.SearchAdRequest -> com.google.ads.c.a:
+    java.lang.String a -> b
+    int b -> c
+    int c -> d
+    int d -> e
+    int e -> f
+    int f -> g
+    int g -> h
+    java.lang.String h -> i
+    int i -> j
+    int j -> k
+    com.google.ads.searchads.SearchAdRequest$BorderType k -> l
+    int l -> m
+    java.lang.String m -> n
+    java.util.Map getRequestMap(android.content.Context) -> a
+    java.lang.String a(int) -> a
+com.google.ads.searchads.SearchAdRequest$BorderType -> com.google.ads.c.b:
+    com.google.ads.searchads.SearchAdRequest$BorderType NONE -> a
+    com.google.ads.searchads.SearchAdRequest$BorderType DASHED -> b
+    com.google.ads.searchads.SearchAdRequest$BorderType DOTTED -> c
+    com.google.ads.searchads.SearchAdRequest$BorderType SOLID -> d
+    java.lang.String a -> e
+    com.google.ads.searchads.SearchAdRequest$BorderType[] b -> f
+    com.google.ads.searchads.SearchAdRequest$BorderType[] values() -> values
+    com.google.ads.searchads.SearchAdRequest$BorderType valueOf(java.lang.String) -> valueOf
+    java.lang.String toString() -> toString
+com.google.ads.t -> com.google.ads.at:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.u -> com.google.ads.au:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.util.AdUtil -> com.google.ads.util.AdUtil:
+    int a -> a
+    java.lang.Boolean b -> b
+    java.lang.String c -> c
+    java.lang.String d -> d
+    java.lang.String e -> e
+    android.media.AudioManager f -> f
+    boolean g -> g
+    boolean h -> h
+    java.lang.String i -> i
+    boolean a(android.content.Intent,android.content.Context) -> a
+    java.lang.String a(java.lang.Readable) -> a
+    int a(java.lang.String) -> b
+    java.lang.String a(android.content.Context) -> a
+    int a() -> a
+    int b() -> b
+    int a(android.content.Context,android.util.DisplayMetrics) -> a
+    int b(android.content.Context,android.util.DisplayMetrics) -> b
+    boolean b(android.content.Context) -> b
+    boolean a(int,int,java.lang.String) -> a
+    boolean c(android.content.Context) -> c
+    boolean c() -> c
+    boolean a(android.net.Uri) -> a
+    java.lang.String b(java.lang.String) -> a
+    java.lang.String d(android.content.Context) -> d
+    java.lang.String e(android.content.Context) -> e
+    java.lang.String f(android.content.Context) -> f
+    com.google.ads.util.AdUtil$a g(android.content.Context) -> g
+    android.util.DisplayMetrics a(android.app.Activity) -> a
+    java.lang.String a(android.location.Location) -> a
+    java.lang.String c(java.lang.String) -> c
+    java.util.HashMap b(android.net.Uri) -> b
+    boolean d() -> d
+    void a(boolean) -> a
+    void h(android.content.Context) -> h
+    java.lang.String i(android.content.Context) -> i
+    void a(android.webkit.WebView) -> a
+    void a(java.net.HttpURLConnection,android.content.Context) -> a
+    java.lang.String a(java.util.Map) -> a
+    org.json.JSONObject b(java.util.Map) -> b
+    org.json.JSONArray a(java.util.Set) -> a
+com.google.ads.util.AdUtil$UserActivityReceiver -> com.google.ads.util.AdUtil$UserActivityReceiver:
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.google.ads.util.AdUtil$a -> com.google.ads.util.a:
+    com.google.ads.util.AdUtil$a a -> a
+    com.google.ads.util.AdUtil$a b -> b
+    com.google.ads.util.AdUtil$a c -> c
+    com.google.ads.util.AdUtil$a d -> d
+    com.google.ads.util.AdUtil$a e -> e
+    com.google.ads.util.AdUtil$a f -> f
+    com.google.ads.util.AdUtil$a[] g -> g
+    com.google.ads.util.AdUtil$a[] values() -> values
+    com.google.ads.util.AdUtil$a valueOf(java.lang.String) -> valueOf
+com.google.ads.util.a -> com.google.ads.util.b:
+    boolean a -> a
+    void a(boolean,java.lang.String) -> a
+    void b(boolean) -> a
+    void b(boolean,java.lang.String) -> b
+    void b(java.lang.Object) -> a
+    void a(java.lang.Object,java.lang.Object) -> a
+    void a(java.lang.String) -> a
+    void c(boolean,java.lang.String) -> c
+com.google.ads.util.a$a -> com.google.ads.util.c:
+com.google.ads.util.b -> com.google.ads.util.d:
+    com.google.ads.util.b$b a -> a
+    int b -> b
+    void a$4ae80d28() -> a
+    void a(java.lang.String) -> a
+    void a(java.lang.String,java.lang.Throwable) -> a
+    void b(java.lang.String) -> b
+    void b(java.lang.String,java.lang.Throwable) -> b
+    void c(java.lang.String) -> c
+    void c(java.lang.String,java.lang.Throwable) -> c
+    void d(java.lang.String) -> d
+    void e(java.lang.String) -> e
+    void d(java.lang.String,java.lang.Throwable) -> d
+    boolean a(java.lang.String,int) -> a
+com.google.ads.util.b$a -> com.google.ads.util.e:
+    com.google.ads.util.b$a a -> a
+    com.google.ads.util.b$a b -> b
+    com.google.ads.util.b$a c -> c
+    com.google.ads.util.b$a d -> d
+    com.google.ads.util.b$a e -> e
+    int f -> f
+    com.google.ads.util.b$a[] g -> g
+    com.google.ads.util.b$a[] values() -> values
+    com.google.ads.util.b$a valueOf(java.lang.String) -> valueOf
+com.google.ads.util.b$b -> com.google.ads.util.f:
+com.google.ads.util.c -> com.google.ads.util.g:
+    boolean a -> a
+    byte[] a(java.lang.String) -> a
+    java.lang.String b$79bb807(byte[]) -> a
+com.google.ads.util.c$a -> com.google.ads.util.h:
+    byte[] a -> a
+    int b -> b
+com.google.ads.util.c$b -> com.google.ads.util.i:
+    int[] c -> c
+    int[] d -> d
+    int e -> e
+    int f -> f
+    int[] g -> g
+    boolean a$7dcd25fc$1cf967a0(byte[],int) -> a
+com.google.ads.util.c$c -> com.google.ads.util.j:
+    byte[] h -> h
+    byte[] i -> i
+    byte[] j -> j
+    int c -> c
+    int k -> k
+    boolean d -> d
+    boolean e -> e
+    boolean f -> f
+    byte[] l -> l
+    boolean g -> g
+    boolean a$7dcd25fc$1cf967a0(byte[],int) -> a
+com.google.ads.util.d -> com.google.ads.util.k:
+    java.lang.String a -> a
+    java.lang.String b -> b
+    java.lang.String c -> c
+    com.google.ads.util.d d -> d
+    com.google.ads.util.d e -> e
+    boolean equals(java.lang.Object) -> equals
+    boolean a(java.lang.String,java.lang.String) -> a
+    int hashCode() -> hashCode
+com.google.ads.util.e -> com.google.ads.util.l:
+    int a(android.content.Context,android.util.DisplayMetrics) -> a
+    int b(android.content.Context,android.util.DisplayMetrics) -> b
+    int a(android.content.Context,float,int) -> a
+com.google.ads.util.f -> com.google.ads.util.m:
+    java.lang.Object b() -> a
+com.google.ads.util.g -> com.google.ads.util.n:
+    void a(android.webkit.WebSettings,com.google.ads.m) -> a
+com.google.ads.util.g$1 -> com.google.ads.util.o:
+    int[] a -> a
+com.google.ads.util.g$a -> com.google.ads.util.p:
+    com.google.ads.m a -> a
+    void onCloseWindow(android.webkit.WebView) -> onCloseWindow
+    boolean onConsoleMessage(android.webkit.ConsoleMessage) -> onConsoleMessage
+    void onExceededDatabaseQuota(java.lang.String,java.lang.String,long,long,long,android.webkit.WebStorage$QuotaUpdater) -> onExceededDatabaseQuota
+    boolean onJsAlert(android.webkit.WebView,java.lang.String,java.lang.String,android.webkit.JsResult) -> onJsAlert
+    boolean onJsBeforeUnload(android.webkit.WebView,java.lang.String,java.lang.String,android.webkit.JsResult) -> onJsBeforeUnload
+    boolean onJsConfirm(android.webkit.WebView,java.lang.String,java.lang.String,android.webkit.JsResult) -> onJsConfirm
+    boolean onJsPrompt(android.webkit.WebView,java.lang.String,java.lang.String,java.lang.String,android.webkit.JsPromptResult) -> onJsPrompt
+    void onReachedMaxAppCacheSize(long,long,android.webkit.WebStorage$QuotaUpdater) -> onReachedMaxAppCacheSize
+    void onShowCustomView(android.view.View,android.webkit.WebChromeClient$CustomViewCallback) -> onShowCustomView
+    boolean a(android.webkit.WebView,java.lang.String,java.lang.String,java.lang.String,android.webkit.JsResult,android.webkit.JsPromptResult,boolean) -> a
+com.google.ads.util.g$a$1 -> com.google.ads.util.q:
+    android.webkit.JsResult a -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.google.ads.util.g$a$2 -> com.google.ads.util.r:
+    android.webkit.JsResult a -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.util.g$a$3 -> com.google.ads.util.s:
+    android.webkit.JsResult a -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.util.g$a$4 -> com.google.ads.util.t:
+    android.webkit.JsPromptResult a -> a
+    void onCancel(android.content.DialogInterface) -> onCancel
+com.google.ads.util.g$a$5 -> com.google.ads.util.u:
+    android.webkit.JsPromptResult a -> a
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.util.g$a$6 -> com.google.ads.util.v:
+    android.webkit.JsPromptResult a -> a
+    android.widget.EditText b -> b
+    void onClick(android.content.DialogInterface,int) -> onClick
+com.google.ads.util.g$b -> com.google.ads.util.w:
+    android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebView,java.lang.String) -> shouldInterceptRequest
+    android.webkit.WebResourceResponse a(java.lang.String,android.content.Context) -> a
+com.google.ads.util.h -> com.google.ads.util.x:
+com.google.ads.util.h$a -> com.google.ads.util.y:
+    void onShowCustomView(android.view.View,int,android.webkit.WebChromeClient$CustomViewCallback) -> onShowCustomView
+com.google.ads.util.i -> com.google.ads.util.z:
+    java.lang.Object a -> a
+    int b -> b
+    java.util.HashMap c -> c
+    int m -> m
+    java.util.ArrayList d -> d
+    void finalize() -> finalize
+    java.lang.String toString() -> toString
+    void a(com.google.ads.util.i,com.google.ads.util.i$a) -> a
+com.google.ads.util.i$a -> com.google.ads.util.aa:
+    java.lang.Object a -> a
+    java.lang.String b -> b
+    com.google.ads.util.i c -> c
+    java.lang.String toString() -> toString
+com.google.ads.util.i$b -> com.google.ads.util.ab:
+    com.google.ads.util.i d -> d
+    java.lang.Object a() -> a
+    java.lang.String toString() -> toString
+com.google.ads.util.i$c -> com.google.ads.util.ac:
+    boolean e -> e
+    com.google.ads.util.i d -> d
+    java.lang.Object a() -> a
+    void a(java.lang.Object) -> a
+    java.lang.String toString() -> toString
+com.google.ads.util.i$d -> com.google.ads.util.ad:
+    com.google.ads.util.i d -> d
+    java.lang.Object a() -> a
+    java.lang.String toString() -> toString
+com.google.ads.v -> com.google.ads.av:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+    void a(java.util.HashMap,java.lang.String,com.google.ads.util.i$c) -> a
+    void b(java.util.HashMap,java.lang.String,com.google.ads.util.i$c) -> b
+    void c(java.util.HashMap,java.lang.String,com.google.ads.util.i$c) -> c
+com.google.ads.w -> com.google.ads.aw:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.x -> com.google.ads.ax:
+    com.google.ads.AdActivity$StaticMethodWrapper a -> a
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.y -> com.google.ads.ay:
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
+com.google.ads.z -> com.google.ads.az:
+    com.google.ads.internal.a a -> a
+    int a(java.util.HashMap,java.lang.String,int,android.util.DisplayMetrics) -> a
+    void a(com.google.ads.internal.d,java.util.HashMap,android.webkit.WebView) -> a
