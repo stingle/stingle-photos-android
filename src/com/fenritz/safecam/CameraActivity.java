@@ -118,6 +118,8 @@ public class CameraActivity extends Activity {
 
 		setContentView(R.layout.camera);
 		
+		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
+		
 		takePhotoButton = (ImageButton) findViewById(R.id.take_photo);
 		takePhotoButton.setOnClickListener(takePhotoClick());
 

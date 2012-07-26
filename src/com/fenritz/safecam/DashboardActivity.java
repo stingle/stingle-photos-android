@@ -34,6 +34,8 @@ public class DashboardActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.dashboard);
 		
+		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
+		
 		findViewById(R.id.gotoCamera).setOnClickListener(new View.OnClickListener() {
 			
 			public void onClick(View v) {

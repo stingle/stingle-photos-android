@@ -50,4 +50,10 @@
         <item name="decrypt">@string/share_decrypt</item>
     </string-array>
     
+    <string-array name="importMenu">
+        <item name="photos">@string/import_photos</item>
+        <item name="unencrypted">@string/import_unencrypted</item>
+        <item name="encrypted">@string/import_encrypted</item>
+    </string-array>
+    
 </resources>

@@ -425,7 +425,7 @@ public class GalleryActivity extends Activity {
 				AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 				builder.setTitle(getString(R.string.import_desc));
 				
-				CharSequence[] items = {getString(R.string.import_unencrypted), getString(R.string.import_encrypted)};
+				CharSequence[] items = getResources().getStringArray(R.array.importMenu);
 				
 				builder.setItems(items, new DialogInterface.OnClickListener() {
 					
@@ -433,6 +433,12 @@ public class GalleryActivity extends Activity {
 						Intent intent = new Intent(getBaseContext(), FileDialog.class);
 						switch (which){
 							case 0:
+								Intent photosIntent = new Intent();
+								photosIntent.setClass(GalleryActivity.this, ImportPhotosActivity.class);
+								startActivityForResult(photosIntent, REQUEST_ENCRYPT);
+								
+								break;
+							case 1:
 								
 								intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
 
@@ -448,7 +454,7 @@ public class GalleryActivity extends Activity {
 
 								startActivityForResult(intent, REQUEST_ENCRYPT);
 								break;
-							case 1:
+							case 2:
 								intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
 
 								// can user select directories or not

@@ -90,7 +90,8 @@
     <string name="deselect_all">Deselect All</string>
     <string name="no_files">No files in this folder</string>
     <string name="password_short">Password have to be at least %s characters long</string>
-    <string name="import_unencrypted">New files</string>
+    <string name="import_photos">Photos</string>
+    <string name="import_unencrypted">Other files</string>
     <string name="import_encrypted">Encrypted files</string>
     <string name="flash">Flash</string>
     <string name="timer">Timer</string>

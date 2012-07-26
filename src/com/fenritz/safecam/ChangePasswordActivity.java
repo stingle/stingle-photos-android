@@ -35,6 +35,8 @@ public class ChangePasswordActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.change_password);
 		
+		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
+		
 		findViewById(R.id.change).setOnClickListener(changeClick());
 		findViewById(R.id.cancel).setOnClickListener(cancelClick());
 		
@@ -47,6 +49,7 @@ public class ChangePasswordActivity extends Activity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
+		
 	}
 	
 	@Override

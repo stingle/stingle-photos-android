@@ -9,7 +9,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
@@ -21,6 +20,7 @@ public class SetUpActivity  extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.setup);
 
+		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
 		
 		((Button) findViewById(R.id.setupButton)).setOnClickListener(setup());
 	}

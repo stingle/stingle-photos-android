@@ -44,6 +44,8 @@ public class SafeCameraActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.startup);
 
+		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
+		
 		Helpers.createFolders(this);
 		
 		Helpers.deleteTmpDir(SafeCameraActivity.this);
