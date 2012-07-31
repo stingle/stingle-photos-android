@@ -3,20 +3,31 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <Button
-        android:id="@+id/selectBtn"
-        android:layout_width="wrap_content"
+    <LinearLayout 
+        android:id="@+id/buttonsHolder"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:minWidth="200px"
-        android:text="Select" />
-
+        android:layout_centerHorizontal="true">
+	    <Button
+	        android:id="@+id/selectBtn"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:text="@string/select_all" />
+	    
+	    <Button
+	        android:id="@+id/importBtn"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:text="@string/import_btn" />
+	</LinearLayout>
     <GridView
         android:id="@+id/PhoneImageGrid"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@id/selectBtn"
+        android:layout_above="@id/buttonsHolder"
         android:columnWidth="90dp"
         android:gravity="center"
         android:horizontalSpacing="10dp"

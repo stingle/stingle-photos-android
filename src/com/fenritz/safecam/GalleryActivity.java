@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -102,7 +103,7 @@ public class GalleryActivity extends Activity {
 	private String currentPath;
 	
 	private int pageNumber = 1;
-	private final int itemsPerPage = 50;
+	private final int itemsPerPage = 40;
 	private final int loadThreshold = 5;
 
 	@Override
@@ -113,8 +114,10 @@ public class GalleryActivity extends Activity {
 
 		Bundle bundle = new Bundle();
 		bundle.putParcelable("intent", getIntent());
+		bundle.putBoolean("wentToLoginToProceed", true);
 		if(!Helpers.checkLoginedState(this, bundle)){
 			isWentToLogin = true;
+			finish();
 			return;
 		}
 
@@ -156,7 +159,9 @@ public class GalleryActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		unregisterReceiver(receiver);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 	}
 	
 	private OnClickListener gotoHome() {
@@ -872,14 +877,6 @@ public class GalleryActivity extends Activity {
 			};
 		}
 		
-		private OnClickListener getOnClickListenerLongAction(final File file){
-			 return new View.OnClickListener() {
-				public void onClick(View v) {
-					doLongClick(file, v);
-				}
-			};
-		}
-		
 		private boolean doLongClick(final File file, View v) {
 			CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
 
@@ -1059,12 +1056,12 @@ public class GalleryActivity extends Activity {
 			}
 			
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-				
 				int lastVisiblePosition = firstVisibleItem + visibleItemCount;
 				
 				int pagedPosition = pageNumber * itemsPerPage;
 				
 				if(pagedPosition - lastVisiblePosition < loadThreshold){
+					Log.d("qaq", "scroll - " + String.valueOf(firstVisibleItem) + " - " + String.valueOf(lastVisiblePosition) + " - " + String.valueOf(pagedPosition));
 					if(fillCacheTask == null){
 						int[] params = {pageNumber * itemsPerPage, itemsPerPage};
 						fillCacheTask = new FillCache();
@@ -1075,7 +1072,8 @@ public class GalleryActivity extends Activity {
 				
 				
 				pagedPosition = (pageNumber-1) * itemsPerPage;
-				if(pageNumber > 1 && lastVisiblePosition - pagedPosition + loadThreshold * 2  < loadThreshold){
+				if(pageNumber > 1 && firstVisibleItem - pagedPosition < loadThreshold){
+					Log.d("qaq", "scroll2 - " + String.valueOf(firstVisibleItem) + " - " + String.valueOf(lastVisiblePosition) + " - " + String.valueOf(pagedPosition));
 					if(fillCacheTask == null){
 						pageNumber--;
 						int[] params = {(pageNumber - 1) * itemsPerPage, itemsPerPage, 1};
@@ -1108,6 +1106,8 @@ public class GalleryActivity extends Activity {
 				if(params[0].length == 3 && params[0][2] == 1){
 					reverse = true;
 				}
+				
+				Log.d("qaq", "fill - " + String.valueOf(offset) + " - " + String.valueOf(length) + " - " + String.valueOf(reverse));
 				
 				Context appContext = getApplicationContext(); 
 				if(offset+length > files.size()){

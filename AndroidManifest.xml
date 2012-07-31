@@ -84,6 +84,7 @@
         <activity
             android:name=".ImportPhotosActivity"
             android:configChanges="keyboardHidden|orientation"
+            android:theme="@android:style/Theme.NoTitleBar"
             android:label="Import Photos" >
         </activity>
         <activity 

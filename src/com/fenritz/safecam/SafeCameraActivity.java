@@ -19,6 +19,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
@@ -72,6 +73,10 @@ public class SafeCameraActivity extends Activity {
 				return false;
 			}
 		});
+		
+		if(extraData != null && extraData.getBoolean("wentToLoginToProceed", false)){
+			Toast.makeText(this, getString(R.string.login_to_proceed), Toast.LENGTH_LONG).show();
+		}
 	}
 
 	private OnClickListener login() {

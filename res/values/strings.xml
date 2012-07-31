@@ -105,6 +105,7 @@
     <string name="review">Review</string>
     <string name="later">Later</string>
     <string name="read_security">SafeCamera security</string>
+    <string name="login_to_proceed">Please login to proceed…</string>
     
     
     <!-- File Dialog -->
