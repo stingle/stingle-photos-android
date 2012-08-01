@@ -24,7 +24,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -102,9 +101,8 @@ public class GalleryActivity extends Activity {
 	
 	private String currentPath;
 	
-	private int pageNumber = 1;
-	private final int itemsPerPage = 40;
-	private final int loadThreshold = 5;
+	private int prevVisiblePosition = 0;
+	private final int defaultThumbCountToLoad = 30;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -123,8 +121,6 @@ public class GalleryActivity extends Activity {
 
 		currentPath = Helpers.getHomeDir(this);
 		fillFilesList();
-		int[] params = {0, itemsPerPage};
-		fillCacheTask.execute(params);
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
 		photosGrid.setAdapter(galleryAdapter);
@@ -270,74 +266,70 @@ public class GalleryActivity extends Activity {
 		File dir = new File(currentPath);
 		File[] folderFiles = dir.listFiles();
 
-		int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-		
-		Arrays.sort(folderFiles, new Comparator<File>() {
-			public int compare(File lhs, File rhs) {
-				if(rhs.lastModified() > lhs.lastModified()){
-					return 1;
+		if(folderFiles != null){
+			int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+			
+			Arrays.sort(folderFiles, new Comparator<File>() {
+				public int compare(File lhs, File rhs) {
+					if(rhs.lastModified() > lhs.lastModified()){
+						return 1;
+					}
+					else if(rhs.lastModified() < lhs.lastModified()){
+						return -1;
+					}
+					return 0;
 				}
-				else if(rhs.lastModified() < lhs.lastModified()){
-					return -1;
+			});
+			
+			this.files.clear();
+			toGenerateThumbs.clear();
+			noThumbs.clear();
+			
+			for (File file : folderFiles) {
+				if(file.isDirectory() && !file.getName().startsWith(".")){
+					folders.add(file);
 				}
-				return 0;
-			}
-		});
-		
-		this.files.clear();
-		toGenerateThumbs.clear();
-		noThumbs.clear();
-		
-		for (File file : folderFiles) {
-			if(file.isDirectory() && !file.getName().startsWith(".")){
-				folders.add(file);
-			}
-			else if(file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
-				files.add(file);
-				
-				if(file.length() >= maxFileSize){
-					noThumbs.add(file);
-				}
-				else{
-					String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
-					File thumb = new File(thumbPath);
-					if (!thumb.exists()) {
-						toGenerateThumbs.add(file);
+				else if(file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
+					files.add(file);
+					
+					if(file.length() >= maxFileSize){
+						noThumbs.add(file);
+					}
+					else{
+						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
+						File thumb = new File(thumbPath);
+						if (!thumb.exists()) {
+							toGenerateThumbs.add(file);
+						}
 					}
 				}
 			}
+	
+			Collections.sort(folders);
+			
+			this.files.addAll(folders);
+			this.files.addAll(files);
+			
+			if(this.files.size() == 0){
+				findViewById(R.id.no_files).setVisibility(View.VISIBLE);
+			}
+			else{
+				findViewById(R.id.no_files).setVisibility(View.GONE);
+			}
+			
+			thumbGenTask = new GenerateThumbs();
+			thumbGenTask.execute(toGenerateThumbs);
 		}
-
-		Collections.sort(folders);
-		
-		this.files.addAll(folders);
-		this.files.addAll(files);
-		
-		if(this.files.size() == 0){
-			findViewById(R.id.no_files).setVisibility(View.VISIBLE);
-		}
-		else{
-			findViewById(R.id.no_files).setVisibility(View.GONE);
-		}
-		
-		thumbGenTask = new GenerateThumbs();
-		thumbGenTask.execute(toGenerateThumbs);
 	}
 	
 	private void changeDir(String newPath){
 		currentPath = newPath;
 		selectedFiles.clear();
-		pageNumber = 1;
 		
 		refreshList();
 		
-		if(fillCacheTask != null){
-			fillCacheTask.cancel(true);
-			fillCacheTask = null;
-		}
-		int[] params = {0, itemsPerPage};
-		fillCacheTask = new FillCache();
-		fillCacheTask.execute(params);
+		isScrollingDown = true;
+		generateVisibleThumbs();
 	}
 	
 	@Override
@@ -381,11 +373,7 @@ public class GalleryActivity extends Activity {
 					thumbGenTask = new GenerateThumbs();
 					thumbGenTask.execute(toGenerateThumbs);
 				}
-				if(fillCacheTask == null){
-					int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
-					fillCacheTask = new FillCache();
-					fillCacheTask.execute(params);
-				}
+				generateVisibleThumbs();
 			}
 		}
 	}
@@ -628,11 +616,7 @@ public class GalleryActivity extends Activity {
 		galleryAdapter.notifyDataSetChanged();
 		clearMutliSelect();
 		
-		if(fillCacheTask == null){
-			int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
-			fillCacheTask = new FillCache();
-			fillCacheTask.execute(params);
-		}
+		generateVisibleThumbs();
 	}
 	
 	private void deleteSelected() {
@@ -978,13 +962,6 @@ public class GalleryActivity extends Activity {
 								layout.addView(progress);
 							}
 							else {
-								if(position>= photosGrid.getFirstVisiblePosition() && position <= photosGrid.getLastVisiblePosition()){
-									if(fillCacheTask == null){
-										int[] params = {(pageNumber-1) * itemsPerPage, itemsPerPage};
-										fillCacheTask = new FillCache();
-										fillCacheTask.execute(params);
-									}
-								}
 								ImageView fileImage = new ImageView(GalleryActivity.this);
 								fileImage.setImageResource(R.drawable.file);
 								fileImage.setPadding(3, 3, 3, 3);
@@ -1048,40 +1025,62 @@ public class GalleryActivity extends Activity {
 		}
 	}
 
+	private int lastFirstVisibleItem = -1;
+	private int lastVisibleItemCount = 0;
+	private boolean isScrollingDown = true;
+	
+		private void generateVisibleThumbs(){
+		
+		if(lastFirstVisibleItem == -1){
+			lastFirstVisibleItem = 0;
+		}
+		if(lastVisibleItemCount == 0){
+			lastVisibleItemCount = defaultThumbCountToLoad;
+		}
+		
+		if(fillCacheTask != null){
+			fillCacheTask.cancel(false);
+			fillCacheTask = null;
+		}
+		
+		int[] params = new int[3];
+		if(isScrollingDown){
+			params[0] = lastFirstVisibleItem;
+			params[1] = lastVisibleItemCount + 6;
+			params[2] = 0;
+		}
+		else{
+			params[0] = lastFirstVisibleItem - 6;
+			params[1] = lastVisibleItemCount + 6;
+			params[2] = 1;
+		}
+		
+		
+		fillCacheTask = new FillCache();
+		fillCacheTask.execute(params);
+	}
+	
 	private OnScrollListener getOnScrollListener(){
 		return new OnScrollListener() {
 			
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
-				
+				if(scrollState == SCROLL_STATE_IDLE){
+					generateVisibleThumbs();
+				}
 			}
 			
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-				int lastVisiblePosition = firstVisibleItem + visibleItemCount;
+				lastFirstVisibleItem = firstVisibleItem;
+				lastVisibleItemCount = visibleItemCount;
 				
-				int pagedPosition = pageNumber * itemsPerPage;
-				
-				if(pagedPosition - lastVisiblePosition < loadThreshold){
-					Log.d("qaq", "scroll - " + String.valueOf(firstVisibleItem) + " - " + String.valueOf(lastVisiblePosition) + " - " + String.valueOf(pagedPosition));
-					if(fillCacheTask == null){
-						int[] params = {pageNumber * itemsPerPage, itemsPerPage};
-						fillCacheTask = new FillCache();
-						fillCacheTask.execute(params);
-						pageNumber++;
-					}
+				if(prevVisiblePosition < firstVisibleItem){
+					isScrollingDown = true;
+				}
+				else if(prevVisiblePosition > firstVisibleItem){
+					isScrollingDown = false;
 				}
 				
-				
-				pagedPosition = (pageNumber-1) * itemsPerPage;
-				if(pageNumber > 1 && firstVisibleItem - pagedPosition < loadThreshold){
-					Log.d("qaq", "scroll2 - " + String.valueOf(firstVisibleItem) + " - " + String.valueOf(lastVisiblePosition) + " - " + String.valueOf(pagedPosition));
-					if(fillCacheTask == null){
-						pageNumber--;
-						int[] params = {(pageNumber - 1) * itemsPerPage, itemsPerPage, 1};
-						fillCacheTask = new FillCache();
-						fillCacheTask.execute(params);
-					}
-				}
-				
+				prevVisiblePosition = firstVisibleItem;
 			}
 		};
 	}
@@ -1107,18 +1106,17 @@ public class GalleryActivity extends Activity {
 					reverse = true;
 				}
 				
-				Log.d("qaq", "fill - " + String.valueOf(offset) + " - " + String.valueOf(length) + " - " + String.valueOf(reverse));
 				
-				Context appContext = getApplicationContext(); 
+				Context appContext = getApplicationContext();
+				if(offset < 0){
+					offset = 0;
+				}
+				
 				if(offset+length > files.size()){
 					length = files.size() - offset - 1;
 				}
 				
 				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
-				
-				/*if(reverse){
-					Collections.sort(slicedArray);
-				}*/
 				
 				int start;
 				int end;

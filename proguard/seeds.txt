@@ -27,6 +27,8 @@ com.fenritz.safecam.FileDialog
 com.fenritz.safecam.FileDialog: FileDialog()
 com.fenritz.safecam.GalleryActivity
 com.fenritz.safecam.GalleryActivity: GalleryActivity()
+com.fenritz.safecam.ImportPhotosActivity
+com.fenritz.safecam.ImportPhotosActivity: ImportPhotosActivity()
 com.fenritz.safecam.SafeCameraActivity
 com.fenritz.safecam.SafeCameraActivity: SafeCameraActivity()
 com.fenritz.safecam.SafeCameraApplication

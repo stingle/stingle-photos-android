@@ -529,10 +529,10 @@ com.fenritz.safecam.CameraActivity:
     private static final int ORIENTATION_LANDSCAPE_NORMAL
     private static final int ORIENTATION_LANDSCAPE_INVERTED
 com.fenritz.safecam.CameraActivity$EncryptAndWriteFile:
-    699:700:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
+    664:665:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb:
-    745:746:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
-    749:750:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
+    710:711:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
+    714:715:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
 com.fenritz.safecam.FileDialog:
     public static final int MODE_CREATE
     public static final int MODE_OPEN
@@ -565,9 +565,6 @@ com.fenritz.safecam.GalleryActivity:
     protected static final int ACTION_MOVE
     protected static final int ACTION_DELETE
     protected static final int ACTION_DELETE_FOLDER
-com.fenritz.safecam.GalleryActivity$GalleryAdapter:
-    870:870:private android.view.View$OnClickListener getOnClickListenerLongAction(java.io.File)
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$4
 com.fenritz.safecam.R
 com.fenritz.safecam.R$anim
 com.fenritz.safecam.R$array
@@ -646,9 +643,9 @@ com.fenritz.safecam.util.Helpers:
     protected static final int SHARE_AS_IS
     protected static final int SHARE_REENCRYPT
     protected static final int SHARE_DECRYPT
-    49:49:public Helpers()
-    143:151:public static void registerForBroadcastReceiver(android.app.Activity)
-    179:188:public static void printMaxKeySizes()
+    52:52:public Helpers()
+    146:154:public static void registerForBroadcastReceiver(android.app.Activity)
+    182:191:public static void printMaxKeySizes()
 com.fenritz.safecam.util.Helpers$1
 com.fenritz.safecam.util.MemoryCache:
     42:43:public void clear()
