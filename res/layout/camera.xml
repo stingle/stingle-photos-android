@@ -11,6 +11,15 @@
 		android:layout_height="wrap_content"
 		android:gravity="left" />
 
+	<TextView
+        android:id="@+id/photoSizeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:textColor="@android:color/white"
+        android:background="#00000000"
+        android:textSize="15dp" />
+	
 	<LinearLayout
 	    android:id="@+id/timerLabelContainer"
         android:layout_width="50dp"

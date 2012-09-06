@@ -1,11 +1,25 @@
 package com.fenritz.safecam;
 
 import android.app.Application;
+import android.content.Context;
 
 public class SafeCameraApplication extends Application{
 
 	private String key;
 	private long lockedTime = 0;
+	
+	
+	private static Context context;
+
+    @Override
+	public void onCreate(){
+        super.onCreate();
+        SafeCameraApplication.context = getApplicationContext();
+    }
+
+    public static Context getAppContext() {
+        return SafeCameraApplication.context;
+    }
 	
 	public String getKey(){
 		return key;

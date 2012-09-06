@@ -106,6 +106,9 @@
     <string name="later">Later</string>
     <string name="read_security">SafeCamera security</string>
     <string name="login_to_proceed">Please login to proceed…</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache_desc">Clear thumbnail cache</string>
+    <string name="confirm_delete_cache">Are you sure you want to delete whole thumbnail cache?</string>
     
     
     <!-- File Dialog -->

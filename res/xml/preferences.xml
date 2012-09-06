@@ -19,7 +19,6 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     	 <EditTextPreference
-    	    android:defaultValue="SafeCamera"
     	    android:key="home_folder"
     	    android:summary="@string/home_folder_desc"
     	    android:title="@string/home_folder" />
@@ -45,5 +44,10 @@
             android:defaultValue="10" 
             android:entries="@array/timerDurations"
             android:entryValues="@array/timerDurationValues" />
+		
+		<Preference
+		    android:key="clear_cache"
+    	    android:title="@string/clear_cache"
+    	    android:summary="@string/clear_cache_desc" />
 
 </PreferenceScreen>

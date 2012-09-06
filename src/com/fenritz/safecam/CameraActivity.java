@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Timer;
@@ -98,7 +100,6 @@ public class CameraActivity extends Activity {
 	private Timer timer;
 	
 	private int photoSizeIndex = 0;
-	private int firstEnabledIndex = -1;
 
 	// The first rear facing camera
 	int defaultCameraId;
@@ -409,19 +410,16 @@ public class CameraActivity extends Activity {
 				return;
 			}
 	
-			List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
+			List<Size> mSupportedPictureSizes = getSupportedImageSizes();
 			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
 			
 			if(Helpers.isDemo(CameraActivity.this)){
 				for(int i=0;i<mSupportedPictureSizes.size();i++){
 					if(mSupportedPictureSizes.get(i).width <= 640){
-						firstEnabledIndex = i;
+						photoSizeIndex = i;
+						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
 						break;
 					}
-				}
-				if(photoSizeIndex < firstEnabledIndex){
-					photoSizeIndex = firstEnabledIndex;
-					preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
 				}
 			}
 			Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
@@ -462,7 +460,9 @@ public class CameraActivity extends Activity {
 			parameters.setFlashMode(flashMode);
 			parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
 			parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-	
+			
+			setMegapixelLabel(seletectedSize.width, seletectedSize.height);
+			
 			if (mOrientationEventListener == null) {
 				mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
 	
@@ -537,6 +537,12 @@ public class CameraActivity extends Activity {
 		}
 	}
 
+	private void setMegapixelLabel(int width, int height){
+		double megapixel = Double.parseDouble(new DecimalFormat("#.#").format((double)width * (double)height / 1000000));
+		
+		((TextView)findViewById(R.id.photoSizeLabel)).setText(String.valueOf(megapixel) + " MP");
+	}
+	
 	/**
 	 * Performs required action to accommodate new orientation
 	 * 
@@ -755,6 +761,31 @@ public class CameraActivity extends Activity {
 		return true;
 	}
 
+	private List<Size> getSupportedImageSizes(){
+		List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
+
+		Collections.sort(mSupportedPictureSizes, new Comparator<Size>() {
+
+			public int compare(Size lhs, Size rhs) {
+				double megapixel1 = Double.parseDouble(new DecimalFormat("#.#").format((double)lhs.width * (double)lhs.height / 1000000));
+				double megapixel2 = Double.parseDouble(new DecimalFormat("#.#").format((double)rhs.width * (double)rhs.height / 1000000));
+				
+				if(megapixel1 == megapixel2){
+					return 0;
+				}
+				else if(megapixel1 < megapixel2){
+					return -1;
+				}
+				else{
+					return 1;
+				}
+			}
+			
+		});
+		
+		return mSupportedPictureSizes;
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
@@ -775,13 +806,14 @@ public class CameraActivity extends Activity {
 					return false;
 				}
 
-				final List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
-
+				final List<Size> mSupportedPictureSizes = getSupportedImageSizes();
+				
 				CharSequence[] listEntries = new CharSequence[mSupportedPictureSizes.size()];
 
 				for (int i = 0; i < mSupportedPictureSizes.size(); i++) {
 					Camera.Size size = mSupportedPictureSizes.get(i);
-					listEntries[i] = String.valueOf(size.width) + "x" + String.valueOf(size.height);
+					double megapixel = Double.parseDouble(new DecimalFormat("#.#").format((double)size.width * (double)size.height / 1000000));
+					listEntries[i] = String.valueOf(megapixel) + " MP - " + String.valueOf(size.width) + "x" + String.valueOf(size.height);
 				}
 
 				final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
@@ -802,6 +834,8 @@ public class CameraActivity extends Activity {
 						parameters.setPictureSize(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
 						mCamera.setParameters(parameters);
 
+						setMegapixelLabel(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
+						
 						mPreview.setCamera(mCamera);
 						mPreview.requestLayout();
 						
@@ -820,21 +854,23 @@ public class CameraActivity extends Activity {
 	
 	private class PhotoSizeAdapter extends ArrayAdapter<CharSequence> {
 
+		private final List<Size> mSupportedPictureSizes;
 	    public PhotoSizeAdapter(Context context, int textViewResId, CharSequence[] strings) {
 	        super(context, textViewResId, strings);
+	        mSupportedPictureSizes = getSupportedImageSizes();
 	    }
 
 	    @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View view = super.getView(position, convertView, parent);
+	    	View view = super.getView(position, convertView, parent);
+	    	TextView textView=(TextView) view.findViewById(android.R.id.text1);
 
-            TextView textView=(TextView) view.findViewById(android.R.id.text1);
-
-            if(firstEnabledIndex != -1 && firstEnabledIndex > position){
-            	textView.setTextColor(Color.GRAY);
-            }
+	    	
+	    	if(Helpers.isDemo(CameraActivity.this) && mSupportedPictureSizes.get(position).width > 640){
+	            textView.setTextColor(Color.GRAY);
+	    	}
             else{
-            	textView.setTextColor(Color.BLACK);
+            	textView.setTextColor(Color.GREEN);
             }
 
             return view;
@@ -847,12 +883,10 @@ public class CameraActivity extends Activity {
 
 	    @Override
 		public boolean isEnabled(int position) {
-	    	if(firstEnabledIndex != -1 && firstEnabledIndex > position){
-            	return false;
-            }
-            else{
-            	return true;
-            }
+	    	if(Helpers.isDemo(CameraActivity.this) && mSupportedPictureSizes.get(position).width > 640){
+	            return false;
+	    	}
+            return true;
 	    }
 	}
 
