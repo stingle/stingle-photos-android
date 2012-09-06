@@ -11,7 +11,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
@@ -348,12 +350,15 @@ public class AsyncTasks {
 		}
 
 		@Override
-		protected void onPostExecute(ArrayList<File> decryptedFiles) {
+		protected void onPostExecute(final ArrayList<File> decryptedFiles) {
 			super.onPostExecute(decryptedFiles);
 
 			progressDialog.dismiss();
 			if (finishListener != null) {
 				finishListener.onFinish(decryptedFiles);
+			}
+			for(File file : decryptedFiles){
+				this.activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
 			}
 		}
 	}

@@ -125,6 +125,7 @@ public class GalleryActivity extends Activity {
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
 		photosGrid.setAdapter(galleryAdapter);
 		photosGrid.setOnScrollListener(getOnScrollListener());
+		photosGrid.setColumnWidth(Helpers.getThumbSize(GalleryActivity.this)-10);
 
 		findViewById(R.id.multi_select).setOnClickListener(multiSelectClick());
 		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
@@ -916,7 +917,7 @@ public class GalleryActivity extends Activity {
 		
 		public View getView(int position, View convertView, ViewGroup parent) {
 			final CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
-			int thumbSize = Integer.valueOf(getString(R.string.thumb_size));
+			int thumbSize = Helpers.getThumbSize(GalleryActivity.this);
 			layout.setGravity(Gravity.CENTER);
 			layout.setLayoutParams(new GridView.LayoutParams(thumbSize, thumbSize));
 			layout.setOrientation(LinearLayout.VERTICAL);

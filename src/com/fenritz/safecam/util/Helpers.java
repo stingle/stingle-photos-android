@@ -1,10 +1,13 @@
 package com.fenritz.safecam.util;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.text.SimpleDateFormat;
@@ -29,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -37,12 +41,19 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraActivity;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -225,7 +236,7 @@ public class Helpers {
 		
 		Bitmap thumbBitmap = null;
 		if (bitmap != null) {
-			thumbBitmap = Helpers.getThumbFromBitmap(bitmap, Integer.valueOf(context.getString(R.string.thumb_size)));
+			thumbBitmap = Helpers.getThumbFromBitmap(bitmap, getThumbSize(context));
 
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -235,6 +246,19 @@ public class Helpers {
 			Helpers.getAESCrypt(context).encrypt(imageByteArray, out);
 		}
 		return thumbBitmap;
+	}
+	
+	public static int getThumbSize(Context context){
+		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics metrics = new DisplayMetrics();
+		wm.getDefaultDisplay().getMetrics(metrics);
+		
+		if(metrics.widthPixels <= metrics.heightPixels){
+			return (int) Math.floor(metrics.widthPixels / 3);
+		}
+		else{
+			return (int) Math.floor(metrics.heightPixels / 3);
+		}
 	}
 
 	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide) {
@@ -284,6 +308,39 @@ public class Helpers {
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize) {
 		if(data != null){
+			Integer rotation = null;
+			try {
+				BufferedInputStream stream = new BufferedInputStream(new ByteArrayInputStream(data));
+				Metadata metadata = ImageMetadataReader.readMetadata(stream, false);
+			
+				/*for (Directory directory : metadata.getDirectories()) {
+				    for (Tag tag : directory.getTags()) {
+				        System.out.println(directory.toString() + " - " + tag);
+				    }
+				}*/
+				
+				ExifIFD0Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+				int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+				
+				switch(exifRotation){
+					case 3:
+						// Rotate 180 deg
+						rotation = 180;
+						break;
+					case 6:
+						// Rotate 90 deg
+						rotation = 90;
+						break;
+					case 8:
+						// Rotate 270 deg
+						rotation = 270;
+						break;
+				}
+			}
+			catch (ImageProcessingException e) { }
+			catch (IOException e) { }
+			catch (MetadataException e) { }
+			
 			// Decode image size
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
@@ -298,7 +355,17 @@ public class Helpers {
 			// Decode with inSampleSize
 			BitmapFactory.Options o2 = new BitmapFactory.Options();
 			o2.inSampleSize = scale;
-			return BitmapFactory.decodeByteArray(data, 0, data.length, o2);
+			
+			if(rotation != null){
+				Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, o2);
+				Matrix matrix = new Matrix();
+				matrix.postRotate(rotation);
+	
+				return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+			}
+			else{
+				return BitmapFactory.decodeByteArray(data, 0, data.length, o2);
+			}
 		}
 		return null;
 	}
