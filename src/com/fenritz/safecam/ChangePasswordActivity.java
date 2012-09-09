@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,17 +21,21 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
 
-public class ChangePasswordActivity extends Activity {
+public class ChangePasswordActivity extends SherlockActivity {
 
 	private BroadcastReceiver receiver;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
 		setContentView(R.layout.change_password);
 		
 		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
@@ -55,7 +58,9 @@ public class ChangePasswordActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		unregisterReceiver(receiver);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 	}
 	
 	private OnClickListener changeClick() {
@@ -233,5 +238,17 @@ public class ChangePasswordActivity extends Activity {
 		
 		Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 }

@@ -1,10 +1,10 @@
 package com.fenritz.safecam;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,6 +29,7 @@ import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
@@ -38,14 +40,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
@@ -55,6 +53,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.fenritz.safecam.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
@@ -63,15 +65,15 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
-public class CameraActivity extends Activity {
+public class CameraActivity extends SherlockActivity {
 
 	public static final String FLASH_MODE = "flash_mode";
 	public static final String TIMER_MODE = "timer_mode";
 	public static final String PHOTO_SIZE = "photo_size";
+	public static final String PHOTO_SIZE_FRONT = "photo_size_front";
 
 	private CameraPreview mPreview;
 	Camera mCamera;
-	int numberOfCameras;
 	int cameraCurrentlyLocked;
 	FrameLayout.LayoutParams origParams;
 	private int mOrientation = -1;
@@ -81,6 +83,10 @@ public class CameraActivity extends Activity {
 	private static final int ORIENTATION_PORTRAIT_INVERTED = 2;
 	private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
 	private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
+	
+	private static final int DEFAULT_CAMERA = 0;
+	private int numberOfCameras = 1; 
+	private int currentCamera = 0; 
 	
 	private boolean isFlashOn = false; 
 	private boolean isTimerOn = false; 
@@ -110,12 +116,14 @@ public class CameraActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		if(!checkCameraHardware()){
+			finish();
+			return;
+		}
+		
 		// Hide the window title.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-		// Create a RelativeLayout container that will hold a SurfaceView,
-		// and set it as the content of our activity.
 
 		setContentView(R.layout.camera);
 		
@@ -133,8 +141,12 @@ public class CameraActivity extends Activity {
 		
 		timerButton = (ImageButton) findViewById(R.id.timerButton);
 		timerButton.setOnClickListener(toggleTimer());
+		
+		findViewById(R.id.switchCamButton).setOnClickListener(switchCamera());
+		findViewById(R.id.optionsButton).setOnClickListener(showOptions());
 
-		mPreview = ((CameraPreview) findViewById(R.id.camera_preview));
+		mPreview = new CameraPreview(this); 
+		((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
 
 		showLastPhotoThumb();
 		
@@ -157,6 +169,248 @@ public class CameraActivity extends Activity {
 		}
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		boolean logined = Helpers.checkLoginedState(this);
+		Helpers.disableLockTimer(this);
+
+		if(logined){
+			startCamera();
+			initOrientationListener();
+			showLastPhotoThumb();
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		Helpers.checkLoginedState(this);
+		Helpers.setLockedTime(this);
+
+		destroyOrientationListener();
+
+		// Because the Camera object is a shared resource, it's very
+		// important to release it when the activity is paused.
+		releaseCamera();
+	}
+	
+	private void startCamera(){
+		startCamera(DEFAULT_CAMERA);
+	}
+	
+	private OnClickListener switchCamera(){
+		return new OnClickListener() {
+			public void onClick(View v) {
+				if(numberOfCameras > 1){
+					releaseCamera();
+					
+					currentCamera++;
+					
+					if(currentCamera == numberOfCameras){
+						currentCamera = 0;
+					}
+					
+					mPreview = null;
+					mPreview = new CameraPreview(CameraActivity.this);
+					((LinearLayout) findViewById(R.id.camera_preview_container)).removeAllViews();
+					((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
+					startCamera(currentCamera);
+					//mPreview.switchCamera(mCamera);
+				}
+			}
+		};
+	}
+	private OnClickListener showOptions(){
+		return new OnClickListener() {
+			public void onClick(View v) {
+				openOptionsMenu();
+			}
+		};
+	}
+	
+	@SuppressLint("NewApi")
+	private void startCamera(int cameraId){
+		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		
+		// Open the default i.e. the first rear facing camera.
+		
+		try{
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
+				numberOfCameras = Camera.getNumberOfCameras();
+				if(numberOfCameras > 1){
+					findViewById(R.id.switchCamButton).setVisibility(View.VISIBLE);
+					mCamera = Camera.open(cameraId);
+					currentCamera = cameraId;
+				}
+				else{
+					findViewById(R.id.switchCamButton).setVisibility(View.GONE);
+					mCamera = Camera.open(DEFAULT_CAMERA);
+					currentCamera = DEFAULT_CAMERA;
+				}
+			}
+			else{
+				mCamera = Camera.open();
+			}
+		}
+		catch(RuntimeException e){
+			Toast.makeText(CameraActivity.this, getText(R.string.unable_to_connect_camera), Toast.LENGTH_LONG).show();
+			showLastPhotoThumb();
+			return;
+		}
+
+		List<Size> mSupportedPictureSizes = getSupportedImageSizes();
+		if(isCurrentCameraFrontFacing()){
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, 0);
+		}
+		else{
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+		}
+		
+		if(Helpers.isDemo(CameraActivity.this)){
+			for(int i=0;i<mSupportedPictureSizes.size();i++){
+				if(mSupportedPictureSizes.get(i).width <= 640){
+					photoSizeIndex = i;
+					if(isCurrentCameraFrontFacing()){
+						preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, photoSizeIndex).commit();
+					}
+					else{
+						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
+					}
+					break;
+				}
+			}
+		}
+		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
+
+		// Set flash mode from preferences and update button accordingly
+		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
+
+		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
+			isFlashOn = false;
+			flashButton.setImageResource(R.drawable.flash_off);
+		}
+		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
+			isFlashOn = true;
+			flashButton.setImageResource(R.drawable.flash_on);
+		}
+		
+		boolean timerMode = preferences.getBoolean(CameraActivity.TIMER_MODE, false);
+		
+		if(timerMode){
+			isTimerOn = true;
+			timerButton.setImageResource(R.drawable.timer);
+		}
+		else{
+			isTimerOn = false;
+			timerButton.setImageResource(R.drawable.timer_disabled);
+		}
+
+		Camera.Parameters parameters = mCamera.getParameters();
+		List<String> flashModes = parameters.getSupportedFlashModes();
+		List<String> focusModes = parameters.getSupportedFocusModes();
+		
+		if(flashModes != null && flashModes.contains(flashMode)){
+			parameters.setFlashMode(flashMode);
+		}
+		if(focusModes != null && focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
+			parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+		}
+		parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
+		
+		setMegapixelLabel(seletectedSize.width, seletectedSize.height);
+		
+		mCamera.setParameters(parameters);
+
+		cameraCurrentlyLocked = defaultCameraId;
+		mPreview.setCamera(mCamera);
+	}
+	
+	private void releaseCamera(){
+		if (mCamera != null) {
+			mPreview.setCamera(null);
+			mCamera.release();
+			mCamera = null;
+		}
+	}
+	
+	private void initOrientationListener(){
+		if (mOrientationEventListener == null) {
+			mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+
+				@Override
+				public void onOrientationChanged(int orientation) {
+					if (orientation == ORIENTATION_UNKNOWN){
+						return;
+					}
+					
+					// determine our orientation based on sensor response
+					int lastOrientation = mOrientation;
+
+					if (orientation >= 315 || orientation < 45) {
+						if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {
+							mOrientation = ORIENTATION_PORTRAIT_NORMAL;
+						}
+					}
+					else if (orientation < 315 && orientation >= 225) {
+						if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
+							mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
+						}
+					}
+					else if (orientation < 225 && orientation >= 135) {
+						if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
+							mOrientation = ORIENTATION_PORTRAIT_INVERTED;
+						}
+					}
+					else { // orientation <135 && orientation > 45
+						if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
+							mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
+						}
+					}
+
+					if (lastOrientation != mOrientation) {
+						Camera.Parameters parameters = mCamera.getParameters();
+						parameters.setRotation(changeRotation(mOrientation));
+						mCamera.setParameters(parameters);
+					}
+				}
+			};
+		}
+		if (mOrientationEventListener.canDetectOrientation()) {
+			mOrientationEventListener.enable();
+		}
+	}
+	
+	private void destroyOrientationListener(){
+		if (mOrientationEventListener != null) {
+			mOrientationEventListener.disable();
+			mOrientationEventListener = null;
+		}
+	}
+	
+	private boolean checkCameraHardware() {
+	    if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) || getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)){
+	        // this device has a camera
+	        return true;
+	    } else {
+	        // no camera on this device
+	        return false;
+	    }
+	}
+
+	private void setMegapixelLabel(int width, int height){
+		try{
+			String megapixel = String.format("%.1f", (double)width * (double)height / 1000000);
+			
+			((TextView)findViewById(R.id.photoSizeLabel)).setText(megapixel + " MP");
+		}
+		catch(NumberFormatException e){
+			((TextView)findViewById(R.id.photoSizeLabel)).setText("");
+		}
+	}
+	
 	private void showLastPhotoThumb(){
 		File dir = new File(Helpers.getHomeDir(CameraActivity.this));
 		final int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
@@ -211,7 +465,9 @@ public class CameraActivity extends Activity {
 		if (adView != null){
 			adView.destroy();
 		}
-		unregisterReceiver(receiver);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 		super.onDestroy();
 	}
 	
@@ -373,6 +629,10 @@ public class CameraActivity extends Activity {
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
+				/*if(isCurrentCameraFrontFacing()){
+					data = FixFrontCamPhoto(data, currentCamera);
+				}*/
+				
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 
 				new EncryptAndWriteFile(filename).execute(data);
@@ -389,158 +649,43 @@ public class CameraActivity extends Activity {
 			}
 		};
 	}
+	
+	public static byte[] FixFrontCamPhoto(byte[] data, int cameraID) {
+	    Matrix matrix = new Matrix();
+	    
+	    // Convert ByteArray to Bitmap
+	    Bitmap bitPic = Helpers.decodeBitmap(data, 999999999, true);
 
-	@Override
-	protected void onResume() {
-		super.onResume();
+	    // Perform matrix rotations/mirrors depending on camera that took the photo
+        float[] mirrorY = { -1, 0, 0, 0, 1, 0, 0, 0, 1};
+        Matrix matrixMirrorY = new Matrix();
+        matrixMirrorY.setValues(mirrorY);
 
-		boolean logined = Helpers.checkLoginedState(this);
-		Helpers.disableLockTimer(this);
+        matrix.postConcat(matrixMirrorY);
 
-		if(logined){
-			final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-	
-			// Open the default i.e. the first rear facing camera.
-			try{
-				mCamera = Camera.open();
-			}
-			catch(RuntimeException e){
-				Toast.makeText(CameraActivity.this, getText(R.string.unable_to_connect_camera), Toast.LENGTH_LONG).show();
-				showLastPhotoThumb();
-				return;
-			}
-	
-			List<Size> mSupportedPictureSizes = getSupportedImageSizes();
-			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
-			
-			if(Helpers.isDemo(CameraActivity.this)){
-				for(int i=0;i<mSupportedPictureSizes.size();i++){
-					if(mSupportedPictureSizes.get(i).width <= 640){
-						photoSizeIndex = i;
-						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
-						break;
-					}
-				}
-			}
-			Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
-	
-			// Set flash mode from preferences and update button accordingly
-			String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
-	
-			if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
-				isFlashOn = false;
-				flashButton.setImageResource(R.drawable.flash_off);
-			}
-			else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
-				isFlashOn = true;
-				flashButton.setImageResource(R.drawable.flash_on);
-			}
-			
-			boolean timerMode = preferences.getBoolean(CameraActivity.TIMER_MODE, false);
-			
-			if(timerMode){
-				isTimerOn = true;
-				timerButton.setImageResource(R.drawable.timer);
-			}
-			else{
-				isTimerOn = false;
-				timerButton.setImageResource(R.drawable.timer_disabled);
-			}
-	
-			if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
-				isFlashOn = false;
-				((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_off);
-			}
-			else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
-				isFlashOn = true;
-				((ImageButton) findViewById(R.id.flashButton)).setImageResource(R.drawable.flash_on);
-			}
-	
-			Camera.Parameters parameters = mCamera.getParameters();
-			parameters.setFlashMode(flashMode);
-			parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
-			parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-			
-			setMegapixelLabel(seletectedSize.width, seletectedSize.height);
-			
-			if (mOrientationEventListener == null) {
-				mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
-	
-					@Override
-					public void onOrientationChanged(int orientation) {
-						if (orientation == ORIENTATION_UNKNOWN){
-							return;
-						}
-						
-						// determine our orientation based on sensor response
-						int lastOrientation = mOrientation;
-	
-						if (orientation >= 315 || orientation < 45) {
-							if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {
-								mOrientation = ORIENTATION_PORTRAIT_NORMAL;
-							}
-						}
-						else if (orientation < 315 && orientation >= 225) {
-							if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
-								mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
-							}
-						}
-						else if (orientation < 225 && orientation >= 135) {
-							if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
-								mOrientation = ORIENTATION_PORTRAIT_INVERTED;
-							}
-						}
-						else { // orientation <135 && orientation > 45
-							if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
-								mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
-							}
-						}
-	
-						if (lastOrientation != mOrientation) {
-							Camera.Parameters parameters = mCamera.getParameters();
-							parameters.setRotation(changeRotation(mOrientation));
-							mCamera.setParameters(parameters);
-						}
-					}
-				};
-			}
-			if (mOrientationEventListener.canDetectOrientation()) {
-				mOrientationEventListener.enable();
-			}
-			mCamera.setParameters(parameters);
-	
-			cameraCurrentlyLocked = defaultCameraId;
-			mPreview.setCamera(mCamera);
-			
-			showLastPhotoThumb();
-		}
+	    //matrix.postRotate(90);
+
+
+	    // Create new Bitmap out of the old one
+	    Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
+	    bitPic.recycle();
+	    
+	    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	    bitPicFinal.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+	    
+	    return stream.toByteArray();
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-
-		Helpers.checkLoginedState(this);
-		Helpers.setLockedTime(this);
-
-		if (mOrientationEventListener != null) {
-			mOrientationEventListener.disable();
-			mOrientationEventListener = null;
+	@SuppressLint("NewApi")
+	private boolean isCurrentCameraFrontFacing(){
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
+			Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+			Camera.getCameraInfo(currentCamera, cameraInfo);
+			if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
+				return true;
+			}
 		}
-
-		// Because the Camera object is a shared resource, it's very
-		// important to release it when the activity is paused.
-		if (mCamera != null) {
-			mPreview.setCamera(null);
-			mCamera.release();
-			mCamera = null;
-		}
-	}
-
-	private void setMegapixelLabel(int width, int height){
-		double megapixel = Double.parseDouble(new DecimalFormat("#.#").format((double)width * (double)height / 1000000));
-		
-		((TextView)findViewById(R.id.photoSizeLabel)).setText(String.valueOf(megapixel) + " MP");
+		return false;
 	}
 	
 	/**
@@ -550,6 +695,7 @@ public class CameraActivity extends Activity {
 	 * @param lastOrientation
 	 */
 	private int changeRotation(int orientation) {
+		boolean isFrontCamera = isCurrentCameraFrontFacing();
 		int rotation = 0;
 		switch (orientation) {
 			case ORIENTATION_PORTRAIT_NORMAL:
@@ -569,7 +715,12 @@ public class CameraActivity extends Activity {
 					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 270));
 				}
 				
-				rotation = 90;
+				if(!isFrontCamera){
+					rotation = 90;
+				}
+				else{
+					rotation = 270;
+				}
 				
 				break;
 			case ORIENTATION_LANDSCAPE_NORMAL:
@@ -608,7 +759,12 @@ public class CameraActivity extends Activity {
 					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 90));
 				}
 				
-				rotation = 270;
+				if(!isFrontCamera){
+					rotation = 270;
+				}
+				else{
+					rotation = 90;
+				}
 				break;
 			case ORIENTATION_LANDSCAPE_INVERTED:
 				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 180));
@@ -756,9 +912,8 @@ public class CameraActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.camera_menu, menu);
-		return true;
+		getSupportMenuInflater().inflate(R.menu.camera_menu, menu);;
+        return super.onCreateOptionsMenu(menu);
 	}
 
 	private List<Size> getSupportedImageSizes(){
@@ -767,8 +922,8 @@ public class CameraActivity extends Activity {
 		Collections.sort(mSupportedPictureSizes, new Comparator<Size>() {
 
 			public int compare(Size lhs, Size rhs) {
-				double megapixel1 = Double.parseDouble(new DecimalFormat("#.#").format((double)lhs.width * (double)lhs.height / 1000000));
-				double megapixel2 = Double.parseDouble(new DecimalFormat("#.#").format((double)rhs.width * (double)rhs.height / 1000000));
+				double megapixel1 = (double)lhs.width * (double)lhs.height / 1000000;
+				double megapixel2 = (double)rhs.width * (double)rhs.height / 1000000;
 				
 				if(megapixel1 == megapixel2){
 					return 0;
@@ -812,12 +967,17 @@ public class CameraActivity extends Activity {
 
 				for (int i = 0; i < mSupportedPictureSizes.size(); i++) {
 					Camera.Size size = mSupportedPictureSizes.get(i);
-					double megapixel = Double.parseDouble(new DecimalFormat("#.#").format((double)size.width * (double)size.height / 1000000));
-					listEntries[i] = String.valueOf(megapixel) + " MP - " + String.valueOf(size.width) + "x" + String.valueOf(size.height);
+					String megapixel = String.format("%.1f", (double)size.width * (double)size.height / 1000000);
+					listEntries[i] = megapixel + " MP - " + String.valueOf(size.width) + "x" + String.valueOf(size.height);
 				}
 
 				final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-				photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+				if(isCurrentCameraFrontFacing()){
+					photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, 0);
+				}
+				else{
+					photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+				}
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(getString(R.string.photo_size_choose));
@@ -826,7 +986,12 @@ public class CameraActivity extends Activity {
 						new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
 						
-						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
+						if(isCurrentCameraFrontFacing()){
+							preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, item).commit();
+						}
+						else{
+							preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
+						}
 
 						mPreview.setCamera(null);
 

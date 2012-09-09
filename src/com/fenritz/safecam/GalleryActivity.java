@@ -27,14 +27,10 @@ import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -43,7 +39,6 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -52,6 +47,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
 import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
@@ -60,7 +59,7 @@ import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
 import com.fenritz.safecam.widget.CheckableLayout;
 
-public class GalleryActivity extends Activity {
+public class GalleryActivity extends SherlockActivity {
 
 	public final MemoryCache memCache = new MemoryCache();
 
@@ -84,6 +83,7 @@ public class GalleryActivity extends Activity {
 	private boolean multiSelectModeActive = false;
 
 	private GridView photosGrid;
+	private MenuItem multiselectMenuItem;
 
 	private final ArrayList<File> files = new ArrayList<File>();
 	
@@ -106,8 +106,10 @@ public class GalleryActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
 		setContentView(R.layout.gallery);
 
 		Bundle bundle = new Bundle();
@@ -118,7 +120,7 @@ public class GalleryActivity extends Activity {
 			finish();
 			return;
 		}
-
+		
 		currentPath = Helpers.getHomeDir(this);
 		fillFilesList();
 
@@ -127,15 +129,12 @@ public class GalleryActivity extends Activity {
 		photosGrid.setOnScrollListener(getOnScrollListener());
 		photosGrid.setColumnWidth(Helpers.getThumbSize(GalleryActivity.this)-10);
 
-		findViewById(R.id.multi_select).setOnClickListener(multiSelectClick());
 		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
 		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
 		findViewById(R.id.importFiles).setOnClickListener(importClick());
 		findViewById(R.id.newFolder).setOnClickListener(newFolderClick());
 		findViewById(R.id.moveSelected).setOnClickListener(moveSelectedClick());
 		findViewById(R.id.share).setOnClickListener(shareClick());
-		findViewById(R.id.gotoHome).setOnClickListener(gotoHome());
-		findViewById(R.id.gotoCamera).setOnClickListener(gotoCamera());
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -161,30 +160,6 @@ public class GalleryActivity extends Activity {
 		}
 	}
 	
-	private OnClickListener gotoHome() {
-		return new OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent();
-				intent.setClass(GalleryActivity.this, DashboardActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-				finish();
-			}
-		};
-	}
-	
-	private OnClickListener gotoCamera() {
-		return new OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent();
-				intent.setClass(GalleryActivity.this, CameraActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-				startActivity(intent);
-				finish();
-			}
-		};
-	}
-
 	void handleIntentFilters(Intent intent){
 		// Handle Intent filters
 		String action = intent.getAction();
@@ -329,6 +304,14 @@ public class GalleryActivity extends Activity {
 		
 		refreshList();
 		
+		if(!newPath.equals(Helpers.getHomeDir(this))){
+			String[] splittedPath = newPath.split("/");
+			getSupportActionBar().setTitle(splittedPath[splittedPath.length - 1]);
+		}
+		else{
+			getSupportActionBar().setTitle(getString(R.string.title_gallery));
+		}
+		
 		isScrollingDown = true;
 		generateVisibleThumbs();
 	}
@@ -379,23 +362,6 @@ public class GalleryActivity extends Activity {
 		}
 	}
 
-	private OnClickListener multiSelectClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				if (multiSelectMode == MULTISELECT_OFF) {
-					((ImageButton) v).setImageResource(R.drawable.checkbox_checked);
-					multiSelectMode = MULTISELECT_ON;
-				}
-				else {
-					((ImageButton) v).setImageResource(R.drawable.checkbox_unchecked);
-					multiSelectMode = MULTISELECT_OFF;
-					clearMutliSelect();
-				}
-			}
-		};
-	}
-	
 	private void enterMultiSelect(){
 		findViewById(R.id.bottomPanel).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_out));
 		findViewById(R.id.bottomPanel).setVisibility(View.GONE);
@@ -675,7 +641,14 @@ public class GalleryActivity extends Activity {
 				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
 				File destinationFolder = new File(filePath);
 				destinationFolder.mkdirs();
-				new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath).execute(selectedFiles);
+				new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath, new OnAsyncTaskFinish() {
+					@Override
+					public void onFinish(java.util.ArrayList<File> decryptedFiles) {
+						for(File file : decryptedFiles){
+							sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+						}
+					}
+				}).execute(selectedFiles);
 			}
 			else if (requestCode == REQUEST_ENCRYPT) {
 				final String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
@@ -698,7 +671,10 @@ public class GalleryActivity extends Activity {
 								}
 								new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
 									@Override
-									public void onFinish() {
+									public void onFinish(ArrayList<File> deletedFiles) {
+										for(File file : deletedFiles){
+											sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+										}
 										Toast.makeText(GalleryActivity.this, getString(R.string.success_delete_originals), Toast.LENGTH_LONG).show();
 									}
 								}).execute(filesToDelete);
@@ -768,7 +744,10 @@ public class GalleryActivity extends Activity {
 	}
 
 	private void clearMutliSelect() {
-		((ImageButton) findViewById(R.id.multi_select)).setImageResource(R.drawable.checkbox_unchecked);
+		if(multiselectMenuItem != null){
+			multiselectMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
+		}
+		
 		multiSelectMode = MULTISELECT_OFF;
 		selectedFiles.clear();
 		for (int i = 0; i < photosGrid.getChildCount(); i++) {
@@ -1091,7 +1070,7 @@ public class GalleryActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			((ProgressBar)findViewById(R.id.progressBar)).setVisibility(View.VISIBLE);
+			getSherlock().setProgressBarIndeterminateVisibility(true);
 		}
 		
 		
@@ -1108,7 +1087,6 @@ public class GalleryActivity extends Activity {
 				}
 				
 				
-				Context appContext = getApplicationContext();
 				if(offset < 0){
 					offset = 0;
 				}
@@ -1134,18 +1112,33 @@ public class GalleryActivity extends Activity {
 					if(files.size() > i){
 						File file = files.get(i);
 						if(file != null){
-							try {
-								String thumbPath = thumbsDir + file.getName();
-								if(memCache.get(thumbPath) == null){
+							final String thumbPath = thumbsDir + file.getName();
+							if(memCache.get(thumbPath) == null){
+								/*final FillCache asyncTaskContext = this;
+								Thread thread = new Thread(){
+									@Override
+									public void run() {
+										try {
+											FileInputStream input = new FileInputStream(thumbPath);
+											memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(SafeCameraApplication.getAppContext()).decrypt(input, asyncTaskContext), 300));
+											publishProgress();
+										}
+										catch (FileNotFoundException e) { }
+									}
+								};
+								thread.start();*/
+								
+								try {
 									FileInputStream input = new FileInputStream(thumbPath);
-									memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(appContext).decrypt(input, this), 300));
+									memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(SafeCameraApplication.getAppContext()).decrypt(input, this), 300));
 								}
-								if(isCancelled()){
-									break;
-								}
+								catch (FileNotFoundException e) { }
 								publishProgress();
 							}
-							catch (FileNotFoundException e) { }
+							if(isCancelled()){
+								break;
+							}
+							//publishProgress();
 						}
 						if(i==end){
 							break;
@@ -1175,7 +1168,7 @@ public class GalleryActivity extends Activity {
 
 			galleryAdapter.notifyDataSetChanged();
 			fillCacheTask = null;
-			((ProgressBar)findViewById(R.id.progressBar)).setVisibility(View.GONE);
+			getSherlock().setProgressBarIndeterminateVisibility(false);
 		}
 
 	}
@@ -1244,9 +1237,9 @@ public class GalleryActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.gallery_menu, menu);
-		return true;
+        getSupportMenuInflater().inflate(R.menu.gallery_menu, menu);
+        multiselectMenuItem = menu.findItem(R.id.multi_select);
+        return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -1254,9 +1247,39 @@ public class GalleryActivity extends Activity {
 		// Handle item selection
 		Intent intent = new Intent();
 		switch (item.getItemId()) {
+			case android.R.id.home:
+				if(currentPath != null && !currentPath.equals(Helpers.getHomeDir(this))){
+					changeDir((new File(currentPath)).getParent());
+				}
+				else{
+					intent.setClass(GalleryActivity.this, DashboardActivity.class);
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
+					finish();
+				}
+				return true;
+			case R.id.multi_select:
+				if (multiSelectMode == MULTISELECT_OFF) {
+					item.setIcon(R.drawable.ic_action_checkbox_checked);
+					multiSelectMode = MULTISELECT_ON;
+				}
+				else {
+					item.setIcon(R.drawable.ic_action_checkbox_unchecked);
+					multiSelectMode = MULTISELECT_OFF;
+					clearMutliSelect();
+				}
+				return true;
+			case R.id.goto_camera:
+				intent.setClass(GalleryActivity.this, CameraActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+				startActivity(intent);
+				finish();
+				return true;
 			case R.id.select_all:
 				if (multiSelectMode == MULTISELECT_OFF) {
-					((ImageButton) findViewById(R.id.multi_select)).setImageResource(R.drawable.checkbox_checked);
+					if(multiselectMenuItem != null){
+						multiselectMenuItem.setIcon(R.drawable.ic_action_checkbox_checked);
+					}
 					multiSelectMode = MULTISELECT_ON;
 				}
 				enterMultiSelect();
@@ -1266,7 +1289,9 @@ public class GalleryActivity extends Activity {
 				return true;
 			case R.id.deselect_all:
 				if (multiSelectMode == MULTISELECT_ON) {
-					((ImageButton) findViewById(R.id.multi_select)).setImageResource(R.drawable.checkbox_unchecked);
+					if(multiselectMenuItem != null){
+						multiselectMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
+					}
 					multiSelectMode = MULTISELECT_OFF;
 					clearMutliSelect();
 				}

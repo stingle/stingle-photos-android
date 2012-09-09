@@ -11,9 +11,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
@@ -93,7 +91,7 @@ public class AsyncTasks {
 		}
 	}
 	
-	public static class DeleteFiles extends AsyncTask<ArrayList<File>, Integer, Void> {
+	public static class DeleteFiles extends AsyncTask<ArrayList<File>, Integer, ArrayList<File>> {
 
 		private ProgressDialog progressDialog;
 		private final Activity activity;
@@ -124,7 +122,7 @@ public class AsyncTasks {
 		}
 
 		@Override
-		protected Void doInBackground(ArrayList<File>... params) {
+		protected ArrayList<File> doInBackground(ArrayList<File>... params) {
 			ArrayList<File> filesToDelete = params[0];
 			progressDialog.setMax(filesToDelete.size());
 			for (int i = 0; i < filesToDelete.size(); i++) {
@@ -151,7 +149,7 @@ public class AsyncTasks {
 				}
 			}
 
-			return null;
+			return filesToDelete;
 		}
 		
 		private void deleteFileFolder(File fileOrDirectory) {
@@ -179,13 +177,13 @@ public class AsyncTasks {
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
+		protected void onPostExecute(ArrayList<File> deletedFiles) {
+			super.onPostExecute(deletedFiles);
 
 			progressDialog.dismiss();
 			
 			if (finishListener != null) {
-				finishListener.onFinish();
+				finishListener.onFinish(deletedFiles);
 			}
 		}
 	}
@@ -350,15 +348,12 @@ public class AsyncTasks {
 		}
 
 		@Override
-		protected void onPostExecute(final ArrayList<File> decryptedFiles) {
+		protected void onPostExecute(ArrayList<File> decryptedFiles) {
 			super.onPostExecute(decryptedFiles);
 
 			progressDialog.dismiss();
 			if (finishListener != null) {
 				finishListener.onFinish(decryptedFiles);
-			}
-			for(File file : decryptedFiles){
-				this.activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
 			}
 		}
 	}

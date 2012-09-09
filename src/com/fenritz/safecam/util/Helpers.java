@@ -312,34 +312,44 @@ public class Helpers {
 	}
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize) {
+		return decodeBitmap(data, requiredSize, false);
+	}
+	
+	public static Bitmap decodeBitmap(byte[] data, int requiredSize, boolean isFront) {
 		if(data != null){
 			Integer rotation = null;
 			try {
 				BufferedInputStream stream = new BufferedInputStream(new ByteArrayInputStream(data));
 				Metadata metadata = ImageMetadataReader.readMetadata(stream, false);
 			
-				/*for (Directory directory : metadata.getDirectories()) {
-				    for (Tag tag : directory.getTags()) {
-				        System.out.println(directory.toString() + " - " + tag);
-				    }
-				}*/
-				
 				ExifIFD0Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
-				int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-				
-				switch(exifRotation){
-					case 3:
-						// Rotate 180 deg
-						rotation = 180;
-						break;
-					case 6:
-						// Rotate 90 deg
-						rotation = 90;
-						break;
-					case 8:
-						// Rotate 270 deg
-						rotation = 270;
-						break;
+				if(directory != null){
+					int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+					
+					switch(exifRotation){
+						case 3:
+							// Rotate 180 deg
+							rotation = 180;
+							break;
+						case 6:
+							// Rotate 90 deg
+							if(!isFront){
+								rotation = 90;
+							}
+							else{
+								rotation = 270;
+							}
+							break;
+						case 8:
+							// Rotate 270 deg
+							if(!isFront){
+								rotation = 270;
+							}
+							else{
+								rotation = 90;
+							}
+							break;
+					}
 				}
 			}
 			catch (ImageProcessingException e) { }

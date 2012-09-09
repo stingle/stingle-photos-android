@@ -12,31 +12,33 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecam.R;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.fenritz.safecam.util.AsyncTasks;
-import com.fenritz.safecam.util.DecryptAndShowImage;
-import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.util.DecryptAndShowImage;
+import com.fenritz.safecam.util.Helpers;
 
-public class ViewImageActivity extends Activity {
+public class ViewImageActivity extends SherlockActivity {
 
 	private final ArrayList<File> files = new ArrayList<File>();
 	
@@ -54,6 +56,7 @@ public class ViewImageActivity extends Activity {
     
     private final Handler handler = new Handler();
     private String currentPath;
+    private boolean isViewsVisible = true;;
     
     private final ArrayList<DecryptAndShowImage> taskStack = new ArrayList<DecryptAndShowImage>();
     
@@ -61,9 +64,16 @@ public class ViewImageActivity extends Activity {
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		super.onCreate(savedInstanceState);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
 		setContentView(R.layout.view_photo);
 
+		getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ab_bg_black));
+		
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
 		
@@ -83,9 +93,6 @@ public class ViewImageActivity extends Activity {
 		
 		((ImageButton)findViewById(R.id.previousButton)).setOnClickListener(navigateLeft());
 		((ImageButton)findViewById(R.id.nextButton)).setOnClickListener(navigateRight());
-		((ImageButton)findViewById(R.id.delete)).setOnClickListener(deleteClick());
-		((ImageButton)findViewById(R.id.decrypt)).setOnClickListener(decryptClick());
-		((ImageButton)findViewById(R.id.share)).setOnClickListener(shareClick());
 		
 		gestureDetector = new GestureDetector(new SwipeGestureDetector());
 		gestureListener = new View.OnTouchListener() {
@@ -106,7 +113,6 @@ public class ViewImageActivity extends Activity {
 		};
 		registerReceiver(receiver, intentFilter);
 		
-		viewsHideShow.add(findViewById(R.id.topPanel)); 
 		viewsHideShow.add(findViewById(R.id.countLabel)); 
 		viewsHideShow.add(findViewById(R.id.previousButton)); 
 		viewsHideShow.add(findViewById(R.id.nextButton)); 
@@ -116,7 +122,9 @@ public class ViewImageActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		unregisterReceiver(receiver);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 	}
 	
 	@Override
@@ -167,76 +175,6 @@ public class ViewImageActivity extends Activity {
 		}
 	}
 	
-	private OnClickListener deleteClick(){
-		return new OnClickListener() {
-			@SuppressWarnings("unchecked")
-			public void onClick(View v) {
-				cancelPendingTasks();
-				final ArrayList<File> selectedFiles = new ArrayList<File>();
-				selectedFiles.add(files.get(currentPosition));
-				
-				AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
-				builder.setMessage(getString(R.string.confirm_delete_photo));
-				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						new DeleteFiles(ViewImageActivity.this, new OnAsyncTaskFinish() {
-							@Override
-							public void onFinish() {
-								super.onFinish();
-								
-								fillFilesList();
-								if(currentPosition > 0){
-									--currentPosition;
-								}
-								
-								Intent resultIntent = new Intent();
-								resultIntent.putExtra("needToRefresh", true);
-								setResult(RESULT_OK, resultIntent);
-								
-								if(files.size() > 0){
-									showImage(files.get(currentPosition));
-									showViews();
-								}
-								else{
-									ViewImageActivity.this.finish();
-								}
-							}
-						}).execute(selectedFiles);
-					}
-				});
-				builder.setNegativeButton(getString(R.string.no), null);
-				AlertDialog dialog = builder.create();
-				dialog.show();
-			}
-		};
-	}
-	
-	private OnClickListener decryptClick(){
-		return new OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent(getBaseContext(), FileDialog.class);
-				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-				// can user select directories or not
-				intent.putExtra(FileDialog.CAN_SELECT_FILE, false);
-				intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
-
-				startActivityForResult(intent, REQUEST_DECRYPT);
-			}
-		};
-	}
-	
-	private OnClickListener shareClick(){
-		return new OnClickListener() {
-			public void onClick(View v) {
-				final ArrayList<File> selectedFiles = new ArrayList<File>();
-				selectedFiles.add(files.get(currentPosition));
-				
-				Helpers.share(ViewImageActivity.this, selectedFiles, null);
-			}
-		};
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void onActivityResult(final int requestCode, int resultCode, final Intent data) {
@@ -251,8 +189,11 @@ public class ViewImageActivity extends Activity {
 				selectedFiles.add(files.get(currentPosition));
 				new AsyncTasks.DecryptFiles(ViewImageActivity.this, filePath, new OnAsyncTaskFinish() {
 					@Override
-					public void onFinish(ArrayList<File> files) {
-						super.onFinish(files);
+					public void onFinish(ArrayList<File> decryptedFiles) {
+						super.onFinish(decryptedFiles);
+						for(File file : decryptedFiles){
+							sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+						}
 						Toast.makeText(ViewImageActivity.this, getString(R.string.success_decrypt), Toast.LENGTH_LONG).show();
 					}
 				}).execute(selectedFiles);
@@ -290,32 +231,45 @@ public class ViewImageActivity extends Activity {
 	private OnClickListener showControls(){
 		return new OnClickListener() {
 			public void onClick(View v) {
-				showViews();
+				if(!isViewsVisible){
+					showViews();
+				}
+				else{
+					hideViewsInternal();
+				}
 			}
 		};
+	}
+	
+	private void hideViewsInternal(){
+		getSupportActionBar().hide();
+		for(View view : viewsHideShow){
+			if(view.getVisibility() == View.VISIBLE) {
+				view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_out));
+				view.setVisibility(View.INVISIBLE);
+			}
+		}
+		isViewsVisible = false;
 	}
 	
 	private void hideViews(){
 		handler.postDelayed(new Runnable() {
 		  public void run() {
-			  for(View view : viewsHideShow){
-				    if(view.getVisibility() == View.VISIBLE) {
-				    	view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_out));
-				    	view.setVisibility(View.INVISIBLE);
-				    }
-				}
+			  hideViewsInternal();
 		  }
 		}, 4000);
 	}
 	
 	private void showViews(){
 		handler.removeCallbacksAndMessages(null);
+		getSupportActionBar().show();
 		for(View view : viewsHideShow){
 		    if(view.getVisibility() != View.VISIBLE) {
 		    	view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_in));
 		    	view.setVisibility(View.VISIBLE);
 		    }
 		}
+		isViewsVisible = true;
 		hideViews();
 	}
 	
@@ -331,7 +285,7 @@ public class ViewImageActivity extends Activity {
 		task.execute();
 		taskStack.add(task);
 		
-		((TextView)findViewById(R.id.title)).setText(photo.getName());
+		getSupportActionBar().setTitle(photo.getName());
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
 	}
 	
@@ -363,16 +317,71 @@ public class ViewImageActivity extends Activity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.view_photo_menu, menu);
-		return true;
+		getSupportMenuInflater().inflate(R.menu.view_photo_menu, menu);;
+        return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		Intent intent = new Intent();
+		final ArrayList<File> selectedFiles = new ArrayList<File>();
 		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				return true;
+			case R.id.decrypt:
+				intent = new Intent(getBaseContext(), FileDialog.class);
+				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+				// can user select directories or not
+				intent.putExtra(FileDialog.CAN_SELECT_FILE, false);
+				intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
+
+				startActivityForResult(intent, REQUEST_DECRYPT);
+				return true;
+			case R.id.share:
+				selectedFiles.add(files.get(currentPosition));
+				
+				Helpers.share(ViewImageActivity.this, selectedFiles, null);
+				return true;
+			case R.id.delete:
+				cancelPendingTasks();
+				selectedFiles.add(files.get(currentPosition));
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
+				builder.setMessage(getString(R.string.confirm_delete_photo));
+				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						new DeleteFiles(ViewImageActivity.this, new OnAsyncTaskFinish() {
+							@Override
+							public void onFinish() {
+								super.onFinish();
+								
+								fillFilesList();
+								if(currentPosition > 0){
+									--currentPosition;
+								}
+								
+								Intent resultIntent = new Intent();
+								resultIntent.putExtra("needToRefresh", true);
+								setResult(RESULT_OK, resultIntent);
+								
+								if(files.size() > 0){
+									showImage(files.get(currentPosition));
+									showViews();
+								}
+								else{
+									ViewImageActivity.this.finish();
+								}
+							}
+						}).execute(selectedFiles);
+					}
+				});
+				builder.setNegativeButton(getString(R.string.no), null);
+				AlertDialog dialog = builder.create();
+				dialog.show();
+				return true;
 			case R.id.gotoGallery:
 				intent.setClass(ViewImageActivity.this, GalleryActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);

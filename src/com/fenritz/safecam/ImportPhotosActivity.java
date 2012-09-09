@@ -2,14 +2,12 @@ package com.fenritz.safecam;
 
 import java.util.HashSet;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -23,9 +21,10 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
 import com.fenritz.safecam.util.Helpers;
 
-public class ImportPhotosActivity extends Activity {
+public class ImportPhotosActivity extends SherlockActivity {
 	private int count;
 	private Bitmap[] thumbnails;
 	private final HashSet<Integer> selectedItems = new HashSet<Integer>();
@@ -39,6 +38,8 @@ public class ImportPhotosActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.import_photos);
 
+		//String[] projection = { MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA }; String selection = ""; String[] selectionArgs = null; mImageExternalCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null); mImageInternalCursor = managedQuery(MediaStore.Images.Media.INTERNAL_CONTENT_URI, projection, selection, selectionArgs, null); then mImageExternalCursor.getString(mImageExternalCursor.getColumnIndexOrThrow(Media‌​Store.Images.ImageColumns.DATA));
+		
 		final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
 		final String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
 		Cursor imagecursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
@@ -106,24 +107,26 @@ public class ImportPhotosActivity extends Activity {
 		};
 		registerReceiver(receiver, intentFilter);
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		unregisterReceiver(receiver);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
+
 		Helpers.setLockedTime(this);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
+
 		Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
 	}
@@ -163,23 +166,23 @@ public class ImportPhotosActivity extends Activity {
 					}
 					else {
 						selectedItems.remove(id);
-						((Button)findViewById(R.id.selectBtn)).setText(getString(R.string.select_all));
+						((Button) findViewById(R.id.selectBtn)).setText(getString(R.string.select_all));
 					}
 				}
 			});
-			
-			imageview.setOnClickListener(new OnClickListener() {
 
-				public void onClick(View v) {
-					Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse("file://" + arrPath[v.getId()]), "image/*");
-					startActivity(intent);
-				}
-			});
+			/*
+			 * imageview.setOnClickListener(new OnClickListener() {
+			 * 
+			 * public void onClick(View v) { Intent intent = new Intent();
+			 * intent.setAction(Intent.ACTION_VIEW);
+			 * intent.setDataAndType(Uri.parse("file://" + arrPath[v.getId()]),
+			 * "image/*"); startActivity(intent); } });
+			 */
+
 			imageview.setImageBitmap(thumbnails[position]);
-			
-			if(selectedItems.contains(position)){
+
+			if (selectedItems.contains(position)) {
 				checkbox.setChecked(true);
 			}
 			return view;

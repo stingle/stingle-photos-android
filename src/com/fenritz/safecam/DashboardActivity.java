@@ -1,6 +1,5 @@
 package com.fenritz.safecam;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,20 +9,19 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.Helpers;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
-public class DashboardActivity extends Activity {
+public class DashboardActivity extends SherlockActivity {
 	
 	private BroadcastReceiver receiver;
 	private AdView adView;
@@ -31,7 +29,7 @@ public class DashboardActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		//requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.dashboard);
 		
 		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
@@ -173,15 +171,16 @@ public class DashboardActivity extends Activity {
 		if (adView != null){
 			adView.destroy();
 		}
-		unregisterReceiver(receiver);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 		super.onDestroy();
 	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.dashborad_menu, menu);
-		return true;
+		getSupportMenuInflater().inflate(R.menu.dashborad_menu, menu);;
+        return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -191,10 +190,6 @@ public class DashboardActivity extends Activity {
 		switch (item.getItemId()) {
 			case R.id.settings:
 				intent.setClass(DashboardActivity.this, SettingsActivity.class);
-				startActivity(intent);
-				return true;
-			case R.id.change_password:
-				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
 				startActivity(intent);
 				return true;
 			case R.id.read_security:

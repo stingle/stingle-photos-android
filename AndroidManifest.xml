@@ -7,24 +7,24 @@
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/> 
-
     <uses-permission android:name="android.permission.CAMERA" />
-    
     <uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus"  android:required="false"/>
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/> 
 
     <application
         android:name=".SafeCameraApplication"
         android:icon="@drawable/safe_camera"
         android:label="@string/app_name"
+        android:theme="@style/Theme.Sherlock"
         android:largeHeap="true" >
         <activity
             android:name=".SafeCameraActivity"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -39,7 +39,7 @@
         <activity
             android:name=".GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="SafeCamera - Vault" >
+            android:label="@string/title_gallery" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -54,39 +54,36 @@
         <activity
             android:name=".ViewImageActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:label="View Image" >
+            android:label="@string/title_view_photo" >
         </activity>
         <activity
             android:name=".SetUpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="SetUp" >
+            android:label="@string/title_setup" >
         </activity>
         <activity
             android:name=".DashboardActivity"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:label="Dashboard" >
+            android:label="@string/title_dashboard" >
         </activity>
         <activity
             android:name=".SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="Settings" >
+            android:label="@string/title_settings" >
         </activity>
         <activity
             android:name=".FileDialog"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="Choose File" >
+            android:label="@string/title_choose_file" >
         </activity>
         <activity
             android:name=".ChangePasswordActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="Change Password" >
+            android:label="@string/title_change_password" >
         </activity>
         <activity
             android:name=".ImportPhotosActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:label="Import Photos" >
+            android:label="@string/title_import" >
         </activity>
         <activity 
      		android:name="com.google.ads.AdActivity"

@@ -67,7 +67,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         }
     }
 
-    /*public void switchCamera(Camera camera) {
+    public void switchCamera(Camera camera) {
        setCamera(camera);
        try {
            camera.setPreviewDisplay(mHolder);
@@ -79,7 +79,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
        requestLayout();
 
        camera.setParameters(parameters);
-    }*/
+    }
 
     
     @Override

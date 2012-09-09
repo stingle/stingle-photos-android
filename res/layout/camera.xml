@@ -5,20 +5,48 @@
     android:id="@+id/parentLayout"
     android:background="@drawable/background" >
 
-	<com.fenritz.safecam.util.CameraPreview
-		android:id="@+id/camera_preview"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:gravity="left" />
+    <LinearLayout
+        android:id="@+id/camera_preview_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+	    android:gravity="left" />
 
-	<TextView
-        android:id="@+id/photoSizeLabel"
+	<LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="left"
-        android:textColor="@android:color/white"
-        android:background="#00000000"
-        android:textSize="15dp" />
+        android:orientation="vertical"
+	    android:gravity="center" >
+		<TextView
+	        android:id="@+id/photoSizeLabel"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="left"
+	        android:textColor="@android:color/white"
+	        android:background="#00000000"
+	        android:textSize="15dp" />
+		
+		<ImageButton
+	        android:id="@+id/switchCamButton"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
+	        android:scaleType="centerInside"
+	        android:layout_gravity="left"
+	        android:contentDescription="@string/camera"
+	        android:background="@null"
+	        android:src="@drawable/ic_action_switch_camera"
+	        android:visibility="gone" />
+		
+		<ImageButton
+	        android:id="@+id/optionsButton"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
+	        android:scaleType="centerInside"
+	        android:layout_gravity="left"
+	        android:contentDescription="@string/options"
+	        android:background="@null"
+	        android:src="@drawable/ic_action_options" />
+	</LinearLayout>
 	
 	<LinearLayout
 	    android:id="@+id/timerLabelContainer"

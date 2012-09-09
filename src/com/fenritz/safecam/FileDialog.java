@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.TreeMap;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,14 +27,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
-import com.fenritz.safecam.R;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
 
@@ -45,7 +45,7 @@ import com.fenritz.safecam.util.MemoryCache;
  * @author android
  * 
  */
-public class FileDialog extends ListActivity {
+public class FileDialog extends SherlockListActivity {
 
 	public static final int MODE_CREATE = 0;
 
@@ -128,6 +128,7 @@ public class FileDialog extends ListActivity {
 	private static final int SELECT_ALL = 1;
 	
 	private int selectedMode = SELECT_NONE;
+	private MenuItem selectAllMenuItem;
 
 	private boolean canSelectFile = true;
 	private boolean canSelectDir = false;
@@ -149,6 +150,9 @@ public class FileDialog extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setResult(RESULT_CANCELED, getIntent());
 
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
+		
 		setContentView(R.layout.file_dialog_main);
 		
 		IntentFilter intentFilter = new IntentFilter();
@@ -216,13 +220,6 @@ public class FileDialog extends ListActivity {
 		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
 		layoutCreate.setVisibility(View.GONE);
 
-		if(fileSelectionMode == MODE_MULTIPLE){
-			findViewById(R.id.select_all).setOnClickListener(selectAllClick());
-		}
-		else{
-			findViewById(R.id.select_all).setVisibility(View.GONE);
-		}
-		
 		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
 		cancelButton.setOnClickListener(new OnClickListener() {
 
@@ -256,23 +253,11 @@ public class FileDialog extends ListActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		unregisterReceiver(receiver);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 	}
 
-	private OnClickListener selectAllClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				if (selectedMode == SELECT_NONE) {
-					selectAll();
-				}
-				else {
-					unSelectAll();
-				}
-			}
-		};
-	}
-	
 	private void selectAll(){
 		for(int i=0;i<path.size();i++){
 			File file = new File(path.get(i));
@@ -283,7 +268,9 @@ public class FileDialog extends ListActivity {
 		((BaseAdapter)getListView().getAdapter()).notifyDataSetChanged();
 		selectButton.setEnabled(true);
 		selectedMode = SELECT_ALL;
-		((ImageButton) findViewById(R.id.select_all)).setImageResource(R.drawable.checkbox_checked);
+		if(selectAllMenuItem != null){
+			selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_checked);
+		}
 	}
 	
 	private void unSelectAll(){
@@ -295,7 +282,9 @@ public class FileDialog extends ListActivity {
 		}
 		selectButton.setEnabled(false);
 		selectedMode = SELECT_NONE;
-		((ImageButton) findViewById(R.id.select_all)).setImageResource(R.drawable.checkbox_unchecked);
+		if(selectAllMenuItem != null){
+			selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
+		}
 	}
 	
 	private void getDir(String dirPath) {
@@ -648,5 +637,35 @@ public class FileDialog extends ListActivity {
 		
 		Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.file_dialog_menu, menu);
+		selectAllMenuItem = menu.findItem(R.id.select_all);
+		if(fileSelectionMode == MODE_SINGLE){
+			selectAllMenuItem.setVisible(false);
+		}
+        return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				return true;
+			case R.id.select_all:
+				if (selectedMode == SELECT_NONE) {
+					selectAll();
+				}
+				else {
+					unSelectAll();
+				}
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 }
