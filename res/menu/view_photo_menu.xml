@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/decrypt"
-        android:icon="@drawable/ic_action_unlock"
-        android:title="@string/decrypt"
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_action_delete"
+        android:title="@string/delete"
         android:showAsAction="ifRoom" />
     <item
         android:id="@+id/share"
@@ -12,9 +12,9 @@
         android:title="@string/share"
         android:showAsAction="ifRoom" />
     <item
-        android:id="@+id/delete"
-        android:icon="@drawable/ic_action_delete"
-        android:title="@string/delete"
+        android:id="@+id/decrypt"
+        android:icon="@drawable/ic_action_unlock"
+        android:title="@string/decrypt"
         android:showAsAction="ifRoom" />
     <item
         android:id="@+id/gotoGallery"

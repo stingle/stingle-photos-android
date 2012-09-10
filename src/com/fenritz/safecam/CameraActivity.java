@@ -45,6 +45,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -102,6 +105,8 @@ public class CameraActivity extends SherlockActivity {
 	
 	private File lastFile;
 	private Drawable lastFileDrawable;
+	private int lastRotation = 0;
+	private int overallRotation = 0;
 	
 	private Timer timer;
 	
@@ -144,6 +149,7 @@ public class CameraActivity extends SherlockActivity {
 		
 		findViewById(R.id.switchCamButton).setOnClickListener(switchCamera());
 		findViewById(R.id.optionsButton).setOnClickListener(showOptions());
+		findViewById(R.id.photoSizeLabel).setOnClickListener(showPhotoSizes());
 
 		mPreview = new CameraPreview(this); 
 		((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
@@ -227,6 +233,14 @@ public class CameraActivity extends SherlockActivity {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				openOptionsMenu();
+			}
+		};
+	}
+	
+	private OnClickListener showPhotoSizes(){
+		return new OnClickListener() {
+			public void onClick(View v) {
+				showPhotoSizeChooser();
 			}
 		};
 	}
@@ -697,97 +711,118 @@ public class CameraActivity extends SherlockActivity {
 	private int changeRotation(int orientation) {
 		boolean isFrontCamera = isCurrentCameraFrontFacing();
 		int rotation = 0;
+		int viewsRotation = 0;
 		switch (orientation) {
 			case ORIENTATION_PORTRAIT_NORMAL:
-				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 270));
-				
-				if(isFlashOn){
-					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_on, 270));
-				}
-				else{
-					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 270));
-				}
-				
-				if(isTimerOn){
-					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer, 270));
-				}
-				else{
-					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 270));
-				}
-				
-				if(!isFrontCamera){
-					rotation = 90;
-				}
-				else{
-					rotation = 270;
-				}
-				
+				rotation = (!isFrontCamera ? 90 : 270);
+				viewsRotation = 270;
 				break;
 			case ORIENTATION_LANDSCAPE_NORMAL:
-				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 0));
-				
-				if(isFlashOn){
-					flashButton.setImageResource(R.drawable.flash_on);
-				}
-				else{
-					flashButton.setImageResource(R.drawable.flash_off);
-				}
-				
-				if(isTimerOn){
-					timerButton.setImageResource(R.drawable.timer);
-				}
-				else{
-					timerButton.setImageResource(R.drawable.timer_disabled);
-				}
-				
 				rotation = 0;
+				viewsRotation = 0;
 				break;
 			case ORIENTATION_PORTRAIT_INVERTED:
-				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 90));
-				
-				if(isFlashOn){
-					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_on, 90));
-				}
-				else{
-					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 90));
-				}
-				
-				if(isTimerOn){
-					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer, 90));
-				}
-				else{
-					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 90));
-				}
-				
-				if(!isFrontCamera){
-					rotation = 270;
-				}
-				else{
-					rotation = 90;
-				}
+				rotation = (!isFrontCamera ? 270 : 90);
+				viewsRotation = 90;
 				break;
 			case ORIENTATION_LANDSCAPE_INVERTED:
-				galleryButton.setImageDrawable(getRotatedImage(lastFileDrawable, 180));
-				
-				if(isFlashOn){
-					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_on, 180));
-				}
-				else{
-					flashButton.setImageDrawable(getRotatedImage(R.drawable.flash_off, 180));
-				}
-				
-				if(isTimerOn){
-					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer, 180));
-				}
-				else{
-					timerButton.setImageDrawable(getRotatedImage(R.drawable.timer_disabled, 180));
-				}
-				
 				rotation = 180;
+				viewsRotation = 180;
+				break;
+		}
+		
+		int howMuchRotated = 0;
+		
+		switch(lastRotation){
+			case 0:
+				switch(viewsRotation){
+					case 0:
+						howMuchRotated = 0;
+						break;
+					case 90:
+						howMuchRotated = 90;
+						break;
+					case 180:
+						howMuchRotated = 180;
+						break;
+					case 270:
+						howMuchRotated = -90;
+						break;
+				}
+				break;
+			case 90:
+				switch(viewsRotation){
+					case 0:
+						howMuchRotated = -90;
+						break;
+					case 90:
+						howMuchRotated = 0;
+						break;
+					case 180:
+						howMuchRotated = 90;
+						break;
+					case 270:
+						howMuchRotated = 180;
+						break;
+				}
+				break;
+			case 180:
+				switch(viewsRotation){
+					case 0:
+						howMuchRotated = 180;
+						break;
+					case 90:
+						howMuchRotated = -90;
+						break;
+					case 180:
+						howMuchRotated = 0;
+						break;
+					case 270:
+						howMuchRotated = 90;
+						break;
+				}
+				break;
+			case 270:
+				switch(viewsRotation){
+					case 0:
+						howMuchRotated = 90;
+						break;
+					case 90:
+						howMuchRotated = 180;
+						break;
+					case 180:
+						howMuchRotated = -90;
+						break;
+					case 270:
+						howMuchRotated = 0;
+						break;
+				}
 				break;
 		}
 
+		
+		int oldOverallRotation = overallRotation;
+		overallRotation += howMuchRotated;
+		
+		rotateElement(galleryButton, oldOverallRotation, overallRotation);
+		rotateElement(flashButton, oldOverallRotation, overallRotation);
+		rotateElement(timerButton, oldOverallRotation, overallRotation);
+		rotateElement(findViewById(R.id.switchCamButton), oldOverallRotation, overallRotation);
+		rotateElement(findViewById(R.id.optionsButton), oldOverallRotation, overallRotation);
+		
+		lastRotation = viewsRotation;
+		
 		return rotation;
+	}
+	
+	private void rotateElement(View view, int start, int end){
+		RotateAnimation rotateAnimation = new RotateAnimation(start, end, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		rotateAnimation.setInterpolator(new LinearInterpolator());
+		rotateAnimation.setDuration(500);
+		rotateAnimation.setFillAfter(true);
+		rotateAnimation.setFillEnabled(true);
+		
+		view.startAnimation(rotateAnimation);
 	}
 
 	/**
@@ -910,6 +945,59 @@ public class CameraActivity extends SherlockActivity {
 		}
 	}
 
+	private void showPhotoSizeChooser(){
+		if (mCamera == null) {
+			return;
+		}
+		
+		final List<Size> mSupportedPictureSizes = getSupportedImageSizes();
+		
+		CharSequence[] listEntries = new CharSequence[mSupportedPictureSizes.size()];
+		
+		for (int i = 0; i < mSupportedPictureSizes.size(); i++) {
+			Camera.Size size = mSupportedPictureSizes.get(i);
+			String megapixel = String.format("%.1f", (double)size.width * (double)size.height / 1000000);
+			listEntries[i] = megapixel + " MP - " + String.valueOf(size.width) + "x" + String.valueOf(size.height);
+		}
+		
+		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		if(isCurrentCameraFrontFacing()){
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, 0);
+		}
+		else{
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+		}
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getString(R.string.photo_size_choose));
+		builder.setSingleChoiceItems(new PhotoSizeAdapter(CameraActivity.this, android.R.layout.simple_list_item_single_choice, listEntries), 
+				photoSizeIndex, 
+				new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int item) {
+			
+				if(isCurrentCameraFrontFacing()){
+					preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, item).commit();
+				}
+				else{
+					preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
+				}
+				
+				mPreview.setCamera(null);
+				
+				Camera.Parameters parameters = mCamera.getParameters();
+				parameters.setPictureSize(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
+				mCamera.setParameters(parameters);
+				
+				setMegapixelLabel(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
+				
+				mPreview.setCamera(mCamera);
+				mPreview.requestLayout();
+				
+				dialog.dismiss();
+			}
+		}).show();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.camera_menu, menu);;
@@ -957,57 +1045,7 @@ public class CameraActivity extends SherlockActivity {
 				finish();
 				return true;
 			case R.id.photo_size:
-				if (mCamera == null) {
-					return false;
-				}
-
-				final List<Size> mSupportedPictureSizes = getSupportedImageSizes();
-				
-				CharSequence[] listEntries = new CharSequence[mSupportedPictureSizes.size()];
-
-				for (int i = 0; i < mSupportedPictureSizes.size(); i++) {
-					Camera.Size size = mSupportedPictureSizes.get(i);
-					String megapixel = String.format("%.1f", (double)size.width * (double)size.height / 1000000);
-					listEntries[i] = megapixel + " MP - " + String.valueOf(size.width) + "x" + String.valueOf(size.height);
-				}
-
-				final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-				if(isCurrentCameraFrontFacing()){
-					photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, 0);
-				}
-				else{
-					photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
-				}
-
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle(getString(R.string.photo_size_choose));
-				builder.setSingleChoiceItems(new PhotoSizeAdapter(CameraActivity.this, android.R.layout.simple_list_item_single_choice, listEntries), 
-						photoSizeIndex, 
-						new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int item) {
-						
-						if(isCurrentCameraFrontFacing()){
-							preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, item).commit();
-						}
-						else{
-							preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
-						}
-
-						mPreview.setCamera(null);
-
-						Camera.Parameters parameters = mCamera.getParameters();
-						parameters.setPictureSize(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
-						mCamera.setParameters(parameters);
-
-						setMegapixelLabel(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
-						
-						mPreview.setCamera(mCamera);
-						mPreview.requestLayout();
-						
-						dialog.dismiss();
-					}
-				}).show();
-
+				showPhotoSizeChooser();
 				return true;
 			case R.id.logout:
 				Helpers.logout(CameraActivity.this);
