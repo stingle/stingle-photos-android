@@ -237,7 +237,7 @@ public class Helpers {
 	}
 
 	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
-		Bitmap bitmap = decodeBitmap(data, 75);
+		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		Bitmap thumbBitmap = null;
 		if (bitmap != null) {
@@ -291,21 +291,61 @@ public class Helpers {
 
 	public static Bitmap decodeFile(File f, int requiredSize) {
 		try {
+			BufferedInputStream input = new BufferedInputStream(new FileInputStream(f));
+			Integer rotation = null;
+			try {
+				Metadata metadata = ImageMetadataReader.readMetadata(input, false);
+			
+				ExifIFD0Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+				if(directory != null){
+					int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+					
+					switch(exifRotation){
+						case 3:
+							// Rotate 180 deg
+							rotation = 180;
+							break;
+						case 6:
+							// Rotate 90 deg
+							rotation = 90;
+							break;
+						case 8:
+							// Rotate 270 deg
+							rotation = 270;
+							break;
+					}
+				}
+			}
+			catch (ImageProcessingException e) { }
+			catch (IOException e) { }
+			catch (MetadataException e) { }
+			
 			// Decode image size
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
 			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
 
 			// Find the correct scale value. It should be the power of 2.
+			requiredSize = requiredSize * requiredSize;
 			int scale = 1;
-			while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
-				scale *= 2;
-			}
+		    while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > requiredSize) {
+		    	scale++;
+		    }
 
 			// Decode with inSampleSize
 			BitmapFactory.Options o2 = new BitmapFactory.Options();
 			o2.inSampleSize = scale;
-			return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+			
+			if(rotation != null){
+				Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+				Matrix matrix = new Matrix();
+				matrix.postRotate(rotation);
+	
+				return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+			}
+			else{
+				return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+			}
 		}
 		catch (FileNotFoundException e) { }
 		return null;
@@ -362,10 +402,11 @@ public class Helpers {
 			BitmapFactory.decodeByteArray(data, 0, data.length, o);
 	
 			// Find the correct scale value. It should be the power of 2.
+			requiredSize = requiredSize * requiredSize;
 			int scale = 1;
-			while (o.outWidth / scale / 2 >= requiredSize && o.outHeight / scale / 2 >= requiredSize) {
-				scale *= 2;
-			}
+		    while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > requiredSize) {
+		    	scale++;
+		    }
 			
 			// Decode with inSampleSize
 			BitmapFactory.Options o2 = new BitmapFactory.Options();

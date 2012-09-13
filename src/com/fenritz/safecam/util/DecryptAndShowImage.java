@@ -8,12 +8,14 @@ import java.io.IOException;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
@@ -110,6 +112,8 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 				return cachedBitmap;
 			}
 		}
+		
+		
 		File thumbFile = new File(filePath);
 		if (thumbFile.exists() && thumbFile.isFile()) {
 			try {
@@ -126,7 +130,20 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 				byte[] decryptedData = Helpers.getAESCrypt(parent.getContext()).decrypt(input, progress, this);
 
 				if (decryptedData != null) {
-					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, 300);
+					
+					WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+					DisplayMetrics metrics = new DisplayMetrics();
+					wm.getDefaultDisplay().getMetrics(metrics);
+					
+					int size;
+					if(metrics.widthPixels <= metrics.heightPixels){
+						size = (int) Math.floor(metrics.widthPixels * 2);
+					}
+					else{
+						size = (int) Math.floor(metrics.heightPixels * 2);
+					}
+					
+					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, size);
 					decryptedData = null;
 					if (bitmap != null) {
 						if (memCache != null) {

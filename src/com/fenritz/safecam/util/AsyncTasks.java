@@ -12,11 +12,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
+import android.provider.MediaStore.Video.Thumbnails;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.fenritz.safecam.R;
+import com.fenritz.safecam.SafeCameraApplication;
 
 public class AsyncTasks {
 	public static abstract class OnAsyncTaskFinish {
@@ -649,6 +652,59 @@ public class AsyncTasks {
 			progressDialog.dismiss();
 			if (finishListener != null) {
 				finishListener.onFinish(result);
+			}
+		}
+
+	}
+	
+	public static class ShowImageThumb extends AsyncTask<File, Void, Bitmap> {
+
+		private final ImageView imageView;
+		private final MemoryCache cache;
+		private OnAsyncTaskFinish finishListener;
+		
+		
+		public ShowImageThumb(ImageView pImageView, MemoryCache pCache){
+			this(pImageView, pCache, null);
+		}
+		
+		public ShowImageThumb(ImageView pImageView, MemoryCache pCache, OnAsyncTaskFinish pFinishListener){
+			imageView = pImageView;
+			cache = pCache;
+			finishListener = pFinishListener;
+		}
+		
+		public void setOnFinish(OnAsyncTaskFinish onFinish){
+			this.finishListener = onFinish;
+		}
+		
+		@Override
+		protected Bitmap doInBackground(File... params) {
+			Bitmap image = Helpers.decodeFile(params[0], Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
+			//image = Helpers.getThumbFromBitmap(image, Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
+			
+			if(image != null){
+				cache.put(params[0].getPath(), image);
+				return image;
+			}
+			
+			image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MICRO_KIND);
+			
+			if(image != null){
+				cache.put(params[0].getPath(), image);
+				return image;
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			super.onPostExecute(result);
+			if(result != null){
+				imageView.setImageBitmap(result);
+			}
+			if (finishListener != null) {
+				finishListener.onFinish();
 			}
 		}
 

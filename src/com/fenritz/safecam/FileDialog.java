@@ -14,10 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore.Video.Thumbnails;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +33,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
 
@@ -137,7 +135,7 @@ public class FileDialog extends SherlockListActivity {
 	private File selectedFile;
 	private final HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
 
-	private final MemoryCache cache = new MemoryCache();
+	private final MemoryCache cache = SafeCameraApplication.getCache();
 	
 	private BroadcastReceiver receiver;
 	
@@ -449,7 +447,7 @@ public class FileDialog extends SherlockListActivity {
 						fileIcon = cachedImage;
 					}
 					else{
-						new ShowImageThumb(image).execute(file);
+						new AsyncTasks.ShowImageThumb(image, cache).execute(file);
 					}
 					break;
 				case TYPE_FOLDER:
@@ -461,43 +459,6 @@ public class FileDialog extends SherlockListActivity {
 		}
 	}
 	
-	private class ShowImageThumb extends AsyncTask<File, Void, Bitmap> {
-
-		private final ImageView imageView;
-		
-		public ShowImageThumb(ImageView pImageView){
-			imageView = pImageView;
-		}
-		
-		@Override
-		protected Bitmap doInBackground(File... params) {
-			Bitmap image = Helpers.decodeFile(params[0], 50);
-			
-			if(image != null){
-				cache.put(params[0].getPath(), image);
-				return image;
-			}
-			
-			image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MICRO_KIND);
-			
-			if(image != null){
-				cache.put(params[0].getPath(), image);
-				return image;
-			}
-			
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Bitmap result) {
-			super.onPostExecute(result);
-			if(result != null){
-				imageView.setImageBitmap(result);
-			}
-		}
-
-	}
-
 	 public class BitmapViewBinder implements ViewBinder {
          public boolean setViewValue(View view, Object data, String textRepresentation) {
                  if( (view instanceof ImageView) & (data instanceof Bitmap) ) {

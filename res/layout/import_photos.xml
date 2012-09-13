@@ -28,11 +28,11 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@id/buttonsHolder"
-        android:columnWidth="90dp"
+        android:columnWidth="100dp"
         android:gravity="center"
-        android:horizontalSpacing="10dp"
+        android:horizontalSpacing="1dp"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="10dp" />
+        android:verticalSpacing="1dp" />
 
 </RelativeLayout>

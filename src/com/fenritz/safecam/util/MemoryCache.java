@@ -1,5 +1,6 @@
 package com.fenritz.safecam.util;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -32,7 +33,8 @@ public class MemoryCache {
         return bitmap;
     }
     
-    public void put(String id, Bitmap bitmap){
+    @SuppressLint("NewApi")
+	public void put(String id, Bitmap bitmap){
         synchronized(cache) {
         	if(bitmap != null){
         		cache.put(id, bitmap);

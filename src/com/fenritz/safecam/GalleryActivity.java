@@ -61,7 +61,7 @@ import com.fenritz.safecam.widget.CheckableLayout;
 
 public class GalleryActivity extends SherlockActivity {
 
-	public final MemoryCache memCache = new MemoryCache();
+	public final MemoryCache memCache = SafeCameraApplication.getCache();
 
 	private final static int MULTISELECT_OFF = 0;
 	private final static int MULTISELECT_ON = 1;
@@ -101,8 +101,12 @@ public class GalleryActivity extends SherlockActivity {
 	
 	private String currentPath;
 	
-	private int prevVisiblePosition = 0;
+	
 	private final int defaultThumbCountToLoad = 30;
+	private int prevVisiblePosition = 0;
+	private int lastFirstVisibleItem = -1;
+	private int lastVisibleItemCount = 0;
+	private boolean isScrollingDown = true;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -1005,11 +1009,7 @@ public class GalleryActivity extends SherlockActivity {
 		}
 	}
 
-	private int lastFirstVisibleItem = -1;
-	private int lastVisibleItemCount = 0;
-	private boolean isScrollingDown = true;
-	
-		private void generateVisibleThumbs(){
+	private void generateVisibleThumbs(){
 		
 		if(lastFirstVisibleItem == -1){
 			lastFirstVisibleItem = 0;
