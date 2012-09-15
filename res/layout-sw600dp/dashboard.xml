@@ -17,7 +17,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal" >
+        android:orientation="vertical" >
 
         <LinearLayout 
 		    android:layout_width="fill_parent"
@@ -28,7 +28,7 @@
 	        <ImageButton
 	            android:id="@+id/gotoCamera"
 	            android:layout_width="wrap_content"
-	            android:layout_height="120dp"
+	            android:layout_height="300dp"
 	            android:background="@null"
 	            android:contentDescription="@string/camera"
 	            android:scaleType="fitCenter"
@@ -37,7 +37,7 @@
 	            android:text="@string/camera"
 	            android:layout_width="wrap_content" 
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-30dp"
+	            android:layout_marginTop="-80dp"
 	            android:textSize="16dp"
 	            android:textColor="@android:color/black" />
 	    </LinearLayout>
@@ -51,7 +51,7 @@
 	        <ImageButton
 	            android:id="@+id/gotoGallery"
 	            android:layout_width="wrap_content"
-	            android:layout_height="120dp"
+	            android:layout_height="300dp"
 	            android:background="@null"
 	            android:contentDescription="@string/gallery"
 	            android:scaleType="fitCenter"
@@ -60,7 +60,7 @@
 	            android:text="@string/gallery"
 	            android:layout_width="wrap_content" 
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-30dp"
+	            android:layout_marginTop="-80dp"
 	            android:textSize="16dp"
 	            android:textColor="@android:color/black" />
 	    </LinearLayout>

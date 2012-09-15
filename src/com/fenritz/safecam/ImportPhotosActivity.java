@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -29,6 +28,8 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
@@ -41,6 +42,7 @@ public class ImportPhotosActivity extends SherlockActivity {
 	private BroadcastReceiver receiver;
 	private final MemoryCache cache = SafeCameraApplication.getCache();
 	private final HashMap<Integer, AsyncTasks.ShowImageThumb> tasks = new HashMap<Integer, AsyncTasks.ShowImageThumb>();
+	private MenuItem selectAllMenuItem;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -65,44 +67,6 @@ public class ImportPhotosActivity extends SherlockActivity {
 		imagegrid.setColumnWidth(Helpers.getThumbSize(this)-10);
 		imagegrid.setAdapter(imageAdapter);
 
-		findViewById(R.id.selectBtn).setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				if(selectedItems.size() < arrPath.size()){
-					for(int i=0; i<arrPath.size(); i++){
-						selectedItems.add(i);
-					}
-					((Button)v).setText(getString(R.string.deselect_all));
-				}
-				else{
-					selectedItems.clear();
-					((Button)v).setText(getString(R.string.select_all));
-				}
-				imageAdapter.notifyDataSetChanged();
-			}
-		});
-		
-		findViewById(R.id.importBtn).setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				final int len = selectedItems.size();
-				
-				if (len == 0) {
-					Toast.makeText(getApplicationContext(), "Please select at least one image", Toast.LENGTH_LONG).show();
-				}
-				else {
-					String[] filePaths = new String[selectedItems.size()];
-					int counter = 0;
-					for(Integer selectedFileId : selectedItems){
-						filePaths[counter++] = arrPath.get(selectedFileId);
-					}
-					getIntent().putExtra("RESULT_PATH", filePaths);
-					setResult(RESULT_OK, getIntent());
-					finish();
-				}
-			}
-		});
-		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.package.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -163,7 +127,10 @@ public class ImportPhotosActivity extends SherlockActivity {
 			}
 			else {
 				selectedItems.remove(id);
-				((Button) findViewById(R.id.selectBtn)).setText(getString(R.string.select_all));
+				if(selectAllMenuItem != null){
+					selectAllMenuItem.setTitle(getString(R.string.select_all));
+					selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
+				}
 			}
 		}
 		
@@ -244,6 +211,59 @@ public class ImportPhotosActivity extends SherlockActivity {
 		};
 	}
 	
-	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.import_photos_menu, menu);
+		selectAllMenuItem = menu.findItem(R.id.select_all);
+        return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				return true;
+			case R.id.select_all:
+				if(selectedItems.size() < arrPath.size()){
+					for(int i=0; i<arrPath.size(); i++){
+						selectedItems.add(i);
+					}
+					if(selectAllMenuItem != null){
+						selectAllMenuItem.setTitle(getString(R.string.deselect_all));
+						selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_checked);
+					}
+				}
+				else{
+					selectedItems.clear();
+					if(selectAllMenuItem != null){
+						selectAllMenuItem.setTitle(getString(R.string.select_all));
+						selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
+					}
+				}
+				imageAdapter.notifyDataSetChanged();
+				return true;
+			case R.id.importBtn:
+				final int len = selectedItems.size();
+				
+				if (len == 0) {
+					Toast.makeText(getApplicationContext(), "Please select at least one image", Toast.LENGTH_LONG).show();
+				}
+				else {
+					String[] filePaths = new String[selectedItems.size()];
+					int counter = 0;
+					for(Integer selectedFileId : selectedItems){
+						filePaths[counter++] = arrPath.get(selectedFileId);
+					}
+					getIntent().putExtra("RESULT_PATH", filePaths);
+					setResult(RESULT_OK, getIntent());
+					finish();
+				}
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
 	
 }

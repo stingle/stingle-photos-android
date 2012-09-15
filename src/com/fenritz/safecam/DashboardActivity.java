@@ -51,40 +51,6 @@ public class DashboardActivity extends SherlockActivity {
 			}
 		});
 		
-		findViewById(R.id.gotoChangePass).setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent();
-				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
-				startActivity(intent);
-			}
-		});
-		
-		findViewById(R.id.gotoSettings).setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent();
-				intent.setClass(DashboardActivity.this, SettingsActivity.class);
-				startActivity(intent);
-			}
-		});
-		
-		findViewById(R.id.logOut).setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Helpers.logout(DashboardActivity.this);
-			}
-		});
-		
-		findViewById(R.id.goPro).setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent(Intent.ACTION_VIEW);
-				intent.setData(Uri.parse("market://details?id=" + getString(R.string.key_package_name)));
-				startActivity(intent);
-			}
-		});
-		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.package.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -104,13 +70,13 @@ public class DashboardActivity extends SherlockActivity {
 		    layout.addView(adView);
 		    adView.loadAd(new AdRequest());
 		    
-		    findViewById(R.id.goProContainer).setVisibility(View.VISIBLE);
+		    //findViewById(R.id.goProContainer).setVisibility(View.VISIBLE);
 		    if(freeVersionText != null){
 		    	freeVersionText.setVisibility(View.VISIBLE);
 		    }
 		}
 		else{
-			findViewById(R.id.goProContainer).setVisibility(View.GONE);
+			//findViewById(R.id.goProContainer).setVisibility(View.GONE);
 			if(freeVersionText != null){
 				freeVersionText.setVisibility(View.GONE);
 			}
@@ -186,11 +152,22 @@ public class DashboardActivity extends SherlockActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
-		Intent intent = new Intent();
+		Intent intent;
 		switch (item.getItemId()) {
 			case R.id.settings:
+				intent = new Intent();
 				intent.setClass(DashboardActivity.this, SettingsActivity.class);
 				startActivity(intent);
+				return true;
+			case R.id.change_password:
+				intent = new Intent();
+				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
+				startActivity(intent);
+				return true;
+			case R.id.go_pro:
+				 intent = new Intent(Intent.ACTION_VIEW);
+				 intent.setData(Uri.parse("market://details?id=" + getString(R.string.key_package_name)));
+				 startActivity(intent);
 				return true;
 			case R.id.read_security:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));

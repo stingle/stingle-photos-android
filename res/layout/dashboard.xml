@@ -13,155 +13,61 @@
     	android:id="@+id/adHolder" >
     </LinearLayout>
 
-    <com.fenritz.safecam.widget.DashboardLayout
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:orientation="vertical" >
 
         <LinearLayout 
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:orientation="vertical"
+		    android:layout_weight="1"
 		    android:gravity="center" >
 	        <ImageButton
 	            android:id="@+id/gotoCamera"
 	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
+	            android:layout_height="120dp"
 	            android:background="@null"
 	            android:contentDescription="@string/camera"
 	            android:scaleType="fitCenter"
-	            android:src="@drawable/camera_button" />
+	            android:src="@drawable/dashboard_camera_button" />
 	        <TextView 
 	            android:text="@string/camera"
 	            android:layout_width="wrap_content" 
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-10dp"
-	            android:layout_marginBottom="10dp"
-	            android:textSize="12dp" />
+	            android:layout_marginTop="-30dp"
+	            android:textSize="16dp"
+	            android:textColor="@android:color/black" />
 	    </LinearLayout>
 
         <LinearLayout 
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:orientation="vertical"
+		    android:layout_weight="1"
 		    android:gravity="center" >
 	        <ImageButton
 	            android:id="@+id/gotoGallery"
 	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
+	            android:layout_height="120dp"
 	            android:background="@null"
 	            android:contentDescription="@string/gallery"
 	            android:scaleType="fitCenter"
-	            android:src="@drawable/gallery_button" />
+	            android:src="@drawable/dashboard_gallery_button" />
         	<TextView 
 	            android:text="@string/gallery"
 	            android:layout_width="wrap_content" 
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-10dp"
-	            android:layout_marginBottom="10dp"
-	            android:textSize="12dp" />
+	            android:layout_marginTop="-30dp"
+	            android:textSize="16dp"
+	            android:textColor="@android:color/black" />
 	    </LinearLayout>
 	    
-        <LinearLayout 
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:orientation="vertical"
-		    android:gravity="center" >
-	        <ImageButton
-	            android:id="@+id/gotoChangePass"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:background="@null"
-	            android:contentDescription="@string/change_password"
-	            android:scaleType="fitCenter"
-	            android:src="@drawable/key_button" />
-			<TextView 
-	            android:text="@string/change_password"
-	            android:layout_width="wrap_content" 
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-10dp"
-	            android:layout_marginBottom="10dp"
-	            android:textSize="12dp" />
-	    </LinearLayout>
-	    
-        <LinearLayout 
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:orientation="vertical"
-		    android:gravity="center" >
-	        <ImageButton
-	            android:id="@+id/gotoSettings"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:background="@null"
-	            android:contentDescription="@string/settings"
-	            android:scaleType="fitCenter"
-	            android:src="@drawable/gears_button" />
-        	<TextView 
-	            android:text="@string/settings"
-	            android:layout_width="wrap_content" 
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-10dp"
-	            android:layout_marginBottom="10dp"
-	            android:textSize="12dp" />
-	    </LinearLayout>
-	        
-    </com.fenritz.safecam.widget.DashboardLayout>
+    </LinearLayout>
 
-     <LinearLayout 
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:orientation="horizontal"
-	    android:baselineAligned="false"
-	    android:layout_marginBottom="5dp"
-	    android:gravity="center|top" >
-    	<LinearLayout 
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:orientation="vertical"
-		    android:layout_weight="1"
-		    android:id="@+id/goProContainer"
-		    android:gravity="center" >
-	        <ImageButton
-	            android:id="@+id/goPro"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:background="@null"
-	            android:contentDescription="@string/get_pro"
-	            android:scaleType="fitCenter"
-	            android:src="@drawable/cart_button" />
-	        <TextView 
-	            android:text="@string/get_pro"
-	            android:layout_width="wrap_content" 
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-10dp"
-	            android:layout_marginBottom="10dp"
-	            android:textSize="12dp" />
-        </LinearLayout>
-    
-	    <LinearLayout 
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:orientation="vertical"
-		    android:layout_weight="1"
-		    android:gravity="center|top" >
-	        <ImageButton
-	            android:id="@+id/logOut"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:background="@null"
-	            android:contentDescription="@string/log_out"
-	            android:scaleType="fitCenter"
-	            android:src="@drawable/power_button" />
-	        <TextView 
-	            android:text="@string/log_out"
-	            android:layout_width="wrap_content" 
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-10dp"
-	            android:layout_marginBottom="10dp"
-	            android:textSize="12dp" />
-		</LinearLayout>
-	</LinearLayout>
+     
 	<TextView
 	    android:id="@+id/free_version_text"
         android:layout_width="wrap_content"

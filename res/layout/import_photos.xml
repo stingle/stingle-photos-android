@@ -1,33 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <LinearLayout 
-        android:id="@+id/buttonsHolder"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true">
-	    <Button
-	        android:id="@+id/selectBtn"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:text="@string/select_all" />
-	    
-	    <Button
-	        android:id="@+id/importBtn"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:text="@string/import_btn" />
-	</LinearLayout>
     <GridView
         android:id="@+id/PhoneImageGrid"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@id/buttonsHolder"
         android:columnWidth="100dp"
         android:gravity="center"
         android:horizontalSpacing="1dp"
@@ -35,4 +14,4 @@
         android:stretchMode="columnWidth"
         android:verticalSpacing="1dp" />
 
-</RelativeLayout>
+</LinearLayout>
