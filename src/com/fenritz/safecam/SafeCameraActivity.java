@@ -18,8 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
@@ -183,7 +181,7 @@ public class SafeCameraActivity extends SherlockActivity {
 		
 	}
 	
-	@Override
+	/*@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.main_menu, menu);;
         return super.onCreateOptionsMenu(menu);
@@ -201,5 +199,5 @@ public class SafeCameraActivity extends SherlockActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}
+	}*/
 }

@@ -39,7 +39,7 @@ public class AsyncTasks {
 		private final String filePath;
 		private final ImageView image;
 		private OnAsyncTaskFinish onFinish;
-		private int ratio = 200;
+		private int size = 200;
 
 
 		public DecryptPopulateImage(Context context, String filePath, ImageView image) {
@@ -48,8 +48,8 @@ public class AsyncTasks {
 			this.image = image;
 		}
 		
-		public void setRatio(int ratio){
-			this.ratio = ratio;
+		public void setSize(int size){
+			this.size = size;
 		}
 		
 		public void setOnFinish(OnAsyncTaskFinish onFinish){
@@ -65,7 +65,7 @@ public class AsyncTasks {
 					byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, null, this);
 
 					if (decryptedData != null) {
-						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, ratio);
+						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, size);
 						decryptedData = null;
 						if (bitmap != null) {
 							return bitmap;

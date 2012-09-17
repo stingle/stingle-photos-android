@@ -2,23 +2,29 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/multi_select"
+        android:icon="@drawable/ic_action_ok"
+        android:title="@string/multi_select"
+        android:showAsAction="always|withText" />
+    <item
         android:id="@+id/goto_camera"
         android:icon="@drawable/ic_action_camera"
         android:title="@string/camera"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="always|withText" />
     <item
-        android:id="@+id/multi_select"
-        android:icon="@drawable/ic_action_checkbox_unchecked"
-        android:title="@string/multi_select"
-        android:showAsAction="ifRoom|withText" />
+        android:id="@+id/add_new_folder"
+        android:icon="@drawable/ic_action_folder"
+        android:title="@string/new_folder"
+        android:showAsAction="always|withText" />
+    <item
+        android:id="@+id/importBtn"
+        android:icon="@drawable/ic_action_import"
+        android:title="@string/import_btn"
+        android:showAsAction="always|withText" />
     <item
         android:id="@+id/select_all"
-        android:icon="@android:drawable/ic_notification_overlay"
+        android:icon="@drawable/ic_action_checkbox_checked"
         android:title="@string/select_all" />
-    <item
-        android:id="@+id/deselect_all"
-        android:icon="@android:drawable/ic_notification_clear_all"
-        android:title="@string/deselect_all" />
     <item
         android:id="@+id/change_password"
         android:icon="@android:drawable/ic_menu_manage"

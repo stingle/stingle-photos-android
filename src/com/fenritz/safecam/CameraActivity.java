@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -43,7 +42,6 @@ import android.view.KeyEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -104,7 +102,6 @@ public class CameraActivity extends SherlockActivity {
 	private boolean isTimerRunning = false;
 	
 	private File lastFile;
-	private Drawable lastFileDrawable;
 	private int lastRotation = 0;
 	private int overallRotation = 0;
 	
@@ -139,7 +136,6 @@ public class CameraActivity extends SherlockActivity {
 
 		galleryButton = (ImageView) findViewById(R.id.lastPhoto);
 		galleryButton.setOnClickListener(openGallery());
-		lastFileDrawable = galleryButton.getDrawable();
 
 		flashButton = (ImageButton) findViewById(R.id.flashButton);
 		flashButton.setOnClickListener(toggleFlash());
@@ -148,9 +144,9 @@ public class CameraActivity extends SherlockActivity {
 		timerButton.setOnClickListener(toggleTimer());
 		
 		findViewById(R.id.switchCamButton).setOnClickListener(switchCamera());
-		findViewById(R.id.optionsButton).setOnClickListener(showOptions());
 		findViewById(R.id.photoSizeLabel).setOnClickListener(showPhotoSizes());
-
+		findViewById(R.id.optionsButton).setOnClickListener(showOptions());
+		
 		mPreview = new CameraPreview(this); 
 		((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
 
@@ -454,14 +450,15 @@ public class CameraActivity extends SherlockActivity {
 		
 			lastFile = folderFiles[0];
 			final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + lastFile.getName());
+			final int thumbSize = (int) Math.round(Helpers.getThumbSize(CameraActivity.this) / 1.3);
 			
 			DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
-			task.setRatio(50);
+			task.setSize(thumbSize);
 			task.setOnFinish(new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
-					lastFileDrawable = galleryButton.getDrawable();
+					galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
 					changeRotation(mOrientation);
 					findViewById(R.id.lastPhotoContainer).setVisibility(View.VISIBLE);
 				}
@@ -975,6 +972,12 @@ public class CameraActivity extends SherlockActivity {
 				new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int item) {
 			
+				if(Helpers.isDemo(CameraActivity.this) && mSupportedPictureSizes.get(item).width > 640){
+					Helpers.warnProVersion(CameraActivity.this);
+					dialog.cancel();
+					return;
+				}
+				
 				if(isCurrentCameraFrontFacing()){
 					preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, item).commit();
 				}
@@ -1063,7 +1066,7 @@ public class CameraActivity extends SherlockActivity {
 	        mSupportedPictureSizes = getSupportedImageSizes();
 	    }
 
-	    @Override
+	   /* @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 	    	View view = super.getView(position, convertView, parent);
 	    	TextView textView=(TextView) view.findViewById(android.R.id.text1);
@@ -1082,15 +1085,7 @@ public class CameraActivity extends SherlockActivity {
 	    @Override
 		public boolean areAllItemsEnabled() {
 	        return false;
-	    }
-
-	    @Override
-		public boolean isEnabled(int position) {
-	    	if(Helpers.isDemo(CameraActivity.this) && mSupportedPictureSizes.get(position).width > 640){
-	            return false;
-	    	}
-            return true;
-	    }
+	    }*/
 	}
 
 }

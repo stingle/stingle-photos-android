@@ -42,13 +42,15 @@ public class ImportPhotosActivity extends SherlockActivity {
 	private BroadcastReceiver receiver;
 	private final MemoryCache cache = SafeCameraApplication.getCache();
 	private final HashMap<Integer, AsyncTasks.ShowImageThumb> tasks = new HashMap<Integer, AsyncTasks.ShowImageThumb>();
-	private MenuItem selectAllMenuItem;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.import_photos);
+		
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
 
 		final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
 		final String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
@@ -123,14 +125,17 @@ public class ImportPhotosActivity extends SherlockActivity {
 		private void toggleCheckboxSelected(CheckBox cb){
 			int id = Integer.valueOf(((String)cb.getTag()).split("-")[1]);
 			if (cb.isChecked()) {
+				if(Helpers.isDemo(ImportPhotosActivity.this)){
+					if(selectedItems.size() >= 1){
+						Helpers.warnProVersion(ImportPhotosActivity.this);
+						cb.setChecked(false);
+						return;
+					}
+				}
 				selectedItems.add(id);
 			}
 			else {
 				selectedItems.remove(id);
-				if(selectAllMenuItem != null){
-					selectAllMenuItem.setTitle(getString(R.string.select_all));
-					selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
-				}
 			}
 		}
 		
@@ -214,7 +219,6 @@ public class ImportPhotosActivity extends SherlockActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.import_photos_menu, menu);
-		selectAllMenuItem = menu.findItem(R.id.select_all);
         return super.onCreateOptionsMenu(menu);
 	}
 
@@ -230,17 +234,9 @@ public class ImportPhotosActivity extends SherlockActivity {
 					for(int i=0; i<arrPath.size(); i++){
 						selectedItems.add(i);
 					}
-					if(selectAllMenuItem != null){
-						selectAllMenuItem.setTitle(getString(R.string.deselect_all));
-						selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_checked);
-					}
 				}
 				else{
 					selectedItems.clear();
-					if(selectAllMenuItem != null){
-						selectAllMenuItem.setTitle(getString(R.string.select_all));
-						selectAllMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
-					}
 				}
 				imageAdapter.notifyDataSetChanged();
 				return true;

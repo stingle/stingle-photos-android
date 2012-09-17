@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
@@ -48,6 +47,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
@@ -63,9 +63,6 @@ public class GalleryActivity extends SherlockActivity {
 
 	public final MemoryCache memCache = SafeCameraApplication.getCache();
 
-	private final static int MULTISELECT_OFF = 0;
-	private final static int MULTISELECT_ON = 1;
-
 	protected static final int REQUEST_DECRYPT = 0;
 	protected static final int REQUEST_ENCRYPT = 1;
 	protected static final int REQUEST_IMPORT = 2;
@@ -78,12 +75,9 @@ public class GalleryActivity extends SherlockActivity {
 	
 	protected static final int ACTION_DELETE_FOLDER = 0;
 
-	private int multiSelectMode = MULTISELECT_OFF;
-	
 	private boolean multiSelectModeActive = false;
 
 	private GridView photosGrid;
-	private MenuItem multiselectMenuItem;
 
 	private final ArrayList<File> files = new ArrayList<File>();
 	
@@ -107,6 +101,8 @@ public class GalleryActivity extends SherlockActivity {
 	private int lastFirstVisibleItem = -1;
 	private int lastVisibleItemCount = 0;
 	private boolean isScrollingDown = true;
+	
+	private ActionMode mMode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -132,13 +128,6 @@ public class GalleryActivity extends SherlockActivity {
 		photosGrid.setAdapter(galleryAdapter);
 		photosGrid.setOnScrollListener(getOnScrollListener());
 		photosGrid.setColumnWidth(Helpers.getThumbSize(GalleryActivity.this)-10);
-
-		findViewById(R.id.deleteSelected).setOnClickListener(deleteSelectedClick());
-		findViewById(R.id.decryptSelected).setOnClickListener(decryptSelectedClick());
-		findViewById(R.id.importFiles).setOnClickListener(importClick());
-		findViewById(R.id.newFolder).setOnClickListener(newFolderClick());
-		findViewById(R.id.moveSelected).setOnClickListener(moveSelectedClick());
-		findViewById(R.id.share).setOnClickListener(shareClick());
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -367,118 +356,71 @@ public class GalleryActivity extends SherlockActivity {
 	}
 
 	private void enterMultiSelect(){
-		findViewById(R.id.bottomPanel).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_out));
-		findViewById(R.id.bottomPanel).setVisibility(View.GONE);
-		
-	    findViewById(R.id.bottomPanelMultiSelect).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_in));
-	    findViewById(R.id.bottomPanelMultiSelect).setVisibility(View.VISIBLE);
+	    mMode = startActionMode(new MultiselectMode());
+	    multiSelectModeActive = true;
 	}
 	
 	private void exitMultiSelect(){
-		findViewById(R.id.bottomPanelMultiSelect).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_out));
-	    findViewById(R.id.bottomPanelMultiSelect).setVisibility(View.GONE);
-	    
-	    findViewById(R.id.bottomPanel).startAnimation(AnimationUtils.loadAnimation(GalleryActivity.this, android.R.anim.fade_in));
-	    findViewById(R.id.bottomPanel).setVisibility(View.VISIBLE);
+	    if (mMode != null) {
+            mMode.finish();
+        }
+	    clearSelection();
+	    multiSelectModeActive = false;
 	}
 	
-	private OnClickListener importClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-				builder.setTitle(getString(R.string.import_desc));
-				
-				CharSequence[] items = getResources().getStringArray(R.array.importMenu);
-				
-				builder.setItems(items, new DialogInterface.OnClickListener() {
-					
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(getBaseContext(), FileDialog.class);
-						switch (which){
-							case 0:
-								Intent photosIntent = new Intent();
-								photosIntent.setClass(GalleryActivity.this, ImportPhotosActivity.class);
-								startActivityForResult(photosIntent, REQUEST_ENCRYPT);
-								
-								break;
-							case 1:
-								
-								intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-								// can user select directories or not
-								intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
-								intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-								intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
-								intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
-
-								// alternatively you can set file filter
-								// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-								// "png" });
-
-								startActivityForResult(intent, REQUEST_ENCRYPT);
-								break;
-							case 2:
-								intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-								// can user select directories or not
-								intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
-								intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-								intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
-								intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
-
-								// alternatively you can set file filter
-								// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-								// "png" });
-
-								startActivityForResult(intent, REQUEST_IMPORT);
-						}
-					}
-				});
-				
-				AlertDialog dialog = builder.create();
-				dialog.show();
-			}
-		};
-	}
-	
-	private OnClickListener newFolderClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-				builder.setTitle(getString(R.string.new_folder));
-				builder.setMessage(getString(R.string.enter_new_folder_name));
-				final EditText input = new EditText(GalleryActivity.this);
-				builder.setView(input);
-				builder.setPositiveButton(getString(R.string.create), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						File newFolder = new File(currentPath + "/" + input.getText());
-						if(newFolder.mkdir()){
-							Toast.makeText(GalleryActivity.this, getString(R.string.success_created), Toast.LENGTH_LONG).show();
-						}
-						else{
-							Toast.makeText(GalleryActivity.this, getString(R.string.failed_create_dir), Toast.LENGTH_LONG).show();
-						}
-						refreshList();
-					}
-				});
-				builder.setNegativeButton(getString(R.string.cancel), null);
-				AlertDialog dialog = builder.create();
-				dialog.show();
-			}
-		};
-	}
-	
-	private OnClickListener moveSelectedClick() {
-		return new OnClickListener() {
+	private void importClick() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+		builder.setTitle(getString(R.string.import_desc));
+		
+		CharSequence[] items = getResources().getStringArray(R.array.importMenu);
+		
+		builder.setItems(items, new DialogInterface.OnClickListener() {
 			
-			public void onClick(View v) {
-				if (multiSelectMode == MULTISELECT_ON) {
-					moveSelected();
+			public void onClick(DialogInterface dialog, int which) {
+				Intent intent = new Intent(getBaseContext(), FileDialog.class);
+				switch (which){
+					case 0:
+						Intent photosIntent = new Intent();
+						photosIntent.setClass(GalleryActivity.this, ImportPhotosActivity.class);
+						startActivityForResult(photosIntent, REQUEST_ENCRYPT);
+						
+						break;
+					case 1:
+						
+						intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+						// can user select directories or not
+						intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
+						intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+						intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
+						intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
+
+						// alternatively you can set file filter
+						// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
+						// "png" });
+
+						startActivityForResult(intent, REQUEST_ENCRYPT);
+						break;
+					case 2:
+						intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+						// can user select directories or not
+						intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
+						intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+						intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
+						intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
+
+						// alternatively you can set file filter
+						// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
+						// "png" });
+
+						startActivityForResult(intent, REQUEST_IMPORT);
 				}
 			}
-		};
+		});
+		
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 	
 	private void moveSelected() {
@@ -549,43 +491,19 @@ public class GalleryActivity extends SherlockActivity {
 				}
 			}
 		});
-		builder.setNegativeButton(getString(R.string.cancel), null);
+		builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				refreshList();
+			}
+		});
 		AlertDialog dialog = builder.create();
 		dialog.show();
-	}
-
-	private OnClickListener shareClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				if (multiSelectMode == MULTISELECT_ON) {
-					Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
-						@Override
-						public void onFinish() {
-							super.onFinish();
-							refreshList();
-						}
-					});
-				}
-			}
-		};
-	}
-
-	private OnClickListener deleteSelectedClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				if (multiSelectMode == MULTISELECT_ON) {
-					deleteSelected();
-				}
-			}
-		};
 	}
 
 	private void refreshList(){
 		fillFilesList();
 		galleryAdapter.notifyDataSetChanged();
-		clearMutliSelect();
+		exitMultiSelect();
 		
 		generateVisibleThumbs();
 	}
@@ -604,20 +522,14 @@ public class GalleryActivity extends SherlockActivity {
 				}).execute(selectedFiles);
 			}
 		});
-		builder.setNegativeButton(getString(R.string.no), null);
+		builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				refreshList();
+			}
+		});
 		AlertDialog dialog = builder.create();
 		dialog.show();
-	}
-
-	private OnClickListener decryptSelectedClick() {
-		return new OnClickListener() {
-
-			public void onClick(View v) {
-				if (multiSelectMode == MULTISELECT_ON) {
-					decryptSelected();
-				}
-			}
-		};
 	}
 
 	private void decryptSelected() {
@@ -651,6 +563,7 @@ public class GalleryActivity extends SherlockActivity {
 						for(File file : decryptedFiles){
 							sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
 						}
+						exitMultiSelect();
 					}
 				}).execute(selectedFiles);
 			}
@@ -743,25 +656,17 @@ public class GalleryActivity extends SherlockActivity {
 		}
 		else if (resultCode == Activity.RESULT_CANCELED) {
 			// Logger.getLogger().log(Level.WARNING, "file not selected");
+			refreshList();
 		}
 
 	}
 
-	private void clearMutliSelect() {
-		if(multiselectMenuItem != null){
-			multiselectMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
-		}
-		
-		multiSelectMode = MULTISELECT_OFF;
+	private void clearSelection() {
 		selectedFiles.clear();
 		for (int i = 0; i < photosGrid.getChildCount(); i++) {
 			((CheckableLayout) photosGrid.getChildAt(i)).setChecked(false);
 		}
-
-		if(multiSelectModeActive){
-			exitMultiSelect();
-			multiSelectModeActive = false;
-		}
+		galleryAdapter.notifyDataSetChanged();
 	}
 
 	public class GalleryAdapter extends BaseAdapter {
@@ -781,22 +686,13 @@ public class GalleryActivity extends SherlockActivity {
 		private OnClickListener getOnClickListener(final CheckableLayout layout, final File file){
 			 return new View.OnClickListener() {
 				public void onClick(View v) {
-					if (multiSelectMode == MULTISELECT_ON) {
+					if (multiSelectModeActive) {
 						layout.toggle();
 						if (layout.isChecked()) {
 							selectedFiles.add(file);
 						}
 						else {
 							selectedFiles.remove(file);
-						}
-						
-						if(selectedFiles.size() > 0 && !multiSelectModeActive){
-							enterMultiSelect();
-							multiSelectModeActive = true;
-						}
-						else if(selectedFiles.size() == 0 && multiSelectModeActive){
-							exitMultiSelect();
-							multiSelectModeActive = false;
 						}
 					}
 					else {
@@ -812,22 +708,13 @@ public class GalleryActivity extends SherlockActivity {
 		private OnClickListener getNoThumbClickListener(final CheckableLayout layout, final File file){
 			return new View.OnClickListener() {
 				public void onClick(View v) {
-					if (multiSelectMode == MULTISELECT_ON) {
+					if (multiSelectModeActive) {
 						layout.toggle();
 						if (layout.isChecked()) {
 							selectedFiles.add(file);
 						}
 						else {
 							selectedFiles.remove(file);
-						}
-						
-						if(selectedFiles.size() > 0 && !multiSelectModeActive){
-							enterMultiSelect();
-							multiSelectModeActive = true;
-						}
-						else if(selectedFiles.size() == 0 && multiSelectModeActive){
-							exitMultiSelect();
-							multiSelectModeActive = false;
 						}
 					}
 					else {
@@ -864,7 +751,6 @@ public class GalleryActivity extends SherlockActivity {
 								@Override
 								public void onFinish() {
 									super.onFinish();
-									selectedFiles.clear();
 									refreshList();
 								}
 							});
@@ -962,7 +848,7 @@ public class GalleryActivity extends SherlockActivity {
 					folderImage.setPadding(3, 3, 3, 3);
 					folderImage.setOnClickListener(new OnClickListener() {
 						public void onClick(View v) {
-							if (multiSelectMode == MULTISELECT_ON) {
+							if (multiSelectModeActive) {
 								layout.toggle();
 								if (layout.isChecked()) {
 									selectedFiles.add(file);
@@ -1235,10 +1121,61 @@ public class GalleryActivity extends SherlockActivity {
 
 	}
 
+    private final class MultiselectMode implements ActionMode.Callback {
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        	getSupportMenuInflater().inflate(R.menu.gallery_menu_multiselect, menu);
+        	
+            return true;
+        }
+
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        	if (multiSelectModeActive) {
+	        	switch(item.getItemId()){
+	        		case R.id.decrypt:
+    					decryptSelected();
+	        			break;
+	        		case R.id.share:
+    					Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
+    						@Override
+    						public void onFinish() {
+    							super.onFinish();
+    							refreshList();
+    						}
+    					});
+	        			break;
+	        		case R.id.move:
+    					moveSelected();
+	        			break;
+	        		case R.id.delete:
+    					deleteSelected();
+	        			break;
+	        		case R.id.select_all:
+	    				selectedFiles.clear();
+	    				selectedFiles.addAll(files);
+	    				galleryAdapter.notifyDataSetChanged();
+	    				return true;
+	        		case R.id.deselect_all:
+	    				selectedFiles.clear();
+	    				galleryAdapter.notifyDataSetChanged();
+	    				return true;
+	        	}
+        	}
+            return true;
+        }
+
+        public void onDestroyActionMode(ActionMode mode) {
+        	multiSelectModeActive = false;
+        	clearSelection();
+        }
+    }
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
         getSupportMenuInflater().inflate(R.menu.gallery_menu, menu);
-        multiselectMenuItem = menu.findItem(R.id.multi_select);
         return super.onCreateOptionsMenu(menu);
 	}
 
@@ -1259,15 +1196,7 @@ public class GalleryActivity extends SherlockActivity {
 				}
 				return true;
 			case R.id.multi_select:
-				if (multiSelectMode == MULTISELECT_OFF) {
-					item.setIcon(R.drawable.ic_action_checkbox_checked);
-					multiSelectMode = MULTISELECT_ON;
-				}
-				else {
-					item.setIcon(R.drawable.ic_action_checkbox_unchecked);
-					multiSelectMode = MULTISELECT_OFF;
-					clearMutliSelect();
-				}
+				enterMultiSelect();
 				return true;
 			case R.id.goto_camera:
 				intent.setClass(GalleryActivity.this, CameraActivity.class);
@@ -1275,30 +1204,36 @@ public class GalleryActivity extends SherlockActivity {
 				startActivity(intent);
 				finish();
 				return true;
-			case R.id.select_all:
-				if (multiSelectMode == MULTISELECT_OFF) {
-					if(multiselectMenuItem != null){
-						multiselectMenuItem.setIcon(R.drawable.ic_action_checkbox_checked);
+			case R.id.add_new_folder:
+				AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+				builder.setTitle(getString(R.string.new_folder));
+				builder.setMessage(getString(R.string.enter_new_folder_name));
+				final EditText input = new EditText(GalleryActivity.this);
+				builder.setView(input);
+				builder.setPositiveButton(getString(R.string.create), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						File newFolder = new File(currentPath + "/" + input.getText());
+						if(newFolder.mkdir()){
+							Toast.makeText(GalleryActivity.this, getString(R.string.success_created), Toast.LENGTH_LONG).show();
+						}
+						else{
+							Toast.makeText(GalleryActivity.this, getString(R.string.failed_create_dir), Toast.LENGTH_LONG).show();
+						}
+						refreshList();
 					}
-					multiSelectMode = MULTISELECT_ON;
-				}
+				});
+				builder.setNegativeButton(getString(R.string.cancel), null);
+				AlertDialog dialog = builder.create();
+				dialog.show();
+				return true;
+			case R.id.importBtn:
+				importClick();
+				return true;
+			case R.id.select_all:
 				enterMultiSelect();
 				selectedFiles.clear();
 				selectedFiles.addAll(files);
 				galleryAdapter.notifyDataSetChanged();
-				return true;
-			case R.id.deselect_all:
-				if (multiSelectMode == MULTISELECT_ON) {
-					if(multiselectMenuItem != null){
-						multiselectMenuItem.setIcon(R.drawable.ic_action_checkbox_unchecked);
-					}
-					multiSelectMode = MULTISELECT_OFF;
-					clearMutliSelect();
-				}
-				exitMultiSelect();
-				selectedFiles.clear();
-				galleryAdapter.notifyDataSetChanged();
-				
 				return true;
 			case R.id.change_password:
 				intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);

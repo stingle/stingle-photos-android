@@ -70,13 +70,11 @@ public class DashboardActivity extends SherlockActivity {
 		    layout.addView(adView);
 		    adView.loadAd(new AdRequest());
 		    
-		    //findViewById(R.id.goProContainer).setVisibility(View.VISIBLE);
 		    if(freeVersionText != null){
 		    	freeVersionText.setVisibility(View.VISIBLE);
 		    }
 		}
 		else{
-			//findViewById(R.id.goProContainer).setVisibility(View.GONE);
 			if(freeVersionText != null){
 				freeVersionText.setVisibility(View.GONE);
 			}
@@ -145,7 +143,10 @@ public class DashboardActivity extends SherlockActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.dashborad_menu, menu);;
+		getSupportMenuInflater().inflate(R.menu.dashborad_menu, menu);
+		if(!Helpers.isDemo(DashboardActivity.this)){
+			menu.removeItem(R.id.go_pro);
+		}
         return super.onCreateOptionsMenu(menu);
 	}
 

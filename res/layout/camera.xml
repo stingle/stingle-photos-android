@@ -132,8 +132,8 @@
 		
 		<LinearLayout
 		    android:id="@+id/lastPhotoContainer"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:padding="1dp"
             android:layout_gravity="right"
@@ -143,8 +143,8 @@
             android:background="#000">
             <ImageView
                 android:id="@+id/lastPhoto"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="@android:drawable/ic_menu_gallery" />
 		</LinearLayout>

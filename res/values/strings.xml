@@ -119,6 +119,7 @@
     <string name="title_import">Import</string>
     <string name="multi_select">Multi Select</string>
     <string name="options">Options</string>
+    <string name="pro_version_warning">This feature is avalable in PRO version. Do you want to purchase SafeCamera PRO version?</string>
     
     
     <!-- File Dialog -->

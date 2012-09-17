@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/decrypt"
+        android:icon="@drawable/ic_action_unlock"
+        android:title="@string/decrypt"
+        android:showAsAction="always|withText" />
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_action_share"
+        android:title="@string/share"
+        android:showAsAction="always|withText" />
+    <item
+        android:id="@+id/move"
+        android:icon="@drawable/ic_action_move"
+        android:title="@string/move"
+        android:showAsAction="always|withText" />
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_action_delete"
+        android:title="@string/delete"
+        android:showAsAction="always|withText" />
+    <item
+        android:id="@+id/select_all"
+        android:icon="@drawable/ic_action_checkbox_checked"
+        android:title="@string/select_all" />
+    <item
+        android:id="@+id/deselect_all"
+        android:icon="@drawable/ic_action_checkbox_unchecked"
+        android:title="@string/deselect_all" />
+</menu>

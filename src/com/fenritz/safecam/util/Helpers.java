@@ -494,6 +494,9 @@ public class Helpers {
 				switch (item) {
 					case SHARE_AS_IS:
 						shareFiles(activity, files);
+						if(onDecrypt != null){
+							onDecrypt.onFinish();
+						}
 						break;
 					case SHARE_REENCRYPT:
 						AlertDialog.Builder passwordDialog = new AlertDialog.Builder(activity);
@@ -518,6 +521,9 @@ public class Helpers {
 											if (processedFiles != null && processedFiles.size() > 0) {
 												shareFiles(activity, processedFiles);
 											}
+											if(onDecrypt != null){
+												onDecrypt.onFinish();
+											}
 										};
 									};
 									new ReEncryptFiles(activity, onReencrypt).execute(params);
@@ -528,7 +534,14 @@ public class Helpers {
 							}
 						});
 
-						passwordDialog.setNegativeButton(activity.getString(R.string.cancel), null);
+						passwordDialog.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+							
+							public void onClick(DialogInterface dialog, int which) {
+								if(onDecrypt != null){
+									onDecrypt.onFinish();
+								}
+							}
+						});
 
 						passwordDialog.setView(enterPasswordView);
 						passwordDialog.setTitle(activity.getString(R.string.enter_reencrypt_password));
@@ -594,5 +607,21 @@ public class Helpers {
 	            bmp.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 	        }
 	    }
+	}
+	
+	public static void warnProVersion(final Activity activity) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setMessage(activity.getString(R.string.pro_version_warning));
+		
+		builder.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setData(Uri.parse("market://details?id=" + activity.getString(R.string.key_package_name)));
+				activity.startActivity(intent);
+			}
+		});
+		builder.setNegativeButton(activity.getString(R.string.later), null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 }
