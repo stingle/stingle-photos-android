@@ -24,9 +24,11 @@
     <item
         android:id="@+id/select_all"
         android:icon="@drawable/ic_action_checkbox_checked"
-        android:title="@string/select_all" />
+        android:title="@string/select_all"
+        android:showAsAction="never" />
     <item
         android:id="@+id/deselect_all"
         android:icon="@drawable/ic_action_checkbox_unchecked"
-        android:title="@string/deselect_all" />
+        android:title="@string/deselect_all"
+        android:showAsAction="never" />
 </menu>

@@ -12,8 +12,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.provider.MediaStore.Video.Thumbnails;
 import android.util.Log;
 import android.widget.ImageView;
@@ -694,6 +696,88 @@ public class AsyncTasks {
 				cache.put(params[0].getPath(), image);
 				return image;
 			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			super.onPostExecute(result);
+			if(result != null){
+				imageView.setImageBitmap(result);
+			}
+			if (finishListener != null) {
+				finishListener.onFinish();
+			}
+		}
+
+	}
+	
+	public static class ShowSystemImageThumb extends AsyncTask<File, Void, Bitmap> {
+
+		private final ImageView imageView;
+		private final MemoryCache cache;
+		private OnAsyncTaskFinish finishListener;
+		private final int imgId;
+		private final int orientation;
+		
+		
+		public ShowSystemImageThumb(ImageView pImageView, int pImgId, int pOrientation, MemoryCache pCache){
+			this(pImageView, pImgId, pOrientation, pCache, null);
+		}
+		
+		public ShowSystemImageThumb(ImageView pImageView, int pImgId, int pOrientation, MemoryCache pCache, OnAsyncTaskFinish pFinishListener){
+			imageView = pImageView;
+			cache = pCache;
+			imgId = pImgId;
+			orientation = pOrientation;
+			finishListener = pFinishListener;
+		}
+		
+		public void setOnFinish(OnAsyncTaskFinish onFinish){
+			this.finishListener = onFinish;
+		}
+		
+		private Bitmap getBitmap(Bitmap image){
+			if(orientation != 0){
+				Matrix matrix = new Matrix();
+				matrix.postRotate(orientation);
+				image = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+			}
+			return image;
+		}
+		
+		@Override
+		protected Bitmap doInBackground(File... params) {
+			
+			// Get from cache
+			Bitmap image = cache.get(params[0].getPath());
+			if(image != null){
+				return image;
+			}
+			
+			// Get from MediaStore
+			image = MediaStore.Images.Thumbnails.getThumbnail(SafeCameraApplication.getAppContext().getContentResolver(), imgId, MediaStore.Images.Thumbnails.MINI_KIND, null);
+			if(image != null){
+				image = getBitmap(image);
+				cache.put(params[0].getPath(), image);
+				return image;
+			}
+			
+			// Get from File and Resize it
+			image = Helpers.decodeFile(params[0], Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
+			
+			if(image != null){
+				cache.put(params[0].getPath(), image);
+				return image;
+			}
+			
+			// Get from Video
+			image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MINI_KIND);
+			if(image != null){
+				cache.put(params[0].getPath(), image);
+				return image;
+			}
+				
 			return null;
 		}
 
