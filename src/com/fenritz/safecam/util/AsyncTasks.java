@@ -35,13 +35,14 @@ public class AsyncTasks {
 	}
 	
 	
-	public static class DecryptPopulateImage extends AsyncTask<Void, Integer, Bitmap> {
+	public static class DecryptPopulateImage extends LimitedThreadAsyncTask<Void, Integer, Bitmap> {
 
 		private final Context context;
 		private final String filePath;
 		private final ImageView image;
 		private OnAsyncTaskFinish onFinish;
 		private int size = 200;
+		private MemoryCache memCache;
 
 
 		public DecryptPopulateImage(Context context, String filePath, ImageView image) {
@@ -52,6 +53,10 @@ public class AsyncTasks {
 		
 		public void setSize(int size){
 			this.size = size;
+		}
+		
+		public void setCache(MemoryCache cache){
+			memCache = cache;
 		}
 		
 		public void setOnFinish(OnAsyncTaskFinish onFinish){
@@ -70,6 +75,9 @@ public class AsyncTasks {
 						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, size);
 						decryptedData = null;
 						if (bitmap != null) {
+							if(memCache != null){
+								memCache.put(filePath, bitmap);
+							}
 							return bitmap;
 						}
 					}
@@ -88,7 +96,6 @@ public class AsyncTasks {
 
 			if (bitmap != null) {
 				image.setImageBitmap(bitmap);
-				
 				if(onFinish != null){
 					onFinish.onFinish();
 				}

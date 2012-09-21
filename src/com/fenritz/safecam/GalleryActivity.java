@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -24,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -50,7 +52,6 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
 import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
@@ -87,7 +88,7 @@ public class GalleryActivity extends SherlockActivity {
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
 	private GenerateThumbs thumbGenTask;
-	private FillCache fillCacheTask = new FillCache();
+	//private final FillCache fillCacheTask = new FillCache();
 
 	private BroadcastReceiver receiver;
 	
@@ -95,18 +96,17 @@ public class GalleryActivity extends SherlockActivity {
 	
 	private String currentPath;
 	
+	private final HashMap<Integer, AsyncTasks.DecryptPopulateImage> tasks = new HashMap<Integer, AsyncTasks.DecryptPopulateImage>();
 	
-	private final int defaultThumbCountToLoad = 30;
-	private int prevVisiblePosition = 0;
-	private int lastFirstVisibleItem = -1;
-	private int lastVisibleItemCount = 0;
-	private boolean isScrollingDown = true;
+	private final ArrayList<Dec> queue = new ArrayList<Dec>();
+	
+	private int currentVisibleItemCount = 25;
 	
 	private ActionMode mMode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		//requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setHomeButtonEnabled(true);
@@ -126,8 +126,8 @@ public class GalleryActivity extends SherlockActivity {
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
 		photosGrid.setAdapter(galleryAdapter);
-		photosGrid.setOnScrollListener(getOnScrollListener());
 		photosGrid.setColumnWidth(Helpers.getThumbSize(GalleryActivity.this)-10);
+		photosGrid.setOnScrollListener(getOnScrollListener());
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -147,10 +147,12 @@ public class GalleryActivity extends SherlockActivity {
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+		decryptor.interrupt();
+		
 		if(receiver != null){
 			unregisterReceiver(receiver);
 		}
+		super.onDestroy();
 	}
 	
 	void handleIntentFilters(Intent intent){
@@ -304,9 +306,6 @@ public class GalleryActivity extends SherlockActivity {
 		else{
 			getSupportActionBar().setTitle(getString(R.string.title_gallery));
 		}
-		
-		isScrollingDown = true;
-		generateVisibleThumbs();
 	}
 	
 	@Override
@@ -330,10 +329,10 @@ public class GalleryActivity extends SherlockActivity {
 			thumbGenTask.cancel(true);
 			thumbGenTask = null;
 		}
-		if(fillCacheTask != null){
+		/*if(fillCacheTask != null){
 			fillCacheTask.cancel(true);
 			fillCacheTask = null;
-		}
+		}*/
 	}
 
 	@SuppressWarnings("unchecked")
@@ -350,7 +349,7 @@ public class GalleryActivity extends SherlockActivity {
 					thumbGenTask = new GenerateThumbs();
 					thumbGenTask.execute(toGenerateThumbs);
 				}
-				generateVisibleThumbs();
+				//generateVisibleThumbs();
 			}
 		}
 	}
@@ -505,7 +504,7 @@ public class GalleryActivity extends SherlockActivity {
 		galleryAdapter.notifyDataSetChanged();
 		exitMultiSelect();
 		
-		generateVisibleThumbs();
+		//generateVisibleThumbs();
 	}
 	
 	private void deleteSelected() {
@@ -784,6 +783,7 @@ public class GalleryActivity extends SherlockActivity {
 			return label;
 		}
 		
+		@SuppressLint("NewApi")
 		public View getView(int position, View convertView, ViewGroup parent) {
 			final CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
 			int thumbSize = Helpers.getThumbSize(GalleryActivity.this);
@@ -813,33 +813,45 @@ public class GalleryActivity extends SherlockActivity {
 					}
 					else{
 						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
-						Bitmap image = memCache.get(thumbPath);
-						if (image != null) {
+						if (toGenerateThumbs.contains(file)) {
+							ProgressBar progress = new ProgressBar(GalleryActivity.this);
+							progress.setOnClickListener(onClick);
+							progress.setOnLongClickListener(onLongClick);
+							progress.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+							layout.addView(progress);
+						}
+						else{
 							ImageView imageView = new ImageView(GalleryActivity.this);
-							imageView.setImageBitmap(image);
+							
+							Bitmap image = memCache.get(thumbPath);
+							if(image != null){
+								imageView.setImageBitmap(image);
+							}
+							else{
+								/*boolean found = false;
+								for(Dec item : queue){
+									if(item.fileName.equals(thumbPath)){
+										imageView.setImageDrawable(item.image.getDrawable());
+										found = true;
+									}
+								}
+								
+								if(!found){*/
+								imageView.setImageResource(R.drawable.file);
+								
+								queue.add(new Dec(thumbPath, imageView));
+								
+								if(!decryptor.isAlive()){
+									decryptor.start();
+								}
+								//}
+							}
 							imageView.setOnClickListener(onClick);
 							imageView.setOnLongClickListener(onLongClick);
 							imageView.setPadding(3, 3, 3, 3);
 							imageView.setScaleType(ScaleType.FIT_CENTER);
 							layout.addView(imageView);
 						}
-						else {
-							if (toGenerateThumbs.contains(file)) {
-								ProgressBar progress = new ProgressBar(GalleryActivity.this);
-								progress.setOnClickListener(onClick);
-								progress.setOnLongClickListener(onLongClick);
-								progress.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-								layout.addView(progress);
-							}
-							else {
-								ImageView fileImage = new ImageView(GalleryActivity.this);
-								fileImage.setImageResource(R.drawable.file);
-								fileImage.setPadding(3, 3, 3, 3);
-								fileImage.setOnClickListener(onClick);
-								fileImage.setOnLongClickListener(onLongClick);
-								layout.addView(fileImage);
-							}
-					}
 					}
 				}
 				else if(file.isDirectory()){
@@ -894,170 +906,84 @@ public class GalleryActivity extends SherlockActivity {
 			return layout;
 		}
 	}
-
-	private void generateVisibleThumbs(){
+	
+	private class Dec{
+		public String fileName;
+		public ImageView image;
 		
-		if(lastFirstVisibleItem == -1){
-			lastFirstVisibleItem = 0;
+		public Dec(String fileName, ImageView image){
+			this.fileName = fileName;
+			this.image = image;
 		}
-		if(lastVisibleItemCount == 0){
-			lastVisibleItemCount = defaultThumbCountToLoad;
-		}
-		
-		if(fillCacheTask != null){
-			fillCacheTask.cancel(false);
-			fillCacheTask = null;
-		}
-		
-		int[] params = new int[3];
-		if(isScrollingDown){
-			params[0] = lastFirstVisibleItem;
-			params[1] = lastVisibleItemCount + 6;
-			params[2] = 0;
-		}
-		else{
-			params[0] = lastFirstVisibleItem - 6;
-			params[1] = lastVisibleItemCount + 6;
-			params[2] = 1;
-		}
-		
-		
-		fillCacheTask = new FillCache();
-		fillCacheTask.execute(params);
 	}
+	
+	private final Thread decryptor = new Thread(){
+	    @Override
+	    public void run() {
+	    	while(!isInterrupted()){
+				try {
+					int size = queue.size();
+					if(size > 0){
+						
+						if(size > currentVisibleItemCount + 3){
+							for(int i = 0; i < size - (currentVisibleItemCount + 3); i++){
+								queue.remove(queue.get(i));
+								i--;
+								size--;
+							}
+						}
+						
+						for(int i = 0; i < size; i++){
+							final Dec item = queue.get(i);
+							FileInputStream input = new FileInputStream(new File(item.fileName));
+							byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
+
+							if (decryptedData != null) {
+								final Bitmap bitmap = Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(GalleryActivity.this));
+								decryptedData = null;
+								if (bitmap != null) {
+									if(memCache != null){
+										memCache.put(item.fileName, bitmap);
+									}
+									runOnUiThread(new Runnable() {
+										public void run() {
+											item.image.setImageBitmap(bitmap);
+										}
+									});
+								}
+							}
+							else {
+								Log.d("sc", "Unable to decrypt: " + item.fileName);
+							}
+							
+							queue.remove(item);
+							i--;
+							size--;
+						}
+					}
+					sleep(50);
+				}
+				catch (InterruptedException e) { }
+				catch (FileNotFoundException e) { }
+			}
+	    }
+	};
 	
 	private OnScrollListener getOnScrollListener(){
 		return new OnScrollListener() {
 			
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
-				if(scrollState == SCROLL_STATE_IDLE){
-					generateVisibleThumbs();
-				}
+				
 			}
 			
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-				lastFirstVisibleItem = firstVisibleItem;
-				lastVisibleItemCount = visibleItemCount;
-				
-				if(prevVisiblePosition < firstVisibleItem){
-					isScrollingDown = true;
+				if(visibleItemCount >= 12){
+					currentVisibleItemCount = visibleItemCount;
 				}
-				else if(prevVisiblePosition > firstVisibleItem){
-					isScrollingDown = false;
-				}
-				
-				prevVisiblePosition = firstVisibleItem;
 			}
 		};
 	}
 	
-	private class FillCache extends AsyncTask<int[], Void, Void> {
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			getSherlock().setProgressBarIndeterminateVisibility(true);
-		}
-		
-		
-		@Override
-		protected Void doInBackground(int[]... params) {
-			
-			if(files.size() > 0 && params[0].length >= 2){
-				int offset = params[0][0];
-				int length = params[0][1];
-				
-				boolean reverse = false;
-				if(params[0].length == 3 && params[0][2] == 1){
-					reverse = true;
-				}
-				
-				
-				if(offset < 0){
-					offset = 0;
-				}
-				
-				if(offset+length > files.size()){
-					length = files.size() - offset - 1;
-				}
-				
-				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
-				
-				int start;
-				int end;
-				if(!reverse){
-					start = offset;
-					end = offset+length;
-				}
-				else{
-					start = offset+length;
-					end = offset;
-				}
-				int i = start;
-				while(true){
-					if(files.size() > i){
-						File file = files.get(i);
-						if(file != null){
-							final String thumbPath = thumbsDir + file.getName();
-							if(memCache.get(thumbPath) == null){
-								/*final FillCache asyncTaskContext = this;
-								Thread thread = new Thread(){
-									@Override
-									public void run() {
-										try {
-											FileInputStream input = new FileInputStream(thumbPath);
-											memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(SafeCameraApplication.getAppContext()).decrypt(input, asyncTaskContext), 300));
-											publishProgress();
-										}
-										catch (FileNotFoundException e) { }
-									}
-								};
-								thread.start();*/
-								
-								try {
-									FileInputStream input = new FileInputStream(thumbPath);
-									memCache.put(thumbPath, Helpers.decodeBitmap(Helpers.getAESCrypt(SafeCameraApplication.getAppContext()).decrypt(input, this), 300));
-								}
-								catch (FileNotFoundException e) { }
-								publishProgress();
-							}
-							if(isCancelled()){
-								break;
-							}
-							//publishProgress();
-						}
-						if(i==end){
-							break;
-						}
-						if(reverse){
-							i--;
-						}
-						else{
-							i++;
-						}
-					}
-				}
-			}
-			return null;
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... values) {
-			super.onProgressUpdate(values);
-
-			galleryAdapter.notifyDataSetChanged();
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-
-			galleryAdapter.notifyDataSetChanged();
-			fillCacheTask = null;
-			getSherlock().setProgressBarIndeterminateVisibility(false);
-		}
-
-	}
 	
 	private class GenerateThumbs extends AsyncTask<ArrayList<File>, Integer, Void> {
 
