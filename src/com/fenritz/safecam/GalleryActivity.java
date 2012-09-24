@@ -830,7 +830,9 @@ public class GalleryActivity extends SherlockActivity {
 								boolean found = false;
 								for(Dec item : queue){
 									if(item.fileName.equals(thumbPath)){
-										item.images.add(imageView);
+										synchronized (item.images) {
+											item.images.add(imageView);
+										}
 										found = true;
 									}
 								}

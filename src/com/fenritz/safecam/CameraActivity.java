@@ -23,10 +23,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
@@ -42,6 +40,7 @@ import android.view.KeyEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -296,6 +295,8 @@ public class CameraActivity extends SherlockActivity {
 		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
 
 		// Set flash mode from preferences and update button accordingly
+		
+		
 		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 
 		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
@@ -321,6 +322,13 @@ public class CameraActivity extends SherlockActivity {
 		Camera.Parameters parameters = mCamera.getParameters();
 		List<String> flashModes = parameters.getSupportedFlashModes();
 		List<String> focusModes = parameters.getSupportedFocusModes();
+		
+		if(flashModes == null || flashModes.size() == 0){
+			flashButton.setVisibility(View.INVISIBLE);
+		}
+		else{
+			flashButton.setVisibility(View.VISIBLE);
+		}
 		
 		if(flashModes != null && flashModes.contains(flashMode)){
 			parameters.setFlashMode(flashMode);
@@ -490,7 +498,7 @@ public class CameraActivity extends SherlockActivity {
 		}
 		
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
-		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", false);
+		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", true);
 		
 		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
 			takePhoto();
@@ -520,22 +528,25 @@ public class CameraActivity extends SherlockActivity {
 				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 				String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 
+				int flashButtonImage = R.drawable.flash_off;
 				if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
 					flashMode = Parameters.FLASH_MODE_ON;
-					flashButton.setImageResource(R.drawable.flash_on);
+					flashButtonImage = R.drawable.flash_on;
 					isFlashOn = true;
 				}
 				else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
 					flashMode = Parameters.FLASH_MODE_OFF;
-					flashButton.setImageResource(R.drawable.flash_off);
 					isFlashOn = false;
 				}
 
 				Camera.Parameters parameters = mCamera.getParameters();
-				parameters.setFlashMode(flashMode);
-				mCamera.setParameters(parameters);
-
-				preferences.edit().putString(CameraActivity.FLASH_MODE, flashMode).commit();
+				List<String> flashModes = parameters.getSupportedFlashModes();
+				if(flashModes != null && flashModes.contains(flashMode)){
+					parameters.setFlashMode(flashMode);
+					mCamera.setParameters(parameters);
+					flashButton.setImageResource(flashButtonImage);
+					preferences.edit().putString(CameraActivity.FLASH_MODE, flashMode).commit();
+				}
 				changeRotation(mOrientation);
 			}
 		};
@@ -822,33 +833,6 @@ public class CameraActivity extends SherlockActivity {
 		view.startAnimation(rotateAnimation);
 	}
 
-	/**
-	 * Rotates given Drawable
-	 * 
-	 * @param drawableId
-	 *            Drawable Id to rotate
-	 * @param degrees
-	 *            Rotate drawable by Degrees
-	 * @return Rotated Drawable
-	 */
-	private Drawable getRotatedImage(int drawableId, int degrees) {
-		Bitmap original = BitmapFactory.decodeResource(getResources(), drawableId);
-		Matrix matrix = new Matrix();
-		matrix.postRotate(degrees);
-
-		Bitmap rotated = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
-		return new BitmapDrawable(rotated);
-	}
-	
-	private Drawable getRotatedImage(Drawable drawable, int degrees) {
-		Bitmap original = ((BitmapDrawable)drawable).getBitmap();
-		Matrix matrix = new Matrix();
-		matrix.postRotate(degrees);
-
-		Bitmap rotated = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
-		return new BitmapDrawable(rotated);
-	}
-
 	public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
 
 		private final String filename;
@@ -1066,26 +1050,12 @@ public class CameraActivity extends SherlockActivity {
 	        mSupportedPictureSizes = getSupportedImageSizes();
 	    }
 
-	   /* @Override
+	    @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 	    	View view = super.getView(position, convertView, parent);
-	    	TextView textView=(TextView) view.findViewById(android.R.id.text1);
-
-	    	
-	    	if(Helpers.isDemo(CameraActivity.this) && mSupportedPictureSizes.get(position).width > 640){
-	            textView.setTextColor(Color.GRAY);
-	    	}
-            else{
-            	textView.setTextColor(Color.GREEN);
-            }
-
+	    	((TextView) view.findViewById(android.R.id.text1)).setTextColor(Color.parseColor("#9a3333"));
             return view;
         }
-	    
-	    @Override
-		public boolean areAllItemsEnabled() {
-	        return false;
-	    }*/
 	}
 
 }

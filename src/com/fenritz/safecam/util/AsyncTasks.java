@@ -762,29 +762,31 @@ public class AsyncTasks {
 				return image;
 			}
 			
-			// Get from MediaStore
-			image = MediaStore.Images.Thumbnails.getThumbnail(SafeCameraApplication.getAppContext().getContentResolver(), imgId, MediaStore.Images.Thumbnails.MINI_KIND, null);
-			if(image != null){
-				image = getBitmap(image);
-				cache.put(params[0].getPath(), image);
-				return image;
-			}
-			
-			// Get from File and Resize it
-			image = Helpers.decodeFile(params[0], Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
-			
-			if(image != null){
-				cache.put(params[0].getPath(), image);
-				return image;
-			}
-			
-			// Get from Video
-			image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MINI_KIND);
-			if(image != null){
-				cache.put(params[0].getPath(), image);
-				return image;
-			}
+			try{
+				// Get from MediaStore
+				image = MediaStore.Images.Thumbnails.getThumbnail(SafeCameraApplication.getAppContext().getContentResolver(), imgId, MediaStore.Images.Thumbnails.MINI_KIND, null);
+				if(image != null){
+					image = getBitmap(image);
+					cache.put(params[0].getPath(), image);
+					return image;
+				}
 				
+				// Get from File and Resize it
+				image = Helpers.decodeFile(params[0], Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
+				
+				if(image != null){
+					cache.put(params[0].getPath(), image);
+					return image;
+				}
+				
+				// Get from Video
+				image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MINI_KIND);
+				if(image != null){
+					cache.put(params[0].getPath(), image);
+					return image;
+				}
+			}
+			catch(OutOfMemoryError e){}
 			return null;
 		}
 

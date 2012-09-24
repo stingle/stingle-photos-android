@@ -12,247 +12,6 @@ android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat$Accessibi
 android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat$AccessibilityServiceInfoStubImpl
 android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat$AccessibilityServiceInfoVersionImpl
 android.support.v4.accessibilityservice.AccessibilityServiceInfoCompatIcs
-android.support.v4.app.ActivityCompat
-android.support.v4.app.ActivityCompatHoneycomb:
-    28:28:ActivityCompatHoneycomb()
-    34:35:static void startActivities(android.app.Activity,android.content.Intent[])
-    39:40:static void dump(android.app.Activity,java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[])
-android.support.v4.app.BackStackRecord:
-    static final java.lang.String TAG
-    static final int OP_NULL
-    static final int OP_ADD
-    static final int OP_REPLACE
-    static final int OP_REMOVE
-    static final int OP_HIDE
-    static final int OP_SHOW
-    static final int OP_DETACH
-    static final int OP_ATTACH
-    291:291:public int getId()
-    295:295:public int getBreadCrumbTitleRes()
-    299:299:public int getBreadCrumbShortTitleRes()
-    303:306:public java.lang.CharSequence getBreadCrumbTitle()
-    310:313:public java.lang.CharSequence getBreadCrumbShortTitle()
-    332:333:public android.support.v4.app.FragmentTransaction add(android.support.v4.app.Fragment,java.lang.String)
-    337:338:public android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment)
-    342:343:public android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment,java.lang.String)
-    347:371:private void doAddOp(int,android.support.v4.app.Fragment,java.lang.String,int)
-    374:374:public android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment)
-    378:383:public android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment,java.lang.String)
-    387:392:public android.support.v4.app.FragmentTransaction remove(android.support.v4.app.Fragment)
-    396:401:public android.support.v4.app.FragmentTransaction hide(android.support.v4.app.Fragment)
-    405:410:public android.support.v4.app.FragmentTransaction show(android.support.v4.app.Fragment)
-    414:419:public android.support.v4.app.FragmentTransaction detach(android.support.v4.app.Fragment)
-    423:428:public android.support.v4.app.FragmentTransaction attach(android.support.v4.app.Fragment)
-    432:432:public android.support.v4.app.FragmentTransaction setCustomAnimations(int,int)
-    437:441:public android.support.v4.app.FragmentTransaction setCustomAnimations(int,int,int,int)
-    445:446:public android.support.v4.app.FragmentTransaction setTransition(int)
-    450:451:public android.support.v4.app.FragmentTransaction setTransitionStyle(int)
-    455:461:public android.support.v4.app.FragmentTransaction addToBackStack(java.lang.String)
-    465:465:public boolean isAddToBackStackAllowed()
-    469:474:public android.support.v4.app.FragmentTransaction disallowAddToBackStack()
-    478:480:public android.support.v4.app.FragmentTransaction setBreadCrumbTitle(int)
-    484:486:public android.support.v4.app.FragmentTransaction setBreadCrumbTitle(java.lang.CharSequence)
-    490:492:public android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(int)
-    496:498:public android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(java.lang.CharSequence)
-    525:525:public int commit()
-    529:529:public int commitAllowingStateLoss()
-    533:542:int commitInternal(boolean)
-    712:712:public int getTransition()
-    716:716:public int getTransitionStyle()
-    720:720:public boolean isEmpty()
-android.support.v4.app.DialogFragment
-android.support.v4.app.Fragment:
-    static final int INITIALIZING
-    static final int CREATED
-    static final int ACTIVITY_CREATED
-    static final int STOPPED
-    static final int STARTED
-    static final int RESUMED
-    461:461:public final int getId()
-    468:468:public final java.lang.String getTag()
-    479:483:public void setArguments(android.os.Bundle)
-    490:490:public final android.os.Bundle getArguments()
-    502:507:public void setInitialSavedState(android.support.v4.app.Fragment$SavedState)
-    521:523:public void setTargetFragment(android.support.v4.app.Fragment,int)
-    529:529:public final android.support.v4.app.Fragment getTargetFragment()
-    536:536:public final int getTargetRequestCode()
-    550:553:public final android.content.res.Resources getResources()
-    563:563:public final java.lang.CharSequence getText(int)
-    573:573:public final java.lang.String getString(int)
-    586:586:public final varargs java.lang.String getString(int,java.lang.Object[])
-    597:597:public final android.support.v4.app.FragmentManager getFragmentManager()
-    604:604:public final boolean isAdded()
-    613:613:public final boolean isDetached()
-    622:622:public final boolean isRemoving()
-    633:633:public final boolean isInLayout()
-    641:641:public final boolean isResumed()
-    650:650:public final boolean isVisible()
-    662:662:public final boolean isHidden()
-    690:691:public void setRetainInstance(boolean)
-    694:694:public final boolean getRetainInstance()
-    705:711:public void setHasOptionsMenu(boolean)
-    723:729:public void setMenuVisibility(boolean)
-    745:750:public void setUserVisibleHint(boolean)
-    757:757:public boolean getUserVisibleHint()
-    764:772:public android.support.v4.app.LoaderManager getLoaderManager()
-    780:784:public void startActivity(android.content.Intent)
-    791:795:public void startActivityForResult(android.content.Intent,int)
-    946:946:public android.view.View getView()
-    1218:1219:public void registerForContextMenu(android.view.View)
-    1229:1230:public void unregisterForContextMenu(android.view.View)
-android.support.v4.app.Fragment$SavedState:
-    291:293:Fragment$SavedState(android.os.Bundle)
-android.support.v4.app.FragmentActivity:
-    private static final java.lang.String TAG
-    private static final java.lang.String FRAGMENTS_TAG
-    private static final int HONEYCOMB
-    static final int MSG_REALLY_STOPPED
-    static final int MSG_RESUME_PENDING
-    558:560:public java.lang.Object getLastCustomNonConfigurationInstance()
-    662:662:public android.support.v4.app.FragmentManager getSupportFragmentManager()
-    682:690:public void startActivityFromFragment(android.support.v4.app.Fragment,android.content.Intent,int)
-    711:716:public android.support.v4.app.LoaderManager getSupportLoaderManager()
-android.support.v4.app.FragmentActivity$FragmentTag:
-    public static final int Fragment_id
-    public static final int Fragment_name
-    public static final int Fragment_tag
-    121:121:FragmentActivity$FragmentTag()
-android.support.v4.app.FragmentManager:
-    public static final int POP_BACK_STACK_INCLUSIVE
-    public abstract android.support.v4.app.FragmentTransaction beginTransaction()
-    139:139:public android.support.v4.app.FragmentTransaction openTransaction()
-    public abstract boolean executePendingTransactions()
-    public abstract android.support.v4.app.Fragment findFragmentById(int)
-    public abstract android.support.v4.app.Fragment findFragmentByTag(java.lang.String)
-    public abstract void popBackStack()
-    public abstract boolean popBackStackImmediate()
-    public abstract void popBackStack(java.lang.String,int)
-    public abstract boolean popBackStackImmediate(java.lang.String,int)
-    public abstract void popBackStack(int,int)
-    public abstract boolean popBackStackImmediate(int,int)
-    public abstract int getBackStackEntryCount()
-    public abstract android.support.v4.app.FragmentManager$BackStackEntry getBackStackEntryAt(int)
-    public abstract void addOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
-    public abstract void removeOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
-    public abstract void putFragment(android.os.Bundle,java.lang.String,android.support.v4.app.Fragment)
-    public abstract android.support.v4.app.Fragment getFragment(android.os.Bundle,java.lang.String)
-    public abstract android.support.v4.app.Fragment$SavedState saveFragmentInstanceState(android.support.v4.app.Fragment)
-    public abstract void dump(java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[])
-    334:335:public static void enableDebugLogging(boolean)
-android.support.v4.app.FragmentManager$BackStackEntry
-android.support.v4.app.FragmentManagerImpl:
-    static final java.lang.String TAG
-    static final java.lang.String TARGET_REQUEST_CODE_STATE_TAG
-    static final java.lang.String TARGET_STATE_TAG
-    static final java.lang.String VIEW_STATE_TAG
-    static final java.lang.String USER_VISIBLE_HINT_TAG
-    static final int ANIM_DUR
-    public static final int ANIM_STYLE_OPEN_ENTER
-    public static final int ANIM_STYLE_OPEN_EXIT
-    public static final int ANIM_STYLE_CLOSE_ENTER
-    public static final int ANIM_STYLE_CLOSE_EXIT
-    public static final int ANIM_STYLE_FADE_ENTER
-    public static final int ANIM_STYLE_FADE_EXIT
-    426:426:public android.support.v4.app.FragmentTransaction beginTransaction()
-    436:441:public void popBackStack()
-    452:457:public void popBackStack(java.lang.String,int)
-    461:463:public boolean popBackStackImmediate(java.lang.String,int)
-    468:476:public void popBackStack(int,int)
-    480:485:public boolean popBackStackImmediate(int,int)
-    490:490:public int getBackStackEntryCount()
-    495:495:public android.support.v4.app.FragmentManager$BackStackEntry getBackStackEntryAt(int)
-    500:504:public void addOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
-    508:511:public void removeOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
-    542:550:public android.support.v4.app.Fragment$SavedState saveFragmentInstanceState(android.support.v4.app.Fragment)
-    1286:1294:public android.support.v4.app.Fragment findFragmentByWho(java.lang.String)
-    1309:1325:public void enqueueAction(java.lang.Runnable,boolean)
-    1328:1344:public int allocBackStackIndex(android.support.v4.app.BackStackRecord)
-android.support.v4.app.FragmentManagerImpl$2
-android.support.v4.app.FragmentManagerImpl$3
-android.support.v4.app.FragmentManagerImpl$4
-android.support.v4.app.FragmentPagerAdapter
-android.support.v4.app.FragmentStatePagerAdapter
-android.support.v4.app.FragmentTransaction:
-    public static final int TRANSIT_ENTER_MASK
-    public static final int TRANSIT_EXIT_MASK
-    public static final int TRANSIT_UNSET
-    public static final int TRANSIT_NONE
-    public static final int TRANSIT_FRAGMENT_OPEN
-    public static final int TRANSIT_FRAGMENT_CLOSE
-    public static final int TRANSIT_FRAGMENT_FADE
-    public abstract android.support.v4.app.FragmentTransaction add(android.support.v4.app.Fragment,java.lang.String)
-    public abstract android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment)
-    public abstract android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment,java.lang.String)
-    public abstract android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment)
-    public abstract android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment,java.lang.String)
-    public abstract android.support.v4.app.FragmentTransaction remove(android.support.v4.app.Fragment)
-    public abstract android.support.v4.app.FragmentTransaction hide(android.support.v4.app.Fragment)
-    public abstract android.support.v4.app.FragmentTransaction show(android.support.v4.app.Fragment)
-    public abstract android.support.v4.app.FragmentTransaction detach(android.support.v4.app.Fragment)
-    public abstract android.support.v4.app.FragmentTransaction attach(android.support.v4.app.Fragment)
-    public abstract boolean isEmpty()
-    public abstract android.support.v4.app.FragmentTransaction setCustomAnimations(int,int)
-    public abstract android.support.v4.app.FragmentTransaction setCustomAnimations(int,int,int,int)
-    public abstract android.support.v4.app.FragmentTransaction setTransition(int)
-    public abstract android.support.v4.app.FragmentTransaction setTransitionStyle(int)
-    public abstract android.support.v4.app.FragmentTransaction addToBackStack(java.lang.String)
-    public abstract boolean isAddToBackStackAllowed()
-    public abstract android.support.v4.app.FragmentTransaction disallowAddToBackStack()
-    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbTitle(int)
-    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbTitle(java.lang.CharSequence)
-    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(int)
-    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(java.lang.CharSequence)
-    public abstract int commit()
-    public abstract int commitAllowingStateLoss()
-android.support.v4.app.HCSparseArray:
-    223:228:public void setValueAt(int,java.lang.Object)
-    236:240:public int indexOfKey(int)
-    252:260:public int indexOfValue(java.lang.Object)
-    283:310:public void append(int,java.lang.Object)
-android.support.v4.app.ListFragment
-android.support.v4.app.ListFragment$1
-android.support.v4.app.ListFragment$2
-android.support.v4.app.LoaderManager:
-    public abstract android.support.v4.content.Loader initLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
-    public abstract android.support.v4.content.Loader restartLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
-    public abstract void destroyLoader(int)
-    public abstract android.support.v4.content.Loader getLoader(int)
-    public abstract void dump(java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[])
-    176:177:public static void enableDebugLogging(boolean)
-android.support.v4.app.LoaderManagerImpl:
-    static final java.lang.String TAG
-    boolean mRetainingStarted
-    boolean mCreatingLoader
-    485:488:private android.support.v4.app.LoaderManagerImpl$LoaderInfo createLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
-    494:499:private android.support.v4.app.LoaderManagerImpl$LoaderInfo createAndInstallLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
-    504:511:void installLoader(android.support.v4.app.LoaderManagerImpl$LoaderInfo)
-    539:561:public android.support.v4.content.Loader initLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
-    589:643:public android.support.v4.content.Loader restartLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
-    654:674:public void destroyLoader(int)
-    682:693:public android.support.v4.content.Loader getLoader(int)
-android.support.v4.app.LoaderManagerImpl$LoaderInfo:
-    225:229:public LoaderManagerImpl$LoaderInfo(android.support.v4.app.LoaderManagerImpl,int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
-    359:412:public void onLoadComplete(android.support.v4.content.Loader,java.lang.Object)
-android.support.v4.app.NavUtils
-android.support.v4.app.NotificationCompat
-android.support.v4.app.NotificationCompat$Builder
-android.support.v4.app.NotificationCompat$NotificationCompatImpl
-android.support.v4.app.NotificationCompat$NotificationCompatImplBase
-android.support.v4.app.NotificationCompat$NotificationCompatImplHoneycomb
-android.support.v4.app.NotificationCompatHoneycomb
-android.support.v4.app.ServiceCompat
-android.support.v4.app.ShareCompat
-android.support.v4.app.ShareCompat$IntentBuilder
-android.support.v4.app.ShareCompat$IntentReader
-android.support.v4.app.ShareCompat$ShareCompatImpl
-android.support.v4.app.ShareCompat$ShareCompatImplBase
-android.support.v4.app.ShareCompat$ShareCompatImplICS
-android.support.v4.app.ShareCompatICS
-android.support.v4.app.TaskStackBuilder
-android.support.v4.app.TaskStackBuilder$TaskStackBuilderImpl
-android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplBase
-android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplHoneycomb
-android.support.v4.app.TaskStackBuilderHoneycomb
 android.support.v4.content.AsyncTaskLoader
 android.support.v4.content.AsyncTaskLoader$LoadTask
 android.support.v4.content.CursorLoader
@@ -268,8 +27,6 @@ android.support.v4.content.Loader:
     175:175:public boolean isReset()
     217:218:public void forceLoad()
     225:225:protected void onForceLoad()
-    261:263:public void abandon()
-    275:275:protected void onAbandon()
     312:314:public boolean takeContentChanged()
     326:334:public void onContentChanged()
 android.support.v4.content.Loader$ForceLoadContentObserver
@@ -352,12 +109,6 @@ android.support.v4.view.MotionEventCompat:
     148:148:public static int getActionMasked(android.view.MotionEvent)
 android.support.v4.view.MotionEventCompatEclair:
     24:24:MotionEventCompatEclair()
-android.support.v4.view.PagerAdapter:
-    public static final int POSITION_UNCHANGED
-    public static final int POSITION_NONE
-    78:79:public PagerAdapter()
-    268:268:public int getItemPosition(java.lang.Object)
-    276:277:public void notifyDataSetChanged()
 android.support.v4.view.PagerTitleStrip:
     private static final java.lang.String TAG
     private static final int SIDE_ALPHA
@@ -517,22 +268,1436 @@ android.support.v4.widget.SearchViewCompatHoneycomb$OnQueryTextListenerCompatBri
 android.support.v4.widget.SimpleCursorAdapter
 android.support.v4.widget.SimpleCursorAdapter$CursorToStringConverter
 android.support.v4.widget.SimpleCursorAdapter$ViewBinder
+com.adobe.xmp.XMPConst
+com.adobe.xmp.XMPDateTime:
+    public abstract java.lang.String getISO8601String()
+com.adobe.xmp.XMPDateTimeFactory
+com.adobe.xmp.XMPError
+com.adobe.xmp.XMPIterator:
+    public abstract void skipSubtree()
+    public abstract void skipSiblings()
+com.adobe.xmp.XMPMeta:
+    public abstract com.adobe.xmp.properties.XMPProperty getProperty(java.lang.String,java.lang.String)
+    public abstract com.adobe.xmp.properties.XMPProperty getArrayItem(java.lang.String,java.lang.String,int)
+    public abstract int countArrayItems(java.lang.String,java.lang.String)
+    public abstract com.adobe.xmp.properties.XMPProperty getStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract com.adobe.xmp.properties.XMPProperty getQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract void setProperty(java.lang.String,java.lang.String,java.lang.Object,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setProperty(java.lang.String,java.lang.String,java.lang.Object)
+    public abstract void setArrayItem(java.lang.String,java.lang.String,int,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setArrayItem(java.lang.String,java.lang.String,int,java.lang.String)
+    public abstract void insertArrayItem(java.lang.String,java.lang.String,int,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public abstract void insertArrayItem(java.lang.String,java.lang.String,int,java.lang.String)
+    public abstract void appendArrayItem(java.lang.String,java.lang.String,com.adobe.xmp.options.PropertyOptions,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public abstract void appendArrayItem(java.lang.String,java.lang.String,java.lang.String)
+    public abstract void setStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract void setQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract void deleteProperty(java.lang.String,java.lang.String)
+    public abstract void deleteArrayItem(java.lang.String,java.lang.String,int)
+    public abstract void deleteStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract void deleteQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract boolean doesPropertyExist(java.lang.String,java.lang.String)
+    public abstract boolean doesArrayItemExist(java.lang.String,java.lang.String,int)
+    public abstract boolean doesStructFieldExist(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract boolean doesQualifierExist(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract com.adobe.xmp.properties.XMPProperty getLocalizedText(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract void setLocalizedText(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public abstract java.lang.Boolean getPropertyBoolean(java.lang.String,java.lang.String)
+    public abstract java.lang.Integer getPropertyInteger(java.lang.String,java.lang.String)
+    public abstract java.lang.Long getPropertyLong(java.lang.String,java.lang.String)
+    public abstract java.lang.Double getPropertyDouble(java.lang.String,java.lang.String)
+    public abstract com.adobe.xmp.XMPDateTime getPropertyDate(java.lang.String,java.lang.String)
+    public abstract byte[] getPropertyBase64(java.lang.String,java.lang.String)
+    public abstract void setPropertyBoolean(java.lang.String,java.lang.String,boolean,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setPropertyBoolean(java.lang.String,java.lang.String,boolean)
+    public abstract void setPropertyInteger(java.lang.String,java.lang.String,int,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setPropertyInteger(java.lang.String,java.lang.String,int)
+    public abstract void setPropertyLong(java.lang.String,java.lang.String,long,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setPropertyLong(java.lang.String,java.lang.String,long)
+    public abstract void setPropertyDouble(java.lang.String,java.lang.String,double,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setPropertyDouble(java.lang.String,java.lang.String,double)
+    public abstract void setPropertyDate(java.lang.String,java.lang.String,com.adobe.xmp.XMPDateTime,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setPropertyDate(java.lang.String,java.lang.String,com.adobe.xmp.XMPDateTime)
+    public abstract void setPropertyCalendar(java.lang.String,java.lang.String,java.util.Calendar,com.adobe.xmp.options.PropertyOptions)
+    public abstract void setPropertyCalendar(java.lang.String,java.lang.String,java.util.Calendar)
+    public abstract void setPropertyBase64(java.lang.String,java.lang.String,byte[],com.adobe.xmp.options.PropertyOptions)
+    public abstract void setPropertyBase64(java.lang.String,java.lang.String,byte[])
+    public abstract com.adobe.xmp.XMPIterator iterator(com.adobe.xmp.options.IteratorOptions)
+    public abstract com.adobe.xmp.XMPIterator iterator(java.lang.String,java.lang.String,com.adobe.xmp.options.IteratorOptions)
+    public abstract java.lang.String getObjectName()
+    public abstract void setObjectName(java.lang.String)
+    public abstract java.lang.String getPacketHeader()
+    public abstract java.lang.Object clone()
+    public abstract void sort()
+    public abstract void normalize(com.adobe.xmp.options.ParseOptions)
+    public abstract java.lang.String dumpObject()
+com.adobe.xmp.XMPMetaFactory:
+    private XMPMetaFactory()
+    public static com.adobe.xmp.XMPMeta create()
+    public static com.adobe.xmp.XMPMeta parse(java.io.InputStream)
+    public static com.adobe.xmp.XMPMeta parse(java.io.InputStream,com.adobe.xmp.options.ParseOptions)
+    public static com.adobe.xmp.XMPMeta parseFromString(java.lang.String)
+    public static com.adobe.xmp.XMPMeta parseFromString(java.lang.String,com.adobe.xmp.options.ParseOptions)
+    public static void serialize(com.adobe.xmp.XMPMeta,java.io.OutputStream)
+    public static void serialize(com.adobe.xmp.XMPMeta,java.io.OutputStream,com.adobe.xmp.options.SerializeOptions)
+    public static byte[] serializeToBuffer(com.adobe.xmp.XMPMeta,com.adobe.xmp.options.SerializeOptions)
+    public static java.lang.String serializeToString(com.adobe.xmp.XMPMeta,com.adobe.xmp.options.SerializeOptions)
+    private static void assertImplementation(com.adobe.xmp.XMPMeta)
+    public static void reset()
+    public static synchronized com.adobe.xmp.XMPVersionInfo getVersionInfo()
+com.adobe.xmp.XMPMetaFactory$1
+com.adobe.xmp.XMPPathFactory
+com.adobe.xmp.XMPSchemaRegistry:
+    public abstract java.util.Map getNamespaces()
+    public abstract java.util.Map getPrefixes()
+    public abstract void deleteNamespace(java.lang.String)
+    public abstract com.adobe.xmp.properties.XMPAliasInfo resolveAlias(java.lang.String,java.lang.String)
+    public abstract com.adobe.xmp.properties.XMPAliasInfo[] findAliases(java.lang.String)
+    public abstract java.util.Map getAliases()
+com.adobe.xmp.XMPUtils:
+    private XMPUtils()
+    public static java.lang.String catenateArrayItems(com.adobe.xmp.XMPMeta,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)
+    public static void separateArrayItems(com.adobe.xmp.XMPMeta,java.lang.String,java.lang.String,java.lang.String,com.adobe.xmp.options.PropertyOptions,boolean)
+    public static void removeProperties(com.adobe.xmp.XMPMeta,java.lang.String,java.lang.String,boolean,boolean)
+    public static void appendProperties(com.adobe.xmp.XMPMeta,com.adobe.xmp.XMPMeta,boolean,boolean)
+    public static void appendProperties(com.adobe.xmp.XMPMeta,com.adobe.xmp.XMPMeta,boolean,boolean,boolean)
+    public static java.lang.String convertFromBoolean(boolean)
+    public static java.lang.String convertFromInteger(int)
+    public static java.lang.String convertFromLong(long)
+    public static java.lang.String convertFromDouble(double)
+    public static java.lang.String encodeBase64(byte[])
+com.adobe.xmp.XMPVersionInfo:
+    public abstract int getMajor()
+    public abstract int getMinor()
+    public abstract int getMicro()
+    public abstract int getBuild()
+    public abstract boolean isDebug()
+    public abstract java.lang.String getMessage()
+com.adobe.xmp.impl.Base64:
+    private static final byte INVALID
+    private static final byte WHITESPACE
+    private static final byte EQUAL
+    public Base64()
+    public static final byte[] encode(byte[])
+    public static final byte[] encode(byte[],int)
+    public static final java.lang.String encode(java.lang.String)
+    public static final java.lang.String decode(java.lang.String)
+com.adobe.xmp.impl.ByteBuffer:
+    public ByteBuffer(byte[],int)
+    public ByteBuffer(byte[],int,int)
+    public byte byteAt(int)
+    public void append(com.adobe.xmp.impl.ByteBuffer)
+com.adobe.xmp.impl.CountOutputStream
+com.adobe.xmp.impl.FixASCIIControlsReader:
+    private static final int STATE_START
+    private static final int STATE_AMP
+    private static final int STATE_HASH
+    private static final int STATE_HEX
+    private static final int STATE_DIG1
+    private static final int STATE_ERROR
+    private static final int BUFFER_SIZE
+com.adobe.xmp.impl.ISO8601Converter:
+    private ISO8601Converter()
+com.adobe.xmp.impl.Latin1Converter:
+    private static final int STATE_START
+    private static final int STATE_UTF8CHAR
+    private Latin1Converter()
+com.adobe.xmp.impl.ParameterAsserts:
+    private ParameterAsserts()
+    public static void assertStructName(java.lang.String)
+    public static void assertImplementation(com.adobe.xmp.XMPMeta)
+com.adobe.xmp.impl.ParseRDF:
+    public static final int RDFTERM_OTHER
+    public static final int RDFTERM_RDF
+    public static final int RDFTERM_ID
+    public static final int RDFTERM_ABOUT
+    public static final int RDFTERM_PARSE_TYPE
+    public static final int RDFTERM_RESOURCE
+    public static final int RDFTERM_NODE_ID
+    public static final int RDFTERM_DATATYPE
+    public static final int RDFTERM_DESCRIPTION
+    public static final int RDFTERM_LI
+    public static final int RDFTERM_ABOUT_EACH
+    public static final int RDFTERM_ABOUT_EACH_PREFIX
+    public static final int RDFTERM_BAG_ID
+    public static final int RDFTERM_FIRST_CORE
+    public static final int RDFTERM_LAST_CORE
+    public static final int RDFTERM_FIRST_SYNTAX
+    public static final int RDFTERM_LAST_SYNTAX
+    public static final int RDFTERM_FIRST_OLD
+    public static final int RDFTERM_LAST_OLD
+    public static final java.lang.String DEFAULT_PREFIX
+com.adobe.xmp.impl.QName
+com.adobe.xmp.impl.Utils:
+    public static final int UUID_SEGMENT_COUNT
+    public static final int UUID_LENGTH
+    private Utils()
+    static boolean isInternalProperty(java.lang.String,java.lang.String)
+    public static java.lang.String escapeXML(java.lang.String,boolean,boolean)
+    static java.lang.String removeControlChars(java.lang.String)
+com.adobe.xmp.impl.XMPDateTimeImpl:
+    public XMPDateTimeImpl(java.util.Date,java.util.TimeZone)
+    public XMPDateTimeImpl(java.lang.String)
+com.adobe.xmp.impl.XMPIteratorImpl:
+    public void skipSubtree()
+    public void skipSiblings()
+com.adobe.xmp.impl.XMPIteratorImpl$NodeIterator:
+    protected static final int ITERATE_NODE
+    protected static final int ITERATE_CHILDREN
+    protected static final int ITERATE_QUALIFIER
+    protected java.util.Iterator getChildrenIterator()
+    protected void setChildrenIterator(java.util.Iterator)
+com.adobe.xmp.impl.XMPIteratorImpl$NodeIterator$1:
+    public java.lang.String getNamespace()
+    public com.adobe.xmp.options.PropertyOptions getOptions()
+    public java.lang.String getLanguage()
+com.adobe.xmp.impl.XMPMetaImpl:
+    private static final int VALUE_STRING
+    private static final int VALUE_BOOLEAN
+    private static final int VALUE_INTEGER
+    private static final int VALUE_LONG
+    private static final int VALUE_DOUBLE
+    private static final int VALUE_DATE
+    private static final int VALUE_CALENDAR
+    private static final int VALUE_BASE64
+    public void appendArrayItem(java.lang.String,java.lang.String,com.adobe.xmp.options.PropertyOptions,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public void appendArrayItem(java.lang.String,java.lang.String,java.lang.String)
+    public int countArrayItems(java.lang.String,java.lang.String)
+    public void deleteArrayItem(java.lang.String,java.lang.String,int)
+    public void deleteProperty(java.lang.String,java.lang.String)
+    public void deleteQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public void deleteStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public boolean doesPropertyExist(java.lang.String,java.lang.String)
+    public boolean doesArrayItemExist(java.lang.String,java.lang.String,int)
+    public boolean doesStructFieldExist(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public boolean doesQualifierExist(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public com.adobe.xmp.properties.XMPProperty getArrayItem(java.lang.String,java.lang.String,int)
+    public com.adobe.xmp.properties.XMPProperty getLocalizedText(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public void setLocalizedText(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public com.adobe.xmp.properties.XMPProperty getProperty(java.lang.String,java.lang.String)
+    protected com.adobe.xmp.properties.XMPProperty getProperty(java.lang.String,java.lang.String,int)
+    public java.lang.Boolean getPropertyBoolean(java.lang.String,java.lang.String)
+    public void setPropertyBoolean(java.lang.String,java.lang.String,boolean,com.adobe.xmp.options.PropertyOptions)
+    public void setPropertyBoolean(java.lang.String,java.lang.String,boolean)
+    public java.lang.Integer getPropertyInteger(java.lang.String,java.lang.String)
+    public void setPropertyInteger(java.lang.String,java.lang.String,int,com.adobe.xmp.options.PropertyOptions)
+    public void setPropertyInteger(java.lang.String,java.lang.String,int)
+    public java.lang.Long getPropertyLong(java.lang.String,java.lang.String)
+    public void setPropertyLong(java.lang.String,java.lang.String,long,com.adobe.xmp.options.PropertyOptions)
+    public void setPropertyLong(java.lang.String,java.lang.String,long)
+    public java.lang.Double getPropertyDouble(java.lang.String,java.lang.String)
+    public void setPropertyDouble(java.lang.String,java.lang.String,double,com.adobe.xmp.options.PropertyOptions)
+    public void setPropertyDouble(java.lang.String,java.lang.String,double)
+    public com.adobe.xmp.XMPDateTime getPropertyDate(java.lang.String,java.lang.String)
+    public void setPropertyDate(java.lang.String,java.lang.String,com.adobe.xmp.XMPDateTime,com.adobe.xmp.options.PropertyOptions)
+    public void setPropertyDate(java.lang.String,java.lang.String,com.adobe.xmp.XMPDateTime)
+    public void setPropertyCalendar(java.lang.String,java.lang.String,java.util.Calendar,com.adobe.xmp.options.PropertyOptions)
+    public void setPropertyCalendar(java.lang.String,java.lang.String,java.util.Calendar)
+    public byte[] getPropertyBase64(java.lang.String,java.lang.String)
+    public void setPropertyBase64(java.lang.String,java.lang.String,byte[],com.adobe.xmp.options.PropertyOptions)
+    public void setPropertyBase64(java.lang.String,java.lang.String,byte[])
+    public com.adobe.xmp.properties.XMPProperty getQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public com.adobe.xmp.properties.XMPProperty getStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public com.adobe.xmp.XMPIterator iterator(com.adobe.xmp.options.IteratorOptions)
+    public void setArrayItem(java.lang.String,java.lang.String,int,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public void setArrayItem(java.lang.String,java.lang.String,int,java.lang.String)
+    public void insertArrayItem(java.lang.String,java.lang.String,int,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public void insertArrayItem(java.lang.String,java.lang.String,int,java.lang.String)
+    public void setProperty(java.lang.String,java.lang.String,java.lang.Object,com.adobe.xmp.options.PropertyOptions)
+    public void setProperty(java.lang.String,java.lang.String,java.lang.Object)
+    public void setQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public void setQualifier(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public void setStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,com.adobe.xmp.options.PropertyOptions)
+    public void setStructField(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+    public java.lang.String getObjectName()
+    public void setObjectName(java.lang.String)
+    public java.lang.String getPacketHeader()
+    public java.lang.String dumpObject()
+    public void sort()
+    public void normalize(com.adobe.xmp.options.ParseOptions)
+    private void doSetArrayItem(com.adobe.xmp.impl.XMPNode,int,java.lang.String,com.adobe.xmp.options.PropertyOptions,boolean)
+    void setNode(com.adobe.xmp.impl.XMPNode,java.lang.Object,com.adobe.xmp.options.PropertyOptions,boolean)
+com.adobe.xmp.impl.XMPMetaImpl$1
+com.adobe.xmp.impl.XMPMetaImpl$2
+com.adobe.xmp.impl.XMPMetaParser:
+    private XMPMetaParser()
+com.adobe.xmp.impl.XMPNode:
+    public void clear()
+    public java.lang.String dumpNode(boolean)
+    public void sort()
+    private void dumpNode(java.lang.StringBuffer,boolean,int,int)
+com.adobe.xmp.impl.XMPNodeUtils:
+    static final int CLT_NO_VALUES
+    static final int CLT_SPECIFIC_MATCH
+    static final int CLT_SINGLE_GENERIC
+    static final int CLT_MULTIPLE_GENERIC
+    static final int CLT_XDEFAULT
+    static final int CLT_FIRST_ITEM
+    static void setNodeValue(com.adobe.xmp.impl.XMPNode,java.lang.Object)
+    static java.lang.String serializeNodeValue(java.lang.Object)
+com.adobe.xmp.impl.XMPNormalizer:
+    private XMPNormalizer()
+com.adobe.xmp.impl.XMPSchemaRegistryImpl:
+    public synchronized void deleteNamespace(java.lang.String)
+    public synchronized java.util.Map getNamespaces()
+    public synchronized java.util.Map getPrefixes()
+    public synchronized com.adobe.xmp.properties.XMPAliasInfo resolveAlias(java.lang.String,java.lang.String)
+    public synchronized com.adobe.xmp.properties.XMPAliasInfo[] findAliases(java.lang.String)
+    public synchronized java.util.Map getAliases()
+com.adobe.xmp.impl.XMPSerializerHelper
+com.adobe.xmp.impl.XMPSerializerRDF
+com.adobe.xmp.impl.XMPUtilsImpl
+com.adobe.xmp.impl.xpath.XMPPath:
+    public static final int STRUCT_FIELD_STEP
+    public static final int QUALIFIER_STEP
+    public static final int ARRAY_INDEX_STEP
+    public static final int ARRAY_LAST_STEP
+    public static final int QUAL_SELECTOR_STEP
+    public static final int FIELD_SELECTOR_STEP
+    public static final int SCHEMA_NODE
+    public static final int STEP_SCHEMA
+    public static final int STEP_ROOT_PROP
+com.adobe.xmp.impl.xpath.XMPPathParser:
+    private XMPPathParser()
+com.adobe.xmp.impl.xpath.XMPPathSegment:
+    public XMPPathSegment(java.lang.String)
+com.adobe.xmp.options.AliasOptions:
+    public static final int PROP_DIRECT
+    public static final int PROP_ARRAY
+    public static final int PROP_ARRAY_ORDERED
+    public static final int PROP_ARRAY_ALTERNATE
+    public static final int PROP_ARRAY_ALT_TEXT
+    public com.adobe.xmp.options.AliasOptions setArray(boolean)
+    public boolean isArrayOrdered()
+    public boolean isArrayAlternate()
+    public com.adobe.xmp.options.AliasOptions setArrayAlternate(boolean)
+    protected java.lang.String defineOptionName(int)
+com.adobe.xmp.options.IteratorOptions:
+    public static final int JUST_CHILDREN
+    public static final int JUST_LEAFNODES
+    public static final int JUST_LEAFNAME
+    public static final int INCLUDE_ALIASES
+    public static final int OMIT_QUALIFIERS
+    public com.adobe.xmp.options.IteratorOptions setJustChildren(boolean)
+    public com.adobe.xmp.options.IteratorOptions setJustLeafname(boolean)
+    public com.adobe.xmp.options.IteratorOptions setJustLeafnodes(boolean)
+    public com.adobe.xmp.options.IteratorOptions setOmitQualifiers(boolean)
+    protected java.lang.String defineOptionName(int)
+com.adobe.xmp.options.Options:
+    public void clear()
+    public boolean isExactly(int)
+    public boolean containsAllOptions(int)
+    public boolean containsOneOf(int)
+    public java.lang.String getOptionsString()
+    protected abstract java.lang.String defineOptionName(int)
+    private java.lang.String getOptionName(int)
+    private java.util.Map procureOptionNames()
+com.adobe.xmp.options.ParseOptions:
+    public static final int REQUIRE_XMP_META
+    public static final int STRICT_ALIASING
+    public static final int FIX_CONTROL_CHARS
+    public static final int ACCEPT_LATIN_1
+    public static final int OMIT_NORMALIZATION
+    public com.adobe.xmp.options.ParseOptions setRequireXMPMeta(boolean)
+    public com.adobe.xmp.options.ParseOptions setStrictAliasing(boolean)
+    public com.adobe.xmp.options.ParseOptions setFixControlChars(boolean)
+    public com.adobe.xmp.options.ParseOptions setOmitNormalization(boolean)
+    public com.adobe.xmp.options.ParseOptions setAcceptLatin1(boolean)
+    protected java.lang.String defineOptionName(int)
+com.adobe.xmp.options.PropertyOptions:
+    public static final int NO_OPTIONS
+    public static final int URI
+    public static final int HAS_QUALIFIERS
+    public static final int QUALIFIER
+    public static final int HAS_LANGUAGE
+    public static final int HAS_TYPE
+    public static final int STRUCT
+    public static final int ARRAY
+    public static final int ARRAY_ORDERED
+    public static final int ARRAY_ALTERNATE
+    public static final int ARRAY_ALT_TEXT
+    public static final int SCHEMA_NODE
+    public static final int DELETE_EXISTING
+    public boolean isURI()
+    public boolean getHasQualifiers()
+    public boolean getHasType()
+    public boolean equalArrayTypes(com.adobe.xmp.options.PropertyOptions)
+    public boolean isOnlyArrayOptions()
+    protected java.lang.String defineOptionName(int)
+com.adobe.xmp.options.SerializeOptions
+com.adobe.xmp.properties.XMPProperty
+com.adobe.xmp.properties.XMPPropertyInfo:
+    public abstract java.lang.String getNamespace()
+    public abstract com.adobe.xmp.options.PropertyOptions getOptions()
+com.drew.imaging.ImageMetadataReader:
+    private static final int JPEG_FILE_MAGIC_NUMBER
+    private static final int MOTOROLA_TIFF_MAGIC_NUMBER
+    private static final int INTEL_TIFF_MAGIC_NUMBER
+    private static final int PSD_MAGIC_NUMBER
+    public static com.drew.metadata.Metadata readMetadata(java.io.File)
+    public static void main(java.lang.String[])
+    private static java.lang.String escapeForWiki(java.lang.String)
+com.drew.imaging.ImageProcessingException:
+    private static final long serialVersionUID
+    public ImageProcessingException(java.lang.Throwable)
+com.drew.imaging.PhotographicConversions:
+    private PhotographicConversions()
+    public static double shutterSpeedToExposureTime(double)
+com.drew.imaging.jpeg.JpegMetadataReader:
+    public static com.drew.metadata.Metadata readMetadata(java.io.InputStream)
+    private JpegMetadataReader()
+com.drew.imaging.jpeg.JpegProcessingException:
+    private static final long serialVersionUID
+    public JpegProcessingException(java.lang.Throwable)
+com.drew.imaging.jpeg.JpegSegmentData:
+    private static final long serialVersionUID
+    public int getSegmentCount(byte)
+    public void removeSegmentOccurrence(byte,int)
+    public void removeSegment(byte)
+    public boolean containsSegment(byte)
+    public static void toFile(java.io.File,com.drew.imaging.jpeg.JpegSegmentData)
+    public static com.drew.imaging.jpeg.JpegSegmentData fromFile(java.io.File)
+com.drew.imaging.jpeg.JpegSegmentReader:
+    private static final byte SEGMENT_SOS
+    private static final byte MARKER_EOI
+    public static final byte SEGMENT_APP0
+    public static final byte SEGMENT_APP1
+    public static final byte SEGMENT_APP2
+    public static final byte SEGMENT_APP3
+    public static final byte SEGMENT_APP4
+    public static final byte SEGMENT_APP5
+    public static final byte SEGMENT_APP6
+    public static final byte SEGMENT_APP7
+    public static final byte SEGMENT_APP8
+    public static final byte SEGMENT_APP9
+    public static final byte SEGMENT_APPA
+    public static final byte SEGMENT_APPB
+    public static final byte SEGMENT_APPC
+    public static final byte SEGMENT_APPD
+    public static final byte SEGMENT_APPE
+    public static final byte SEGMENT_APPF
+    public static final byte SEGMENT_SOI
+    public static final byte SEGMENT_DQT
+    public static final byte SEGMENT_DHT
+    public static final byte SEGMENT_SOF0
+    public static final byte SEGMENT_COM
+    public JpegSegmentReader(byte[])
+    public byte[] readSegment(byte)
+    public byte[] readSegment(byte,int)
+    public java.lang.Iterable readSegments(byte)
+    public final int getSegmentCount(byte)
+com.drew.imaging.psd.PsdMetadataReader:
+    public PsdMetadataReader()
+com.drew.imaging.tiff.TiffMetadataReader:
+    public TiffMetadataReader()
+com.drew.imaging.tiff.TiffProcessingException
+com.drew.lang.BufferBoundsException:
+    private static final long serialVersionUID
+com.drew.lang.CompoundException:
+    private static final long serialVersionUID
+    public CompoundException(java.lang.Throwable)
+    public java.lang.Throwable getInnerException()
+com.drew.lang.GeoLocation:
+    public boolean isZero()
+    public java.lang.String toDMSString()
+com.drew.lang.NullOutputStream
+com.drew.lang.Rational:
+    private static final long serialVersionUID
+com.drew.lang.StringUtil:
+    public StringUtil()
+com.drew.lang.annotations.NotNull
+com.drew.lang.annotations.Nullable
+com.drew.lang.annotations.SuppressWarnings
+com.drew.metadata.Age:
+    public int getYears()
+    public int getMonths()
+    public int getDays()
+    public int getHours()
+    public int getMinutes()
+    public int getSeconds()
+com.drew.metadata.DefaultTagDescriptor
+com.drew.metadata.Directory:
+    public java.util.Collection getTags()
+    public int getTagCount()
+    public boolean hasErrors()
+    public java.lang.Iterable getErrors()
+    public int getErrorCount()
+    public void setBoolean(int,boolean)
+    public double getDouble(int)
+    public float getFloat(int)
+    public long getLong(int)
+    public boolean getBoolean(int)
+    public java.lang.Boolean getBooleanObject(int)
+    public java.util.Date getDate(int)
+    public java.util.Date getDate(int,java.util.TimeZone)
+    public java.lang.String getString(int,java.lang.String)
+com.drew.metadata.Face:
+    public int getX()
+    public int getY()
+    public int getWidth()
+    public int getHeight()
+    public java.lang.String getName()
+    public com.drew.metadata.Age getAge()
+com.drew.metadata.Metadata:
+    public java.lang.Iterable getDirectories()
+    public int getDirectoryCount()
+    public boolean containsDirectory(java.lang.Class)
+    public boolean hasErrors()
+com.drew.metadata.MetadataException:
+    private static final long serialVersionUID
+    public MetadataException(java.lang.Throwable)
+    public MetadataException(java.lang.String,java.lang.Throwable)
+com.drew.metadata.MetadataReader
+com.drew.metadata.Tag:
+    public java.lang.String getTagTypeHex()
+    public java.lang.String getDirectoryName()
+com.drew.metadata.adobe.AdobeJpegDirectory:
+    public static final int TAG_DCT_ENCODE_VERSION
+    public static final int TAG_APP14_FLAGS0
+    public static final int TAG_APP14_FLAGS1
+    public static final int TAG_COLOR_TRANSFORM
+com.drew.metadata.exif.CanonMakernoteDirectory:
+    private static final int TAG_CAMERA_SETTINGS_ARRAY
+    private static final int TAG_FOCAL_LENGTH_ARRAY
+    private static final int TAG_SHOT_INFO_ARRAY
+    private static final int TAG_PANORAMA_ARRAY
+    public static final int TAG_CANON_IMAGE_TYPE
+    public static final int TAG_CANON_FIRMWARE_VERSION
+    public static final int TAG_CANON_IMAGE_NUMBER
+    public static final int TAG_CANON_OWNER_NAME
+    public static final int TAG_CANON_SERIAL_NUMBER
+    public static final int TAG_CAMERA_INFO_ARRAY
+    public static final int TAG_CANON_FILE_LENGTH
+    public static final int TAG_CANON_CUSTOM_FUNCTIONS_ARRAY
+    public static final int TAG_MODEL_ID
+    public static final int TAG_MOVIE_INFO_ARRAY
+    private static final int TAG_AF_INFO_ARRAY
+    public static final int TAG_THUMBNAIL_IMAGE_VALID_AREA
+    public static final int TAG_SERIAL_NUMBER_FORMAT
+    public static final int TAG_SUPER_MACRO
+    public static final int TAG_DATE_STAMP_MODE
+    public static final int TAG_MY_COLORS
+    public static final int TAG_FIRMWARE_REVISION
+    public static final int TAG_CATEGORIES
+    public static final int TAG_FACE_DETECT_ARRAY_1
+    public static final int TAG_FACE_DETECT_ARRAY_2
+    public static final int TAG_AF_INFO_ARRAY_2
+    public static final int TAG_IMAGE_UNIQUE_ID
+    public static final int TAG_RAW_DATA_OFFSET
+    public static final int TAG_ORIGINAL_DECISION_DATA_OFFSET
+    public static final int TAG_CUSTOM_FUNCTIONS_1D_ARRAY
+    public static final int TAG_PERSONAL_FUNCTIONS_ARRAY
+    public static final int TAG_PERSONAL_FUNCTION_VALUES_ARRAY
+    public static final int TAG_FILE_INFO_ARRAY
+    public static final int TAG_AF_POINTS_IN_FOCUS_1D
+    public static final int TAG_LENS_MODEL
+    public static final int TAG_SERIAL_INFO_ARRAY
+    public static final int TAG_DUST_REMOVAL_DATA
+    public static final int TAG_CROP_INFO
+    public static final int TAG_CUSTOM_FUNCTIONS_ARRAY_2
+    public static final int TAG_ASPECT_INFO_ARRAY
+    public static final int TAG_PROCESSING_INFO_ARRAY
+    public static final int TAG_TONE_CURVE_TABLE
+    public static final int TAG_SHARPNESS_TABLE
+    public static final int TAG_SHARPNESS_FREQ_TABLE
+    public static final int TAG_WHITE_BALANCE_TABLE
+    public static final int TAG_COLOR_BALANCE_ARRAY
+    public static final int TAG_MEASURED_COLOR_ARRAY
+    public static final int TAG_COLOR_TEMPERATURE
+    public static final int TAG_CANON_FLAGS_ARRAY
+    public static final int TAG_MODIFIED_INFO_ARRAY
+    public static final int TAG_TONE_CURVE_MATCHING
+    public static final int TAG_WHITE_BALANCE_MATCHING
+    public static final int TAG_COLOR_SPACE
+    public static final int TAG_PREVIEW_IMAGE_INFO_ARRAY
+    public static final int TAG_VRD_OFFSET
+    public static final int TAG_SENSOR_INFO_ARRAY
+    public static final int TAG_COLOR_DATA_ARRAY_2
+    public static final int TAG_COLOR_INFO_ARRAY_2
+    public static final int TAG_CUSTOM_PICTURE_STYLE_FILE_NAME
+    public static final int TAG_COLOR_INFO_ARRAY
+    public static final int TAG_VIGNETTING_CORRECTION_ARRAY_1
+    public static final int TAG_VIGNETTING_CORRECTION_ARRAY_2
+    public static final int TAG_LIGHTING_OPTIMIZER_ARRAY
+    public static final int TAG_LENS_INFO_ARRAY
+    public static final int TAG_AMBIANCE_INFO_ARRAY
+    public static final int TAG_FILTER_INFO_ARRAY
+com.drew.metadata.exif.CanonMakernoteDirectory$AFInfo
+com.drew.metadata.exif.CanonMakernoteDirectory$CameraSettings
+com.drew.metadata.exif.CanonMakernoteDirectory$FocalLength
+com.drew.metadata.exif.CanonMakernoteDirectory$Panorama
+com.drew.metadata.exif.CanonMakernoteDirectory$ShotInfo
+com.drew.metadata.exif.CasioType1MakernoteDirectory:
+    public static final int TAG_CASIO_RECORDING_MODE
+    public static final int TAG_CASIO_QUALITY
+    public static final int TAG_CASIO_FOCUSING_MODE
+    public static final int TAG_CASIO_FLASH_MODE
+    public static final int TAG_CASIO_FLASH_INTENSITY
+    public static final int TAG_CASIO_OBJECT_DISTANCE
+    public static final int TAG_CASIO_WHITE_BALANCE
+    public static final int TAG_CASIO_UNKNOWN_1
+    public static final int TAG_CASIO_UNKNOWN_2
+    public static final int TAG_CASIO_DIGITAL_ZOOM
+    public static final int TAG_CASIO_SHARPNESS
+    public static final int TAG_CASIO_CONTRAST
+    public static final int TAG_CASIO_SATURATION
+    public static final int TAG_CASIO_UNKNOWN_3
+    public static final int TAG_CASIO_UNKNOWN_4
+    public static final int TAG_CASIO_UNKNOWN_5
+    public static final int TAG_CASIO_UNKNOWN_6
+    public static final int TAG_CASIO_UNKNOWN_7
+    public static final int TAG_CASIO_UNKNOWN_8
+    public static final int TAG_CASIO_CCD_SENSITIVITY
+com.drew.metadata.exif.CasioType2MakernoteDirectory:
+    public static final int TAG_CASIO_TYPE2_THUMBNAIL_DIMENSIONS
+    public static final int TAG_CASIO_TYPE2_THUMBNAIL_SIZE
+    public static final int TAG_CASIO_TYPE2_THUMBNAIL_OFFSET
+    public static final int TAG_CASIO_TYPE2_QUALITY_MODE
+    public static final int TAG_CASIO_TYPE2_IMAGE_SIZE
+    public static final int TAG_CASIO_TYPE2_FOCUS_MODE_1
+    public static final int TAG_CASIO_TYPE2_ISO_SENSITIVITY
+    public static final int TAG_CASIO_TYPE2_WHITE_BALANCE_1
+    public static final int TAG_CASIO_TYPE2_FOCAL_LENGTH
+    public static final int TAG_CASIO_TYPE2_SATURATION
+    public static final int TAG_CASIO_TYPE2_CONTRAST
+    public static final int TAG_CASIO_TYPE2_SHARPNESS
+    public static final int TAG_CASIO_TYPE2_PRINT_IMAGE_MATCHING_INFO
+    public static final int TAG_CASIO_TYPE2_CASIO_PREVIEW_THUMBNAIL
+    public static final int TAG_CASIO_TYPE2_WHITE_BALANCE_BIAS
+    public static final int TAG_CASIO_TYPE2_WHITE_BALANCE_2
+    public static final int TAG_CASIO_TYPE2_OBJECT_DISTANCE
+    public static final int TAG_CASIO_TYPE2_FLASH_DISTANCE
+    public static final int TAG_CASIO_TYPE2_RECORD_MODE
+    public static final int TAG_CASIO_TYPE2_SELF_TIMER
+    public static final int TAG_CASIO_TYPE2_QUALITY
+    public static final int TAG_CASIO_TYPE2_FOCUS_MODE_2
+    public static final int TAG_CASIO_TYPE2_TIME_ZONE
+    public static final int TAG_CASIO_TYPE2_BESTSHOT_MODE
+    public static final int TAG_CASIO_TYPE2_CCD_ISO_SENSITIVITY
+    public static final int TAG_CASIO_TYPE2_COLOUR_MODE
+    public static final int TAG_CASIO_TYPE2_ENHANCEMENT
+    public static final int TAG_CASIO_TYPE2_FILTER
+com.drew.metadata.exif.DataFormat
+com.drew.metadata.exif.ExifIFD0Directory:
+    public static final int TAG_IMAGE_DESCRIPTION
+    public static final int TAG_MAKE
+    public static final int TAG_MODEL
+    public static final int TAG_ORIENTATION
+    public static final int TAG_X_RESOLUTION
+    public static final int TAG_Y_RESOLUTION
+    public static final int TAG_RESOLUTION_UNIT
+    public static final int TAG_SOFTWARE
+    public static final int TAG_DATETIME
+    public static final int TAG_ARTIST
+    public static final int TAG_WHITE_POINT
+    public static final int TAG_PRIMARY_CHROMATICITIES
+    public static final int TAG_YCBCR_COEFFICIENTS
+    public static final int TAG_YCBCR_POSITIONING
+    public static final int TAG_REFERENCE_BLACK_WHITE
+    public static final int TAG_COPYRIGHT
+    public static final int TAG_WIN_TITLE
+    public static final int TAG_WIN_COMMENT
+    public static final int TAG_WIN_AUTHOR
+    public static final int TAG_WIN_KEYWORDS
+    public static final int TAG_WIN_SUBJECT
+com.drew.metadata.exif.ExifInteropDirectory:
+    public static final int TAG_INTEROP_INDEX
+    public static final int TAG_INTEROP_VERSION
+    public static final int TAG_RELATED_IMAGE_FILE_FORMAT
+    public static final int TAG_RELATED_IMAGE_WIDTH
+    public static final int TAG_RELATED_IMAGE_LENGTH
+com.drew.metadata.exif.ExifReader:
+    private static final int MAX_FORMAT_CODE
+    private static final int FMT_BYTE
+    private static final int FMT_STRING
+    private static final int FMT_USHORT
+    private static final int FMT_ULONG
+    private static final int FMT_URATIONAL
+    private static final int FMT_SBYTE
+    private static final int FMT_UNDEFINED
+    private static final int FMT_SSHORT
+    private static final int FMT_SLONG
+    private static final int FMT_SRATIONAL
+    private static final int FMT_SINGLE
+    private static final int FMT_DOUBLE
+    public static final int TAG_EXIF_SUB_IFD_OFFSET
+    public static final int TAG_INTEROP_OFFSET
+    public static final int TAG_GPS_INFO_OFFSET
+    public static final int TAG_MAKER_NOTE_OFFSET
+    public static final int TIFF_HEADER_START_OFFSET
+com.drew.metadata.exif.ExifSubIFDDirectory:
+    public static final int TAG_APERTURE
+    public static final int TAG_BITS_PER_SAMPLE
+    public static final int TAG_PHOTOMETRIC_INTERPRETATION
+    public static final int TAG_THRESHOLDING
+    public static final int TAG_FILL_ORDER
+    public static final int TAG_DOCUMENT_NAME
+    public static final int TAG_STRIP_OFFSETS
+    public static final int TAG_SAMPLES_PER_PIXEL
+    public static final int TAG_ROWS_PER_STRIP
+    public static final int TAG_STRIP_BYTE_COUNTS
+    public static final int TAG_MIN_SAMPLE_VALUE
+    public static final int TAG_MAX_SAMPLE_VALUE
+    public static final int TAG_PLANAR_CONFIGURATION
+    public static final int TAG_YCBCR_SUBSAMPLING
+    public static final int TAG_NEW_SUBFILE_TYPE
+    public static final int TAG_SUBFILE_TYPE
+    public static final int TAG_TRANSFER_FUNCTION
+    public static final int TAG_PREDICTOR
+    public static final int TAG_TILE_WIDTH
+    public static final int TAG_TILE_LENGTH
+    public static final int TAG_TILE_OFFSETS
+    public static final int TAG_TILE_BYTE_COUNTS
+    public static final int TAG_JPEG_TABLES
+    public static final int TAG_CFA_REPEAT_PATTERN_DIM
+    public static final int TAG_CFA_PATTERN_2
+    public static final int TAG_BATTERY_LEVEL
+    public static final int TAG_IPTC_NAA
+    public static final int TAG_INTER_COLOR_PROFILE
+    public static final int TAG_SPECTRAL_SENSITIVITY
+    public static final int TAG_OPTO_ELECTRIC_CONVERSION_FUNCTION
+    public static final int TAG_INTERLACE
+    public static final int TAG_TIME_ZONE_OFFSET
+    public static final int TAG_SELF_TIMER_MODE
+    public static final int TAG_FLASH_ENERGY
+    public static final int TAG_SPATIAL_FREQ_RESPONSE
+    public static final int TAG_NOISE
+    public static final int TAG_IMAGE_NUMBER
+    public static final int TAG_SECURITY_CLASSIFICATION
+    public static final int TAG_IMAGE_HISTORY
+    public static final int TAG_SUBJECT_LOCATION
+    public static final int TAG_EXPOSURE_INDEX_2
+    public static final int TAG_TIFF_EP_STANDARD_ID
+    public static final int TAG_FLASH_ENERGY_2
+    public static final int TAG_SPATIAL_FREQ_RESPONSE_2
+    public static final int TAG_SUBJECT_LOCATION_2
+    public static final int TAG_PAGE_NAME
+    public static final int TAG_EXPOSURE_TIME
+    public static final int TAG_FNUMBER
+    public static final int TAG_EXPOSURE_PROGRAM
+    public static final int TAG_ISO_EQUIVALENT
+    public static final int TAG_EXIF_VERSION
+    public static final int TAG_DATETIME_ORIGINAL
+    public static final int TAG_DATETIME_DIGITIZED
+    public static final int TAG_COMPONENTS_CONFIGURATION
+    public static final int TAG_COMPRESSED_AVERAGE_BITS_PER_PIXEL
+    public static final int TAG_SHUTTER_SPEED
+    public static final int TAG_BRIGHTNESS_VALUE
+    public static final int TAG_EXPOSURE_BIAS
+    public static final int TAG_MAX_APERTURE
+    public static final int TAG_SUBJECT_DISTANCE
+    public static final int TAG_METERING_MODE
+    public static final int TAG_LIGHT_SOURCE
+    public static final int TAG_WHITE_BALANCE
+    public static final int TAG_FLASH
+    public static final int TAG_FOCAL_LENGTH
+    public static final int TAG_USER_COMMENT
+    public static final int TAG_SUBSECOND_TIME
+    public static final int TAG_SUBSECOND_TIME_ORIGINAL
+    public static final int TAG_SUBSECOND_TIME_DIGITIZED
+    public static final int TAG_FLASHPIX_VERSION
+    public static final int TAG_COLOR_SPACE
+    public static final int TAG_EXIF_IMAGE_WIDTH
+    public static final int TAG_EXIF_IMAGE_HEIGHT
+    public static final int TAG_RELATED_SOUND_FILE
+    public static final int TAG_FOCAL_PLANE_X_RES
+    public static final int TAG_FOCAL_PLANE_Y_RES
+    public static final int TAG_FOCAL_PLANE_UNIT
+    public static final int TAG_EXPOSURE_INDEX
+    public static final int TAG_SENSING_METHOD
+    public static final int TAG_FILE_SOURCE
+    public static final int TAG_SCENE_TYPE
+    public static final int TAG_CFA_PATTERN
+    public static final int TAG_CUSTOM_RENDERED
+    public static final int TAG_EXPOSURE_MODE
+    public static final int TAG_WHITE_BALANCE_MODE
+    public static final int TAG_DIGITAL_ZOOM_RATIO
+    public static final int TAG_35MM_FILM_EQUIV_FOCAL_LENGTH
+    public static final int TAG_SCENE_CAPTURE_TYPE
+    public static final int TAG_GAIN_CONTROL
+    public static final int TAG_CONTRAST
+    public static final int TAG_SATURATION
+    public static final int TAG_SHARPNESS
+    public static final int TAG_DEVICE_SETTING_DESCRIPTION
+    public static final int TAG_SUBJECT_DISTANCE_RANGE
+    public static final int TAG_IMAGE_UNIQUE_ID
+    public static final int TAG_CAMERA_OWNER_NAME
+    public static final int TAG_BODY_SERIAL_NUMBER
+    public static final int TAG_LENS_SPECIFICATION
+    public static final int TAG_LENS_MAKE
+    public static final int TAG_LENS_MODEL
+    public static final int TAG_LENS_SERIAL_NUMBER
+    public static final int TAG_GAMMA
+    public static final int TAG_LENS
+com.drew.metadata.exif.ExifThumbnailDirectory:
+    public static final int TAG_THUMBNAIL_IMAGE_WIDTH
+    public static final int TAG_THUMBNAIL_IMAGE_HEIGHT
+    public static final int TAG_BITS_PER_SAMPLE
+    public static final int TAG_THUMBNAIL_COMPRESSION
+    public static final int TAG_PHOTOMETRIC_INTERPRETATION
+    public static final int TAG_STRIP_OFFSETS
+    public static final int TAG_ORIENTATION
+    public static final int TAG_SAMPLES_PER_PIXEL
+    public static final int TAG_ROWS_PER_STRIP
+    public static final int TAG_STRIP_BYTE_COUNTS
+    public static final int TAG_X_RESOLUTION
+    public static final int TAG_Y_RESOLUTION
+    public static final int TAG_PLANAR_CONFIGURATION
+    public static final int TAG_RESOLUTION_UNIT
+    public static final int TAG_THUMBNAIL_OFFSET
+    public static final int TAG_THUMBNAIL_LENGTH
+    public static final int TAG_YCBCR_COEFFICIENTS
+    public static final int TAG_YCBCR_SUBSAMPLING
+    public static final int TAG_YCBCR_POSITIONING
+    public static final int TAG_REFERENCE_BLACK_WHITE
+    public boolean hasThumbnailData()
+    public byte[] getThumbnailData()
+    public void writeThumbnail(java.lang.String)
+com.drew.metadata.exif.FujifilmMakernoteDirectory:
+    public static final int TAG_FUJIFILM_MAKERNOTE_VERSION
+    public static final int TAG_FUJIFILM_QUALITY
+    public static final int TAG_FUJIFILM_SHARPNESS
+    public static final int TAG_FUJIFILM_WHITE_BALANCE
+    public static final int TAG_FUJIFILM_COLOR_SATURATION
+    public static final int TAG_FUJIFILM_TONE
+    public static final int TAG_FUJIFILM_FLASH_MODE
+    public static final int TAG_FUJIFILM_FLASH_STRENGTH
+    public static final int TAG_FUJIFILM_MACRO
+    public static final int TAG_FUJIFILM_FOCUS_MODE
+    public static final int TAG_FUJIFILM_SLOW_SYNCH
+    public static final int TAG_FUJIFILM_PICTURE_MODE
+    public static final int TAG_FUJIFILM_UNKNOWN_1
+    public static final int TAG_FUJIFILM_CONTINUOUS_TAKING_OR_AUTO_BRACKETTING
+    public static final int TAG_FUJIFILM_UNKNOWN_2
+    public static final int TAG_FUJIFILM_BLUR_WARNING
+    public static final int TAG_FUJIFILM_FOCUS_WARNING
+    public static final int TAG_FUJIFILM_AE_WARNING
+com.drew.metadata.exif.GpsDescriptor:
+    public java.lang.String getDegreesMinutesSecondsDescription()
+com.drew.metadata.exif.GpsDirectory:
+    public static final int TAG_GPS_VERSION_ID
+    public static final int TAG_GPS_LATITUDE_REF
+    public static final int TAG_GPS_LATITUDE
+    public static final int TAG_GPS_LONGITUDE_REF
+    public static final int TAG_GPS_LONGITUDE
+    public static final int TAG_GPS_ALTITUDE_REF
+    public static final int TAG_GPS_ALTITUDE
+    public static final int TAG_GPS_TIME_STAMP
+    public static final int TAG_GPS_SATELLITES
+    public static final int TAG_GPS_STATUS
+    public static final int TAG_GPS_MEASURE_MODE
+    public static final int TAG_GPS_DOP
+    public static final int TAG_GPS_SPEED_REF
+    public static final int TAG_GPS_SPEED
+    public static final int TAG_GPS_TRACK_REF
+    public static final int TAG_GPS_TRACK
+    public static final int TAG_GPS_IMG_DIRECTION_REF
+    public static final int TAG_GPS_IMG_DIRECTION
+    public static final int TAG_GPS_MAP_DATUM
+    public static final int TAG_GPS_DEST_LATITUDE_REF
+    public static final int TAG_GPS_DEST_LATITUDE
+    public static final int TAG_GPS_DEST_LONGITUDE_REF
+    public static final int TAG_GPS_DEST_LONGITUDE
+    public static final int TAG_GPS_DEST_BEARING_REF
+    public static final int TAG_GPS_DEST_BEARING
+    public static final int TAG_GPS_DEST_DISTANCE_REF
+    public static final int TAG_GPS_DEST_DISTANCE
+    public static final int TAG_GPS_PROCESSING_METHOD
+    public static final int TAG_GPS_AREA_INFORMATION
+    public static final int TAG_GPS_DATE_STAMP
+    public static final int TAG_GPS_DIFFERENTIAL
+com.drew.metadata.exif.KyoceraMakernoteDirectory:
+    public static final int TAG_KYOCERA_PROPRIETARY_THUMBNAIL
+    public static final int TAG_KYOCERA_PRINT_IMAGE_MATCHING_INFO
+com.drew.metadata.exif.NikonType1MakernoteDirectory:
+    public static final int TAG_NIKON_TYPE1_UNKNOWN_1
+    public static final int TAG_NIKON_TYPE1_QUALITY
+    public static final int TAG_NIKON_TYPE1_COLOR_MODE
+    public static final int TAG_NIKON_TYPE1_IMAGE_ADJUSTMENT
+    public static final int TAG_NIKON_TYPE1_CCD_SENSITIVITY
+    public static final int TAG_NIKON_TYPE1_WHITE_BALANCE
+    public static final int TAG_NIKON_TYPE1_FOCUS
+    public static final int TAG_NIKON_TYPE1_UNKNOWN_2
+    public static final int TAG_NIKON_TYPE1_DIGITAL_ZOOM
+    public static final int TAG_NIKON_TYPE1_CONVERTER
+    public static final int TAG_NIKON_TYPE1_UNKNOWN_3
+com.drew.metadata.exif.NikonType2MakernoteDirectory:
+    public static final int TAG_NIKON_TYPE2_FIRMWARE_VERSION
+    public static final int TAG_NIKON_TYPE2_ISO_1
+    public static final int TAG_NIKON_TYPE2_COLOR_MODE
+    public static final int TAG_NIKON_TYPE2_QUALITY_AND_FILE_FORMAT
+    public static final int TAG_NIKON_TYPE2_CAMERA_WHITE_BALANCE
+    public static final int TAG_NIKON_TYPE2_CAMERA_SHARPENING
+    public static final int TAG_NIKON_TYPE2_AF_TYPE
+    public static final int TAG_NIKON_TYPE2_FLASH_SYNC_MODE
+    public static final int TAG_NIKON_TYPE2_AUTO_FLASH_MODE
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_34
+    public static final int TAG_NIKON_TYPE2_CAMERA_WHITE_BALANCE_FINE
+    public static final int TAG_NIKON_TYPE2_CAMERA_WHITE_BALANCE_RB_COEFF
+    public static final int TAG_NIKON_TYPE2_PROGRAM_SHIFT
+    public static final int TAG_NIKON_TYPE2_EXPOSURE_DIFFERENCE
+    public static final int TAG_NIKON_TYPE2_ISO_MODE
+    public static final int TAG_NIKON_TYPE2_DATA_DUMP
+    public static final int TAG_NIKON_TYPE2_PREVIEW_IFD
+    public static final int TAG_NIKON_TYPE2_AUTO_FLASH_COMPENSATION
+    public static final int TAG_NIKON_TYPE2_ISO_REQUESTED
+    public static final int TAG_NIKON_TYPE2_IMAGE_BOUNDARY
+    public static final int TAG_NIKON_TYPE2_FLASH_EXPOSURE_COMPENSATION
+    public static final int TAG_NIKON_TYPE2_FLASH_BRACKET_COMPENSATION
+    public static final int TAG_NIKON_TYPE2_AE_BRACKET_COMPENSATION
+    public static final int TAG_NIKON_TYPE2_FLASH_MODE
+    public static final int TAG_NIKON_TYPE2_CROP_HIGH_SPEED
+    public static final int TAG_NIKON_TYPE2_EXPOSURE_TUNING
+    public static final int TAG_NIKON_TYPE2_CAMERA_SERIAL_NUMBER
+    public static final int TAG_NIKON_TYPE2_COLOR_SPACE
+    public static final int TAG_NIKON_TYPE2_VR_INFO
+    public static final int TAG_NIKON_TYPE2_IMAGE_AUTHENTICATION
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_35
+    public static final int TAG_NIKON_TYPE2_ACTIVE_D_LIGHTING
+    public static final int TAG_NIKON_TYPE2_PICTURE_CONTROL
+    public static final int TAG_NIKON_TYPE2_WORLD_TIME
+    public static final int TAG_NIKON_TYPE2_ISO_INFO
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_36
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_37
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_38
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_39
+    public static final int TAG_NIKON_TYPE2_VIGNETTE_CONTROL
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_40
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_41
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_42
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_43
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_44
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_45
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_46
+    public static final int TAG_NIKON_TYPE2_IMAGE_ADJUSTMENT
+    public static final int TAG_NIKON_TYPE2_CAMERA_TONE_COMPENSATION
+    public static final int TAG_NIKON_TYPE2_ADAPTER
+    public static final int TAG_NIKON_TYPE2_LENS_TYPE
+    public static final int TAG_NIKON_TYPE2_LENS
+    public static final int TAG_NIKON_TYPE2_MANUAL_FOCUS_DISTANCE
+    public static final int TAG_NIKON_TYPE2_DIGITAL_ZOOM
+    public static final int TAG_NIKON_TYPE2_FLASH_USED
+    public static final int TAG_NIKON_TYPE2_AF_FOCUS_POSITION
+    public static final int TAG_NIKON_TYPE2_SHOOTING_MODE
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_20
+    public static final int TAG_NIKON_TYPE2_LENS_STOPS
+    public static final int TAG_NIKON_TYPE2_CONTRAST_CURVE
+    public static final int TAG_NIKON_TYPE2_CAMERA_COLOR_MODE
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_47
+    public static final int TAG_NIKON_TYPE2_SCENE_MODE
+    public static final int TAG_NIKON_TYPE2_LIGHT_SOURCE
+    public static final int TAG_NIKON_TYPE2_SHOT_INFO
+    public static final int TAG_NIKON_TYPE2_CAMERA_HUE_ADJUSTMENT
+    public static final int TAG_NIKON_TYPE2_NEF_COMPRESSION
+    public static final int TAG_NIKON_TYPE2_SATURATION
+    public static final int TAG_NIKON_TYPE2_NOISE_REDUCTION
+    public static final int TAG_NIKON_TYPE2_LINEARIZATION_TABLE
+    public static final int TAG_NIKON_TYPE2_COLOR_BALANCE
+    public static final int TAG_NIKON_TYPE2_LENS_DATA
+    public static final int TAG_NIKON_TYPE2_NEF_THUMBNAIL_SIZE
+    public static final int TAG_NIKON_TYPE2_SENSOR_PIXEL_SIZE
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_10
+    public static final int TAG_NIKON_TYPE2_SCENE_ASSIST
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_11
+    public static final int TAG_NIKON_TYPE2_RETOUCH_HISTORY
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_12
+    public static final int TAG_NIKON_TYPE2_CAMERA_SERIAL_NUMBER_2
+    public static final int TAG_NIKON_TYPE2_IMAGE_DATA_SIZE
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_27
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_28
+    public static final int TAG_NIKON_TYPE2_IMAGE_COUNT
+    public static final int TAG_NIKON_TYPE2_DELETED_IMAGE_COUNT
+    public static final int TAG_NIKON_TYPE2_EXPOSURE_SEQUENCE_NUMBER
+    public static final int TAG_NIKON_TYPE2_FLASH_INFO
+    public static final int TAG_NIKON_TYPE2_IMAGE_OPTIMISATION
+    public static final int TAG_NIKON_TYPE2_SATURATION_2
+    public static final int TAG_NIKON_TYPE2_DIGITAL_VARI_PROGRAM
+    public static final int TAG_NIKON_TYPE2_IMAGE_STABILISATION
+    public static final int TAG_NIKON_TYPE2_AF_RESPONSE
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_29
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_30
+    public static final int TAG_NIKON_TYPE2_MULTI_EXPOSURE
+    public static final int TAG_NIKON_TYPE2_HIGH_ISO_NOISE_REDUCTION
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_31
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_32
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_33
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_48
+    public static final int TAG_NIKON_TYPE2_POWER_UP_TIME
+    public static final int TAG_NIKON_TYPE2_AF_INFO_2
+    public static final int TAG_NIKON_TYPE2_FILE_INFO
+    public static final int TAG_NIKON_TYPE2_AF_TUNE
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_49
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_50
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_51
+    public static final int TAG_NIKON_TYPE2_PRINT_IM
+    public static final int TAG_NIKON_TYPE2_NIKON_CAPTURE_DATA
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_52
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_53
+    public static final int TAG_NIKON_TYPE2_NIKON_CAPTURE_VERSION
+    public static final int TAG_NIKON_TYPE2_NIKON_CAPTURE_OFFSETS
+    public static final int TAG_NIKON_TYPE2_NIKON_SCAN
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_54
+    public static final int TAG_NIKON_TYPE2_NEF_BIT_DEPTH
+    public static final int TAG_NIKON_TYPE2_UNKNOWN_55
+com.drew.metadata.exif.OlympusMakernoteDirectory:
+    public static final int TAG_OLYMPUS_MAKERNOTE_VERSION
+    public static final int TAG_OLYMPUS_CAMERA_SETTINGS_1
+    public static final int TAG_OLYMPUS_CAMERA_SETTINGS_2
+    public static final int TAG_OLYMPUS_COMPRESSED_IMAGE_SIZE
+    public static final int TAG_OLYMPUS_MINOLTA_THUMBNAIL_OFFSET_1
+    public static final int TAG_OLYMPUS_MINOLTA_THUMBNAIL_OFFSET_2
+    public static final int TAG_OLYMPUS_MINOLTA_THUMBNAIL_LENGTH
+    public static final int TAG_OLYMPUS_COLOUR_MODE
+    public static final int TAG_OLYMPUS_IMAGE_QUALITY_1
+    public static final int TAG_OLYMPUS_IMAGE_QUALITY_2
+    public static final int TAG_OLYMPUS_SPECIAL_MODE
+    public static final int TAG_OLYMPUS_JPEG_QUALITY
+    public static final int TAG_OLYMPUS_MACRO_MODE
+    public static final int TAG_OLYMPUS_UNKNOWN_1
+    public static final int TAG_OLYMPUS_DIGI_ZOOM_RATIO
+    public static final int TAG_OLYMPUS_UNKNOWN_2
+    public static final int TAG_OLYMPUS_UNKNOWN_3
+    public static final int TAG_OLYMPUS_FIRMWARE_VERSION
+    public static final int TAG_OLYMPUS_PICT_INFO
+    public static final int TAG_OLYMPUS_CAMERA_ID
+    public static final int TAG_OLYMPUS_IMAGE_WIDTH
+    public static final int TAG_OLYMPUS_IMAGE_HEIGHT
+    public static final int TAG_OLYMPUS_ORIGINAL_MANUFACTURER_MODEL
+    public static final int TAG_OLYMPUS_PRINT_IMAGE_MATCHING_INFO
+    public static final int TAG_OLYMPUS_DATA_DUMP
+    public static final int TAG_OLYMPUS_FLASH_MODE
+    public static final int TAG_OLYMPUS_BRACKET
+    public static final int TAG_OLYMPUS_FOCUS_MODE
+    public static final int TAG_OLYMPUS_FOCUS_DISTANCE
+    public static final int TAG_OLYMPUS_ZOOM
+    public static final int TAG_OLYMPUS_MACRO_FOCUS
+    public static final int TAG_OLYMPUS_SHARPNESS
+    public static final int TAG_OLYMPUS_COLOUR_MATRIX
+    public static final int TAG_OLYMPUS_BLACK_LEVEL
+    public static final int TAG_OLYMPUS_WHITE_BALANCE
+    public static final int TAG_OLYMPUS_RED_BIAS
+    public static final int TAG_OLYMPUS_BLUE_BIAS
+    public static final int TAG_OLYMPUS_SERIAL_NUMBER
+    public static final int TAG_OLYMPUS_FLASH_BIAS
+    public static final int TAG_OLYMPUS_CONTRAST
+    public static final int TAG_OLYMPUS_SHARPNESS_FACTOR
+    public static final int TAG_OLYMPUS_COLOUR_CONTROL
+    public static final int TAG_OLYMPUS_VALID_BITS
+    public static final int TAG_OLYMPUS_CORING_FILTER
+    public static final int TAG_OLYMPUS_FINAL_WIDTH
+    public static final int TAG_OLYMPUS_FINAL_HEIGHT
+    public static final int TAG_OLYMPUS_COMPRESSION_RATIO
+com.drew.metadata.exif.PanasonicMakernoteDirectory:
+    public static final int TAG_QUALITY_MODE
+    public static final int TAG_VERSION
+    public static final int TAG_WHITE_BALANCE
+    public static final int TAG_FOCUS_MODE
+    public static final int TAG_AF_AREA_MODE
+    public static final int TAG_IMAGE_STABILIZATION
+    public static final int TAG_MACRO_MODE
+    public static final int TAG_RECORD_MODE
+    public static final int TAG_AUDIO
+    public static final int TAG_UNKNOWN_DATA_DUMP
+    public static final int TAG_WHITE_BALANCE_BIAS
+    public static final int TAG_FLASH_BIAS
+    public static final int TAG_INTERNAL_SERIAL_NUMBER
+    public static final int TAG_EXIF_VERSION
+    public static final int TAG_COLOR_EFFECT
+    public static final int TAG_UPTIME
+    public static final int TAG_BURST_MODE
+    public static final int TAG_SEQUENCE_NUMBER
+    public static final int TAG_CONTRAST_MODE
+    public static final int TAG_NOISE_REDUCTION
+    public static final int TAG_SELF_TIMER
+    public static final int TAG_ROTATION
+    public static final int TAG_AF_ASSIST_LAMP
+    public static final int TAG_COLOR_MODE
+    public static final int TAG_BABY_AGE
+    public static final int TAG_OPTICAL_ZOOM_MODE
+    public static final int TAG_CONVERSION_LENS
+    public static final int TAG_TRAVEL_DAY
+    public static final int TAG_CONTRAST
+    public static final int TAG_WORLD_TIME_LOCATION
+    public static final int TAG_TEXT_STAMP
+    public static final int TAG_PROGRAM_ISO
+    public static final int TAG_ADVANCED_SCENE_MODE
+    public static final int TAG_TEXT_STAMP_1
+    public static final int TAG_FACES_DETECTED
+    public static final int TAG_SATURATION
+    public static final int TAG_SHARPNESS
+    public static final int TAG_FILM_MODE
+    public static final int TAG_WB_ADJUST_AB
+    public static final int TAG_WB_ADJUST_GM
+    public static final int TAG_AF_POINT_POSITION
+    public static final int TAG_FACE_DETECTION_INFO
+    public static final int TAG_LENS_TYPE
+    public static final int TAG_LENS_SERIAL_NUMBER
+    public static final int TAG_ACCESSORY_TYPE
+    public static final int TAG_TRANSFORM
+    public static final int TAG_INTELLIGENT_EXPOSURE
+    public static final int TAG_PRINT_IMAGE_MATCHING_INFO
+    public static final int TAG_FACE_RECOGNITION_INFO
+    public static final int TAG_FLASH_WARNING
+    public static final int TAG_RECOGNIZED_FACE_FLAGS
+    public static final int TAG_TITLE
+    public static final int TAG_BABY_NAME
+    public static final int TAG_LOCATION
+    public static final int TAG_COUNTRY
+    public static final int TAG_STATE
+    public static final int TAG_CITY
+    public static final int TAG_LANDMARK
+    public static final int TAG_INTELLIGENT_RESOLUTION
+    public static final int TAG_MAKERNOTE_VERSION
+    public static final int TAG_SCENE_MODE
+    public static final int TAG_WB_RED_LEVEL
+    public static final int TAG_WB_GREEN_LEVEL
+    public static final int TAG_WB_BLUE_LEVEL
+    public static final int TAG_FLASH_FIRED
+    public static final int TAG_TEXT_STAMP_2
+    public static final int TAG_TEXT_STAMP_3
+    public static final int TAG_BABY_AGE_1
+    public static final int TAG_TRANSFORM_1
+com.drew.metadata.exif.PentaxMakernoteDirectory:
+    public static final int TAG_PENTAX_CAPTURE_MODE
+    public static final int TAG_PENTAX_QUALITY_LEVEL
+    public static final int TAG_PENTAX_FOCUS_MODE
+    public static final int TAG_PENTAX_FLASH_MODE
+    public static final int TAG_PENTAX_WHITE_BALANCE
+    public static final int TAG_PENTAX_DIGITAL_ZOOM
+    public static final int TAG_PENTAX_SHARPNESS
+    public static final int TAG_PENTAX_CONTRAST
+    public static final int TAG_PENTAX_SATURATION
+    public static final int TAG_PENTAX_ISO_SPEED
+    public static final int TAG_PENTAX_COLOUR
+    public static final int TAG_PENTAX_PRINT_IMAGE_MATCHING_INFO
+    public static final int TAG_PENTAX_TIME_ZONE
+    public static final int TAG_PENTAX_DAYLIGHT_SAVINGS
+com.drew.metadata.exif.SigmaMakernoteDirectory:
+    public static final int TAG_SERIAL_NUMBER
+    public static final int TAG_DRIVE_MODE
+    public static final int TAG_RESOLUTION_MODE
+    public static final int TAG_AUTO_FOCUS_MODE
+    public static final int TAG_FOCUS_SETTING
+    public static final int TAG_WHITE_BALANCE
+    public static final int TAG_EXPOSURE_MODE
+    public static final int TAG_METERING_MODE
+    public static final int TAG_LENS_RANGE
+    public static final int TAG_COLOR_SPACE
+    public static final int TAG_EXPOSURE
+    public static final int TAG_CONTRAST
+    public static final int TAG_SHADOW
+    public static final int TAG_HIGHLIGHT
+    public static final int TAG_SATURATION
+    public static final int TAG_SHARPNESS
+    public static final int TAG_FILL_LIGHT
+    public static final int TAG_COLOR_ADJUSTMENT
+    public static final int TAG_ADJUSTMENT_MODE
+    public static final int TAG_QUALITY
+    public static final int TAG_FIRMWARE
+    public static final int TAG_SOFTWARE
+    public static final int TAG_AUTO_BRACKET
+com.drew.metadata.exif.SonyType1MakernoteDirectory:
+    public static final int TAG_PRINT_IMAGE_MATCHING_INFO
+    public static final int TAG_PREVIEW_IMAGE
+    public static final int TAG_COLOR_MODE_SETTING
+    public static final int TAG_COLOR_TEMPERATURE
+    public static final int TAG_SCENE_MODE
+    public static final int TAG_ZONE_MATCHING
+    public static final int TAG_DYNAMIC_RANGE_OPTIMISER
+    public static final int TAG_IMAGE_STABILISATION
+    public static final int TAG_LENS_ID
+    public static final int TAG_MINOLTA_MAKER_NOTE
+    public static final int TAG_COLOR_MODE
+    public static final int TAG_MACRO
+    public static final int TAG_EXPOSURE_MODE
+    public static final int TAG_QUALITY
+    public static final int TAG_ANTI_BLUR
+    public static final int TAG_LONG_EXPOSURE_NOISE_REDUCTION
+    public static final int TAG_NO_PRINT
+com.drew.metadata.exif.SonyType6MakernoteDirectory:
+    public static final int TAG_MAKER_NOTE_THUMB_OFFSET
+    public static final int TAG_MAKER_NOTE_THUMB_LENGTH
+    public static final int TAG_UNKNOWN_1
+    public static final int TAG_MAKER_NOTE_THUMB_VERSION
+com.drew.metadata.icc.IccDescriptor:
+    private static final int ICC_TAG_TYPE_TEXT
+    private static final int ICC_TAG_TYPE_DESC
+    private static final int ICC_TAG_TYPE_SIG
+    private static final int ICC_TAG_TYPE_MEAS
+    private static final int ICC_TAG_TYPE_XYZ_ARRAY
+    private static final int ICC_TAG_TYPE_MLUC
+    private static final int ICC_TAG_TYPE_CURV
+com.drew.metadata.icc.IccDirectory:
+    public static final int TAG_ICC_PROFILE_BYTE_COUNT
+    public static final int TAG_ICC_CMM_TYPE
+    public static final int TAG_ICC_PROFILE_VERSION
+    public static final int TAG_ICC_PROFILE_CLASS
+    public static final int TAG_ICC_COLOR_SPACE
+    public static final int TAG_ICC_PROFILE_CONNECTION_SPACE
+    public static final int TAG_ICC_PROFILE_DATETIME
+    public static final int TAG_ICC_SIGNATURE
+    public static final int TAG_ICC_PLATFORM
+    public static final int TAG_ICC_CMM_FLAGS
+    public static final int TAG_ICC_DEVICE_MAKE
+    public static final int TAG_ICC_DEVICE_MODEL
+    public static final int TAG_ICC_DEVICE_ATTR
+    public static final int TAG_ICC_RENDERING_INTENT
+    public static final int TAG_ICC_XYZ_VALUES
+    public static final int TAG_ICC_PROFILE_CREATOR
+    public static final int TAG_ICC_TAG_COUNT
+    public static final int TAG_ICC_TAG_A2B0
+    public static final int TAG_ICC_TAG_A2B1
+    public static final int TAG_ICC_TAG_A2B2
+    public static final int TAG_ICC_TAG_bXYZ
+    public static final int TAG_ICC_TAG_bTRC
+    public static final int TAG_ICC_TAG_B2A0
+    public static final int TAG_ICC_TAG_B2A1
+    public static final int TAG_ICC_TAG_B2A2
+    public static final int TAG_ICC_TAG_calt
+    public static final int TAG_ICC_TAG_targ
+    public static final int TAG_ICC_TAG_chad
+    public static final int TAG_ICC_TAG_chrm
+    public static final int TAG_ICC_TAG_cprt
+    public static final int TAG_ICC_TAG_crdi
+    public static final int TAG_ICC_TAG_dmnd
+    public static final int TAG_ICC_TAG_dmdd
+    public static final int TAG_ICC_TAG_devs
+    public static final int TAG_ICC_TAG_gamt
+    public static final int TAG_ICC_TAG_kTRC
+    public static final int TAG_ICC_TAG_gXYZ
+    public static final int TAG_ICC_TAG_gTRC
+    public static final int TAG_ICC_TAG_lumi
+    public static final int TAG_ICC_TAG_meas
+    public static final int TAG_ICC_TAG_bkpt
+    public static final int TAG_ICC_TAG_wtpt
+    public static final int TAG_ICC_TAG_ncol
+    public static final int TAG_ICC_TAG_ncl2
+    public static final int TAG_ICC_TAG_resp
+    public static final int TAG_ICC_TAG_pre0
+    public static final int TAG_ICC_TAG_pre1
+    public static final int TAG_ICC_TAG_pre2
+    public static final int TAG_ICC_TAG_desc
+    public static final int TAG_ICC_TAG_pseq
+    public static final int TAG_ICC_TAG_psd0
+    public static final int TAG_ICC_TAG_psd1
+    public static final int TAG_ICC_TAG_psd2
+    public static final int TAG_ICC_TAG_psd3
+    public static final int TAG_ICC_TAG_ps2s
+    public static final int TAG_ICC_TAG_ps2i
+    public static final int TAG_ICC_TAG_rXYZ
+    public static final int TAG_ICC_TAG_rTRC
+    public static final int TAG_ICC_TAG_scrd
+    public static final int TAG_ICC_TAG_scrn
+    public static final int TAG_ICC_TAG_tech
+    public static final int TAG_ICC_TAG_bfd
+    public static final int TAG_ICC_TAG_vued
+    public static final int TAG_ICC_TAG_view
+    public static final int TAG_ICC_APPLE_MULTI_LANGUAGE_PROFILE_NAME
+com.drew.metadata.iptc.IptcDescriptor:
+    public java.lang.String getByLineDescription()
+    public java.lang.String getByLineTitleDescription()
+    public java.lang.String getCaptionDescription()
+    public java.lang.String getCategoryDescription()
+    public java.lang.String getCityDescription()
+    public java.lang.String getCopyrightNoticeDescription()
+    public java.lang.String getCountryOrPrimaryLocationDescription()
+    public java.lang.String getCreditDescription()
+    public java.lang.String getDateCreatedDescription()
+    public java.lang.String getHeadlineDescription()
+    public java.lang.String getObjectNameDescription()
+    public java.lang.String getOriginalTransmissionReferenceDescription()
+    public java.lang.String getOriginatingProgramDescription()
+    public java.lang.String getProvinceOrStateDescription()
+    public java.lang.String getRecordVersionDescription()
+    public java.lang.String getReleaseDateDescription()
+    public java.lang.String getReleaseTimeDescription()
+    public java.lang.String getSourceDescription()
+    public java.lang.String getSpecialInstructionsDescription()
+    public java.lang.String getSupplementalCategoriesDescription()
+    public java.lang.String getTimeCreatedDescription()
+    public java.lang.String getUrgencyDescription()
+    public java.lang.String getWriterDescription()
+com.drew.metadata.iptc.IptcDirectory:
+    public static final int TAG_ENVELOPE_RECORD_VERSION
+    public static final int TAG_DESTINATION
+    public static final int TAG_FILE_FORMAT
+    public static final int TAG_FILE_VERSION
+    public static final int TAG_SERVICE_ID
+    public static final int TAG_ENVELOPE_NUMBER
+    public static final int TAG_PRODUCT_ID
+    public static final int TAG_ENVELOPE_PRIORITY
+    public static final int TAG_DATE_SENT
+    public static final int TAG_TIME_SENT
+    public static final int TAG_CODED_CHARACTER_SET
+    public static final int TAG_UNIQUE_OBJECT_NAME
+    public static final int TAG_ARM_IDENTIFIER
+    public static final int TAG_ARM_VERSION
+    public static final int TAG_APPLICATION_RECORD_VERSION
+    public static final int TAG_OBJECT_TYPE_REFERENCE
+    public static final int TAG_OBJECT_ATTRIBUTE_REFERENCE
+    public static final int TAG_OBJECT_NAME
+    public static final int TAG_EDIT_STATUS
+    public static final int TAG_EDITORIAL_UPDATE
+    public static final int TAG_URGENCY
+    public static final int TAG_SUBJECT_REFERENCE
+    public static final int TAG_CATEGORY
+    public static final int TAG_SUPPLEMENTAL_CATEGORIES
+    public static final int TAG_FIXTURE_ID
+    public static final int TAG_KEYWORDS
+    public static final int TAG_CONTENT_LOCATION_CODE
+    public static final int TAG_CONTENT_LOCATION_NAME
+    public static final int TAG_RELEASE_DATE
+    public static final int TAG_RELEASE_TIME
+    public static final int TAG_EXPIRATION_DATE
+    public static final int TAG_EXPIRATION_TIME
+    public static final int TAG_SPECIAL_INSTRUCTIONS
+    public static final int TAG_ACTION_ADVISED
+    public static final int TAG_REFERENCE_SERVICE
+    public static final int TAG_REFERENCE_DATE
+    public static final int TAG_REFERENCE_NUMBER
+    public static final int TAG_DATE_CREATED
+    public static final int TAG_TIME_CREATED
+    public static final int TAG_DIGITAL_DATE_CREATED
+    public static final int TAG_DIGITAL_TIME_CREATED
+    public static final int TAG_ORIGINATING_PROGRAM
+    public static final int TAG_PROGRAM_VERSION
+    public static final int TAG_OBJECT_CYCLE
+    public static final int TAG_BY_LINE
+    public static final int TAG_BY_LINE_TITLE
+    public static final int TAG_CITY
+    public static final int TAG_SUB_LOCATION
+    public static final int TAG_PROVINCE_OR_STATE
+    public static final int TAG_COUNTRY_OR_PRIMARY_LOCATION_CODE
+    public static final int TAG_COUNTRY_OR_PRIMARY_LOCATION_NAME
+    public static final int TAG_ORIGINAL_TRANSMISSION_REFERENCE
+    public static final int TAG_HEADLINE
+    public static final int TAG_CREDIT
+    public static final int TAG_SOURCE
+    public static final int TAG_COPYRIGHT_NOTICE
+    public static final int TAG_CONTACT
+    public static final int TAG_CAPTION
+    public static final int TAG_LOCAL_CAPTION
+    public static final int TAG_CAPTION_WRITER
+    public static final int TAG_RASTERIZED_CAPTION
+    public static final int TAG_IMAGE_TYPE
+    public static final int TAG_IMAGE_ORIENTATION
+    public static final int TAG_LANGUAGE_IDENTIFIER
+    public static final int TAG_AUDIO_TYPE
+    public static final int TAG_AUDIO_SAMPLING_RATE
+    public static final int TAG_AUDIO_SAMPLING_RESOLUTION
+    public static final int TAG_AUDIO_DURATION
+    public static final int TAG_AUDIO_OUTCUE
+    public static final int TAG_JOB_ID
+    public static final int TAG_MASTER_DOCUMENT_ID
+    public static final int TAG_SHORT_DOCUMENT_ID
+    public static final int TAG_UNIQUE_DOCUMENT_ID
+    public static final int TAG_OWNER_ID
+    public static final int TAG_OBJECT_PREVIEW_FILE_FORMAT
+    public static final int TAG_OBJECT_PREVIEW_FILE_FORMAT_VERSION
+    public static final int TAG_OBJECT_PREVIEW_DATA
+    public java.util.List getKeywords()
+com.drew.metadata.jfif.JfifDirectory:
+    public static final int TAG_JFIF_VERSION
+    public static final int TAG_JFIF_UNITS
+    public static final int TAG_JFIF_RESX
+    public static final int TAG_JFIF_RESY
+    public int getVersion()
+    public int getResUnits()
+    public int getImageWidth()
+    public int getImageHeight()
+com.drew.metadata.jpeg.JpegCommentDescriptor:
+    public java.lang.String getJpegCommentDescription()
+com.drew.metadata.jpeg.JpegCommentDirectory:
+    public static final int TAG_JPEG_COMMENT
+com.drew.metadata.jpeg.JpegComponent:
+    private static final long serialVersionUID
+    public int getComponentId()
+com.drew.metadata.jpeg.JpegDirectory:
+    public static final int TAG_JPEG_COMPRESSION_TYPE
+    public static final int TAG_JPEG_DATA_PRECISION
+    public static final int TAG_JPEG_IMAGE_HEIGHT
+    public static final int TAG_JPEG_IMAGE_WIDTH
+    public static final int TAG_JPEG_NUMBER_OF_COMPONENTS
+    public static final int TAG_JPEG_COMPONENT_DATA_1
+    public static final int TAG_JPEG_COMPONENT_DATA_2
+    public static final int TAG_JPEG_COMPONENT_DATA_3
+    public static final int TAG_JPEG_COMPONENT_DATA_4
+    public int getImageWidth()
+    public int getImageHeight()
+    public int getNumberOfComponents()
+com.drew.metadata.photoshop.PhotoshopDirectory:
+    public static final int TAG_PHOTOSHOP_THUMBNAIL
+    public static final int TAG_PHOTOSHOP_THUMBNAIL_OLD
+    public static final int TAG_PHOTOSHOP_JPEG_QUALITY
+    public static final int TAG_PHOTOSHOP_URL
+    public static final int TAG_PHOTOSHOP_IPTC
+    public static final int TAG_PHOTOSHOP_CAPTION_DIGEST
+    public static final int TAG_PHOTOSHOP_SLICES
+    public static final int TAG_PHOTOSHOP_VERSION
+    public static final int TAG_PHOTOSHOP_RESOLUTION_INFO
+    public static final int TAG_PHOTOSHOP_XML
+    public static final int TAG_PHOTOSHOP_COPYRIGHT
+    public static final int TAG_PHOTOSHOP_GLOBAL_ANGLE
+    public static final int TAG_PHOTOSHOP_GLOBAL_ALTITUDE
+    public static final int TAG_PHOTOSHOP_URL_LIST
+    public static final int TAG_PHOTOSHOP_PRINT_SCALE
+    public static final int TAG_PHOTOSHOP_PRINT_FLAGS_INFO
+    public static final int TAG_PHOTOSHOP_PRINT_FLAGS
+    public static final int TAG_PHOTOSHOP_SEED_NUMBER
+    public static final int TAG_PHOTOSHOP_PIXEL_ASPECT_RATIO
+    public byte[] getThumbnailBytes()
+com.drew.metadata.photoshop.PsdHeaderDirectory:
+    public static final int TAG_CHANNEL_COUNT
+    public static final int TAG_IMAGE_HEIGHT
+    public static final int TAG_IMAGE_WIDTH
+    public static final int TAG_BITS_PER_CHANNEL
+    public static final int TAG_COLOR_MODE
+com.drew.metadata.xmp.XmpDirectory:
+    public static final int TAG_MAKE
+    public static final int TAG_MODEL
+    public static final int TAG_EXPOSURE_TIME
+    public static final int TAG_SHUTTER_SPEED
+    public static final int TAG_F_NUMBER
+    public static final int TAG_LENS_INFO
+    public static final int TAG_LENS
+    public static final int TAG_CAMERA_SERIAL_NUMBER
+    public static final int TAG_FIRMWARE
+    public static final int TAG_FOCAL_LENGTH
+    public static final int TAG_APERTURE_VALUE
+    public static final int TAG_EXPOSURE_PROGRAM
+    public static final int TAG_DATETIME_ORIGINAL
+    public static final int TAG_DATETIME_DIGITIZED
+    public java.util.Map getXmpProperties()
+    public com.adobe.xmp.XMPMeta getXMPMeta()
+com.drew.metadata.xmp.XmpReader:
+    private static final int FMT_STRING
+    private static final int FMT_RATIONAL
+    private static final int FMT_INT
+    private static final int FMT_DOUBLE
+    private static final java.lang.String SCHEMA_EXIF_SPECIFIC_PROPERTIES
+    private static final java.lang.String SCHEMA_EXIF_ADDITIONAL_PROPERTIES
+    private static final java.lang.String SCHEMA_EXIF_TIFF_PROPERTIES
+    private static final java.lang.String SCHEMA_DUBLIN_CORE_SPECIFIC_PROPERTIES
 com.fenritz.safecam.BuildConfig
 com.fenritz.safecam.CameraActivity:
     public static final java.lang.String FLASH_MODE
     public static final java.lang.String TIMER_MODE
     public static final java.lang.String PHOTO_SIZE
-    int numberOfCameras
+    public static final java.lang.String PHOTO_SIZE_FRONT
     android.widget.FrameLayout$LayoutParams origParams
     private static final int ORIENTATION_PORTRAIT_NORMAL
     private static final int ORIENTATION_PORTRAIT_INVERTED
     private static final int ORIENTATION_LANDSCAPE_NORMAL
     private static final int ORIENTATION_LANDSCAPE_INVERTED
+    private static final int DEFAULT_CAMERA
+    676:698:public static byte[] FixFrontCamPhoto(byte[],int)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteFile:
-    664:665:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
+    842:843:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb:
-    710:711:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
-    714:715:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
+    888:889:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
+    892:893:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
 com.fenritz.safecam.FileDialog:
     public static final int MODE_CREATE
     public static final int MODE_OPEN
@@ -554,8 +1719,6 @@ com.fenritz.safecam.FileDialog:
     private static final int SELECT_ALL
 com.fenritz.safecam.FileDialog$BitmapViewBinder
 com.fenritz.safecam.GalleryActivity:
-    private static final int MULTISELECT_OFF
-    private static final int MULTISELECT_ON
     protected static final int REQUEST_DECRYPT
     protected static final int REQUEST_ENCRYPT
     protected static final int REQUEST_IMPORT
@@ -569,12 +1732,17 @@ com.fenritz.safecam.R
 com.fenritz.safecam.R$anim
 com.fenritz.safecam.R$array
 com.fenritz.safecam.R$attr
+com.fenritz.safecam.R$bool
 com.fenritz.safecam.R$color
+com.fenritz.safecam.R$dimen
 com.fenritz.safecam.R$drawable
 com.fenritz.safecam.R$id
+com.fenritz.safecam.R$integer
 com.fenritz.safecam.R$layout
 com.fenritz.safecam.R$menu
 com.fenritz.safecam.R$string
+com.fenritz.safecam.R$style
+com.fenritz.safecam.R$styleable
 com.fenritz.safecam.R$xml
 com.fenritz.safecam.SafeCameraActivity:
     public static final java.lang.String DEFAULT_PREFS
@@ -608,8 +1776,8 @@ com.fenritz.safecam.util.AESCrypt:
     231:231:public boolean reEncrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
     300:301:public void decrypt(java.io.InputStream,java.io.OutputStream)
     304:305:public void decrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
-    348:348:public byte[] decrypt(java.io.InputStream)
     351:351:public byte[] decrypt(java.io.InputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
+    355:355:public byte[] decrypt(java.io.InputStream,android.os.AsyncTask)
     414:425:public java.lang.String encrypt(java.lang.String)
     436:450:public java.lang.String decrypt(java.lang.String)
     456:460:public java.lang.String decryptForString(byte[])
@@ -621,38 +1789,53 @@ com.fenritz.safecam.util.AESCrypt$CryptoProgress:
 com.fenritz.safecam.util.AESCryptException:
     private static final long serialVersionUID
 com.fenritz.safecam.util.AsyncTasks:
-    21:21:public AsyncTasks()
-com.fenritz.safecam.util.AsyncTasks$DeleteFiles:
-    101:102:public AsyncTasks$DeleteFiles(android.app.Activity)
+    26:26:public AsyncTasks()
+com.fenritz.safecam.util.AsyncTasks$DecryptFiles:
+    289:290:public AsyncTasks$DecryptFiles(android.app.Activity,java.lang.String)
+com.fenritz.safecam.util.AsyncTasks$DecryptPopulateImage:
+    59:60:public void setCache(com.fenritz.safecam.util.MemoryCache)
 com.fenritz.safecam.util.AsyncTasks$EncryptFiles:
-    461:462:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
+    473:474:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$ImportFiles:
     public static final int STATUS_OK
     public static final int STATUS_FAIL
     public static final int STATUS_CANCEL
-    553:554:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
+    565:566:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$MoveFiles:
-    199:200:public AsyncTasks$MoveFiles(android.app.Activity,java.io.File)
+    211:212:public AsyncTasks$MoveFiles(android.app.Activity,java.io.File)
+com.fenritz.safecam.util.AsyncTasks$ShowImageThumb:
+    687:688:public void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish)
+com.fenritz.safecam.util.CameraPreview:
+    71:82:public void switchCamera(android.hardware.Camera)
 com.fenritz.safecam.util.DecryptAndShowImage:
-    40:41:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup)
-    44:45:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,com.fenritz.safecam.util.MemoryCache)
-    48:49:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener,android.view.View$OnLongClickListener)
-    52:53:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener)
+    42:43:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup)
+    46:47:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,com.fenritz.safecam.util.MemoryCache)
+    50:51:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener,android.view.View$OnLongClickListener)
+    54:55:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener)
 com.fenritz.safecam.util.Helpers:
     public static final java.lang.String JPEG_FILE_PREFIX
     protected static final int SHARE_AS_IS
     protected static final int SHARE_REENCRYPT
     protected static final int SHARE_DECRYPT
-    52:52:public Helpers()
-    146:154:public static void registerForBroadcastReceiver(android.app.Activity)
-    182:191:public static void printMaxKeySizes()
+    63:63:public Helpers()
+    157:165:public static void registerForBroadcastReceiver(android.app.Activity)
+    193:202:public static void printMaxKeySizes()
 com.fenritz.safecam.util.Helpers$1
+com.fenritz.safecam.util.LimitedThreadAsyncTask:
+    private static final int CORE_POOL_SIZE
+    private static final int MAXIMUM_POOL_SIZE
+    private static final int KEEP_ALIVE
 com.fenritz.safecam.util.MemoryCache:
-    42:43:public void clear()
+    46:47:public void clear()
 com.fenritz.safecam.util.OptimizedCipherInputStream:
     164:167:protected OptimizedCipherInputStream(java.io.InputStream)
+com.fenritz.safecam.util.SerialExecutor
+com.fenritz.safecam.util.SerialExecutor$OnPostExecute
+com.fenritz.safecam.util.SerialExecutor$SerialTask
+com.fenritz.safecam.util.SerialExecutor$TaskParams
 com.fenritz.safecam.widget.DashboardLayout:
     private static final int UNEVEN_GRID_PENALTY_MULTIPLIER
+    36:37:public DashboardLayout(android.content.Context)
 com.fenritz.safecam.widget.TouchImageView:
     static final int NONE
     static final int DRAG

@@ -92,7 +92,7 @@ public class Helpers {
 		}
 
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-		int lockTimeout = Integer.valueOf(sharedPrefs.getString("lock_time", "300")) * 1000;
+		int lockTimeout = Integer.valueOf(sharedPrefs.getString("lock_time", "60")) * 1000;
 
 		long currentTimestamp = System.currentTimeMillis();
 		long lockedTime = ((SafeCameraApplication) activity.getApplicationContext()).getLockedTime();
