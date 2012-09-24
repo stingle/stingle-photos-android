@@ -25,7 +25,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -95,8 +94,6 @@ public class GalleryActivity extends SherlockActivity {
 	private boolean isWentToLogin = false;
 	
 	private String currentPath;
-	
-	private final HashMap<Integer, AsyncTasks.DecryptPopulateImage> tasks = new HashMap<Integer, AsyncTasks.DecryptPopulateImage>();
 	
 	private final ArrayList<Dec> queue = new ArrayList<Dec>();
 	
@@ -828,23 +825,22 @@ public class GalleryActivity extends SherlockActivity {
 								imageView.setImageBitmap(image);
 							}
 							else{
-								/*boolean found = false;
+								imageView.setImageResource(R.drawable.file);
+								
+								boolean found = false;
 								for(Dec item : queue){
 									if(item.fileName.equals(thumbPath)){
-										imageView.setImageDrawable(item.image.getDrawable());
+										item.images.add(imageView);
 										found = true;
 									}
 								}
 								
-								if(!found){*/
-								imageView.setImageResource(R.drawable.file);
-								
-								queue.add(new Dec(thumbPath, imageView));
-								
-								if(!decryptor.isAlive()){
-									decryptor.start();
+								if(!found){
+									queue.add(new Dec(thumbPath, imageView));
+									if(!decryptor.isAlive()){
+										decryptor.start();
+									}
 								}
-								//}
 							}
 							imageView.setOnClickListener(onClick);
 							imageView.setOnLongClickListener(onLongClick);
@@ -909,11 +905,11 @@ public class GalleryActivity extends SherlockActivity {
 	
 	private class Dec{
 		public String fileName;
-		public ImageView image;
+		public ArrayList<ImageView> images = new ArrayList<ImageView>();
 		
 		public Dec(String fileName, ImageView image){
 			this.fileName = fileName;
-			this.image = image;
+			this.images.add(image);
 		}
 	}
 	
@@ -947,13 +943,14 @@ public class GalleryActivity extends SherlockActivity {
 									}
 									runOnUiThread(new Runnable() {
 										public void run() {
-											item.image.setImageBitmap(bitmap);
+											if(item.images.size() > 0){
+												for(ImageView image : item.images){
+													image.setImageBitmap(bitmap);
+												}
+											}
 										}
 									});
 								}
-							}
-							else {
-								Log.d("sc", "Unable to decrypt: " + item.fileName);
 							}
 							
 							queue.remove(item);
