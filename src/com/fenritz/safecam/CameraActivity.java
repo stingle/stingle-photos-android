@@ -88,7 +88,6 @@ public class CameraActivity extends SherlockActivity {
 	private int numberOfCameras = 1; 
 	private int currentCamera = 0; 
 	
-	private boolean isFlashOn = false; 
 	private boolean isTimerOn = false; 
 
 	private ImageButton takePhotoButton;
@@ -300,11 +299,9 @@ public class CameraActivity extends SherlockActivity {
 		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 
 		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
-			isFlashOn = false;
 			flashButton.setImageResource(R.drawable.flash_off);
 		}
 		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
-			isFlashOn = true;
 			flashButton.setImageResource(R.drawable.flash_on);
 		}
 		
@@ -532,11 +529,9 @@ public class CameraActivity extends SherlockActivity {
 				if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
 					flashMode = Parameters.FLASH_MODE_ON;
 					flashButtonImage = R.drawable.flash_on;
-					isFlashOn = true;
 				}
 				else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
 					flashMode = Parameters.FLASH_MODE_OFF;
-					isFlashOn = false;
 				}
 
 				Camera.Parameters parameters = mCamera.getParameters();
@@ -1044,10 +1039,8 @@ public class CameraActivity extends SherlockActivity {
 	
 	private class PhotoSizeAdapter extends ArrayAdapter<CharSequence> {
 
-		private final List<Size> mSupportedPictureSizes;
 	    public PhotoSizeAdapter(Context context, int textViewResId, CharSequence[] strings) {
 	        super(context, textViewResId, strings);
-	        mSupportedPictureSizes = getSupportedImageSizes();
 	    }
 
 	    @Override
