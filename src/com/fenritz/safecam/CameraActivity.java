@@ -385,10 +385,12 @@ public class CameraActivity extends SherlockActivity {
 						}
 					}
 
-					if (lastOrientation != mOrientation) {
+					if (lastOrientation != mOrientation && mCamera != null) {
 						Camera.Parameters parameters = mCamera.getParameters();
-						parameters.setRotation(changeRotation(mOrientation));
-						mCamera.setParameters(parameters);
+						if(parameters != null){
+							parameters.setRotation(changeRotation(mOrientation));
+							mCamera.setParameters(parameters);
+						}
 					}
 				}
 			};

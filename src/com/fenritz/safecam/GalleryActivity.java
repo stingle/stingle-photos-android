@@ -588,8 +588,10 @@ public class GalleryActivity extends SherlockActivity {
 								new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
 									@Override
 									public void onFinish(ArrayList<File> deletedFiles) {
-										for(File file : deletedFiles){
-											sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+										if(deletedFiles != null){
+											for(File file : deletedFiles){
+												sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+											}
 										}
 										Toast.makeText(GalleryActivity.this, getString(R.string.success_delete_originals), Toast.LENGTH_LONG).show();
 									}
