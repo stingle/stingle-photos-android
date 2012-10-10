@@ -237,7 +237,8 @@ public class GalleryActivity extends SherlockActivity {
 		if(folderFiles != null){
 			int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
 			
-			Arrays.sort(folderFiles, new Comparator<File>() {
+			Arrays.sort(folderFiles, Collections.reverseOrder());
+			/*Arrays.sort(folderFiles, new Comparator<File>() {
 				public int compare(File lhs, File rhs) {
 					if(rhs.lastModified() > lhs.lastModified()){
 						return 1;
@@ -247,7 +248,7 @@ public class GalleryActivity extends SherlockActivity {
 					}
 					return 0;
 				}
-			});
+			});*/
 			
 			this.files.clear();
 			toGenerateThumbs.clear();
@@ -264,7 +265,7 @@ public class GalleryActivity extends SherlockActivity {
 						noThumbs.add(file);
 					}
 					else{
-						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
+						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + Helpers.getThumbFileName(file);
 						File thumb = new File(thumbPath);
 						if (!thumb.exists()) {
 							toGenerateThumbs.add(file);
@@ -330,6 +331,8 @@ public class GalleryActivity extends SherlockActivity {
 			fillCacheTask.cancel(true);
 			fillCacheTask = null;
 		}*/
+		
+		decryptor.interrupt();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -809,7 +812,7 @@ public class GalleryActivity extends SherlockActivity {
 						layout.addView(getLabel(file));
 					}
 					else{
-						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + file.getName();
+						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + Helpers.getThumbFileName(file);
 						if (toGenerateThumbs.contains(file)) {
 							ProgressBar progress = new ProgressBar(GalleryActivity.this);
 							progress.setOnClickListener(onClick);
@@ -999,9 +1002,10 @@ public class GalleryActivity extends SherlockActivity {
 						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 
 						String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
-						String key = thumbsDir + file.getName();
+						String fileName = Helpers.getThumbFileName(file);
+						String key = thumbsDir + fileName;
 						if (decryptedData != null) {
-							memCache.put(key, Helpers.generateThumbnail(GalleryActivity.this, decryptedData, file.getName()));
+							memCache.put(key, Helpers.generateThumbnail(GalleryActivity.this, decryptedData, fileName));
 						}
 						
 						if(memCache.get(key) == null){

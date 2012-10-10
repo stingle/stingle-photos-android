@@ -41,6 +41,13 @@ public class MemoryCache {
         	}
 		}
     }
+    
+    @SuppressLint("NewApi")
+	public void remove(String id){
+        synchronized(cache) {
+        	cache.remove(id);
+		}
+    }
 
     public void clear() {
         cache.evictAll();

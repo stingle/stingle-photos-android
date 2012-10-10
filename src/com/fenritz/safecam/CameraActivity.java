@@ -432,7 +432,7 @@ public class CameraActivity extends SherlockActivity {
 		File[] folderFiles = dir.listFiles(new FileFilter() {
 			
 			public boolean accept(File file) {
-				File thumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + file.getName());
+				File thumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(file));
 				if(file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()){
 					return true;
 				}
@@ -441,7 +441,8 @@ public class CameraActivity extends SherlockActivity {
 		});
 		
 		if(folderFiles != null && folderFiles.length > 0){
-			Arrays.sort(folderFiles, new Comparator<File>() {
+			Arrays.sort(folderFiles, Collections.reverseOrder());
+			/*Arrays.sort(folderFiles, new Comparator<File>() {
 				public int compare(File lhs, File rhs) {
 					if(rhs.lastModified() > lhs.lastModified()){
 						return 1;
@@ -451,10 +452,10 @@ public class CameraActivity extends SherlockActivity {
 					}
 					return 0;
 				}
-			});
+			});*/
 		
 			lastFile = folderFiles[0];
-			final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + lastFile.getName());
+			final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(lastFile));
 			final int thumbSize = (int) Math.round(Helpers.getThumbSize(CameraActivity.this) / 1.3);
 			
 			DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
@@ -653,7 +654,7 @@ public class CameraActivity extends SherlockActivity {
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 
 				new EncryptAndWriteFile(filename).execute(data);
-				new EncryptAndWriteThumb(CameraActivity.this, filename, new OnAsyncTaskFinish() {
+				new EncryptAndWriteThumb(CameraActivity.this, Helpers.getThumbFileName(Helpers.getHomeDir(CameraActivity.this) + "/" + filename), new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();

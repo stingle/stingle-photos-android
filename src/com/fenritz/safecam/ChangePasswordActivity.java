@@ -140,7 +140,7 @@ public class ChangePasswordActivity extends SherlockActivity {
 				if (file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
 					files.add(file);
 					
-					String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + file.getName();
+					String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
 					File thumb = new File(thumbPath);
 					if(thumb.exists() && thumb.isFile()){
 						files.add(thumb);

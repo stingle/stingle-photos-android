@@ -3,7 +3,7 @@ package com.fenritz.safecam;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -293,7 +294,8 @@ public class ViewImageActivity extends SherlockActivity {
 		File dir = new File(currentPath);
 		File[] folderFiles = dir.listFiles();
 
-		Arrays.sort(folderFiles, new Comparator<File>() {
+		Arrays.sort(folderFiles, Collections.reverseOrder());
+		/*Arrays.sort(folderFiles, new Comparator<File>() {
 			public int compare(File lhs, File rhs) {
 				if(rhs.lastModified() > lhs.lastModified()){
 					return 1;
@@ -303,7 +305,7 @@ public class ViewImageActivity extends SherlockActivity {
 				}
 				return 0;
 			}
-		});
+		});*/
 		
 		files.clear();
 		
@@ -352,6 +354,7 @@ public class ViewImageActivity extends SherlockActivity {
 				AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
 				builder.setMessage(getString(R.string.confirm_delete_photo));
 				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+					@SuppressWarnings("unchecked")
 					public void onClick(DialogInterface dialog, int whichButton) {
 						new DeleteFiles(ViewImageActivity.this, new OnAsyncTaskFinish() {
 							@Override
@@ -381,6 +384,40 @@ public class ViewImageActivity extends SherlockActivity {
 				builder.setNegativeButton(getString(R.string.no), null);
 				AlertDialog dialog = builder.create();
 				dialog.show();
+				return true;
+			case R.id.rotateCW:
+				new AsyncTasks.RotatePhoto(this, files.get(currentPosition).getPath(), AsyncTasks.RotatePhoto.ROTATION_CW, new OnAsyncTaskFinish() {
+					@Override
+					public void onFinish(Integer result) {
+						super.onFinish(result);
+						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
+							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + Helpers.getThumbFileName(files.get(currentPosition));
+							Log.d("qaq", key);
+							SafeCameraApplication.getCache().remove(key);
+							showImage(files.get(currentPosition));
+							Intent resultIntent = new Intent();
+							resultIntent.putExtra("needToRefresh", true);
+							setResult(RESULT_OK, resultIntent);
+						}
+					}
+				}).execute();
+				return true;
+			case R.id.rotateCCW:
+				new AsyncTasks.RotatePhoto(this, files.get(currentPosition).getPath(), AsyncTasks.RotatePhoto.ROTATION_CCW, new OnAsyncTaskFinish() {
+					@Override
+					public void onFinish(Integer result) {
+						super.onFinish(result);
+						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
+							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + Helpers.getThumbFileName(files.get(currentPosition));
+							Log.d("qaq", key);
+							SafeCameraApplication.getCache().remove(key);
+							showImage(files.get(currentPosition));
+							Intent resultIntent = new Intent();
+							resultIntent.putExtra("needToRefresh", true);
+							setResult(RESULT_OK, resultIntent);
+						}
+					}
+				}).execute();
 				return true;
 			case R.id.gotoGallery:
 				intent.setClass(ViewImageActivity.this, GalleryActivity.class);

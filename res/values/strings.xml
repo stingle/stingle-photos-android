@@ -120,6 +120,9 @@
     <string name="multi_select">Multi Select</string>
     <string name="options">Options</string>
     <string name="pro_version_warning">This feature is avalable in PRO version. Do you want to purchase SafeCamera PRO version?</string>
+    <string name="rotate_cw">Rotate clockwise</string>
+    <string name="rotate_ccw">Rotate counter clockwise</string>
+    <string name="rotating">Rotating…</string>
     
     
     <!-- File Dialog -->

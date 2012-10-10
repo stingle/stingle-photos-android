@@ -495,16 +495,20 @@ public class AESCrypt {
 		return new byte[IV_LENGTH];
 	}
 
-	public static byte[] getHash(String password) throws AESCryptException {
+	public static byte[] getHash(String string) throws AESCryptException {
+		return getHash(string, HASH_ALGORITHM);
+	}
+	
+	public static byte[] getHash(String string, String hashAlgorithm) throws AESCryptException {
 		try {
-			MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
-			return md.digest(password.getBytes("UTF-8"));
+			MessageDigest md = MessageDigest.getInstance(hashAlgorithm, PROVIDER);
+			return md.digest(string.getBytes("UTF-8"));
 		}
 		catch (Exception e) {
 			throw new AESCryptException("Unable to get hash");
 		}
 	}
-
+	
 	private static SecretKey getSecretKey(String password, byte[] salt) throws AESCryptException {
 		try {
 			PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), salt, PBE_ITERATION_COUNT, 256);

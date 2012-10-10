@@ -20,6 +20,13 @@ import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 
+import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
+import org.apache.sanselan.common.IImageMetadata;
+import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
+import org.apache.sanselan.formats.tiff.TiffField;
+import org.apache.sanselan.formats.tiff.constants.TiffConstants;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -245,10 +252,9 @@ public class Helpers {
 
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-			byte[] imageByteArray = stream.toByteArray();
 
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
-			Helpers.getAESCrypt(context).encrypt(imageByteArray, out);
+			Helpers.getAESCrypt(context).encrypt(stream.toByteArray(), out);
 		}
 		return thumbBitmap;
 	}
@@ -289,66 +295,112 @@ public class Helpers {
 		return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
 	}
 
-	public static Bitmap decodeFile(File f, int requiredSize) {
+	public static int getExifRotation(byte[] data){
 		try {
-			BufferedInputStream input = new BufferedInputStream(new FileInputStream(f));
-			Integer rotation = null;
-			try {
-				Metadata metadata = ImageMetadataReader.readMetadata(input, false);
+			return getRotationFromMetadata(Sanselan.getMetadata(data));
+		}
+		catch (ImageReadException e) {}
+		catch (IOException e) {}
+		
+		return 0;
+	}
+	
+	public static int getExifRotation(File file){
+		try {
+			return getRotationFromMetadata(Sanselan.getMetadata(file));
+		}
+		catch (ImageReadException e) {}
+		catch (IOException e) {}
+		
+		return 0;
+	}
+	
+	public static int getAltExifRotation(byte[] data){
+		try{
+			return getRotationFromMetadata(ImageMetadataReader.readMetadata(new BufferedInputStream(new ByteArrayInputStream(data)), false));
+		}
+		catch (ImageProcessingException e) {}
+		catch (IOException e) {}
+		
+		return 0;
+	}
+	
+	public static int getAltExifRotation(File file){
+		try{
+			return getRotationFromMetadata(ImageMetadataReader.readMetadata(new BufferedInputStream(new FileInputStream(file)), false));
+		}
+		catch (ImageProcessingException e) {}
+		catch (IOException e) {}
+		
+		return 0;
+	}
+	
+	private static int getRotationFromMetadata(IImageMetadata meta){
+		int currentRotation = 1;
+		try {
+			JpegImageMetadata metaJpg = null;
+			TiffField orientationField = null;
 			
-				ExifIFD0Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
-				if(directory != null){
-					int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-					
-					switch(exifRotation){
-						case 3:
-							// Rotate 180 deg
-							rotation = 180;
-							break;
-						case 6:
-							// Rotate 90 deg
-							rotation = 90;
-							break;
-						case 8:
-							// Rotate 270 deg
-							rotation = 270;
-							break;
-					}
+			if(meta instanceof JpegImageMetadata){
+				metaJpg = (JpegImageMetadata) meta;
+			}
+			
+			if (null != metaJpg){
+				orientationField =  metaJpg.findEXIFValue(TiffConstants.EXIF_TAG_ORIENTATION);
+				if(orientationField != null){
+					currentRotation = orientationField.getIntValue();
 				}
 			}
-			catch (ImageProcessingException e) { }
-			catch (IOException e) { }
-			catch (MetadataException e) { }
-			
-			// Decode image size
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-
-			// Find the correct scale value. It should be the power of 2.
-			requiredSize = requiredSize * requiredSize;
-			int scale = 1;
-		    while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > requiredSize) {
-		    	scale++;
-		    }
-
-			// Decode with inSampleSize
-			BitmapFactory.Options o2 = new BitmapFactory.Options();
-			o2.inSampleSize = scale;
-			
-			if(rotation != null){
-				Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-				Matrix matrix = new Matrix();
-				matrix.postRotate(rotation);
+		}
+		catch (ImageReadException e1) {}
+		
+		switch(currentRotation){
+			case 3:
+				//It's 180 deg now
+				return 180;
+			case 6:
+				//It's 90 deg now
+				return 90;
+			case 8:
+				//It's 270 deg now
+				return 270;
+			default:
+				//It's 0 deg now
+				return 0;
+		}
+	}
 	
-				return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-			}
-			else{
-				return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+	private static int getRotationFromMetadata(Metadata metadata){
+		try {
+			ExifIFD0Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+			if(directory != null){
+				int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+				
+				switch(exifRotation){
+					case 3:
+						//It's 180 deg now
+						return 180;
+					case 6:
+						//It's 90 deg now
+						return 90;
+					case 8:
+						//It's 270 deg now
+						return 270;
+					default:
+						//It's 0 deg now
+						return 0;
+				}
 			}
 		}
-		catch (FileNotFoundException e) { }
-		return null;
+		catch (MetadataException e) {}
+		return 0;
+	}
+	
+	public static Bitmap getRotatedBitmap(Bitmap bitmap, int deg){
+		Matrix matrix = new Matrix();
+		matrix.postRotate(deg);
+
+		return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 	}
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize) {
@@ -357,44 +409,14 @@ public class Helpers {
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize, boolean isFront) {
 		if(data != null){
-			Integer rotation = null;
-			try {
-				BufferedInputStream stream = new BufferedInputStream(new ByteArrayInputStream(data));
-				Metadata metadata = ImageMetadataReader.readMetadata(stream, false);
+			Integer rotation = getAltExifRotation(data);
 			
-				ExifIFD0Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
-				if(directory != null){
-					int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-					
-					switch(exifRotation){
-						case 3:
-							// Rotate 180 deg
-							rotation = 180;
-							break;
-						case 6:
-							// Rotate 90 deg
-							if(!isFront){
-								rotation = 90;
-							}
-							else{
-								rotation = 270;
-							}
-							break;
-						case 8:
-							// Rotate 270 deg
-							if(!isFront){
-								rotation = 270;
-							}
-							else{
-								rotation = 90;
-							}
-							break;
-					}
-				}
+			if(rotation == 90 && isFront){
+				rotation = 270;
 			}
-			catch (ImageProcessingException e) { }
-			catch (IOException e) { }
-			catch (MetadataException e) { }
+			else if(rotation == 270 && isFront){
+				rotation = 90;
+			}
 			
 			// Decode image size
 			BitmapFactory.Options o = new BitmapFactory.Options();
@@ -413,17 +435,57 @@ public class Helpers {
 			o2.inSampleSize = scale;
 			
 			if(rotation != null){
-				Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, o2);
-				Matrix matrix = new Matrix();
-				matrix.postRotate(rotation);
-	
-				return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+				return getRotatedBitmap(BitmapFactory.decodeByteArray(data, 0, data.length, o2), rotation);
 			}
 			else{
 				return BitmapFactory.decodeByteArray(data, 0, data.length, o2);
 			}
 		}
 		return null;
+	}
+	
+	public static Bitmap decodeFile(File f, int requiredSize) {
+		try {
+			Integer rotation = getAltExifRotation(f);
+			
+			// Decode image size
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
+
+			// Find the correct scale value. It should be the power of 2.
+			requiredSize = requiredSize * requiredSize;
+			int scale = 1;
+		    while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > requiredSize) {
+		    	scale++;
+		    }
+
+			// Decode with inSampleSize
+			BitmapFactory.Options o2 = new BitmapFactory.Options();
+			o2.inSampleSize = scale;
+			
+			if(rotation != null){
+				return getRotatedBitmap(BitmapFactory.decodeStream(new FileInputStream(f), null, o2), rotation);
+			}
+			else{
+				return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+			}
+		}
+		catch (FileNotFoundException e) { }
+		return null;
+	}
+	
+	public static String getThumbFileName(File file){
+		return getThumbFileName(file.getPath());
+	}
+	
+	public static String getThumbFileName(String filePath){
+		try{
+			return AESCrypt.byteToHex(AESCrypt.getHash(filePath, "SHA-1"));
+		}
+		catch(AESCryptException e){
+			return filePath;
+		}
 	}
 	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
