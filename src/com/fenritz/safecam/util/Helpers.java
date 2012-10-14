@@ -397,10 +397,13 @@ public class Helpers {
 	}
 	
 	public static Bitmap getRotatedBitmap(Bitmap bitmap, int deg){
-		Matrix matrix = new Matrix();
-		matrix.postRotate(deg);
+		if(bitmap != null){
+			Matrix matrix = new Matrix();
+			matrix.postRotate(deg);
 
-		return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+			return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+		}
+		return null;
 	}
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize) {

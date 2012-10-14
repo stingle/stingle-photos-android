@@ -291,7 +291,11 @@ public class CameraActivity extends SherlockActivity {
 				}
 			}
 		}
-		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
+		Size seletectedSize;
+		
+		if(mSupportedPictureSizes.contains(photoSizeIndex)){
+			seletectedSize = mSupportedPictureSizes.get(0);
+		}
 
 		// Set flash mode from preferences and update button accordingly
 		
