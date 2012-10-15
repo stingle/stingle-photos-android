@@ -270,36 +270,35 @@ public class CameraActivity extends SherlockActivity {
 		}
 
 		List<Size> mSupportedPictureSizes = getSupportedImageSizes();
+		int defaultPhotoSizeIndex = mSupportedPictureSizes.size()-1;
 		if(isCurrentCameraFrontFacing()){
-			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, 0);
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, defaultPhotoSizeIndex);
 		}
 		else{
-			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, defaultPhotoSizeIndex);
 		}
 		
 		if(Helpers.isDemo(CameraActivity.this)){
 			for(int i=0;i<mSupportedPictureSizes.size();i++){
 				if(mSupportedPictureSizes.get(i).width <= 640){
 					photoSizeIndex = i;
-					if(isCurrentCameraFrontFacing()){
+					/*if(isCurrentCameraFrontFacing()){
 						preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, photoSizeIndex).commit();
 					}
 					else{
 						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
-					}
+					}*/
 					break;
 				}
 			}
 		}
-		Size seletectedSize;
+		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
 		
-		if(mSupportedPictureSizes.contains(photoSizeIndex)){
-			seletectedSize = mSupportedPictureSizes.get(0);
+		if(seletectedSize == null){
+			seletectedSize = mSupportedPictureSizes.get(defaultPhotoSizeIndex);
 		}
 
 		// Set flash mode from preferences and update button accordingly
-		
-		
 		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 
 		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
@@ -494,6 +493,27 @@ public class CameraActivity extends SherlockActivity {
 		super.onDestroy();
 	}
 	
+	/*@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		int keyCode = event.getKeyCode();
+		switch (keyCode) {
+			case KeyEvent.KEYCODE_DPAD_DOWN:
+				takePhoto();
+				return true;
+			case KeyEvent.KEYCODE_VOLUME_UP:
+			case KeyEvent.KEYCODE_VOLUME_DOWN:
+				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
+				
+				if(sharedPrefs.getBoolean("volume_take_photo", true)){
+					takePhoto();
+					return true;
+				}
+			default:
+				return super.dispatchKeyEvent(event);
+		}
+	}*/
+
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
@@ -510,6 +530,23 @@ public class CameraActivity extends SherlockActivity {
 		}
 		
 		return super.onKeyDown(keyCode, event);
+	}
+	
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+			return true;
+		}
+		
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
+		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", true);
+		
+		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+			return true;
+		}
+		
+		return super.onKeyUp(keyCode, event);
 	}
 	
 	private OnClickListener openGallery() {
@@ -944,12 +981,6 @@ public class CameraActivity extends SherlockActivity {
 		}
 		
 		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-		if(isCurrentCameraFrontFacing()){
-			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, 0);
-		}
-		else{
-			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, 0);
-		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(getString(R.string.photo_size_choose));

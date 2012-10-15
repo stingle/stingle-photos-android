@@ -56,6 +56,7 @@ public class SafeCameraActivity extends SherlockActivity {
 			Intent intent = new Intent();
 			intent.setClass(SafeCameraActivity.this, SetUpActivity.class);
 			startActivity(intent);
+			finish();
 		}
 
 		((Button) findViewById(R.id.login)).setOnClickListener(login());

@@ -20,6 +20,5 @@ Desktop.ini
 bin
 gen
 local.properties
-*.jar
 R.java
 *.ap_

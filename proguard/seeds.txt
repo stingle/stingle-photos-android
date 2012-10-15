@@ -1,11 +1,11 @@
+android.support.v13.dreams.BasicDream
+android.support.v13.dreams.BasicDream: void setContentView(android.view.View)
 android.support.v4.app.ActivityCompat
 android.support.v4.app.ActivityCompat: ActivityCompat()
 android.support.v4.app.ActivityCompat: boolean invalidateOptionsMenu(android.app.Activity)
-android.support.v4.app.ActivityCompat: boolean startActivities(android.app.Activity,android.content.Intent[])
 android.support.v4.app.ActivityCompatHoneycomb
 android.support.v4.app.ActivityCompatHoneycomb: ActivityCompatHoneycomb()
 android.support.v4.app.ActivityCompatHoneycomb: void invalidateOptionsMenu(android.app.Activity)
-android.support.v4.app.ActivityCompatHoneycomb: void startActivities(android.app.Activity,android.content.Intent[])
 android.support.v4.app.ActivityCompatHoneycomb: void dump(android.app.Activity,java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[])
 android.support.v4.app.BackStackRecord
 android.support.v4.app.BackStackRecord: java.lang.String TAG
@@ -127,13 +127,15 @@ android.support.v4.app.DialogFragment: boolean mCancelable
 android.support.v4.app.DialogFragment: boolean mShowsDialog
 android.support.v4.app.DialogFragment: int mBackStackId
 android.support.v4.app.DialogFragment: android.app.Dialog mDialog
-android.support.v4.app.DialogFragment: boolean mDestroyed
-android.support.v4.app.DialogFragment: boolean mRemoved
+android.support.v4.app.DialogFragment: boolean mViewDestroyed
+android.support.v4.app.DialogFragment: boolean mDismissed
+android.support.v4.app.DialogFragment: boolean mShownByMe
 android.support.v4.app.DialogFragment: DialogFragment()
 android.support.v4.app.DialogFragment: void setStyle(int,int)
 android.support.v4.app.DialogFragment: void show(android.support.v4.app.FragmentManager,java.lang.String)
 android.support.v4.app.DialogFragment: int show(android.support.v4.app.FragmentTransaction,java.lang.String)
 android.support.v4.app.DialogFragment: void dismiss()
+android.support.v4.app.DialogFragment: void dismissAllowingStateLoss()
 android.support.v4.app.DialogFragment: void dismissInternal(boolean)
 android.support.v4.app.DialogFragment: android.app.Dialog getDialog()
 android.support.v4.app.DialogFragment: int getTheme()
@@ -141,6 +143,8 @@ android.support.v4.app.DialogFragment: void setCancelable(boolean)
 android.support.v4.app.DialogFragment: boolean isCancelable()
 android.support.v4.app.DialogFragment: void setShowsDialog(boolean)
 android.support.v4.app.DialogFragment: boolean getShowsDialog()
+android.support.v4.app.DialogFragment: void onAttach(android.app.Activity)
+android.support.v4.app.DialogFragment: void onDetach()
 android.support.v4.app.DialogFragment: void onCreate(android.os.Bundle)
 android.support.v4.app.DialogFragment: android.view.LayoutInflater getLayoutInflater(android.os.Bundle)
 android.support.v4.app.DialogFragment: android.app.Dialog onCreateDialog(android.os.Bundle)
@@ -306,7 +310,7 @@ android.support.v4.app.FragmentActivity: boolean mRetaining
 android.support.v4.app.FragmentActivity: boolean mOptionsMenuInvalidated
 android.support.v4.app.FragmentActivity: boolean mCheckedForLoaderManager
 android.support.v4.app.FragmentActivity: boolean mLoadersStarted
-android.support.v4.app.FragmentActivity: android.support.v4.app.HCSparseArray mAllLoaderManagers
+android.support.v4.app.FragmentActivity: android.support.v4.util.SparseArrayCompat mAllLoaderManagers
 android.support.v4.app.FragmentActivity: android.support.v4.app.LoaderManagerImpl mLoaderManager
 android.support.v4.app.FragmentActivity: FragmentActivity()
 android.support.v4.app.FragmentActivity: void onActivityResult(int,int,android.content.Intent)
@@ -323,6 +327,7 @@ android.support.v4.app.FragmentActivity: void onPanelClosed(int,android.view.Men
 android.support.v4.app.FragmentActivity: void onPause()
 android.support.v4.app.FragmentActivity: void onResume()
 android.support.v4.app.FragmentActivity: void onPostResume()
+android.support.v4.app.FragmentActivity: void onResumeFragments()
 android.support.v4.app.FragmentActivity: boolean onPreparePanel(int,android.view.View,android.view.Menu)
 android.support.v4.app.FragmentActivity: java.lang.Object onRetainNonConfigurationInstance()
 android.support.v4.app.FragmentActivity: void onSaveInstanceState(android.os.Bundle)
@@ -357,7 +362,7 @@ android.support.v4.app.FragmentActivity$NonConfigurationInstances: java.lang.Obj
 android.support.v4.app.FragmentActivity$NonConfigurationInstances: java.lang.Object custom
 android.support.v4.app.FragmentActivity$NonConfigurationInstances: java.util.HashMap children
 android.support.v4.app.FragmentActivity$NonConfigurationInstances: java.util.ArrayList fragments
-android.support.v4.app.FragmentActivity$NonConfigurationInstances: android.support.v4.app.HCSparseArray loaders
+android.support.v4.app.FragmentActivity$NonConfigurationInstances: android.support.v4.util.SparseArrayCompat loaders
 android.support.v4.app.FragmentActivity$NonConfigurationInstances: FragmentActivity$NonConfigurationInstances()
 android.support.v4.app.FragmentManager
 android.support.v4.app.FragmentManager: int POP_BACK_STACK_INCLUSIVE
@@ -453,7 +458,7 @@ android.support.v4.app.FragmentManagerImpl: android.view.animation.Animation mak
 android.support.v4.app.FragmentManagerImpl: android.view.animation.Animation makeFadeAnimation(android.content.Context,float,float)
 android.support.v4.app.FragmentManagerImpl: android.view.animation.Animation loadAnimation(android.support.v4.app.Fragment,int,boolean,int)
 android.support.v4.app.FragmentManagerImpl: void performPendingDeferredStart(android.support.v4.app.Fragment)
-android.support.v4.app.FragmentManagerImpl: void moveToState(android.support.v4.app.Fragment,int,int,int)
+android.support.v4.app.FragmentManagerImpl: void moveToState(android.support.v4.app.Fragment,int,int,int,boolean)
 android.support.v4.app.FragmentManagerImpl: void moveToState(android.support.v4.app.Fragment)
 android.support.v4.app.FragmentManagerImpl: void moveToState(int,boolean)
 android.support.v4.app.FragmentManagerImpl: void moveToState(int,int,int,boolean)
@@ -562,7 +567,8 @@ android.support.v4.app.FragmentPagerAdapter: void finishUpdate(android.view.View
 android.support.v4.app.FragmentPagerAdapter: boolean isViewFromObject(android.view.View,java.lang.Object)
 android.support.v4.app.FragmentPagerAdapter: android.os.Parcelable saveState()
 android.support.v4.app.FragmentPagerAdapter: void restoreState(android.os.Parcelable,java.lang.ClassLoader)
-android.support.v4.app.FragmentPagerAdapter: java.lang.String makeFragmentName(int,int)
+android.support.v4.app.FragmentPagerAdapter: long getItemId(int)
+android.support.v4.app.FragmentPagerAdapter: java.lang.String makeFragmentName(int,long)
 android.support.v4.app.FragmentState
 android.support.v4.app.FragmentState: java.lang.String mClassName
 android.support.v4.app.FragmentState: int mIndex
@@ -639,33 +645,6 @@ android.support.v4.app.FragmentTransaction: android.support.v4.app.FragmentTrans
 android.support.v4.app.FragmentTransaction: android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(java.lang.CharSequence)
 android.support.v4.app.FragmentTransaction: int commit()
 android.support.v4.app.FragmentTransaction: int commitAllowingStateLoss()
-android.support.v4.app.HCSparseArray
-android.support.v4.app.HCSparseArray: java.lang.Object DELETED
-android.support.v4.app.HCSparseArray: boolean mGarbage
-android.support.v4.app.HCSparseArray: int[] mKeys
-android.support.v4.app.HCSparseArray: java.lang.Object[] mValues
-android.support.v4.app.HCSparseArray: int mSize
-android.support.v4.app.HCSparseArray: HCSparseArray()
-android.support.v4.app.HCSparseArray: HCSparseArray(int)
-android.support.v4.app.HCSparseArray: java.lang.Object get(int)
-android.support.v4.app.HCSparseArray: java.lang.Object get(int,java.lang.Object)
-android.support.v4.app.HCSparseArray: void delete(int)
-android.support.v4.app.HCSparseArray: void remove(int)
-android.support.v4.app.HCSparseArray: void removeAt(int)
-android.support.v4.app.HCSparseArray: void gc()
-android.support.v4.app.HCSparseArray: void put(int,java.lang.Object)
-android.support.v4.app.HCSparseArray: int size()
-android.support.v4.app.HCSparseArray: int keyAt(int)
-android.support.v4.app.HCSparseArray: java.lang.Object valueAt(int)
-android.support.v4.app.HCSparseArray: void setValueAt(int,java.lang.Object)
-android.support.v4.app.HCSparseArray: int indexOfKey(int)
-android.support.v4.app.HCSparseArray: int indexOfValue(java.lang.Object)
-android.support.v4.app.HCSparseArray: void clear()
-android.support.v4.app.HCSparseArray: void append(int,java.lang.Object)
-android.support.v4.app.HCSparseArray: int binarySearch(int[],int,int,int)
-android.support.v4.app.HCSparseArray: int idealByteArraySize(int)
-android.support.v4.app.HCSparseArray: int idealIntArraySize(int)
-android.support.v4.app.HCSparseArray: void <clinit>()
 android.support.v4.app.ListFragment
 android.support.v4.app.ListFragment: int INTERNAL_EMPTY_ID
 android.support.v4.app.ListFragment: int INTERNAL_PROGRESS_CONTAINER_ID
@@ -721,8 +700,8 @@ android.support.v4.app.LoaderManager$LoaderCallbacks: void onLoaderReset(android
 android.support.v4.app.LoaderManagerImpl
 android.support.v4.app.LoaderManagerImpl: java.lang.String TAG
 android.support.v4.app.LoaderManagerImpl: boolean DEBUG
-android.support.v4.app.LoaderManagerImpl: android.support.v4.app.HCSparseArray mLoaders
-android.support.v4.app.LoaderManagerImpl: android.support.v4.app.HCSparseArray mInactiveLoaders
+android.support.v4.app.LoaderManagerImpl: android.support.v4.util.SparseArrayCompat mLoaders
+android.support.v4.app.LoaderManagerImpl: android.support.v4.util.SparseArrayCompat mInactiveLoaders
 android.support.v4.app.LoaderManagerImpl: android.support.v4.app.FragmentActivity mActivity
 android.support.v4.app.LoaderManagerImpl: boolean mStarted
 android.support.v4.app.LoaderManagerImpl: boolean mRetaining
@@ -778,6 +757,7 @@ android.support.v4.app.LoaderManagerImpl$LoaderInfo: void dump(java.lang.String,
 android.support.v4.app.NavUtils
 android.support.v4.app.NavUtils: java.lang.String TAG
 android.support.v4.app.NavUtils: java.lang.String PARENT_ACTIVITY
+android.support.v4.app.NavUtils: android.support.v4.app.NavUtils$NavUtilsImpl IMPL
 android.support.v4.app.NavUtils: boolean shouldUpRecreateTask(android.app.Activity,android.content.Intent)
 android.support.v4.app.NavUtils: void navigateUpFromSameTask(android.app.Activity)
 android.support.v4.app.NavUtils: void navigateUpTo(android.app.Activity,android.content.Intent)
@@ -787,6 +767,30 @@ android.support.v4.app.NavUtils: android.content.Intent getParentActivityIntent(
 android.support.v4.app.NavUtils: java.lang.String getParentActivityName(android.app.Activity)
 android.support.v4.app.NavUtils: java.lang.String getParentActivityName(android.content.Context,android.content.ComponentName)
 android.support.v4.app.NavUtils: NavUtils()
+android.support.v4.app.NavUtils: void <clinit>()
+android.support.v4.app.NavUtils$NavUtilsImpl
+android.support.v4.app.NavUtils$NavUtilsImpl: android.content.Intent getParentActivityIntent(android.app.Activity)
+android.support.v4.app.NavUtils$NavUtilsImpl: boolean shouldUpRecreateTask(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtils$NavUtilsImpl: void navigateUpTo(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtils$NavUtilsImpl: java.lang.String getParentActivityName(android.content.Context,android.content.pm.ActivityInfo)
+android.support.v4.app.NavUtils$NavUtilsImplBase
+android.support.v4.app.NavUtils$NavUtilsImplBase: NavUtils$NavUtilsImplBase()
+android.support.v4.app.NavUtils$NavUtilsImplBase: android.content.Intent getParentActivityIntent(android.app.Activity)
+android.support.v4.app.NavUtils$NavUtilsImplBase: boolean shouldUpRecreateTask(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtils$NavUtilsImplBase: void navigateUpTo(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtils$NavUtilsImplBase: java.lang.String getParentActivityName(android.content.Context,android.content.pm.ActivityInfo)
+android.support.v4.app.NavUtils$NavUtilsImplJB
+android.support.v4.app.NavUtils$NavUtilsImplJB: NavUtils$NavUtilsImplJB()
+android.support.v4.app.NavUtils$NavUtilsImplJB: android.content.Intent getParentActivityIntent(android.app.Activity)
+android.support.v4.app.NavUtils$NavUtilsImplJB: boolean shouldUpRecreateTask(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtils$NavUtilsImplJB: void navigateUpTo(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtils$NavUtilsImplJB: java.lang.String getParentActivityName(android.content.Context,android.content.pm.ActivityInfo)
+android.support.v4.app.NavUtilsJB
+android.support.v4.app.NavUtilsJB: NavUtilsJB()
+android.support.v4.app.NavUtilsJB: android.content.Intent getParentActivityIntent(android.app.Activity)
+android.support.v4.app.NavUtilsJB: boolean shouldUpRecreateTask(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtilsJB: void navigateUpTo(android.app.Activity,android.content.Intent)
+android.support.v4.app.NavUtilsJB: java.lang.String getParentActivityName(android.content.pm.ActivityInfo)
 android.support.v4.app.NoSaveStateFrameLayout
 android.support.v4.app.NoSaveStateFrameLayout: android.view.ViewGroup wrap(android.view.View)
 android.support.v4.app.NoSaveStateFrameLayout: NoSaveStateFrameLayout(android.content.Context)
@@ -794,10 +798,34 @@ android.support.v4.app.NoSaveStateFrameLayout: void dispatchSaveInstanceState(an
 android.support.v4.app.NoSaveStateFrameLayout: void dispatchRestoreInstanceState(android.util.SparseArray)
 android.support.v4.app.NotificationCompat
 android.support.v4.app.NotificationCompat: int FLAG_HIGH_PRIORITY
+android.support.v4.app.NotificationCompat: int PRIORITY_DEFAULT
+android.support.v4.app.NotificationCompat: int PRIORITY_LOW
+android.support.v4.app.NotificationCompat: int PRIORITY_MIN
+android.support.v4.app.NotificationCompat: int PRIORITY_HIGH
+android.support.v4.app.NotificationCompat: int PRIORITY_MAX
 android.support.v4.app.NotificationCompat: android.support.v4.app.NotificationCompat$NotificationCompatImpl IMPL
 android.support.v4.app.NotificationCompat: NotificationCompat()
 android.support.v4.app.NotificationCompat: android.support.v4.app.NotificationCompat$NotificationCompatImpl access$000()
 android.support.v4.app.NotificationCompat: void <clinit>()
+android.support.v4.app.NotificationCompat$Action
+android.support.v4.app.NotificationCompat$Action: int icon
+android.support.v4.app.NotificationCompat$Action: java.lang.CharSequence title
+android.support.v4.app.NotificationCompat$Action: android.app.PendingIntent actionIntent
+android.support.v4.app.NotificationCompat$Action: NotificationCompat$Action(int,java.lang.CharSequence,android.app.PendingIntent)
+android.support.v4.app.NotificationCompat$BigPictureStyle
+android.support.v4.app.NotificationCompat$BigPictureStyle: android.graphics.Bitmap mPicture
+android.support.v4.app.NotificationCompat$BigPictureStyle: NotificationCompat$BigPictureStyle()
+android.support.v4.app.NotificationCompat$BigPictureStyle: NotificationCompat$BigPictureStyle(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$BigPictureStyle: android.support.v4.app.NotificationCompat$BigPictureStyle setBigContentTitle(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$BigPictureStyle: android.support.v4.app.NotificationCompat$BigPictureStyle setSummaryText(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$BigPictureStyle: android.support.v4.app.NotificationCompat$BigPictureStyle bigPicture(android.graphics.Bitmap)
+android.support.v4.app.NotificationCompat$BigTextStyle
+android.support.v4.app.NotificationCompat$BigTextStyle: java.lang.CharSequence mBigText
+android.support.v4.app.NotificationCompat$BigTextStyle: NotificationCompat$BigTextStyle()
+android.support.v4.app.NotificationCompat$BigTextStyle: NotificationCompat$BigTextStyle(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$BigTextStyle: android.support.v4.app.NotificationCompat$BigTextStyle setBigContentTitle(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$BigTextStyle: android.support.v4.app.NotificationCompat$BigTextStyle setSummaryText(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$BigTextStyle: android.support.v4.app.NotificationCompat$BigTextStyle bigText(java.lang.CharSequence)
 android.support.v4.app.NotificationCompat$Builder
 android.support.v4.app.NotificationCompat$Builder: android.content.Context mContext
 android.support.v4.app.NotificationCompat$Builder: java.lang.CharSequence mContentTitle
@@ -808,15 +836,26 @@ android.support.v4.app.NotificationCompat$Builder: android.widget.RemoteViews mT
 android.support.v4.app.NotificationCompat$Builder: android.graphics.Bitmap mLargeIcon
 android.support.v4.app.NotificationCompat$Builder: java.lang.CharSequence mContentInfo
 android.support.v4.app.NotificationCompat$Builder: int mNumber
+android.support.v4.app.NotificationCompat$Builder: int mPriority
+android.support.v4.app.NotificationCompat$Builder: boolean mUseChronometer
+android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Style mStyle
+android.support.v4.app.NotificationCompat$Builder: java.lang.CharSequence mSubText
+android.support.v4.app.NotificationCompat$Builder: int mProgressMax
+android.support.v4.app.NotificationCompat$Builder: int mProgress
+android.support.v4.app.NotificationCompat$Builder: boolean mProgressIndeterminate
+android.support.v4.app.NotificationCompat$Builder: java.util.ArrayList mActions
 android.support.v4.app.NotificationCompat$Builder: android.app.Notification mNotification
 android.support.v4.app.NotificationCompat$Builder: NotificationCompat$Builder(android.content.Context)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setWhen(long)
+android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setUsesChronometer(boolean)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setSmallIcon(int)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setSmallIcon(int,int)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContentTitle(java.lang.CharSequence)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContentText(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setSubText(java.lang.CharSequence)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setNumber(int)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContentInfo(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setProgress(int,int,boolean)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContent(android.widget.RemoteViews)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContentIntent(android.app.PendingIntent)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setDeleteIntent(android.app.PendingIntent)
@@ -833,18 +872,54 @@ android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.Notifi
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setAutoCancel(boolean)
 android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setDefaults(int)
 android.support.v4.app.NotificationCompat$Builder: void setFlag(int,boolean)
+android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setPriority(int)
+android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder addAction(int,java.lang.CharSequence,android.app.PendingIntent)
+android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setStyle(android.support.v4.app.NotificationCompat$Style)
 android.support.v4.app.NotificationCompat$Builder: android.app.Notification getNotification()
+android.support.v4.app.NotificationCompat$Builder: android.app.Notification build()
+android.support.v4.app.NotificationCompat$InboxStyle
+android.support.v4.app.NotificationCompat$InboxStyle: java.util.ArrayList mTexts
+android.support.v4.app.NotificationCompat$InboxStyle: NotificationCompat$InboxStyle()
+android.support.v4.app.NotificationCompat$InboxStyle: NotificationCompat$InboxStyle(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$InboxStyle: android.support.v4.app.NotificationCompat$InboxStyle setBigContentTitle(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$InboxStyle: android.support.v4.app.NotificationCompat$InboxStyle setSummaryText(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$InboxStyle: android.support.v4.app.NotificationCompat$InboxStyle addLine(java.lang.CharSequence)
 android.support.v4.app.NotificationCompat$NotificationCompatImpl
-android.support.v4.app.NotificationCompat$NotificationCompatImpl: android.app.Notification getNotification(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$NotificationCompatImpl: android.app.Notification build(android.support.v4.app.NotificationCompat$Builder)
 android.support.v4.app.NotificationCompat$NotificationCompatImplBase
 android.support.v4.app.NotificationCompat$NotificationCompatImplBase: NotificationCompat$NotificationCompatImplBase()
-android.support.v4.app.NotificationCompat$NotificationCompatImplBase: android.app.Notification getNotification(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$NotificationCompatImplBase: android.app.Notification build(android.support.v4.app.NotificationCompat$Builder)
 android.support.v4.app.NotificationCompat$NotificationCompatImplHoneycomb
 android.support.v4.app.NotificationCompat$NotificationCompatImplHoneycomb: NotificationCompat$NotificationCompatImplHoneycomb()
-android.support.v4.app.NotificationCompat$NotificationCompatImplHoneycomb: android.app.Notification getNotification(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$NotificationCompatImplHoneycomb: android.app.Notification build(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$NotificationCompatImplIceCreamSandwich
+android.support.v4.app.NotificationCompat$NotificationCompatImplIceCreamSandwich: NotificationCompat$NotificationCompatImplIceCreamSandwich()
+android.support.v4.app.NotificationCompat$NotificationCompatImplIceCreamSandwich: android.app.Notification build(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$NotificationCompatImplJellybean
+android.support.v4.app.NotificationCompat$NotificationCompatImplJellybean: NotificationCompat$NotificationCompatImplJellybean()
+android.support.v4.app.NotificationCompat$NotificationCompatImplJellybean: android.app.Notification build(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$Style
+android.support.v4.app.NotificationCompat$Style: android.support.v4.app.NotificationCompat$Builder mBuilder
+android.support.v4.app.NotificationCompat$Style: java.lang.CharSequence mBigContentTitle
+android.support.v4.app.NotificationCompat$Style: java.lang.CharSequence mSummaryText
+android.support.v4.app.NotificationCompat$Style: boolean mSummaryTextSet
+android.support.v4.app.NotificationCompat$Style: NotificationCompat$Style()
+android.support.v4.app.NotificationCompat$Style: void setBuilder(android.support.v4.app.NotificationCompat$Builder)
+android.support.v4.app.NotificationCompat$Style: android.app.Notification build()
 android.support.v4.app.NotificationCompatHoneycomb
 android.support.v4.app.NotificationCompatHoneycomb: NotificationCompatHoneycomb()
 android.support.v4.app.NotificationCompatHoneycomb: android.app.Notification add(android.content.Context,android.app.Notification,java.lang.CharSequence,java.lang.CharSequence,java.lang.CharSequence,android.widget.RemoteViews,int,android.app.PendingIntent,android.app.PendingIntent,android.graphics.Bitmap)
+android.support.v4.app.NotificationCompatIceCreamSandwich
+android.support.v4.app.NotificationCompatIceCreamSandwich: NotificationCompatIceCreamSandwich()
+android.support.v4.app.NotificationCompatIceCreamSandwich: android.app.Notification add(android.content.Context,android.app.Notification,java.lang.CharSequence,java.lang.CharSequence,java.lang.CharSequence,android.widget.RemoteViews,int,android.app.PendingIntent,android.app.PendingIntent,android.graphics.Bitmap,int,int,boolean)
+android.support.v4.app.NotificationCompatJellybean
+android.support.v4.app.NotificationCompatJellybean: android.app.Notification$Builder b
+android.support.v4.app.NotificationCompatJellybean: NotificationCompatJellybean(android.content.Context,android.app.Notification,java.lang.CharSequence,java.lang.CharSequence,java.lang.CharSequence,android.widget.RemoteViews,int,android.app.PendingIntent,android.app.PendingIntent,android.graphics.Bitmap,int,int,boolean,boolean,int,java.lang.CharSequence)
+android.support.v4.app.NotificationCompatJellybean: void addAction(int,java.lang.CharSequence,android.app.PendingIntent)
+android.support.v4.app.NotificationCompatJellybean: void addBigTextStyle(java.lang.CharSequence,boolean,java.lang.CharSequence,java.lang.CharSequence)
+android.support.v4.app.NotificationCompatJellybean: void addBigPictureStyle(java.lang.CharSequence,boolean,java.lang.CharSequence,android.graphics.Bitmap)
+android.support.v4.app.NotificationCompatJellybean: void addInboxStyle(java.lang.CharSequence,boolean,java.lang.CharSequence,java.util.ArrayList)
+android.support.v4.app.NotificationCompatJellybean: android.app.Notification build()
 android.support.v4.app.ServiceCompat
 android.support.v4.app.ServiceCompat: int START_STICKY
 android.support.v4.app.ServiceCompat: ServiceCompat()
@@ -857,6 +932,7 @@ android.support.v4.app.ShareCompat: java.lang.String getCallingPackage(android.a
 android.support.v4.app.ShareCompat: android.content.ComponentName getCallingActivity(android.app.Activity)
 android.support.v4.app.ShareCompat: void configureMenuItem(android.view.MenuItem,android.support.v4.app.ShareCompat$IntentBuilder)
 android.support.v4.app.ShareCompat: void configureMenuItem(android.view.Menu,int,android.support.v4.app.ShareCompat$IntentBuilder)
+android.support.v4.app.ShareCompat: android.support.v4.app.ShareCompat$ShareCompatImpl access$000()
 android.support.v4.app.ShareCompat: void <clinit>()
 android.support.v4.app.ShareCompat$IntentBuilder
 android.support.v4.app.ShareCompat$IntentBuilder: android.app.Activity mActivity
@@ -878,6 +954,7 @@ android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCo
 android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCompat$IntentBuilder setChooserTitle(int)
 android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCompat$IntentBuilder setType(java.lang.String)
 android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCompat$IntentBuilder setText(java.lang.CharSequence)
+android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCompat$IntentBuilder setHtmlText(java.lang.String)
 android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCompat$IntentBuilder setStream(android.net.Uri)
 android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCompat$IntentBuilder addStream(android.net.Uri)
 android.support.v4.app.ShareCompat$IntentBuilder: android.support.v4.app.ShareCompat$IntentBuilder setEmailTo(java.lang.String[])
@@ -904,6 +981,7 @@ android.support.v4.app.ShareCompat$IntentReader: boolean isSingleShare()
 android.support.v4.app.ShareCompat$IntentReader: boolean isMultipleShare()
 android.support.v4.app.ShareCompat$IntentReader: java.lang.String getType()
 android.support.v4.app.ShareCompat$IntentReader: java.lang.CharSequence getText()
+android.support.v4.app.ShareCompat$IntentReader: java.lang.String getHtmlText()
 android.support.v4.app.ShareCompat$IntentReader: android.net.Uri getStream()
 android.support.v4.app.ShareCompat$IntentReader: android.net.Uri getStream(int)
 android.support.v4.app.ShareCompat$IntentReader: int getStreamCount()
@@ -918,16 +996,27 @@ android.support.v4.app.ShareCompat$IntentReader: android.graphics.drawable.Drawa
 android.support.v4.app.ShareCompat$IntentReader: java.lang.CharSequence getCallingApplicationLabel()
 android.support.v4.app.ShareCompat$ShareCompatImpl
 android.support.v4.app.ShareCompat$ShareCompatImpl: void configureMenuItem(android.view.MenuItem,android.support.v4.app.ShareCompat$IntentBuilder)
+android.support.v4.app.ShareCompat$ShareCompatImpl: java.lang.String escapeHtml(java.lang.CharSequence)
 android.support.v4.app.ShareCompat$ShareCompatImplBase
 android.support.v4.app.ShareCompat$ShareCompatImplBase: ShareCompat$ShareCompatImplBase()
 android.support.v4.app.ShareCompat$ShareCompatImplBase: void configureMenuItem(android.view.MenuItem,android.support.v4.app.ShareCompat$IntentBuilder)
+android.support.v4.app.ShareCompat$ShareCompatImplBase: java.lang.String escapeHtml(java.lang.CharSequence)
+android.support.v4.app.ShareCompat$ShareCompatImplBase: void withinStyle(java.lang.StringBuilder,java.lang.CharSequence,int,int)
 android.support.v4.app.ShareCompat$ShareCompatImplICS
 android.support.v4.app.ShareCompat$ShareCompatImplICS: ShareCompat$ShareCompatImplICS()
 android.support.v4.app.ShareCompat$ShareCompatImplICS: void configureMenuItem(android.view.MenuItem,android.support.v4.app.ShareCompat$IntentBuilder)
+android.support.v4.app.ShareCompat$ShareCompatImplICS: boolean shouldAddChooserIntent(android.view.MenuItem)
+android.support.v4.app.ShareCompat$ShareCompatImplJB
+android.support.v4.app.ShareCompat$ShareCompatImplJB: ShareCompat$ShareCompatImplJB()
+android.support.v4.app.ShareCompat$ShareCompatImplJB: java.lang.String escapeHtml(java.lang.CharSequence)
+android.support.v4.app.ShareCompat$ShareCompatImplJB: boolean shouldAddChooserIntent(android.view.MenuItem)
 android.support.v4.app.ShareCompatICS
 android.support.v4.app.ShareCompatICS: java.lang.String HISTORY_FILENAME_PREFIX
 android.support.v4.app.ShareCompatICS: ShareCompatICS()
 android.support.v4.app.ShareCompatICS: void configureMenuItem(android.view.MenuItem,android.app.Activity,android.content.Intent)
+android.support.v4.app.ShareCompatJB
+android.support.v4.app.ShareCompatJB: ShareCompatJB()
+android.support.v4.app.ShareCompatJB: java.lang.String escapeHtml(java.lang.CharSequence)
 android.support.v4.app.SuperNotCalledException
 android.support.v4.app.SuperNotCalledException: SuperNotCalledException(java.lang.String)
 android.support.v4.app.TaskStackBuilder
@@ -936,27 +1025,38 @@ android.support.v4.app.TaskStackBuilder: android.support.v4.app.TaskStackBuilder
 android.support.v4.app.TaskStackBuilder: java.util.ArrayList mIntents
 android.support.v4.app.TaskStackBuilder: android.content.Context mSourceContext
 android.support.v4.app.TaskStackBuilder: TaskStackBuilder(android.content.Context)
+android.support.v4.app.TaskStackBuilder: android.support.v4.app.TaskStackBuilder create(android.content.Context)
 android.support.v4.app.TaskStackBuilder: android.support.v4.app.TaskStackBuilder from(android.content.Context)
 android.support.v4.app.TaskStackBuilder: android.support.v4.app.TaskStackBuilder addNextIntent(android.content.Intent)
 android.support.v4.app.TaskStackBuilder: android.support.v4.app.TaskStackBuilder addParentStack(android.app.Activity)
 android.support.v4.app.TaskStackBuilder: android.support.v4.app.TaskStackBuilder addParentStack(java.lang.Class)
 android.support.v4.app.TaskStackBuilder: int getIntentCount()
 android.support.v4.app.TaskStackBuilder: android.content.Intent getIntent(int)
+android.support.v4.app.TaskStackBuilder: android.content.Intent editIntentAt(int)
 android.support.v4.app.TaskStackBuilder: java.util.Iterator iterator()
 android.support.v4.app.TaskStackBuilder: void startActivities()
+android.support.v4.app.TaskStackBuilder: void startActivities(android.os.Bundle)
 android.support.v4.app.TaskStackBuilder: android.app.PendingIntent getPendingIntent(int,int)
+android.support.v4.app.TaskStackBuilder: android.app.PendingIntent getPendingIntent(int,int,android.os.Bundle)
+android.support.v4.app.TaskStackBuilder: android.content.Intent[] getIntents()
 android.support.v4.app.TaskStackBuilder: void <clinit>()
 android.support.v4.app.TaskStackBuilder$TaskStackBuilderImpl
-android.support.v4.app.TaskStackBuilder$TaskStackBuilderImpl: android.app.PendingIntent getPendingIntent(android.content.Context,android.content.Intent[],int,int)
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImpl: android.app.PendingIntent getPendingIntent(android.content.Context,android.content.Intent[],int,int,android.os.Bundle)
 android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplBase
 android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplBase: TaskStackBuilder$TaskStackBuilderImplBase()
-android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplBase: android.app.PendingIntent getPendingIntent(android.content.Context,android.content.Intent[],int,int)
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplBase: android.app.PendingIntent getPendingIntent(android.content.Context,android.content.Intent[],int,int,android.os.Bundle)
 android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplHoneycomb
 android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplHoneycomb: TaskStackBuilder$TaskStackBuilderImplHoneycomb()
-android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplHoneycomb: android.app.PendingIntent getPendingIntent(android.content.Context,android.content.Intent[],int,int)
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplHoneycomb: android.app.PendingIntent getPendingIntent(android.content.Context,android.content.Intent[],int,int,android.os.Bundle)
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplJellybean
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplJellybean: TaskStackBuilder$TaskStackBuilderImplJellybean()
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplJellybean: android.app.PendingIntent getPendingIntent(android.content.Context,android.content.Intent[],int,int,android.os.Bundle)
 android.support.v4.app.TaskStackBuilderHoneycomb
 android.support.v4.app.TaskStackBuilderHoneycomb: TaskStackBuilderHoneycomb()
 android.support.v4.app.TaskStackBuilderHoneycomb: android.app.PendingIntent getActivitiesPendingIntent(android.content.Context,int,android.content.Intent[],int)
+android.support.v4.app.TaskStackBuilderJellybean
+android.support.v4.app.TaskStackBuilderJellybean: TaskStackBuilderJellybean()
+android.support.v4.app.TaskStackBuilderJellybean: android.app.PendingIntent getActivitiesPendingIntent(android.content.Context,int,android.content.Intent[],int,android.os.Bundle)
 android.support.v4.app._ActionBarSherlockTrojanHorse
 android.support.v4.app._ActionBarSherlockTrojanHorse: boolean DEBUG
 android.support.v4.app._ActionBarSherlockTrojanHorse: java.lang.String TAG
@@ -975,6 +1075,9 @@ android.support.v4.app._ActionBarSherlockTrojanHorse$OnOptionsItemSelectedListen
 android.support.v4.app._ActionBarSherlockTrojanHorse$OnOptionsItemSelectedListener: boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
 android.support.v4.app._ActionBarSherlockTrojanHorse$OnPrepareOptionsMenuListener
 android.support.v4.app._ActionBarSherlockTrojanHorse$OnPrepareOptionsMenuListener: void onPrepareOptionsMenu(com.actionbarsherlock.view.Menu)
+android.support.v4.content.ContextCompat: ContextCompat()
+android.support.v4.content.ContextCompat: boolean startActivities(android.content.Context,android.content.Intent[])
+android.support.v4.content.ContextCompat: boolean startActivities(android.content.Context,android.content.Intent[],android.os.Bundle)
 android.support.v4.content.ModernAsyncTask$Status: android.support.v4.content.ModernAsyncTask$Status[] values()
 android.support.v4.content.ModernAsyncTask$Status: android.support.v4.content.ModernAsyncTask$Status valueOf(java.lang.String)
 android.support.v4.view.PagerAdapter: android.database.DataSetObservable mObservable
@@ -1000,6 +1103,9 @@ android.support.v4.view.PagerAdapter: void notifyDataSetChanged()
 android.support.v4.view.PagerAdapter: void registerDataSetObserver(android.database.DataSetObserver)
 android.support.v4.view.PagerAdapter: void unregisterDataSetObserver(android.database.DataSetObserver)
 android.support.v4.view.PagerAdapter: java.lang.CharSequence getPageTitle(int)
+android.support.v4.view.PagerAdapter: float getPageWidth(int)
+android.support.v4.view.PagerTabStrip
+android.support.v4.view.PagerTabStrip: PagerTabStrip(android.content.Context,android.util.AttributeSet)
 android.support.v4.view.PagerTitleStrip
 android.support.v4.view.PagerTitleStrip: PagerTitleStrip(android.content.Context,android.util.AttributeSet)
 android.support.v4.view.ViewPager
@@ -1357,6 +1463,8 @@ com.actionbarsherlock.R$drawable: int ic_action_next
 com.actionbarsherlock.R$drawable: int ic_action_ok
 com.actionbarsherlock.R$drawable: int ic_action_options
 com.actionbarsherlock.R$drawable: int ic_action_previous
+com.actionbarsherlock.R$drawable: int ic_action_rotate_ccw
+com.actionbarsherlock.R$drawable: int ic_action_rotate_cw
 com.actionbarsherlock.R$drawable: int ic_action_share
 com.actionbarsherlock.R$drawable: int ic_action_switch_camera
 com.actionbarsherlock.R$drawable: int ic_action_unlock
@@ -1495,6 +1603,8 @@ com.actionbarsherlock.R$id: int photosGrid
 com.actionbarsherlock.R$id: int previousButton
 com.actionbarsherlock.R$id: int read_security
 com.actionbarsherlock.R$id: int relativeLayout01
+com.actionbarsherlock.R$id: int rotateCCW
+com.actionbarsherlock.R$id: int rotateCW
 com.actionbarsherlock.R$id: int scrollView1
 com.actionbarsherlock.R$id: int select_all
 com.actionbarsherlock.R$id: int settings
@@ -1583,6 +1693,7 @@ com.actionbarsherlock.R$string: int actions
 com.actionbarsherlock.R$string: int ad_publisher_id
 com.actionbarsherlock.R$string: int add_files
 com.actionbarsherlock.R$string: int app_name
+com.actionbarsherlock.R$string: int attention
 com.actionbarsherlock.R$string: int before_sharing
 com.actionbarsherlock.R$string: int bottom_text
 com.actionbarsherlock.R$string: int camera
@@ -1684,6 +1795,10 @@ com.actionbarsherlock.R$string: int pro_version_warning
 com.actionbarsherlock.R$string: int read_security
 com.actionbarsherlock.R$string: int reencrypting_files
 com.actionbarsherlock.R$string: int review
+com.actionbarsherlock.R$string: int rotate_ccw
+com.actionbarsherlock.R$string: int rotate_cw
+com.actionbarsherlock.R$string: int rotating
+com.actionbarsherlock.R$string: int same_password_alert
 com.actionbarsherlock.R$string: int save
 com.actionbarsherlock.R$string: int seconds
 com.actionbarsherlock.R$string: int seconds10
@@ -1718,6 +1833,7 @@ com.actionbarsherlock.R$string: int title_settings
 com.actionbarsherlock.R$string: int title_setup
 com.actionbarsherlock.R$string: int title_view_photo
 com.actionbarsherlock.R$string: int unable_to_connect_camera
+com.actionbarsherlock.R$string: int understood
 com.actionbarsherlock.R$string: int unexpected_error
 com.actionbarsherlock.R$string: int volume_take_photo
 com.actionbarsherlock.R$string: int volume_take_photo_desc

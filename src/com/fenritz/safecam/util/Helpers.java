@@ -218,7 +218,9 @@ public class Helpers {
 
 	public static String getHomeDir(Context context) {
 		String sdcardPath = Environment.getExternalStorageDirectory().getPath();
+		
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		
 		String defaultHomeDir = sdcardPath + "/" + context.getString(R.string.default_home_folder_name);
 		String homeDirPath = sharedPrefs.getString("home_folder", defaultHomeDir);
 		if(new File(homeDirPath).exists()){

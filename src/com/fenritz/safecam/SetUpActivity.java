@@ -1,5 +1,9 @@
 package com.fenritz.safecam;
 
+import java.io.File;
+import java.io.FileFilter;
+
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -21,6 +25,29 @@ public class SetUpActivity  extends SherlockActivity{
 		setContentView(R.layout.setup);
 
 		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
+		
+		File homeFolder = new File(Helpers.getHomeDir(this));
+		
+		if(homeFolder.exists()){
+			File[] files = homeFolder.listFiles(new FileFilter() {
+				
+				public boolean accept(File file) {
+					if(file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
+						return true;
+					}
+					return false;
+				}
+			});
+			
+			if(files.length > 0){
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(getString(R.string.attention));
+				builder.setMessage(getString(R.string.same_password_alert));
+				builder.setNeutralButton(getString(R.string.understood), null);
+				AlertDialog dialog = builder.create();
+				dialog.show();
+			}
+		}
 		
 		((Button) findViewById(R.id.setupButton)).setOnClickListener(setup());
 	}

@@ -123,6 +123,9 @@
     <string name="rotate_cw">Rotate clockwise</string>
     <string name="rotate_ccw">Rotate counter clockwise</string>
     <string name="rotating">Rotating…</string>
+    <string name="attention">ATTENTION!!!</string>
+    <string name="same_password_alert">It seems that you already had SafeCamera on this device before.\nIf you want to be able to access photos that exist on this device setup with same master password that you have used before, otherwise SafeCamera will be unable to decrypt them.</string>
+    <string name="understood">Understood!</string>
     
     
     <!-- File Dialog -->
