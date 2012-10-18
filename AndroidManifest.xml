@@ -64,6 +64,7 @@
         </activity>
         <activity
             android:name=".DashboardActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_dashboard" >
         </activity>
         <activity
@@ -83,7 +84,7 @@
         </activity>
         <activity
             android:name=".ImportPhotosActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_import" >
         </activity>
         <activity 

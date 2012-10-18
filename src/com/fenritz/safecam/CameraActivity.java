@@ -103,6 +103,8 @@ public class CameraActivity extends SherlockActivity {
 	private int lastRotation = 0;
 	private int overallRotation = 0;
 	
+	private boolean isTakingPhoto = false;
+	
 	private Timer timer;
 	
 	private int photoSizeIndex = 0;
@@ -173,6 +175,8 @@ public class CameraActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 
+		isTakingPhoto = false;
+		
 		boolean logined = Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
 
@@ -620,7 +624,7 @@ public class CameraActivity extends SherlockActivity {
 	}
 	
 	private void takePhoto() {
-		if (mCamera != null) {
+		if (mCamera != null && !isTakingPhoto) {
 			Camera.Parameters parameters = mCamera.getParameters();
 			parameters.setRotation(changeRotation(mOrientation));
 			mCamera.setParameters(parameters);
@@ -652,6 +656,7 @@ public class CameraActivity extends SherlockActivity {
 							
 							if(timerTimePassed > timerTotalSeconds){
 								if(mCamera != null){
+									isTakingPhoto = true;
 									mCamera.takePicture(null, null, getPictureCallback());
 								}
 								this.cancel();
@@ -670,6 +675,7 @@ public class CameraActivity extends SherlockActivity {
 				}
 			}
 			else{
+				isTakingPhoto = true;
 				mCamera.takePicture(null, null, getPictureCallback());
 			}
 		}
@@ -690,6 +696,7 @@ public class CameraActivity extends SherlockActivity {
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
+				isTakingPhoto = false;
 				/*if(isCurrentCameraFrontFacing()){
 					data = FixFrontCamPhoto(data, currentCamera);
 				}*/
