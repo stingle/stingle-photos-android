@@ -1,10 +1,13 @@
 package com.fenritz.safecam;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -18,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
@@ -72,11 +77,26 @@ public class SafeCameraActivity extends SherlockActivity {
 			}
 		});
 		
+		displayVersionName();
+		
 		if(extraData != null && extraData.getBoolean("wentToLoginToProceed", false)){
 			Toast.makeText(this, getString(R.string.login_to_proceed), Toast.LENGTH_LONG).show();
 		}
 	}
 
+	private void displayVersionName() {
+	    String versionName = "";
+	    PackageInfo packageInfo;
+	    try {
+	        packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+	    	versionName = "v " + packageInfo.versionName;
+	    } catch (NameNotFoundException e) {
+	        e.printStackTrace();
+	    }
+	    ((TextView) findViewById(R.id.versionText)).setText(versionName);
+	}
+
+	
 	private OnClickListener login() {
 		return new OnClickListener() {
 			public void onClick(View v) {
@@ -182,7 +202,7 @@ public class SafeCameraActivity extends SherlockActivity {
 		
 	}
 	
-	/*@Override
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.main_menu, menu);;
         return super.onCreateOptionsMenu(menu);
@@ -192,13 +212,28 @@ public class SafeCameraActivity extends SherlockActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-		case R.id.settings:
-			Intent intent = new Intent();
-			intent.setClass(SafeCameraActivity.this, SettingsActivity.class);
-			startActivity(intent);
+		case R.id.forgot_password:
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.forgot_password));
+			builder.setMessage(getString(R.string.reset_password));
+			builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+					preferences.edit().remove(SafeCameraActivity.PASSWORD).commit();
+					((SafeCameraApplication) getApplication()).setKey(null);
+					
+					Intent intent = new Intent();
+					intent.setClass(SafeCameraActivity.this, SetUpActivity.class);
+					startActivity(intent);
+					finish();
+				}
+			});
+			builder.setNegativeButton(getString(R.string.no), null);
+			AlertDialog dialog = builder.create();
+			dialog.show();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}*/
+	}
 }

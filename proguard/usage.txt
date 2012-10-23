@@ -2088,12 +2088,12 @@ com.fenritz.safecam.CameraActivity:
     private static final int ORIENTATION_LANDSCAPE_NORMAL
     private static final int ORIENTATION_LANDSCAPE_INVERTED
     private static final int DEFAULT_CAMERA
-    715:737:public static byte[] FixFrontCamPhoto(byte[],int)
+    722:744:public static byte[] FixFrontCamPhoto(byte[],int)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteFile:
-    881:882:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
+    888:889:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb:
-    927:928:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
-    931:932:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
+    934:935:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
+    938:939:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
 com.fenritz.safecam.FileDialog:
     public static final int MODE_CREATE
     public static final int MODE_OPEN

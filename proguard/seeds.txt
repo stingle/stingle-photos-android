@@ -1570,6 +1570,7 @@ com.actionbarsherlock.R$id: int fdLinearLayoutSelect
 com.actionbarsherlock.R$id: int fdrowimage
 com.actionbarsherlock.R$id: int fdrowtext
 com.actionbarsherlock.R$id: int flashButton
+com.actionbarsherlock.R$id: int forgot_password
 com.actionbarsherlock.R$id: int free_version_text
 com.actionbarsherlock.R$id: int go_pro
 com.actionbarsherlock.R$id: int gotoCamera
@@ -1626,6 +1627,7 @@ com.actionbarsherlock.R$id: int timerButton
 com.actionbarsherlock.R$id: int timerLabel
 com.actionbarsherlock.R$id: int timerLabelContainer
 com.actionbarsherlock.R$id: int useLogo
+com.actionbarsherlock.R$id: int versionText
 com.actionbarsherlock.R$id: int wrap_content
 com.actionbarsherlock.R$id: R$id()
 com.actionbarsherlock.R$integer
@@ -1655,6 +1657,7 @@ com.actionbarsherlock.R$layout: int abs__screen_simple_overlay_action_mode
 com.actionbarsherlock.R$layout: int camera
 com.actionbarsherlock.R$layout: int change_password
 com.actionbarsherlock.R$layout: int dashboard
+com.actionbarsherlock.R$layout: int dashboard_land
 com.actionbarsherlock.R$layout: int dialog_import_password
 com.actionbarsherlock.R$layout: int dialog_reencrypt_password
 com.actionbarsherlock.R$layout: int file_dialog_main
@@ -1736,6 +1739,7 @@ com.actionbarsherlock.R$string: int file_extension
 com.actionbarsherlock.R$string: int file_name
 com.actionbarsherlock.R$string: int file_not_found
 com.actionbarsherlock.R$string: int flash
+com.actionbarsherlock.R$string: int forgot_password
 com.actionbarsherlock.R$string: int free_version_text
 com.actionbarsherlock.R$string: int gallery
 com.actionbarsherlock.R$string: int generating_key
@@ -1794,6 +1798,7 @@ com.actionbarsherlock.R$string: int popup_title
 com.actionbarsherlock.R$string: int pro_version_warning
 com.actionbarsherlock.R$string: int read_security
 com.actionbarsherlock.R$string: int reencrypting_files
+com.actionbarsherlock.R$string: int reset_password
 com.actionbarsherlock.R$string: int review
 com.actionbarsherlock.R$string: int rotate_ccw
 com.actionbarsherlock.R$string: int rotate_cw

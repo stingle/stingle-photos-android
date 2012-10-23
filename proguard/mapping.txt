@@ -2050,6 +2050,7 @@ com.actionbarsherlock.R$id -> com.actionbarsherlock.R$id:
     int fdrowimage -> fdrowimage
     int fdrowtext -> fdrowtext
     int flashButton -> flashButton
+    int forgot_password -> forgot_password
     int free_version_text -> free_version_text
     int go_pro -> go_pro
     int gotoCamera -> gotoCamera
@@ -2106,6 +2107,7 @@ com.actionbarsherlock.R$id -> com.actionbarsherlock.R$id:
     int timerLabel -> timerLabel
     int timerLabelContainer -> timerLabelContainer
     int useLogo -> useLogo
+    int versionText -> versionText
     int wrap_content -> wrap_content
 com.actionbarsherlock.R$integer -> com.actionbarsherlock.R$integer:
     int abs__max_action_buttons -> abs__max_action_buttons
@@ -2133,6 +2135,7 @@ com.actionbarsherlock.R$layout -> com.actionbarsherlock.R$layout:
     int camera -> camera
     int change_password -> change_password
     int dashboard -> dashboard
+    int dashboard_land -> dashboard_land
     int dialog_import_password -> dialog_import_password
     int dialog_reencrypt_password -> dialog_reencrypt_password
     int file_dialog_main -> file_dialog_main
@@ -2212,6 +2215,7 @@ com.actionbarsherlock.R$string -> com.actionbarsherlock.R$string:
     int file_name -> file_name
     int file_not_found -> file_not_found
     int flash -> flash
+    int forgot_password -> forgot_password
     int free_version_text -> free_version_text
     int gallery -> gallery
     int generating_key -> generating_key
@@ -2270,6 +2274,7 @@ com.actionbarsherlock.R$string -> com.actionbarsherlock.R$string:
     int pro_version_warning -> pro_version_warning
     int read_security -> read_security
     int reencrypting_files -> reencrypting_files
+    int reset_password -> reset_password
     int review -> review
     int rotate_ccw -> rotate_ccw
     int rotate_cw -> rotate_cw
@@ -6646,120 +6651,122 @@ com.fenritz.safecam.CameraActivity -> com.fenritz.safecam.CameraActivity:
     java.io.File lastFile -> q
     int lastRotation -> r
     int overallRotation -> s
-    java.util.Timer timer -> t
-    int photoSizeIndex -> u
+    boolean isTakingPhoto -> t
+    java.util.Timer timer -> u
+    int photoSizeIndex -> v
     int defaultCameraId -> c
-    android.content.BroadcastReceiver receiver -> v
-    com.google.ads.AdView adView -> w
-    117:170:void onCreate(android.os.Bundle) -> onCreate
-    174:184:void onResume() -> onResume
-    188:198:void onPause() -> onPause
-    244:347:void startCamera(int) -> a
-    350:355:void releaseCamera() -> a
-    425:432:void setMegapixelLabel(int,int) -> a
-    435:483:void showLastPhotoThumb() -> b
-    487:494:void onDestroy() -> onDestroy
-    519:532:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
-    538:549:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
-    623:676:void takePhoto() -> c
-    690:690:android.hardware.Camera$PictureCallback getPictureCallback() -> d
-    742:749:boolean isCurrentCameraFrontFacing() -> e
-    759:862:int changeRotation(int) -> b
-    866:873:void rotateElement(android.view.View,int,int) -> a
-    969:1019:void showPhotoSizeChooser() -> f
-    1023:1024:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    1028:1049:java.util.List getSupportedImageSizes() -> g
-    1055:1074:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    android.content.BroadcastReceiver receiver -> w
+    com.google.ads.AdView adView -> x
+    119:172:void onCreate(android.os.Bundle) -> onCreate
+    176:188:void onResume() -> onResume
+    192:202:void onPause() -> onPause
+    248:351:void startCamera(int) -> a
+    354:359:void releaseCamera() -> a
+    429:436:void setMegapixelLabel(int,int) -> a
+    439:487:void showLastPhotoThumb() -> b
+    491:498:void onDestroy() -> onDestroy
+    523:536:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    542:553:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
+    627:682:void takePhoto() -> c
+    696:696:android.hardware.Camera$PictureCallback getPictureCallback() -> d
+    749:756:boolean isCurrentCameraFrontFacing() -> e
+    766:869:int changeRotation(int) -> b
+    873:880:void rotateElement(android.view.View,int,int) -> a
+    976:1026:void showPhotoSizeChooser() -> f
+    1030:1031:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    1035:1056:java.util.List getSupportedImageSizes() -> g
+    1062:1081:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
     88:88:int access$0(com.fenritz.safecam.CameraActivity) -> a
-    349:349:void access$1(com.fenritz.safecam.CameraActivity) -> b
+    353:353:void access$1(com.fenritz.safecam.CameraActivity) -> b
     89:89:int access$2(com.fenritz.safecam.CameraActivity) -> c
     89:89:void access$3(com.fenritz.safecam.CameraActivity,int) -> a
     75:75:void access$4(com.fenritz.safecam.CameraActivity,com.fenritz.safecam.util.CameraPreview) -> a
     75:75:com.fenritz.safecam.util.CameraPreview access$5(com.fenritz.safecam.CameraActivity) -> d
-    243:243:void access$6(com.fenritz.safecam.CameraActivity,int) -> b
-    968:968:void access$7(com.fenritz.safecam.CameraActivity) -> e
+    247:247:void access$6(com.fenritz.safecam.CameraActivity,int) -> b
+    975:975:void access$7(com.fenritz.safecam.CameraActivity) -> e
     79:79:int access$8(com.fenritz.safecam.CameraActivity) -> f
     79:79:void access$9(com.fenritz.safecam.CameraActivity,int) -> c
-    758:758:int access$10(com.fenritz.safecam.CameraActivity,int) -> d
+    765:765:int access$10(com.fenritz.safecam.CameraActivity,int) -> d
     96:96:android.widget.ImageView access$11(com.fenritz.safecam.CameraActivity) -> g
     102:102:java.io.File access$12(com.fenritz.safecam.CameraActivity) -> h
     94:94:android.widget.ImageButton access$13(com.fenritz.safecam.CameraActivity) -> i
     91:91:boolean access$14(com.fenritz.safecam.CameraActivity) -> j
     95:95:android.widget.ImageButton access$15(com.fenritz.safecam.CameraActivity) -> k
     91:91:void access$16(com.fenritz.safecam.CameraActivity,boolean) -> a
-    622:622:void access$17(com.fenritz.safecam.CameraActivity) -> l
+    626:626:void access$17(com.fenritz.safecam.CameraActivity) -> l
     98:98:int access$18(com.fenritz.safecam.CameraActivity) -> m
     99:99:int access$19(com.fenritz.safecam.CameraActivity) -> n
-    688:688:android.hardware.Camera$PictureCallback access$20(com.fenritz.safecam.CameraActivity) -> o
-    106:106:java.util.Timer access$21(com.fenritz.safecam.CameraActivity) -> p
-    100:100:void access$22$687b731e(com.fenritz.safecam.CameraActivity) -> q
-    99:99:void access$23(com.fenritz.safecam.CameraActivity,int) -> e
-    434:434:void access$24(com.fenritz.safecam.CameraActivity) -> r
-    741:741:boolean access$25(com.fenritz.safecam.CameraActivity) -> s
-    423:423:void access$26(com.fenritz.safecam.CameraActivity,int,int) -> a
+    106:106:void access$20(com.fenritz.safecam.CameraActivity,boolean) -> b
+    694:694:android.hardware.Camera$PictureCallback access$21(com.fenritz.safecam.CameraActivity) -> o
+    108:108:java.util.Timer access$22(com.fenritz.safecam.CameraActivity) -> p
+    100:100:void access$23$687b731e(com.fenritz.safecam.CameraActivity) -> q
+    99:99:void access$24(com.fenritz.safecam.CameraActivity,int) -> e
+    438:438:void access$25(com.fenritz.safecam.CameraActivity) -> r
+    748:748:boolean access$26(com.fenritz.safecam.CameraActivity) -> s
+    427:427:void access$27(com.fenritz.safecam.CameraActivity,int,int) -> a
 com.fenritz.safecam.CameraActivity$1 -> com.fenritz.safecam.a:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    158:159:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    160:161:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.fenritz.safecam.CameraActivity$10 -> com.fenritz.safecam.b:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    597:610:void onClick(android.view.View) -> onClick
+    601:614:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$11 -> com.fenritz.safecam.c:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    617:618:void onClick(android.view.View) -> onClick
+    621:622:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$12 -> com.fenritz.safecam.d:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    642:663:void run() -> run
-    639:639:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$12) -> a
+    646:668:void run() -> run
+    643:643:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$12) -> a
 com.fenritz.safecam.CameraActivity$12$1 -> com.fenritz.safecam.e:
     com.fenritz.safecam.CameraActivity$12 this$1 -> a
-    645:649:void run() -> run
+    649:653:void run() -> run
 com.fenritz.safecam.CameraActivity$13 -> com.fenritz.safecam.f:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    697:710:void onPictureTaken(byte[],android.hardware.Camera) -> onPictureTaken
-    690:690:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$13) -> a
+    699:717:void onPictureTaken(byte[],android.hardware.Camera) -> onPictureTaken
+    696:696:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$13) -> a
 com.fenritz.safecam.CameraActivity$13$1 -> com.fenritz.safecam.g:
     com.fenritz.safecam.CameraActivity$13 this$1 -> a
-    703:705:void onFinish() -> a
+    710:712:void onFinish() -> a
 com.fenritz.safecam.CameraActivity$14 -> com.fenritz.safecam.h:
     com.fenritz.safecam.CameraActivity this$0 -> a
     java.util.List val$mSupportedPictureSizes -> b
     android.content.SharedPreferences val$preferences -> c
-    992:1017:void onClick(android.content.DialogInterface,int) -> onClick
+    999:1024:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.CameraActivity$15 -> com.fenritz.safecam.i:
     com.fenritz.safecam.CameraActivity this$0 -> a
     1:1:int compare(java.lang.Object,java.lang.Object) -> compare
 com.fenritz.safecam.CameraActivity$2 -> com.fenritz.safecam.j:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    207:223:void onClick(android.view.View) -> onClick
+    211:227:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$3 -> com.fenritz.safecam.k:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    229:230:void onClick(android.view.View) -> onClick
+    233:234:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$4 -> com.fenritz.safecam.l:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    237:238:void onClick(android.view.View) -> onClick
+    241:242:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$5 -> com.fenritz.safecam.m:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    363:398:void onOrientationChanged(int) -> onOrientationChanged
+    367:402:void onOrientationChanged(int) -> onOrientationChanged
 com.fenritz.safecam.CameraActivity$6 -> com.fenritz.safecam.n:
     com.fenritz.safecam.CameraActivity this$0 -> a
     int val$maxFileSize -> b
-    440:444:boolean accept(java.io.File) -> accept
+    444:448:boolean accept(java.io.File) -> accept
 com.fenritz.safecam.CameraActivity$7 -> com.fenritz.safecam.o:
     com.fenritz.safecam.CameraActivity this$0 -> a
     int val$thumbSize -> b
-    471:475:void onFinish() -> a
+    475:479:void onFinish() -> a
 com.fenritz.safecam.CameraActivity$8 -> com.fenritz.safecam.p:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    555:562:void onClick(android.view.View) -> onClick
+    559:566:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$9 -> com.fenritz.safecam.q:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    569:590:void onClick(android.view.View) -> onClick
+    573:594:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$EncryptAndWriteFile -> com.fenritz.safecam.r:
     java.lang.String filename -> b
     android.app.ProgressDialog progressDialog -> c
     com.fenritz.safecam.CameraActivity this$0 -> a
-    895:897:void onPreExecute() -> onPreExecute
-    902:909:java.lang.Void doInBackground(byte[][]) -> a
+    902:904:void onPreExecute() -> onPreExecute
+    909:916:java.lang.Void doInBackground(byte[][]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb -> com.fenritz.safecam.s:
@@ -6767,15 +6774,15 @@ com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb -> com.fenritz.safecam.s
     android.content.Context context -> c
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish onFinish -> d
     com.fenritz.safecam.CameraActivity this$0 -> a
-    950:955:java.lang.Void doInBackground(byte[][]) -> a
+    957:962:java.lang.Void doInBackground(byte[][]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.CameraActivity$PhotoSizeAdapter -> com.fenritz.safecam.t:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    1086:1088:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    1093:1095:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
 com.fenritz.safecam.CameraActivity$ResumePreview -> com.fenritz.safecam.u:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    681:685:void handleMessage(android.os.Message) -> handleMessage
+    687:691:void handleMessage(android.os.Message) -> handleMessage
 com.fenritz.safecam.ChangePasswordActivity -> com.fenritz.safecam.ChangePasswordActivity:
     android.content.BroadcastReceiver receiver -> a
     36:56:void onCreate(android.os.Bundle) -> onCreate
@@ -6807,29 +6814,31 @@ com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles$1 -> com.fenritz.safec
 com.fenritz.safecam.DashboardActivity -> com.fenritz.safecam.DashboardActivity:
     android.content.BroadcastReceiver receiver -> a
     com.google.ads.AdView adView -> b
-    31:87:void onCreate(android.os.Bundle) -> onCreate
-    120:124:void onResume() -> onResume
-    128:131:void onPause() -> onPause
-    135:142:void onDestroy() -> onDestroy
-    146:150:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    157:181:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    32:52:void onCreate(android.os.Bundle) -> onCreate
+    55:92:void initViews() -> a
+    96:105:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
+    138:142:void onResume() -> onResume
+    146:149:void onPause() -> onPause
+    153:160:void onDestroy() -> onDestroy
+    164:168:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    175:199:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
 com.fenritz.safecam.DashboardActivity$1 -> com.fenritz.safecam.aa:
     com.fenritz.safecam.DashboardActivity this$0 -> a
-    40:43:void onClick(android.view.View) -> onClick
+    43:44:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.fenritz.safecam.DashboardActivity$2 -> com.fenritz.safecam.ab:
     com.fenritz.safecam.DashboardActivity this$0 -> a
-    48:51:void onClick(android.view.View) -> onClick
+    60:63:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.DashboardActivity$3 -> com.fenritz.safecam.ac:
     com.fenritz.safecam.DashboardActivity this$0 -> a
-    59:60:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    68:71:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.DashboardActivity$4 -> com.fenritz.safecam.ad:
     com.fenritz.safecam.DashboardActivity this$0 -> a
     android.content.SharedPreferences val$preferences -> b
-    97:101:void onClick(android.content.DialogInterface,int) -> onClick
+    115:119:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.DashboardActivity$5 -> com.fenritz.safecam.ae:
     com.fenritz.safecam.DashboardActivity this$0 -> a
     android.content.SharedPreferences val$preferences -> b
-    105:112:void onClick(android.content.DialogInterface,int) -> onClick
+    123:130:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.FileDialog -> com.fenritz.safecam.FileDialog:
     java.util.List path -> a
     android.widget.TextView myPath -> b
@@ -7149,27 +7158,32 @@ com.fenritz.safecam.SafeCameraActivity -> com.fenritz.safecam.SafeCameraActivity
     android.content.SharedPreferences preferences -> a
     boolean justLogin -> b
     android.os.Bundle extraData -> c
-    42:78:void onCreate(android.os.Bundle) -> onCreate
-    90:103:void onResume() -> onResume
-    37:37:boolean access$0(com.fenritz.safecam.SafeCameraActivity) -> a
-    38:38:android.os.Bundle access$1(com.fenritz.safecam.SafeCameraActivity) -> b
-    35:35:android.content.SharedPreferences access$2(com.fenritz.safecam.SafeCameraActivity) -> c
-    105:105:void access$3(com.fenritz.safecam.SafeCameraActivity) -> d
+    47:85:void onCreate(android.os.Bundle) -> onCreate
+    110:123:void onResume() -> onResume
+    207:208:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    214:236:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    42:42:boolean access$0(com.fenritz.safecam.SafeCameraActivity) -> a
+    43:43:android.os.Bundle access$1(com.fenritz.safecam.SafeCameraActivity) -> b
+    40:40:android.content.SharedPreferences access$2(com.fenritz.safecam.SafeCameraActivity) -> c
+    125:125:void access$3(com.fenritz.safecam.SafeCameraActivity) -> d
 com.fenritz.safecam.SafeCameraActivity$1 -> com.fenritz.safecam.cb:
     com.fenritz.safecam.SafeCameraActivity this$0 -> a
-    65:71:boolean onEditorAction(android.widget.TextView,int,android.view.KeyEvent) -> onEditorAction
+    70:76:boolean onEditorAction(android.widget.TextView,int,android.view.KeyEvent) -> onEditorAction
 com.fenritz.safecam.SafeCameraActivity$2 -> com.fenritz.safecam.cc:
     com.fenritz.safecam.SafeCameraActivity this$0 -> a
-    83:84:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.SafeCameraActivity$Login -> com.fenritz.safecam.cd:
+    103:104:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.SafeCameraActivity$3 -> com.fenritz.safecam.cd:
+    com.fenritz.safecam.SafeCameraActivity this$0 -> a
+    221:229:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.SafeCameraActivity$Login -> com.fenritz.safecam.ce:
     android.app.ProgressDialog progressDialog -> b
     com.fenritz.safecam.SafeCameraActivity this$0 -> a
-    131:137:void onPreExecute() -> onPreExecute
+    151:157:void onPreExecute() -> onPreExecute
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-com.fenritz.safecam.SafeCameraActivity$Login$1 -> com.fenritz.safecam.ce:
+com.fenritz.safecam.SafeCameraActivity$Login$1 -> com.fenritz.safecam.cf:
     com.fenritz.safecam.SafeCameraActivity$Login this$1 -> a
-    135:135:void onCancel(android.content.DialogInterface) -> onCancel
+    155:155:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.SafeCameraApplication -> com.fenritz.safecam.SafeCameraApplication:
     java.lang.String key -> a
     long lockedTime -> b
@@ -7184,24 +7198,24 @@ com.fenritz.safecam.SafeCameraApplication -> com.fenritz.safecam.SafeCameraAppli
     44:45:void setLockedTime(long) -> a
 com.fenritz.safecam.SetUpActivity -> com.fenritz.safecam.SetUpActivity:
     24:53:void onCreate(android.os.Bundle) -> onCreate
-com.fenritz.safecam.SetUpActivity$1 -> com.fenritz.safecam.cf:
+com.fenritz.safecam.SetUpActivity$1 -> com.fenritz.safecam.cg:
     com.fenritz.safecam.SetUpActivity this$0 -> a
     35:38:boolean accept(java.io.File) -> accept
-com.fenritz.safecam.SetUpActivity$2 -> com.fenritz.safecam.cg:
+com.fenritz.safecam.SetUpActivity$2 -> com.fenritz.safecam.ch:
     com.fenritz.safecam.SetUpActivity this$0 -> a
     58:100:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.SettingsActivity -> com.fenritz.safecam.SettingsActivity:
     21:82:void onCreate(android.os.Bundle) -> onCreate
     86:89:void onResume() -> onResume
     94:99:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-com.fenritz.safecam.SettingsActivity$1 -> com.fenritz.safecam.ch:
+com.fenritz.safecam.SettingsActivity$1 -> com.fenritz.safecam.ci:
     com.fenritz.safecam.SettingsActivity this$0 -> a
     51:52:boolean onPreferenceClick(android.preference.Preference) -> onPreferenceClick
-com.fenritz.safecam.SettingsActivity$2 -> com.fenritz.safecam.ci:
+com.fenritz.safecam.SettingsActivity$2 -> com.fenritz.safecam.cj:
     com.fenritz.safecam.SettingsActivity this$0 -> a
     60:77:boolean onPreferenceClick(android.preference.Preference) -> onPreferenceClick
     57:57:com.fenritz.safecam.SettingsActivity access$0(com.fenritz.safecam.SettingsActivity$2) -> a
-com.fenritz.safecam.SettingsActivity$2$1 -> com.fenritz.safecam.cj:
+com.fenritz.safecam.SettingsActivity$2$1 -> com.fenritz.safecam.ck:
     com.fenritz.safecam.SettingsActivity$2 this$1 -> a
     65:72:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.ViewImageActivity -> com.fenritz.safecam.ViewImageActivity:
@@ -7237,45 +7251,45 @@ com.fenritz.safecam.ViewImageActivity -> com.fenritz.safecam.ViewImageActivity:
     245:245:void access$8(com.fenritz.safecam.ViewImageActivity) -> g
     62:62:java.util.ArrayList access$9(com.fenritz.safecam.ViewImageActivity) -> h
     293:293:void access$10(com.fenritz.safecam.ViewImageActivity) -> i
-com.fenritz.safecam.ViewImageActivity$1 -> com.fenritz.safecam.ck:
+com.fenritz.safecam.ViewImageActivity$1 -> com.fenritz.safecam.cl:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     101:101:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
-com.fenritz.safecam.ViewImageActivity$10 -> com.fenritz.safecam.cl:
+com.fenritz.safecam.ViewImageActivity$10 -> com.fenritz.safecam.cm:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     392:402:void onFinish(java.lang.Integer) -> a
-com.fenritz.safecam.ViewImageActivity$11 -> com.fenritz.safecam.cm:
+com.fenritz.safecam.ViewImageActivity$11 -> com.fenritz.safecam.cn:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     409:419:void onFinish(java.lang.Integer) -> a
-com.fenritz.safecam.ViewImageActivity$2 -> com.fenritz.safecam.cn:
+com.fenritz.safecam.ViewImageActivity$2 -> com.fenritz.safecam.co:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     112:113:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.fenritz.safecam.ViewImageActivity$3 -> com.fenritz.safecam.co:
+com.fenritz.safecam.ViewImageActivity$3 -> com.fenritz.safecam.cp:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     152:157:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ViewImageActivity$4 -> com.fenritz.safecam.cp:
+com.fenritz.safecam.ViewImageActivity$4 -> com.fenritz.safecam.cq:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     164:169:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ViewImageActivity$5 -> com.fenritz.safecam.cq:
+com.fenritz.safecam.ViewImageActivity$5 -> com.fenritz.safecam.cr:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     194:199:void onFinish(java.util.ArrayList) -> a
-com.fenritz.safecam.ViewImageActivity$6 -> com.fenritz.safecam.cr:
+com.fenritz.safecam.ViewImageActivity$6 -> com.fenritz.safecam.cs:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     235:241:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ViewImageActivity$7 -> com.fenritz.safecam.cs:
+com.fenritz.safecam.ViewImageActivity$7 -> com.fenritz.safecam.ct:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     259:260:void run() -> run
-com.fenritz.safecam.ViewImageActivity$8 -> com.fenritz.safecam.ct:
+com.fenritz.safecam.ViewImageActivity$8 -> com.fenritz.safecam.cu:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     281:284:void onFinish() -> a
-com.fenritz.safecam.ViewImageActivity$9 -> com.fenritz.safecam.cu:
+com.fenritz.safecam.ViewImageActivity$9 -> com.fenritz.safecam.cv:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     java.util.ArrayList val$selectedFiles -> b
     359:382:void onClick(android.content.DialogInterface,int) -> onClick
     356:356:com.fenritz.safecam.ViewImageActivity access$0(com.fenritz.safecam.ViewImageActivity$9) -> a
-com.fenritz.safecam.ViewImageActivity$9$1 -> com.fenritz.safecam.cv:
+com.fenritz.safecam.ViewImageActivity$9$1 -> com.fenritz.safecam.cw:
     com.fenritz.safecam.ViewImageActivity$9 this$1 -> a
     362:380:void onFinish() -> a
-com.fenritz.safecam.ViewImageActivity$SwipeGestureDetector -> com.fenritz.safecam.cw:
+com.fenritz.safecam.ViewImageActivity$SwipeGestureDetector -> com.fenritz.safecam.cx:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     209:226:boolean onFling(android.view.MotionEvent,android.view.MotionEvent,float,float) -> onFling
 com.fenritz.safecam.util.AESCrypt -> com.fenritz.safecam.util.a:

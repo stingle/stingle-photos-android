@@ -53,6 +53,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
+        android:id="@+id/versionText"
+        android:gravity="center"
+        android:autoLink="web" />
+	<TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
         android:text="@string/bottom_text"
         android:gravity="center"
         android:autoLink="web"
