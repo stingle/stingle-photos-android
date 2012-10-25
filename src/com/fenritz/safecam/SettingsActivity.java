@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
@@ -45,6 +46,21 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 		 */
 
 		Preference homeFolderPref = findPreference("home_folder");
+		homeFolderPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+			
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				Helpers.createFolders(SettingsActivity.this, (String)newValue);
+				int result = Helpers.synchronizePasswordHash(SettingsActivity.this, (String)newValue);
+				
+				if(result == Helpers.HASH_SYNC_UPDATED_PREF){
+					Toast.makeText(SettingsActivity.this, getString(R.string.need_to_relogin), Toast.LENGTH_LONG).show();
+					Helpers.logout(SettingsActivity.this);
+					finish();
+				}
+				
+				return true;
+			}
+		});
 		homeFolderPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			
 			public boolean onPreferenceClick(Preference preference) {
@@ -77,10 +93,8 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 				return true;
 			}
 		});
-		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 	}
-
+	
 	@Override
 	protected void onResume() {
 		super.onResume();

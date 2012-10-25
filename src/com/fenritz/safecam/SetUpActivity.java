@@ -77,6 +77,7 @@ public class SetUpActivity  extends SherlockActivity{
 				try {
 					String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(AESCrypt.byteToHex(AESCrypt.getHash(password1)) + password1));
 					preferences.edit().putString(SafeCameraActivity.PASSWORD, loginHash).commit();
+					Helpers.writeLoginHashToFile(SetUpActivity.this, loginHash);
 				}
 				catch (AESCryptException e) {
 					Helpers.showAlertDialog(SetUpActivity.this, String.format(getString(R.string.unexpected_error), "102"));

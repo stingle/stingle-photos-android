@@ -73,6 +73,10 @@ public class Helpers {
 	protected static final int SHARE_REENCRYPT = 1;
 	protected static final int SHARE_DECRYPT = 2;
 	
+	public static final int HASH_SYNC_NOTHING_DONE = 0;
+	public static final int HASH_SYNC_UPDATED_PREF = 1;
+	public static final int HASH_SYNC_WROTE_FILE = 2;
+	
 	public static boolean isDemo(Context context){
 		PackageManager manager = context.getPackageManager();
 		if(manager.checkSignatures(context.getString(R.string.main_package_name), context.getString(R.string.key_package_name)) == PackageManager.SIGNATURE_MATCH) {
@@ -230,19 +234,124 @@ public class Helpers {
 	}
 
 	public static String getThumbsDir(Context context) {
-		return getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
+		return getThumbsDir(context, null);
+	}
+	
+	public static String getThumbsDir(Context context, String homeDir) {
+		if(homeDir != null){
+			return homeDir + "/" + context.getString(R.string.default_thumb_folder_name);
+		}
+		else{
+			return getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
+		}
 	}
 
 	public static void createFolders(Context context) {
-		File dir = new File(getThumbsDir(context));
+		createFolders(context, null);
+	}
+	
+	public static void createFolders(Context context, String homeDir) {
+		File dir = new File(getThumbsDir(context, homeDir));
 		if (!dir.exists() || !dir.isDirectory()) {
 			dir.mkdirs();
 		}
 		
-		File tmpFile = new File(Helpers.getHomeDir(context) + "/.tmp/");
+		File tmpFile;
+		if(homeDir != null){
+			tmpFile = new File(homeDir + "/.tmp/");
+		}
+		else{
+			tmpFile = new File(Helpers.getHomeDir(context) + "/.tmp/");
+		}
 		if (!tmpFile.exists() || !tmpFile.isDirectory()) {
 			tmpFile.mkdirs();
 		}
+	}
+	
+	
+	public static void writeLoginHashToFile(Context context, String hash){
+		writeLoginHashToFile(context, hash, null);
+	}
+	public static void writeLoginHashToFile(Context context, String hash, String homeDir){
+		File hashFile;
+		if(homeDir != null){
+			hashFile = new File(homeDir + "/.hash");
+		}
+		else{
+			hashFile = new File(Helpers.getHomeDir(context) + "/.hash");
+		}
+		
+		try {
+			FileOutputStream out = new FileOutputStream(hashFile);
+			out.write(hash.getBytes());
+			out.close();
+		}
+		catch (FileNotFoundException e) {}
+		catch (IOException e) {}
+	}
+	
+	public static void removeLoginHashFile(Context context){
+		File hashFile = new File(Helpers.getHomeDir(context) + "/.hash");
+		if(hashFile.exists() && hashFile.isFile()){
+			hashFile.delete();
+		}
+	}
+	
+	public static String readLoginHashFromFile(Context context){
+		return readLoginHashFromFile(context, null);
+	}
+	public static String readLoginHashFromFile(Context context, String homeDir){
+		File hashFile;
+		
+		if(homeDir != null){
+			hashFile = new File(homeDir + "/.hash");
+		}
+		else{
+			hashFile = new File(Helpers.getHomeDir(context) + "/.hash");
+		}
+		
+		if(hashFile.exists() && hashFile.isFile()){
+			try {
+				FileInputStream in = new FileInputStream(hashFile);
+				ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+				int numRead = 0;
+				byte[] buf = new byte[1024];
+				while ((numRead = in.read(buf)) >= 0) {
+					bytes.write(buf, 0, numRead);
+				}
+				in.close();
+				
+				return bytes.toString();
+			}
+			catch (FileNotFoundException e) {}
+			catch (IOException e) {}
+		}
+		
+		return null;
+	}
+	
+	
+	public static int synchronizePasswordHash(Context context){
+		return synchronizePasswordHash(context, null);
+	}
+	public static int synchronizePasswordHash(Context context, String homeDir){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Activity.MODE_PRIVATE);
+		String fileHash = readLoginHashFromFile(context, homeDir);
+		String preferenceHash = null;
+		if (preferences.contains(SafeCameraActivity.PASSWORD)){
+			preferenceHash = preferences.getString(SafeCameraActivity.PASSWORD, null);
+		}
+		
+		if((preferenceHash == null && fileHash != null) || (preferenceHash != null && fileHash != null && !preferenceHash.equals(fileHash))) {
+			preferences.edit().putString(SafeCameraActivity.PASSWORD, fileHash).commit();
+			return HASH_SYNC_UPDATED_PREF;
+		}
+		else if(preferenceHash != null && fileHash == null) {
+			writeLoginHashToFile(context, preferenceHash, homeDir);
+			return HASH_SYNC_WROTE_FILE;
+		}
+		
+		return HASH_SYNC_NOTHING_DONE;
 	}
 
 	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {

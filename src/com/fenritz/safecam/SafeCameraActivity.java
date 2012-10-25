@@ -53,6 +53,8 @@ public class SafeCameraActivity extends SherlockActivity {
 		
 		Helpers.deleteTmpDir(SafeCameraActivity.this);
 		
+		Helpers.synchronizePasswordHash(this);
+		
 		justLogin = getIntent().getBooleanExtra(ACTION_JUST_LOGIN, false);
 		extraData = getIntent().getBundleExtra(PARAM_EXTRA_DATA);
 		
@@ -220,6 +222,7 @@ public class SafeCameraActivity extends SherlockActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 					preferences.edit().remove(SafeCameraActivity.PASSWORD).commit();
+					Helpers.removeLoginHashFile(SafeCameraActivity.this);
 					((SafeCameraApplication) getApplication()).setKey(null);
 					
 					Intent intent = new Intent();

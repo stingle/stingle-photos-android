@@ -197,6 +197,7 @@ public class ChangePasswordActivity extends SherlockActivity {
 				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 				String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(passwordHash + newPassword));
 				preferences.edit().putString(SafeCameraActivity.PASSWORD, loginHash).commit();
+				Helpers.writeLoginHashToFile(ChangePasswordActivity.this, loginHash);
 				
 				((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(passwordHash);
 			}
