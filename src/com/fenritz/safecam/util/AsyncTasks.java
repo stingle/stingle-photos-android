@@ -935,20 +935,24 @@ public class AsyncTasks {
 		
 		@Override
 		protected Bitmap doInBackground(File... params) {
-			Bitmap image = Helpers.decodeFile(params[0], Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
-			//image = Helpers.getThumbFromBitmap(image, Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
+			try {
+				Bitmap image = Helpers.decodeFile(new FileInputStream(params[0]), Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
 			
-			if(image != null){
-				cache.put(params[0].getPath(), image);
-				return image;
+				//image = Helpers.getThumbFromBitmap(image, Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
+				
+				if(image != null){
+					cache.put(params[0].getPath(), image);
+					return image;
+				}
+				
+				image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MICRO_KIND);
+				
+				if(image != null){
+					cache.put(params[0].getPath(), image);
+					return image;
+				}
 			}
-			
-			image = ThumbnailUtils.createVideoThumbnail(params[0].getPath(), Thumbnails.MICRO_KIND);
-			
-			if(image != null){
-				cache.put(params[0].getPath(), image);
-				return image;
-			}
+			catch (FileNotFoundException e) {}
 			return null;
 		}
 
@@ -1018,7 +1022,7 @@ public class AsyncTasks {
 				}
 				
 				// Get from File and Resize it
-				image = Helpers.decodeFile(params[0], Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
+				image = Helpers.decodeFile(new FileInputStream(params[0]), Helpers.getThumbSize(SafeCameraApplication.getAppContext()));
 				
 				if(image != null){
 					cache.put(params[0].getPath(), image);
@@ -1033,6 +1037,7 @@ public class AsyncTasks {
 				}
 			}
 			catch(OutOfMemoryError e){}
+			catch (FileNotFoundException e) {}
 			return null;
 		}
 

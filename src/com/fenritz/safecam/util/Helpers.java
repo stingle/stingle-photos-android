@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.text.SimpleDateFormat;
@@ -426,9 +427,9 @@ public class Helpers {
 		return 0;
 	}
 	
-	public static int getAltExifRotation(byte[] data){
+	public static int getAltExifRotation(BufferedInputStream stream){
 		try{
-			return getRotationFromMetadata(ImageMetadataReader.readMetadata(new BufferedInputStream(new ByteArrayInputStream(data)), false));
+			return getRotationFromMetadata(ImageMetadataReader.readMetadata(stream, false));
 		}
 		catch (ImageProcessingException e) {}
 		catch (IOException e) {}
@@ -523,7 +524,7 @@ public class Helpers {
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize, boolean isFront) {
 		if(data != null){
-			Integer rotation = getAltExifRotation(data);
+			Integer rotation = getAltExifRotation(new BufferedInputStream(new ByteArrayInputStream(data)));
 			
 			if(rotation == 90 && isFront){
 				rotation = 270;
@@ -558,35 +559,32 @@ public class Helpers {
 		return null;
 	}
 	
-	public static Bitmap decodeFile(File f, int requiredSize) {
-		try {
-			Integer rotation = getAltExifRotation(f);
-			
-			// Decode image size
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
+	public static Bitmap decodeFile(InputStream stream, int requiredSize) {
+		Integer rotation = getAltExifRotation(new BufferedInputStream(stream));
+		
+		// Decode image size
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inJustDecodeBounds = true;
+		BitmapFactory.decodeStream(stream, null, o);
 
-			// Find the correct scale value. It should be the power of 2.
-			requiredSize = requiredSize * requiredSize;
-			int scale = 1;
-		    while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > requiredSize) {
-		    	scale++;
-		    }
+		// Find the correct scale value. It should be the power of 2.
+		requiredSize = requiredSize * requiredSize;
+		int scale = 1;
+	    while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > requiredSize) {
+	    	scale++;
+	    }
 
-			// Decode with inSampleSize
-			BitmapFactory.Options o2 = new BitmapFactory.Options();
-			o2.inSampleSize = scale;
-			
-			if(rotation != null){
-				return getRotatedBitmap(BitmapFactory.decodeStream(new FileInputStream(f), null, o2), rotation);
-			}
-			else{
-				return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-			}
+		// Decode with inSampleSize
+		BitmapFactory.Options o2 = new BitmapFactory.Options();
+		o2.inSampleSize = scale;
+		
+		//stream.reset();
+		if(rotation != null){
+			return getRotatedBitmap(BitmapFactory.decodeStream(stream, null, o2), rotation);
 		}
-		catch (FileNotFoundException e) { }
-		return null;
+		else{
+			return BitmapFactory.decodeStream(stream, null, o2);
+		}
 	}
 	
 	public static String getThumbFileName(File file){
