@@ -213,6 +213,9 @@ public class AESCrypt {
 			if(!this.setupCrypto()){
 				return;
 			}
+			if(data == null){
+				return;
+			}
 			writeHeader(out, iv, salt);
 
 			// Bytes written to out will be encrypted

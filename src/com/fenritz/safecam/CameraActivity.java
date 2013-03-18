@@ -747,11 +747,14 @@ public class CameraActivity extends SherlockActivity {
 	@SuppressLint("NewApi")
 	private boolean isCurrentCameraFrontFacing(){
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
-			Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-			Camera.getCameraInfo(currentCamera, cameraInfo);
-			if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
-				return true;
+			try{
+				Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+				Camera.getCameraInfo(currentCamera, cameraInfo);
+				if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
+					return true;
+				}
 			}
+			catch(RuntimeException e){ }
 		}
 		return false;
 	}
