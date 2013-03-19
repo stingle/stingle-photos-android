@@ -1036,24 +1036,26 @@ public class CameraActivity extends SherlockActivity {
 	private List<Size> getSupportedImageSizes(){
 		List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
 
-		Collections.sort(mSupportedPictureSizes, new Comparator<Size>() {
-
-			public int compare(Size lhs, Size rhs) {
-				double megapixel1 = (double)lhs.width * (double)lhs.height / 1000000;
-				double megapixel2 = (double)rhs.width * (double)rhs.height / 1000000;
+		if(mSupportedPictureSizes.size() > 0){
+			Collections.sort(mSupportedPictureSizes, new Comparator<Size>() {
+	
+				public int compare(Size lhs, Size rhs) {
+					double megapixel1 = (double)lhs.width * (double)lhs.height / 1000000;
+					double megapixel2 = (double)rhs.width * (double)rhs.height / 1000000;
+					
+					if(megapixel1 == megapixel2){
+						return 0;
+					}
+					else if(megapixel1 < megapixel2){
+						return -1;
+					}
+					else{
+						return 1;
+					}
+				}
 				
-				if(megapixel1 == megapixel2){
-					return 0;
-				}
-				else if(megapixel1 < megapixel2){
-					return -1;
-				}
-				else{
-					return 1;
-				}
-			}
-			
-		});
+			});
+		}
 		
 		return mSupportedPictureSizes;
 	}
