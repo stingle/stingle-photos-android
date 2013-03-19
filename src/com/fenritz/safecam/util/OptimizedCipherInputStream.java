@@ -34,6 +34,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NullCipher;
 
+import android.annotation.SuppressLint;
+
 /**
  * A CipherInputStream is composed of an InputStream and a Cipher so
  * that read() methods return data that are read in from the
@@ -105,7 +107,8 @@ public class OptimizedCipherInputStream extends FilterInputStream {
      * return 0 (no data now, but could have more later)
      * return -1 (absolutely no more data)
      */
-    private int getMoreData() throws IOException {
+    @SuppressLint("NewApi")
+	private int getMoreData() throws IOException {
         if (done) return -1;
         int readin = input.read(ibuffer);
         if (readin == -1) {
@@ -114,10 +117,20 @@ public class OptimizedCipherInputStream extends FilterInputStream {
                 obuffer = cipher.doFinal();
             }
             catch (IllegalBlockSizeException e) {
-            	throw new IOException(e);
+            	if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
+            		throw new IOException(e);
+            	}
+            	else{
+            		obuffer = null;
+            	}
             }
             catch (BadPaddingException e) {
-            	throw new IOException(e);
+            	if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
+            		throw new IOException(e);
+            	}
+            	else{
+            		obuffer = null;
+            	}
             }
             if (obuffer == null)
                 return -1;

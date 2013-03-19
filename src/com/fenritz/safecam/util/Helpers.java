@@ -603,9 +603,13 @@ public class Helpers {
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
         Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
+        if(cursor != null){
+	        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+	        cursor.moveToFirst();
+	        return cursor.getString(column_index);
+        }
+        
+        return null;
     }
 	
 	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {

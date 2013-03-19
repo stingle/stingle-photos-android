@@ -559,8 +559,10 @@ public class GalleryActivity extends SherlockActivity {
 				new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath, new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish(java.util.ArrayList<File> decryptedFiles) {
-						for(File file : decryptedFiles){
-							sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+						if(decryptedFiles != null){
+							for(File file : decryptedFiles){
+								sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+							}
 						}
 						exitMultiSelect();
 					}
@@ -845,7 +847,10 @@ public class GalleryActivity extends SherlockActivity {
 								if(!found){
 									queue.add(new Dec(thumbPath, imageView));
 									if(!decryptor.isAlive()){
-										decryptor.start();
+										try{
+											decryptor.start();
+										}
+										catch(IllegalThreadStateException e){ }
 									}
 								}
 							}

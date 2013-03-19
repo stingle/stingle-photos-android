@@ -55,23 +55,24 @@ public class ImportPhotosActivity extends SherlockActivity {
 		final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.ORIENTATION };
 		final String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
 		Cursor imagecursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
-		int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
-		int count = imagecursor.getCount();
-		for (int i = 0; i < count; i++) {
-			imagecursor.moveToPosition(i);
-			int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
-			imgIds.add(imagecursor.getInt(image_column_index));
-			
-			/*int orientationIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
-			String orientation = imagecursor.getString(orientationIndex);
-			if(orientation != null){
-				imgOrientations.add(Integer.valueOf(orientation));
-			}*/
-			imgOrientations.add(imagecursor.getInt(imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION)));
-			arrPath.add(imagecursor.getString(dataColumnIndex));
+		if(imagecursor != null){
+			int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
+			int count = imagecursor.getCount();
+			for (int i = 0; i < count; i++) {
+				imagecursor.moveToPosition(i);
+				int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
+				imgIds.add(imagecursor.getInt(image_column_index));
+				
+				/*int orientationIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
+				String orientation = imagecursor.getString(orientationIndex);
+				if(orientation != null){
+					imgOrientations.add(Integer.valueOf(orientation));
+				}*/
+				imgOrientations.add(imagecursor.getInt(imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION)));
+				arrPath.add(imagecursor.getString(dataColumnIndex));
+			}
+			imagecursor.close();
 		}
-		imagecursor.close();
-		
 		GridView imagegrid = (GridView) findViewById(R.id.PhoneImageGrid);
 		imagegrid.setOnScrollListener(getOnScrollListener());
 		imageAdapter = new ImageAdapter();
