@@ -582,15 +582,17 @@ public class CameraActivity extends SherlockActivity {
 					flashMode = Parameters.FLASH_MODE_OFF;
 				}
 
-				Camera.Parameters parameters = mCamera.getParameters();
-				List<String> flashModes = parameters.getSupportedFlashModes();
-				if(flashModes != null && flashModes.contains(flashMode)){
-					parameters.setFlashMode(flashMode);
-					mCamera.setParameters(parameters);
-					flashButton.setImageResource(flashButtonImage);
-					preferences.edit().putString(CameraActivity.FLASH_MODE, flashMode).commit();
+				if (mCamera != null){
+					Camera.Parameters parameters = mCamera.getParameters();
+					List<String> flashModes = parameters.getSupportedFlashModes();
+					if(flashModes != null && flashModes.contains(flashMode)){
+						parameters.setFlashMode(flashMode);
+						mCamera.setParameters(parameters);
+						flashButton.setImageResource(flashButtonImage);
+						preferences.edit().putString(CameraActivity.FLASH_MODE, flashMode).commit();
+					}
+					changeRotation(mOrientation);
 				}
-				changeRotation(mOrientation);
 			}
 		};
 	}
