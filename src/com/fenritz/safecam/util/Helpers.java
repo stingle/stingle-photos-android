@@ -197,7 +197,7 @@ public class Helpers {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = prefix + timeStamp;
 
-		return imageFileName + ".jpg" + context.getString(R.string.file_extension);
+		return Helpers.encryptFilename(context, imageFileName + ".jpg");
 	}
 
 	public static void printMaxKeySizes() {
@@ -659,6 +659,20 @@ public class Helpers {
 			return findNewFileNameIfNeeded(context, filePath, finalFilaname, ++number);
 		}
 		return filePath + "/" + fileName;
+	}
+	
+	public static String encryptFilename(Context context, String fileName){
+		return Helpers.getAESCrypt(context).encrypt(fileName) + context.getString(R.string.file_extension);
+	}
+	
+	public static String decryptFilename(Context context, String fileName){
+		String encryptedString = fileName.substring(0, fileName.indexOf(context.getString(R.string.file_extension)));
+		String decryptedFilename = getAESCrypt(context).decrypt(encryptedString);
+		
+		if(decryptedFilename == null){
+			return fileName;
+		}
+		return decryptedFilename;
 	}
 	
 	public static void share(final Activity activity, final ArrayList<File> files, final OnAsyncTaskFinish onDecrypt) {

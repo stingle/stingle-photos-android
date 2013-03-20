@@ -66,8 +66,10 @@ public class ViewImageActivity extends SherlockActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+        
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setHomeButtonEnabled(true);
@@ -286,7 +288,7 @@ public class ViewImageActivity extends SherlockActivity {
 		task.execute();
 		taskStack.add(task);
 		
-		getSupportActionBar().setTitle(photo.getName());
+		getSupportActionBar().setTitle(Helpers.decryptFilename(ViewImageActivity.this, photo.getName()));
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
 	}
 	

@@ -740,7 +740,7 @@ public class GalleryActivity extends SherlockActivity {
 			CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-			builder.setTitle(file.getName());
+			builder.setTitle(Helpers.decryptFilename(GalleryActivity.this, file.getName()));
 			builder.setItems(listEntries, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int item) {
 					selectedFiles.clear();

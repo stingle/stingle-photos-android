@@ -360,7 +360,7 @@ public class AsyncTasks {
 
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
-						FileOutputStream outputStream = new FileOutputStream(new File(destinationFolder, destFileName));
+						FileOutputStream outputStream = new FileOutputStream(new File(destinationFolder, Helpers.decryptFilename(activity, destFileName)));
 
 						Helpers.getAESCrypt(activity).decrypt(inputStream, outputStream, null, this);
 
@@ -551,7 +551,8 @@ public class AsyncTasks {
 					try {
 						inputStream = new FileInputStream(origFile);
 
-						String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName())  + activity.getString(R.string.file_extension);
+						//String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName())  + activity.getString(R.string.file_extension);
+						String destFilePath = destinationFolder + "/" + Helpers.encryptFilename(activity, origFile.getName());
 						// String destFilePath =
 						// findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this),
 						// origFile.getName());

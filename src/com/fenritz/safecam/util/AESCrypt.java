@@ -418,10 +418,10 @@ public class AESCrypt {
 				return null;
 			}
 			byte[] ciphertext = encryptionCipher.doFinal(plaintext.getBytes("UTF-8"));
-			String ivHexString = new String(byteToHex(iv));
-			String saltHexString = new String(byteToHex(salt));
-			String cipherHexString = new String(byteToHex(ciphertext));
-			return ivHexString.concat(saltHexString).concat(cipherHexString);
+			String ivHexString = byteToHex(iv);
+			String saltHexString = byteToHex(salt);
+			String cipherHexString = byteToHex(ciphertext);
+			return ivHexString + saltHexString + cipherHexString;
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -436,13 +436,14 @@ public class AESCrypt {
 	 * @return a string decrypted in plain text
 	 */
 	public String decrypt(String hexCipherText) {
-			String ivHexText = hexCipherText.substring(0, 32);
-			String saltHexText = hexCipherText.substring(32, 40);
-			hexCipherText = hexCipherText.substring(72);
+		if(hexCipherText.length() > (IV_LENGTH * 2) + (SALT_LENGTH * 2)){
+			String ivHexText = hexCipherText.substring(0, IV_LENGTH * 2);
+			String saltHexText = hexCipherText.substring(IV_LENGTH * 2, (IV_LENGTH * 2) + (SALT_LENGTH * 2));
+			hexCipherText = hexCipherText.substring((IV_LENGTH * 2) + (SALT_LENGTH * 2));
 			
-			iv = hexToByte(ivHexText);
-			salt = hexToByte(saltHexText);
-			setupCrypto(iv, salt);
+			byte[] pIv = hexToByte(ivHexText);
+			byte[] pSalt = hexToByte(saltHexText);
+			setupCrypto(pIv, pSalt);
 			
 			try {
 				String plaintext = new String(decryptionCipher.doFinal(hexToByte(hexCipherText)), "UTF-8");
@@ -452,6 +453,8 @@ public class AESCrypt {
 				e.printStackTrace();
 				return null;
 			}
+		}
+		return null;
 	}
 
 	public String decryptForString(byte[] ciphertext) {
