@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -95,7 +96,7 @@ public class GalleryActivity extends SherlockActivity {
 	
 	private String currentPath;
 	
-	private final ArrayList<Dec> queue = new ArrayList<Dec>();
+	private final CopyOnWriteArrayList<Dec> queue = new CopyOnWriteArrayList<Dec>();
 	
 	private int currentVisibleItemCount = 25;
 	
@@ -917,7 +918,7 @@ public class GalleryActivity extends SherlockActivity {
 	
 	private class Dec{
 		public String fileName;
-		public ArrayList<ImageView> images = new ArrayList<ImageView>();
+		public CopyOnWriteArrayList<ImageView> images = new CopyOnWriteArrayList<ImageView>();
 		
 		public Dec(String fileName, ImageView image){
 			this.fileName = fileName;

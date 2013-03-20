@@ -30,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Video.Thumbnails;
 import android.util.Log;
@@ -123,6 +124,7 @@ public class AsyncTasks {
 		private ProgressDialog progressDialog;
 		private final Activity activity;
 		private final OnAsyncTaskFinish finishListener;
+		private PowerManager.WakeLock wl;
 
 		public DeleteFiles(Activity activity){
 			this(activity, null);
@@ -146,6 +148,10 @@ public class AsyncTasks {
 			progressDialog.setMessage(activity.getString(R.string.deleting_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "delete");
+			wl.acquire();
 		}
 
 		@Override
@@ -208,6 +214,7 @@ public class AsyncTasks {
 			super.onPostExecute(deletedFiles);
 
 			progressDialog.dismiss();
+			wl.release();
 			
 			if (finishListener != null) {
 				finishListener.onFinish(deletedFiles);
@@ -221,6 +228,7 @@ public class AsyncTasks {
 		private final Activity activity;
 		private final File destination;
 		private final OnAsyncTaskFinish finishListener;
+		private PowerManager.WakeLock wl;
 
 		public MoveFiles(Activity activity, File destination){
 			this(activity, destination, null);
@@ -245,6 +253,10 @@ public class AsyncTasks {
 			progressDialog.setMessage(activity.getString(R.string.moving_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "move");
+			wl.acquire();
 		}
 
 		@Override
@@ -286,6 +298,7 @@ public class AsyncTasks {
 			super.onPostExecute(result);
 
 			progressDialog.dismiss();
+			wl.release();
 			
 			if (finishListener != null) {
 				finishListener.onFinish();
@@ -299,6 +312,7 @@ public class AsyncTasks {
 		private final Activity activity;
 		private final String destinationFolder;
 		private final OnAsyncTaskFinish finishListener;
+		private PowerManager.WakeLock wl;
 
 		public DecryptFiles(Activity activity, String pDestinationFolder) {
 			this(activity, pDestinationFolder, null);
@@ -323,6 +337,10 @@ public class AsyncTasks {
 			progressDialog.setMessage(activity.getString(R.string.decrypting_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "decrypt");
+			wl.acquire();
 		}
 
 		@Override
@@ -379,6 +397,8 @@ public class AsyncTasks {
 			super.onPostExecute(decryptedFiles);
 
 			progressDialog.dismiss();
+			wl.release();
+			
 			if (finishListener != null) {
 				finishListener.onFinish(decryptedFiles);
 			}
@@ -390,6 +410,7 @@ public class AsyncTasks {
 		private ProgressDialog progressDialog;
 		private final OnAsyncTaskFinish finishListener;
 		private final Activity activity;
+		private PowerManager.WakeLock wl;
 
 		public ReEncryptFiles(Activity activity, OnAsyncTaskFinish pFinishListener) {
 			this.activity = activity;
@@ -409,6 +430,10 @@ public class AsyncTasks {
 			progressDialog.setMessage(activity.getString(R.string.reencrypting_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "reencrypt");
+			wl.acquire();
 		}
 
 		@SuppressWarnings("unchecked")
@@ -469,6 +494,7 @@ public class AsyncTasks {
 			super.onPostExecute(reencryptedFiles);
 
 			progressDialog.dismiss();
+			wl.release();
 			
 			if (finishListener != null) {
 				finishListener.onFinish(reencryptedFiles);
@@ -483,6 +509,7 @@ public class AsyncTasks {
 		private final Activity activity;
 		private final OnAsyncTaskFinish finishListener;
 		private final String destinationFolder;
+		private PowerManager.WakeLock wl;
 
 		public EncryptFiles(Activity activity, String destinationFolder) {
 			this(activity, destinationFolder, null);
@@ -507,6 +534,10 @@ public class AsyncTasks {
 			progressDialog.setMessage(activity.getString(R.string.encrypting_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "encrypt");
+			wl.acquire();
 		}
 
 		@Override
@@ -558,6 +589,7 @@ public class AsyncTasks {
 			super.onPostExecute(result);
 
 			progressDialog.dismiss();
+			wl.release();
 			
 			if (finishListener != null) {
 				finishListener.onFinish();
@@ -575,6 +607,7 @@ public class AsyncTasks {
 		private final Activity activity;
 		private final OnAsyncTaskFinish finishListener;
 		private final String destinationFolder;
+		private PowerManager.WakeLock wl;
 		
 		public ImportFiles(Activity activity, String destinationFolder){
 			this(activity, destinationFolder, null);
@@ -599,6 +632,10 @@ public class AsyncTasks {
 			progressDialog.setMessage(activity.getString(R.string.importing_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "import");
+			wl.acquire();
 		}
 
 		@Override
@@ -674,6 +711,7 @@ public class AsyncTasks {
 			super.onPostExecute(result);
 
 			progressDialog.dismiss();
+			wl.release();
 			if (finishListener != null) {
 				finishListener.onFinish(result);
 			}
@@ -695,6 +733,7 @@ public class AsyncTasks {
 		private final OnAsyncTaskFinish finishListener;
 		private final String filePath;
 		private final int direction;
+		private PowerManager.WakeLock wl;
 		
 		
 		public RotatePhoto(Activity activity, String filePath, int direction){
@@ -721,6 +760,10 @@ public class AsyncTasks {
 			progressDialog.setMessage(activity.getString(R.string.rotating));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "rotate");
+			wl.acquire();
 		}
 
 		@Override
@@ -905,6 +948,8 @@ public class AsyncTasks {
 			super.onPostExecute(result);
 
 			progressDialog.dismiss();
+			wl.release();
+			
 			if (finishListener != null) {
 				finishListener.onFinish(result);
 			}
