@@ -911,7 +911,7 @@ public class CameraActivity extends SherlockActivity {
 		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
-				FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(CameraActivity.this) + "/" + filename);
+				FileOutputStream out = new FileOutputStream(Helpers.getNewDestinationPath(CameraActivity.this, Helpers.getHomeDir(CameraActivity.this), filename));
 				Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
 			}
 			catch (FileNotFoundException e) {

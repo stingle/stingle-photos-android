@@ -197,7 +197,7 @@ public class Helpers {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = prefix + timeStamp;
 
-		return Helpers.encryptFilename(context, imageFileName + ".jpg");
+		return imageFileName + ".jpg";
 	}
 
 	public static void printMaxKeySizes() {
@@ -612,7 +612,56 @@ public class Helpers {
         return null;
     }
 	
-	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
+	public static String getNewDestinationPath(Context context, String path, String fileName){
+		return path + "/" + getNextAvailableFilePrefix(path) + encryptFilename(context, fileName);
+	}
+	
+	public static String getNextAvailableFilePrefix(String path){
+		File dir = new File(path);
+		File[] folderFiles = dir.listFiles();
+
+		int maxNumber = 0;
+		
+		if(folderFiles != null){
+			for (File file : folderFiles) {
+				String fileName = file.getName();
+				Pattern p = Pattern.compile("^zzSC\\-\\d+\\_.+");
+				Matcher m = p.matcher(fileName);
+				if (m.find()) {
+					try{
+						int num = Integer.parseInt(fileName.substring(5, fileName.indexOf("_")));
+						if(num > maxNumber){
+							maxNumber = num;
+						}
+					}
+					catch(NumberFormatException e){}
+				}
+			}
+		}
+		
+		return "zzSC-" + String.valueOf(maxNumber+1) + "_";
+	}
+	
+	public static String encryptFilename(Context context, String fileName){
+		return Helpers.getAESCrypt(context).encrypt(fileName) + context.getString(R.string.file_extension);
+	}
+	
+	public static String decryptFilename(Context context, String fileName){
+		String encryptedString = fileName.substring(0, fileName.indexOf(context.getString(R.string.file_extension)));
+		
+		if(encryptedString.substring(0, 4).equals("zzSC")){
+			encryptedString = encryptedString.substring(fileName.indexOf("_")+1);
+		}
+		
+		String decryptedFilename = getAESCrypt(context).decrypt(encryptedString);
+		
+		if(decryptedFilename == null){
+			return fileName;
+		}
+		return decryptedFilename;
+	}
+	
+	/*public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
 		return findNewFileNameIfNeeded(context, filePath, fileName, null);
 	}
 	
@@ -659,21 +708,7 @@ public class Helpers {
 			return findNewFileNameIfNeeded(context, filePath, finalFilaname, ++number);
 		}
 		return filePath + "/" + fileName;
-	}
-	
-	public static String encryptFilename(Context context, String fileName){
-		return Helpers.getAESCrypt(context).encrypt(fileName) + context.getString(R.string.file_extension);
-	}
-	
-	public static String decryptFilename(Context context, String fileName){
-		String encryptedString = fileName.substring(0, fileName.indexOf(context.getString(R.string.file_extension)));
-		String decryptedFilename = getAESCrypt(context).decrypt(encryptedString);
-		
-		if(decryptedFilename == null){
-			return fileName;
-		}
-		return decryptedFilename;
-	}
+	}*/
 	
 	public static void share(final Activity activity, final ArrayList<File> files, final OnAsyncTaskFinish onDecrypt) {
 		CharSequence[] listEntries = activity.getResources().getStringArray(R.array.beforeShareActions);

@@ -353,10 +353,7 @@ public class AsyncTasks {
 			for (int i = 0; i < filesToDecrypt.size(); i++) {
 				File file = filesToDecrypt.get(i);
 				if (file.exists() && file.isFile()) {
-					String destFileName = file.getName();
-					if (destFileName.substring(destFileName.length() - 3).equalsIgnoreCase(activity.getString(R.string.file_extension))) {
-						destFileName = destFileName.substring(0, destFileName.length() - 3);
-					}
+					String destFileName = Helpers.decryptFilename(activity, file.getName());
 
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
@@ -552,7 +549,7 @@ public class AsyncTasks {
 						inputStream = new FileInputStream(origFile);
 
 						//String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName())  + activity.getString(R.string.file_extension);
-						String destFilePath = destinationFolder + "/" + Helpers.encryptFilename(activity, origFile.getName());
+						String destFilePath = Helpers.getNewDestinationPath(activity, destinationFolder, origFile.getName());
 						// String destFilePath =
 						// findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this),
 						// origFile.getName());
@@ -667,7 +664,7 @@ public class AsyncTasks {
 					try {
 						FileInputStream inputStream = new FileInputStream(origFile);
 
-						String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName());
+						String destFilePath = Helpers.getNewDestinationPath(activity, destinationFolder, origFile.getName());
 
 						FileOutputStream outputStream = new FileOutputStream(destFilePath);
 						if(Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this, true)){
