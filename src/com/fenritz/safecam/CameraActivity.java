@@ -704,9 +704,13 @@ public class CameraActivity extends SherlockActivity {
 				}*/
 				
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
-
-				new EncryptAndWriteFile(filename).execute(data);
-				new EncryptAndWriteThumb(CameraActivity.this, Helpers.getThumbFileName(Helpers.getHomeDir(CameraActivity.this) + "/" + filename), new OnAsyncTaskFinish() {
+				
+				String path = Helpers.getHomeDir(CameraActivity.this);
+				String newFileName = Helpers.getNextAvailableFilePrefix(path) + Helpers.encryptFilename(CameraActivity.this, filename);
+				String finalPath = path + "/" + newFileName;
+				
+				new EncryptAndWriteFile(finalPath).execute(data);
+				new EncryptAndWriteThumb(CameraActivity.this, Helpers.getThumbFileName(finalPath), new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
@@ -911,7 +915,7 @@ public class CameraActivity extends SherlockActivity {
 		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
-				FileOutputStream out = new FileOutputStream(Helpers.getNewDestinationPath(CameraActivity.this, Helpers.getHomeDir(CameraActivity.this), filename));
+				FileOutputStream out = new FileOutputStream(filename);
 				Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
 			}
 			catch (FileNotFoundException e) {
