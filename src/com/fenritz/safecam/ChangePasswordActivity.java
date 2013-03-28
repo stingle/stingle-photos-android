@@ -178,8 +178,12 @@ public class ChangePasswordActivity extends SherlockActivity {
 						FileOutputStream outputStream = new FileOutputStream(tmpFile);
 						
 						if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
+							String oldFilename = Helpers.decryptFilename(ChangePasswordActivity.this, file.getName());
+							String finalFilePath = Helpers.getNewDestinationPath(ChangePasswordActivity.this, file.getParent(), oldFilename);
+							
+							
 							file.delete();
-							tmpFile.renameTo(new File(origFilePath));
+							tmpFile.renameTo(new File(finalFilePath));
 						}
 						else{
 							if(tmpFile.isFile()){

@@ -466,7 +466,8 @@ public class AsyncTasks {
 			for (File file : files) {
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
-					String tmpFilePath = Helpers.getHomeDir(activity) + "/.tmp/" + file.getName();
+					String tmpFilename = Helpers.decryptFilename(activity, file.getName());
+					String tmpFilePath = Helpers.getNewDestinationPath(activity, Helpers.getHomeDir(activity) + "/.tmp/", tmpFilename);
 					
 					File tmpFile = new File(tmpFilePath);
 					FileOutputStream outputStream = new FileOutputStream(tmpFile);
@@ -674,7 +675,8 @@ public class AsyncTasks {
 					try {
 						FileInputStream inputStream = new FileInputStream(origFile);
 
-						String destFilePath = Helpers.getNewDestinationPath(activity, destinationFolder, origFile.getName());
+						String dstFilename = Helpers.decryptFilename(activity, origFile.getName());
+						String destFilePath = Helpers.getNewDestinationPath(activity, destinationFolder, dstFilename, newCrypt);
 
 						FileOutputStream outputStream = new FileOutputStream(destFilePath);
 						if(Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this, true)){

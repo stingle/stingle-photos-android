@@ -613,7 +613,11 @@ public class Helpers {
     }
 	
 	public static String getNewDestinationPath(Context context, String path, String fileName){
-		return path + "/" + getNextAvailableFilePrefix(path) + encryptFilename(context, fileName);
+		return getNewDestinationPath(context, path, fileName, null);
+	}
+	
+	public static String getNewDestinationPath(Context context, String path, String fileName, AESCrypt crypt){
+		return path + "/" + getNextAvailableFilePrefix(path) + encryptFilename(context, fileName, crypt);
 	}
 	
 	public static String getNextAvailableFilePrefix(String path){
@@ -643,17 +647,37 @@ public class Helpers {
 	}
 	
 	public static String encryptFilename(Context context, String fileName){
-		return Helpers.getAESCrypt(context).encrypt(fileName) + context.getString(R.string.file_extension);
+		return encryptFilename(context, fileName, null);
+	}
+	
+	public static String encryptFilename(Context context, String fileName, AESCrypt crypt){
+		if(crypt != null){
+			return crypt.encrypt(fileName) + context.getString(R.string.file_extension);
+		}
+		else{
+			return getAESCrypt(context).encrypt(fileName) + context.getString(R.string.file_extension);
+		}
 	}
 	
 	public static String decryptFilename(Context context, String fileName){
+		return decryptFilename(context, fileName, null);
+	}
+	
+	public static String decryptFilename(Context context, String fileName, AESCrypt crypt){
 		String encryptedString = fileName.substring(0, fileName.indexOf(context.getString(R.string.file_extension)));
 		
 		if(encryptedString.substring(0, 4).equals("zzSC")){
 			encryptedString = encryptedString.substring(fileName.indexOf("_")+1);
 		}
 		
-		String decryptedFilename = getAESCrypt(context).decrypt(encryptedString);
+		String decryptedFilename;
+		if(crypt != null){
+			decryptedFilename = crypt.decrypt(encryptedString);
+		}
+		else{
+			decryptedFilename = getAESCrypt(context).decrypt(encryptedString);
+		}
+
 		
 		if(decryptedFilename == null){
 			return fileName;
