@@ -164,7 +164,7 @@ public class AsyncTasks {
 					if(file.isFile()) {
 						file.delete();
 						
-						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + file.getName());
+						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + Helpers.getThumbFileName(file));
 
 						if (thumb.exists() && thumb.isFile()) {
 							thumb.delete();
@@ -367,7 +367,7 @@ public class AsyncTasks {
 
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
-						FileOutputStream outputStream = new FileOutputStream(new File(destinationFolder, Helpers.decryptFilename(activity, destFileName)));
+						FileOutputStream outputStream = new FileOutputStream(new File(destinationFolder, destFileName));
 
 						Helpers.getAESCrypt(activity).decrypt(inputStream, outputStream, null, this);
 

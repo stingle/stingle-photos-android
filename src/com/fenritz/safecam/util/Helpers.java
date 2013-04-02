@@ -664,7 +664,12 @@ public class Helpers {
 	}
 	
 	public static String decryptFilename(Context context, String fileName, AESCrypt crypt){
-		String encryptedString = fileName.substring(0, fileName.indexOf(context.getString(R.string.file_extension)));
+		String encryptedString = fileName;
+		
+		int extensionIndex = fileName.indexOf(context.getString(R.string.file_extension));
+		if(extensionIndex > 0){
+			encryptedString = fileName.substring(0, extensionIndex);
+		}
 		
 		if(encryptedString.substring(0, 4).equals("zzSC")){
 			encryptedString = encryptedString.substring(fileName.indexOf("_")+1);

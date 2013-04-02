@@ -58,6 +58,7 @@ import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
+import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.CheckableLayout;
 
 public class GalleryActivity extends SherlockActivity {
@@ -238,18 +239,13 @@ public class GalleryActivity extends SherlockActivity {
 		if(folderFiles != null){
 			int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
 			
-			Arrays.sort(folderFiles, Collections.reverseOrder());
-			/*Arrays.sort(folderFiles, new Comparator<File>() {
-				public int compare(File lhs, File rhs) {
-					if(rhs.lastModified() > lhs.lastModified()){
-						return 1;
-					}
-					else if(rhs.lastModified() < lhs.lastModified()){
-						return -1;
-					}
-					return 0;
+			Arrays.sort(folderFiles, (new NaturalOrderComparator(){
+				@Override
+				public int compare(Object o1, Object o2){
+					return -super.compare(o1, o2);
 				}
-			});*/
+			}));
+			//Arrays.sort(folderFiles, Collections.reverseOrder());
 			
 			this.files.clear();
 			toGenerateThumbs.clear();
@@ -571,6 +567,21 @@ public class GalleryActivity extends SherlockActivity {
 			}
 			else if (requestCode == REQUEST_ENCRYPT) {
 				final String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
+				
+				Arrays.sort(filePaths, new Comparator<String>() {
+					public int compare(String lhs, String rhs) {
+						File f1 = new File(lhs);
+						File f2 = new File(rhs);
+						if(f1.lastModified() > f2.lastModified()){
+							return 1;
+						}
+						else if(f1.lastModified() < f2.lastModified()){
+							return -1;
+						}
+						return 0;
+					}
+				});
+				
 				new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
@@ -776,7 +787,7 @@ public class GalleryActivity extends SherlockActivity {
 		
 		private TextView getLabel(File file){
 			TextView label = new TextView(GalleryActivity.this);
-			label.setText(file.getName());
+			label.setText(Helpers.decryptFilename(GalleryActivity.this, file.getName()));
 			label.setEllipsize(TruncateAt.END);
 			label.setMaxLines(2);
 			
