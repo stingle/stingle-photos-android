@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -16,6 +18,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -113,6 +116,7 @@ public class ChangePasswordActivity extends SherlockActivity {
 	private class ReEncryptFiles extends AsyncTask<String, Integer, Void> {
 
 		private ProgressDialog progressDialog;
+		private PowerManager.WakeLock wl;
 
 		@Override
 		protected void onPreExecute() {
@@ -127,6 +131,10 @@ public class ChangePasswordActivity extends SherlockActivity {
 			progressDialog.setMessage(getString(R.string.changing_password));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progressDialog.show();
+			
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "decrypt");
+			wl.acquire();
 		}
 
 		private ArrayList<File> getFilesList(String path){
@@ -140,11 +148,11 @@ public class ChangePasswordActivity extends SherlockActivity {
 				if (file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
 					files.add(file);
 					
-					String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
+					/*String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
 					File thumb = new File(thumbPath);
 					if(thumb.exists() && thumb.isFile()){
 						files.add(thumb);
-					}
+					}*/
 				}
 				else if(file.isDirectory() && !file.getName().startsWith(".")){
 					files.addAll(getFilesList(file.getPath()));
@@ -178,9 +186,40 @@ public class ChangePasswordActivity extends SherlockActivity {
 						FileOutputStream outputStream = new FileOutputStream(tmpFile);
 						
 						if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
-							String oldFilename = Helpers.decryptFilename(ChangePasswordActivity.this, file.getName());
-							String finalFilePath = Helpers.getNewDestinationPath(ChangePasswordActivity.this, file.getParent(), oldFilename);
+							String oldFilename = file.getName();
+							String decryptedFilename = Helpers.decryptFilename(ChangePasswordActivity.this, oldFilename);
 							
+							Integer num = null;
+							Pattern p = Pattern.compile("^zzSC\\-\\d+\\_.+");
+							Matcher m = p.matcher(oldFilename);
+							if (m.find()) {
+								try{
+									num = Integer.parseInt(oldFilename.substring(5, oldFilename.indexOf("_")));
+									
+								}
+								catch(NumberFormatException e){}
+							}
+							
+							String newFilename;
+							if(num != null){
+								newFilename = "zzSC-" + String.valueOf(num) + "_" + Helpers.encryptFilename(ChangePasswordActivity.this, decryptedFilename, newCrypt);
+							}
+							else{
+								newFilename = decryptedFilename;
+							}
+							
+							String finalFilePath = file.getParent() + "/" + newFilename;
+							
+							String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
+							File thumb = new File(thumbPath);
+							if(thumb.exists() && thumb.isFile()){
+								FileInputStream thumbInputStream = new FileInputStream(thumb);
+								FileOutputStream thumbOutputStream = new FileOutputStream(new File(Helpers.getThumbsDir(ChangePasswordActivity.this), Helpers.getThumbFileName(new File(finalFilePath))));
+								
+								if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(thumbInputStream, thumbOutputStream, newCrypt, null, this)){
+									thumb.delete();
+								}
+							}
 							
 							file.delete();
 							tmpFile.renameTo(new File(finalFilePath));
@@ -223,6 +262,9 @@ public class ChangePasswordActivity extends SherlockActivity {
 			super.onPostExecute(result);
 
 			progressDialog.dismiss();
+			
+			wl.release();
+			
 			Toast.makeText(ChangePasswordActivity.this, getString(R.string.success_change_pass), Toast.LENGTH_LONG).show();
 			
 			ChangePasswordActivity.this.finish();
