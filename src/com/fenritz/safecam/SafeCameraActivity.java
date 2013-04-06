@@ -31,6 +31,7 @@ public class SafeCameraActivity extends SherlockActivity {
 
 	public static final String DEFAULT_PREFS = "default_prefs";
 	public static final String PASSWORD = "password";
+	public static final String LAST_LOCK_TIME = "lock_time";
 	public static final String ACTION_JUST_LOGIN = "just_login";
 	public static final String PARAM_EXTRA_DATA = "extra_data";
 	public static final String LOGINS_COUNT_FOR_POPUP = "logins_count_fp";
@@ -111,8 +112,6 @@ public class SafeCameraActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		
-		Helpers.disableLockTimer(this);
-		
 		String key = ((SafeCameraApplication) this.getApplicationContext()).getKey();
 		if(key != null){
 			Intent intent = new Intent();
@@ -121,7 +120,10 @@ public class SafeCameraActivity extends SherlockActivity {
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 			finish();
+			return;
 		}
+		
+		Helpers.disableLockTimer(this);
 	}
 	
 	private void doLogin() {

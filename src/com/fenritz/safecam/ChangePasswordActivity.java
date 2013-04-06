@@ -162,6 +162,49 @@ public class ChangePasswordActivity extends SherlockActivity {
 			return files;
 		}
 		
+		private ArrayList<File> getFoldersList(String path){
+			File dir = new File(path);
+			File[] folderFiles = dir.listFiles();
+
+			Arrays.sort(folderFiles);
+
+			ArrayList<File> folders = new ArrayList<File>();
+			for (File file : folderFiles) {
+				if(file.isDirectory() && !file.getName().startsWith(".")){
+					folders.add(file);
+					folders.addAll(getFoldersList(file.getPath()));
+				}
+			}
+			
+			return folders;
+		}
+		
+		private String reencryptFilename(String oldFilename, AESCrypt crypt){
+			String decryptedFilename = Helpers.decryptFilename(ChangePasswordActivity.this, oldFilename);
+			
+			Integer num = null;
+			Pattern p = Pattern.compile("^zzSC\\-\\d+\\_.+");
+			Matcher m = p.matcher(oldFilename);
+			if (m.find()) {
+				try{
+					num = Integer.parseInt(oldFilename.substring(5, oldFilename.indexOf("_")));
+					
+				}
+				catch(NumberFormatException e){}
+			}
+			
+			String newFilename;
+			if(num != null){
+				newFilename = "zzSC-" + String.valueOf(num) + "_" + Helpers.encryptFilename(ChangePasswordActivity.this, decryptedFilename, crypt);
+			}
+			else{
+				newFilename = decryptedFilename;
+			}
+			
+			return newFilename;
+		}
+		
+		@SuppressWarnings("unchecked")
 		@Override
 		protected Void doInBackground(String... params) {
 			String newPassword = params[0];
@@ -169,6 +212,12 @@ public class ChangePasswordActivity extends SherlockActivity {
 				String passwordHash = AESCrypt.byteToHex(AESCrypt.getHash(newPassword));
 	
 				AESCrypt newCrypt = Helpers.getAESCrypt(passwordHash, ChangePasswordActivity.this);
+				
+				ArrayList<File> folders = getFoldersList(Helpers.getHomeDir(ChangePasswordActivity.this));
+				for(File folder : folders){
+					String finalFolderPath = folder.getParent() + "/" + reencryptFilename(folder.getName(), newCrypt);
+					folder.renameTo(new File(finalFolderPath));
+				}
 				
 				ArrayList<File> files = getFilesList(Helpers.getHomeDir(ChangePasswordActivity.this));
 				
@@ -186,31 +235,9 @@ public class ChangePasswordActivity extends SherlockActivity {
 						FileOutputStream outputStream = new FileOutputStream(tmpFile);
 						
 						if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
-							String oldFilename = file.getName();
-							String decryptedFilename = Helpers.decryptFilename(ChangePasswordActivity.this, oldFilename);
+							String finalFilePath = file.getParent() + "/" + reencryptFilename(file.getName(), newCrypt);
 							
-							Integer num = null;
-							Pattern p = Pattern.compile("^zzSC\\-\\d+\\_.+");
-							Matcher m = p.matcher(oldFilename);
-							if (m.find()) {
-								try{
-									num = Integer.parseInt(oldFilename.substring(5, oldFilename.indexOf("_")));
-									
-								}
-								catch(NumberFormatException e){}
-							}
-							
-							String newFilename;
-							if(num != null){
-								newFilename = "zzSC-" + String.valueOf(num) + "_" + Helpers.encryptFilename(ChangePasswordActivity.this, decryptedFilename, newCrypt);
-							}
-							else{
-								newFilename = decryptedFilename;
-							}
-							
-							String finalFilePath = file.getParent() + "/" + newFilename;
-							
-							String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
+							/*String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
 							File thumb = new File(thumbPath);
 							if(thumb.exists() && thumb.isFile()){
 								FileInputStream thumbInputStream = new FileInputStream(thumb);
@@ -219,7 +246,7 @@ public class ChangePasswordActivity extends SherlockActivity {
 								if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(thumbInputStream, thumbOutputStream, newCrypt, null, this)){
 									thumb.delete();
 								}
-							}
+							}*/
 							
 							file.delete();
 							tmpFile.renameTo(new File(finalFilePath));
@@ -234,6 +261,16 @@ public class ChangePasswordActivity extends SherlockActivity {
 					}
 					catch (FileNotFoundException e) {
 						e.printStackTrace();
+					}
+				}
+				
+				File thumbsDir = new File(Helpers.getThumbsDir(ChangePasswordActivity.this));
+				
+				File[] thumbs = thumbsDir.listFiles();
+
+				for (File thumb : thumbs) {
+					if (thumb.isFile()){
+						thumb.delete();
 					}
 				}
 				

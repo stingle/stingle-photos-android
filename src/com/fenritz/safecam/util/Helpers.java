@@ -107,7 +107,7 @@ public class Helpers {
 		int lockTimeout = Integer.valueOf(sharedPrefs.getString("lock_time", "60")) * 1000;
 
 		long currentTimestamp = System.currentTimeMillis();
-		long lockedTime = ((SafeCameraApplication) activity.getApplicationContext()).getLockedTime();
+		long lockedTime = activity.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(SafeCameraActivity.LAST_LOCK_TIME, 0);;
 
 		if (lockedTime != 0) {
 			if (currentTimestamp - lockedTime > lockTimeout) {
@@ -123,11 +123,11 @@ public class Helpers {
 	}
 
 	public static void setLockedTime(Context context) {
-		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(System.currentTimeMillis());
+		context.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(SafeCameraActivity.LAST_LOCK_TIME, System.currentTimeMillis()).commit();
 	}
 
 	public static void disableLockTimer(Context context) {
-		((SafeCameraApplication) context.getApplicationContext()).setLockedTime(0);
+		context.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(SafeCameraActivity.LAST_LOCK_TIME, 0).commit();
 	}
 
 	public static void logout(Activity activity){
@@ -651,11 +651,19 @@ public class Helpers {
 	}
 	
 	public static String encryptFilename(Context context, String fileName, AESCrypt crypt){
+		return encryptString(context, fileName, crypt) + context.getString(R.string.file_extension);
+	}
+	
+	public static String encryptString(Context context, String fileName){
+		return encryptString(context, fileName, null);
+	}
+	
+	public static String encryptString(Context context, String fileName, AESCrypt crypt){
 		if(crypt != null){
-			return crypt.encrypt(fileName) + context.getString(R.string.file_extension);
+			return crypt.encrypt(fileName);
 		}
 		else{
-			return getAESCrypt(context).encrypt(fileName) + context.getString(R.string.file_extension);
+			return getAESCrypt(context).encrypt(fileName);
 		}
 	}
 	

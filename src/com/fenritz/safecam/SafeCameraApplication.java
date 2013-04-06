@@ -8,7 +8,6 @@ import com.fenritz.safecam.util.MemoryCache;
 public class SafeCameraApplication extends Application{
 
 	private String key;
-	private long lockedTime = 0;
 	
 	private static Context context;
 	private static MemoryCache cache;
@@ -35,13 +34,4 @@ public class SafeCameraApplication extends Application{
 	public void setKey(String pKey){
 		key = pKey;
 	}
-	
-	public long getLockedTime(){
-		return lockedTime;
-	}
-	
-	public void setLockedTime(long time){
-		lockedTime = time;
-	}
-	
 }

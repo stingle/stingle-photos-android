@@ -296,7 +296,7 @@ public class GalleryActivity extends SherlockActivity {
 		
 		if(!newPath.equals(Helpers.getHomeDir(this))){
 			String[] splittedPath = newPath.split("/");
-			getSupportActionBar().setTitle(splittedPath[splittedPath.length - 1]);
+			getSupportActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
 		}
 		else{
 			getSupportActionBar().setTitle(getString(R.string.title_gallery));
@@ -900,7 +900,7 @@ public class GalleryActivity extends SherlockActivity {
 							CharSequence[] listEntries = getResources().getStringArray(R.array.galleryFolderActions);
 
 							AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-							builder.setTitle(file.getName());
+							builder.setTitle(Helpers.decryptFilename(GalleryActivity.this, file.getName()));
 							builder.setItems(listEntries, new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int item) {
 									selectedFiles.clear();
@@ -1160,7 +1160,7 @@ public class GalleryActivity extends SherlockActivity {
 				builder.setView(input);
 				builder.setPositiveButton(getString(R.string.create), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						File newFolder = new File(currentPath + "/" + input.getText());
+						File newFolder = new File(currentPath + "/" + Helpers.getNextAvailableFilePrefix(currentPath) + Helpers.encryptString(GalleryActivity.this, input.getText().toString()));
 						if(newFolder.mkdir()){
 							Toast.makeText(GalleryActivity.this, getString(R.string.success_created), Toast.LENGTH_LONG).show();
 						}
