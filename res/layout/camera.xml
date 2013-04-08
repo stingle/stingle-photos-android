@@ -71,18 +71,6 @@
 	
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="center_horizontal|bottom" >
-
-		<LinearLayout 
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:orientation="vertical"
-		    android:layout_alignParentBottom="true"
-	    	android:id="@+id/adHolder" />
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
 
        	<LinearLayout

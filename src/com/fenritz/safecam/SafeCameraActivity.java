@@ -31,6 +31,7 @@ public class SafeCameraActivity extends SherlockActivity {
 
 	public static final String DEFAULT_PREFS = "default_prefs";
 	public static final String PASSWORD = "password";
+	public static final String LAST_CAM_ID = "last_cam_id";
 	public static final String LAST_LOCK_TIME = "lock_time";
 	public static final String ACTION_JUST_LOGIN = "just_login";
 	public static final String PARAM_EXTRA_DATA = "extra_data";

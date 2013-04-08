@@ -61,8 +61,7 @@ import com.fenritz.safecam.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
 import com.fenritz.safecam.util.Helpers;
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
+import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.google.ads.AdView;
 
 public class CameraActivity extends SherlockActivity {
@@ -72,7 +71,7 @@ public class CameraActivity extends SherlockActivity {
 	public static final String PHOTO_SIZE = "photo_size";
 	public static final String PHOTO_SIZE_FRONT = "photo_size_front";
 
-	private CameraPreview mPreview;
+	private CameraPreview mPreview = null;
 	Camera mCamera;
 	int cameraCurrentlyLocked;
 	FrameLayout.LayoutParams origParams;
@@ -147,9 +146,6 @@ public class CameraActivity extends SherlockActivity {
 		findViewById(R.id.photoSizeLabel).setOnClickListener(showPhotoSizes());
 		findViewById(R.id.optionsButton).setOnClickListener(showOptions());
 		
-		mPreview = new CameraPreview(this); 
-		((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
-
 		showLastPhotoThumb();
 		
 		IntentFilter intentFilter = new IntentFilter();
@@ -161,14 +157,6 @@ public class CameraActivity extends SherlockActivity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
-		
-		if(Helpers.isDemo(CameraActivity.this)){
-			// Create the adView
-		    adView = new AdView(this, AdSize.BANNER, getString(R.string.ad_publisher_id));
-		    LinearLayout layout = (LinearLayout)findViewById(R.id.adHolder);
-		    layout.addView(adView);
-		    adView.loadAd(new AdRequest());
-		}
 	}
 
 	@Override
@@ -181,7 +169,8 @@ public class CameraActivity extends SherlockActivity {
 		Helpers.disableLockTimer(this);
 
 		if(logined){
-			startCamera();
+			int lastCamId = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).getInt(SafeCameraActivity.LAST_CAM_ID, DEFAULT_CAMERA);
+			startCamera(lastCamId);
 			initOrientationListener();
 			showLastPhotoThumb();
 		}
@@ -347,7 +336,15 @@ public class CameraActivity extends SherlockActivity {
 		mCamera.setParameters(parameters);
 
 		cameraCurrentlyLocked = defaultCameraId;
+		if(mPreview != null){
+			((LinearLayout) findViewById(R.id.camera_preview_container)).removeView(mPreview);
+		}
+		mPreview = null;
+		mPreview = new CameraPreview(CameraActivity.this);
+		((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
 		mPreview.setCamera(mCamera);
+		
+		getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putInt(SafeCameraActivity.LAST_CAM_ID, cameraId).commit();
 	}
 	
 	private void releaseCamera(){
@@ -450,7 +447,13 @@ public class CameraActivity extends SherlockActivity {
 		});
 		
 		if(folderFiles != null && folderFiles.length > 0){
-			Arrays.sort(folderFiles, Collections.reverseOrder());
+			Arrays.sort(folderFiles, (new NaturalOrderComparator(){
+				@Override
+				public int compare(Object o1, Object o2){
+					return -super.compare(o1, o2);
+				}
+			}));
+			//Arrays.sort(folderFiles, Collections.reverseOrder());
 			/*Arrays.sort(folderFiles, new Comparator<File>() {
 				public int compare(File lhs, File rhs) {
 					if(rhs.lastModified() > lhs.lastModified()){

@@ -4,7 +4,6 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="lib" path="libs/android-support-v13.jar"/>
 	<classpathentry kind="lib" path="libs/xmpcore.jar"/>
-	<classpathentry kind="lib" path="libs/GoogleAdMobAdsSdk-6.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/metadata-extractor-2.6.2.jar"/>
 	<classpathentry kind="lib" path="libs/Sanselan.jar"/>
 	<classpathentry kind="src" path="src"/>

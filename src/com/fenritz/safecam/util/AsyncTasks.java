@@ -268,14 +268,11 @@ public class AsyncTasks {
 				if (file.exists() && file.isFile()) {
 					File thumb = new File(Helpers.getThumbsDir(activity) + "/" + Helpers.getThumbFileName(file));
 					
-					Log.d("qaq", "before - " + thumb.getName());
-					
 					File newPath = new File(destination, file.getName());
 					file.renameTo(new File(destination, file.getName()));
 					
 					if (thumb.exists() && thumb.isFile()) {
 						thumb.renameTo(new File(Helpers.getThumbsDir(activity), Helpers.getThumbFileName(newPath)));
-						Log.d("qaq", "after - " + thumb.getName());
 					}
 				}
 

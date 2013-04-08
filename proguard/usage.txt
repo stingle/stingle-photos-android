@@ -2088,12 +2088,13 @@ com.fenritz.safecam.CameraActivity:
     private static final int ORIENTATION_LANDSCAPE_NORMAL
     private static final int ORIENTATION_LANDSCAPE_INVERTED
     private static final int DEFAULT_CAMERA
-    722:744:public static byte[] FixFrontCamPhoto(byte[],int)
+    194:195:private void startCamera()
+    731:753:public static byte[] FixFrontCamPhoto(byte[],int)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteFile:
-    888:889:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
+    900:901:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb:
-    934:935:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
-    938:939:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
+    946:947:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
+    950:951:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
 com.fenritz.safecam.FileDialog:
     public static final int MODE_CREATE
     public static final int MODE_OPEN
@@ -2143,6 +2144,8 @@ com.fenritz.safecam.R$xml
 com.fenritz.safecam.SafeCameraActivity:
     public static final java.lang.String DEFAULT_PREFS
     public static final java.lang.String PASSWORD
+    public static final java.lang.String LAST_CAM_ID
+    public static final java.lang.String LAST_LOCK_TIME
     public static final java.lang.String ACTION_JUST_LOGIN
     public static final java.lang.String PARAM_EXTRA_DATA
     public static final java.lang.String LOGINS_COUNT_FOR_POPUP
@@ -2168,46 +2171,43 @@ com.fenritz.safecam.util.AESCrypt:
     static final java.lang.String HEXES
     169:170:public void encrypt(java.io.InputStream,java.io.OutputStream)
     172:173:public void encrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
-    228:228:public boolean reEncrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt)
-    231:231:public boolean reEncrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
-    300:301:public void decrypt(java.io.InputStream,java.io.OutputStream)
-    304:305:public void decrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
-    351:351:public byte[] decrypt(java.io.InputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
-    355:355:public byte[] decrypt(java.io.InputStream,android.os.AsyncTask)
-    414:425:public java.lang.String encrypt(java.lang.String)
-    436:450:public java.lang.String decrypt(java.lang.String)
-    456:460:public java.lang.String decryptForString(byte[])
-    466:480:public byte[] decrypt(byte[])
-    551:556:public static byte[] hexToByte(java.lang.String)
+    231:231:public boolean reEncrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt)
+    234:234:public boolean reEncrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
+    303:304:public void decrypt(java.io.InputStream,java.io.OutputStream)
+    307:308:public void decrypt(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
+    354:354:public byte[] decrypt(java.io.InputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress)
+    358:358:public byte[] decrypt(java.io.InputStream,android.os.AsyncTask)
+    462:466:public java.lang.String decryptForString(byte[])
+    472:486:public byte[] decrypt(byte[])
 com.fenritz.safecam.util.AESCrypt$CryptoProgress:
-    572:572:public long getTotal()
-    583:586:public long getProgress()
+    578:578:public long getTotal()
+    589:592:public long getProgress()
 com.fenritz.safecam.util.AESCryptException:
     private static final long serialVersionUID
 com.fenritz.safecam.util.AsyncTasks:
-    41:41:public AsyncTasks()
+    42:42:public AsyncTasks()
 com.fenritz.safecam.util.AsyncTasks$DecryptFiles:
-    304:305:public AsyncTasks$DecryptFiles(android.app.Activity,java.lang.String)
+    325:326:public AsyncTasks$DecryptFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$DecryptPopulateImage:
-    74:75:public void setCache(com.fenritz.safecam.util.MemoryCache)
+    75:76:public void setCache(com.fenritz.safecam.util.MemoryCache)
 com.fenritz.safecam.util.AsyncTasks$EncryptFiles:
-    488:489:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
+    520:521:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$ImportFiles:
     public static final int STATUS_OK
     public static final int STATUS_FAIL
     public static final int STATUS_CANCEL
-    580:581:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
+    619:620:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$MoveFiles:
-    226:227:public AsyncTasks$MoveFiles(android.app.Activity,java.io.File)
+    234:235:public AsyncTasks$MoveFiles(android.app.Activity,java.io.File)
 com.fenritz.safecam.util.AsyncTasks$RotatePhoto:
     public static final int STATUS_OK
     public static final int STATUS_FAIL
     public static final int STATUS_CANCEL
     public static final int ROTATION_CW
     public static final int ROTATION_CCW
-    701:702:public AsyncTasks$RotatePhoto(android.app.Activity,java.lang.String,int)
+    747:748:public AsyncTasks$RotatePhoto(android.app.Activity,java.lang.String,int)
 com.fenritz.safecam.util.AsyncTasks$ShowImageThumb:
-    933:934:public void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish)
+    985:986:public void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish)
 com.fenritz.safecam.util.CameraPreview:
     71:82:public void switchCamera(android.hardware.Camera)
 com.fenritz.safecam.util.DecryptAndShowImage:
@@ -2220,12 +2220,17 @@ com.fenritz.safecam.util.Helpers:
     protected static final int SHARE_AS_IS
     protected static final int SHARE_REENCRYPT
     protected static final int SHARE_DECRYPT
-    70:70:public Helpers()
-    164:172:public static void registerForBroadcastReceiver(android.app.Activity)
-    200:209:public static void printMaxKeySizes()
-    302:307:public static int getExifRotation(byte[])
-    312:317:public static int getExifRotation(java.io.File)
-    341:371:private static int getRotationFromMetadata(org.apache.sanselan.common.IImageMetadata)
+    public static final int HASH_SYNC_NOTHING_DONE
+    public static final int HASH_SYNC_UPDATED_PREF
+    public static final int HASH_SYNC_WROTE_FILE
+    71:71:public Helpers()
+    169:177:public static void registerForBroadcastReceiver(android.app.Activity)
+    205:214:public static void printMaxKeySizes()
+    302:302:public static java.lang.String readLoginHashFromFile(android.content.Context)
+    412:417:public static int getExifRotation(byte[])
+    422:427:public static int getExifRotation(java.io.File)
+    442:447:public static int getAltExifRotation(java.io.File)
+    451:481:private static int getRotationFromMetadata(org.apache.sanselan.common.IImageMetadata)
 com.fenritz.safecam.util.Helpers$1
 com.fenritz.safecam.util.LimitedThreadAsyncTask:
     private static final int CORE_POOL_SIZE
@@ -2234,7 +2239,7 @@ com.fenritz.safecam.util.LimitedThreadAsyncTask:
 com.fenritz.safecam.util.MemoryCache:
     53:54:public void clear()
 com.fenritz.safecam.util.OptimizedCipherInputStream:
-    164:167:protected OptimizedCipherInputStream(java.io.InputStream)
+    177:180:protected OptimizedCipherInputStream(java.io.InputStream)
 com.fenritz.safecam.util.SerialExecutor
 com.fenritz.safecam.util.SerialExecutor$OnPostExecute
 com.fenritz.safecam.util.SerialExecutor$SerialTask
@@ -2297,6 +2302,7 @@ com.google.ads.AdSize:
     294:294:public boolean isSizeAppropriate(int,int)
     317:337:public varargs com.google.ads.AdSize findBestSize(com.google.ads.AdSize[])
 com.google.ads.AdView:
+    87:100:public AdView(android.app.Activity,com.google.ads.AdSize,java.lang.String)
     483:487:public boolean isReady()
     534:535:public void setAdListener(com.google.ads.AdListener)
     546:549:public void stopLoading()

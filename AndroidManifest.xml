@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fenritz.safecam"
-    android:versionCode="11"
-    android:versionName="2.2" >
+    android:versionCode="12"
+    android:versionName="2.5" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 	
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
@@ -88,10 +86,6 @@
             android:name=".ImportPhotosActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_import" >
-        </activity>
-        <activity 
-     		android:name="com.google.ads.AdActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|screenSize" >
         </activity>
     </application>
 

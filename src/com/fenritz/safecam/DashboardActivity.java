@@ -11,15 +11,12 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.Helpers;
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
 public class DashboardActivity extends SherlockActivity {
@@ -74,12 +71,6 @@ public class DashboardActivity extends SherlockActivity {
 		TextView freeVersionText = (TextView)findViewById(R.id.free_version_text);
 		
 		if(Helpers.isDemo(DashboardActivity.this)){
-			// Create the adView
-		    adView = new AdView(this, AdSize.BANNER, getString(R.string.ad_publisher_id));
-		    LinearLayout layout = (LinearLayout)findViewById(R.id.adHolder);
-		    layout.addView(adView);
-		    adView.loadAd(new AdRequest());
-		    
 		    if(freeVersionText != null){
 		    	freeVersionText.setVisibility(View.VISIBLE);
 		    }

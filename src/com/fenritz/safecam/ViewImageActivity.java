@@ -3,7 +3,6 @@ package com.fenritz.safecam;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -38,6 +36,7 @@ import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.DecryptAndShowImage;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.NaturalOrderComparator;
 
 public class ViewImageActivity extends SherlockActivity {
 
@@ -296,18 +295,12 @@ public class ViewImageActivity extends SherlockActivity {
 		File dir = new File(currentPath);
 		File[] folderFiles = dir.listFiles();
 
-		Arrays.sort(folderFiles, Collections.reverseOrder());
-		/*Arrays.sort(folderFiles, new Comparator<File>() {
-			public int compare(File lhs, File rhs) {
-				if(rhs.lastModified() > lhs.lastModified()){
-					return 1;
-				}
-				else if(rhs.lastModified() < lhs.lastModified()){
-					return -1;
-				}
-				return 0;
+		Arrays.sort(folderFiles, (new NaturalOrderComparator(){
+			@Override
+			public int compare(Object o1, Object o2){
+				return -super.compare(o1, o2);
 			}
-		});*/
+		}));
 		
 		files.clear();
 		
@@ -394,7 +387,6 @@ public class ViewImageActivity extends SherlockActivity {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
 							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + Helpers.getThumbFileName(files.get(currentPosition));
-							Log.d("qaq", key);
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();
@@ -411,7 +403,6 @@ public class ViewImageActivity extends SherlockActivity {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
 							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + Helpers.getThumbFileName(files.get(currentPosition));
-							Log.d("qaq", key);
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();

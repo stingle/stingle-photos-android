@@ -679,7 +679,7 @@ public class Helpers {
 			encryptedString = fileName.substring(0, extensionIndex);
 		}
 		
-		if(encryptedString.substring(0, 4).equals("zzSC")){
+		if(encryptedString.length() >= 4 && encryptedString.substring(0, 4).equals("zzSC")){
 			encryptedString = encryptedString.substring(fileName.indexOf("_")+1);
 		}
 		

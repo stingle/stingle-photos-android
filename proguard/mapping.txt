@@ -1677,869 +1677,503 @@ com.actionbarsherlock.ActionBarSherlock$OnPrepareOptionsMenuListener -> com.acti
 com.actionbarsherlock.ActionBarSherlock$OnPreparePanelListener -> com.actionbarsherlock.ActionBarSherlock$OnPreparePanelListener:
     boolean onPreparePanel(int,android.view.View,com.actionbarsherlock.view.Menu) -> onPreparePanel
 com.actionbarsherlock.R -> com.actionbarsherlock.R:
-com.actionbarsherlock.R$anim -> com.actionbarsherlock.R$anim:
-    int linear_interpolator -> linear_interpolator
-    int loading -> loading
-com.actionbarsherlock.R$array -> com.actionbarsherlock.R$array:
-    int beforeShareActions -> beforeShareActions
-    int galleryFolderActions -> galleryFolderActions
-    int galleryItemActions -> galleryItemActions
-    int importMenu -> importMenu
-    int lockTimes -> lockTimes
-    int lockTimesValues -> lockTimesValues
-    int timerDurationValues -> timerDurationValues
-    int timerDurations -> timerDurations
 com.actionbarsherlock.R$attr -> com.actionbarsherlock.R$attr:
-    int absForceOverflow -> absForceOverflow
-    int actionBarDivider -> actionBarDivider
-    int actionBarItemBackground -> actionBarItemBackground
-    int actionBarSize -> actionBarSize
-    int actionBarSplitStyle -> actionBarSplitStyle
-    int actionBarStyle -> actionBarStyle
-    int actionBarTabBarStyle -> actionBarTabBarStyle
-    int actionBarTabStyle -> actionBarTabStyle
-    int actionBarTabTextStyle -> actionBarTabTextStyle
-    int actionBarWidgetTheme -> actionBarWidgetTheme
-    int actionButtonStyle -> actionButtonStyle
-    int actionDropDownStyle -> actionDropDownStyle
-    int actionMenuTextAppearance -> actionMenuTextAppearance
-    int actionMenuTextColor -> actionMenuTextColor
-    int actionModeBackground -> actionModeBackground
-    int actionModeCloseButtonStyle -> actionModeCloseButtonStyle
-    int actionModeCloseDrawable -> actionModeCloseDrawable
-    int actionModePopupWindowStyle -> actionModePopupWindowStyle
-    int actionModeShareDrawable -> actionModeShareDrawable
-    int actionModeSplitBackground -> actionModeSplitBackground
-    int actionModeStyle -> actionModeStyle
-    int actionOverflowButtonStyle -> actionOverflowButtonStyle
-    int actionSpinnerItemStyle -> actionSpinnerItemStyle
-    int activatedBackgroundIndicator -> activatedBackgroundIndicator
-    int activityChooserViewStyle -> activityChooserViewStyle
-    int background -> background
-    int backgroundSplit -> backgroundSplit
-    int backgroundStacked -> backgroundStacked
-    int buttonStyleSmall -> buttonStyleSmall
-    int customNavigationLayout -> customNavigationLayout
-    int displayOptions -> displayOptions
-    int divider -> divider
-    int dividerVertical -> dividerVertical
-    int dropDownListViewStyle -> dropDownListViewStyle
-    int dropdownListPreferredItemHeight -> dropdownListPreferredItemHeight
-    int expandActivityOverflowButtonDrawable -> expandActivityOverflowButtonDrawable
-    int headerBackground -> headerBackground
-    int height -> height
-    int homeAsUpIndicator -> homeAsUpIndicator
-    int homeLayout -> homeLayout
-    int horizontalDivider -> horizontalDivider
-    int icon -> icon
-    int indeterminateProgressStyle -> indeterminateProgressStyle
-    int initialActivityCount -> initialActivityCount
-    int itemBackground -> itemBackground
-    int itemIconDisabledAlpha -> itemIconDisabledAlpha
-    int itemPadding -> itemPadding
-    int itemTextAppearance -> itemTextAppearance
-    int listPopupWindowStyle -> listPopupWindowStyle
-    int listPreferredItemHeightSmall -> listPreferredItemHeightSmall
-    int listPreferredItemPaddingLeft -> listPreferredItemPaddingLeft
-    int listPreferredItemPaddingRight -> listPreferredItemPaddingRight
-    int logo -> logo
-    int navigationMode -> navigationMode
-    int popupMenuStyle -> popupMenuStyle
-    int preserveIconSpacing -> preserveIconSpacing
-    int progressBarPadding -> progressBarPadding
-    int progressBarStyle -> progressBarStyle
-    int spinnerDropDownItemStyle -> spinnerDropDownItemStyle
-    int spinnerItemStyle -> spinnerItemStyle
-    int subtitle -> subtitle
-    int subtitleTextStyle -> subtitleTextStyle
-    int textAppearanceLargePopupMenu -> textAppearanceLargePopupMenu
-    int textAppearanceListItemSmall -> textAppearanceListItemSmall
     int textAppearanceSmall -> textAppearanceSmall
-    int textAppearanceSmallPopupMenu -> textAppearanceSmallPopupMenu
-    int textColorPrimary -> textColorPrimary
-    int textColorPrimaryDisableOnly -> textColorPrimaryDisableOnly
-    int textColorPrimaryInverse -> textColorPrimaryInverse
-    int title -> title
-    int titleTextStyle -> titleTextStyle
-    int verticalDivider -> verticalDivider
-    int windowActionBar -> windowActionBar
-    int windowActionBarOverlay -> windowActionBarOverlay
-    int windowActionModeOverlay -> windowActionModeOverlay
-    int windowAnimationStyle -> windowAnimationStyle
-    int windowContentOverlay -> windowContentOverlay
+    int actionOverflowButtonStyle -> actionOverflowButtonStyle
     int windowMinWidthMajor -> windowMinWidthMajor
+    int initialActivityCount -> initialActivityCount
+    int actionModeStyle -> actionModeStyle
+    int listPreferredItemPaddingRight -> listPreferredItemPaddingRight
+    int actionBarTabTextStyle -> actionBarTabTextStyle
+    int dropDownListViewStyle -> dropDownListViewStyle
     int windowMinWidthMinor -> windowMinWidthMinor
+    int actionModeBackground -> actionModeBackground
+    int activityChooserViewStyle -> activityChooserViewStyle
+    int itemIconDisabledAlpha -> itemIconDisabledAlpha
+    int textAppearanceSmallPopupMenu -> textAppearanceSmallPopupMenu
+    int height -> height
+    int actionButtonStyle -> actionButtonStyle
+    int windowAnimationStyle -> windowAnimationStyle
+    int headerBackground -> headerBackground
+    int dividerVertical -> dividerVertical
+    int actionModeCloseDrawable -> actionModeCloseDrawable
+    int actionBarTabStyle -> actionBarTabStyle
+    int windowContentOverlay -> windowContentOverlay
+    int actionBarStyle -> actionBarStyle
+    int actionBarDivider -> actionBarDivider
+    int actionBarWidgetTheme -> actionBarWidgetTheme
+    int spinnerDropDownItemStyle -> spinnerDropDownItemStyle
+    int windowActionModeOverlay -> windowActionModeOverlay
+    int divider -> divider
+    int navigationMode -> navigationMode
+    int listPopupWindowStyle -> listPopupWindowStyle
+    int actionBarItemBackground -> actionBarItemBackground
+    int expandActivityOverflowButtonDrawable -> expandActivityOverflowButtonDrawable
+    int homeLayout -> homeLayout
+    int indeterminateProgressStyle -> indeterminateProgressStyle
+    int progressBarPadding -> progressBarPadding
+    int activatedBackgroundIndicator -> activatedBackgroundIndicator
+    int actionModeShareDrawable -> actionModeShareDrawable
     int windowNoTitle -> windowNoTitle
+    int textColorPrimaryInverse -> textColorPrimaryInverse
+    int textAppearanceLargePopupMenu -> textAppearanceLargePopupMenu
+    int actionMenuTextAppearance -> actionMenuTextAppearance
+    int horizontalDivider -> horizontalDivider
+    int verticalDivider -> verticalDivider
+    int listPreferredItemHeightSmall -> listPreferredItemHeightSmall
+    int actionModePopupWindowStyle -> actionModePopupWindowStyle
+    int homeAsUpIndicator -> homeAsUpIndicator
+    int textColorPrimary -> textColorPrimary
+    int itemBackground -> itemBackground
+    int actionModeCloseButtonStyle -> actionModeCloseButtonStyle
+    int actionBarSplitStyle -> actionBarSplitStyle
+    int popupMenuStyle -> popupMenuStyle
+    int backgroundSplit -> backgroundSplit
+    int actionBarTabBarStyle -> actionBarTabBarStyle
+    int title -> title
+    int preserveIconSpacing -> preserveIconSpacing
+    int actionBarSize -> actionBarSize
+    int textAppearanceListItemSmall -> textAppearanceListItemSmall
+    int actionSpinnerItemStyle -> actionSpinnerItemStyle
+    int buttonStyleSmall -> buttonStyleSmall
+    int dropdownListPreferredItemHeight -> dropdownListPreferredItemHeight
+    int displayOptions -> displayOptions
+    int itemPadding -> itemPadding
+    int titleTextStyle -> titleTextStyle
+    int logo -> logo
+    int icon -> icon
+    int textColorPrimaryDisableOnly -> textColorPrimaryDisableOnly
+    int actionModeSplitBackground -> actionModeSplitBackground
+    int backgroundStacked -> backgroundStacked
+    int customNavigationLayout -> customNavigationLayout
+    int listPreferredItemPaddingLeft -> listPreferredItemPaddingLeft
+    int windowActionBarOverlay -> windowActionBarOverlay
+    int itemTextAppearance -> itemTextAppearance
+    int windowActionBar -> windowActionBar
     int windowSplitActionBar -> windowSplitActionBar
+    int subtitleTextStyle -> subtitleTextStyle
+    int absForceOverflow -> absForceOverflow
+    int progressBarStyle -> progressBarStyle
+    int spinnerItemStyle -> spinnerItemStyle
+    int background -> background
+    int subtitle -> subtitle
+    int actionMenuTextColor -> actionMenuTextColor
+    int actionDropDownStyle -> actionDropDownStyle
 com.actionbarsherlock.R$bool -> com.actionbarsherlock.R$bool:
-    int abs__action_bar_embed_tabs -> abs__action_bar_embed_tabs
-    int abs__action_bar_expanded_action_views_exclusive -> abs__action_bar_expanded_action_views_exclusive
-    int abs__config_actionMenuItemAllCaps -> abs__config_actionMenuItemAllCaps
     int abs__config_allowActionMenuItemTextWithIcon -> abs__config_allowActionMenuItemTextWithIcon
+    int abs__action_bar_expanded_action_views_exclusive -> abs__action_bar_expanded_action_views_exclusive
     int abs__config_showMenuShortcutsWhenKeyboardPresent -> abs__config_showMenuShortcutsWhenKeyboardPresent
+    int abs__action_bar_embed_tabs -> abs__action_bar_embed_tabs
     int abs__split_action_bar_is_narrow -> abs__split_action_bar_is_narrow
+    int abs__config_actionMenuItemAllCaps -> abs__config_actionMenuItemAllCaps
 com.actionbarsherlock.R$color -> com.actionbarsherlock.R$color:
-    int abs__background_holo_dark -> abs__background_holo_dark
-    int abs__background_holo_light -> abs__background_holo_light
-    int abs__bright_foreground_disabled_holo_dark -> abs__bright_foreground_disabled_holo_dark
-    int abs__bright_foreground_disabled_holo_light -> abs__bright_foreground_disabled_holo_light
+    int abs__bright_foreground_inverse_holo_light -> abs__bright_foreground_inverse_holo_light
+    int abs__primary_text_disable_only_holo_light -> abs__primary_text_disable_only_holo_light
+    int abs__holo_blue_light -> abs__holo_blue_light
     int abs__bright_foreground_holo_dark -> abs__bright_foreground_holo_dark
     int abs__bright_foreground_holo_light -> abs__bright_foreground_holo_light
-    int abs__bright_foreground_inverse_holo_dark -> abs__bright_foreground_inverse_holo_dark
-    int abs__bright_foreground_inverse_holo_light -> abs__bright_foreground_inverse_holo_light
-    int abs__holo_blue_light -> abs__holo_blue_light
-    int abs__primary_text_disable_only_holo_dark -> abs__primary_text_disable_only_holo_dark
-    int abs__primary_text_disable_only_holo_light -> abs__primary_text_disable_only_holo_light
     int abs__primary_text_holo_dark -> abs__primary_text_holo_dark
+    int abs__primary_text_disable_only_holo_dark -> abs__primary_text_disable_only_holo_dark
+    int abs__bright_foreground_disabled_holo_dark -> abs__bright_foreground_disabled_holo_dark
+    int abs__background_holo_light -> abs__background_holo_light
+    int abs__bright_foreground_disabled_holo_light -> abs__bright_foreground_disabled_holo_light
+    int abs__bright_foreground_inverse_holo_dark -> abs__bright_foreground_inverse_holo_dark
     int abs__primary_text_holo_light -> abs__primary_text_holo_light
-    int file_manager_selected -> file_manager_selected
-    int file_manager_text -> file_manager_text
-    int gray -> gray
-    int transparent_black -> transparent_black
+    int abs__background_holo_dark -> abs__background_holo_dark
 com.actionbarsherlock.R$dimen -> com.actionbarsherlock.R$dimen:
-    int abs__action_bar_default_height -> abs__action_bar_default_height
-    int abs__action_bar_icon_vertical_padding -> abs__action_bar_icon_vertical_padding
-    int abs__action_bar_subtitle_bottom_margin -> abs__action_bar_subtitle_bottom_margin
-    int abs__action_bar_subtitle_text_size -> abs__action_bar_subtitle_text_size
-    int abs__action_bar_subtitle_top_margin -> abs__action_bar_subtitle_top_margin
-    int abs__action_bar_title_text_size -> abs__action_bar_title_text_size
-    int abs__action_button_min_width -> abs__action_button_min_width
-    int abs__alert_dialog_title_height -> abs__alert_dialog_title_height
     int abs__config_prefDialogWidth -> abs__config_prefDialogWidth
-    int abs__dialog_min_width_major -> abs__dialog_min_width_major
+    int abs__action_bar_subtitle_text_size -> abs__action_bar_subtitle_text_size
     int abs__dialog_min_width_minor -> abs__dialog_min_width_minor
+    int abs__dialog_min_width_major -> abs__dialog_min_width_major
+    int abs__action_bar_icon_vertical_padding -> abs__action_bar_icon_vertical_padding
+    int abs__action_button_min_width -> abs__action_button_min_width
+    int abs__action_bar_subtitle_top_margin -> abs__action_bar_subtitle_top_margin
+    int abs__alert_dialog_title_height -> abs__alert_dialog_title_height
+    int abs__action_bar_subtitle_bottom_margin -> abs__action_bar_subtitle_bottom_margin
     int action_button_min_width -> action_button_min_width
+    int abs__action_bar_title_text_size -> abs__action_bar_title_text_size
+    int abs__action_bar_default_height -> abs__action_bar_default_height
 com.actionbarsherlock.R$drawable -> com.actionbarsherlock.R$drawable:
-    int ab_bg_black -> ab_bg_black
+    int abs__list_selector_holo_dark -> abs__list_selector_holo_dark
+    int abs__ic_cab_done_holo_dark -> abs__ic_cab_done_holo_dark
+    int abs__ab_share_pack_holo_dark -> abs__ab_share_pack_holo_dark
+    int abs__progress_medium_holo -> abs__progress_medium_holo
+    int abs__btn_cab_done_pressed_holo_light -> abs__btn_cab_done_pressed_holo_light
+    int abs__ab_bottom_transparent_dark_holo -> abs__ab_bottom_transparent_dark_holo
+    int abs__progress_secondary_holo_light -> abs__progress_secondary_holo_light
+    int abs__spinner_48_outer_holo -> abs__spinner_48_outer_holo
+    int abs__ab_stacked_solid_dark_holo -> abs__ab_stacked_solid_dark_holo
+    int abs__ab_solid_shadow_holo -> abs__ab_solid_shadow_holo
     int abs__ab_bottom_solid_dark_holo -> abs__ab_bottom_solid_dark_holo
+    int abs__tab_selected_pressed_holo -> abs__tab_selected_pressed_holo
+    int abs__spinner_ab_focused_holo_dark -> abs__spinner_ab_focused_holo_dark
+    int abs__ab_transparent_light_holo -> abs__ab_transparent_light_holo
+    int abs__list_selector_disabled_holo_light -> abs__list_selector_disabled_holo_light
+    int abs__ab_solid_dark_holo -> abs__ab_solid_dark_holo
+    int abs__progress_secondary_holo_dark -> abs__progress_secondary_holo_dark
+    int abs__ab_stacked_transparent_light_holo -> abs__ab_stacked_transparent_light_holo
+    int abs__spinner_ab_holo_light -> abs__spinner_ab_holo_light
+    int abs__btn_cab_done_focused_holo_light -> abs__btn_cab_done_focused_holo_light
+    int abs__ab_share_pack_holo_light -> abs__ab_share_pack_holo_light
+    int abs__list_selector_background_transition_holo_light -> abs__list_selector_background_transition_holo_light
+    int abs__ab_solid_light_holo -> abs__ab_solid_light_holo
+    int abs__list_focused_holo -> abs__list_focused_holo
+    int abs__spinner_ab_pressed_holo_light -> abs__spinner_ab_pressed_holo_light
+    int abs__progress_primary_holo_dark -> abs__progress_primary_holo_dark
+    int abs__list_selector_holo_light -> abs__list_selector_holo_light
+    int abs__spinner_ab_pressed_holo_dark -> abs__spinner_ab_pressed_holo_dark
+    int abs__spinner_ab_default_holo_light -> abs__spinner_ab_default_holo_light
     int abs__ab_bottom_solid_inverse_holo -> abs__ab_bottom_solid_inverse_holo
     int abs__ab_bottom_solid_light_holo -> abs__ab_bottom_solid_light_holo
-    int abs__ab_bottom_transparent_dark_holo -> abs__ab_bottom_transparent_dark_holo
-    int abs__ab_bottom_transparent_light_holo -> abs__ab_bottom_transparent_light_holo
-    int abs__ab_share_pack_holo_dark -> abs__ab_share_pack_holo_dark
-    int abs__ab_share_pack_holo_light -> abs__ab_share_pack_holo_light
-    int abs__ab_solid_dark_holo -> abs__ab_solid_dark_holo
-    int abs__ab_solid_light_holo -> abs__ab_solid_light_holo
-    int abs__ab_solid_shadow_holo -> abs__ab_solid_shadow_holo
-    int abs__ab_stacked_solid_dark_holo -> abs__ab_stacked_solid_dark_holo
-    int abs__ab_stacked_solid_light_holo -> abs__ab_stacked_solid_light_holo
-    int abs__ab_stacked_transparent_dark_holo -> abs__ab_stacked_transparent_dark_holo
-    int abs__ab_stacked_transparent_light_holo -> abs__ab_stacked_transparent_light_holo
-    int abs__ab_transparent_dark_holo -> abs__ab_transparent_dark_holo
-    int abs__ab_transparent_light_holo -> abs__ab_transparent_light_holo
-    int abs__activated_background_holo_dark -> abs__activated_background_holo_dark
-    int abs__activated_background_holo_light -> abs__activated_background_holo_light
-    int abs__btn_cab_done_default_holo_dark -> abs__btn_cab_done_default_holo_dark
-    int abs__btn_cab_done_default_holo_light -> abs__btn_cab_done_default_holo_light
-    int abs__btn_cab_done_focused_holo_dark -> abs__btn_cab_done_focused_holo_dark
-    int abs__btn_cab_done_focused_holo_light -> abs__btn_cab_done_focused_holo_light
-    int abs__btn_cab_done_holo_dark -> abs__btn_cab_done_holo_dark
-    int abs__btn_cab_done_holo_light -> abs__btn_cab_done_holo_light
-    int abs__btn_cab_done_pressed_holo_dark -> abs__btn_cab_done_pressed_holo_dark
-    int abs__btn_cab_done_pressed_holo_light -> abs__btn_cab_done_pressed_holo_light
-    int abs__cab_background_bottom_holo_dark -> abs__cab_background_bottom_holo_dark
-    int abs__cab_background_bottom_holo_light -> abs__cab_background_bottom_holo_light
-    int abs__cab_background_top_holo_dark -> abs__cab_background_top_holo_dark
-    int abs__cab_background_top_holo_light -> abs__cab_background_top_holo_light
-    int abs__dialog_full_holo_dark -> abs__dialog_full_holo_dark
-    int abs__dialog_full_holo_light -> abs__dialog_full_holo_light
-    int abs__ic_ab_back_holo_dark -> abs__ic_ab_back_holo_dark
-    int abs__ic_ab_back_holo_light -> abs__ic_ab_back_holo_light
-    int abs__ic_cab_done_holo_dark -> abs__ic_cab_done_holo_dark
-    int abs__ic_cab_done_holo_light -> abs__ic_cab_done_holo_light
-    int abs__ic_menu_moreoverflow_holo_dark -> abs__ic_menu_moreoverflow_holo_dark
-    int abs__ic_menu_moreoverflow_holo_light -> abs__ic_menu_moreoverflow_holo_light
     int abs__ic_menu_moreoverflow_normal_holo_dark -> abs__ic_menu_moreoverflow_normal_holo_dark
-    int abs__ic_menu_moreoverflow_normal_holo_light -> abs__ic_menu_moreoverflow_normal_holo_light
-    int abs__ic_menu_share_holo_dark -> abs__ic_menu_share_holo_dark
-    int abs__ic_menu_share_holo_light -> abs__ic_menu_share_holo_light
-    int abs__item_background_holo_dark -> abs__item_background_holo_dark
-    int abs__item_background_holo_light -> abs__item_background_holo_light
-    int abs__list_activated_holo -> abs__list_activated_holo
-    int abs__list_divider_holo_dark -> abs__list_divider_holo_dark
-    int abs__list_divider_holo_light -> abs__list_divider_holo_light
-    int abs__list_focused_holo -> abs__list_focused_holo
-    int abs__list_longpressed_holo -> abs__list_longpressed_holo
-    int abs__list_pressed_holo_dark -> abs__list_pressed_holo_dark
-    int abs__list_pressed_holo_light -> abs__list_pressed_holo_light
-    int abs__list_selector_background_transition_holo_dark -> abs__list_selector_background_transition_holo_dark
-    int abs__list_selector_background_transition_holo_light -> abs__list_selector_background_transition_holo_light
-    int abs__list_selector_disabled_holo_dark -> abs__list_selector_disabled_holo_dark
-    int abs__list_selector_disabled_holo_light -> abs__list_selector_disabled_holo_light
-    int abs__list_selector_holo_dark -> abs__list_selector_holo_dark
-    int abs__list_selector_holo_light -> abs__list_selector_holo_light
-    int abs__menu_dropdown_panel_holo_dark -> abs__menu_dropdown_panel_holo_dark
-    int abs__menu_dropdown_panel_holo_light -> abs__menu_dropdown_panel_holo_light
-    int abs__progress_bg_holo_dark -> abs__progress_bg_holo_dark
-    int abs__progress_bg_holo_light -> abs__progress_bg_holo_light
-    int abs__progress_horizontal_holo_dark -> abs__progress_horizontal_holo_dark
-    int abs__progress_horizontal_holo_light -> abs__progress_horizontal_holo_light
-    int abs__progress_medium_holo -> abs__progress_medium_holo
-    int abs__progress_primary_holo_dark -> abs__progress_primary_holo_dark
     int abs__progress_primary_holo_light -> abs__progress_primary_holo_light
-    int abs__progress_secondary_holo_dark -> abs__progress_secondary_holo_dark
-    int abs__progress_secondary_holo_light -> abs__progress_secondary_holo_light
-    int abs__spinner_48_inner_holo -> abs__spinner_48_inner_holo
-    int abs__spinner_48_outer_holo -> abs__spinner_48_outer_holo
-    int abs__spinner_ab_default_holo_dark -> abs__spinner_ab_default_holo_dark
-    int abs__spinner_ab_default_holo_light -> abs__spinner_ab_default_holo_light
-    int abs__spinner_ab_disabled_holo_dark -> abs__spinner_ab_disabled_holo_dark
+    int abs__btn_cab_done_default_holo_dark -> abs__btn_cab_done_default_holo_dark
+    int abs__btn_cab_done_focused_holo_dark -> abs__btn_cab_done_focused_holo_dark
+    int abs__list_divider_holo_dark -> abs__list_divider_holo_dark
+    int abs__list_pressed_holo_light -> abs__list_pressed_holo_light
+    int abs__btn_cab_done_holo_light -> abs__btn_cab_done_holo_light
+    int abs__activated_background_holo_dark -> abs__activated_background_holo_dark
+    int abs__ic_ab_back_holo_light -> abs__ic_ab_back_holo_light
+    int abs__list_selector_background_transition_holo_dark -> abs__list_selector_background_transition_holo_dark
     int abs__spinner_ab_disabled_holo_light -> abs__spinner_ab_disabled_holo_light
-    int abs__spinner_ab_focused_holo_dark -> abs__spinner_ab_focused_holo_dark
-    int abs__spinner_ab_focused_holo_light -> abs__spinner_ab_focused_holo_light
-    int abs__spinner_ab_holo_dark -> abs__spinner_ab_holo_dark
-    int abs__spinner_ab_holo_light -> abs__spinner_ab_holo_light
-    int abs__spinner_ab_pressed_holo_dark -> abs__spinner_ab_pressed_holo_dark
-    int abs__spinner_ab_pressed_holo_light -> abs__spinner_ab_pressed_holo_light
-    int abs__tab_indicator_ab_holo -> abs__tab_indicator_ab_holo
-    int abs__tab_selected_focused_holo -> abs__tab_selected_focused_holo
-    int abs__tab_selected_holo -> abs__tab_selected_holo
-    int abs__tab_selected_pressed_holo -> abs__tab_selected_pressed_holo
+    int abs__ab_stacked_transparent_dark_holo -> abs__ab_stacked_transparent_dark_holo
+    int abs__progress_bg_holo_light -> abs__progress_bg_holo_light
+    int abs__dialog_full_holo_dark -> abs__dialog_full_holo_dark
+    int abs__ic_cab_done_holo_light -> abs__ic_cab_done_holo_light
+    int abs__spinner_ab_default_holo_dark -> abs__spinner_ab_default_holo_dark
+    int abs__ic_menu_share_holo_light -> abs__ic_menu_share_holo_light
     int abs__tab_unselected_pressed_holo -> abs__tab_unselected_pressed_holo
-    int add -> add
-    int add_button -> add_button
-    int add_pressed -> add_pressed
-    int arrow_left -> arrow_left
-    int arrow_left_button -> arrow_left_button
-    int arrow_left_pressed -> arrow_left_pressed
-    int background -> background
-    int camera -> camera
-    int camera_button -> camera_button
-    int camera_icon -> camera_icon
-    int camera_icon_pressed -> camera_icon_pressed
-    int cart -> cart
-    int cart_button -> cart_button
-    int cart_pressed -> cart_pressed
-    int check_green -> check_green
-    int cross_red -> cross_red
-    int dashboard_camera_button -> dashboard_camera_button
-    int dashboard_gallery_button -> dashboard_gallery_button
-    int delete -> delete
-    int delete_button -> delete_button
-    int delete_pressed -> delete_pressed
-    int file -> file
-    int flash_off -> flash_off
-    int flash_on -> flash_on
-    int folder -> folder
-    int gallery -> gallery
-    int gallery_button -> gallery_button
-    int gallery_pressed -> gallery_pressed
-    int gears -> gears
-    int gears_button -> gears_button
-    int gears_pressed -> gears_pressed
-    int home -> home
-    int home_button -> home_button
-    int home_pressed -> home_pressed
-    int ic_action_camera -> ic_action_camera
-    int ic_action_cart -> ic_action_cart
-    int ic_action_checkbox_checked -> ic_action_checkbox_checked
-    int ic_action_checkbox_unchecked -> ic_action_checkbox_unchecked
-    int ic_action_delete -> ic_action_delete
-    int ic_action_folder -> ic_action_folder
-    int ic_action_import -> ic_action_import
-    int ic_action_key -> ic_action_key
-    int ic_action_key_white -> ic_action_key_white
-    int ic_action_move -> ic_action_move
-    int ic_action_next -> ic_action_next
-    int ic_action_ok -> ic_action_ok
-    int ic_action_options -> ic_action_options
-    int ic_action_previous -> ic_action_previous
-    int ic_action_rotate_ccw -> ic_action_rotate_ccw
-    int ic_action_rotate_cw -> ic_action_rotate_cw
-    int ic_action_share -> ic_action_share
-    int ic_action_switch_camera -> ic_action_switch_camera
-    int ic_action_unlock -> ic_action_unlock
-    int ic_dashboard_camera -> ic_dashboard_camera
-    int ic_dashboard_camera_red -> ic_dashboard_camera_red
-    int ic_dashboard_gallery -> ic_dashboard_gallery
-    int ic_dashboard_gallery_red -> ic_dashboard_gallery_red
-    int ic_launcher -> ic_launcher
-    int icon -> icon
-    int import_btn -> import_btn
-    int import_btn_pressed -> import_btn_pressed
-    int import_button -> import_button
-    int key -> key
-    int key_button -> key_button
-    int key_pressed -> key_pressed
-    int left -> left
-    int left_button -> left_button
-    int left_pressed -> left_pressed
-    int loading -> loading
-    int lock -> lock
-    int lock_button -> lock_button
-    int lock_pressed -> lock_pressed
-    int mesh -> mesh
-    int move -> move
-    int move_button -> move_button
-    int move_pressed -> move_pressed
-    int new_folder -> new_folder
-    int new_folder_button -> new_folder_button
-    int new_folder_pressed -> new_folder_pressed
-    int no -> no
-    int power -> power
-    int power_button -> power_button
-    int power_pressed -> power_pressed
-    int right -> right
-    int right_button -> right_button
-    int right_pressed -> right_pressed
-    int safe_camera_logo -> safe_camera_logo
-    int share -> share
-    int share_button -> share_button
-    int share_pressed -> share_pressed
-    int shutter -> shutter
-    int shutter_button -> shutter_button
-    int shutter_pressed -> shutter_pressed
-    int timer -> timer
-    int timer_disabled -> timer_disabled
-    int unlock -> unlock
-    int unlock_button -> unlock_button
-    int unlock_pressed -> unlock_pressed
+    int abs__ic_menu_moreoverflow_normal_holo_light -> abs__ic_menu_moreoverflow_normal_holo_light
+    int abs__progress_horizontal_holo_dark -> abs__progress_horizontal_holo_dark
+    int abs__menu_dropdown_panel_holo_dark -> abs__menu_dropdown_panel_holo_dark
+    int abs__progress_bg_holo_dark -> abs__progress_bg_holo_dark
+    int abs__activated_background_holo_light -> abs__activated_background_holo_light
+    int abs__btn_cab_done_holo_dark -> abs__btn_cab_done_holo_dark
+    int abs__cab_background_bottom_holo_light -> abs__cab_background_bottom_holo_light
+    int abs__btn_cab_done_default_holo_light -> abs__btn_cab_done_default_holo_light
+    int abs__spinner_48_inner_holo -> abs__spinner_48_inner_holo
+    int abs__tab_selected_holo -> abs__tab_selected_holo
+    int abs__progress_horizontal_holo_light -> abs__progress_horizontal_holo_light
+    int abs__ab_transparent_dark_holo -> abs__ab_transparent_dark_holo
+    int abs__btn_cab_done_pressed_holo_dark -> abs__btn_cab_done_pressed_holo_dark
+    int abs__cab_background_bottom_holo_dark -> abs__cab_background_bottom_holo_dark
+    int abs__ic_ab_back_holo_dark -> abs__ic_ab_back_holo_dark
+    int abs__menu_dropdown_panel_holo_light -> abs__menu_dropdown_panel_holo_light
+    int abs__ic_menu_share_holo_dark -> abs__ic_menu_share_holo_dark
+    int abs__ab_stacked_solid_light_holo -> abs__ab_stacked_solid_light_holo
+    int abs__list_activated_holo -> abs__list_activated_holo
+    int abs__dialog_full_holo_light -> abs__dialog_full_holo_light
+    int abs__spinner_ab_focused_holo_light -> abs__spinner_ab_focused_holo_light
+    int abs__cab_background_top_holo_light -> abs__cab_background_top_holo_light
+    int abs__spinner_ab_disabled_holo_dark -> abs__spinner_ab_disabled_holo_dark
+    int abs__list_selector_disabled_holo_dark -> abs__list_selector_disabled_holo_dark
+    int abs__cab_background_top_holo_dark -> abs__cab_background_top_holo_dark
+    int abs__ab_bottom_transparent_light_holo -> abs__ab_bottom_transparent_light_holo
+    int abs__ic_menu_moreoverflow_holo_light -> abs__ic_menu_moreoverflow_holo_light
+    int abs__item_background_holo_dark -> abs__item_background_holo_dark
+    int abs__list_divider_holo_light -> abs__list_divider_holo_light
+    int abs__list_pressed_holo_dark -> abs__list_pressed_holo_dark
+    int abs__spinner_ab_holo_dark -> abs__spinner_ab_holo_dark
+    int abs__item_background_holo_light -> abs__item_background_holo_light
+    int abs__tab_selected_focused_holo -> abs__tab_selected_focused_holo
+    int abs__tab_indicator_ab_holo -> abs__tab_indicator_ab_holo
+    int abs__list_longpressed_holo -> abs__list_longpressed_holo
+    int abs__ic_menu_moreoverflow_holo_dark -> abs__ic_menu_moreoverflow_holo_dark
 com.actionbarsherlock.R$id -> com.actionbarsherlock.R$id:
-    int PhoneImageGrid -> PhoneImageGrid
-    int abs__action_bar -> abs__action_bar
-    int abs__action_bar_container -> abs__action_bar_container
-    int abs__action_bar_subtitle -> abs__action_bar_subtitle
-    int abs__action_bar_title -> abs__action_bar_title
-    int abs__action_context_bar -> abs__action_context_bar
-    int abs__action_menu_divider -> abs__action_menu_divider
-    int abs__action_menu_presenter -> abs__action_menu_presenter
-    int abs__action_mode_bar -> abs__action_mode_bar
-    int abs__action_mode_bar_stub -> abs__action_mode_bar_stub
-    int abs__action_mode_close_button -> abs__action_mode_close_button
-    int abs__activity_chooser_view_content -> abs__activity_chooser_view_content
-    int abs__checkbox -> abs__checkbox
-    int abs__content -> abs__content
-    int abs__default_activity_button -> abs__default_activity_button
-    int abs__expand_activities_button -> abs__expand_activities_button
-    int abs__home -> abs__home
-    int abs__icon -> abs__icon
     int abs__image -> abs__image
+    int showCustom -> showCustom
+    int abs__action_mode_bar_stub -> abs__action_mode_bar_stub
+    int abs__content -> abs__content
+    int abs__action_bar_container -> abs__action_bar_container
+    int normal -> normal
+    int abs__action_menu_divider -> abs__action_menu_divider
+    int abs__icon -> abs__icon
+    int homeAsUp -> homeAsUp
+    int abs__action_bar -> abs__action_bar
+    int abs__default_activity_button -> abs__default_activity_button
+    int abs__action_mode_bar -> abs__action_mode_bar
     int abs__imageButton -> abs__imageButton
-    int abs__list_item -> abs__list_item
+    int abs__action_mode_close_button -> abs__action_mode_close_button
+    int abs__action_bar_subtitle -> abs__action_bar_subtitle
+    int abs__activity_chooser_view_content -> abs__activity_chooser_view_content
+    int wrap_content -> wrap_content
+    int listMode -> listMode
+    int disableHome -> disableHome
+    int showTitle -> showTitle
+    int abs__title -> abs__title
+    int abs__up -> abs__up
     int abs__progress_circular -> abs__progress_circular
+    int abs__split_action_bar -> abs__split_action_bar
+    int useLogo -> useLogo
+    int abs__action_context_bar -> abs__action_context_bar
+    int tabMode -> tabMode
+    int abs__list_item -> abs__list_item
     int abs__progress_horizontal -> abs__progress_horizontal
+    int abs__action_bar_title -> abs__action_bar_title
     int abs__radio -> abs__radio
     int abs__shortcut -> abs__shortcut
-    int abs__split_action_bar -> abs__split_action_bar
-    int abs__textButton -> abs__textButton
-    int abs__title -> abs__title
-    int abs__titleDivider -> abs__titleDivider
-    int abs__up -> abs__up
-    int adHolder -> adHolder
-    int add_new_folder -> add_new_folder
-    int camera_preview_container -> camera_preview_container
-    int cancel -> cancel
-    int change -> change
-    int change_password -> change_password
-    int confirm_password -> confirm_password
-    int countLabel -> countLabel
-    int current_password -> current_password
-    int decrypt -> decrypt
-    int delete -> delete
-    int deleteAfterImport -> deleteAfterImport
-    int deselect_all -> deselect_all
-    int disableHome -> disableHome
-    int fdButtonCancel -> fdButtonCancel
-    int fdButtonCreate -> fdButtonCreate
-    int fdButtonNew -> fdButtonNew
-    int fdButtonSelect -> fdButtonSelect
-    int fdEditTextFile -> fdEditTextFile
-    int fdLinearLayoutCreate -> fdLinearLayoutCreate
-    int fdLinearLayoutList -> fdLinearLayoutList
-    int fdLinearLayoutSelect -> fdLinearLayoutSelect
-    int fdrowimage -> fdrowimage
-    int fdrowtext -> fdrowtext
-    int flashButton -> flashButton
-    int forgot_password -> forgot_password
-    int free_version_text -> free_version_text
-    int go_pro -> go_pro
-    int gotoCamera -> gotoCamera
-    int gotoGallery -> gotoGallery
-    int goto_camera -> goto_camera
-    int homeAsUp -> homeAsUp
-    int imageView1 -> imageView1
-    int importBtn -> importBtn
-    int itemCheckBox -> itemCheckBox
-    int lastPhoto -> lastPhoto
-    int lastPhotoContainer -> lastPhotoContainer
-    int listMode -> listMode
-    int login -> login
-    int logout -> logout
-    int move -> move
-    int multi_select -> multi_select
-    int new_password -> new_password
-    int nextButton -> nextButton
-    int no_files -> no_files
-    int normal -> normal
-    int optionsButton -> optionsButton
-    int parentLayout -> parentLayout
-    int parent_layout -> parent_layout
-    int password -> password
-    int password1 -> password1
-    int password2 -> password2
-    int path -> path
-    int photoSizeLabel -> photoSizeLabel
-    int photo_size -> photo_size
-    int photosGrid -> photosGrid
-    int previousButton -> previousButton
-    int read_security -> read_security
-    int relativeLayout01 -> relativeLayout01
-    int rotateCCW -> rotateCCW
-    int rotateCW -> rotateCW
-    int scrollView1 -> scrollView1
-    int select_all -> select_all
-    int settings -> settings
-    int setupButton -> setupButton
-    int share -> share
-    int showCustom -> showCustom
     int showHome -> showHome
-    int showTitle -> showTitle
-    int switchCamButton -> switchCamButton
-    int tabMode -> tabMode
-    int take_photo -> take_photo
-    int textView1 -> textView1
-    int textView2 -> textView2
-    int textView3 -> textView3
-    int textView4 -> textView4
-    int textViewFilename -> textViewFilename
-    int thumbImage -> thumbImage
-    int timerButton -> timerButton
-    int timerLabel -> timerLabel
-    int timerLabelContainer -> timerLabelContainer
-    int useLogo -> useLogo
-    int versionText -> versionText
-    int wrap_content -> wrap_content
+    int abs__action_menu_presenter -> abs__action_menu_presenter
+    int abs__textButton -> abs__textButton
+    int abs__home -> abs__home
+    int abs__titleDivider -> abs__titleDivider
+    int abs__checkbox -> abs__checkbox
+    int abs__expand_activities_button -> abs__expand_activities_button
 com.actionbarsherlock.R$integer -> com.actionbarsherlock.R$integer:
     int abs__max_action_buttons -> abs__max_action_buttons
 com.actionbarsherlock.R$layout -> com.actionbarsherlock.R$layout:
-    int abs__action_bar_home -> abs__action_bar_home
-    int abs__action_bar_tab -> abs__action_bar_tab
-    int abs__action_bar_tab_bar_view -> abs__action_bar_tab_bar_view
-    int abs__action_bar_title_item -> abs__action_bar_title_item
-    int abs__action_menu_item_layout -> abs__action_menu_item_layout
-    int abs__action_menu_layout -> abs__action_menu_layout
-    int abs__action_mode_bar -> abs__action_mode_bar
+    int abs__list_menu_item_radio -> abs__list_menu_item_radio
     int abs__action_mode_close_item -> abs__action_mode_close_item
-    int abs__activity_chooser_view -> abs__activity_chooser_view
     int abs__activity_chooser_view_list_item -> abs__activity_chooser_view_list_item
     int abs__dialog_title_holo -> abs__dialog_title_holo
+    int abs__screen_simple_overlay_action_mode -> abs__screen_simple_overlay_action_mode
+    int abs__screen_action_bar -> abs__screen_action_bar
+    int abs__action_menu_layout -> abs__action_menu_layout
+    int sherlock_spinner_dropdown_item -> sherlock_spinner_dropdown_item
+    int abs__screen_action_bar_overlay -> abs__screen_action_bar_overlay
+    int abs__action_bar_title_item -> abs__action_bar_title_item
     int abs__list_menu_item_checkbox -> abs__list_menu_item_checkbox
     int abs__list_menu_item_icon -> abs__list_menu_item_icon
+    int abs__action_mode_bar -> abs__action_mode_bar
     int abs__list_menu_item_layout -> abs__list_menu_item_layout
-    int abs__list_menu_item_radio -> abs__list_menu_item_radio
-    int abs__popup_menu_item_layout -> abs__popup_menu_item_layout
-    int abs__screen_action_bar -> abs__screen_action_bar
-    int abs__screen_action_bar_overlay -> abs__screen_action_bar_overlay
-    int abs__screen_simple -> abs__screen_simple
-    int abs__screen_simple_overlay_action_mode -> abs__screen_simple_overlay_action_mode
-    int camera -> camera
-    int change_password -> change_password
-    int dashboard -> dashboard
-    int dashboard_land -> dashboard_land
-    int dialog_import_password -> dialog_import_password
-    int dialog_reencrypt_password -> dialog_reencrypt_password
-    int file_dialog_main -> file_dialog_main
-    int file_dialog_row -> file_dialog_row
-    int gallery -> gallery
-    int gallery_item -> gallery_item
-    int import_photos -> import_photos
-    int setup -> setup
-    int sherlock_spinner_dropdown_item -> sherlock_spinner_dropdown_item
     int sherlock_spinner_item -> sherlock_spinner_item
-    int startup -> startup
-    int view_photo -> view_photo
-com.actionbarsherlock.R$menu -> com.actionbarsherlock.R$menu:
-    int camera_menu -> camera_menu
-    int dashborad_menu -> dashborad_menu
-    int file_dialog_menu -> file_dialog_menu
-    int gallery_menu -> gallery_menu
-    int gallery_menu_multiselect -> gallery_menu_multiselect
-    int import_photos_menu -> import_photos_menu
-    int main_menu -> main_menu
-    int view_photo_menu -> view_photo_menu
+    int abs__screen_simple -> abs__screen_simple
+    int abs__activity_chooser_view -> abs__activity_chooser_view
+    int abs__popup_menu_item_layout -> abs__popup_menu_item_layout
+    int abs__action_bar_home -> abs__action_bar_home
+    int abs__action_bar_tab_bar_view -> abs__action_bar_tab_bar_view
+    int abs__action_menu_item_layout -> abs__action_menu_item_layout
+    int abs__action_bar_tab -> abs__action_bar_tab
 com.actionbarsherlock.R$string -> com.actionbarsherlock.R$string:
-    int abs__action_bar_home_description -> abs__action_bar_home_description
+    int abs__activitychooserview_choose_application -> abs__activitychooserview_choose_application
     int abs__action_bar_up_description -> abs__action_bar_up_description
+    int abs__share_action_provider_share_with -> abs__share_action_provider_share_with
     int abs__action_menu_overflow_description -> abs__action_menu_overflow_description
     int abs__action_mode_done -> abs__action_mode_done
     int abs__activity_chooser_view_dialog_title_default -> abs__activity_chooser_view_dialog_title_default
-    int abs__activity_chooser_view_see_all -> abs__activity_chooser_view_see_all
-    int abs__activitychooserview_choose_application -> abs__activitychooserview_choose_application
-    int abs__share_action_provider_share_with -> abs__share_action_provider_share_with
-    int abs__shareactionprovider_share_with -> abs__shareactionprovider_share_with
     int abs__shareactionprovider_share_with_application -> abs__shareactionprovider_share_with_application
-    int actions -> actions
-    int ad_publisher_id -> ad_publisher_id
-    int add_files -> add_files
-    int app_name -> app_name
-    int attention -> attention
-    int before_sharing -> before_sharing
-    int bottom_text -> bottom_text
-    int camera -> camera
-    int cancel -> cancel
-    int cant_read_folder -> cant_read_folder
-    int change -> change
-    int change_password -> change_password
-    int change_password_warning -> change_password_warning
-    int changing_password -> changing_password
-    int choose_folder -> choose_folder
-    int clear_cache -> clear_cache
-    int clear_cache_desc -> clear_cache_desc
-    int confirm_delete_cache -> confirm_delete_cache
-    int confirm_delete_files -> confirm_delete_files
-    int confirm_delete_photo -> confirm_delete_photo
-    int confirm_password -> confirm_password
-    int create -> create
-    int current_password -> current_password
-    int decrypt -> decrypt
-    int decrypting_files -> decrypting_files
-    int default_home_folder_name -> default_home_folder_name
-    int default_thumb_folder_name -> default_thumb_folder_name
-    int delete -> delete
-    int delete_after_import -> delete_after_import
-    int delete_original_files -> delete_original_files
-    int deleting_files -> deleting_files
-    int deselect_all -> deselect_all
-    int encrypt -> encrypt
-    int encrypt_files -> encrypt_files
-    int encrypting_files -> encrypting_files
-    int encrypting_photo -> encrypting_photo
-    int enter_import_password -> enter_import_password
-    int enter_new_folder_name -> enter_new_folder_name
-    int enter_password -> enter_password
-    int enter_reencrypt_password -> enter_reencrypt_password
-    int err -> err
-    int failed_create_dir -> failed_create_dir
-    int failed_move_files -> failed_move_files
-    int file_extension -> file_extension
-    int file_name -> file_name
-    int file_not_found -> file_not_found
-    int flash -> flash
-    int forgot_password -> forgot_password
-    int free_version_text -> free_version_text
-    int gallery -> gallery
-    int generating_key -> generating_key
-    int get_pro -> get_pro
-    int home_dir -> home_dir
-    int home_folder -> home_folder
-    int home_folder_desc -> home_folder_desc
-    int hour -> hour
-    int hour1 -> hour1
-    int import_btn -> import_btn
-    int import_desc -> import_desc
-    int import_encrypted -> import_encrypted
-    int import_fialed -> import_fialed
-    int import_photos -> import_photos
-    int import_unencrypted -> import_unencrypted
-    int importing_files -> importing_files
-    int incorrect_password -> incorrect_password
-    int key_package_name -> key_package_name
-    int later -> later
-    int location -> location
-    int lock_time -> lock_time
-    int lock_time_desc -> lock_time_desc
-    int log_out -> log_out
-    int login_to_proceed -> login_to_proceed
-    int main_package_name -> main_package_name
-    int max_file_size -> max_file_size
-    int min_pass_length -> min_pass_length
-    int minute -> minute
-    int minute1 -> minute1
-    int minutes -> minutes
-    int minutes10 -> minutes10
-    int minutes30 -> minutes30
-    int minutes5 -> minutes5
-    int move -> move
-    int moving_files -> moving_files
-    int multi_select -> multi_select
-    int new_folder -> new_folder
-    int new_password -> new_password
-    int nnew -> nnew
-    int no -> no
-    int no_data -> no_data
-    int no_files -> no_files
-    int ok -> ok
-    int options -> options
-    int password -> password
-    int password_empty -> password_empty
-    int password_not_match -> password_not_match
-    int password_short -> password_short
-    int photo_size -> photo_size
-    int photo_size_choose -> photo_size_choose
-    int photo_size_descr -> photo_size_descr
-    int popup_laters_limit -> popup_laters_limit
-    int popup_logins_limit -> popup_logins_limit
-    int popup_text -> popup_text
-    int popup_title -> popup_title
-    int pro_version_warning -> pro_version_warning
-    int read_security -> read_security
-    int reencrypting_files -> reencrypting_files
-    int reset_password -> reset_password
-    int review -> review
-    int rotate_ccw -> rotate_ccw
-    int rotate_cw -> rotate_cw
-    int rotating -> rotating
-    int same_password_alert -> same_password_alert
-    int save -> save
-    int seconds -> seconds
-    int seconds10 -> seconds10
-    int seconds15 -> seconds15
-    int seconds20 -> seconds20
-    int seconds30 -> seconds30
-    int seconds5 -> seconds5
-    int security_page_link -> security_page_link
-    int select -> select
-    int select_all -> select_all
-    int settings -> settings
-    int setup -> setup
-    int setup_info -> setup_info
-    int share -> share
-    int share_as_is -> share_as_is
-    int share_decrypt -> share_decrypt
-    int share_reencrypt -> share_reencrypt
-    int success_change_pass -> success_change_pass
-    int success_created -> success_created
-    int success_decrypt -> success_decrypt
-    int success_delete_originals -> success_delete_originals
-    int success_import -> success_import
-    int timer -> timer
-    int timer_duartion_desc -> timer_duartion_desc
-    int timer_duration -> timer_duration
-    int title_change_password -> title_change_password
-    int title_choose_file -> title_choose_file
-    int title_dashboard -> title_dashboard
-    int title_gallery -> title_gallery
-    int title_import -> title_import
-    int title_settings -> title_settings
-    int title_setup -> title_setup
-    int title_view_photo -> title_view_photo
-    int unable_to_connect_camera -> unable_to_connect_camera
-    int understood -> understood
-    int unexpected_error -> unexpected_error
-    int volume_take_photo -> volume_take_photo
-    int volume_take_photo_desc -> volume_take_photo_desc
-    int yes -> yes
+    int abs__shareactionprovider_share_with -> abs__shareactionprovider_share_with
+    int abs__action_bar_home_description -> abs__action_bar_home_description
+    int abs__activity_chooser_view_see_all -> abs__activity_chooser_view_see_all
 com.actionbarsherlock.R$style -> com.actionbarsherlock.R$style:
-    int DialogWindowTitle_Sherlock -> DialogWindowTitle_Sherlock
-    int DialogWindowTitle_Sherlock_Light -> DialogWindowTitle_Sherlock_Light
-    int Sherlock___TextAppearance_Small -> Sherlock___TextAppearance_Small
-    int Sherlock___Theme -> Sherlock___Theme
-    int Sherlock___Theme_DarkActionBar -> Sherlock___Theme_DarkActionBar
-    int Sherlock___Theme_Dialog -> Sherlock___Theme_Dialog
-    int Sherlock___Theme_Light -> Sherlock___Theme_Light
-    int Sherlock___Widget_ActionBar -> Sherlock___Widget_ActionBar
-    int Sherlock___Widget_ActionMode -> Sherlock___Widget_ActionMode
-    int Sherlock___Widget_ActivityChooserView -> Sherlock___Widget_ActivityChooserView
-    int Sherlock___Widget_Holo_DropDownItem -> Sherlock___Widget_Holo_DropDownItem
-    int Sherlock___Widget_Holo_ListView -> Sherlock___Widget_Holo_ListView
-    int Sherlock___Widget_Holo_Spinner -> Sherlock___Widget_Holo_Spinner
-    int TextAppearance_Sherlock_DialogWindowTitle -> TextAppearance_Sherlock_DialogWindowTitle
-    int TextAppearance_Sherlock_Light_DialogWindowTitle -> TextAppearance_Sherlock_Light_DialogWindowTitle
-    int TextAppearance_Sherlock_Light_Small -> TextAppearance_Sherlock_Light_Small
-    int TextAppearance_Sherlock_Light_Widget_PopupMenu_Large -> TextAppearance_Sherlock_Light_Widget_PopupMenu_Large
-    int TextAppearance_Sherlock_Light_Widget_PopupMenu_Small -> TextAppearance_Sherlock_Light_Widget_PopupMenu_Small
-    int TextAppearance_Sherlock_Small -> TextAppearance_Sherlock_Small
-    int TextAppearance_Sherlock_Widget_ActionBar_Menu -> TextAppearance_Sherlock_Widget_ActionBar_Menu
-    int TextAppearance_Sherlock_Widget_ActionBar_Subtitle -> TextAppearance_Sherlock_Widget_ActionBar_Subtitle
-    int TextAppearance_Sherlock_Widget_ActionBar_Subtitle_Inverse -> TextAppearance_Sherlock_Widget_ActionBar_Subtitle_Inverse
-    int TextAppearance_Sherlock_Widget_ActionBar_Title -> TextAppearance_Sherlock_Widget_ActionBar_Title
-    int TextAppearance_Sherlock_Widget_ActionBar_Title_Inverse -> TextAppearance_Sherlock_Widget_ActionBar_Title_Inverse
-    int TextAppearance_Sherlock_Widget_ActionMode_Subtitle -> TextAppearance_Sherlock_Widget_ActionMode_Subtitle
-    int TextAppearance_Sherlock_Widget_ActionMode_Subtitle_Inverse -> TextAppearance_Sherlock_Widget_ActionMode_Subtitle_Inverse
-    int TextAppearance_Sherlock_Widget_ActionMode_Title -> TextAppearance_Sherlock_Widget_ActionMode_Title
-    int TextAppearance_Sherlock_Widget_ActionMode_Title_Inverse -> TextAppearance_Sherlock_Widget_ActionMode_Title_Inverse
-    int TextAppearance_Sherlock_Widget_DropDownItem -> TextAppearance_Sherlock_Widget_DropDownItem
-    int TextAppearance_Sherlock_Widget_PopupMenu -> TextAppearance_Sherlock_Widget_PopupMenu
-    int TextAppearance_Sherlock_Widget_PopupMenu_Large -> TextAppearance_Sherlock_Widget_PopupMenu_Large
-    int TextAppearance_Sherlock_Widget_PopupMenu_Small -> TextAppearance_Sherlock_Widget_PopupMenu_Small
-    int TextAppearance_Sherlock_Widget_TextView_SpinnerItem -> TextAppearance_Sherlock_Widget_TextView_SpinnerItem
-    int Theme_Sherlock -> Theme_Sherlock
-    int Theme_Sherlock_Dialog -> Theme_Sherlock_Dialog
-    int Theme_Sherlock_ForceOverflow -> Theme_Sherlock_ForceOverflow
-    int Theme_Sherlock_Light -> Theme_Sherlock_Light
-    int Theme_Sherlock_Light_DarkActionBar -> Theme_Sherlock_Light_DarkActionBar
-    int Theme_Sherlock_Light_DarkActionBar_ForceOverflow -> Theme_Sherlock_Light_DarkActionBar_ForceOverflow
-    int Theme_Sherlock_Light_Dialog -> Theme_Sherlock_Light_Dialog
-    int Theme_Sherlock_Light_ForceOverflow -> Theme_Sherlock_Light_ForceOverflow
-    int Theme_Sherlock_Light_NoActionBar -> Theme_Sherlock_Light_NoActionBar
-    int Theme_Sherlock_NoActionBar -> Theme_Sherlock_NoActionBar
-    int Widget -> Widget
-    int Widget_Sherlock_ActionBar -> Widget_Sherlock_ActionBar
-    int Widget_Sherlock_ActionBar_Solid -> Widget_Sherlock_ActionBar_Solid
-    int Widget_Sherlock_ActionBar_TabBar -> Widget_Sherlock_ActionBar_TabBar
-    int Widget_Sherlock_ActionBar_TabText -> Widget_Sherlock_ActionBar_TabText
-    int Widget_Sherlock_ActionBar_TabView -> Widget_Sherlock_ActionBar_TabView
-    int Widget_Sherlock_ActionButton -> Widget_Sherlock_ActionButton
-    int Widget_Sherlock_ActionButton_CloseMode -> Widget_Sherlock_ActionButton_CloseMode
-    int Widget_Sherlock_ActionButton_Overflow -> Widget_Sherlock_ActionButton_Overflow
-    int Widget_Sherlock_ActionMode -> Widget_Sherlock_ActionMode
-    int Widget_Sherlock_ActivityChooserView -> Widget_Sherlock_ActivityChooserView
-    int Widget_Sherlock_Button_Small -> Widget_Sherlock_Button_Small
-    int Widget_Sherlock_DropDownItem_Spinner -> Widget_Sherlock_DropDownItem_Spinner
-    int Widget_Sherlock_Light_ActionBar -> Widget_Sherlock_Light_ActionBar
-    int Widget_Sherlock_Light_ActionBar_Solid -> Widget_Sherlock_Light_ActionBar_Solid
-    int Widget_Sherlock_Light_ActionBar_Solid_Inverse -> Widget_Sherlock_Light_ActionBar_Solid_Inverse
-    int Widget_Sherlock_Light_ActionBar_TabBar -> Widget_Sherlock_Light_ActionBar_TabBar
-    int Widget_Sherlock_Light_ActionBar_TabBar_Inverse -> Widget_Sherlock_Light_ActionBar_TabBar_Inverse
-    int Widget_Sherlock_Light_ActionBar_TabText -> Widget_Sherlock_Light_ActionBar_TabText
-    int Widget_Sherlock_Light_ActionBar_TabText_Inverse -> Widget_Sherlock_Light_ActionBar_TabText_Inverse
-    int Widget_Sherlock_Light_ActionBar_TabView -> Widget_Sherlock_Light_ActionBar_TabView
-    int Widget_Sherlock_Light_ActionBar_TabView_Inverse -> Widget_Sherlock_Light_ActionBar_TabView_Inverse
-    int Widget_Sherlock_Light_ActionButton -> Widget_Sherlock_Light_ActionButton
-    int Widget_Sherlock_Light_ActionButton_CloseMode -> Widget_Sherlock_Light_ActionButton_CloseMode
-    int Widget_Sherlock_Light_ActionButton_Overflow -> Widget_Sherlock_Light_ActionButton_Overflow
-    int Widget_Sherlock_Light_ActionMode -> Widget_Sherlock_Light_ActionMode
-    int Widget_Sherlock_Light_ActionMode_Inverse -> Widget_Sherlock_Light_ActionMode_Inverse
     int Widget_Sherlock_Light_ActivityChooserView -> Widget_Sherlock_Light_ActivityChooserView
-    int Widget_Sherlock_Light_Button_Small -> Widget_Sherlock_Light_Button_Small
+    int Widget_Sherlock_Light_ProgressBar_Horizontal -> Widget_Sherlock_Light_ProgressBar_Horizontal
+    int TextAppearance_Sherlock_Light_Small -> TextAppearance_Sherlock_Light_Small
+    int DialogWindowTitle_Sherlock_Light -> DialogWindowTitle_Sherlock_Light
+    int Widget_Sherlock_ActivityChooserView -> Widget_Sherlock_ActivityChooserView
+    int TextAppearance_Sherlock_Widget_ActionBar_Subtitle_Inverse -> TextAppearance_Sherlock_Widget_ActionBar_Subtitle_Inverse
+    int Sherlock___Widget_Holo_ListView -> Sherlock___Widget_Holo_ListView
+    int Widget_Sherlock_Light_ActionBar -> Widget_Sherlock_Light_ActionBar
+    int Theme_Sherlock_Light_ForceOverflow -> Theme_Sherlock_Light_ForceOverflow
+    int DialogWindowTitle_Sherlock -> DialogWindowTitle_Sherlock
+    int Theme_Sherlock -> Theme_Sherlock
+    int TextAppearance_Sherlock_Widget_ActionMode_Subtitle_Inverse -> TextAppearance_Sherlock_Widget_ActionMode_Subtitle_Inverse
+    int TextAppearance_Sherlock_Widget_PopupMenu_Small -> TextAppearance_Sherlock_Widget_PopupMenu_Small
+    int Theme_Sherlock_ForceOverflow -> Theme_Sherlock_ForceOverflow
+    int Widget_Sherlock_Button_Small -> Widget_Sherlock_Button_Small
+    int TextAppearance_Sherlock_Light_DialogWindowTitle -> TextAppearance_Sherlock_Light_DialogWindowTitle
+    int Widget_Sherlock_Light_ActionBar_Solid -> Widget_Sherlock_Light_ActionBar_Solid
+    int TextAppearance_Sherlock_Widget_PopupMenu -> TextAppearance_Sherlock_Widget_PopupMenu
+    int Theme_Sherlock_Light_DarkActionBar_ForceOverflow -> Theme_Sherlock_Light_DarkActionBar_ForceOverflow
+    int Widget_Sherlock_ActionBar -> Widget_Sherlock_ActionBar
     int Widget_Sherlock_Light_DropDownItem_Spinner -> Widget_Sherlock_Light_DropDownItem_Spinner
     int Widget_Sherlock_Light_ListPopupWindow -> Widget_Sherlock_Light_ListPopupWindow
-    int Widget_Sherlock_Light_ListView_DropDown -> Widget_Sherlock_Light_ListView_DropDown
-    int Widget_Sherlock_Light_PopupMenu -> Widget_Sherlock_Light_PopupMenu
-    int Widget_Sherlock_Light_PopupWindow_ActionMode -> Widget_Sherlock_Light_PopupWindow_ActionMode
-    int Widget_Sherlock_Light_ProgressBar -> Widget_Sherlock_Light_ProgressBar
-    int Widget_Sherlock_Light_ProgressBar_Horizontal -> Widget_Sherlock_Light_ProgressBar_Horizontal
-    int Widget_Sherlock_Light_Spinner_DropDown_ActionBar -> Widget_Sherlock_Light_Spinner_DropDown_ActionBar
-    int Widget_Sherlock_ListPopupWindow -> Widget_Sherlock_ListPopupWindow
-    int Widget_Sherlock_ListView_DropDown -> Widget_Sherlock_ListView_DropDown
-    int Widget_Sherlock_PopupMenu -> Widget_Sherlock_PopupMenu
-    int Widget_Sherlock_PopupWindow_ActionMode -> Widget_Sherlock_PopupWindow_ActionMode
-    int Widget_Sherlock_ProgressBar -> Widget_Sherlock_ProgressBar
-    int Widget_Sherlock_ProgressBar_Horizontal -> Widget_Sherlock_ProgressBar_Horizontal
-    int Widget_Sherlock_Spinner_DropDown_ActionBar -> Widget_Sherlock_Spinner_DropDown_ActionBar
+    int Widget_Sherlock_Light_ActionMode -> Widget_Sherlock_Light_ActionMode
+    int Widget_Sherlock_Light_ActionBar_TabBar -> Widget_Sherlock_Light_ActionBar_TabBar
+    int Theme_Sherlock_Light_NoActionBar -> Theme_Sherlock_Light_NoActionBar
+    int Widget_Sherlock_Light_ActionMode_Inverse -> Widget_Sherlock_Light_ActionMode_Inverse
+    int Sherlock___Theme_Dialog -> Sherlock___Theme_Dialog
+    int Sherlock___Theme_DarkActionBar -> Sherlock___Theme_DarkActionBar
+    int Theme_Sherlock_Light_DarkActionBar -> Theme_Sherlock_Light_DarkActionBar
+    int Sherlock___Widget_Holo_Spinner -> Sherlock___Widget_Holo_Spinner
+    int TextAppearance_Sherlock_Widget_ActionBar_Menu -> TextAppearance_Sherlock_Widget_ActionBar_Menu
+    int Sherlock___Theme_Light -> Sherlock___Theme_Light
     int Widget_Sherlock_TextView_SpinnerItem -> Widget_Sherlock_TextView_SpinnerItem
+    int Widget_Sherlock_Light_ListView_DropDown -> Widget_Sherlock_Light_ListView_DropDown
+    int Widget_Sherlock_Light_Button_Small -> Widget_Sherlock_Light_Button_Small
+    int TextAppearance_Sherlock_Small -> TextAppearance_Sherlock_Small
+    int Theme_Sherlock_Light -> Theme_Sherlock_Light
+    int Widget_Sherlock_ActionBar_TabBar -> Widget_Sherlock_ActionBar_TabBar
+    int TextAppearance_Sherlock_Light_Widget_PopupMenu_Large -> TextAppearance_Sherlock_Light_Widget_PopupMenu_Large
+    int Sherlock___Theme -> Sherlock___Theme
+    int Widget_Sherlock_Light_ActionBar_TabBar_Inverse -> Widget_Sherlock_Light_ActionBar_TabBar_Inverse
+    int Widget_Sherlock_ActionButton -> Widget_Sherlock_ActionButton
+    int Theme_Sherlock_Light_Dialog -> Theme_Sherlock_Light_Dialog
+    int Widget_Sherlock_ProgressBar_Horizontal -> Widget_Sherlock_ProgressBar_Horizontal
+    int Widget_Sherlock_ActionButton_CloseMode -> Widget_Sherlock_ActionButton_CloseMode
+    int TextAppearance_Sherlock_Widget_DropDownItem -> TextAppearance_Sherlock_Widget_DropDownItem
+    int Theme_Sherlock_Dialog -> Theme_Sherlock_Dialog
+    int Widget_Sherlock_PopupWindow_ActionMode -> Widget_Sherlock_PopupWindow_ActionMode
+    int Widget_Sherlock_Light_ActionBar_Solid_Inverse -> Widget_Sherlock_Light_ActionBar_Solid_Inverse
+    int Widget_Sherlock_Light_Spinner_DropDown_ActionBar -> Widget_Sherlock_Light_Spinner_DropDown_ActionBar
+    int Sherlock___Widget_ActivityChooserView -> Sherlock___Widget_ActivityChooserView
+    int Sherlock___Widget_Holo_DropDownItem -> Sherlock___Widget_Holo_DropDownItem
+    int Widget -> Widget
+    int TextAppearance_Sherlock_Widget_ActionBar_Title_Inverse -> TextAppearance_Sherlock_Widget_ActionBar_Title_Inverse
+    int Sherlock___Widget_ActionMode -> Sherlock___Widget_ActionMode
+    int Widget_Sherlock_ActionMode -> Widget_Sherlock_ActionMode
+    int Widget_Sherlock_Light_ActionButton_Overflow -> Widget_Sherlock_Light_ActionButton_Overflow
+    int Theme_Sherlock_NoActionBar -> Theme_Sherlock_NoActionBar
+    int Widget_Sherlock_Light_PopupMenu -> Widget_Sherlock_Light_PopupMenu
+    int Widget_Sherlock_PopupMenu -> Widget_Sherlock_PopupMenu
+    int Sherlock___TextAppearance_Small -> Sherlock___TextAppearance_Small
+    int Widget_Sherlock_Light_PopupWindow_ActionMode -> Widget_Sherlock_Light_PopupWindow_ActionMode
+    int Widget_Sherlock_Light_ActionBar_TabView -> Widget_Sherlock_Light_ActionBar_TabView
+    int Widget_Sherlock_ListPopupWindow -> Widget_Sherlock_ListPopupWindow
+    int TextAppearance_Sherlock_DialogWindowTitle -> TextAppearance_Sherlock_DialogWindowTitle
+    int TextAppearance_Sherlock_Widget_ActionMode_Title_Inverse -> TextAppearance_Sherlock_Widget_ActionMode_Title_Inverse
+    int Widget_Sherlock_Light_ActionButton_CloseMode -> Widget_Sherlock_Light_ActionButton_CloseMode
+    int Widget_Sherlock_Light_ActionBar_TabText_Inverse -> Widget_Sherlock_Light_ActionBar_TabText_Inverse
+    int TextAppearance_Sherlock_Widget_ActionMode_Title -> TextAppearance_Sherlock_Widget_ActionMode_Title
+    int Widget_Sherlock_Spinner_DropDown_ActionBar -> Widget_Sherlock_Spinner_DropDown_ActionBar
+    int TextAppearance_Sherlock_Widget_TextView_SpinnerItem -> TextAppearance_Sherlock_Widget_TextView_SpinnerItem
+    int Sherlock___Widget_ActionBar -> Sherlock___Widget_ActionBar
+    int Widget_Sherlock_ProgressBar -> Widget_Sherlock_ProgressBar
+    int Widget_Sherlock_Light_ActionBar_TabView_Inverse -> Widget_Sherlock_Light_ActionBar_TabView_Inverse
+    int TextAppearance_Sherlock_Widget_ActionBar_Title -> TextAppearance_Sherlock_Widget_ActionBar_Title
+    int TextAppearance_Sherlock_Light_Widget_PopupMenu_Small -> TextAppearance_Sherlock_Light_Widget_PopupMenu_Small
+    int Widget_Sherlock_ActionBar_TabText -> Widget_Sherlock_ActionBar_TabText
+    int Widget_Sherlock_Light_ProgressBar -> Widget_Sherlock_Light_ProgressBar
+    int Widget_Sherlock_ActionBar_TabView -> Widget_Sherlock_ActionBar_TabView
+    int Widget_Sherlock_ActionBar_Solid -> Widget_Sherlock_ActionBar_Solid
+    int Widget_Sherlock_ListView_DropDown -> Widget_Sherlock_ListView_DropDown
+    int Widget_Sherlock_ActionButton_Overflow -> Widget_Sherlock_ActionButton_Overflow
+    int Widget_Sherlock_Light_ActionBar_TabText -> Widget_Sherlock_Light_ActionBar_TabText
+    int TextAppearance_Sherlock_Widget_ActionMode_Subtitle -> TextAppearance_Sherlock_Widget_ActionMode_Subtitle
+    int TextAppearance_Sherlock_Widget_ActionBar_Subtitle -> TextAppearance_Sherlock_Widget_ActionBar_Subtitle
+    int Widget_Sherlock_DropDownItem_Spinner -> Widget_Sherlock_DropDownItem_Spinner
+    int Widget_Sherlock_Light_ActionButton -> Widget_Sherlock_Light_ActionButton
+    int TextAppearance_Sherlock_Widget_PopupMenu_Large -> TextAppearance_Sherlock_Widget_PopupMenu_Large
 com.actionbarsherlock.R$styleable -> com.actionbarsherlock.R$styleable:
-    int[] SherlockActionBar -> SherlockActionBar
-    int SherlockActionBar_background -> SherlockActionBar_background
-    int SherlockActionBar_backgroundSplit -> SherlockActionBar_backgroundSplit
-    int SherlockActionBar_backgroundStacked -> SherlockActionBar_backgroundStacked
-    int SherlockActionBar_customNavigationLayout -> SherlockActionBar_customNavigationLayout
+    int SherlockTheme_textColorPrimaryInverse -> SherlockTheme_textColorPrimaryInverse
     int SherlockActionBar_displayOptions -> SherlockActionBar_displayOptions
-    int SherlockActionBar_divider -> SherlockActionBar_divider
-    int SherlockActionBar_height -> SherlockActionBar_height
-    int SherlockActionBar_homeLayout -> SherlockActionBar_homeLayout
-    int SherlockActionBar_icon -> SherlockActionBar_icon
-    int SherlockActionBar_indeterminateProgressStyle -> SherlockActionBar_indeterminateProgressStyle
-    int SherlockActionBar_itemPadding -> SherlockActionBar_itemPadding
-    int SherlockActionBar_logo -> SherlockActionBar_logo
-    int SherlockActionBar_navigationMode -> SherlockActionBar_navigationMode
-    int SherlockActionBar_progressBarPadding -> SherlockActionBar_progressBarPadding
-    int SherlockActionBar_progressBarStyle -> SherlockActionBar_progressBarStyle
-    int SherlockActionBar_subtitle -> SherlockActionBar_subtitle
-    int SherlockActionBar_subtitleTextStyle -> SherlockActionBar_subtitleTextStyle
-    int SherlockActionBar_title -> SherlockActionBar_title
-    int SherlockActionBar_titleTextStyle -> SherlockActionBar_titleTextStyle
-    int[] SherlockActionMenuItemView -> SherlockActionMenuItemView
-    int SherlockActionMenuItemView_android_minWidth -> SherlockActionMenuItemView_android_minWidth
-    int[] SherlockActionMode -> SherlockActionMode
-    int SherlockActionMode_background -> SherlockActionMode_background
-    int SherlockActionMode_backgroundSplit -> SherlockActionMode_backgroundSplit
-    int SherlockActionMode_height -> SherlockActionMode_height
-    int SherlockActionMode_subtitleTextStyle -> SherlockActionMode_subtitleTextStyle
-    int SherlockActionMode_titleTextStyle -> SherlockActionMode_titleTextStyle
-    int[] SherlockActivityChooserView -> SherlockActivityChooserView
-    int SherlockActivityChooserView_android_background -> SherlockActivityChooserView_android_background
-    int SherlockActivityChooserView_expandActivityOverflowButtonDrawable -> SherlockActivityChooserView_expandActivityOverflowButtonDrawable
-    int SherlockActivityChooserView_initialActivityCount -> SherlockActivityChooserView_initialActivityCount
-    int[] SherlockMenuGroup -> SherlockMenuGroup
-    int SherlockMenuGroup_android_checkableBehavior -> SherlockMenuGroup_android_checkableBehavior
-    int SherlockMenuGroup_android_enabled -> SherlockMenuGroup_android_enabled
-    int SherlockMenuGroup_android_id -> SherlockMenuGroup_android_id
-    int SherlockMenuGroup_android_menuCategory -> SherlockMenuGroup_android_menuCategory
-    int SherlockMenuGroup_android_orderInCategory -> SherlockMenuGroup_android_orderInCategory
-    int SherlockMenuGroup_android_visible -> SherlockMenuGroup_android_visible
-    int[] SherlockMenuItem -> SherlockMenuItem
-    int SherlockMenuItem_android_actionLayout -> SherlockMenuItem_android_actionLayout
-    int SherlockMenuItem_android_actionProviderClass -> SherlockMenuItem_android_actionProviderClass
-    int SherlockMenuItem_android_actionViewClass -> SherlockMenuItem_android_actionViewClass
-    int SherlockMenuItem_android_alphabeticShortcut -> SherlockMenuItem_android_alphabeticShortcut
-    int SherlockMenuItem_android_checkable -> SherlockMenuItem_android_checkable
-    int SherlockMenuItem_android_checked -> SherlockMenuItem_android_checked
-    int SherlockMenuItem_android_enabled -> SherlockMenuItem_android_enabled
-    int SherlockMenuItem_android_icon -> SherlockMenuItem_android_icon
-    int SherlockMenuItem_android_id -> SherlockMenuItem_android_id
-    int SherlockMenuItem_android_menuCategory -> SherlockMenuItem_android_menuCategory
-    int SherlockMenuItem_android_numericShortcut -> SherlockMenuItem_android_numericShortcut
-    int SherlockMenuItem_android_onClick -> SherlockMenuItem_android_onClick
-    int SherlockMenuItem_android_orderInCategory -> SherlockMenuItem_android_orderInCategory
-    int SherlockMenuItem_android_showAsAction -> SherlockMenuItem_android_showAsAction
-    int SherlockMenuItem_android_title -> SherlockMenuItem_android_title
-    int SherlockMenuItem_android_titleCondensed -> SherlockMenuItem_android_titleCondensed
-    int SherlockMenuItem_android_visible -> SherlockMenuItem_android_visible
-    int[] SherlockMenuView -> SherlockMenuView
-    int SherlockMenuView_headerBackground -> SherlockMenuView_headerBackground
-    int SherlockMenuView_horizontalDivider -> SherlockMenuView_horizontalDivider
-    int SherlockMenuView_itemBackground -> SherlockMenuView_itemBackground
-    int SherlockMenuView_itemIconDisabledAlpha -> SherlockMenuView_itemIconDisabledAlpha
-    int SherlockMenuView_itemTextAppearance -> SherlockMenuView_itemTextAppearance
-    int SherlockMenuView_preserveIconSpacing -> SherlockMenuView_preserveIconSpacing
-    int SherlockMenuView_verticalDivider -> SherlockMenuView_verticalDivider
-    int SherlockMenuView_windowAnimationStyle -> SherlockMenuView_windowAnimationStyle
-    int[] SherlockSpinner -> SherlockSpinner
-    int SherlockSpinner_android_dropDownHorizontalOffset -> SherlockSpinner_android_dropDownHorizontalOffset
-    int SherlockSpinner_android_dropDownSelector -> SherlockSpinner_android_dropDownSelector
-    int SherlockSpinner_android_dropDownVerticalOffset -> SherlockSpinner_android_dropDownVerticalOffset
-    int SherlockSpinner_android_dropDownWidth -> SherlockSpinner_android_dropDownWidth
-    int SherlockSpinner_android_gravity -> SherlockSpinner_android_gravity
-    int SherlockSpinner_android_popupBackground -> SherlockSpinner_android_popupBackground
-    int SherlockSpinner_android_popupPromptView -> SherlockSpinner_android_popupPromptView
-    int SherlockSpinner_android_prompt -> SherlockSpinner_android_prompt
-    int[] SherlockTheme -> SherlockTheme
-    int SherlockTheme_absForceOverflow -> SherlockTheme_absForceOverflow
-    int SherlockTheme_actionBarDivider -> SherlockTheme_actionBarDivider
-    int SherlockTheme_actionBarItemBackground -> SherlockTheme_actionBarItemBackground
-    int SherlockTheme_actionBarSize -> SherlockTheme_actionBarSize
-    int SherlockTheme_actionBarSplitStyle -> SherlockTheme_actionBarSplitStyle
-    int SherlockTheme_actionBarStyle -> SherlockTheme_actionBarStyle
-    int SherlockTheme_actionBarTabBarStyle -> SherlockTheme_actionBarTabBarStyle
-    int SherlockTheme_actionBarTabStyle -> SherlockTheme_actionBarTabStyle
-    int SherlockTheme_actionBarTabTextStyle -> SherlockTheme_actionBarTabTextStyle
-    int SherlockTheme_actionBarWidgetTheme -> SherlockTheme_actionBarWidgetTheme
-    int SherlockTheme_actionButtonStyle -> SherlockTheme_actionButtonStyle
-    int SherlockTheme_actionDropDownStyle -> SherlockTheme_actionDropDownStyle
     int SherlockTheme_actionMenuTextAppearance -> SherlockTheme_actionMenuTextAppearance
-    int SherlockTheme_actionMenuTextColor -> SherlockTheme_actionMenuTextColor
-    int SherlockTheme_actionModeBackground -> SherlockTheme_actionModeBackground
-    int SherlockTheme_actionModeCloseButtonStyle -> SherlockTheme_actionModeCloseButtonStyle
-    int SherlockTheme_actionModeCloseDrawable -> SherlockTheme_actionModeCloseDrawable
-    int SherlockTheme_actionModePopupWindowStyle -> SherlockTheme_actionModePopupWindowStyle
+    int SherlockTheme_listPreferredItemPaddingLeft -> SherlockTheme_listPreferredItemPaddingLeft
+    int SherlockMenuView_itemBackground -> SherlockMenuView_itemBackground
+    int SherlockTheme_actionBarDivider -> SherlockTheme_actionBarDivider
+    int SherlockTheme_homeAsUpIndicator -> SherlockTheme_homeAsUpIndicator
+    int SherlockMenuItem_android_id -> SherlockMenuItem_android_id
+    int[] SherlockTheme -> SherlockTheme
+    int[] SherlockMenuGroup -> SherlockMenuGroup
+    int SherlockTheme_actionBarSplitStyle -> SherlockTheme_actionBarSplitStyle
     int SherlockTheme_actionModeShareDrawable -> SherlockTheme_actionModeShareDrawable
+    int SherlockTheme_activatedBackgroundIndicator -> SherlockTheme_activatedBackgroundIndicator
+    int SherlockActionBar_subtitle -> SherlockActionBar_subtitle
+    int SherlockActionMode_backgroundSplit -> SherlockActionMode_backgroundSplit
+    int[] SherlockActionBar -> SherlockActionBar
+    int SherlockTheme_buttonStyleSmall -> SherlockTheme_buttonStyleSmall
+    int SherlockMenuItem_android_icon -> SherlockMenuItem_android_icon
+    int SherlockMenuItem_android_title -> SherlockMenuItem_android_title
+    int SherlockTheme_dropdownListPreferredItemHeight -> SherlockTheme_dropdownListPreferredItemHeight
+    int SherlockActivityChooserView_initialActivityCount -> SherlockActivityChooserView_initialActivityCount
+    int SherlockActionBar_itemPadding -> SherlockActionBar_itemPadding
+    int SherlockTheme_actionBarWidgetTheme -> SherlockTheme_actionBarWidgetTheme
+    int SherlockSpinner_android_dropDownHorizontalOffset -> SherlockSpinner_android_dropDownHorizontalOffset
+    int SherlockMenuGroup_android_orderInCategory -> SherlockMenuGroup_android_orderInCategory
+    int SherlockTheme_actionOverflowButtonStyle -> SherlockTheme_actionOverflowButtonStyle
+    int SherlockTheme_spinnerDropDownItemStyle -> SherlockTheme_spinnerDropDownItemStyle
+    int SherlockTheme_android_windowIsFloating -> SherlockTheme_android_windowIsFloating
+    int SherlockActionMode_background -> SherlockActionMode_background
+    int SherlockTheme_actionMenuTextColor -> SherlockTheme_actionMenuTextColor
+    int SherlockActionBar_progressBarPadding -> SherlockActionBar_progressBarPadding
+    int SherlockMenuItem_android_titleCondensed -> SherlockMenuItem_android_titleCondensed
+    int SherlockActionMode_height -> SherlockActionMode_height
+    int SherlockActionMenuItemView_android_minWidth -> SherlockActionMenuItemView_android_minWidth
+    int SherlockTheme_actionBarTabStyle -> SherlockTheme_actionBarTabStyle
+    int SherlockTheme_actionSpinnerItemStyle -> SherlockTheme_actionSpinnerItemStyle
+    int SherlockActivityChooserView_expandActivityOverflowButtonDrawable -> SherlockActivityChooserView_expandActivityOverflowButtonDrawable
+    int SherlockActionBar_backgroundSplit -> SherlockActionBar_backgroundSplit
+    int SherlockMenuView_headerBackground -> SherlockMenuView_headerBackground
+    int SherlockActionBar_subtitleTextStyle -> SherlockActionBar_subtitleTextStyle
+    int SherlockActionBar_icon -> SherlockActionBar_icon
+    int SherlockTheme_dropDownListViewStyle -> SherlockTheme_dropDownListViewStyle
+    int SherlockMenuItem_android_alphabeticShortcut -> SherlockMenuItem_android_alphabeticShortcut
+    int[] SherlockActionMenuItemView -> SherlockActionMenuItemView
+    int SherlockSpinner_android_dropDownWidth -> SherlockSpinner_android_dropDownWidth
+    int SherlockActionBar_indeterminateProgressStyle -> SherlockActionBar_indeterminateProgressStyle
+    int SherlockTheme_textAppearanceLargePopupMenu -> SherlockTheme_textAppearanceLargePopupMenu
+    int SherlockTheme_windowMinWidthMajor -> SherlockTheme_windowMinWidthMajor
+    int SherlockMenuItem_android_checked -> SherlockMenuItem_android_checked
+    int SherlockActionBar_progressBarStyle -> SherlockActionBar_progressBarStyle
+    int SherlockMenuView_horizontalDivider -> SherlockMenuView_horizontalDivider
+    int[] SherlockActivityChooserView -> SherlockActivityChooserView
+    int[] SherlockMenuItem -> SherlockMenuItem
+    int SherlockTheme_actionBarStyle -> SherlockTheme_actionBarStyle
+    int SherlockTheme_windowSplitActionBar -> SherlockTheme_windowSplitActionBar
+    int SherlockMenuGroup_android_enabled -> SherlockMenuGroup_android_enabled
+    int SherlockSpinner_android_gravity -> SherlockSpinner_android_gravity
+    int SherlockActionBar_customNavigationLayout -> SherlockActionBar_customNavigationLayout
+    int SherlockSpinner_android_prompt -> SherlockSpinner_android_prompt
+    int SherlockTheme_actionBarTabBarStyle -> SherlockTheme_actionBarTabBarStyle
+    int SherlockActionBar_title -> SherlockActionBar_title
+    int SherlockMenuItem_android_menuCategory -> SherlockMenuItem_android_menuCategory
+    int SherlockActionBar_height -> SherlockActionBar_height
+    int SherlockActionBar_navigationMode -> SherlockActionBar_navigationMode
+    int SherlockTheme_actionBarTabTextStyle -> SherlockTheme_actionBarTabTextStyle
+    int SherlockTheme_windowMinWidthMinor -> SherlockTheme_windowMinWidthMinor
+    int SherlockMenuItem_android_actionViewClass -> SherlockMenuItem_android_actionViewClass
+    int SherlockMenuView_itemTextAppearance -> SherlockMenuView_itemTextAppearance
+    int SherlockTheme_actionModeBackground -> SherlockTheme_actionModeBackground
+    int SherlockMenuItem_android_checkable -> SherlockMenuItem_android_checkable
+    int SherlockTheme_actionModeCloseDrawable -> SherlockTheme_actionModeCloseDrawable
+    int SherlockTheme_windowNoTitle -> SherlockTheme_windowNoTitle
+    int SherlockTheme_textAppearanceSmall -> SherlockTheme_textAppearanceSmall
+    int SherlockSpinner_android_dropDownVerticalOffset -> SherlockSpinner_android_dropDownVerticalOffset
+    int SherlockMenuView_verticalDivider -> SherlockMenuView_verticalDivider
+    int SherlockMenuGroup_android_visible -> SherlockMenuGroup_android_visible
+    int SherlockActionMode_subtitleTextStyle -> SherlockActionMode_subtitleTextStyle
+    int SherlockMenuView_itemIconDisabledAlpha -> SherlockMenuView_itemIconDisabledAlpha
+    int SherlockTheme_actionBarItemBackground -> SherlockTheme_actionBarItemBackground
+    int SherlockTheme_textColorPrimary -> SherlockTheme_textColorPrimary
+    int SherlockTheme_listPreferredItemHeightSmall -> SherlockTheme_listPreferredItemHeightSmall
+    int SherlockTheme_windowContentOverlay -> SherlockTheme_windowContentOverlay
+    int SherlockTheme_listPopupWindowStyle -> SherlockTheme_listPopupWindowStyle
+    int SherlockMenuGroup_android_menuCategory -> SherlockMenuGroup_android_menuCategory
+    int SherlockActionBar_logo -> SherlockActionBar_logo
+    int SherlockMenuItem_android_actionProviderClass -> SherlockMenuItem_android_actionProviderClass
+    int SherlockTheme_actionBarSize -> SherlockTheme_actionBarSize
+    int SherlockActionBar_backgroundStacked -> SherlockActionBar_backgroundStacked
+    int SherlockTheme_actionModeCloseButtonStyle -> SherlockTheme_actionModeCloseButtonStyle
+    int SherlockActivityChooserView_android_background -> SherlockActivityChooserView_android_background
+    int SherlockTheme_absForceOverflow -> SherlockTheme_absForceOverflow
+    int SherlockTheme_dividerVertical -> SherlockTheme_dividerVertical
+    int SherlockTheme_actionModePopupWindowStyle -> SherlockTheme_actionModePopupWindowStyle
+    int SherlockTheme_textAppearanceSmallPopupMenu -> SherlockTheme_textAppearanceSmallPopupMenu
+    int SherlockSpinner_android_popupBackground -> SherlockSpinner_android_popupBackground
+    int[] SherlockActionMode -> SherlockActionMode
+    int SherlockTheme_popupMenuStyle -> SherlockTheme_popupMenuStyle
+    int[] SherlockMenuView -> SherlockMenuView
+    int SherlockSpinner_android_popupPromptView -> SherlockSpinner_android_popupPromptView
+    int SherlockActionBar_background -> SherlockActionBar_background
+    int SherlockSpinner_android_dropDownSelector -> SherlockSpinner_android_dropDownSelector
     int SherlockTheme_actionModeSplitBackground -> SherlockTheme_actionModeSplitBackground
     int SherlockTheme_actionModeStyle -> SherlockTheme_actionModeStyle
-    int SherlockTheme_actionOverflowButtonStyle -> SherlockTheme_actionOverflowButtonStyle
-    int SherlockTheme_actionSpinnerItemStyle -> SherlockTheme_actionSpinnerItemStyle
-    int SherlockTheme_activatedBackgroundIndicator -> SherlockTheme_activatedBackgroundIndicator
-    int SherlockTheme_activityChooserViewStyle -> SherlockTheme_activityChooserViewStyle
-    int SherlockTheme_android_windowIsFloating -> SherlockTheme_android_windowIsFloating
-    int SherlockTheme_buttonStyleSmall -> SherlockTheme_buttonStyleSmall
-    int SherlockTheme_dividerVertical -> SherlockTheme_dividerVertical
-    int SherlockTheme_dropDownListViewStyle -> SherlockTheme_dropDownListViewStyle
-    int SherlockTheme_dropdownListPreferredItemHeight -> SherlockTheme_dropdownListPreferredItemHeight
-    int SherlockTheme_homeAsUpIndicator -> SherlockTheme_homeAsUpIndicator
-    int SherlockTheme_listPopupWindowStyle -> SherlockTheme_listPopupWindowStyle
-    int SherlockTheme_listPreferredItemHeightSmall -> SherlockTheme_listPreferredItemHeightSmall
-    int SherlockTheme_listPreferredItemPaddingLeft -> SherlockTheme_listPreferredItemPaddingLeft
+    int SherlockMenuView_windowAnimationStyle -> SherlockMenuView_windowAnimationStyle
     int SherlockTheme_listPreferredItemPaddingRight -> SherlockTheme_listPreferredItemPaddingRight
-    int SherlockTheme_popupMenuStyle -> SherlockTheme_popupMenuStyle
-    int SherlockTheme_spinnerDropDownItemStyle -> SherlockTheme_spinnerDropDownItemStyle
-    int SherlockTheme_spinnerItemStyle -> SherlockTheme_spinnerItemStyle
-    int SherlockTheme_textAppearanceLargePopupMenu -> SherlockTheme_textAppearanceLargePopupMenu
-    int SherlockTheme_textAppearanceListItemSmall -> SherlockTheme_textAppearanceListItemSmall
-    int SherlockTheme_textAppearanceSmall -> SherlockTheme_textAppearanceSmall
-    int SherlockTheme_textAppearanceSmallPopupMenu -> SherlockTheme_textAppearanceSmallPopupMenu
-    int SherlockTheme_textColorPrimary -> SherlockTheme_textColorPrimary
+    int SherlockMenuItem_android_numericShortcut -> SherlockMenuItem_android_numericShortcut
+    int SherlockMenuItem_android_showAsAction -> SherlockMenuItem_android_showAsAction
+    int SherlockTheme_actionButtonStyle -> SherlockTheme_actionButtonStyle
+    int SherlockMenuGroup_android_checkableBehavior -> SherlockMenuGroup_android_checkableBehavior
+    int SherlockMenuGroup_android_id -> SherlockMenuGroup_android_id
+    int SherlockTheme_actionDropDownStyle -> SherlockTheme_actionDropDownStyle
+    int SherlockActionMode_titleTextStyle -> SherlockActionMode_titleTextStyle
     int SherlockTheme_textColorPrimaryDisableOnly -> SherlockTheme_textColorPrimaryDisableOnly
-    int SherlockTheme_textColorPrimaryInverse -> SherlockTheme_textColorPrimaryInverse
-    int SherlockTheme_windowActionBar -> SherlockTheme_windowActionBar
-    int SherlockTheme_windowActionBarOverlay -> SherlockTheme_windowActionBarOverlay
+    int SherlockTheme_textAppearanceListItemSmall -> SherlockTheme_textAppearanceListItemSmall
     int SherlockTheme_windowActionModeOverlay -> SherlockTheme_windowActionModeOverlay
-    int SherlockTheme_windowContentOverlay -> SherlockTheme_windowContentOverlay
-    int SherlockTheme_windowMinWidthMajor -> SherlockTheme_windowMinWidthMajor
-    int SherlockTheme_windowMinWidthMinor -> SherlockTheme_windowMinWidthMinor
-    int SherlockTheme_windowNoTitle -> SherlockTheme_windowNoTitle
-    int SherlockTheme_windowSplitActionBar -> SherlockTheme_windowSplitActionBar
-com.actionbarsherlock.R$xml -> com.actionbarsherlock.R$xml:
-    int preferences -> preferences
+    int SherlockActionBar_homeLayout -> SherlockActionBar_homeLayout
+    int SherlockActionBar_divider -> SherlockActionBar_divider
+    int SherlockTheme_spinnerItemStyle -> SherlockTheme_spinnerItemStyle
+    int SherlockMenuItem_android_visible -> SherlockMenuItem_android_visible
+    int SherlockMenuItem_android_orderInCategory -> SherlockMenuItem_android_orderInCategory
+    int SherlockActionBar_titleTextStyle -> SherlockActionBar_titleTextStyle
+    int SherlockMenuView_preserveIconSpacing -> SherlockMenuView_preserveIconSpacing
+    int SherlockTheme_windowActionBar -> SherlockTheme_windowActionBar
+    int SherlockTheme_activityChooserViewStyle -> SherlockTheme_activityChooserViewStyle
+    int SherlockMenuItem_android_enabled -> SherlockMenuItem_android_enabled
+    int SherlockMenuItem_android_onClick -> SherlockMenuItem_android_onClick
+    int SherlockMenuItem_android_actionLayout -> SherlockMenuItem_android_actionLayout
+    int[] SherlockSpinner -> SherlockSpinner
+    int SherlockTheme_windowActionBarOverlay -> SherlockTheme_windowActionBarOverlay
 com.actionbarsherlock.app.ActionBar -> com.actionbarsherlock.app.ActionBar:
     int NAVIGATION_MODE_STANDARD -> NAVIGATION_MODE_STANDARD
     int NAVIGATION_MODE_LIST -> NAVIGATION_MODE_LIST
@@ -6657,188 +6291,194 @@ com.fenritz.safecam.CameraActivity -> com.fenritz.safecam.CameraActivity:
     int defaultCameraId -> c
     android.content.BroadcastReceiver receiver -> w
     com.google.ads.AdView adView -> x
-    119:172:void onCreate(android.os.Bundle) -> onCreate
-    176:188:void onResume() -> onResume
-    192:202:void onPause() -> onPause
-    248:351:void startCamera(int) -> a
-    354:359:void releaseCamera() -> a
-    429:436:void setMegapixelLabel(int,int) -> a
-    439:487:void showLastPhotoThumb() -> b
-    491:498:void onDestroy() -> onDestroy
-    523:536:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
-    542:553:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
-    627:682:void takePhoto() -> c
-    696:696:android.hardware.Camera$PictureCallback getPictureCallback() -> d
-    749:756:boolean isCurrentCameraFrontFacing() -> e
-    766:869:int changeRotation(int) -> b
-    873:880:void rotateElement(android.view.View,int,int) -> a
-    976:1026:void showPhotoSizeChooser() -> f
-    1030:1031:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    1035:1056:java.util.List getSupportedImageSizes() -> g
-    1062:1081:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-    88:88:int access$0(com.fenritz.safecam.CameraActivity) -> a
-    353:353:void access$1(com.fenritz.safecam.CameraActivity) -> b
-    89:89:int access$2(com.fenritz.safecam.CameraActivity) -> c
-    89:89:void access$3(com.fenritz.safecam.CameraActivity,int) -> a
-    75:75:void access$4(com.fenritz.safecam.CameraActivity,com.fenritz.safecam.util.CameraPreview) -> a
-    75:75:com.fenritz.safecam.util.CameraPreview access$5(com.fenritz.safecam.CameraActivity) -> d
-    247:247:void access$6(com.fenritz.safecam.CameraActivity,int) -> b
-    975:975:void access$7(com.fenritz.safecam.CameraActivity) -> e
-    79:79:int access$8(com.fenritz.safecam.CameraActivity) -> f
-    79:79:void access$9(com.fenritz.safecam.CameraActivity,int) -> c
-    765:765:int access$10(com.fenritz.safecam.CameraActivity,int) -> d
-    96:96:android.widget.ImageView access$11(com.fenritz.safecam.CameraActivity) -> g
-    102:102:java.io.File access$12(com.fenritz.safecam.CameraActivity) -> h
-    94:94:android.widget.ImageButton access$13(com.fenritz.safecam.CameraActivity) -> i
-    91:91:boolean access$14(com.fenritz.safecam.CameraActivity) -> j
-    95:95:android.widget.ImageButton access$15(com.fenritz.safecam.CameraActivity) -> k
-    91:91:void access$16(com.fenritz.safecam.CameraActivity,boolean) -> a
-    626:626:void access$17(com.fenritz.safecam.CameraActivity) -> l
-    98:98:int access$18(com.fenritz.safecam.CameraActivity) -> m
-    99:99:int access$19(com.fenritz.safecam.CameraActivity) -> n
-    106:106:void access$20(com.fenritz.safecam.CameraActivity,boolean) -> b
-    694:694:android.hardware.Camera$PictureCallback access$21(com.fenritz.safecam.CameraActivity) -> o
-    108:108:java.util.Timer access$22(com.fenritz.safecam.CameraActivity) -> p
-    100:100:void access$23$687b731e(com.fenritz.safecam.CameraActivity) -> q
-    99:99:void access$24(com.fenritz.safecam.CameraActivity,int) -> e
-    438:438:void access$25(com.fenritz.safecam.CameraActivity) -> r
-    748:748:boolean access$26(com.fenritz.safecam.CameraActivity) -> s
-    427:427:void access$27(com.fenritz.safecam.CameraActivity,int,int) -> a
+    118:160:void onCreate(android.os.Bundle) -> onCreate
+    164:177:void onResume() -> onResume
+    181:191:void onPause() -> onPause
+    237:348:void startCamera(int) -> a
+    351:356:void releaseCamera() -> a
+    426:433:void setMegapixelLabel(int,int) -> a
+    436:490:void showLastPhotoThumb() -> b
+    494:501:void onDestroy() -> onDestroy
+    526:539:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    545:556:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
+    632:687:void takePhoto() -> c
+    701:701:android.hardware.Camera$PictureCallback getPictureCallback() -> d
+    758:768:boolean isCurrentCameraFrontFacing() -> e
+    778:881:int changeRotation(int) -> b
+    885:892:void rotateElement(android.view.View,int,int) -> a
+    988:1038:void showPhotoSizeChooser() -> f
+    1042:1043:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    1047:1070:java.util.List getSupportedImageSizes() -> g
+    1076:1095:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    87:87:int access$0(com.fenritz.safecam.CameraActivity) -> a
+    350:350:void access$1(com.fenritz.safecam.CameraActivity) -> b
+    88:88:int access$2(com.fenritz.safecam.CameraActivity) -> c
+    88:88:void access$3(com.fenritz.safecam.CameraActivity,int) -> a
+    74:74:void access$4(com.fenritz.safecam.CameraActivity,com.fenritz.safecam.util.CameraPreview) -> a
+    74:74:com.fenritz.safecam.util.CameraPreview access$5(com.fenritz.safecam.CameraActivity) -> d
+    236:236:void access$6(com.fenritz.safecam.CameraActivity,int) -> b
+    987:987:void access$7(com.fenritz.safecam.CameraActivity) -> e
+    78:78:int access$8(com.fenritz.safecam.CameraActivity) -> f
+    78:78:void access$9(com.fenritz.safecam.CameraActivity,int) -> c
+    777:777:int access$10(com.fenritz.safecam.CameraActivity,int) -> d
+    95:95:android.widget.ImageView access$11(com.fenritz.safecam.CameraActivity) -> g
+    101:101:java.io.File access$12(com.fenritz.safecam.CameraActivity) -> h
+    93:93:android.widget.ImageButton access$13(com.fenritz.safecam.CameraActivity) -> i
+    90:90:boolean access$14(com.fenritz.safecam.CameraActivity) -> j
+    94:94:android.widget.ImageButton access$15(com.fenritz.safecam.CameraActivity) -> k
+    90:90:void access$16(com.fenritz.safecam.CameraActivity,boolean) -> a
+    631:631:void access$17(com.fenritz.safecam.CameraActivity) -> l
+    97:97:int access$18(com.fenritz.safecam.CameraActivity) -> m
+    98:98:int access$19(com.fenritz.safecam.CameraActivity) -> n
+    105:105:void access$20(com.fenritz.safecam.CameraActivity,boolean) -> b
+    699:699:android.hardware.Camera$PictureCallback access$21(com.fenritz.safecam.CameraActivity) -> o
+    107:107:java.util.Timer access$22(com.fenritz.safecam.CameraActivity) -> p
+    99:99:void access$23$687b731e(com.fenritz.safecam.CameraActivity) -> q
+    98:98:void access$24(com.fenritz.safecam.CameraActivity,int) -> e
+    435:435:void access$25(com.fenritz.safecam.CameraActivity) -> r
+    757:757:boolean access$26(com.fenritz.safecam.CameraActivity) -> s
+    424:424:void access$27(com.fenritz.safecam.CameraActivity,int,int) -> a
 com.fenritz.safecam.CameraActivity$1 -> com.fenritz.safecam.a:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    160:161:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    156:157:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.fenritz.safecam.CameraActivity$10 -> com.fenritz.safecam.b:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    601:614:void onClick(android.view.View) -> onClick
+    576:599:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$11 -> com.fenritz.safecam.c:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    621:622:void onClick(android.view.View) -> onClick
+    606:619:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.CameraActivity$12 -> com.fenritz.safecam.d:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    646:668:void run() -> run
-    643:643:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$12) -> a
-com.fenritz.safecam.CameraActivity$12$1 -> com.fenritz.safecam.e:
-    com.fenritz.safecam.CameraActivity$12 this$1 -> a
-    649:653:void run() -> run
-com.fenritz.safecam.CameraActivity$13 -> com.fenritz.safecam.f:
+    626:627:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$13 -> com.fenritz.safecam.e:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    699:717:void onPictureTaken(byte[],android.hardware.Camera) -> onPictureTaken
-    696:696:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$13) -> a
-com.fenritz.safecam.CameraActivity$13$1 -> com.fenritz.safecam.g:
+    651:673:void run() -> run
+    648:648:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$13) -> a
+com.fenritz.safecam.CameraActivity$13$1 -> com.fenritz.safecam.f:
     com.fenritz.safecam.CameraActivity$13 this$1 -> a
-    710:712:void onFinish() -> a
-com.fenritz.safecam.CameraActivity$14 -> com.fenritz.safecam.h:
+    654:658:void run() -> run
+com.fenritz.safecam.CameraActivity$14 -> com.fenritz.safecam.g:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    704:726:void onPictureTaken(byte[],android.hardware.Camera) -> onPictureTaken
+    701:701:com.fenritz.safecam.CameraActivity access$0(com.fenritz.safecam.CameraActivity$14) -> a
+com.fenritz.safecam.CameraActivity$14$1 -> com.fenritz.safecam.h:
+    com.fenritz.safecam.CameraActivity$14 this$1 -> a
+    719:721:void onFinish() -> a
+com.fenritz.safecam.CameraActivity$15 -> com.fenritz.safecam.i:
     com.fenritz.safecam.CameraActivity this$0 -> a
     java.util.List val$mSupportedPictureSizes -> b
     android.content.SharedPreferences val$preferences -> c
-    999:1024:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.CameraActivity$15 -> com.fenritz.safecam.i:
+    1011:1036:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.CameraActivity$16 -> com.fenritz.safecam.j:
     com.fenritz.safecam.CameraActivity this$0 -> a
     1:1:int compare(java.lang.Object,java.lang.Object) -> compare
-com.fenritz.safecam.CameraActivity$2 -> com.fenritz.safecam.j:
+com.fenritz.safecam.CameraActivity$2 -> com.fenritz.safecam.k:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    211:227:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.CameraActivity$3 -> com.fenritz.safecam.k:
+    200:216:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$3 -> com.fenritz.safecam.l:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    233:234:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.CameraActivity$4 -> com.fenritz.safecam.l:
+    222:223:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$4 -> com.fenritz.safecam.m:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    241:242:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.CameraActivity$5 -> com.fenritz.safecam.m:
+    230:231:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$5 -> com.fenritz.safecam.n:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    367:402:void onOrientationChanged(int) -> onOrientationChanged
-com.fenritz.safecam.CameraActivity$6 -> com.fenritz.safecam.n:
+    364:399:void onOrientationChanged(int) -> onOrientationChanged
+com.fenritz.safecam.CameraActivity$6 -> com.fenritz.safecam.o:
     com.fenritz.safecam.CameraActivity this$0 -> a
     int val$maxFileSize -> b
-    444:448:boolean accept(java.io.File) -> accept
-com.fenritz.safecam.CameraActivity$7 -> com.fenritz.safecam.o:
+    441:445:boolean accept(java.io.File) -> accept
+com.fenritz.safecam.CameraActivity$7 -> com.fenritz.safecam.p:
+    com.fenritz.safecam.CameraActivity this$0 -> a
+    453:453:int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.CameraActivity$8 -> com.fenritz.safecam.q:
     com.fenritz.safecam.CameraActivity this$0 -> a
     int val$thumbSize -> b
-    475:479:void onFinish() -> a
-com.fenritz.safecam.CameraActivity$8 -> com.fenritz.safecam.p:
+    478:482:void onFinish() -> a
+com.fenritz.safecam.CameraActivity$9 -> com.fenritz.safecam.r:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    559:566:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.CameraActivity$9 -> com.fenritz.safecam.q:
-    com.fenritz.safecam.CameraActivity this$0 -> a
-    573:594:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.CameraActivity$EncryptAndWriteFile -> com.fenritz.safecam.r:
+    562:569:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.CameraActivity$EncryptAndWriteFile -> com.fenritz.safecam.s:
     java.lang.String filename -> b
     android.app.ProgressDialog progressDialog -> c
     com.fenritz.safecam.CameraActivity this$0 -> a
-    902:904:void onPreExecute() -> onPreExecute
-    909:916:java.lang.Void doInBackground(byte[][]) -> a
+    914:916:void onPreExecute() -> onPreExecute
+    921:928:java.lang.Void doInBackground(byte[][]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb -> com.fenritz.safecam.s:
+com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb -> com.fenritz.safecam.t:
     java.lang.String fileName -> b
     android.content.Context context -> c
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish onFinish -> d
     com.fenritz.safecam.CameraActivity this$0 -> a
-    957:962:java.lang.Void doInBackground(byte[][]) -> a
+    969:974:java.lang.Void doInBackground(byte[][]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-com.fenritz.safecam.CameraActivity$PhotoSizeAdapter -> com.fenritz.safecam.t:
+com.fenritz.safecam.CameraActivity$PhotoSizeAdapter -> com.fenritz.safecam.u:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    1093:1095:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-com.fenritz.safecam.CameraActivity$ResumePreview -> com.fenritz.safecam.u:
+    1107:1109:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+com.fenritz.safecam.CameraActivity$ResumePreview -> com.fenritz.safecam.v:
     com.fenritz.safecam.CameraActivity this$0 -> a
-    687:691:void handleMessage(android.os.Message) -> handleMessage
+    692:696:void handleMessage(android.os.Message) -> handleMessage
 com.fenritz.safecam.ChangePasswordActivity -> com.fenritz.safecam.ChangePasswordActivity:
     android.content.BroadcastReceiver receiver -> a
-    36:56:void onCreate(android.os.Bundle) -> onCreate
-    60:64:void onDestroy() -> onDestroy
-    230:233:void onPause() -> onPause
-    237:241:void onResume() -> onResume
-    246:251:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-com.fenritz.safecam.ChangePasswordActivity$1 -> com.fenritz.safecam.v:
+    39:59:void onCreate(android.os.Bundle) -> onCreate
+    63:67:void onDestroy() -> onDestroy
+    314:317:void onPause() -> onPause
+    321:325:void onResume() -> onResume
+    330:335:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+com.fenritz.safecam.ChangePasswordActivity$1 -> com.fenritz.safecam.w:
     com.fenritz.safecam.ChangePasswordActivity this$0 -> a
-    51:52:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.fenritz.safecam.ChangePasswordActivity$2 -> com.fenritz.safecam.w:
+    54:55:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.ChangePasswordActivity$2 -> com.fenritz.safecam.x:
     com.fenritz.safecam.ChangePasswordActivity this$0 -> a
-    70:100:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ChangePasswordActivity$3 -> com.fenritz.safecam.x:
+    73:103:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ChangePasswordActivity$3 -> com.fenritz.safecam.y:
     com.fenritz.safecam.ChangePasswordActivity this$0 -> a
-    108:109:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles -> com.fenritz.safecam.y:
+    111:112:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles -> com.fenritz.safecam.z:
     android.app.ProgressDialog progressDialog -> b
+    android.os.PowerManager$WakeLock wl -> c
     com.fenritz.safecam.ChangePasswordActivity this$0 -> a
-    119:130:void onPreExecute() -> onPreExecute
-    133:154:java.util.ArrayList getFilesList(java.lang.String) -> a
-    159:206:java.lang.Void doInBackground(java.lang.String[]) -> a
+    123:138:void onPreExecute() -> onPreExecute
+    141:162:java.util.ArrayList getFilesList(java.lang.String) -> a
+    166:179:java.util.ArrayList getFoldersList(java.lang.String) -> b
+    183:204:java.lang.String reencryptFilename(java.lang.String,com.fenritz.safecam.util.AESCrypt) -> a
+    210:287:java.lang.Void doInBackground(java.lang.String[]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
-com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles$1 -> com.fenritz.safecam.z:
+com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles$1 -> com.fenritz.safecam.aa:
     com.fenritz.safecam.ChangePasswordActivity$ReEncryptFiles this$1 -> a
-    124:125:void onCancel(android.content.DialogInterface) -> onCancel
+    128:129:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.DashboardActivity -> com.fenritz.safecam.DashboardActivity:
     android.content.BroadcastReceiver receiver -> a
     com.google.ads.AdView adView -> b
-    32:52:void onCreate(android.os.Bundle) -> onCreate
-    55:92:void initViews() -> a
-    96:105:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
-    138:142:void onResume() -> onResume
-    146:149:void onPause() -> onPause
-    153:160:void onDestroy() -> onDestroy
-    164:168:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    175:199:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-com.fenritz.safecam.DashboardActivity$1 -> com.fenritz.safecam.aa:
+    29:49:void onCreate(android.os.Bundle) -> onCreate
+    52:83:void initViews() -> a
+    87:96:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
+    129:133:void onResume() -> onResume
+    137:140:void onPause() -> onPause
+    144:151:void onDestroy() -> onDestroy
+    155:159:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    166:190:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+com.fenritz.safecam.DashboardActivity$1 -> com.fenritz.safecam.ab:
     com.fenritz.safecam.DashboardActivity this$0 -> a
-    43:44:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.fenritz.safecam.DashboardActivity$2 -> com.fenritz.safecam.ab:
+    40:41:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.DashboardActivity$2 -> com.fenritz.safecam.ac:
     com.fenritz.safecam.DashboardActivity this$0 -> a
-    60:63:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.DashboardActivity$3 -> com.fenritz.safecam.ac:
+    57:60:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$3 -> com.fenritz.safecam.ad:
     com.fenritz.safecam.DashboardActivity this$0 -> a
-    68:71:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.DashboardActivity$4 -> com.fenritz.safecam.ad:
-    com.fenritz.safecam.DashboardActivity this$0 -> a
-    android.content.SharedPreferences val$preferences -> b
-    115:119:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.DashboardActivity$5 -> com.fenritz.safecam.ae:
+    65:68:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.DashboardActivity$4 -> com.fenritz.safecam.ae:
     com.fenritz.safecam.DashboardActivity this$0 -> a
     android.content.SharedPreferences val$preferences -> b
-    123:130:void onClick(android.content.DialogInterface,int) -> onClick
+    106:110:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.DashboardActivity$5 -> com.fenritz.safecam.af:
+    com.fenritz.safecam.DashboardActivity this$0 -> a
+    android.content.SharedPreferences val$preferences -> b
+    114:121:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.FileDialog -> com.fenritz.safecam.FileDialog:
     java.util.List path -> a
     android.widget.TextView myPath -> b
@@ -6882,25 +6522,25 @@ com.fenritz.safecam.FileDialog -> com.fenritz.safecam.FileDialog:
     567:567:void access$5(com.fenritz.safecam.FileDialog,android.view.View) -> a
     108:108:android.widget.EditText access$6(com.fenritz.safecam.FileDialog) -> f
     580:580:void access$7(com.fenritz.safecam.FileDialog,android.view.View) -> b
-com.fenritz.safecam.FileDialog$1 -> com.fenritz.safecam.af:
+com.fenritz.safecam.FileDialog$1 -> com.fenritz.safecam.ag:
     com.fenritz.safecam.FileDialog this$0 -> a
     161:162:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.fenritz.safecam.FileDialog$2 -> com.fenritz.safecam.ag:
+com.fenritz.safecam.FileDialog$2 -> com.fenritz.safecam.ah:
     com.fenritz.safecam.FileDialog this$0 -> a
     176:191:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.FileDialog$3 -> com.fenritz.safecam.ah:
+com.fenritz.safecam.FileDialog$3 -> com.fenritz.safecam.ai:
     com.fenritz.safecam.FileDialog this$0 -> a
     198:202:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.FileDialog$4 -> com.fenritz.safecam.ai:
+com.fenritz.safecam.FileDialog$4 -> com.fenritz.safecam.aj:
     com.fenritz.safecam.FileDialog this$0 -> a
     225:226:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.FileDialog$5 -> com.fenritz.safecam.aj:
+com.fenritz.safecam.FileDialog$5 -> com.fenritz.safecam.ak:
     com.fenritz.safecam.FileDialog this$0 -> a
     233:238:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.FileDialog$6 -> com.fenritz.safecam.ak:
+com.fenritz.safecam.FileDialog$6 -> com.fenritz.safecam.al:
     com.fenritz.safecam.FileDialog this$0 -> a
     511:511:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.FileDialog$FilesAdapter -> com.fenritz.safecam.al:
+com.fenritz.safecam.FileDialog$FilesAdapter -> com.fenritz.safecam.am:
     java.util.ArrayList list -> b
     com.fenritz.safecam.FileDialog this$0 -> a
     413:413:int getCount() -> getCount
@@ -6920,190 +6560,197 @@ com.fenritz.safecam.GalleryActivity -> com.fenritz.safecam.GalleryActivity:
     android.content.BroadcastReceiver receiver -> j
     boolean isWentToLogin -> k
     java.lang.String currentPath -> l
-    java.util.ArrayList queue -> m
+    java.util.concurrent.CopyOnWriteArrayList queue -> m
     int currentVisibleItemCount -> n
     com.actionbarsherlock.view.ActionMode mMode -> o
     java.lang.Thread decryptor -> p
-    107:143:void onCreate(android.os.Bundle) -> onCreate
-    147:153:void onDestroy() -> onDestroy
-    198:222:void handleSendMulti(android.content.Intent) -> a
-    226:292:void fillFilesList() -> a
-    295:307:void changeDir(java.lang.String) -> a
-    311:317:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
-    322:336:void onPause() -> onPause
-    341:355:void onResume() -> onResume
-    358:360:void enterMultiSelect() -> b
-    363:368:void exitMultiSelect() -> c
-    503:508:void refreshList() -> d
-    553:663:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    666:671:void clearSelection() -> e
-    1109:1110:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    1116:1185:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-    98:98:java.util.ArrayList access$0(com.fenritz.safecam.GalleryActivity) -> a
-    100:100:int access$1(com.fenritz.safecam.GalleryActivity) -> b
-    82:82:java.util.ArrayList access$2(com.fenritz.safecam.GalleryActivity) -> c
-    78:78:boolean access$3(com.fenritz.safecam.GalleryActivity) -> d
-    84:84:java.util.ArrayList access$4(com.fenritz.safecam.GalleryActivity) -> e
-    96:96:java.lang.String access$5(com.fenritz.safecam.GalleryActivity) -> f
-    534:534:void access$6(com.fenritz.safecam.GalleryActivity) -> g
-    502:502:void access$7(com.fenritz.safecam.GalleryActivity) -> h
-    425:425:void access$8(com.fenritz.safecam.GalleryActivity) -> i
-    510:510:void access$9(com.fenritz.safecam.GalleryActivity) -> j
-    86:86:java.util.ArrayList access$10(com.fenritz.safecam.GalleryActivity) -> k
-    85:85:java.util.ArrayList access$11(com.fenritz.safecam.GalleryActivity) -> l
-    923:923:java.lang.Thread access$12(com.fenritz.safecam.GalleryActivity) -> m
-    294:294:void access$13(com.fenritz.safecam.GalleryActivity,java.lang.String) -> a
-    87:87:com.fenritz.safecam.GalleryActivity$GalleryAdapter access$14(com.fenritz.safecam.GalleryActivity) -> n
-    78:78:void access$15$108e64cb(com.fenritz.safecam.GalleryActivity) -> o
-    665:665:void access$16(com.fenritz.safecam.GalleryActivity) -> p
-    362:362:void access$17(com.fenritz.safecam.GalleryActivity) -> q
-    100:100:void access$18(com.fenritz.safecam.GalleryActivity,int) -> a
-com.fenritz.safecam.GalleryActivity$1 -> com.fenritz.safecam.am:
+    110:146:void onCreate(android.os.Bundle) -> onCreate
+    150:156:void onDestroy() -> onDestroy
+    201:225:void handleSendMulti(android.content.Intent) -> a
+    229:290:void fillFilesList() -> a
+    293:305:void changeDir(java.lang.String) -> a
+    309:315:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    320:334:void onPause() -> onPause
+    339:353:void onResume() -> onResume
+    356:358:void enterMultiSelect() -> b
+    361:366:void exitMultiSelect() -> c
+    505:510:void refreshList() -> d
+    555:682:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    685:690:void clearSelection() -> e
+    1131:1132:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    1138:1207:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    101:101:java.util.concurrent.CopyOnWriteArrayList access$0(com.fenritz.safecam.GalleryActivity) -> a
+    103:103:int access$1(com.fenritz.safecam.GalleryActivity) -> b
+    85:85:java.util.ArrayList access$2(com.fenritz.safecam.GalleryActivity) -> c
+    81:81:boolean access$3(com.fenritz.safecam.GalleryActivity) -> d
+    87:87:java.util.ArrayList access$4(com.fenritz.safecam.GalleryActivity) -> e
+    99:99:java.lang.String access$5(com.fenritz.safecam.GalleryActivity) -> f
+    536:536:void access$6(com.fenritz.safecam.GalleryActivity) -> g
+    504:504:void access$7(com.fenritz.safecam.GalleryActivity) -> h
+    423:423:void access$8(com.fenritz.safecam.GalleryActivity) -> i
+    512:512:void access$9(com.fenritz.safecam.GalleryActivity) -> j
+    89:89:java.util.ArrayList access$10(com.fenritz.safecam.GalleryActivity) -> k
+    88:88:java.util.ArrayList access$11(com.fenritz.safecam.GalleryActivity) -> l
+    945:945:java.lang.Thread access$12(com.fenritz.safecam.GalleryActivity) -> m
+    292:292:void access$13(com.fenritz.safecam.GalleryActivity,java.lang.String) -> a
+    90:90:com.fenritz.safecam.GalleryActivity$GalleryAdapter access$14(com.fenritz.safecam.GalleryActivity) -> n
+    81:81:void access$15$108e64cb(com.fenritz.safecam.GalleryActivity) -> o
+    684:684:void access$16(com.fenritz.safecam.GalleryActivity) -> p
+    360:360:void access$17(com.fenritz.safecam.GalleryActivity) -> q
+    103:103:void access$18(com.fenritz.safecam.GalleryActivity,int) -> a
+com.fenritz.safecam.GalleryActivity$1 -> com.fenritz.safecam.an:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    926:973:void run() -> run
-com.fenritz.safecam.GalleryActivity$1$1 -> com.fenritz.safecam.an:
+    948:995:void run() -> run
+com.fenritz.safecam.GalleryActivity$1$1 -> com.fenritz.safecam.ao:
     com.fenritz.safecam.GalleryActivity$1 this$1 -> a
     com.fenritz.safecam.GalleryActivity$Dec val$item -> b
     android.graphics.Bitmap val$bitmap -> c
-    953:958:void run() -> run
-com.fenritz.safecam.GalleryActivity$10 -> com.fenritz.safecam.ao:
+    975:980:void run() -> run
+com.fenritz.safecam.GalleryActivity$10 -> com.fenritz.safecam.ap:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    516:522:void onClick(android.content.DialogInterface,int) -> onClick
-    513:513:com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$10) -> a
-com.fenritz.safecam.GalleryActivity$10$1 -> com.fenritz.safecam.ap:
-    com.fenritz.safecam.GalleryActivity$10 this$1 -> a
-    519:520:void onFinish() -> a
+    497:498:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.GalleryActivity$11 -> com.fenritz.safecam.aq:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    527:528:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.GalleryActivity$12 -> com.fenritz.safecam.ar:
+    518:524:void onClick(android.content.DialogInterface,int) -> onClick
+    515:515:com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$11) -> a
+com.fenritz.safecam.GalleryActivity$11$1 -> com.fenritz.safecam.ar:
+    com.fenritz.safecam.GalleryActivity$11 this$1 -> a
+    521:522:void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$12 -> com.fenritz.safecam.as:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    562:566:void onFinish(java.util.ArrayList) -> a
-com.fenritz.safecam.GalleryActivity$13 -> com.fenritz.safecam.as:
+    529:530:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.GalleryActivity$13 -> com.fenritz.safecam.at:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    564:570:void onFinish(java.util.ArrayList) -> a
+com.fenritz.safecam.GalleryActivity$14 -> com.fenritz.safecam.au:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    1:1:int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.GalleryActivity$15 -> com.fenritz.safecam.av:
     com.fenritz.safecam.GalleryActivity this$0 -> a
     java.lang.String[] val$filePaths -> b
-    574:604:void onFinish() -> a
-com.fenritz.safecam.GalleryActivity$13$1 -> com.fenritz.safecam.at:
-    com.fenritz.safecam.GalleryActivity$13 this$1 -> a
+    593:623:void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$15$1 -> com.fenritz.safecam.aw:
+    com.fenritz.safecam.GalleryActivity$15 this$1 -> a
     java.lang.String[] val$filePaths -> b
-    581:599:void onClick(android.content.DialogInterface,int) -> onClick
-    579:579:com.fenritz.safecam.GalleryActivity$13 access$0(com.fenritz.safecam.GalleryActivity$13$1) -> a
-com.fenritz.safecam.GalleryActivity$13$1$1 -> com.fenritz.safecam.au:
-    com.fenritz.safecam.GalleryActivity$13$1 this$2 -> a
-    591:597:void onFinish(java.util.ArrayList) -> a
-com.fenritz.safecam.GalleryActivity$14 -> com.fenritz.safecam.av:
+    600:618:void onClick(android.content.DialogInterface,int) -> onClick
+    598:598:com.fenritz.safecam.GalleryActivity$15 access$0(com.fenritz.safecam.GalleryActivity$15$1) -> a
+com.fenritz.safecam.GalleryActivity$15$1$1 -> com.fenritz.safecam.ax:
+    com.fenritz.safecam.GalleryActivity$15$1 this$2 -> a
+    610:616:void onFinish(java.util.ArrayList) -> a
+com.fenritz.safecam.GalleryActivity$16 -> com.fenritz.safecam.ay:
     com.fenritz.safecam.GalleryActivity this$0 -> a
     android.view.View val$enterPasswordView -> b
     java.lang.String[] val$filePaths -> c
-    617:642:void onClick(android.content.DialogInterface,int) -> onClick
-    615:615:com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$14) -> a
-com.fenritz.safecam.GalleryActivity$14$1 -> com.fenritz.safecam.aw:
-    com.fenritz.safecam.GalleryActivity$14 this$1 -> a
-    629:640:void onFinish(java.lang.Integer) -> a
-com.fenritz.safecam.GalleryActivity$15 -> com.fenritz.safecam.ax:
+    636:661:void onClick(android.content.DialogInterface,int) -> onClick
+    634:634:com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$16) -> a
+com.fenritz.safecam.GalleryActivity$16$1 -> com.fenritz.safecam.az:
+    com.fenritz.safecam.GalleryActivity$16 this$1 -> a
+    648:659:void onFinish(java.lang.Integer) -> a
+com.fenritz.safecam.GalleryActivity$17 -> com.fenritz.safecam.ba:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    981:981:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
-    984:987:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
-com.fenritz.safecam.GalleryActivity$16 -> com.fenritz.safecam.ay:
+    1003:1003:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
+    1006:1009:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
+com.fenritz.safecam.GalleryActivity$18 -> com.fenritz.safecam.bb:
     com.fenritz.safecam.GalleryActivity this$0 -> a
     android.widget.EditText val$input -> b
-    1146:1154:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.GalleryActivity$2 -> com.fenritz.safecam.az:
+    1168:1176:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.GalleryActivity$2 -> com.fenritz.safecam.bc:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    137:138:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.fenritz.safecam.GalleryActivity$3 -> com.fenritz.safecam.ba:
+    140:141:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.GalleryActivity$3 -> com.fenritz.safecam.bd:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    189:192:void onFinish() -> a
-com.fenritz.safecam.GalleryActivity$4 -> com.fenritz.safecam.bb:
+    192:195:void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$4 -> com.fenritz.safecam.be:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    216:219:void onFinish() -> a
-com.fenritz.safecam.GalleryActivity$5 -> com.fenritz.safecam.bc:
+    219:222:void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$5 -> com.fenritz.safecam.bf:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    379:418:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.GalleryActivity$6 -> com.fenritz.safecam.bd:
+    246:246:int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.GalleryActivity$6 -> com.fenritz.safecam.bg:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    434:437:boolean accept(java.io.File) -> accept
-com.fenritz.safecam.GalleryActivity$7 -> com.fenritz.safecam.be:
+    377:416:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.GalleryActivity$7 -> com.fenritz.safecam.bh:
+    com.fenritz.safecam.GalleryActivity this$0 -> a
+    432:435:boolean accept(java.io.File) -> accept
+com.fenritz.safecam.GalleryActivity$8 -> com.fenritz.safecam.bi:
     com.fenritz.safecam.GalleryActivity this$0 -> a
     1:1:int compare(java.lang.Object,java.lang.Object) -> compare
-com.fenritz.safecam.GalleryActivity$8 -> com.fenritz.safecam.bf:
+com.fenritz.safecam.GalleryActivity$9 -> com.fenritz.safecam.bj:
     com.fenritz.safecam.GalleryActivity this$0 -> a
     boolean val$isInHome -> b
     android.widget.Spinner val$spinner -> c
-    474:491:void onClick(android.content.DialogInterface,int) -> onClick
-    470:470:com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$8) -> a
-com.fenritz.safecam.GalleryActivity$8$1 -> com.fenritz.safecam.bg:
-    com.fenritz.safecam.GalleryActivity$8 this$1 -> a
-    484:485:void onFinish() -> a
-com.fenritz.safecam.GalleryActivity$9 -> com.fenritz.safecam.bh:
-    com.fenritz.safecam.GalleryActivity this$0 -> a
-    495:496:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.GalleryActivity$Dec -> com.fenritz.safecam.bi:
+    android.util.SparseArray val$realFolderNames -> d
+    476:493:void onClick(android.content.DialogInterface,int) -> onClick
+    472:472:com.fenritz.safecam.GalleryActivity access$0(com.fenritz.safecam.GalleryActivity$9) -> a
+com.fenritz.safecam.GalleryActivity$9$1 -> com.fenritz.safecam.bk:
+    com.fenritz.safecam.GalleryActivity$9 this$1 -> a
+    486:487:void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$Dec -> com.fenritz.safecam.bl:
     java.lang.String fileName -> a
-    java.util.ArrayList images -> b
+    java.util.concurrent.CopyOnWriteArrayList images -> b
     com.fenritz.safecam.GalleryActivity this$0 -> c
-com.fenritz.safecam.GalleryActivity$GalleryAdapter -> com.fenritz.safecam.bj:
+com.fenritz.safecam.GalleryActivity$GalleryAdapter -> com.fenritz.safecam.bm:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    676:676:int getCount() -> getCount
-    680:680:java.lang.Object getItem(int) -> getItem
-    684:684:long getItemId(int) -> getItemId
-    775:785:android.widget.TextView getLabel(java.io.File) -> a
-    790:909:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    736:736:boolean access$0$17e55af9(com.fenritz.safecam.GalleryActivity$GalleryAdapter,java.io.File) -> a
-    673:673:com.fenritz.safecam.GalleryActivity access$1(com.fenritz.safecam.GalleryActivity$GalleryAdapter) -> a
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$1 -> com.fenritz.safecam.bk:
+    695:695:int getCount() -> getCount
+    699:699:java.lang.Object getItem(int) -> getItem
+    703:703:long getItemId(int) -> getItemId
+    794:804:android.widget.TextView getLabel(java.io.File) -> a
+    809:931:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    755:755:boolean access$0$17e55af9(com.fenritz.safecam.GalleryActivity$GalleryAdapter,java.io.File) -> a
+    692:692:com.fenritz.safecam.GalleryActivity access$1(com.fenritz.safecam.GalleryActivity$GalleryAdapter) -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$1 -> com.fenritz.safecam.bn:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
     com.fenritz.safecam.widget.CheckableLayout val$layout -> b
     java.io.File val$file -> c
-    690:706:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$2 -> com.fenritz.safecam.bl:
+    709:725:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$2 -> com.fenritz.safecam.bo:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
     com.fenritz.safecam.widget.CheckableLayout val$layout -> b
     java.io.File val$file -> c
-    712:724:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$3 -> com.fenritz.safecam.bm:
+    731:743:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$3 -> com.fenritz.safecam.bp:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
     java.io.File val$file -> b
-    731:731:boolean onLongClick(android.view.View) -> onLongClick
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$4 -> com.fenritz.safecam.bn:
+    750:750:boolean onLongClick(android.view.View) -> onLongClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$4 -> com.fenritz.safecam.bq:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
     java.io.File val$file -> b
-    743:768:void onClick(android.content.DialogInterface,int) -> onClick
-    741:741:com.fenritz.safecam.GalleryActivity$GalleryAdapter access$0(com.fenritz.safecam.GalleryActivity$GalleryAdapter$4) -> a
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$4$1 -> com.fenritz.safecam.bo:
+    762:787:void onClick(android.content.DialogInterface,int) -> onClick
+    760:760:com.fenritz.safecam.GalleryActivity$GalleryAdapter access$0(com.fenritz.safecam.GalleryActivity$GalleryAdapter$4) -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$4$1 -> com.fenritz.safecam.br:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter$4 this$2 -> a
-    754:756:void onFinish() -> a
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$5 -> com.fenritz.safecam.bp:
+    773:775:void onFinish() -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$5 -> com.fenritz.safecam.bs:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
     com.fenritz.safecam.widget.CheckableLayout val$layout -> b
     java.io.File val$file -> c
-    866:878:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$6 -> com.fenritz.safecam.bq:
+    888:900:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$6 -> com.fenritz.safecam.bt:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter this$1 -> a
     java.io.File val$file -> b
-    883:901:boolean onLongClick(android.view.View) -> onLongClick
-    880:880:com.fenritz.safecam.GalleryActivity$GalleryAdapter access$0(com.fenritz.safecam.GalleryActivity$GalleryAdapter$6) -> a
-com.fenritz.safecam.GalleryActivity$GalleryAdapter$6$1 -> com.fenritz.safecam.br:
+    905:923:boolean onLongClick(android.view.View) -> onLongClick
+    902:902:com.fenritz.safecam.GalleryActivity$GalleryAdapter access$0(com.fenritz.safecam.GalleryActivity$GalleryAdapter$6) -> a
+com.fenritz.safecam.GalleryActivity$GalleryAdapter$6$1 -> com.fenritz.safecam.bu:
     com.fenritz.safecam.GalleryActivity$GalleryAdapter$6 this$2 -> a
     java.io.File val$file -> b
-    889:898:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.GalleryActivity$GenerateThumbs -> com.fenritz.safecam.bs:
+    911:920:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.GalleryActivity$GenerateThumbs -> com.fenritz.safecam.bv:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    997:1031:java.lang.Void doInBackground$3f6017d3() -> a
-    1036:1037:void onCancelled() -> onCancelled
+    1019:1053:java.lang.Void doInBackground$3f6017d3() -> a
+    1058:1059:void onCancelled() -> onCancelled
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
-com.fenritz.safecam.GalleryActivity$MultiselectMode -> com.fenritz.safecam.bt:
+com.fenritz.safecam.GalleryActivity$MultiselectMode -> com.fenritz.safecam.bw:
     com.fenritz.safecam.GalleryActivity this$0 -> a
-    1057:1059:boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode,com.actionbarsherlock.view.Menu) -> onCreateActionMode
-    1063:1063:boolean onPrepareActionMode(com.actionbarsherlock.view.ActionMode,com.actionbarsherlock.view.Menu) -> onPrepareActionMode
-    1067:1098:boolean onActionItemClicked(com.actionbarsherlock.view.ActionMode,com.actionbarsherlock.view.MenuItem) -> onActionItemClicked
-    1102:1104:void onDestroyActionMode(com.actionbarsherlock.view.ActionMode) -> onDestroyActionMode
-    1055:1055:com.fenritz.safecam.GalleryActivity access$1(com.fenritz.safecam.GalleryActivity$MultiselectMode) -> a
-com.fenritz.safecam.GalleryActivity$MultiselectMode$1 -> com.fenritz.safecam.bu:
+    1079:1081:boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode,com.actionbarsherlock.view.Menu) -> onCreateActionMode
+    1085:1085:boolean onPrepareActionMode(com.actionbarsherlock.view.ActionMode,com.actionbarsherlock.view.Menu) -> onPrepareActionMode
+    1089:1120:boolean onActionItemClicked(com.actionbarsherlock.view.ActionMode,com.actionbarsherlock.view.MenuItem) -> onActionItemClicked
+    1124:1126:void onDestroyActionMode(com.actionbarsherlock.view.ActionMode) -> onDestroyActionMode
+    1077:1077:com.fenritz.safecam.GalleryActivity access$1(com.fenritz.safecam.GalleryActivity$MultiselectMode) -> a
+com.fenritz.safecam.GalleryActivity$MultiselectMode$1 -> com.fenritz.safecam.bx:
     com.fenritz.safecam.GalleryActivity$MultiselectMode this$1 -> a
-    1076:1078:void onFinish() -> a
+    1098:1100:void onFinish() -> a
 com.fenritz.safecam.ImportPhotosActivity -> com.fenritz.safecam.ImportPhotosActivity:
     java.util.HashSet selectedItems -> a
     java.util.ArrayList arrPath -> b
@@ -7114,110 +6761,110 @@ com.fenritz.safecam.ImportPhotosActivity -> com.fenritz.safecam.ImportPhotosActi
     com.fenritz.safecam.util.MemoryCache cache -> g
     java.util.HashMap tasks -> h
     int lastPosition -> i
-    49:90:void onCreate(android.os.Bundle) -> onCreate
-    94:98:void onDestroy() -> onDestroy
-    102:105:void onPause() -> onPause
-    109:113:void onResume() -> onResume
-    220:221:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    227:260:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    49:91:void onCreate(android.os.Bundle) -> onCreate
+    95:99:void onDestroy() -> onDestroy
+    103:106:void onPause() -> onPause
+    110:114:void onResume() -> onResume
+    221:222:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    228:261:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
     38:38:java.util.ArrayList access$0(com.fenritz.safecam.ImportPhotosActivity) -> a
     37:37:java.util.HashSet access$1(com.fenritz.safecam.ImportPhotosActivity) -> b
     39:39:java.util.ArrayList access$2(com.fenritz.safecam.ImportPhotosActivity) -> c
     40:40:java.util.ArrayList access$3(com.fenritz.safecam.ImportPhotosActivity) -> d
     43:43:com.fenritz.safecam.util.MemoryCache access$4(com.fenritz.safecam.ImportPhotosActivity) -> e
     44:44:java.util.HashMap access$5(com.fenritz.safecam.ImportPhotosActivity) -> f
-    194:194:int access$6(com.fenritz.safecam.ImportPhotosActivity) -> g
-    194:194:void access$7(com.fenritz.safecam.ImportPhotosActivity,int) -> a
-com.fenritz.safecam.ImportPhotosActivity$1 -> com.fenritz.safecam.bv:
+    195:195:int access$6(com.fenritz.safecam.ImportPhotosActivity) -> g
+    195:195:void access$7(com.fenritz.safecam.ImportPhotosActivity,int) -> a
+com.fenritz.safecam.ImportPhotosActivity$1 -> com.fenritz.safecam.by:
     com.fenritz.safecam.ImportPhotosActivity this$0 -> a
-    86:87:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.fenritz.safecam.ImportPhotosActivity$2 -> com.fenritz.safecam.bw:
+    87:88:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.ImportPhotosActivity$2 -> com.fenritz.safecam.bz:
     com.fenritz.safecam.ImportPhotosActivity this$0 -> a
-    203:203:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
-    206:214:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
-com.fenritz.safecam.ImportPhotosActivity$ImageAdapter -> com.fenritz.safecam.bx:
+    204:204:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
+    207:215:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
+com.fenritz.safecam.ImportPhotosActivity$ImageAdapter -> com.fenritz.safecam.ca:
     android.view.LayoutInflater mInflater -> b
     com.fenritz.safecam.ImportPhotosActivity this$0 -> a
-    123:123:int getCount() -> getCount
-    127:127:java.lang.Object getItem(int) -> getItem
-    131:131:long getItemId(int) -> getItemId
-    152:190:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    134:134:void access$0(com.fenritz.safecam.ImportPhotosActivity$ImageAdapter,android.widget.CheckBox) -> a
-    115:115:com.fenritz.safecam.ImportPhotosActivity access$1(com.fenritz.safecam.ImportPhotosActivity$ImageAdapter) -> a
-com.fenritz.safecam.ImportPhotosActivity$ImageAdapter$1 -> com.fenritz.safecam.by:
+    124:124:int getCount() -> getCount
+    128:128:java.lang.Object getItem(int) -> getItem
+    132:132:long getItemId(int) -> getItemId
+    153:191:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    135:135:void access$0(com.fenritz.safecam.ImportPhotosActivity$ImageAdapter,android.widget.CheckBox) -> a
+    116:116:com.fenritz.safecam.ImportPhotosActivity access$1(com.fenritz.safecam.ImportPhotosActivity$ImageAdapter) -> a
+com.fenritz.safecam.ImportPhotosActivity$ImageAdapter$1 -> com.fenritz.safecam.cb:
     com.fenritz.safecam.ImportPhotosActivity$ImageAdapter this$1 -> a
-    163:164:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ImportPhotosActivity$ImageAdapter$2 -> com.fenritz.safecam.bz:
+    164:165:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ImportPhotosActivity$ImageAdapter$2 -> com.fenritz.safecam.cc:
     com.fenritz.safecam.ImportPhotosActivity$ImageAdapter this$1 -> a
-    169:173:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ImportPhotosActivity$ImageAdapter$3 -> com.fenritz.safecam.ca:
+    170:174:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ImportPhotosActivity$ImageAdapter$3 -> com.fenritz.safecam.cd:
     com.fenritz.safecam.ImportPhotosActivity$ImageAdapter this$1 -> a
     com.fenritz.safecam.util.AsyncTasks$ShowSystemImageThumb val$task -> b
-    180:181:void onFinish() -> a
+    181:182:void onFinish() -> a
 com.fenritz.safecam.SafeCameraActivity -> com.fenritz.safecam.SafeCameraActivity:
     android.content.SharedPreferences preferences -> a
     boolean justLogin -> b
     android.os.Bundle extraData -> c
-    47:85:void onCreate(android.os.Bundle) -> onCreate
-    110:123:void onResume() -> onResume
-    207:208:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    214:236:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-    42:42:boolean access$0(com.fenritz.safecam.SafeCameraActivity) -> a
-    43:43:android.os.Bundle access$1(com.fenritz.safecam.SafeCameraActivity) -> b
-    40:40:android.content.SharedPreferences access$2(com.fenritz.safecam.SafeCameraActivity) -> c
-    125:125:void access$3(com.fenritz.safecam.SafeCameraActivity) -> d
-com.fenritz.safecam.SafeCameraActivity$1 -> com.fenritz.safecam.cb:
+    49:89:void onCreate(android.os.Bundle) -> onCreate
+    114:128:void onResume() -> onResume
+    212:213:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    219:242:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    44:44:boolean access$0(com.fenritz.safecam.SafeCameraActivity) -> a
+    45:45:android.os.Bundle access$1(com.fenritz.safecam.SafeCameraActivity) -> b
+    42:42:android.content.SharedPreferences access$2(com.fenritz.safecam.SafeCameraActivity) -> c
+    130:130:void access$3(com.fenritz.safecam.SafeCameraActivity) -> d
+com.fenritz.safecam.SafeCameraActivity$1 -> com.fenritz.safecam.ce:
     com.fenritz.safecam.SafeCameraActivity this$0 -> a
-    70:76:boolean onEditorAction(android.widget.TextView,int,android.view.KeyEvent) -> onEditorAction
-com.fenritz.safecam.SafeCameraActivity$2 -> com.fenritz.safecam.cc:
+    74:80:boolean onEditorAction(android.widget.TextView,int,android.view.KeyEvent) -> onEditorAction
+com.fenritz.safecam.SafeCameraActivity$2 -> com.fenritz.safecam.cf:
     com.fenritz.safecam.SafeCameraActivity this$0 -> a
-    103:104:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.SafeCameraActivity$3 -> com.fenritz.safecam.cd:
+    107:108:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.SafeCameraActivity$3 -> com.fenritz.safecam.cg:
     com.fenritz.safecam.SafeCameraActivity this$0 -> a
-    221:229:void onClick(android.content.DialogInterface,int) -> onClick
-com.fenritz.safecam.SafeCameraActivity$Login -> com.fenritz.safecam.ce:
+    226:235:void onClick(android.content.DialogInterface,int) -> onClick
+com.fenritz.safecam.SafeCameraActivity$Login -> com.fenritz.safecam.ch:
     android.app.ProgressDialog progressDialog -> b
     com.fenritz.safecam.SafeCameraActivity this$0 -> a
-    151:157:void onPreExecute() -> onPreExecute
+    156:162:void onPreExecute() -> onPreExecute
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-com.fenritz.safecam.SafeCameraActivity$Login$1 -> com.fenritz.safecam.cf:
+com.fenritz.safecam.SafeCameraActivity$Login$1 -> com.fenritz.safecam.ci:
     com.fenritz.safecam.SafeCameraActivity$Login this$1 -> a
-    155:155:void onCancel(android.content.DialogInterface) -> onCancel
+    160:160:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.SafeCameraApplication -> com.fenritz.safecam.SafeCameraApplication:
     java.lang.String key -> a
-    long lockedTime -> b
-    android.content.Context context -> c
-    com.fenritz.safecam.util.MemoryCache cache -> d
-    18:21:void onCreate() -> onCreate
-    24:24:android.content.Context getAppContext() -> a
-    28:28:com.fenritz.safecam.util.MemoryCache getCache() -> b
-    32:32:java.lang.String getKey() -> c
-    36:37:void setKey(java.lang.String) -> a
-    40:40:long getLockedTime() -> d
-    44:45:void setLockedTime(long) -> a
+    android.content.Context context -> b
+    com.fenritz.safecam.util.MemoryCache cache -> c
+    17:20:void onCreate() -> onCreate
+    23:23:android.content.Context getAppContext() -> a
+    27:27:com.fenritz.safecam.util.MemoryCache getCache() -> b
+    31:31:java.lang.String getKey() -> c
+    35:36:void setKey(java.lang.String) -> a
 com.fenritz.safecam.SetUpActivity -> com.fenritz.safecam.SetUpActivity:
     24:53:void onCreate(android.os.Bundle) -> onCreate
-com.fenritz.safecam.SetUpActivity$1 -> com.fenritz.safecam.cg:
+com.fenritz.safecam.SetUpActivity$1 -> com.fenritz.safecam.cj:
     com.fenritz.safecam.SetUpActivity this$0 -> a
     35:38:boolean accept(java.io.File) -> accept
-com.fenritz.safecam.SetUpActivity$2 -> com.fenritz.safecam.ch:
+com.fenritz.safecam.SetUpActivity$2 -> com.fenritz.safecam.ck:
     com.fenritz.safecam.SetUpActivity this$0 -> a
-    58:100:void onClick(android.view.View) -> onClick
+    58:101:void onClick(android.view.View) -> onClick
 com.fenritz.safecam.SettingsActivity -> com.fenritz.safecam.SettingsActivity:
-    21:82:void onCreate(android.os.Bundle) -> onCreate
-    86:89:void onResume() -> onResume
-    94:99:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-com.fenritz.safecam.SettingsActivity$1 -> com.fenritz.safecam.ci:
+    22:96:void onCreate(android.os.Bundle) -> onCreate
+    100:103:void onResume() -> onResume
+    108:113:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+com.fenritz.safecam.SettingsActivity$1 -> com.fenritz.safecam.cl:
     com.fenritz.safecam.SettingsActivity this$0 -> a
-    51:52:boolean onPreferenceClick(android.preference.Preference) -> onPreferenceClick
-com.fenritz.safecam.SettingsActivity$2 -> com.fenritz.safecam.cj:
+    52:61:boolean onPreferenceChange(android.preference.Preference,java.lang.Object) -> onPreferenceChange
+com.fenritz.safecam.SettingsActivity$2 -> com.fenritz.safecam.cm:
     com.fenritz.safecam.SettingsActivity this$0 -> a
-    60:77:boolean onPreferenceClick(android.preference.Preference) -> onPreferenceClick
-    57:57:com.fenritz.safecam.SettingsActivity access$0(com.fenritz.safecam.SettingsActivity$2) -> a
-com.fenritz.safecam.SettingsActivity$2$1 -> com.fenritz.safecam.ck:
-    com.fenritz.safecam.SettingsActivity$2 this$1 -> a
-    65:72:void onClick(android.content.DialogInterface,int) -> onClick
+    67:68:boolean onPreferenceClick(android.preference.Preference) -> onPreferenceClick
+com.fenritz.safecam.SettingsActivity$3 -> com.fenritz.safecam.cn:
+    com.fenritz.safecam.SettingsActivity this$0 -> a
+    76:93:boolean onPreferenceClick(android.preference.Preference) -> onPreferenceClick
+    73:73:com.fenritz.safecam.SettingsActivity access$0(com.fenritz.safecam.SettingsActivity$3) -> a
+com.fenritz.safecam.SettingsActivity$3$1 -> com.fenritz.safecam.co:
+    com.fenritz.safecam.SettingsActivity$3 this$1 -> a
+    81:88:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.ViewImageActivity -> com.fenritz.safecam.ViewImageActivity:
     java.util.ArrayList files -> a
     android.content.BroadcastReceiver receiver -> b
@@ -7229,69 +6876,72 @@ com.fenritz.safecam.ViewImageActivity -> com.fenritz.safecam.ViewImageActivity:
     boolean isViewsVisible -> h
     java.util.ArrayList taskStack -> i
     java.util.ArrayList viewsHideShow -> j
-    68:121:void onCreate(android.os.Bundle) -> onCreate
-    125:129:void onDestroy() -> onDestroy
-    133:137:void onPause() -> onPause
-    141:147:void onResume() -> onResume
-    174:177:void cancelPendingTasks() -> a
-    183:203:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    257:262:void hideViews() -> b
-    278:291:void showImage(java.io.File) -> a
-    294:318:void fillFilesList() -> c
-    322:323:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
-    329:429:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
-    47:47:int access$0(com.fenritz.safecam.ViewImageActivity) -> a
-    44:44:java.util.ArrayList access$1(com.fenritz.safecam.ViewImageActivity) -> b
-    173:173:void access$2(com.fenritz.safecam.ViewImageActivity) -> c
-    47:47:void access$3(com.fenritz.safecam.ViewImageActivity,int) -> a
-    277:277:void access$4(com.fenritz.safecam.ViewImageActivity,java.io.File) -> a
-    55:55:android.view.GestureDetector access$5(com.fenritz.safecam.ViewImageActivity) -> d
-    264:264:void access$6(com.fenritz.safecam.ViewImageActivity) -> e
-    60:60:boolean access$7(com.fenritz.safecam.ViewImageActivity) -> f
-    245:245:void access$8(com.fenritz.safecam.ViewImageActivity) -> g
-    62:62:java.util.ArrayList access$9(com.fenritz.safecam.ViewImageActivity) -> h
-    293:293:void access$10(com.fenritz.safecam.ViewImageActivity) -> i
-com.fenritz.safecam.ViewImageActivity$1 -> com.fenritz.safecam.cl:
+    67:122:void onCreate(android.os.Bundle) -> onCreate
+    126:130:void onDestroy() -> onDestroy
+    134:138:void onPause() -> onPause
+    142:148:void onResume() -> onResume
+    175:178:void cancelPendingTasks() -> a
+    184:204:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    258:263:void hideViews() -> b
+    279:292:void showImage(java.io.File) -> a
+    295:313:void fillFilesList() -> c
+    317:318:boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
+    324:422:boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
+    46:46:int access$0(com.fenritz.safecam.ViewImageActivity) -> a
+    43:43:java.util.ArrayList access$1(com.fenritz.safecam.ViewImageActivity) -> b
+    174:174:void access$2(com.fenritz.safecam.ViewImageActivity) -> c
+    46:46:void access$3(com.fenritz.safecam.ViewImageActivity,int) -> a
+    278:278:void access$4(com.fenritz.safecam.ViewImageActivity,java.io.File) -> a
+    54:54:android.view.GestureDetector access$5(com.fenritz.safecam.ViewImageActivity) -> d
+    265:265:void access$6(com.fenritz.safecam.ViewImageActivity) -> e
+    59:59:boolean access$7(com.fenritz.safecam.ViewImageActivity) -> f
+    246:246:void access$8(com.fenritz.safecam.ViewImageActivity) -> g
+    61:61:java.util.ArrayList access$9(com.fenritz.safecam.ViewImageActivity) -> h
+    294:294:void access$10(com.fenritz.safecam.ViewImageActivity) -> i
+com.fenritz.safecam.ViewImageActivity$1 -> com.fenritz.safecam.cp:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
-    101:101:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
-com.fenritz.safecam.ViewImageActivity$10 -> com.fenritz.safecam.cm:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    392:402:void onFinish(java.lang.Integer) -> a
-com.fenritz.safecam.ViewImageActivity$11 -> com.fenritz.safecam.cn:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    409:419:void onFinish(java.lang.Integer) -> a
-com.fenritz.safecam.ViewImageActivity$2 -> com.fenritz.safecam.co:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    112:113:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.fenritz.safecam.ViewImageActivity$3 -> com.fenritz.safecam.cp:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    152:157:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ViewImageActivity$4 -> com.fenritz.safecam.cq:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    164:169:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ViewImageActivity$5 -> com.fenritz.safecam.cr:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    194:199:void onFinish(java.util.ArrayList) -> a
-com.fenritz.safecam.ViewImageActivity$6 -> com.fenritz.safecam.cs:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    235:241:void onClick(android.view.View) -> onClick
-com.fenritz.safecam.ViewImageActivity$7 -> com.fenritz.safecam.ct:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    259:260:void run() -> run
-com.fenritz.safecam.ViewImageActivity$8 -> com.fenritz.safecam.cu:
-    com.fenritz.safecam.ViewImageActivity this$0 -> a
-    281:284:void onFinish() -> a
-com.fenritz.safecam.ViewImageActivity$9 -> com.fenritz.safecam.cv:
+    102:102:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
+com.fenritz.safecam.ViewImageActivity$10 -> com.fenritz.safecam.cq:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
     java.util.ArrayList val$selectedFiles -> b
-    359:382:void onClick(android.content.DialogInterface,int) -> onClick
-    356:356:com.fenritz.safecam.ViewImageActivity access$0(com.fenritz.safecam.ViewImageActivity$9) -> a
-com.fenritz.safecam.ViewImageActivity$9$1 -> com.fenritz.safecam.cw:
-    com.fenritz.safecam.ViewImageActivity$9 this$1 -> a
-    362:380:void onFinish() -> a
-com.fenritz.safecam.ViewImageActivity$SwipeGestureDetector -> com.fenritz.safecam.cx:
+    354:377:void onClick(android.content.DialogInterface,int) -> onClick
+    351:351:com.fenritz.safecam.ViewImageActivity access$0(com.fenritz.safecam.ViewImageActivity$10) -> a
+com.fenritz.safecam.ViewImageActivity$10$1 -> com.fenritz.safecam.cr:
+    com.fenritz.safecam.ViewImageActivity$10 this$1 -> a
+    357:375:void onFinish() -> a
+com.fenritz.safecam.ViewImageActivity$11 -> com.fenritz.safecam.cs:
     com.fenritz.safecam.ViewImageActivity this$0 -> a
-    209:226:boolean onFling(android.view.MotionEvent,android.view.MotionEvent,float,float) -> onFling
+    387:396:void onFinish(java.lang.Integer) -> a
+com.fenritz.safecam.ViewImageActivity$12 -> com.fenritz.safecam.ct:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    403:412:void onFinish(java.lang.Integer) -> a
+com.fenritz.safecam.ViewImageActivity$2 -> com.fenritz.safecam.cu:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    113:114:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.fenritz.safecam.ViewImageActivity$3 -> com.fenritz.safecam.cv:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    153:158:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$4 -> com.fenritz.safecam.cw:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    165:170:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$5 -> com.fenritz.safecam.cx:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    195:200:void onFinish(java.util.ArrayList) -> a
+com.fenritz.safecam.ViewImageActivity$6 -> com.fenritz.safecam.cy:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    236:242:void onClick(android.view.View) -> onClick
+com.fenritz.safecam.ViewImageActivity$7 -> com.fenritz.safecam.cz:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    260:261:void run() -> run
+com.fenritz.safecam.ViewImageActivity$8 -> com.fenritz.safecam.da:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    282:285:void onFinish() -> a
+com.fenritz.safecam.ViewImageActivity$9 -> com.fenritz.safecam.db:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    301:301:int compare(java.lang.Object,java.lang.Object) -> compare
+com.fenritz.safecam.ViewImageActivity$SwipeGestureDetector -> com.fenritz.safecam.dc:
+    com.fenritz.safecam.ViewImageActivity this$0 -> a
+    210:227:boolean onFling(android.view.MotionEvent,android.view.MotionEvent,float,float) -> onFling
 com.fenritz.safecam.util.AESCrypt -> com.fenritz.safecam.util.a:
     javax.crypto.Cipher encryptionCipher -> b
     javax.crypto.Cipher decryptionCipher -> c
@@ -7305,21 +6955,24 @@ com.fenritz.safecam.util.AESCrypt -> com.fenritz.safecam.util.a:
     143:147:void writeHeader(java.io.OutputStream,byte[],byte[]) -> a
     150:165:int readHeader(java.io.InputStream,byte[],byte[]) -> a
     176:209:void encrypt$45f1a8cc(java.io.InputStream,java.io.OutputStream,android.os.AsyncTask) -> a
-    213:225:void encrypt(byte[],java.io.OutputStream) -> a
-    234:234:boolean reEncrypt$3b0656d5(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,android.os.AsyncTask) -> a
-    241:296:boolean reEncrypt$25c3d16f(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,android.os.AsyncTask,boolean) -> a
-    309:345:void decrypt$45f1a8cc(java.io.InputStream,java.io.OutputStream,android.os.AsyncTask) -> b
-    360:404:byte[] decrypt(java.io.InputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress,android.os.AsyncTask) -> a
-    487:495:byte[] generateIv() -> a
-    504:508:byte[] getHash(java.lang.String,java.lang.String) -> a
-    514:520:javax.crypto.SecretKey getSecretKey(java.lang.String,byte[]) -> a
-    526:532:byte[] generateSalt() -> b
-    539:547:java.lang.String byteToHex(byte[]) -> a
+    213:228:void encrypt(byte[],java.io.OutputStream) -> a
+    237:237:boolean reEncrypt$3b0656d5(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,android.os.AsyncTask) -> a
+    244:299:boolean reEncrypt$25c3d16f(java.io.InputStream,java.io.OutputStream,com.fenritz.safecam.util.AESCrypt,android.os.AsyncTask,boolean) -> a
+    312:348:void decrypt$45f1a8cc(java.io.InputStream,java.io.OutputStream,android.os.AsyncTask) -> b
+    363:407:byte[] decrypt(java.io.InputStream,com.fenritz.safecam.util.AESCrypt$CryptoProgress,android.os.AsyncTask) -> a
+    417:428:java.lang.String encrypt(java.lang.String) -> a
+    439:457:java.lang.String decrypt(java.lang.String) -> b
+    493:501:byte[] generateIv() -> a
+    510:514:byte[] getHash(java.lang.String,java.lang.String) -> a
+    520:526:javax.crypto.SecretKey getSecretKey(java.lang.String,byte[]) -> a
+    532:538:byte[] generateSalt() -> b
+    545:553:java.lang.String byteToHex(byte[]) -> a
+    557:562:byte[] hexToByte(java.lang.String) -> c
 com.fenritz.safecam.util.AESCrypt$CryptoProgress -> com.fenritz.safecam.util.b:
     long total -> a
     long current -> b
-    568:569:void setProgress(long) -> a
-    576:579:int getProgressPercents() -> a
+    574:575:void setProgress(long) -> a
+    582:585:int getProgressPercents() -> a
 com.fenritz.safecam.util.AESCryptException -> com.fenritz.safecam.util.c:
 com.fenritz.safecam.util.AsyncTasks -> com.fenritz.safecam.util.d:
 com.fenritz.safecam.util.AsyncTasks$DecryptFiles -> com.fenritz.safecam.util.e:
@@ -7327,16 +6980,17 @@ com.fenritz.safecam.util.AsyncTasks$DecryptFiles -> com.fenritz.safecam.util.e:
     android.app.Activity activity -> b
     java.lang.String destinationFolder -> c
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> d
-    315:326:void onPreExecute() -> onPreExecute
-    330:360:java.util.ArrayList doInBackground(java.util.ArrayList[]) -> a
-    365:368:void onCancelled() -> onCancelled
-    379:385:void onPostExecute(java.util.ArrayList) -> a
+    android.os.PowerManager$WakeLock wl -> e
+    336:351:void onPreExecute() -> onPreExecute
+    355:382:java.util.ArrayList doInBackground(java.util.ArrayList[]) -> a
+    387:390:void onCancelled() -> onCancelled
+    401:409:void onPostExecute(java.util.ArrayList) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$DecryptFiles$1 -> com.fenritz.safecam.util.f:
     com.fenritz.safecam.util.AsyncTasks$DecryptFiles this$1 -> a
-    320:321:void onCancel(android.content.DialogInterface) -> onCancel
+    341:342:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$DecryptPopulateImage -> com.fenritz.safecam.util.g:
     android.content.Context context -> a
     java.lang.String filePath -> b
@@ -7344,104 +6998,111 @@ com.fenritz.safecam.util.AsyncTasks$DecryptPopulateImage -> com.fenritz.safecam.
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish onFinish -> d
     int size -> e
     com.fenritz.safecam.util.MemoryCache memCache -> f
-    70:71:void setSize(int) -> a
-    78:79:void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
-    83:105:android.graphics.Bitmap doInBackground$2d4c763b() -> a
+    71:72:void setSize(int) -> a
+    79:80:void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
+    84:106:android.graphics.Bitmap doInBackground$2d4c763b() -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.util.AsyncTasks$DeleteFiles -> com.fenritz.safecam.util.h:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
-    138:149:void onPreExecute() -> onPreExecute
-    183:190:void deleteFileFolder(java.io.File) -> a
-    194:197:void onCancelled() -> onCancelled
-    208:215:void onPostExecute(java.util.ArrayList) -> a
+    android.os.PowerManager$WakeLock wl -> d
+    140:155:void onPreExecute() -> onPreExecute
+    189:196:void deleteFileFolder(java.io.File) -> a
+    200:203:void onCancelled() -> onCancelled
+    214:222:void onPostExecute(java.util.ArrayList) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$DeleteFiles$1 -> com.fenritz.safecam.util.i:
     com.fenritz.safecam.util.AsyncTasks$DeleteFiles this$1 -> a
-    143:144:void onCancel(android.content.DialogInterface) -> onCancel
+    145:146:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$EncryptFiles -> com.fenritz.safecam.util.j:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
     java.lang.String destinationFolder -> d
-    499:510:void onPreExecute() -> onPreExecute
-    514:539:java.lang.Void doInBackground(java.lang.String[]) -> a
-    544:547:void onCancelled() -> onCancelled
-    558:565:void onPostExecute(java.lang.Void) -> a
+    android.os.PowerManager$WakeLock wl -> e
+    531:546:void onPreExecute() -> onPreExecute
+    550:576:java.lang.Void doInBackground(java.lang.String[]) -> a
+    581:584:void onCancelled() -> onCancelled
+    595:603:void onPostExecute(java.lang.Void) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$EncryptFiles$1 -> com.fenritz.safecam.util.k:
     com.fenritz.safecam.util.AsyncTasks$EncryptFiles this$1 -> a
-    504:505:void onCancel(android.content.DialogInterface) -> onCancel
+    536:537:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$ImportFiles -> com.fenritz.safecam.util.l:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
     java.lang.String destinationFolder -> d
-    591:602:void onPreExecute() -> onPreExecute
-    606:655:java.lang.Integer doInBackground(java.util.HashMap[]) -> a
-    660:663:void onCancelled() -> onCancelled
-    674:680:void onPostExecute(java.lang.Integer) -> a
+    android.os.PowerManager$WakeLock wl -> e
+    630:645:void onPreExecute() -> onPreExecute
+    649:699:java.lang.Integer doInBackground(java.util.HashMap[]) -> a
+    704:707:void onCancelled() -> onCancelled
+    718:725:void onPostExecute(java.lang.Integer) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$ImportFiles$1 -> com.fenritz.safecam.util.m:
     com.fenritz.safecam.util.AsyncTasks$ImportFiles this$1 -> a
-    596:597:void onCancel(android.content.DialogInterface) -> onCancel
+    635:636:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$MoveFiles -> com.fenritz.safecam.util.n:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
     java.io.File destination -> c
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> d
-    237:248:void onPreExecute() -> onPreExecute
-    272:275:void onCancelled() -> onCancelled
-    286:293:void onPostExecute(java.lang.Void) -> a
+    android.os.PowerManager$WakeLock wl -> e
+    245:260:void onPreExecute() -> onPreExecute
+    291:294:void onCancelled() -> onCancelled
+    305:313:void onPostExecute(java.lang.Void) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$MoveFiles$1 -> com.fenritz.safecam.util.o:
     com.fenritz.safecam.util.AsyncTasks$MoveFiles this$1 -> a
-    242:243:void onCancel(android.content.DialogInterface) -> onCancel
+    250:251:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish -> com.fenritz.safecam.util.p:
-    43:43:void onFinish() -> a
-    45:46:void onFinish(java.util.ArrayList) -> a
-    48:49:void onFinish(java.lang.Integer) -> a
+    44:44:void onFinish() -> a
+    46:47:void onFinish(java.util.ArrayList) -> a
+    49:50:void onFinish(java.lang.Integer) -> a
 com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles -> com.fenritz.safecam.util.q:
     android.app.ProgressDialog progressDialog -> a
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> b
     android.app.Activity activity -> c
-    401:412:void onPreExecute() -> onPreExecute
-    417:457:java.util.ArrayList doInBackground(java.util.HashMap[]) -> a
+    android.os.PowerManager$WakeLock wl -> d
+    426:441:void onPreExecute() -> onPreExecute
+    446:487:java.util.ArrayList doInBackground(java.util.HashMap[]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles$1 -> com.fenritz.safecam.util.r:
     com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles this$1 -> a
-    406:407:void onCancel(android.content.DialogInterface) -> onCancel
+    431:432:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$RotatePhoto -> com.fenritz.safecam.util.s:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
     java.lang.String filePath -> d
     int direction -> e
-    713:724:void onPreExecute() -> onPreExecute
-    728:893:java.lang.Integer doInBackground$9ecd34e() -> a
-    898:901:void onCancelled() -> onCancelled
-    905:911:void onPostExecute(java.lang.Integer) -> a
+    android.os.PowerManager$WakeLock wl -> f
+    759:774:void onPreExecute() -> onPreExecute
+    778:943:java.lang.Integer doInBackground$9ecd34e() -> a
+    948:951:void onCancelled() -> onCancelled
+    955:963:void onPostExecute(java.lang.Integer) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.util.AsyncTasks$RotatePhoto$1 -> com.fenritz.safecam.util.t:
     com.fenritz.safecam.util.AsyncTasks$RotatePhoto this$1 -> a
-    718:719:void onCancel(android.content.DialogInterface) -> onCancel
+    764:765:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$ShowImageThumb -> com.fenritz.safecam.util.u:
     android.widget.ImageView imageView -> a
     com.fenritz.safecam.util.MemoryCache cache -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
+    991:1008:android.graphics.Bitmap doInBackground(java.io.File[]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.util.AsyncTasks$ShowSystemImageThumb -> com.fenritz.safecam.util.v:
@@ -7450,8 +7111,8 @@ com.fenritz.safecam.util.AsyncTasks$ShowSystemImageThumb -> com.fenritz.safecam.
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
     int imgId -> d
     int orientation -> e
-    990:991:void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
-    1006:1036:android.graphics.Bitmap doInBackground(java.io.File[]) -> a
+    1046:1047:void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
+    1062:1093:android.graphics.Bitmap doInBackground(java.io.File[]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.util.CameraPreview -> com.fenritz.safecam.util.CameraPreview:
@@ -7491,64 +7152,71 @@ com.fenritz.safecam.util.DecryptAndShowImage$1 -> com.fenritz.safecam.util.x:
     com.fenritz.safecam.util.DecryptAndShowImage this$0 -> a
     124:127:void setProgress(long) -> a
 com.fenritz.safecam.util.Helpers -> com.fenritz.safecam.util.y:
-    77:81:boolean isDemo(android.content.Context) -> a
-    85:85:boolean checkLoginedState(android.app.Activity) -> a
-    91:117:boolean checkLoginedState$2dadfc0b(android.app.Activity,android.os.Bundle) -> a
-    121:122:void setLockedTime(android.content.Context) -> b
-    125:126:void disableLockTimer(android.content.Context) -> c
-    129:131:void logout(android.app.Activity) -> b
-    134:141:void redirectToLogin(android.app.Activity,android.os.Bundle) -> b
-    144:151:void doLogout(android.app.Activity) -> d
-    154:161:void deleteTmpDir(android.content.Context) -> d
-    180:188:com.fenritz.safecam.util.AESCrypt getAESCrypt(java.lang.String,android.content.Context) -> a
-    192:195:java.lang.String getFilename(android.content.Context,java.lang.String) -> a
-    212:217:void showAlertDialog(android.app.Activity,java.lang.String) -> a
-    220:229:java.lang.String getHomeDir(android.content.Context) -> e
-    233:233:java.lang.String getThumbsDir(android.content.Context) -> f
-    249:261:android.graphics.Bitmap generateThumbnail(android.content.Context,byte[],java.lang.String) -> a
-    265:273:int getThumbSize(android.content.Context) -> g
-    322:327:int getAltExifRotation(byte[]) -> a
-    332:337:int getAltExifRotation(java.io.File) -> a
-    377:398:int getRotationFromMetadata(com.drew.metadata.Metadata) -> a
-    402:408:android.graphics.Bitmap getRotatedBitmap(android.graphics.Bitmap,int) -> a
-    412:412:android.graphics.Bitmap decodeBitmap(byte[],int) -> a
-    454:480:android.graphics.Bitmap decodeFile(java.io.File,int) -> a
-    489:492:java.lang.String getThumbFileName(java.lang.String) -> a
-    497:501:java.lang.String getRealPathFromURI(android.app.Activity,android.net.Uri) -> a
-    509:550:java.lang.String findNewFileNameIfNeeded(android.content.Context,java.lang.String,java.lang.String,java.lang.Integer) -> a
-    554:644:void share(android.app.Activity,java.util.ArrayList,com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
-    647:666:void shareFiles(android.app.Activity,java.util.ArrayList) -> a
-    669:677:void fixBackgroundRepeat(android.view.View) -> a
-    680:693:void warnProVersion(android.app.Activity) -> c
+    82:86:boolean isDemo(android.content.Context) -> a
+    90:90:boolean checkLoginedState(android.app.Activity) -> a
+    96:122:boolean checkLoginedState$2dadfc0b(android.app.Activity,android.os.Bundle) -> a
+    126:127:void setLockedTime(android.content.Context) -> b
+    130:131:void disableLockTimer(android.content.Context) -> c
+    134:136:void logout(android.app.Activity) -> b
+    139:146:void redirectToLogin(android.app.Activity,android.os.Bundle) -> b
+    149:156:void doLogout(android.app.Activity) -> d
+    159:166:void deleteTmpDir(android.content.Context) -> d
+    185:193:com.fenritz.safecam.util.AESCrypt getAESCrypt(java.lang.String,android.content.Context) -> a
+    197:200:java.lang.String getFilename$5b1592bd(java.lang.String) -> a
+    217:222:void showAlertDialog(android.app.Activity,java.lang.String) -> a
+    225:234:java.lang.String getHomeDir(android.content.Context) -> e
+    242:246:java.lang.String getThumbsDir(android.content.Context,java.lang.String) -> a
+    255:270:void createFolders(android.content.Context,java.lang.String) -> b
+    278:292:void writeLoginHashToFile(android.content.Context,java.lang.String,java.lang.String) -> a
+    307:331:java.lang.String readLoginHashFromFile(android.content.Context,java.lang.String) -> d
+    339:355:int synchronizePasswordHash(android.content.Context,java.lang.String) -> c
+    359:371:android.graphics.Bitmap generateThumbnail(android.content.Context,byte[],java.lang.String) -> a
+    375:383:int getThumbSize(android.content.Context) -> f
+    432:437:int getAltExifRotation(java.io.BufferedInputStream) -> a
+    487:508:int getRotationFromMetadata(com.drew.metadata.Metadata) -> a
+    512:518:android.graphics.Bitmap getRotatedBitmap(android.graphics.Bitmap,int) -> a
+    522:522:android.graphics.Bitmap decodeBitmap(byte[],int) -> a
+    563:586:android.graphics.Bitmap decodeFile(java.io.InputStream,int) -> a
+    596:599:java.lang.String getThumbFileName(java.lang.String) -> b
+    604:612:java.lang.String getRealPathFromURI(android.app.Activity,android.net.Uri) -> a
+    620:620:java.lang.String getNewDestinationPath(android.content.Context,java.lang.String,java.lang.String,com.fenritz.safecam.util.AESCrypt) -> a
+    624:646:java.lang.String getNextAvailableFilePrefix(java.lang.String) -> c
+    654:654:java.lang.String encryptFilename(android.content.Context,java.lang.String,com.fenritz.safecam.util.AESCrypt) -> a
+    662:666:java.lang.String encryptString(android.content.Context,java.lang.String,com.fenritz.safecam.util.AESCrypt) -> b
+    675:698:java.lang.String decryptFilename(android.content.Context,java.lang.String,com.fenritz.safecam.util.AESCrypt) -> c
+    751:841:void share(android.app.Activity,java.util.ArrayList,com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
+    844:863:void shareFiles(android.app.Activity,java.util.ArrayList) -> a
+    866:874:void fixBackgroundRepeat(android.view.View) -> a
+    877:890:void warnProVersion(android.app.Activity) -> c
 com.fenritz.safecam.util.Helpers$2 -> com.fenritz.safecam.util.z:
     android.app.Activity val$activity -> a
     java.util.ArrayList val$files -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish val$onDecrypt -> c
-    561:642:void onClick(android.content.DialogInterface,int) -> onClick
+    758:839:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.util.Helpers$2$1 -> com.fenritz.safecam.util.aa:
     com.fenritz.safecam.util.Helpers$2 this$1 -> a
     android.view.View val$enterPasswordView -> b
     java.util.ArrayList val$files -> c
     android.app.Activity val$activity -> d
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish val$onDecrypt -> e
-    576:601:void onClick(android.content.DialogInterface,int) -> onClick
+    773:798:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.util.Helpers$2$1$1 -> com.fenritz.safecam.util.ab:
     com.fenritz.safecam.util.Helpers$2$1 this$2 -> a
     android.app.Activity val$activity -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish val$onDecrypt -> c
-    588:594:void onFinish(java.util.ArrayList) -> a
+    785:791:void onFinish(java.util.ArrayList) -> a
 com.fenritz.safecam.util.Helpers$2$2 -> com.fenritz.safecam.util.ac:
     com.fenritz.safecam.util.Helpers$2 this$1 -> a
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish val$onDecrypt -> b
-    607:610:void onClick(android.content.DialogInterface,int) -> onClick
+    804:807:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.util.Helpers$2$3 -> com.fenritz.safecam.util.ad:
     com.fenritz.safecam.util.Helpers$2 this$1 -> a
     android.app.Activity val$activity -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish val$onDecrypt -> c
-    627:633:void onFinish(java.util.ArrayList) -> a
+    824:830:void onFinish(java.util.ArrayList) -> a
 com.fenritz.safecam.util.Helpers$3 -> com.fenritz.safecam.util.ae:
     android.app.Activity val$activity -> a
-    685:688:void onClick(android.content.DialogInterface,int) -> onClick
+    882:885:void onClick(android.content.DialogInterface,int) -> onClick
 com.fenritz.safecam.util.LimitedThreadAsyncTask -> com.fenritz.safecam.util.af:
 com.fenritz.safecam.util.MemoryCache -> com.fenritz.safecam.util.ag:
     android.support.v4.util.LruCache cache -> a
@@ -7558,7 +7226,10 @@ com.fenritz.safecam.util.MemoryCache -> com.fenritz.safecam.util.ag:
 com.fenritz.safecam.util.MemoryCache$1 -> com.fenritz.safecam.util.ah:
     com.fenritz.safecam.util.MemoryCache this$0 -> a
     1:1:int sizeOf$2838e5a0(java.lang.Object) -> c
-com.fenritz.safecam.util.OptimizedCipherInputStream -> com.fenritz.safecam.util.ai:
+com.fenritz.safecam.util.NaturalOrderComparator -> com.fenritz.safecam.util.ai:
+    79:87:int compare(java.lang.Object,java.lang.Object) -> compare
+    158:164:char charAt(java.lang.String,int) -> a
+com.fenritz.safecam.util.OptimizedCipherInputStream -> com.fenritz.safecam.util.aj:
     javax.crypto.Cipher cipher -> a
     java.io.InputStream input -> b
     byte[] ibuffer -> c
@@ -7566,14 +7237,14 @@ com.fenritz.safecam.util.OptimizedCipherInputStream -> com.fenritz.safecam.util.
     byte[] obuffer -> e
     int ostart -> f
     int ofinish -> g
-    109:137:int getMoreData() -> a
-    186:192:int read() -> read
-    213:213:int read(byte[]) -> read
-    235:250:int read(byte[],int,int) -> read
-    273:281:long skip(long) -> skip
-    297:297:int available() -> available
-    313:324:void close() -> close
-    338:338:boolean markSupported() -> markSupported
+    112:150:int getMoreData() -> a
+    199:205:int read() -> read
+    226:226:int read(byte[]) -> read
+    248:263:int read(byte[],int,int) -> read
+    286:294:long skip(long) -> skip
+    310:310:int available() -> available
+    326:337:void close() -> close
+    351:351:boolean markSupported() -> markSupported
 com.fenritz.safecam.widget.CheckableLayout -> com.fenritz.safecam.widget.CheckableLayout:
     boolean mChecked -> a
     21:26:void setChecked(boolean) -> setChecked
@@ -7726,14 +7397,10 @@ com.google.ads.AdView -> com.google.ads.AdView:
     com.google.ads.internal.d b -> b
     151:186:void a(android.content.Context,java.lang.String,int,com.google.ads.AdSize,android.util.AttributeSet) -> a
     196:196:int a(android.content.Context,int) -> a
-    215:224:boolean a(android.content.Context,com.google.ads.AdSize,android.util.AttributeSet) -> a
-    244:253:boolean b(android.content.Context,com.google.ads.AdSize,android.util.AttributeSet) -> b
     263:264:void destroy() -> a
     283:287:void a(android.content.Context,java.lang.String,com.google.ads.AdSize,android.util.AttributeSet) -> a
     380:405:java.lang.String a(java.lang.String,android.content.Context,android.util.AttributeSet,boolean,boolean) -> a
     411:423:java.util.Set b$565bd434(java.lang.String,android.content.Context,android.util.AttributeSet) -> a
-    441:472:void a(android.app.Activity,com.google.ads.AdSize,java.lang.String) -> a
-    514:523:void loadAd(com.google.ads.AdRequest) -> a
 com.google.ads.InterstitialAd -> com.google.ads.h:
 com.google.ads.a -> com.google.ads.i:
     java.lang.String a -> a

@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -458,8 +459,12 @@ public class GalleryActivity extends SherlockActivity {
 			isInHome = true;
 		}
 		
+		
+		final SparseArray<String> realFolderNames = new SparseArray<String>();
 		for(File dir : dirs){
-			folderNames[count++] = dir.getName();
+			realFolderNames.put(count, dir.getName());
+			folderNames[count] = Helpers.decryptFilename(GalleryActivity.this, dir.getName());
+			count++;
 		}
 		spinner.setAdapter(new ArrayAdapter<String>(GalleryActivity.this, android.R.layout.simple_spinner_dropdown_item, folderNames));
 		builder.setView(spinner);
@@ -472,7 +477,7 @@ public class GalleryActivity extends SherlockActivity {
 					destDir = new File(Helpers.getHomeDir(GalleryActivity.this));
 				}
 				else{
-					destDir = new File(Helpers.getHomeDir(GalleryActivity.this), ((String)spinner.getSelectedItem()));
+					destDir = new File(Helpers.getHomeDir(GalleryActivity.this), (realFolderNames.get(spinner.getSelectedItemPosition())));
 				}
 				if(destDir.exists() && destDir.isDirectory()){
 					new AsyncTasks.MoveFiles(GalleryActivity.this, destDir, new AsyncTasks.OnAsyncTaskFinish() {
