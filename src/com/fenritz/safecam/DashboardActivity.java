@@ -17,12 +17,10 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.Helpers;
-import com.google.ads.AdView;
 
 public class DashboardActivity extends SherlockActivity {
 	
 	private BroadcastReceiver receiver;
-	private AdView adView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -141,9 +139,6 @@ public class DashboardActivity extends SherlockActivity {
 	
 	@Override
 	protected void onDestroy() {
-		if (adView != null){
-			adView.destroy();
-		}
 		if(receiver != null){
 			unregisterReceiver(receiver);
 		}

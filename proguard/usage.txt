@@ -2088,13 +2088,13 @@ com.fenritz.safecam.CameraActivity:
     private static final int ORIENTATION_LANDSCAPE_NORMAL
     private static final int ORIENTATION_LANDSCAPE_INVERTED
     private static final int DEFAULT_CAMERA
-    194:195:private void startCamera()
-    731:753:public static byte[] FixFrontCamPhoto(byte[],int)
+    192:193:private void startCamera()
+    726:748:public static byte[] FixFrontCamPhoto(byte[],int)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteFile:
-    900:901:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
+    895:896:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb:
-    946:947:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
-    950:951:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
+    941:942:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
+    945:946:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
 com.fenritz.safecam.FileDialog:
     public static final int MODE_CREATE
     public static final int MODE_OPEN
@@ -2303,6 +2303,7 @@ com.google.ads.AdSize:
     317:337:public varargs com.google.ads.AdSize findBestSize(com.google.ads.AdSize[])
 com.google.ads.AdView:
     87:100:public AdView(android.app.Activity,com.google.ads.AdSize,java.lang.String)
+    263:264:public void destroy()
     483:487:public boolean isReady()
     534:535:public void setAdListener(com.google.ads.AdListener)
     546:549:public void stopLoading()
@@ -2317,6 +2318,7 @@ com.google.ads.InterstitialAd:
     148:149:public void setAdListener(com.google.ads.AdListener)
     158:159:public void stopLoading()
 com.google.ads.e:
+    112:122:public void b()
     199:205:private boolean a(com.google.ads.h,java.lang.String)
     211:222:public void a(com.google.ads.h,boolean)
     227:241:public void a(com.google.ads.h,android.view.View)
@@ -2340,11 +2342,15 @@ com.google.ads.h:
     262:262:com.google.ads.e i()
     266:267:synchronized void a(android.view.View)
 com.google.ads.h$2
+com.google.ads.internal.c:
+    433:449:protected void a()
 com.google.ads.internal.d:
+    294:302:public synchronized void b()
     497:497:public synchronized boolean q()
     678:683:public synchronized void a(com.google.ads.f,boolean)
     808:819:private void b(com.google.ads.f,java.lang.Boolean)
     999:1028:public synchronized void y()
+    1037:1046:public synchronized void z()
     1150:1150:public java.lang.Boolean C()
 com.google.ads.j:
     private boolean b

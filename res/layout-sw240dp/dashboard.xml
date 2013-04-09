@@ -5,13 +5,6 @@
     android:orientation="vertical"
     android:id="@+id/parentLayout"
     android:background="@drawable/background" >
-    
-    <LinearLayout 
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:orientation="vertical"
-    	android:id="@+id/adHolder" >
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"

@@ -62,7 +62,6 @@ import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.NaturalOrderComparator;
-import com.google.ads.AdView;
 
 public class CameraActivity extends SherlockActivity {
 
@@ -111,7 +110,6 @@ public class CameraActivity extends SherlockActivity {
 	// The first rear facing camera
 	int defaultCameraId;
 	private BroadcastReceiver receiver;
-	private AdView adView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -491,9 +489,6 @@ public class CameraActivity extends SherlockActivity {
 	
 	@Override
 	protected void onDestroy() {
-		if (adView != null){
-			adView.destroy();
-		}
 		if(receiver != null){
 			unregisterReceiver(receiver);
 		}
