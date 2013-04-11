@@ -361,11 +361,6 @@ public class AsyncTasks {
 				File file = filesToDecrypt.get(i);
 				if (file.exists() && file.isFile()) {
 					String destFileName = Helpers.decryptFilename(activity, file.getName());
-					String extension = activity.getString(R.string.file_extension);
-					
-					if(destFileName.endsWith(extension)){
-						destFileName = destFileName.substring(0, destFileName.length() - extension.length());
-					}
 					
 					try {
 						FileInputStream inputStream = new FileInputStream(file);

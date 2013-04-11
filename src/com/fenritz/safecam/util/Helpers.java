@@ -693,6 +693,12 @@ public class Helpers {
 
 		
 		if(decryptedFilename == null){
+			String extension = context.getString(R.string.file_extension);
+			
+			if(fileName.endsWith(extension)){
+				fileName = fileName.substring(0, fileName.length() - extension.length());
+			}
+			
 			return fileName;
 		}
 		return decryptedFilename;
