@@ -6980,9 +6980,9 @@ com.fenritz.safecam.util.AsyncTasks$DecryptFiles -> com.fenritz.safecam.util.e:
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> d
     android.os.PowerManager$WakeLock wl -> e
     336:351:void onPreExecute() -> onPreExecute
-    355:382:java.util.ArrayList doInBackground(java.util.ArrayList[]) -> a
-    387:390:void onCancelled() -> onCancelled
-    401:409:void onPostExecute(java.util.ArrayList) -> a
+    355:387:java.util.ArrayList doInBackground(java.util.ArrayList[]) -> a
+    392:395:void onCancelled() -> onCancelled
+    406:414:void onPostExecute(java.util.ArrayList) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
@@ -7022,32 +7022,32 @@ com.fenritz.safecam.util.AsyncTasks$EncryptFiles -> com.fenritz.safecam.util.j:
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
     java.lang.String destinationFolder -> d
     android.os.PowerManager$WakeLock wl -> e
-    531:546:void onPreExecute() -> onPreExecute
-    550:576:java.lang.Void doInBackground(java.lang.String[]) -> a
-    581:584:void onCancelled() -> onCancelled
-    595:603:void onPostExecute(java.lang.Void) -> a
+    536:551:void onPreExecute() -> onPreExecute
+    555:581:java.lang.Void doInBackground(java.lang.String[]) -> a
+    586:589:void onCancelled() -> onCancelled
+    600:608:void onPostExecute(java.lang.Void) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$EncryptFiles$1 -> com.fenritz.safecam.util.k:
     com.fenritz.safecam.util.AsyncTasks$EncryptFiles this$1 -> a
-    536:537:void onCancel(android.content.DialogInterface) -> onCancel
+    541:542:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$ImportFiles -> com.fenritz.safecam.util.l:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
     java.lang.String destinationFolder -> d
     android.os.PowerManager$WakeLock wl -> e
-    630:645:void onPreExecute() -> onPreExecute
-    649:699:java.lang.Integer doInBackground(java.util.HashMap[]) -> a
-    704:707:void onCancelled() -> onCancelled
-    718:725:void onPostExecute(java.lang.Integer) -> a
+    635:650:void onPreExecute() -> onPreExecute
+    654:704:java.lang.Integer doInBackground(java.util.HashMap[]) -> a
+    709:712:void onCancelled() -> onCancelled
+    723:730:void onPostExecute(java.lang.Integer) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$ImportFiles$1 -> com.fenritz.safecam.util.m:
     com.fenritz.safecam.util.AsyncTasks$ImportFiles this$1 -> a
-    635:636:void onCancel(android.content.DialogInterface) -> onCancel
+    640:641:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$MoveFiles -> com.fenritz.safecam.util.n:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
@@ -7072,14 +7072,14 @@ com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles -> com.fenritz.safecam.util.q
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> b
     android.app.Activity activity -> c
     android.os.PowerManager$WakeLock wl -> d
-    426:441:void onPreExecute() -> onPreExecute
-    446:487:java.util.ArrayList doInBackground(java.util.HashMap[]) -> a
+    431:446:void onPreExecute() -> onPreExecute
+    451:492:java.util.ArrayList doInBackground(java.util.HashMap[]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     1:1:void onProgressUpdate(java.lang.Object[]) -> onProgressUpdate
 com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles$1 -> com.fenritz.safecam.util.r:
     com.fenritz.safecam.util.AsyncTasks$ReEncryptFiles this$1 -> a
-    431:432:void onCancel(android.content.DialogInterface) -> onCancel
+    436:437:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$RotatePhoto -> com.fenritz.safecam.util.s:
     android.app.ProgressDialog progressDialog -> a
     android.app.Activity activity -> b
@@ -7087,20 +7087,20 @@ com.fenritz.safecam.util.AsyncTasks$RotatePhoto -> com.fenritz.safecam.util.s:
     java.lang.String filePath -> d
     int direction -> e
     android.os.PowerManager$WakeLock wl -> f
-    759:774:void onPreExecute() -> onPreExecute
-    778:943:java.lang.Integer doInBackground$9ecd34e() -> a
-    948:951:void onCancelled() -> onCancelled
-    955:963:void onPostExecute(java.lang.Integer) -> a
+    764:779:void onPreExecute() -> onPreExecute
+    783:948:java.lang.Integer doInBackground$9ecd34e() -> a
+    953:956:void onCancelled() -> onCancelled
+    960:968:void onPostExecute(java.lang.Integer) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.util.AsyncTasks$RotatePhoto$1 -> com.fenritz.safecam.util.t:
     com.fenritz.safecam.util.AsyncTasks$RotatePhoto this$1 -> a
-    764:765:void onCancel(android.content.DialogInterface) -> onCancel
+    769:770:void onCancel(android.content.DialogInterface) -> onCancel
 com.fenritz.safecam.util.AsyncTasks$ShowImageThumb -> com.fenritz.safecam.util.u:
     android.widget.ImageView imageView -> a
     com.fenritz.safecam.util.MemoryCache cache -> b
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
-    991:1008:android.graphics.Bitmap doInBackground(java.io.File[]) -> a
+    996:1013:android.graphics.Bitmap doInBackground(java.io.File[]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.util.AsyncTasks$ShowSystemImageThumb -> com.fenritz.safecam.util.v:
@@ -7109,8 +7109,8 @@ com.fenritz.safecam.util.AsyncTasks$ShowSystemImageThumb -> com.fenritz.safecam.
     com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish finishListener -> c
     int imgId -> d
     int orientation -> e
-    1046:1047:void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
-    1062:1093:android.graphics.Bitmap doInBackground(java.io.File[]) -> a
+    1051:1052:void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish) -> a
+    1067:1098:android.graphics.Bitmap doInBackground(java.io.File[]) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.fenritz.safecam.util.CameraPreview -> com.fenritz.safecam.util.CameraPreview:

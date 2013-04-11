@@ -2191,12 +2191,12 @@ com.fenritz.safecam.util.AsyncTasks$DecryptFiles:
 com.fenritz.safecam.util.AsyncTasks$DecryptPopulateImage:
     75:76:public void setCache(com.fenritz.safecam.util.MemoryCache)
 com.fenritz.safecam.util.AsyncTasks$EncryptFiles:
-    520:521:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
+    525:526:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$ImportFiles:
     public static final int STATUS_OK
     public static final int STATUS_FAIL
     public static final int STATUS_CANCEL
-    619:620:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
+    624:625:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$MoveFiles:
     234:235:public AsyncTasks$MoveFiles(android.app.Activity,java.io.File)
 com.fenritz.safecam.util.AsyncTasks$RotatePhoto:
@@ -2205,9 +2205,9 @@ com.fenritz.safecam.util.AsyncTasks$RotatePhoto:
     public static final int STATUS_CANCEL
     public static final int ROTATION_CW
     public static final int ROTATION_CCW
-    747:748:public AsyncTasks$RotatePhoto(android.app.Activity,java.lang.String,int)
+    752:753:public AsyncTasks$RotatePhoto(android.app.Activity,java.lang.String,int)
 com.fenritz.safecam.util.AsyncTasks$ShowImageThumb:
-    985:986:public void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish)
+    990:991:public void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish)
 com.fenritz.safecam.util.CameraPreview:
     71:82:public void switchCamera(android.hardware.Camera)
 com.fenritz.safecam.util.DecryptAndShowImage:
