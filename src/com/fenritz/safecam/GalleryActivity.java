@@ -472,14 +472,17 @@ public class GalleryActivity extends SherlockActivity {
 		builder.setPositiveButton(getString(R.string.move), new DialogInterface.OnClickListener() {
 			@SuppressWarnings("unchecked")
 			public void onClick(DialogInterface dialog, int whichButton) {
-				File destDir;
+				File destDir = null;
 				if(!isInHome && spinner.getSelectedItemPosition() == 1){
 					destDir = new File(Helpers.getHomeDir(GalleryActivity.this));
 				}
 				else{
-					destDir = new File(Helpers.getHomeDir(GalleryActivity.this), (realFolderNames.get(spinner.getSelectedItemPosition())));
+					if(realFolderNames.indexOfKey(spinner.getSelectedItemPosition()) >= 0){
+						String folderName = realFolderNames.get(spinner.getSelectedItemPosition());
+						destDir = new File(Helpers.getHomeDir(GalleryActivity.this), folderName);
+					}
 				}
-				if(destDir.exists() && destDir.isDirectory()){
+				if(destDir != null && destDir.exists() && destDir.isDirectory()){
 					new AsyncTasks.MoveFiles(GalleryActivity.this, destDir, new AsyncTasks.OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
