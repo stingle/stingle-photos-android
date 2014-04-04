@@ -33,7 +33,6 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
 
@@ -447,7 +446,7 @@ public class FileDialog extends SherlockListActivity {
 						fileIcon = cachedImage;
 					}
 					else{
-						new AsyncTasks.ShowImageThumb(image, cache).execute(file);
+						//new AsyncTasks.ShowImageThumb(image, cache).execute(file);
 					}
 					break;
 				case TYPE_FOLDER:

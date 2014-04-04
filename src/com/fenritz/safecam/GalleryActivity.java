@@ -23,6 +23,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
@@ -594,11 +595,13 @@ public class GalleryActivity extends SherlockActivity {
 					@Override
 					public void onFinish() {
 						super.onFinish();
-						refreshList();
+						
 						
 						AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 						builder.setTitle(getString(R.string.delete_original_files));
 						builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+							
+							@SuppressLint("NewApi")
 							public void onClick(DialogInterface dialog, int whichButton) {
 								ArrayList<File> filesToDelete = new ArrayList<File>();
 								for(String filePath : filePaths){
@@ -607,7 +610,7 @@ public class GalleryActivity extends SherlockActivity {
 										filesToDelete.add(file);
 									}
 								}
-								new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
+								AsyncTasks.DeleteFiles deleteOrigFiles = new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
 									@Override
 									public void onFinish(ArrayList<File> deletedFiles) {
 										if(deletedFiles != null){
@@ -617,12 +620,23 @@ public class GalleryActivity extends SherlockActivity {
 										}
 										Toast.makeText(GalleryActivity.this, getString(R.string.success_delete_originals), Toast.LENGTH_LONG).show();
 									}
-								}).execute(filesToDelete);
+								});
+								
+								if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+									deleteOrigFiles.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,filesToDelete);
+								}
+							    else{
+							    	deleteOrigFiles.execute(filesToDelete);
+							    }
+								
 							}
 						});
 						builder.setNegativeButton(getString(R.string.no), null);
+						builder.setCancelable(false);
 						AlertDialog dialog = builder.create();
 						dialog.show();
+						
+						refreshList();
 					}
 				}).execute(filePaths);
 			}
