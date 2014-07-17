@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,8 +24,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
@@ -36,7 +40,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -65,16 +71,19 @@ import com.fenritz.safecam.util.NaturalOrderComparator;
 
 public class CameraActivity extends SherlockActivity {
 
+	private final String TAG = "SCCam";
+	
 	public static final String FLASH_MODE = "flash_mode";
 	public static final String TIMER_MODE = "timer_mode";
 	public static final String PHOTO_SIZE = "photo_size";
 	public static final String PHOTO_SIZE_FRONT = "photo_size_front";
 
 	private CameraPreview mPreview = null;
-	Camera mCamera;
+	static Camera mCamera;
 	int cameraCurrentlyLocked;
 	FrameLayout.LayoutParams origParams;
 	private int mOrientation = -1;
+	private boolean app_is_paused = true;
 	private OrientationEventListener mOrientationEventListener;
 
 	private static final int ORIENTATION_PORTRAIT_NORMAL = 1;
@@ -162,7 +171,7 @@ public class CameraActivity extends SherlockActivity {
 		super.onResume();
 
 		isTakingPhoto = false;
-		
+		this.app_is_paused = false;
 		boolean logined = Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
 
@@ -178,6 +187,8 @@ public class CameraActivity extends SherlockActivity {
 	protected void onPause() {
 		super.onPause();
 
+		this.app_is_paused = true;
+		
 		Helpers.checkLoginedState(this);
 		Helpers.setLockedTime(this);
 
@@ -657,7 +668,7 @@ public class CameraActivity extends SherlockActivity {
 							if(timerTimePassed > timerTotalSeconds){
 								if(mCamera != null){
 									isTakingPhoto = true;
-									mCamera.takePicture(null, null, getPictureCallback());
+									handleFocusAndTakePicture();
 								}
 								this.cancel();
 								timer.cancel();
@@ -676,12 +687,40 @@ public class CameraActivity extends SherlockActivity {
 			}
 			else{
 				isTakingPhoto = true;
-				mCamera.takePicture(null, null, getPictureCallback());
+				handleFocusAndTakePicture();
 			}
 		}
 	}
+	
+	private void takePicture(){
+		successfully_focused = false;
+		mCamera.takePicture(null, null, getPictureCallback());
+	}
+	
+	private void handleFocusAndTakePicture(){
+		if( !this.successfully_focused || System.currentTimeMillis() > this.successfully_focused_time + 5000 ) {
+	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+				public void onAutoFocus(boolean success, Camera camera) {
+					takePicture();
+				}
+	        };
+    		try {
+    	    	mCamera.autoFocus(autoFocusCallback);
+    			count_cameraAutoFocus++;
+    		}
+    		catch(RuntimeException e) {
+    			autoFocusCallback.onAutoFocus(false, mCamera);
 
-	class ResumePreview extends Handler {
+				Log.e(TAG, "runtime exception from autoFocus when trying to take photo");
+    			e.printStackTrace();
+    		}
+		}
+		else {
+			takePicture();
+		}
+	}
+
+	static class ResumePreview extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			if (mCamera != null) {
@@ -761,6 +800,27 @@ public class CameraActivity extends SherlockActivity {
 			catch(RuntimeException e){ }
 		}
 		return false;
+	}
+	
+	private int getRotationFromOrientation(int orientation){
+		int rotation = 0;
+		boolean isFrontCamera = isCurrentCameraFrontFacing();
+		switch (orientation) {
+			case ORIENTATION_PORTRAIT_NORMAL:
+				rotation = (!isFrontCamera ? 90 : 270);
+				break;
+			case ORIENTATION_LANDSCAPE_NORMAL:
+				rotation = 0;
+				break;
+			case ORIENTATION_PORTRAIT_INVERTED:
+				rotation = (!isFrontCamera ? 270 : 90);
+				break;
+			case ORIENTATION_LANDSCAPE_INVERTED:
+				rotation = 180;
+				break;
+		}
+		
+		return rotation;
 	}
 	
 	/**
@@ -1103,6 +1163,373 @@ public class CameraActivity extends SherlockActivity {
 	    	((TextView) view.findViewById(android.R.id.text1)).setTextColor(Color.parseColor("#9a3333"));
             return view;
         }
+	}
+	
+	
+	private boolean touch_was_multitouch = false;
+    private boolean has_focus_area = false;
+	private int focus_screen_x = 0;
+	private int focus_screen_y = 0;
+	private long focus_complete_time = -1;
+	private int focus_success = FOCUS_DONE;
+	private static final int FOCUS_WAITING = 0;
+	private static final int FOCUS_SUCCESS = 1;
+	private static final int FOCUS_FAILED = 2;
+	private static final int FOCUS_DONE = 3;
+	private String set_flash_after_autofocus = "";
+	private boolean successfully_focused = false;
+	private long successfully_focused_time = -1;
+	public int count_cameraAutoFocus = 0;
+	private final Paint p = new Paint();
+	
+	private final Matrix camera_to_preview_matrix = new Matrix();
+    private final Matrix preview_to_camera_matrix = new Matrix();
+    
+	
+	
+    @SuppressLint("NewApi")
+	public boolean handleTouchEvent(MotionEvent event) {
+    	if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+	        //scaleGestureDetector.onTouchEvent(event);
+			if( event.getPointerCount() != 1 ) {
+				touch_was_multitouch = true;
+				return true;
+			}
+			if( event.getAction() != MotionEvent.ACTION_UP ) {
+				if( event.getAction() == MotionEvent.ACTION_DOWN && event.getPointerCount() == 1 ) {
+					touch_was_multitouch = false;
+				}
+				return true;
+			}
+			if( touch_was_multitouch ) {
+				return true;
+			}
+			/*if( this.isTakingPhotoOrOnTimer() ) {
+				return true;
+			}*/
+	
+			// note, we always try to force start the preview (in case is_preview_paused has become false)
+	        //startCameraPreview();
+	        cancelAutoFocus();
+	
+	        if( mCamera != null ) {
+	            Camera.Parameters parameters = mCamera.getParameters();
+				String focus_mode = parameters.getFocusMode();
+	    		this.has_focus_area = false;
+	            if( parameters.getMaxNumFocusAreas() != 0 && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
+					this.has_focus_area = true;
+					this.focus_screen_x = (int)event.getX();
+					this.focus_screen_y = (int)event.getY();
+	
+					ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
+				    parameters.setFocusAreas(areas);
+	
+				    // also set metering areas
+				    if( parameters.getMaxNumMeteringAreas() == 0 ) {
+		        			Log.d(TAG, "metering areas not supported");
+				    }
+				    else {
+				    	parameters.setMeteringAreas(areas);
+				    }
+	
+				    try {
+		        		Log.d(TAG, "set focus areas parameters");
+				    	mCamera.setParameters(parameters);
+		        		Log.d(TAG, "done");
+				    }
+				    catch(RuntimeException e) {
+				    	// just in case something has gone wrong
+	        			Log.d(TAG, "failed to set parameters for focus area");
+		        		e.printStackTrace();
+				    }
+	            }
+	            else if( parameters.getMaxNumMeteringAreas() != 0 ) {
+	       			Log.d(TAG, "set metering area");
+	        		// don't set has_focus_area in this mode
+					ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
+			    	parameters.setMeteringAreas(areas);
+	
+				    try {
+				    	mCamera.setParameters(parameters);
+				    }
+				    catch(RuntimeException e) {
+				    	// just in case something has gone wrong
+	        			Log.d(TAG, "failed to set parameters for focus area");
+		        		e.printStackTrace();
+				    }
+	            }
+	        }
+    	}
+    	mPreview.invalidate();
+		tryAutoFocus(false, true);
+		return true;
+    }
+
+    
+    private void tryAutoFocus(final boolean startup, final boolean manual) {
+    	// manual: whether user has requested autofocus (by touching screen)
+		Log.d(TAG, "tryAutoFocus");
+		Log.d(TAG, "startup? " + startup);
+		Log.d(TAG, "manual? " + manual);
+		if( mCamera == null ) {
+			Log.d(TAG, "no camera");
+		}
+		/*else if( !mPreview.has_surface ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview surface not yet available");
+		}
+		else if( !this.is_preview_started ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview not yet started");
+		}*/
+		//else if( is_taking_photo ) {
+		else if( isTakingPhoto || isTimerRunning ) {
+			Log.d(TAG, "currently taking a photo");
+		}
+		else {
+			// it's only worth doing autofocus when autofocus has an effect (i.e., auto or macro mode)
+            Camera.Parameters parameters = mCamera.getParameters();
+			String focus_mode = parameters.getFocusMode();
+			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
+			// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
+	        if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) ) {
+				Log.d(TAG, "try to start autofocus");
+    			String old_flash = parameters.getFlashMode();
+				Log.d(TAG, "old_flash: " + old_flash);
+    			set_flash_after_autofocus = "";
+    			// getFlashMode() may return null if flash not supported!
+    			if( startup && old_flash != null && old_flash != Camera.Parameters.FLASH_MODE_OFF ) {
+        			set_flash_after_autofocus = old_flash;
+    				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    				mCamera.setParameters(parameters);
+    			}
+		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+					public void onAutoFocus(boolean success, Camera camera) {
+						Log.d(TAG, "autofocus complete: " + success);
+						autoFocusCompleted(manual, success, false);
+					}
+		        };
+	
+				this.focus_success = FOCUS_WAITING;
+	    		this.focus_complete_time = -1;
+	    		this.successfully_focused = false;
+	    		mPreview.invalidate();
+	    		try {
+	    			mCamera.autoFocus(autoFocusCallback);
+	    			count_cameraAutoFocus++;
+	    		}
+	    		catch(RuntimeException e) {
+	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
+	    			autoFocusCallback.onAutoFocus(false, mCamera);
+
+					Log.e(TAG, "runtime exception from autoFocus");
+	    			e.printStackTrace();
+	    		}
+	        }
+	        else if( has_focus_area ) {
+	        	// do this so we get the focus box, for focus modes that support focus area, but don't support autofocus
+				focus_success = FOCUS_SUCCESS;
+				focus_complete_time = System.currentTimeMillis();
+	        }
+		}
+    }
+    
+    private void cancelAutoFocus() {
+        if( mCamera != null ) {
+			try {
+				mCamera.cancelAutoFocus();
+			}
+			catch(RuntimeException e) {
+				Log.d(TAG, "camera.cancelAutoFocus() failed");
+	    		e.printStackTrace();
+			}
+    		autoFocusCompleted(false, false, true);
+        }
+    }
+    
+    private void autoFocusCompleted(boolean manual, boolean success, boolean cancelled) {
+		if( cancelled ) {
+			focus_success = FOCUS_DONE;
+		}
+		else {
+			focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
+			focus_complete_time = System.currentTimeMillis();
+		}
+		if( manual && !cancelled && success ) {
+			successfully_focused = true;
+			successfully_focused_time = focus_complete_time;
+		}
+		if( set_flash_after_autofocus.length() > 0 && mCamera != null ) {
+			Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
+			
+			Camera.Parameters parameters = mCamera.getParameters();
+			parameters.setFlashMode(set_flash_after_autofocus);
+			set_flash_after_autofocus = "";
+			mCamera.setParameters(parameters);
+		}
+		/*if( this.using_face_detection ) {
+			// On some devices such as mtk6589, face detection dooes not resume as written in documentation so we have
+			// to cancelfocus when focus is finished
+			if( camera != null ) {
+				try {
+					camera.cancelAutoFocus();
+				}
+				catch(RuntimeException e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "camera.cancelAutoFocus() failed");
+					e.printStackTrace();
+				}
+			}
+		}*/
+		mPreview.invalidate();
+    }
+    
+    @SuppressLint("NewApi")
+	private ArrayList<Camera.Area> getAreas(float x, float y) {
+		float [] coords = {x, y};
+		calculatePreviewToCameraMatrix();
+		preview_to_camera_matrix.mapPoints(coords);
+		float focus_x = coords[0];
+		float focus_y = coords[1];
+		
+		int focus_size = 50;
+		Log.d(TAG, "x, y: " + x + ", " + y);
+		Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
+		Rect rect = new Rect();
+		rect.left = (int)focus_x - focus_size;
+		rect.right = (int)focus_x + focus_size;
+		rect.top = (int)focus_y - focus_size;
+		rect.bottom = (int)focus_y + focus_size;
+		if( rect.left < -1000 ) {
+			rect.left = -1000;
+			rect.right = rect.left + 2*focus_size;
+		}
+		else if( rect.right > 1000 ) {
+			rect.right = 1000;
+			rect.left = rect.right - 2*focus_size;
+		}
+		if( rect.top < -1000 ) {
+			rect.top = -1000;
+			rect.bottom = rect.top + 2*focus_size;
+		}
+		else if( rect.bottom > 1000 ) {
+			rect.bottom = 1000;
+			rect.top = rect.bottom - 2*focus_size;
+		}
+
+	    ArrayList<Camera.Area> areas = new ArrayList<Camera.Area>();
+	    if (android.os.Build.VERSION.SDK_INT >= 14){
+	    	areas.add(new Camera.Area(rect, 1000));
+	    }
+	    return areas;
+	}
+    
+    @SuppressLint("NewApi")
+	private void calculateCameraToPreviewMatrix() {
+    	int facing = 0;
+    	if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
+			Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+			Camera.getCameraInfo(currentCamera, cameraInfo);
+			facing = cameraInfo.facing;
+    	}
+    	
+		camera_to_preview_matrix.reset();
+		
+		// Need mirror for front camera.
+		boolean mirror = (facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
+		camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
+		// This is the value for android.hardware.Camera.setDisplayOrientation.
+		camera_to_preview_matrix.postRotate(getRotationFromOrientation(mOrientation));
+		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
+		// UI coordinates range from (0, 0) to (width, height).
+		camera_to_preview_matrix.postScale(mPreview.getWidth() / 2000f, mPreview.getHeight() / 2000f);
+		camera_to_preview_matrix.postTranslate(mPreview.getWidth() / 2f, mPreview.getHeight() / 2f);
+	}
+
+	private void calculatePreviewToCameraMatrix() {
+		calculateCameraToPreviewMatrix();
+		if( !camera_to_preview_matrix.invert(preview_to_camera_matrix) ) {
+    		Log.d(TAG, "calculatePreviewToCameraMatrix failed to invert matrix!?");
+		}
+	}
+	
+	public void handleOnDraw(Canvas canvas) {
+
+		if( this.app_is_paused ) {
+			return;
+		}
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		final float scale = getResources().getDisplayMetrics().density;
+		if( mCamera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_3x3") ) {
+			p.setColor(Color.WHITE);
+			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
+			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
+		}
+		if( mCamera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_4x2") ) {
+			p.setColor(Color.GRAY);
+			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(3.0f*canvas.getWidth()/4.0f, 0.0f, 3.0f*canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(0.0f, canvas.getHeight()/2.0f, canvas.getWidth()-1.0f, canvas.getHeight()/2.0f, p);
+			p.setColor(Color.WHITE);
+			int crosshairs_radius = (int) (20 * scale + 0.5f); // convert dps to pixels
+			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
+			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
+		}
+		
+		//canvas.save();
+		
+
+		
+		/*if( this.has_zoom && camera != null && sharedPreferences.getBoolean("preference_show_zoom", true) ) {
+			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
+			// only show when actually zoomed in
+			if( zoom_ratio > 1.0f + 1.0e-5f ) {
+				// Convert the dps to pixels, based on density scale
+				int pixels_offset_y = 2*text_y;
+				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+				p.setTextAlign(Paint.Align.CENTER);
+				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+			}
+		}*/
+		
+		
+		if( this.focus_success != FOCUS_DONE ) {
+			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
+			if( this.focus_success == FOCUS_SUCCESS )
+				p.setColor(Color.GREEN);
+			else if( this.focus_success == FOCUS_FAILED )
+				p.setColor(Color.RED);
+			else
+				p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			int pos_x = 0;
+			int pos_y = 0;
+			if( has_focus_area ) {
+				pos_x = focus_screen_x;
+				pos_y = focus_screen_y;
+			}
+			else {
+				pos_x = canvas.getWidth() / 2;
+				pos_y = canvas.getHeight() / 2;
+			}
+			canvas.drawRect(pos_x - size, pos_y - size, pos_x + size, pos_y + size, p);
+			if( focus_complete_time != -1 && System.currentTimeMillis() > focus_complete_time + 1000 ) {
+				focus_success = FOCUS_DONE;
+			}
+			
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				public void run() {
+					mPreview.invalidate();
+				}
+			}, 1020);
+			p.setStyle(Paint.Style.FILL); // reset
+		}
+		
 	}
 
 }

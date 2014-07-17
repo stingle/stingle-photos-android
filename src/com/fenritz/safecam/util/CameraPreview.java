@@ -4,31 +4,32 @@ import java.io.IOException;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
+
+import com.fenritz.safecam.CameraActivity;
 
 /**
  * A simple wrapper around a Camera and a SurfaceView that renders a centered preview of the Camera
  * to the surface. We need to center the SurfaceView because not all devices have cameras that
  * support preview sizes at the same aspect ratio as the device's display.
  */
-public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private final String TAG = "Preview";
 
-    SurfaceView mSurfaceView;
     SurfaceHolder mHolder;
     Size mPreviewSize;
     List<Size> mSupportedPreviewSizes;
     Camera mCamera;
     DisplayMetrics screenSize;
-
+    
     public CameraPreview(Context context, AttributeSet attrs) {
     	super(context, attrs);
     	init(context);
@@ -40,12 +41,10 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
     }
     
     protected void init(Context context){
-    	mSurfaceView = new SurfaceView(context);
-        addView(mSurfaceView);
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
-        mHolder = mSurfaceView.getHolder();
+        mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         
@@ -112,8 +111,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (changed && getChildCount() > 0) {
-            final View child = getChildAt(0);
+        if (changed) {
 
             final int width = r - l;
             final int height = b - t;
@@ -128,14 +126,20 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
             // Center the child SurfaceView within the parent.
             if (width * previewHeight > height * previewWidth) {
                 final int scaledChildWidth = previewWidth * height / previewHeight;
-                child.layout((width - scaledChildWidth) / 2, 0,
+                layout((width - scaledChildWidth) / 2, 0,
                         (width + scaledChildWidth) / 2, height);
             } else {
                 final int scaledChildHeight = previewHeight * width / previewWidth;
-                child.layout(0, (height - scaledChildHeight) / 2,
+                layout(0, (height - scaledChildHeight) / 2,
                         width, (height + scaledChildHeight) / 2);
             }
         }
+    }
+    
+    @Override
+    protected void onDraw(Canvas canvas) {
+    	((CameraActivity)this.getContext()).handleOnDraw(canvas);
+    	super.onDraw(canvas);
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -148,6 +152,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         } catch (IOException exception) {
             Log.e(TAG, "IOException caused by setPreviewDisplay()", exception);
         }
+        setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -206,5 +211,11 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
     		mCamera.startPreview();
     	}
     }
-
+    
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        //scaleGestureDetector.onTouchEvent(event);
+		CameraActivity cam_activity = (CameraActivity)this.getContext();
+		return cam_activity.handleTouchEvent(event);
+    }
 }
