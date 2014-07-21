@@ -1058,12 +1058,16 @@ public class CameraActivity extends SherlockActivity {
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(getString(R.string.photo_size_choose));
-		builder.setSingleChoiceItems(new PhotoSizeAdapter(CameraActivity.this, android.R.layout.simple_list_item_single_choice, listEntries), 
+		builder.setSingleChoiceItems(listEntries, 
 				photoSizeIndex, 
 				new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int item) {
 			
-				if(Helpers.isDemo(CameraActivity.this) && mSupportedPictureSizes.get(item).width > 640){
+				double megapixel = mSupportedPictureSizes.get(item).width * mSupportedPictureSizes.get(item).height;
+				megapixel = megapixel / 1000000;
+				megapixel = (double)Math.round(megapixel * 10) / 10;
+				
+				if(Helpers.isDemo(CameraActivity.this) && megapixel > 0.3){
 					Helpers.warnProVersion(CameraActivity.this);
 					dialog.cancel();
 					return;
@@ -1086,6 +1090,8 @@ public class CameraActivity extends SherlockActivity {
 				
 				mPreview.setCamera(mCamera);
 				mPreview.requestLayout();
+				
+				photoSizeIndex = item;
 				
 				dialog.dismiss();
 			}
