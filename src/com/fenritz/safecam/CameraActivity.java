@@ -46,12 +46,10 @@ import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -199,10 +197,6 @@ public class CameraActivity extends SherlockActivity {
 		releaseCamera();
 	}
 	
-	private void startCamera(){
-		startCamera(DEFAULT_CAMERA);
-	}
-	
 	private OnClickListener switchCamera(){
 		return new OnClickListener() {
 			public void onClick(View v) {
@@ -301,13 +295,16 @@ public class CameraActivity extends SherlockActivity {
 		}
 
 		// Set flash mode from preferences and update button accordingly
-		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
+		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_AUTO);
 
 		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
 			flashButton.setImageResource(R.drawable.flash_off);
 		}
 		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
 			flashButton.setImageResource(R.drawable.flash_on);
+		}
+		else if (flashMode.equals(Parameters.FLASH_MODE_AUTO)) {
+			flashButton.setImageResource(R.drawable.flash_auto);
 		}
 		
 		boolean timerMode = preferences.getBoolean(CameraActivity.TIMER_MODE, false);
@@ -582,13 +579,18 @@ public class CameraActivity extends SherlockActivity {
 				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 				String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 
-				int flashButtonImage = R.drawable.flash_off;
-				if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
+				int flashButtonImage = R.drawable.flash_auto;
+				if (flashMode.equals(Parameters.FLASH_MODE_AUTO)) {
+					flashMode = Parameters.FLASH_MODE_OFF;
+					flashButtonImage = R.drawable.flash_off;
+				}
+				else if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
 					flashMode = Parameters.FLASH_MODE_ON;
 					flashButtonImage = R.drawable.flash_on;
 				}
 				else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
-					flashMode = Parameters.FLASH_MODE_OFF;
+					flashMode = Parameters.FLASH_MODE_AUTO;
+					flashButtonImage = R.drawable.flash_auto;
 				}
 
 				if (mCamera != null){
@@ -1156,21 +1158,6 @@ public class CameraActivity extends SherlockActivity {
 				return super.onOptionsItemSelected(item);
 		}
 	}
-	
-	private class PhotoSizeAdapter extends ArrayAdapter<CharSequence> {
-
-	    public PhotoSizeAdapter(Context context, int textViewResId, CharSequence[] strings) {
-	        super(context, textViewResId, strings);
-	    }
-
-	    @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-	    	View view = super.getView(position, convertView, parent);
-	    	((TextView) view.findViewById(android.R.id.text1)).setTextColor(Color.parseColor("#9a3333"));
-            return view;
-        }
-	}
-	
 	
 	private boolean touch_was_multitouch = false;
     private boolean has_focus_area = false;
