@@ -565,9 +565,29 @@ public class AsyncTasks {
 						FileOutputStream outputStream = new FileOutputStream(destFilePath);
 
 						Helpers.getAESCrypt(activity).encrypt(inputStream, outputStream, null, this);
+						
+						File destFile = new File(destFilePath);
+						String fileName = Helpers.getThumbFileName(destFile);
+						
+						FileInputStream in = new FileInputStream(origFile);
+						ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+						int numRead = 0;
+						byte[] buf = new byte[1024];
+						while ((numRead = in.read(buf)) >= 0) {
+							bytes.write(buf, 0, numRead);
+						}
+						in.close();
+						
+						System.gc();
+						
+						Helpers.generateThumbnail(activity, bytes.toByteArray(), fileName);
+						
 						publishProgress(i+1);
 					}
 					catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+					catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
