@@ -173,8 +173,11 @@ public class SafeCameraActivity extends SherlockActivity {
 			
 			if(result == true){
 				if(justLogin && extraData != null){
-					Intent intent = extraData.getParcelable("intent");
-					startActivity(intent);
+					//Intent intent = extraData.getParcelable("intent");
+					//startActivity(intent);
+					getIntent().putExtra("login_ok", true);
+					setResult(RESULT_OK, getIntent());
+					finish();
 				}
 				else{
 					

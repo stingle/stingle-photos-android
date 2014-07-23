@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -67,10 +68,11 @@ public class GalleryActivity extends SherlockActivity {
 
 	public final MemoryCache memCache = SafeCameraApplication.getCache();
 
-	protected static final int REQUEST_DECRYPT = 0;
-	protected static final int REQUEST_ENCRYPT = 1;
-	protected static final int REQUEST_IMPORT = 2;
-	protected static final int REQUEST_VIEW_PHOTO = 3;
+	public static final int REQUEST_DECRYPT = 0;
+	public static final int REQUEST_ENCRYPT = 1;
+	public static final int REQUEST_IMPORT = 2;
+	public static final int REQUEST_VIEW_PHOTO = 3;
+	public static final int REQUEST_LOGIN = 4;
 
 	protected static final int ACTION_DECRYPT = 0;
 	protected static final int ACTION_SHARE = 1;
@@ -96,6 +98,8 @@ public class GalleryActivity extends SherlockActivity {
 	private BroadcastReceiver receiver;
 	
 	private boolean isWentToLogin = false;
+	private boolean sendBackDecryptedFile = false;
+	private Intent originalIntent = null;
 	
 	private String currentPath;
 	
@@ -118,10 +122,13 @@ public class GalleryActivity extends SherlockActivity {
 		bundle.putBoolean("wentToLoginToProceed", true);
 		if(!Helpers.checkLoginedState(this, bundle)){
 			isWentToLogin = true;
-			finish();
-			return;
+			//finish();
+			//return;
 		}
-		
+		startupActions();
+	}
+	
+	protected void startupActions(){
 		currentPath = Helpers.getHomeDir(this);
 		fillFilesList();
 
@@ -167,6 +174,11 @@ public class GalleryActivity extends SherlockActivity {
 			}
 			else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
 				handleSendMulti(intent);
+			}
+			else if ((Intent.ACTION_PICK.equals(action) || Intent.ACTION_GET_CONTENT.equals(action)) && type != null) {
+				Log.d("qaq",action);
+				originalIntent = intent;
+				sendBackDecryptedFile = true;
 			}
 			else {
 				// Handle other intents, such as being started from the home
@@ -556,9 +568,20 @@ public class GalleryActivity extends SherlockActivity {
 	@Override
 	public synchronized void onActivityResult(final int requestCode, int resultCode, final Intent data) {
 
+		Log.d("qaq", String.valueOf(requestCode));
+		Log.d("qaq", String.valueOf(resultCode));
+		
 		if (resultCode == Activity.RESULT_OK) {
 
-			if (requestCode == REQUEST_DECRYPT) {
+			if (requestCode == REQUEST_LOGIN) {
+				if(data.getBooleanExtra("login_ok", false)){
+					startupActions();
+				}
+				else{
+					finish();
+				}
+			}
+			else if (requestCode == REQUEST_DECRYPT) {
 				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
 				File destinationFolder = new File(filePath);
 				destinationFolder.mkdirs();
@@ -692,7 +715,6 @@ public class GalleryActivity extends SherlockActivity {
 			}
 		}
 		else if (resultCode == Activity.RESULT_CANCELED) {
-			// Logger.getLogger().log(Level.WARNING, "file not selected");
 			refreshList();
 		}
 
@@ -723,7 +745,41 @@ public class GalleryActivity extends SherlockActivity {
 		private OnClickListener getOnClickListener(final CheckableLayout layout, final File file){
 			 return new View.OnClickListener() {
 				public void onClick(View v) {
-					if (multiSelectModeActive) {
+					if(sendBackDecryptedFile){
+						String filePath = Helpers.getHomeDir(GalleryActivity.this) + "/" + ".tmp";
+						File destinationFolder = new File(filePath);
+						destinationFolder.mkdirs();
+
+						AsyncTasks.OnAsyncTaskFinish finalOnDecrypt = new AsyncTasks.OnAsyncTaskFinish() {
+							@Override
+							public void onFinish(java.util.ArrayList<File> processedFiles) {
+								if (processedFiles != null && processedFiles.size() == 1) {
+									Uri fileUri = Uri.fromFile(processedFiles.get(0));
+									if(originalIntent != null){
+										if (fileUri != null) {
+											Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND, fileUri); //Create a new intent. First parameter means that you want to send the file. The second parameter is the URI pointing to a file on the sd card. (openprev has the datatype File)
+
+								            GalleryActivity.this.setResult(Activity.RESULT_OK, shareIntent); //set the file/intent as result
+								            GalleryActivity.this.finish(); //close your application and get back to the requesting application like GMail and WhatsApp
+											
+											
+											/*originalIntent.setData(fileUri);
+											setResult(Activity.RESULT_OK, originalIntent);*/
+										}
+										else {
+											originalIntent.setDataAndType(null, "");
+											setResult(RESULT_CANCELED, originalIntent);
+										}
+									}
+									GalleryActivity.this.finish();
+								}
+							};
+						};
+						ArrayList<File> filesToDec = new ArrayList<File>();
+						filesToDec.add(file);
+						new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath, finalOnDecrypt).execute(filesToDec);
+					}
+					else if (multiSelectModeActive) {
 						layout.toggle();
 						if (layout.isChecked()) {
 							selectedFiles.add(file);

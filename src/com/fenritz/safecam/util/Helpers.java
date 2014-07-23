@@ -62,6 +62,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
+import com.fenritz.safecam.GalleryActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraActivity;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -142,7 +143,7 @@ public class Helpers {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra(SafeCameraActivity.ACTION_JUST_LOGIN, true);
 		intent.putExtra(SafeCameraActivity.PARAM_EXTRA_DATA, extraData);
-		activity.startActivity(intent);
+		activity.startActivityForResult(intent, GalleryActivity.REQUEST_LOGIN);
 	}
 	
 	private static void doLogout(Activity activity) {
