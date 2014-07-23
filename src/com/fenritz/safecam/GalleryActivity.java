@@ -176,7 +176,6 @@ public class GalleryActivity extends SherlockActivity {
 				handleSendMulti(intent);
 			}
 			else if ((Intent.ACTION_PICK.equals(action) || Intent.ACTION_GET_CONTENT.equals(action)) && type != null) {
-				Log.d("qaq",action);
 				originalIntent = intent;
 				sendBackDecryptedFile = true;
 			}
@@ -757,14 +756,14 @@ public class GalleryActivity extends SherlockActivity {
 									Uri fileUri = Uri.fromFile(processedFiles.get(0));
 									if(originalIntent != null){
 										if (fileUri != null) {
-											Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND, fileUri); //Create a new intent. First parameter means that you want to send the file. The second parameter is the URI pointing to a file on the sd card. (openprev has the datatype File)
+											/*Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND, fileUri); //Create a new intent. First parameter means that you want to send the file. The second parameter is the URI pointing to a file on the sd card. (openprev has the datatype File)
 
 								            GalleryActivity.this.setResult(Activity.RESULT_OK, shareIntent); //set the file/intent as result
 								            GalleryActivity.this.finish(); //close your application and get back to the requesting application like GMail and WhatsApp
+											*/
 											
-											
-											/*originalIntent.setData(fileUri);
-											setResult(Activity.RESULT_OK, originalIntent);*/
+											originalIntent.setData(fileUri);
+											setResult(Activity.RESULT_OK, originalIntent);
 										}
 										else {
 											originalIntent.setDataAndType(null, "");

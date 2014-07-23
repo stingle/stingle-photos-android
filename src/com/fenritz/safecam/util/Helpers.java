@@ -143,6 +143,7 @@ public class Helpers {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra(SafeCameraActivity.ACTION_JUST_LOGIN, true);
 		intent.putExtra(SafeCameraActivity.PARAM_EXTRA_DATA, extraData);
+		//activity.startActivity(intent);
 		activity.startActivityForResult(intent, GalleryActivity.REQUEST_LOGIN);
 	}
 	
