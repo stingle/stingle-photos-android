@@ -109,7 +109,8 @@
     <string name="clear_cache">Clear cache</string>
     <string name="clear_cache_desc">Clear thumbnail cache</string>
     <string name="confirm_delete_cache">Are you sure you want to delete whole thumbnail cache?</string>
-    <string name="title_gallery">Gallery</string>
+    <string name="title_gallery">SafeCamera</string>
+    <string name="title_gallery_for_app">Gallery</string>
     <string name="title_view_photo">Photos</string>
     <string name="title_setup">Set Up</string>
     <string name="title_dashboard">Dashboard</string>

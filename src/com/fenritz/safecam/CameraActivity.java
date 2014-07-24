@@ -154,7 +154,7 @@ public class CameraActivity extends SherlockActivity {
 		showLastPhotoThumb();
 		
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -712,8 +712,6 @@ public class CameraActivity extends SherlockActivity {
     		}
     		catch(RuntimeException e) {
     			autoFocusCallback.onAutoFocus(false, mCamera);
-
-				Log.e(TAG, "runtime exception from autoFocus when trying to take photo");
     			e.printStackTrace();
     		}
 		}
@@ -1218,26 +1216,19 @@ public class CameraActivity extends SherlockActivity {
 				    parameters.setFocusAreas(areas);
 	
 				    // also set metering areas
-				    if( parameters.getMaxNumMeteringAreas() == 0 ) {
-		        			Log.d(TAG, "metering areas not supported");
-				    }
-				    else {
+				    if( parameters.getMaxNumMeteringAreas() > 0 ) {
 				    	parameters.setMeteringAreas(areas);
 				    }
 	
 				    try {
-		        		Log.d(TAG, "set focus areas parameters");
 				    	mCamera.setParameters(parameters);
-		        		Log.d(TAG, "done");
 				    }
 				    catch(RuntimeException e) {
 				    	// just in case something has gone wrong
-	        			Log.d(TAG, "failed to set parameters for focus area");
 		        		e.printStackTrace();
 				    }
 	            }
 	            else if( parameters.getMaxNumMeteringAreas() != 0 ) {
-	       			Log.d(TAG, "set metering area");
 	        		// don't set has_focus_area in this mode
 					ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
 			    	parameters.setMeteringAreas(areas);
@@ -1247,7 +1238,6 @@ public class CameraActivity extends SherlockActivity {
 				    }
 				    catch(RuntimeException e) {
 				    	// just in case something has gone wrong
-	        			Log.d(TAG, "failed to set parameters for focus area");
 		        		e.printStackTrace();
 				    }
 	            }
@@ -1261,19 +1251,12 @@ public class CameraActivity extends SherlockActivity {
     
     private void tryAutoFocus(final boolean startup, final boolean manual) {
     	// manual: whether user has requested autofocus (by touching screen)
-		Log.d(TAG, "tryAutoFocus");
-		Log.d(TAG, "startup? " + startup);
-		Log.d(TAG, "manual? " + manual);
 		if( mCamera == null ) {
 			Log.d(TAG, "no camera");
 		}
 		/*else if( !mPreview.has_surface ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "preview surface not yet available");
 		}
 		else if( !this.is_preview_started ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "preview not yet started");
 		}*/
 		//else if( is_taking_photo ) {
 		else if( isTakingPhoto || isTimerRunning ) {
@@ -1286,9 +1269,7 @@ public class CameraActivity extends SherlockActivity {
 			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
 			// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
 	        if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) ) {
-				Log.d(TAG, "try to start autofocus");
     			String old_flash = parameters.getFlashMode();
-				Log.d(TAG, "old_flash: " + old_flash);
     			set_flash_after_autofocus = "";
     			// getFlashMode() may return null if flash not supported!
     			if( startup && old_flash != null && old_flash != Camera.Parameters.FLASH_MODE_OFF ) {
@@ -1298,7 +1279,6 @@ public class CameraActivity extends SherlockActivity {
     			}
 		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 					public void onAutoFocus(boolean success, Camera camera) {
-						Log.d(TAG, "autofocus complete: " + success);
 						autoFocusCompleted(manual, success, false);
 					}
 		        };
@@ -1314,8 +1294,6 @@ public class CameraActivity extends SherlockActivity {
 	    		catch(RuntimeException e) {
 	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
 	    			autoFocusCallback.onAutoFocus(false, mCamera);
-
-					Log.e(TAG, "runtime exception from autoFocus");
 	    			e.printStackTrace();
 	    		}
 	        }
@@ -1333,7 +1311,6 @@ public class CameraActivity extends SherlockActivity {
 				mCamera.cancelAutoFocus();
 			}
 			catch(RuntimeException e) {
-				Log.d(TAG, "camera.cancelAutoFocus() failed");
 	    		e.printStackTrace();
 			}
     		autoFocusCompleted(false, false, true);
@@ -1353,7 +1330,6 @@ public class CameraActivity extends SherlockActivity {
 			successfully_focused_time = focus_complete_time;
 		}
 		if( set_flash_after_autofocus.length() > 0 && mCamera != null ) {
-			Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
 			
 			Camera.Parameters parameters = mCamera.getParameters();
 			parameters.setFlashMode(set_flash_after_autofocus);
@@ -1369,7 +1345,6 @@ public class CameraActivity extends SherlockActivity {
 				}
 				catch(RuntimeException e) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "camera.cancelAutoFocus() failed");
 					e.printStackTrace();
 				}
 			}
@@ -1386,8 +1361,6 @@ public class CameraActivity extends SherlockActivity {
 		float focus_y = coords[1];
 		
 		int focus_size = 50;
-		Log.d(TAG, "x, y: " + x + ", " + y);
-		Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
 		Rect rect = new Rect();
 		rect.left = (int)focus_x - focus_size;
 		rect.right = (int)focus_x + focus_size;
@@ -1442,7 +1415,6 @@ public class CameraActivity extends SherlockActivity {
 	private void calculatePreviewToCameraMatrix() {
 		calculateCameraToPreviewMatrix();
 		if( !camera_to_preview_matrix.invert(preview_to_camera_matrix) ) {
-    		Log.d(TAG, "calculatePreviewToCameraMatrix failed to invert matrix!?");
 		}
 	}
 	

@@ -47,7 +47,7 @@ public class ChangePasswordActivity extends SherlockActivity {
 		findViewById(R.id.cancel).setOnClickListener(cancelClick());
 		
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {

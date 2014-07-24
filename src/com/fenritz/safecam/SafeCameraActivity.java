@@ -1,14 +1,12 @@
 package com.fenritz.safecam;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -139,75 +137,39 @@ public class SafeCameraActivity extends SherlockActivity {
 				return;
 			}
 
-			new Login().execute(enteredPasswordHash);
+			((SafeCameraApplication) getApplication()).setKey(enteredPasswordHash);
 		}
 		catch (AESCryptException e) {
 			Helpers.showAlertDialog(SafeCameraActivity.this, String.format(getString(R.string.unexpected_error), "102"));
 			e.printStackTrace();
 		}
-	}
-	
-	private class Login extends AsyncTask<String, Void, Boolean> {
 		
-		private ProgressDialog progressDialog;
-		
-		@Override
-    	protected void onPreExecute() {
-    		super.onPreExecute();
-    		progressDialog = ProgressDialog.show(SafeCameraActivity.this, "", getString(R.string.generating_key), false, true, new DialogInterface.OnCancelListener() {
-				public void onCancel(DialogInterface dialog) {
-					
-				}
-			});
-    	}
-		
-		@Override
-		protected Boolean doInBackground(String... params) {
-			((SafeCameraApplication) SafeCameraActivity.this.getApplication()).setKey(params[0]);
-			return true;
+		if(justLogin && extraData != null){
+			//Intent intent = extraData.getParcelable("intent");
+			//startActivity(intent);
+			getIntent().putExtra("login_ok", true);
+			setResult(RESULT_OK, getIntent());
 		}
-		
-		@Override
-		protected void onPostExecute(Boolean result) {
-			super.onPostExecute(result);
+		else{
+			Intent intent = new Intent();
+			intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			
-			if(result == true){
-				if(justLogin && extraData != null){
-					//Intent intent = extraData.getParcelable("intent");
-					//startActivity(intent);
-					getIntent().putExtra("login_ok", true);
-					setResult(RESULT_OK, getIntent());
-					finish();
+			boolean dontShowPopup = preferences.getBoolean(DONT_SHOW_POPUP, false);
+			
+			if(!dontShowPopup){
+				int loginsCount = preferences.getInt(LOGINS_COUNT_FOR_POPUP, 0);
+				loginsCount++;
+				if(loginsCount >= Integer.valueOf(getString(R.string.popup_logins_limit))){
+					intent.putExtra("showPopup", true);
+					loginsCount = 0;
 				}
-				else{
-					
-					
-					Intent intent = new Intent();
-					intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					
-					boolean dontShowPopup = preferences.getBoolean(DONT_SHOW_POPUP, false);
-					
-					if(!dontShowPopup){
-						int loginsCount = preferences.getInt(LOGINS_COUNT_FOR_POPUP, 0);
-						loginsCount++;
-						if(loginsCount >= Integer.valueOf(getString(R.string.popup_logins_limit))){
-							intent.putExtra("showPopup", true);
-							loginsCount = 0;
-						}
-						preferences.edit().putInt(SafeCameraActivity.LOGINS_COUNT_FOR_POPUP, loginsCount).commit();
-					}
-					startActivity(intent);
-				}
-				SafeCameraActivity.this.finish();
+				preferences.edit().putInt(SafeCameraActivity.LOGINS_COUNT_FOR_POPUP, loginsCount).commit();
 			}
-			else{
-				Helpers.showAlertDialog(SafeCameraActivity.this, getString(R.string.incorrect_password));
-			}
-			progressDialog.dismiss();
+			startActivity(intent);
 		}
-		
+		finish();
 	}
 	
 	@Override

@@ -27,7 +27,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -116,16 +115,18 @@ public class GalleryActivity extends SherlockActivity {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setHomeButtonEnabled(true);
 		setContentView(R.layout.gallery);
+		
+		setTitle(getString(R.string.title_gallery_for_app));
 
 		Bundle bundle = new Bundle();
 		bundle.putParcelable("intent", getIntent());
 		bundle.putBoolean("wentToLoginToProceed", true);
 		if(!Helpers.checkLoginedState(this, bundle)){
 			isWentToLogin = true;
-			//finish();
-			//return;
 		}
-		startupActions();
+		else{
+			startupActions();
+		}
 	}
 	
 	protected void startupActions(){
@@ -141,7 +142,7 @@ public class GalleryActivity extends SherlockActivity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -163,6 +164,7 @@ public class GalleryActivity extends SherlockActivity {
 		super.onDestroy();
 	}
 	
+	@SuppressLint("NewApi")
 	void handleIntentFilters(Intent intent){
 		// Handle Intent filters
 		String action = intent.getAction();
@@ -178,6 +180,9 @@ public class GalleryActivity extends SherlockActivity {
 			else if ((Intent.ACTION_PICK.equals(action) || Intent.ACTION_GET_CONTENT.equals(action)) && type != null) {
 				originalIntent = intent;
 				sendBackDecryptedFile = true;
+				if (Build.VERSION.SDK_INT >= 11) {
+					invalidateOptionsMenu();
+				}
 			}
 			else {
 				// Handle other intents, such as being started from the home
@@ -197,11 +202,13 @@ public class GalleryActivity extends SherlockActivity {
 				filePath = Helpers.getRealPathFromURI(this, fileUri);
 			}
 			
-			String[] filePaths = {filePath};
+			final String[] filePaths = {filePath};
 			new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
+					
+					deleteOriginalsDialog(filePaths);
 					
 					refreshList();
 				}
@@ -225,10 +232,15 @@ public class GalleryActivity extends SherlockActivity {
 				
 				filePaths[counter++] = filePath;
 			}
+			
+			final String[] finalFilePaths = filePaths;
+			
 			new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
+					
+					deleteOriginalsDialog(finalFilePaths);
 					
 					refreshList();
 				}
@@ -567,9 +579,6 @@ public class GalleryActivity extends SherlockActivity {
 	@Override
 	public synchronized void onActivityResult(final int requestCode, int resultCode, final Intent data) {
 
-		Log.d("qaq", String.valueOf(requestCode));
-		Log.d("qaq", String.valueOf(resultCode));
-		
 		if (resultCode == Activity.RESULT_OK) {
 
 			if (requestCode == REQUEST_LOGIN) {
@@ -618,45 +627,7 @@ public class GalleryActivity extends SherlockActivity {
 					public void onFinish() {
 						super.onFinish();
 						
-						
-						AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-						builder.setTitle(getString(R.string.delete_original_files));
-						builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-							
-							@SuppressLint("NewApi")
-							public void onClick(DialogInterface dialog, int whichButton) {
-								ArrayList<File> filesToDelete = new ArrayList<File>();
-								for(String filePath : filePaths){
-									File file = new File(filePath);
-									if(file.exists() && file.isFile()){
-										filesToDelete.add(file);
-									}
-								}
-								AsyncTasks.DeleteFiles deleteOrigFiles = new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
-									@Override
-									public void onFinish(ArrayList<File> deletedFiles) {
-										if(deletedFiles != null){
-											for(File file : deletedFiles){
-												sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
-											}
-										}
-										Toast.makeText(GalleryActivity.this, getString(R.string.success_delete_originals), Toast.LENGTH_LONG).show();
-									}
-								});
-								
-								if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-									deleteOrigFiles.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,filesToDelete);
-								}
-							    else{
-							    	deleteOrigFiles.execute(filesToDelete);
-							    }
-								
-							}
-						});
-						builder.setNegativeButton(getString(R.string.no), null);
-						builder.setCancelable(false);
-						AlertDialog dialog = builder.create();
-						dialog.show();
+						deleteOriginalsDialog(filePaths);
 						
 						refreshList();
 					}
@@ -714,11 +685,53 @@ public class GalleryActivity extends SherlockActivity {
 			}
 		}
 		else if (resultCode == Activity.RESULT_CANCELED) {
-			refreshList();
+			//refreshList();
 		}
 
 	}
 
+	private void deleteOriginalsDialog(final String[] filePaths){
+		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+		builder.setTitle(getString(R.string.delete_original_files));
+		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+			
+			@SuppressWarnings("unchecked")
+			@SuppressLint("NewApi")
+			public void onClick(DialogInterface dialog, int whichButton) {
+				ArrayList<File> filesToDelete = new ArrayList<File>();
+				for(String filePath : filePaths){
+					File file = new File(filePath);
+					if(file.exists() && file.isFile()){
+						filesToDelete.add(file);
+					}
+				}
+				AsyncTasks.DeleteFiles deleteOrigFiles = new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
+					@Override
+					public void onFinish(ArrayList<File> deletedFiles) {
+						if(deletedFiles != null){
+							for(File file : deletedFiles){
+								sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+							}
+						}
+						Toast.makeText(GalleryActivity.this, getString(R.string.success_delete_originals), Toast.LENGTH_LONG).show();
+					}
+				});
+				
+				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+					deleteOrigFiles.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,filesToDelete);
+				}
+			    else{
+			    	deleteOrigFiles.execute(filesToDelete);
+			    }
+				
+			}
+		});
+		builder.setNegativeButton(getString(R.string.no), null);
+		builder.setCancelable(false);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+	
 	private void clearSelection() {
 		selectedFiles.clear();
 		for (int i = 0; i < photosGrid.getChildCount(); i++) {
@@ -743,6 +756,7 @@ public class GalleryActivity extends SherlockActivity {
 
 		private OnClickListener getOnClickListener(final CheckableLayout layout, final File file){
 			 return new View.OnClickListener() {
+				@SuppressWarnings("unchecked")
 				public void onClick(View v) {
 					if(sendBackDecryptedFile){
 						String filePath = Helpers.getHomeDir(GalleryActivity.this) + "/" + ".tmp";
@@ -761,8 +775,7 @@ public class GalleryActivity extends SherlockActivity {
 								            GalleryActivity.this.setResult(Activity.RESULT_OK, shareIntent); //set the file/intent as result
 								            GalleryActivity.this.finish(); //close your application and get back to the requesting application like GMail and WhatsApp
 											*/
-											
-											originalIntent.setData(fileUri);
+											originalIntent.setDataAndType(fileUri, getContentResolver().getType(fileUri));
 											setResult(Activity.RESULT_OK, originalIntent);
 										}
 										else {
@@ -819,7 +832,10 @@ public class GalleryActivity extends SherlockActivity {
 		private OnLongClickListener getOnLongClickListener(final File file){
 			return new View.OnLongClickListener() {
 				public boolean onLongClick(View v) {
-					return doLongClick(file, v);
+					if(!sendBackDecryptedFile){
+						return doLongClick(file, v);
+					}
+					return false;
 				}
 			};
 		}
@@ -1200,8 +1216,17 @@ public class GalleryActivity extends SherlockActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.gallery_menu, menu);
+		if(!sendBackDecryptedFile){
+			getSupportMenuInflater().inflate(R.menu.gallery_menu, menu);
+		}
         return super.onCreateOptionsMenu(menu);
+	}
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (Build.VERSION.SDK_INT < 11 && !sendBackDecryptedFile) {
+			getSupportMenuInflater().inflate(R.menu.gallery_menu, menu);
+		}
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override

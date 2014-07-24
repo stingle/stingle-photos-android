@@ -139,17 +139,14 @@ public class Helpers {
 	private static void redirectToLogin(Activity activity, Bundle extraData) {
 		Intent intent = new Intent();
 		intent.setClass(activity, SafeCameraActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra(SafeCameraActivity.ACTION_JUST_LOGIN, true);
 		intent.putExtra(SafeCameraActivity.PARAM_EXTRA_DATA, extraData);
-		//activity.startActivity(intent);
 		activity.startActivityForResult(intent, GalleryActivity.REQUEST_LOGIN);
 	}
 	
 	private static void doLogout(Activity activity) {
 		Intent broadcastIntent = new Intent();
-		broadcastIntent.setAction("com.package.ACTION_LOGOUT");
+		broadcastIntent.setAction("com.fenritz.safecam.ACTION_LOGOUT");
 		activity.sendBroadcast(broadcastIntent);
 
 		((SafeCameraApplication) activity.getApplication()).setKey(null);
@@ -169,7 +166,7 @@ public class Helpers {
 
 	public static void registerForBroadcastReceiver(final Activity activity) {
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction("com.package.ACTION_LOGOUT");
+		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		activity.registerReceiver(new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
