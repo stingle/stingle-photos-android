@@ -71,14 +71,7 @@
         <activity
             android:name=".ViewImageActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_view_photo">
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:scheme="file" />
-				<data android:host="*" />
-				<data android:pathPattern=".*\\.sc" />
-			</intent-filter>
+            android:label="@string/title_view_photo" >
         </activity>
         <activity
             android:name=".SetUpActivity"
