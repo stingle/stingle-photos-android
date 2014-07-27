@@ -24,6 +24,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.PRNGFixes;
 
 public class SafeCameraActivity extends SherlockActivity {
 
@@ -54,6 +55,8 @@ public class SafeCameraActivity extends SherlockActivity {
 		Helpers.deleteTmpDir(SafeCameraActivity.this);
 		
 		Helpers.synchronizePasswordHash(this);
+		
+		PRNGFixes.apply();
 		
 		justLogin = getIntent().getBooleanExtra(ACTION_JUST_LOGIN, false);
 		extraData = getIntent().getBundleExtra(PARAM_EXTRA_DATA);

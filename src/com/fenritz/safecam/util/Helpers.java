@@ -9,12 +9,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +31,7 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -193,7 +197,7 @@ public class Helpers {
 	}
 
 	public static String getFilename(Context context, String prefix) {
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
 		String imageFileName = prefix + timeStamp;
 
 		return imageFileName + ".jpg";
@@ -601,7 +605,7 @@ public class Helpers {
 	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
+        Cursor cursor = activity.getContentResolver().query(contentUri, proj, null, null, null);
         if(cursor != null){
 	        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 	        cursor.moveToFirst();
@@ -892,5 +896,25 @@ public class Helpers {
 		builder.setNegativeButton(activity.getString(R.string.later), null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
+	}
+	
+	@SuppressLint("TrulyRandom")
+	public static void secureDelete(File file) throws IOException {
+		if (file.exists()) {
+			long length = file.length();
+			SecureRandom random = new SecureRandom();
+			RandomAccessFile raf = new RandomAccessFile(file, "rws");
+			raf.seek(0);
+			raf.getFilePointer();
+			byte[] data = new byte[64];
+			int pos = 0;
+			while (pos < length) {
+				random.nextBytes(data);
+				raf.write(data);
+				pos += data.length;
+			}
+			raf.close();
+			file.delete();
+		}
 	}
 }
