@@ -59,6 +59,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.drew.imaging.ImageMetadataReader;
@@ -899,22 +900,35 @@ public class Helpers {
 	}
 	
 	@SuppressLint("TrulyRandom")
-	public static void secureDelete(File file) throws IOException {
-		if (file.exists()) {
-			long length = file.length();
-			SecureRandom random = new SecureRandom();
-			RandomAccessFile raf = new RandomAccessFile(file, "rws");
-			raf.seek(0);
-			raf.getFilePointer();
-			byte[] data = new byte[64];
-			int pos = 0;
-			while (pos < length) {
-				random.nextBytes(data);
-				raf.write(data);
-				pos += data.length;
+	public static boolean secureDelete(File file, ProgressBar progress) {
+		try{
+			if (file.exists()) {
+				long length = file.length();
+				progress.setMax(100);
+				progress.setProgress(0);
+				SecureRandom random = new SecureRandom();
+				RandomAccessFile raf = new RandomAccessFile(file, "rws");
+				raf.seek(0);
+				raf.getFilePointer();
+				byte[] data = new byte[64];
+				long pos = 0;
+				while (pos < length) {
+					random.nextBytes(data);
+					raf.write(data);
+					pos += data.length;
+					
+					progress.setProgress(Math.round(pos*100/length));
+				}
+				raf.close();
+				if(file.delete()){
+					return true;
+				}
 			}
-			raf.close();
-			file.delete();
 		}
+		catch(IOException e){
+			Log.d(SafeCameraApplication.TAG, "Unable to secure wipe "+file.getAbsolutePath());
+		}
+		
+		return false;
 	}
 }

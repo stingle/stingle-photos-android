@@ -693,11 +693,17 @@ public class GalleryActivity extends SherlockActivity {
 	private void deleteOriginalsDialog(final String[] filePaths){
 		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
 		builder.setTitle(getString(R.string.delete_original_files));
+		
+		View checkBoxView = View.inflate(this, R.layout.dialog_delete_originals, null);
+		final CheckBox checkBox = (CheckBox) checkBoxView.findViewById(R.id.secureDelete);
+		
+		builder.setView(checkBoxView);
 		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 			
 			@SuppressWarnings("unchecked")
 			@SuppressLint("NewApi")
 			public void onClick(DialogInterface dialog, int whichButton) {
+				
 				ArrayList<File> filesToDelete = new ArrayList<File>();
 				for(String filePath : filePaths){
 					File file = new File(filePath);
@@ -705,6 +711,9 @@ public class GalleryActivity extends SherlockActivity {
 						filesToDelete.add(file);
 					}
 				}
+				
+				boolean isSecure = checkBox.isChecked();
+				
 				AsyncTasks.DeleteFiles deleteOrigFiles = new AsyncTasks.DeleteFiles(GalleryActivity.this, new AsyncTasks.OnAsyncTaskFinish() {
 					@Override
 					public void onFinish(ArrayList<File> deletedFiles) {
@@ -715,7 +724,7 @@ public class GalleryActivity extends SherlockActivity {
 						}
 						Toast.makeText(GalleryActivity.this, getString(R.string.success_delete_originals), Toast.LENGTH_LONG).show();
 					}
-				});
+				}, isSecure);
 				
 				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
 					deleteOrigFiles.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,filesToDelete);

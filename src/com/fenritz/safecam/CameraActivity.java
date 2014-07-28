@@ -69,8 +69,6 @@ import com.fenritz.safecam.util.NaturalOrderComparator;
 
 public class CameraActivity extends SherlockActivity {
 
-	private final String TAG = "SCCam";
-	
 	public static final String FLASH_MODE = "flash_mode";
 	public static final String TIMER_MODE = "timer_mode";
 	public static final String PHOTO_SIZE = "photo_size";
@@ -1252,7 +1250,7 @@ public class CameraActivity extends SherlockActivity {
     private void tryAutoFocus(final boolean startup, final boolean manual) {
     	// manual: whether user has requested autofocus (by touching screen)
 		if( mCamera == null ) {
-			Log.d(TAG, "no camera");
+			Log.d(SafeCameraApplication.TAG, "no camera");
 		}
 		/*else if( !mPreview.has_surface ) {
 		}
@@ -1260,7 +1258,7 @@ public class CameraActivity extends SherlockActivity {
 		}*/
 		//else if( is_taking_photo ) {
 		else if( isTakingPhoto || isTimerRunning ) {
-			Log.d(TAG, "currently taking a photo");
+			Log.d(SafeCameraApplication.TAG, "currently taking a photo");
 		}
 		else {
 			// it's only worth doing autofocus when autofocus has an effect (i.e., auto or macro mode)

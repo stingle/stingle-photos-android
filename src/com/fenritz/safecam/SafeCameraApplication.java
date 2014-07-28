@@ -7,6 +7,8 @@ import com.fenritz.safecam.util.MemoryCache;
 
 public class SafeCameraApplication extends Application{
 
+	public final static String TAG = "SCCam";
+
 	private String key;
 	
 	private static Context context;

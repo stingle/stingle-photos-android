@@ -23,6 +23,7 @@ import org.apache.sanselan.formats.tiff.write.TiffOutputField;
 import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,7 +35,10 @@ import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Video.Thumbnails;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -121,24 +125,61 @@ public class AsyncTasks {
 	
 	public static class DeleteFiles extends AsyncTask<ArrayList<File>, Integer, ArrayList<File>> {
 
-		private ProgressDialog progressDialog;
+		private AlertDialog dialog;
+		private ProgressBar progressBarMain;
+		private ProgressBar progressBarSec;
+		private TextView currentFileLabel;
+		private TextView progressMainPercent;
+		private TextView progressMainCount;
+		private TextView progressSecPercent;
+		
 		private final Activity activity;
 		private final OnAsyncTaskFinish finishListener;
 		private PowerManager.WakeLock wl;
+		private boolean secureDelete = false;
 
 		public DeleteFiles(Activity activity){
-			this(activity, null);
+			this(activity, null, false);
 		}
 		
 		public DeleteFiles(Activity activity, OnAsyncTaskFinish finishListener){
+			this(activity, finishListener, false);
+		}
+		
+		public DeleteFiles(Activity activity, OnAsyncTaskFinish finishListener, boolean secureDelete){
 			this.activity = activity;
 			this.finishListener = finishListener;
+			this.secureDelete = secureDelete;
 		}
 		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			progressDialog = new ProgressDialog(activity);
+			
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setTitle(activity.getString(R.string.deleting_files));
+			
+			View deleteProgressView = View.inflate(activity, R.layout.dialog_delete_originals_progress, null);
+			progressBarMain = (ProgressBar) deleteProgressView.findViewById(R.id.progressBarMain);
+			progressBarSec = (ProgressBar) deleteProgressView.findViewById(R.id.progressBarSec);
+			currentFileLabel = (TextView) deleteProgressView.findViewById(R.id.currentFile);
+			progressMainPercent = (TextView) deleteProgressView.findViewById(R.id.progressMainPercent);
+			progressMainCount = (TextView) deleteProgressView.findViewById(R.id.progressMainCount);
+			progressSecPercent = (TextView) deleteProgressView.findViewById(R.id.progressSecPercent);
+			
+			
+			builder.setView(deleteProgressView);
+			
+			builder.setCancelable(false);
+			builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					DeleteFiles.this.cancel(false);
+				}
+			});
+			dialog = builder.create();
+			dialog.show();
+			
+			/*progressDialog = new ProgressDialog(activity);
 			progressDialog.setCancelable(true);
 			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 				public void onCancel(DialogInterface dialog) {
@@ -147,7 +188,8 @@ public class AsyncTasks {
 			});
 			progressDialog.setMessage(activity.getString(R.string.deleting_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			progressDialog.show();
+			progressDialog.setIndeterminate(false);
+			progressDialog.show();*/
 			
 			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "delete");
@@ -157,17 +199,29 @@ public class AsyncTasks {
 		@Override
 		protected ArrayList<File> doInBackground(ArrayList<File>... params) {
 			ArrayList<File> filesToDelete = params[0];
-			progressDialog.setMax(filesToDelete.size());
+			progressBarMain.setMax(filesToDelete.size());
 			for (int i = 0; i < filesToDelete.size(); i++) {
 				File file = filesToDelete.get(i);
+				currentFileLabel.setText(file.getName());
 				if (file.exists()){
 					if(file.isFile()) {
-						file.delete();
+						if(secureDelete){
+							Helpers.secureDelete(file, progressBarSec);
+						}
+						else{
+							file.delete();
+						}
 						
 						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + Helpers.getThumbFileName(file));
 
 						if (thumb.exists() && thumb.isFile()) {
-							thumb.delete();
+							
+							if(secureDelete){
+								Helpers.secureDelete(thumb, progressBarSec);
+							}
+							else{
+								thumb.delete();
+							}
 						}
 					}
 					else if(file.isDirectory()){
@@ -192,7 +246,12 @@ public class AsyncTasks {
 		        }
 		    }
 
-		    fileOrDirectory.delete();
+		    if(secureDelete && fileOrDirectory.isFile()){
+		    	Helpers.secureDelete(fileOrDirectory, progressBarSec);
+		    }
+		    else{
+		    	fileOrDirectory.delete();
+		    }
 		}
 
 		@Override
@@ -206,14 +265,16 @@ public class AsyncTasks {
 		protected void onProgressUpdate(Integer... values) {
 			super.onProgressUpdate(values);
 
-			progressDialog.setProgress(values[0]);
+			progressBarMain.setProgress(values[0]);
 		}
 
 		@Override
 		protected void onPostExecute(ArrayList<File> deletedFiles) {
 			super.onPostExecute(deletedFiles);
 
-			progressDialog.dismiss();
+			if(dialog!= null){
+				dialog.dismiss();
+			}
 			wl.release();
 			
 			if (finishListener != null) {
