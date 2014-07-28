@@ -9,9 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,7 +29,6 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -59,7 +56,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.drew.imaging.ImageMetadataReader;
@@ -899,36 +895,4 @@ public class Helpers {
 		dialog.show();
 	}
 	
-	@SuppressLint("TrulyRandom")
-	public static boolean secureDelete(File file, ProgressBar progress) {
-		try{
-			if (file.exists()) {
-				long length = file.length();
-				progress.setMax(100);
-				progress.setProgress(0);
-				SecureRandom random = new SecureRandom();
-				RandomAccessFile raf = new RandomAccessFile(file, "rws");
-				raf.seek(0);
-				raf.getFilePointer();
-				byte[] data = new byte[64];
-				long pos = 0;
-				while (pos < length) {
-					random.nextBytes(data);
-					raf.write(data);
-					pos += data.length;
-					
-					progress.setProgress(Math.round(pos*100/length));
-				}
-				raf.close();
-				if(file.delete()){
-					return true;
-				}
-			}
-		}
-		catch(IOException e){
-			Log.d(SafeCameraApplication.TAG, "Unable to secure wipe "+file.getAbsolutePath());
-		}
-		
-		return false;
-	}
 }

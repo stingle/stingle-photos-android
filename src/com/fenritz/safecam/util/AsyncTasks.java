@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -22,6 +24,7 @@ import org.apache.sanselan.formats.tiff.write.TiffOutputDirectory;
 import org.apache.sanselan.formats.tiff.write.TiffOutputField;
 import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -29,8 +32,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Video.Thumbnails;
@@ -123,8 +128,10 @@ public class AsyncTasks {
 		}
 	}
 	
-	public static class DeleteFiles extends AsyncTask<ArrayList<File>, Integer, ArrayList<File>> {
+	public static class DeleteFiles extends AsyncTask<ArrayList<File>, Bundle, ArrayList<File>> {
 
+		//private ProgressDialog progressDialog;
+		
 		private AlertDialog dialog;
 		private ProgressBar progressBarMain;
 		private ProgressBar progressBarSec;
@@ -132,6 +139,7 @@ public class AsyncTasks {
 		private TextView progressMainPercent;
 		private TextView progressMainCount;
 		private TextView progressSecPercent;
+
 		
 		private final Activity activity;
 		private final OnAsyncTaskFinish finishListener;
@@ -158,7 +166,7 @@ public class AsyncTasks {
 			
 			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 			builder.setTitle(activity.getString(R.string.deleting_files));
-			
+
 			View deleteProgressView = View.inflate(activity, R.layout.dialog_delete_originals_progress, null);
 			progressBarMain = (ProgressBar) deleteProgressView.findViewById(R.id.progressBarMain);
 			progressBarSec = (ProgressBar) deleteProgressView.findViewById(R.id.progressBarSec);
@@ -166,10 +174,13 @@ public class AsyncTasks {
 			progressMainPercent = (TextView) deleteProgressView.findViewById(R.id.progressMainPercent);
 			progressMainCount = (TextView) deleteProgressView.findViewById(R.id.progressMainCount);
 			progressSecPercent = (TextView) deleteProgressView.findViewById(R.id.progressSecPercent);
+
 			
-			
+			progressMainPercent.setText("0%");
+			progressSecPercent.setText("0%");
+
 			builder.setView(deleteProgressView);
-			
+
 			builder.setCancelable(false);
 			builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 				public void onCancel(DialogInterface dialog) {
@@ -178,6 +189,8 @@ public class AsyncTasks {
 			});
 			dialog = builder.create();
 			dialog.show();
+			
+			
 			
 			/*progressDialog = new ProgressDialog(activity);
 			progressDialog.setCancelable(true);
@@ -188,7 +201,8 @@ public class AsyncTasks {
 			});
 			progressDialog.setMessage(activity.getString(R.string.deleting_files));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			progressDialog.setIndeterminate(false);
+			//progressDialog.setIndeterminate(false);
+			
 			progressDialog.show();*/
 			
 			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
@@ -200,28 +214,37 @@ public class AsyncTasks {
 		protected ArrayList<File> doInBackground(ArrayList<File>... params) {
 			ArrayList<File> filesToDelete = params[0];
 			progressBarMain.setMax(filesToDelete.size());
+			progressMainCount.setText("0/"+ String.valueOf(filesToDelete.size()));
+			
 			for (int i = 0; i < filesToDelete.size(); i++) {
 				File file = filesToDelete.get(i);
-				currentFileLabel.setText(file.getName());
+				Bundle fileProgress = new Bundle();
+				fileProgress.putString("currentFileName", file.getName());
+				publishProgress(fileProgress);
 				if (file.exists()){
 					if(file.isFile()) {
+						String filePathToDel = file.getAbsolutePath();
 						if(secureDelete){
-							Helpers.secureDelete(file, progressBarSec);
+							secureDelete(file);
 						}
 						else{
 							file.delete();
 						}
 						
+						MediaScannerConnection.scanFile(activity, new String[]{filePathToDel}, null, null);
+						
 						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + Helpers.getThumbFileName(file));
 
 						if (thumb.exists() && thumb.isFile()) {
-							
+							String thumbPathToDel = thumb.getAbsolutePath();
 							if(secureDelete){
-								Helpers.secureDelete(thumb, progressBarSec);
+								secureDelete(thumb);
 							}
 							else{
 								thumb.delete();
 							}
+							
+							MediaScannerConnection.scanFile(activity, new String[]{thumbPathToDel}, null, null);
 						}
 					}
 					else if(file.isDirectory()){
@@ -229,14 +252,51 @@ public class AsyncTasks {
 					}
 				}
 
-				publishProgress(i + 1);
-
+				Bundle progress = new Bundle();
+				progress.putInt("type", 0);
+				progress.putInt("progress", i+1);
+				publishProgress(progress);
+				
 				if (isCancelled()) {
 					break;
 				}
 			}
 
 			return filesToDelete;
+		}
+		
+		@SuppressLint("TrulyRandom")
+		protected boolean secureDelete(File file) {
+			try{
+				if (file.exists()) {
+					long length = file.length();
+					SecureRandom random = new SecureRandom();
+					RandomAccessFile raf = new RandomAccessFile(file, "rws");
+					raf.seek(0);
+					raf.getFilePointer();
+					byte[] data = new byte[64];
+					long pos = 0;
+					while (pos < length) {
+						random.nextBytes(data);
+						raf.write(data);
+						pos += data.length;
+						
+						Bundle progress = new Bundle();
+						progress.putInt("type", 1);
+						progress.putInt("progress", Math.round(pos*100/length));
+						publishProgress(progress);
+					}
+					raf.close();
+					if(file.delete()){
+						return true;
+					}
+				}
+			}
+			catch(IOException e){
+				Log.d(SafeCameraApplication.TAG, "Unable to secure wipe "+file.getAbsolutePath());
+			}
+			
+			return false;
 		}
 		
 		private void deleteFileFolder(File fileOrDirectory) {
@@ -246,12 +306,15 @@ public class AsyncTasks {
 		        }
 		    }
 
+		    String filePathToDel = fileOrDirectory.getAbsolutePath();
 		    if(secureDelete && fileOrDirectory.isFile()){
-		    	Helpers.secureDelete(fileOrDirectory, progressBarSec);
+		    	secureDelete(fileOrDirectory);
 		    }
 		    else{
 		    	fileOrDirectory.delete();
 		    }
+		    
+		    MediaScannerConnection.scanFile(activity, new String[]{filePathToDel}, null, null);
 		}
 
 		@Override
@@ -262,19 +325,33 @@ public class AsyncTasks {
 		}
 
 		@Override
-		protected void onProgressUpdate(Integer... values) {
+		protected void onProgressUpdate(Bundle... values) {
 			super.onProgressUpdate(values);
 
-			progressBarMain.setProgress(values[0]);
+			if(values[0].containsKey("currentFileName")){
+				currentFileLabel.setText(values[0].getString("currentFileName"));
+			}
+			
+			if(values[0].containsKey("type")){
+			switch(values[0].getInt("type")){
+				case 0:
+					progressBarMain.setProgress(values[0].getInt("progress"));
+					progressMainPercent.setText(String.valueOf(Math.round(progressBarMain.getProgress()*100/progressBarMain.getMax())) + "%");
+					progressMainCount.setText(String.valueOf(progressBarMain.getProgress()) + "/" + String.valueOf(progressBarMain.getMax()));
+					break;
+				case 1:
+					progressBarSec.setProgress(values[0].getInt("progress"));
+					progressSecPercent.setText(String.valueOf(Math.round(progressBarSec.getProgress()*100/progressBarSec.getMax())) + "%");
+					break;
+				}
+			}
 		}
 
 		@Override
 		protected void onPostExecute(ArrayList<File> deletedFiles) {
 			super.onPostExecute(deletedFiles);
 
-			if(dialog!= null){
-				dialog.dismiss();
-			}
+			dialog.dismiss();
 			wl.release();
 			
 			if (finishListener != null) {
