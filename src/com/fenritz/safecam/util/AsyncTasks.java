@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -175,13 +174,18 @@ public class AsyncTasks {
 			progressMainCount = (TextView) deleteProgressView.findViewById(R.id.progressMainCount);
 			progressSecPercent = (TextView) deleteProgressView.findViewById(R.id.progressSecPercent);
 
+			if(!secureDelete){
+				progressBarSec.setVisibility(View.GONE);
+				progressSecPercent.setVisibility(View.GONE);
+				currentFileLabel.setVisibility(View.GONE);
+			}
 			
 			progressMainPercent.setText("0%");
 			progressSecPercent.setText("0%");
 
 			builder.setView(deleteProgressView);
 
-			builder.setCancelable(false);
+			builder.setCancelable(true);
 			builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 				public void onCancel(DialogInterface dialog) {
 					DeleteFiles.this.cancel(false);
@@ -223,7 +227,6 @@ public class AsyncTasks {
 				publishProgress(fileProgress);
 				if (file.exists()){
 					if(file.isFile()) {
-						String filePathToDel = file.getAbsolutePath();
 						if(secureDelete){
 							secureDelete(file);
 						}
@@ -231,12 +234,11 @@ public class AsyncTasks {
 							file.delete();
 						}
 						
-						MediaScannerConnection.scanFile(activity, new String[]{filePathToDel}, null, null);
+						broadcastDeletedFile(file);
 						
 						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + Helpers.getThumbFileName(file));
 
 						if (thumb.exists() && thumb.isFile()) {
-							String thumbPathToDel = thumb.getAbsolutePath();
 							if(secureDelete){
 								secureDelete(thumb);
 							}
@@ -244,7 +246,7 @@ public class AsyncTasks {
 								thumb.delete();
 							}
 							
-							MediaScannerConnection.scanFile(activity, new String[]{thumbPathToDel}, null, null);
+							broadcastDeletedFile(thumb);
 						}
 					}
 					else if(file.isDirectory()){
@@ -263,6 +265,10 @@ public class AsyncTasks {
 			}
 
 			return filesToDelete;
+		}
+		
+		private void broadcastDeletedFile(File file){
+			Helpers.rescanDeletedFile(activity, file);
 		}
 		
 		@SuppressLint("TrulyRandom")
@@ -306,7 +312,6 @@ public class AsyncTasks {
 		        }
 		    }
 
-		    String filePathToDel = fileOrDirectory.getAbsolutePath();
 		    if(secureDelete && fileOrDirectory.isFile()){
 		    	secureDelete(fileOrDirectory);
 		    }
@@ -314,7 +319,7 @@ public class AsyncTasks {
 		    	fileOrDirectory.delete();
 		    }
 		    
-		    MediaScannerConnection.scanFile(activity, new String[]{filePathToDel}, null, null);
+		    broadcastDeletedFile(fileOrDirectory);
 		}
 
 		@Override
@@ -507,7 +512,9 @@ public class AsyncTasks {
 						Helpers.getAESCrypt(activity).decrypt(inputStream, outputStream, null, this);
 
 						publishProgress(i+1);
-						decryptedFiles.add(new File(destinationFolder + "/" + destFileName));
+						File decryptedFile = new File(destinationFolder + "/" + destFileName);
+						Helpers.scanFile(activity, decryptedFile);
+						decryptedFiles.add(decryptedFile);
 					}
 					catch (FileNotFoundException e) { }
 				}
