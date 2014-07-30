@@ -8,7 +8,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -51,7 +50,7 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 		 * listPref.setEntryValues(entries);
 		 */
 
-		ListPreference homeFolderLocPref = (ListPreference)findPreference("home_folder_location");
+		ListPreference homeFolderLocPref = (ListPreference)findPreference("home_folder");
 		
 		List<StorageInfo> storageList = StorageUtils.getStorageList();
 		
@@ -70,35 +69,27 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 			
 			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 			
-			String homeDirPath = sharedPrefs.getString("home_folder_location", null);
+			String homeDirPath = sharedPrefs.getString("home_folder", null);
 			if(homeDirPath == null){
 				homeFolderLocPref.setValue(Helpers.getDefaultHomeDir());
 			}
-		}
-		
-		Preference homeFolderPref = findPreference("home_folder");
-		homeFolderPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 			
-			public boolean onPreferenceChange(Preference preference, Object newValue) {
-				Helpers.createFolders(SettingsActivity.this, (String)newValue);
-				int result = Helpers.synchronizePasswordHash(SettingsActivity.this, (String)newValue);
+			homeFolderLocPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 				
-				if(result == Helpers.HASH_SYNC_UPDATED_PREF){
-					Toast.makeText(SettingsActivity.this, getString(R.string.need_to_relogin), Toast.LENGTH_LONG).show();
-					Helpers.logout(SettingsActivity.this);
-					finish();
+				public boolean onPreferenceChange(Preference preference, Object newValue) {
+					Helpers.createFolders(SettingsActivity.this, (String)newValue);
+					int result = Helpers.synchronizePasswordHash(SettingsActivity.this, (String)newValue);
+					
+					if(result == Helpers.HASH_SYNC_UPDATED_PREF){
+						Toast.makeText(SettingsActivity.this, getString(R.string.need_to_relogin), Toast.LENGTH_LONG).show();
+						Helpers.logout(SettingsActivity.this);
+						finish();
+					}
+					
+					return true;
 				}
-				
-				return true;
-			}
-		});
-		homeFolderPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-			
-			public boolean onPreferenceClick(Preference preference) {
-				((EditTextPreference) preference).getEditText().setText(Helpers.getHomeDir(SettingsActivity.this));
-				return true;
-			}
-		});
+			});
+		}
 		
 		Preference clearCachePref = findPreference("clear_cache");
 		clearCachePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

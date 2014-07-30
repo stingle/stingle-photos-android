@@ -18,13 +18,8 @@
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android">
 
-    	 <EditTextPreference
-    	    android:key="home_folder"
-    	    android:summary="@string/home_folder_desc"
-    	    android:title="@string/home_folder" />
-    	
     	 <ListPreference 
-            android:key="home_folder_location"
+            android:key="home_folder"
             android:title="@string/home_folder"
             android:summary="@string/home_folder_desc" />
     	 

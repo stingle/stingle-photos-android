@@ -230,11 +230,23 @@ public class Helpers {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		
 		String defaultHomeDir = Helpers.getDefaultHomeDir();
-		String homeDirPath = sharedPrefs.getString("home_folder", defaultHomeDir);
-		if(new File(homeDirPath).exists()){
-			return homeDirPath;
+		
+		String homeDirPath = ensureLastSlash(sharedPrefs.getString("home_folder", defaultHomeDir)) + context.getString(R.string.default_home_folder_name);
+		
+		if(!new File(homeDirPath).exists()){
+			Helpers.createFolders(context, homeDirPath);
 		}
-		return defaultHomeDir;
+
+		Log.d("qaq", homeDirPath);
+		
+		return homeDirPath;
+	}
+	
+	public static String ensureLastSlash(String path){
+		if(!path.endsWith("/")){
+			return path + "/";
+		}
+		return path;
 	}
 
 	public static String getThumbsDir(Context context) {
