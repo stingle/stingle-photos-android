@@ -131,6 +131,9 @@
     <string name="reset_password">If you forgot your password thats very sad, because we can\'t help you to recover it. It was never stored anywhere! Sorry, that\'s the cost for absolute security. However we can reset your password so you can continue using SafeCamera, but all your existing photos will be unavailable.\n\nAre you sure you want to reset your password?</string>
     <string name="need_to_relogin">Master password in newly selected folder is different than the current one. Please login again.</string>
     <string name="secure_delete">Secure wipe files (takes longer)</string>
+    <string name="internal_sd_card">"Internal SD card"</string>
+    <string name="external_sd_card">"External SD card"</string>
+    <string name="read_only">"Read Only"</string>
     
     
     <!-- File Dialog -->

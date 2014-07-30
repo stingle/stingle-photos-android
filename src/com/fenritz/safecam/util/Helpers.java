@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -50,7 +51,6 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
@@ -72,6 +72,7 @@ import com.fenritz.safecam.SafeCameraActivity;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.AsyncTasks.ReEncryptFiles;
+import com.fenritz.safecam.util.StorageUtils.StorageInfo;
 
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
@@ -225,11 +226,10 @@ public class Helpers {
 	}
 
 	public static String getHomeDir(Context context) {
-		String sdcardPath = Environment.getExternalStorageDirectory().getPath();
 		
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		
-		String defaultHomeDir = sdcardPath + "/" + context.getString(R.string.default_home_folder_name);
+		String defaultHomeDir = Helpers.getDefaultHomeDir();
 		String homeDirPath = sharedPrefs.getString("home_folder", defaultHomeDir);
 		if(new File(homeDirPath).exists()){
 			return homeDirPath;
@@ -931,5 +931,14 @@ public class Helpers {
 		    // File not found in media store DB
 		}
 		c.close();
+	}
+	
+	public static String getDefaultHomeDir(){
+		List<StorageInfo> storageList = StorageUtils.getStorageList();
+		if(storageList.size() > 0){
+			return storageList.get(0).path;
+		}
+		
+		return null;
 	}
 }

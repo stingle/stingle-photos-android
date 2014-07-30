@@ -2,18 +2,24 @@ package com.fenritz.safecam;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.StorageUtils;
+import com.fenritz.safecam.util.StorageUtils.StorageInfo;
 
 public class SettingsActivity extends SherlockPreferenceActivity {
 
@@ -45,6 +51,31 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 		 * listPref.setEntryValues(entries);
 		 */
 
+		ListPreference homeFolderLocPref = (ListPreference)findPreference("home_folder_location");
+		
+		List<StorageInfo> storageList = StorageUtils.getStorageList();
+		
+		if(storageList.size() > 0){
+			CharSequence[] storageEntries = new CharSequence[storageList.size()];
+			CharSequence[] storageEntriesValues = new CharSequence[storageList.size()];
+			
+			for(int i=0;i<storageList.size();i++){
+				StorageInfo item = storageList.get(i);
+				storageEntries[i] = item.getDisplayName();
+				storageEntriesValues[i] = item.path;
+			}
+			
+			homeFolderLocPref.setEntries(storageEntries);
+			homeFolderLocPref.setEntryValues(storageEntriesValues);
+			
+			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+			
+			String homeDirPath = sharedPrefs.getString("home_folder_location", null);
+			if(homeDirPath == null){
+				homeFolderLocPref.setValue(Helpers.getDefaultHomeDir());
+			}
+		}
+		
 		Preference homeFolderPref = findPreference("home_folder");
 		homeFolderPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 			
