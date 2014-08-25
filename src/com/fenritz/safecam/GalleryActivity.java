@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -561,18 +562,22 @@ public class GalleryActivity extends SherlockActivity {
 	}
 
 	private void decryptSelected() {
-		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-		intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-		// can user select directories or not
-		intent.putExtra(FileDialog.CAN_SELECT_FILE, false);
-		intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
-
-		// alternatively you can set file filter
-		// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-		// "png" });
-
-		startActivityForResult(intent, REQUEST_DECRYPT);
+		SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		
+		String filePath = Helpers.getHomeDir(GalleryActivity.this) + preferences.getString("dec_folder", getString(R.string.dec_folder_def));
+		File destinationFolder = new File(filePath);
+		destinationFolder.mkdirs();
+		new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath, new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish(java.util.ArrayList<File> decryptedFiles) {
+				if(decryptedFiles != null){
+					for(File file : decryptedFiles){
+						sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+					}
+				}
+				exitMultiSelect();
+			}
+		}).execute(selectedFiles);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -134,6 +134,9 @@
     <string name="internal_sd_card">"Internal SD card"</string>
     <string name="external_sd_card">"External SD card"</string>
     <string name="read_only">"Read Only"</string>
+    <string name="dec_folder">"Decrypted files folder"</string>
+    <string name="dec_folder_desc">"Folder name for decrypted files"</string>
+    <string name="dec_folder_def">"SafeCameraDecrypted"</string>
     
     
     <!-- File Dialog -->

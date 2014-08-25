@@ -23,6 +23,12 @@
             android:title="@string/home_folder"
             android:summary="@string/home_folder_desc" />
     	 
+    	 <EditTextPreference
+			android:key="dec_folder"
+			android:summary="@string/dec_folder_desc"
+			android:title="@string/dec_folder"
+			android:defaultValue="@string/dec_folder_def" />
+    	 
     	 <ListPreference 
             android:key="lock_time"
             android:title="@string/lock_time"

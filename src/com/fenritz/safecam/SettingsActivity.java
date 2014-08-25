@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -51,6 +52,7 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 		 */
 
 		ListPreference homeFolderLocPref = (ListPreference)findPreference("home_folder");
+		EditTextPreference decFolderPref = (EditTextPreference)findPreference("dec_folder");
 		
 		List<StorageInfo> storageList = StorageUtils.getStorageList();
 		

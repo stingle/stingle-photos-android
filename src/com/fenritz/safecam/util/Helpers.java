@@ -236,8 +236,6 @@ public class Helpers {
 		if(!new File(homeDirPath).exists()){
 			Helpers.createFolders(context, homeDirPath);
 		}
-
-		Log.d("qaq", homeDirPath);
 		
 		return homeDirPath;
 	}
