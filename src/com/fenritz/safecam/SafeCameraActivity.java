@@ -48,8 +48,6 @@ public class SafeCameraActivity extends SherlockActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.startup);
 
-		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
-		
 		Helpers.createFolders(this);
 		
 		Helpers.deleteTmpDir(SafeCameraActivity.this);

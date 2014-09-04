@@ -18,5 +18,6 @@
     
     <color name="file_manager_text">#f6f6f6</color>
     <color name="file_manager_selected">#8aa6ff</color>
+    <color name="main_bg_color">#273041</color>
     <drawable name="ab_bg_black">#aa000000</drawable>
 </resources>
