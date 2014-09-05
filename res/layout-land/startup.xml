@@ -3,20 +3,32 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="horizontal"
-    android:id="@+id/parentLayout"
-    android:background="@drawable/background">
+    android:gravity="center_vertical"
+    android:background="@color/main_bg_color">
 
     <LinearLayout
-    	android:layout_width="fill_parent"
+    	android:layout_width="0dp"
     	android:layout_height="fill_parent"
     	android:layout_weight="1"
     	android:gravity="center"
+    	android:paddingStart="10dp"
+    	android:paddingEnd="10dp"
+    	android:paddingLeft="10dp"
     	android:orientation="vertical">
+    	<ImageView
+			android:layout_width="fill_parent"
+			android:layout_height="50dp"
+			android:layout_marginTop="10dp"
+			android:layout_marginBottom="10dp"
+			android:src="@drawable/vertical_separator"
+			android:scaleType="fitCenter"
+			android:contentDescription="@string/app_name" />
 	    <TextView
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:layout_marginTop="40dp"
 	        android:layout_gravity="center"
+	        android:textColor="@color/sec_color_light"
+        	android:textSize="18sp"
 	        android:text="@string/enter_password" />
 	
 	    <EditText
@@ -29,31 +41,50 @@
 	
 	        <requestFocus />
 	    </EditText>
-	     <Button
-        android:id="@+id/login"
-        android:layout_width="70dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/ok" />
+	    <Button
+	        android:id="@+id/login"
+	        android:layout_width="120dp"
+	        android:layout_height="40dp"
+	        android:layout_marginTop="10dp"
+	        android:layout_gravity="center"
+	        android:background="@drawable/button"
+	        android:text="@string/ok" />
+	    <ImageView
+			android:layout_width="fill_parent"
+			android:layout_height="50dp"
+			android:layout_marginTop="10dp"
+			android:layout_marginBottom="10dp"
+			android:src="@drawable/vertical_separator"
+			android:scaleType="fitCenter"
+			android:contentDescription="@string/app_name" />
 	</LinearLayout>
 	
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="fill_parent"
-        android:layout_height="200dp"
-        android:layout_weight="1"
-        android:src="@drawable/safe_camera_logo"
-        android:layout_marginTop="10dp"
-        android:scaleType="fitCenter"
-        android:layout_gravity="center"
-        android:contentDescription="@string/app_name" />
+    <LinearLayout
+    	android:layout_width="wrap_content"
+    	android:layout_height="fill_parent"
+    	android:gravity="center"
+    	android:paddingStart="10dp"
+    	android:paddingEnd="10dp"
+    	android:paddingLeft="10dp"
+    	android:orientation="vertical">
     
-	<TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:id="@+id/versionText"
-        android:gravity="center"
-        android:autoLink="web"
-        android:padding="10dp" />
+	    <ImageView
+			android:id="@+id/imageView1"
+			android:layout_width="200dp"
+			android:layout_height="200dp"
+			android:layout_marginTop="10dp"
+			android:src="@drawable/safe_camera_logo"
+			android:scaleType="fitCenter"
+			android:layout_gravity="center"
+			android:contentDescription="@string/app_name" />
+	    
+		<TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal|bottom"
+	        android:id="@+id/versionText"
+	        android:gravity="center"
+	        android:autoLink="web"
+	        android:padding="10dp" />
+	</LinearLayout>
 </LinearLayout>
