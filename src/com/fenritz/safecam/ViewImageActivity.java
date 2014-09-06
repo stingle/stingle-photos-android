@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -17,9 +18,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
@@ -27,10 +31,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
@@ -38,7 +38,7 @@ import com.fenritz.safecam.util.DecryptAndShowImage;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.NaturalOrderComparator;
 
-public class ViewImageActivity extends SherlockActivity {
+public class ViewImageActivity extends Activity {
 
 	private final ArrayList<File> files = new ArrayList<File>();
 	
@@ -62,6 +62,7 @@ public class ViewImageActivity extends SherlockActivity {
     
     private final ArrayList<View> viewsHideShow = new ArrayList<View>();
     
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
@@ -70,11 +71,15 @@ public class ViewImageActivity extends SherlockActivity {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         
 		super.onCreate(savedInstanceState);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setHomeButtonEnabled(true);
+		
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+			getActionBar().setHomeButtonEnabled(true);
+			getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ab_bg_black));
+		}
+		
 		setContentView(R.layout.view_photo);
 
-		getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ab_bg_black));
 		
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
@@ -243,8 +248,11 @@ public class ViewImageActivity extends SherlockActivity {
 		};
 	}
 	
+	@SuppressLint("NewApi")
 	private void hideViewsInternal(){
-		getSupportActionBar().hide();
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().hide();
+		}
 		for(View view : viewsHideShow){
 			if(view.getVisibility() == View.VISIBLE) {
 				view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_out));
@@ -262,9 +270,12 @@ public class ViewImageActivity extends SherlockActivity {
 		}, 4000);
 	}
 	
+	@SuppressLint("NewApi")
 	private void showViews(){
 		handler.removeCallbacksAndMessages(null);
-		getSupportActionBar().show();
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().show();
+		}
 		for(View view : viewsHideShow){
 		    if(view.getVisibility() != View.VISIBLE) {
 		    	view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_in));
@@ -275,6 +286,7 @@ public class ViewImageActivity extends SherlockActivity {
 		hideViews();
 	}
 	
+	@SuppressLint("NewApi")
 	private void showImage(File photo){
 		DecryptAndShowImage task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener){
 			@Override
@@ -287,7 +299,9 @@ public class ViewImageActivity extends SherlockActivity {
 		task.execute();
 		taskStack.add(task);
 		
-		getSupportActionBar().setTitle(Helpers.decryptFilename(ViewImageActivity.this, photo.getName()));
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().setTitle(Helpers.decryptFilename(ViewImageActivity.this, photo.getName()));
+		}
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
 	}
 	
@@ -314,7 +328,7 @@ public class ViewImageActivity extends SherlockActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.view_photo_menu, menu);;
+		getMenuInflater().inflate(R.menu.view_photo_menu, menu);;
         return super.onCreateOptionsMenu(menu);
 	}
 

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -29,9 +30,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
 import android.util.SparseArray;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -51,10 +55,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
 import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
@@ -64,7 +64,7 @@ import com.fenritz.safecam.util.MemoryCache;
 import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.CheckableLayout;
 
-public class GalleryActivity extends SherlockActivity {
+public class GalleryActivity extends Activity {
 
 	public final MemoryCache memCache = SafeCameraApplication.getCache();
 
@@ -109,12 +109,15 @@ public class GalleryActivity extends SherlockActivity {
 	
 	private ActionMode mMode;
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		//requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setHomeButtonEnabled(true);
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+			getActionBar().setHomeButtonEnabled(true);
+		}
 		setContentView(R.layout.gallery);
 		
 		setTitle(getString(R.string.title_gallery_for_app));
@@ -314,6 +317,7 @@ public class GalleryActivity extends SherlockActivity {
 		}
 	}
 	
+	@SuppressLint("NewApi")
 	private void changeDir(String newPath){
 		currentPath = newPath;
 		selectedFiles.clear();
@@ -322,10 +326,14 @@ public class GalleryActivity extends SherlockActivity {
 		
 		if(!newPath.equals(Helpers.getHomeDir(this))){
 			String[] splittedPath = newPath.split("/");
-			getSupportActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+				getActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
+			}
 		}
 		else{
-			getSupportActionBar().setTitle(getString(R.string.title_gallery));
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+				getActionBar().setTitle(getString(R.string.title_gallery));
+			}
 		}
 	}
 	
@@ -377,11 +385,15 @@ public class GalleryActivity extends SherlockActivity {
 		}
 	}
 
+	@SuppressLint("NewApi")
 	private void enterMultiSelect(){
-	    mMode = startActionMode(new MultiselectMode());
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			mMode = startActionMode(new MultiselectMode());
+		}
 	    multiSelectModeActive = true;
 	}
 	
+	@SuppressLint("NewApi")
 	private void exitMultiSelect(){
 	    if (mMode != null) {
             mMode.finish();
@@ -1176,9 +1188,10 @@ public class GalleryActivity extends SherlockActivity {
 
 	}
 
-    private final class MultiselectMode implements ActionMode.Callback {
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private final class MultiselectMode implements ActionMode.Callback {
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        	getSupportMenuInflater().inflate(R.menu.gallery_menu_multiselect, menu);
+        	getMenuInflater().inflate(R.menu.gallery_menu_multiselect, menu);
         	
             return true;
         }
@@ -1231,14 +1244,14 @@ public class GalleryActivity extends SherlockActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if(!sendBackDecryptedFile){
-			getSupportMenuInflater().inflate(R.menu.gallery_menu, menu);
+			getMenuInflater().inflate(R.menu.gallery_menu, menu);
 		}
         return super.onCreateOptionsMenu(menu);
 	}
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		if (Build.VERSION.SDK_INT < 11 && !sendBackDecryptedFile) {
-			getSupportMenuInflater().inflate(R.menu.gallery_menu, menu);
+			getMenuInflater().inflate(R.menu.gallery_menu, menu);
 		}
 		return super.onCreateOptionsMenu(menu);
 	}

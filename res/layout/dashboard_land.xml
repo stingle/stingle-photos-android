@@ -3,60 +3,47 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:id="@+id/parentLayout"
-    android:background="@drawable/background" >
-
+    android:background="@color/main_bg_color" >
+    
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_margin="15dp"
         android:orientation="horizontal" >
 
-        <LinearLayout 
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:orientation="vertical"
-		    android:layout_weight="1"
-		    android:gravity="center" >
-	        <ImageButton
-	            android:id="@+id/gotoCamera"
-	            android:layout_width="wrap_content"
-	            android:layout_height="120dp"
-	            android:background="@null"
-	            android:contentDescription="@string/camera"
-	            android:scaleType="fitCenter"
-	            android:src="@drawable/dashboard_camera_button" />
-	        <TextView 
-	            android:text="@string/camera"
-	            android:layout_width="wrap_content" 
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-30dp"
-	            android:textSize="16dp"
-	            android:textColor="@android:color/black" />
-	    </LinearLayout>
+        <ImageButton
+		    android:id="@+id/gotoCamera"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="3"
+		    android:contentDescription="@string/camera"
+		    android:scaleType="fitCenter"
+		    android:background="@null"
+		    android:src="@drawable/safe_camera_logo"
+		    android:layout_gravity="center" />
 
-        <LinearLayout 
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:orientation="vertical"
-		    android:layout_weight="1"
-		    android:gravity="center" >
-	        <ImageButton
-	            android:id="@+id/gotoGallery"
-	            android:layout_width="wrap_content"
-	            android:layout_height="120dp"
-	            android:background="@null"
-	            android:contentDescription="@string/gallery"
-	            android:scaleType="fitCenter"
-	            android:src="@drawable/dashboard_gallery_button" />
-        	<TextView 
-	            android:text="@string/gallery"
-	            android:layout_width="wrap_content" 
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="-30dp"
-	            android:textSize="16dp"
-	            android:textColor="@android:color/black" />
-	    </LinearLayout>
+        <ImageView
+			android:layout_width="0dp"
+			android:layout_height="6dp"
+			android:layout_weight="1"
+			android:layout_gravity="center"
+			android:layout_marginLeft="5dp"
+			android:layout_marginRight="5dp"
+			android:src="@drawable/vseparator"
+			android:scaleType="fitCenter"
+			android:contentDescription="@string/app_name" />
+        
+        <ImageButton
+		    android:id="@+id/gotoGallery"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="3"
+		    android:contentDescription="@string/gallery"
+		    android:scaleType="fitCenter"
+		    android:background="@null"
+		    android:src="@drawable/safe_camera_logo"
+		    android:layout_gravity="center" />
 	    
     </LinearLayout>
 
@@ -69,7 +56,7 @@
         android:text="@string/free_version_text"
         android:gravity="center"
         android:autoLink="web"
-        android:textSize="12dp"
+        android:textSize="12sp"
         android:paddingBottom="2dp" />
 	<TextView
         android:layout_width="wrap_content"

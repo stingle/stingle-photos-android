@@ -20,13 +20,12 @@
         android:name=".SafeCameraApplication"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Sherlock"
         android:largeHeap="true"
+        android:theme="@style/app_theme"
         android:allowBackup="true" >
         <activity
             android:name=".SafeCameraActivity"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Sherlock.NoActionBar">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

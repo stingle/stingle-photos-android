@@ -1,5 +1,6 @@
 package com.fenritz.safecam;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,15 +11,14 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.Helpers;
 
-public class DashboardActivity extends SherlockActivity {
+public class DashboardActivity extends Activity {
 	
 	private BroadcastReceiver receiver;
 	
@@ -47,8 +47,6 @@ public class DashboardActivity extends SherlockActivity {
 	}
 	
 	private void initViews(){
-		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
-		
 		findViewById(R.id.gotoCamera).setOnClickListener(new View.OnClickListener() {
 			
 			public void onClick(View v) {
@@ -92,7 +90,7 @@ public class DashboardActivity extends SherlockActivity {
 		}
 		initViews();
 	}
-	
+
 	private void showPopup(){
 		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 		
@@ -147,7 +145,7 @@ public class DashboardActivity extends SherlockActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.dashborad_menu, menu);
+		getMenuInflater().inflate(R.menu.dashborad_menu, menu);
 		if(!Helpers.isDemo(DashboardActivity.this)){
 			menu.removeItem(R.id.go_pro);
 		}

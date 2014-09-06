@@ -14,6 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -42,10 +43,13 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -57,17 +61,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.fenritz.safecam.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.NaturalOrderComparator;
 
-public class CameraActivity extends SherlockActivity {
+public class CameraActivity extends Activity {
 
 	public static final String FLASH_MODE = "flash_mode";
 	public static final String TIMER_MODE = "timer_mode";
@@ -130,8 +130,6 @@ public class CameraActivity extends SherlockActivity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.camera);
-		
-		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
 		
 		takePhotoButton = (ImageButton) findViewById(R.id.take_photo);
 		takePhotoButton.setOnClickListener(takePhotoClick());
@@ -1098,7 +1096,7 @@ public class CameraActivity extends SherlockActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.camera_menu, menu);;
+		getMenuInflater().inflate(R.menu.camera_menu, menu);;
         return super.onCreateOptionsMenu(menu);
 	}
 

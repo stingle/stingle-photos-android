@@ -1,5 +1,7 @@
 package com.fenritz.safecam;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,6 +11,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -18,15 +22,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.PRNGFixes;
 
-public class SafeCameraActivity extends SherlockActivity {
+public class SafeCameraActivity extends Activity {
 
 	public static final String DEFAULT_PREFS = "default_prefs";
 	public static final String PASSWORD = "password";
@@ -43,11 +44,16 @@ public class SafeCameraActivity extends SherlockActivity {
 	private boolean justLogin = false;
 	private Bundle extraData;
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.startup);
 
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().hide();
+		}
+		
 		Helpers.createFolders(this);
 		
 		Helpers.deleteTmpDir(SafeCameraActivity.this);
@@ -175,7 +181,7 @@ public class SafeCameraActivity extends SherlockActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.main_menu, menu);;
+		getMenuInflater().inflate(R.menu.main_menu, menu);;
         return super.onCreateOptionsMenu(menu);
 	}
 

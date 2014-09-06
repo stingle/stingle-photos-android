@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +19,8 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -30,9 +34,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
 
@@ -42,7 +43,7 @@ import com.fenritz.safecam.util.MemoryCache;
  * @author android
  * 
  */
-public class FileDialog extends SherlockListActivity {
+public class FileDialog extends ListActivity {
 
 	public static final int MODE_CREATE = 0;
 
@@ -142,13 +143,16 @@ public class FileDialog extends SherlockListActivity {
 	 * Called when the activity is first created. Configura todos os parametros
 	 * de entrada e das VIEWS..
 	 */
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setResult(RESULT_CANCELED, getIntent());
 
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setHomeButtonEnabled(true);
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+			getActionBar().setHomeButtonEnabled(true);
+		}
 		
 		setContentView(R.layout.file_dialog_main);
 		
@@ -601,7 +605,7 @@ public class FileDialog extends SherlockListActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.file_dialog_menu, menu);
+		getMenuInflater().inflate(R.menu.file_dialog_menu, menu);
 		selectAllMenuItem = menu.findItem(R.id.select_all);
 		if(fileSelectionMode == MODE_SINGLE){
 			selectAllMenuItem.setVisible(false);

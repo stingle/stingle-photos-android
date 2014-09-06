@@ -3,6 +3,7 @@ package com.fenritz.safecam;
 import java.io.File;
 import java.io.FileFilter;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,20 +13,17 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.actionbarsherlock.app.SherlockActivity;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
 
-public class SetUpActivity  extends SherlockActivity{
+public class SetUpActivity  extends Activity{
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.setup);
 
-		Helpers.fixBackgroundRepeat(findViewById(R.id.parentLayout));
-		
 		File homeFolder = new File(Helpers.getHomeDir(this));
 		
 		if(homeFolder.exists()){

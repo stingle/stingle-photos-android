@@ -8,20 +8,23 @@
 
 	<ImageView
 		android:id="@+id/imageView1"
-		android:layout_width="200dp"
-		android:layout_height="200dp"
-		android:layout_marginTop="10dp"
+		android:layout_width="wrap_content"
+		android:layout_height="0dp"
+		android:layout_marginTop="15dp"
+		android:layout_weight="3"
 		android:src="@drawable/safe_camera_logo"
 		android:scaleType="fitCenter"
 		android:layout_gravity="center"
 		android:contentDescription="@string/app_name" />
 	
 	<ImageView
-		android:layout_width="fill_parent"
-		android:layout_height="50dp"
+		android:layout_width="6dp"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:layout_gravity="center"
 		android:layout_marginTop="10dp"
 		android:layout_marginBottom="10dp"
-		android:src="@drawable/vertical_separator"
+		android:src="@drawable/vseparator"
 		android:scaleType="fitCenter"
 		android:contentDescription="@string/app_name" />
     
@@ -56,11 +59,13 @@
 	
     
     <ImageView
-		android:layout_width="fill_parent"
-		android:layout_height="50dp"
+		android:layout_width="6dp"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:layout_gravity="center"
 		android:layout_marginTop="10dp"
 		android:layout_marginBottom="10dp"
-		android:src="@drawable/vertical_separator"
+		android:src="@drawable/vseparator"
 		android:scaleType="fitCenter"
 		android:contentDescription="@string/app_name" />
 	
@@ -78,5 +83,5 @@
         android:text="@string/bottom_text"
         android:gravity="center"
         android:autoLink="web"
-        android:paddingBottom="10dp" />
+        android:paddingBottom="15dp" />
 </LinearLayout>

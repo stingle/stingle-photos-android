@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +15,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -25,14 +29,11 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
 
-public class ImportPhotosActivity extends SherlockActivity {
+public class ImportPhotosActivity extends Activity {
 	
 	private final HashSet<Integer> selectedItems = new HashSet<Integer>();
 	private final ArrayList<String> arrPath = new ArrayList<String>();
@@ -44,13 +45,16 @@ public class ImportPhotosActivity extends SherlockActivity {
 	private final HashMap<Integer, AsyncTasks.ShowSystemImageThumb> tasks = new HashMap<Integer, AsyncTasks.ShowSystemImageThumb>();
 
 	/** Called when the activity is first created. */
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.import_photos);
 		
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setHomeButtonEnabled(true);
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+			getActionBar().setHomeButtonEnabled(true);
+		}
 
 		final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.ORIENTATION };
 		final String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
@@ -218,7 +222,7 @@ public class ImportPhotosActivity extends SherlockActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.import_photos_menu, menu);
+		getMenuInflater().inflate(R.menu.import_photos_menu, menu);
         return super.onCreateOptionsMenu(menu);
 	}
 

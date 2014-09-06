@@ -23,4 +23,5 @@
     <color name="main_bg_color">#273041</color>
     <color name="sec_color">#e64d3e</color>
     <color name="sec_color_light">#fc6566</color>
+    <color name="dark_bg">#1e2535</color>
 </resources>
