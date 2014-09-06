@@ -12,9 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -182,32 +180,6 @@ public class ViewImageActivity extends Activity {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public synchronized void onActivityResult(final int requestCode, int resultCode, final Intent data) {
-
-		if (resultCode == Activity.RESULT_OK) {
-
-			if (requestCode == REQUEST_DECRYPT) {
-				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-				File destinationFolder = new File(filePath);
-				destinationFolder.mkdirs();
-				final ArrayList<File> selectedFiles = new ArrayList<File>();
-				selectedFiles.add(files.get(currentPosition));
-				new AsyncTasks.DecryptFiles(ViewImageActivity.this, filePath, new OnAsyncTaskFinish() {
-					@Override
-					public void onFinish(ArrayList<File> decryptedFiles) {
-						super.onFinish(decryptedFiles);
-						for(File file : decryptedFiles){
-							sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
-						}
-						Toast.makeText(ViewImageActivity.this, getString(R.string.success_decrypt), Toast.LENGTH_LONG).show();
-					}
-				}).execute(selectedFiles);
-			}
-		}
-	}
-	
 	class SwipeGestureDetector extends SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -337,28 +309,27 @@ public class ViewImageActivity extends Activity {
 		// Handle item selection
 		Intent intent = new Intent();
 		final ArrayList<File> selectedFiles = new ArrayList<File>();
+		selectedFiles.add(files.get(currentPosition));
 		switch (item.getItemId()) {
 			case android.R.id.home:
 				finish();
 				return true;
 			case R.id.decrypt:
-				intent = new Intent(getBaseContext(), FileDialog.class);
-				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-				// can user select directories or not
-				intent.putExtra(FileDialog.CAN_SELECT_FILE, false);
-				intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
-
-				startActivityForResult(intent, REQUEST_DECRYPT);
+				AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
+					@Override
+					public void onFinish() {
+						super.onFinish();
+						
+						Toast.makeText(ViewImageActivity.this, getString(R.string.success_decrypt), Toast.LENGTH_LONG).show();
+					}
+				};
+				Helpers.decryptSelected(this, selectedFiles, finishTask);
 				return true;
 			case R.id.share:
-				selectedFiles.add(files.get(currentPosition));
-				
 				Helpers.share(ViewImageActivity.this, selectedFiles, null);
 				return true;
 			case R.id.delete:
 				cancelPendingTasks();
-				selectedFiles.add(files.get(currentPosition));
 				
 				AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
 				builder.setMessage(getString(R.string.confirm_delete_photo));

@@ -222,13 +222,16 @@ public class Helpers {
 		dialog.show();
 	}
 
-	public static String getHomeDir(Context context) {
-		
+	public static String getHomeDirParentPath(Context context){
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-		
 		String defaultHomeDir = Helpers.getDefaultHomeDir();
 		
-		String homeDirPath = ensureLastSlash(sharedPrefs.getString("home_folder", defaultHomeDir)) + context.getString(R.string.default_home_folder_name);
+		return ensureLastSlash(sharedPrefs.getString("home_folder", defaultHomeDir));
+	}
+	
+	public static String getHomeDir(Context context) {
+		
+		String homeDirPath = getHomeDirParentPath(context) + context.getString(R.string.default_home_folder_name);
 		
 		if(!new File(homeDirPath).exists()){
 			Helpers.createFolders(context, homeDirPath);
@@ -936,5 +939,29 @@ public class Helpers {
 		}
 		
 		return null;
+	}
+	
+	public static void decryptSelected(final Activity activity, ArrayList<File> selectedFiles) {
+		decryptSelected(activity, selectedFiles, null);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void decryptSelected(final Activity activity, ArrayList<File> selectedFiles, final AsyncTasks.OnAsyncTaskFinish finishTask) {
+		SharedPreferences preferences = activity.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Activity.MODE_PRIVATE);
+		
+		String filePath = Helpers.getHomeDirParentPath(activity) + preferences.getString("dec_folder", activity.getString(R.string.dec_folder_def));
+		File destinationFolder = new File(filePath);
+		destinationFolder.mkdirs();
+		new AsyncTasks.DecryptFiles(activity, filePath, new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish(java.util.ArrayList<File> decryptedFiles) {
+				if(decryptedFiles != null){
+					for(File file : decryptedFiles){
+						activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+					}
+				}
+				finishTask.onFinish();
+			}
+		}).execute(selectedFiles);
 	}
 }

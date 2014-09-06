@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -218,6 +217,19 @@ public class GalleryActivity extends Activity {
 				}
 			}).execute(filePaths);
 		}
+	}
+	
+	private void decryptSelected(){
+		AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
+			@Override
+			public void onFinish() {
+				super.onFinish();
+				
+				exitMultiSelect();
+			}
+		};
+		
+		Helpers.decryptSelected(this, selectedFiles, finishTask);
 	}
 	
 	void handleSendMulti(Intent intent) {
@@ -571,25 +583,6 @@ public class GalleryActivity extends Activity {
 		});
 		AlertDialog dialog = builder.create();
 		dialog.show();
-	}
-
-	private void decryptSelected() {
-		SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-		
-		String filePath = Helpers.getHomeDir(GalleryActivity.this) + preferences.getString("dec_folder", getString(R.string.dec_folder_def));
-		File destinationFolder = new File(filePath);
-		destinationFolder.mkdirs();
-		new AsyncTasks.DecryptFiles(GalleryActivity.this, filePath, new OnAsyncTaskFinish() {
-			@Override
-			public void onFinish(java.util.ArrayList<File> decryptedFiles) {
-				if(decryptedFiles != null){
-					for(File file : decryptedFiles){
-						sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
-					}
-				}
-				exitMultiSelect();
-			}
-		}).execute(selectedFiles);
 	}
 
 	@SuppressWarnings("unchecked")
