@@ -7,7 +7,7 @@
     <string name="ok">OK</string>
     <string name="unexpected_error">Unexpected error %s</string>
     <string name="file_not_found">File not found!</string>
-    <string name="setup_info">Please choose your master password. While no limit is put on what you enter here it is strongly adviced that your password has at least 12 characters and contains lowercase and uppercase letters, digits and special symbols (!?/$%#). If your password is not secure enough then your encryptions may be vulnerable to brute force attacks.</string>
+    <string name="setup_info">Please choose your master password. While no limit is put on what you enter here it is strongly advised that your password has at least 12 characters and contains lowercase and uppercase letters, digits and special symbols (!?/$%#). If your password is not secure enough then your encryptions may be vulnerable to brute force attacks.</string>
     <string name="confirm_password">Confirm password</string>
     <string name="save">Save</string>
     <string name="password_not_match">Passwords don\'t match. Please enter the same password twice correctly.</string>
@@ -22,6 +22,8 @@
     <string name="encrypting_files">Encrypting file(s)…</string>
     <string name="encrypting_photo">Encrypting photo…</string>
     <string name="confirm_delete_files">Do you really want to delete %s files?</string>
+    <string name="confirm_decrypt_files">You\'re about to decrypt %s files. They will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
+    <string name="confirm_decrypt_files_s">You\'re about to decrypt a file. It will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
     <string name="confirm_delete_photo">Do you really want to delete this photo?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

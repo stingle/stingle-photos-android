@@ -507,12 +507,14 @@ public class AsyncTasks {
 					
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
-						FileOutputStream outputStream = new FileOutputStream(new File(destinationFolder, destFileName));
+						
+						String finalWritePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, destFileName);
+						FileOutputStream outputStream = new FileOutputStream(new File(finalWritePath));
 
 						Helpers.getAESCrypt(activity).decrypt(inputStream, outputStream, null, this);
 
 						publishProgress(i+1);
-						File decryptedFile = new File(destinationFolder + "/" + destFileName);
+						File decryptedFile = new File(finalWritePath);
 						Helpers.scanFile(activity, decryptedFile);
 						decryptedFiles.add(decryptedFile);
 					}

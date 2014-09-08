@@ -220,7 +220,7 @@ public class GalleryActivity extends Activity {
 	}
 	
 	private void decryptSelected(){
-		AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
+		final AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {
 				super.onFinish();
@@ -229,7 +229,25 @@ public class GalleryActivity extends Activity {
 			}
 		};
 		
-		Helpers.decryptSelected(this, selectedFiles, finishTask);
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+		builder.setMessage(String.format(getString(R.string.confirm_decrypt_files), String.valueOf(selectedFiles.size())));
+		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+			@SuppressWarnings("unchecked")
+			public void onClick(DialogInterface dialog, int whichButton) {
+				Helpers.decryptSelected(GalleryActivity.this, selectedFiles, finishTask);
+			}
+		});
+		builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				refreshList();
+			}
+		});
+		AlertDialog dialog = builder.create();
+		dialog.show();
+		
+		
 	}
 	
 	void handleSendMulti(Intent intent) {

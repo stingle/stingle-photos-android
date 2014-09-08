@@ -309,13 +309,15 @@ public class ViewImageActivity extends Activity {
 		// Handle item selection
 		Intent intent = new Intent();
 		final ArrayList<File> selectedFiles = new ArrayList<File>();
+		AlertDialog dialog;
+		AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
 		selectedFiles.add(files.get(currentPosition));
 		switch (item.getItemId()) {
 			case android.R.id.home:
 				finish();
 				return true;
 			case R.id.decrypt:
-				AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
+				final AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
@@ -323,7 +325,18 @@ public class ViewImageActivity extends Activity {
 						Toast.makeText(ViewImageActivity.this, getString(R.string.success_decrypt), Toast.LENGTH_LONG).show();
 					}
 				};
-				Helpers.decryptSelected(this, selectedFiles, finishTask);
+				
+				builder.setMessage(getString(R.string.confirm_decrypt_files_s));
+				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+					@SuppressWarnings("unchecked")
+					public void onClick(DialogInterface dialog, int whichButton) {
+						Helpers.decryptSelected(ViewImageActivity.this, selectedFiles, finishTask);
+					}
+				});
+				builder.setNegativeButton(getString(R.string.no), null);
+				dialog = builder.create();
+				dialog.show();
+				
 				return true;
 			case R.id.share:
 				Helpers.share(ViewImageActivity.this, selectedFiles, null);
@@ -331,7 +344,6 @@ public class ViewImageActivity extends Activity {
 			case R.id.delete:
 				cancelPendingTasks();
 				
-				AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
 				builder.setMessage(getString(R.string.confirm_delete_photo));
 				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 					@SuppressWarnings("unchecked")
@@ -362,7 +374,7 @@ public class ViewImageActivity extends Activity {
 					}
 				});
 				builder.setNegativeButton(getString(R.string.no), null);
-				AlertDialog dialog = builder.create();
+				dialog = builder.create();
 				dialog.show();
 				return true;
 			case R.id.rotateCW:

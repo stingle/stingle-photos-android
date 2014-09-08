@@ -717,7 +717,7 @@ public class Helpers {
 		return decryptedFilename;
 	}
 	
-	/*public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
+	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
 		return findNewFileNameIfNeeded(context, filePath, fileName, null);
 	}
 	
@@ -726,24 +726,14 @@ public class Helpers {
 			number = 1;
 		}
 
-		File file;
-		boolean isEncryptedFile = false;
-		if(fileName.endsWith(context.getString(R.string.file_extension))){
-			file = new File(filePath + "/" + fileName);
-			isEncryptedFile = true;
-		}
-		else{
-			file = new File(filePath + "/" + fileName + context.getString(R.string.file_extension));
-		}
+		File file = new File(Helpers.ensureLastSlash(filePath) + fileName);
 		if (file.exists()) {
 			int lastDotIndex = fileName.lastIndexOf(".");
 			String fileNameWithoutExt;
 			String originalExtension = ""; 
 			if (lastDotIndex > 0) {
 				fileNameWithoutExt = fileName.substring(0, lastDotIndex);
-				if(!isEncryptedFile){
-					originalExtension = fileName.substring(lastDotIndex);
-				}
+				originalExtension = fileName.substring(lastDotIndex);
 			}
 			else {
 				fileNameWithoutExt = fileName;
@@ -754,17 +744,13 @@ public class Helpers {
 			if (m.find()) {
 				fileNameWithoutExt = fileNameWithoutExt.substring(0, fileName.lastIndexOf("_"));
 			}
-			String finalFilaname;
-			if(isEncryptedFile){
-				finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension + context.getString(R.string.file_extension);
-			}
-			else{
-				finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension;
-			}
+			
+			String finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension;
+			
 			return findNewFileNameIfNeeded(context, filePath, finalFilaname, ++number);
 		}
-		return filePath + "/" + fileName;
-	}*/
+		return Helpers.ensureLastSlash(filePath) + fileName;
+	}
 	
 	public static void share(final Activity activity, final ArrayList<File> files, final OnAsyncTaskFinish onDecrypt) {
 		CharSequence[] listEntries = activity.getResources().getStringArray(R.array.beforeShareActions);
