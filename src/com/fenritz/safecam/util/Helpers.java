@@ -241,7 +241,7 @@ public class Helpers {
 	}
 	
 	public static String ensureLastSlash(String path){
-		if(!path.endsWith("/")){
+		if(path != null && !path.endsWith("/")){
 			return path + "/";
 		}
 		return path;

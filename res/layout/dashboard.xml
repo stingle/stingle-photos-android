@@ -7,16 +7,15 @@
     android:background="@color/main_bg_color">
     
 
-	<ImageButton
+	<com.fenritz.safecam.widget.SafeCameraButton
 	    android:id="@+id/gotoCamera"
 	    android:layout_width="wrap_content"
 	    android:layout_height="0dp"
 	    android:layout_weight="4"
 	    android:layout_marginTop="15dp"
-	    
+	    android:background="@null"
 	    android:contentDescription="@string/camera"
 	    android:scaleType="fitCenter"
-	    android:background="@null"
 	    android:src="@drawable/safe_camera_logo"
 	    android:layout_gravity="center" />
 	
@@ -40,7 +39,7 @@
 	    android:contentDescription="@string/gallery"
 	    android:scaleType="fitCenter"
 	    android:background="@null"
-	    android:src="@drawable/safe_camera_logo"
+	    android:src="@drawable/gallery_bare"
 	    android:layout_gravity="center" />
 	    
 
