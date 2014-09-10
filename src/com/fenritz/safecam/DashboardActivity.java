@@ -9,18 +9,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.fenritz.safecam.util.Helpers;
@@ -62,6 +55,7 @@ public class DashboardActivity extends Activity {
 				startActivity(intent);
 			}
 		});
+		
 		findViewById(R.id.gotoGallery).setOnClickListener(new View.OnClickListener() {
 			
 			public void onClick(View v) {
@@ -83,37 +77,8 @@ public class DashboardActivity extends Activity {
 				freeVersionText.setVisibility(View.GONE);
 			}
 		}
-		
-		//initButtons();
 	}
 	
-	private void initButtons(){
-		BitmapFactory.Options myOptions = new BitmapFactory.Options();
-	    myOptions.inDither = true;
-	    myOptions.inScaled = false;
-	    myOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;// important
-	    myOptions.inPurgeable = true;
-
-	    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.camera_bare,myOptions);
-	    Paint paint = new Paint();
-	    paint.setAntiAlias(true);
-	    paint.setColor(getResources().getColor(R.color.sec_color));
-	    paint.setStyle(Style.STROKE);
-	    paint.setStrokeWidth(13);
-
-	    Bitmap workingBitmap = Bitmap.createBitmap(bitmap);
-	    Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
-
-
-	    Canvas canvas = new Canvas(mutableBitmap);
-	    
-	    RectF circle = new RectF(7, 7, 506, 505);
-	    canvas.drawArc(circle, -180, 180, false, paint);
-
-	    ImageButton imageButton = (ImageButton)findViewById(R.id.gotoCamera);
-	    imageButton.setAdjustViewBounds(true);
-	    imageButton.setImageBitmap(mutableBitmap);
-	}
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
