@@ -66,6 +66,7 @@ import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.NaturalOrderComparator;
+import com.fenritz.safecam.widget.SafeCameraButton;
 
 public class CameraActivity extends Activity {
 
@@ -93,7 +94,7 @@ public class CameraActivity extends Activity {
 	
 	private boolean isTimerOn = false; 
 
-	private ImageButton takePhotoButton;
+	private SafeCameraButton takePhotoButton;
 	private ImageButton flashButton;
 	private ImageButton timerButton;
 	private ImageView galleryButton;
@@ -131,7 +132,7 @@ public class CameraActivity extends Activity {
 
 		setContentView(R.layout.camera);
 		
-		takePhotoButton = (ImageButton) findViewById(R.id.take_photo);
+		takePhotoButton = (SafeCameraButton) findViewById(R.id.take_photo);
 		takePhotoButton.setOnClickListener(takePhotoClick());
 
 		galleryButton = (ImageView) findViewById(R.id.lastPhoto);
@@ -470,7 +471,7 @@ public class CameraActivity extends Activity {
 		
 			lastFile = folderFiles[0];
 			final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(lastFile));
-			final int thumbSize = (int) Math.round(Helpers.getThumbSize(CameraActivity.this) / 1.3);
+			final int thumbSize = (int) Math.round(Helpers.getThumbSize(CameraActivity.this) / 1.4);
 			
 			DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
 			task.setSize(thumbSize);
@@ -478,16 +479,16 @@ public class CameraActivity extends Activity {
 				@Override
 				public void onFinish() {
 					super.onFinish();
-					galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
+					//galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
 					changeRotation(mOrientation);
-					findViewById(R.id.lastPhotoContainer).setVisibility(View.VISIBLE);
+					findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
 				}
 			});
 			task.execute();
 			
 		}
 		else{
-			findViewById(R.id.lastPhotoContainer).setVisibility(View.INVISIBLE);
+			findViewById(R.id.lastPhoto).setVisibility(View.INVISIBLE);
 		}
 	}
 	
@@ -921,6 +922,7 @@ public class CameraActivity extends Activity {
 		int oldOverallRotation = overallRotation;
 		overallRotation += howMuchRotated;
 		
+		//rotateElement(takePhotoButton, oldOverallRotation, overallRotation);
 		rotateElement(galleryButton, oldOverallRotation, overallRotation);
 		rotateElement(flashButton, oldOverallRotation, overallRotation);
 		rotateElement(timerButton, oldOverallRotation, overallRotation);
@@ -983,6 +985,7 @@ public class CameraActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 			progressDialog.dismiss();
+			takePhotoButton.resetAnimation();
 		}
 
 	}

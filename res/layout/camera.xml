@@ -1,56 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:safecam="http://schemas.android.com/apk/res/com.fenritz.safecam"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:id="@+id/parentLayout"
-    android:background="@drawable/background" >
+    android:layout_height="fill_parent" >
 
     <LinearLayout
         android:id="@+id/camera_preview_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-	    android:gravity="left" />
+	    android:gravity="start"
+	    android:orientation="vertical" />
 
-	<LinearLayout
+	<ImageButton
+        android:id="@+id/switchCamButton"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:scaleType="centerInside"
+        android:padding="10dp"
+        android:contentDescription="@string/camera"
+        android:background="@null"
+        android:src="@drawable/ic_action_switch_camera"
+        android:visibility="visible" />
+	
+	<ImageButton
+		android:id="@+id/timerButton"
+		android:layout_width="50dp"
+		android:layout_height="50dp"
+		android:layout_below="@+id/switchCamButton"
+		android:scaleType="centerInside"
+		android:padding="10dp"
+		android:contentDescription="@string/timer"
+		android:background="@null"
+		android:src="@drawable/timer_disabled" />
+	
+	<TextView
+        android:id="@+id/photoSizeLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:orientation="vertical"
-	    android:gravity="center" >
-		<TextView
-	        android:id="@+id/photoSizeLabel"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="left"
-	        android:textColor="@android:color/white"
-	        android:background="#00000000"
-	        android:textSize="15dp"
-	        android:layout_margin="10dp" />
-		
-		<ImageButton
-	        android:id="@+id/switchCamButton"
-	        android:layout_width="40dp"
-	        android:layout_height="40dp"
-	        android:scaleType="centerInside"
-	        android:layout_gravity="left"
-	        android:contentDescription="@string/camera"
-	        android:background="@null"
-	        android:src="@drawable/ic_action_switch_camera"
-	        android:visibility="gone"
-	        android:layout_margin="10dp" />
-		
-	</LinearLayout>
+        android:layout_toLeftOf="@+id/rightPanel"
+        android:layout_toStartOf="@+id/rightPanel"
+        android:textColor="@android:color/white"
+        android:textSize="15sp"
+        android:padding="10dp" />	
 	
 	<ImageButton
 	        android:id="@+id/optionsButton"
-	        android:layout_width="40dp"
-	        android:layout_height="40dp"
+	        android:layout_width="50dp"
+	        android:layout_height="50dp"
 	        android:scaleType="centerInside"
-	        android:layout_gravity="left|bottom"
+	        android:layout_alignParentBottom="true"
 	        android:contentDescription="@string/options"
 	        android:background="@null"
 	        android:src="@drawable/ic_action_options"
-	        android:layout_margin="10dp" />
+	        android:padding="10dp" />
 	
 	<LinearLayout
 	    android:id="@+id/timerLabelContainer"
@@ -66,76 +68,50 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_gravity="center"
-	        android:textSize="30dp" />
+	        android:textSize="30sp" />
 	</LinearLayout>
 	
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-
-       	<LinearLayout
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp"
-            android:visibility="visible"
-            android:gravity="center" >
-            <ImageButton
-                android:id="@+id/flashButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:scaleType="centerInside"
-                android:layout_gravity="left"
-                android:contentDescription="@string/flash"
-                android:background="@null"
-                android:src="@drawable/flash_off" />
+	<RelativeLayout
+	       android:id="@+id/rightPanel"
+           android:layout_width="90dp"
+           android:layout_height="fill_parent"
+           android:background="@color/main_bg_color_trans"
+           android:layout_alignParentRight="true"
+           android:layout_alignParentEnd="true">
            
-            <ImageButton
-                android:id="@+id/timerButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:scaleType="centerInside"
-                android:layout_gravity="right"
-                android:contentDescription="@string/timer"
-                android:background="@null"
-                android:src="@drawable/timer_disabled" />
-        </LinearLayout>
-		<LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:gravity="center_vertical"
-            android:layout_alignParentRight="true"
-            android:layout_weight="1">
-            <ImageButton
-                android:id="@+id/take_photo"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:scaleType="fitXY"
-                android:background="@null"
-                android:layout_gravity="center"
-                android:src="@drawable/shutter_button" />
-		</LinearLayout>
-		
-		<LinearLayout
-		    android:id="@+id/lastPhotoContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="1dp"
-            android:layout_gravity="right"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:visibility="invisible"
-            android:background="#000">
-            <ImageView
-                android:id="@+id/lastPhoto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@android:drawable/ic_menu_gallery" />
-		</LinearLayout>
-    </RelativeLayout>
+	    
+           <ImageButton
+               android:id="@+id/flashButton"
+               android:layout_width="55dp"
+               android:layout_height="55dp"
+               android:padding="10dp"
+               android:scaleType="centerInside"
+               android:layout_centerHorizontal="true"
+               android:contentDescription="@string/flash"
+               android:background="@null"
+               android:src="@drawable/flash_off" />
+           
+            
+           <com.fenritz.safecam.widget.SafeCameraButton
+               android:id="@+id/take_photo"
+               android:layout_width="70dp"
+               android:layout_height="70dp"
+               android:layout_centerVertical="true"
+               android:layout_centerHorizontal="true"
+               android:background="@drawable/camera_bare_no_text_sm"
+               safecam:auto_reset="false"
+               safecam:shrink_direction="vertical" />
+           
+           <ImageView
+               android:id="@+id/lastPhoto"
+               android:layout_width="70dp"
+               android:layout_height="70dp"
+               android:layout_alignParentBottom="true"
+               android:layout_centerHorizontal="true"
+               android:layout_marginBottom="10dp"
+               android:contentDescription="@string/gallery"
+               android:src="@android:drawable/ic_menu_gallery"
+               android:visibility="invisible" />
+	</RelativeLayout>
 
-</FrameLayout>
+</RelativeLayout>

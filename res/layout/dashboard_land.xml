@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:safecam="http://schemas.android.com/apk/res/com.fenritz.safecam"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
@@ -9,41 +10,43 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_margin="15dp"
+        android:padding="25dp"
+        android:layout_margin="25dp"
+        android:gravity="center"
         android:orientation="horizontal" >
 
-        <ImageButton
+        <com.fenritz.safecam.widget.SafeCameraButton
 		    android:id="@+id/gotoCamera"
 		    android:layout_width="0dp"
 		    android:layout_height="wrap_content"
 		    android:layout_weight="3"
 		    android:contentDescription="@string/camera"
 		    android:scaleType="fitCenter"
-		    android:background="@null"
-		    android:src="@drawable/safe_camera_logo"
-		    android:layout_gravity="center" />
+		    android:background="@drawable/camera_bare"
+		    android:layout_gravity="center"
+		    safecam:shrink_direction="horizontal" />
 
         <ImageView
 			android:layout_width="0dp"
 			android:layout_height="6dp"
 			android:layout_weight="1"
 			android:layout_gravity="center"
-			android:layout_marginLeft="5dp"
-			android:layout_marginRight="5dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
 			android:src="@drawable/vseparator"
 			android:scaleType="fitCenter"
 			android:contentDescription="@string/app_name" />
         
-        <ImageButton
+        <com.fenritz.safecam.widget.SafeCameraButton
 		    android:id="@+id/gotoGallery"
 		    android:layout_width="0dp"
 		    android:layout_height="wrap_content"
 		    android:layout_weight="3"
 		    android:contentDescription="@string/gallery"
 		    android:scaleType="fitCenter"
-		    android:background="@null"
-		    android:src="@drawable/safe_camera_logo"
-		    android:layout_gravity="center" />
+		    android:background="@drawable/gallery_bare"
+		    android:layout_gravity="center"
+		    safecam:shrink_direction="horizontal" />
 	    
     </LinearLayout>
 

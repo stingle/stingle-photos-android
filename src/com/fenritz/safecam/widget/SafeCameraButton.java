@@ -6,6 +6,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -23,10 +24,21 @@ public class SafeCameraButton extends Button {
 	Paint paint = new Paint();
 	RectF circle = null;
 	int arcAddDegress = 0;
+	int shrinkDirection = 0;
+	boolean autoReset = true;
 	
 	public SafeCameraButton(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
+		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SafeCameraButton, 0, 0);
+		try {
+			shrinkDirection = ta.getInteger(R.styleable.SafeCameraButton_shrink_direction, 0);
+			autoReset = ta.getBoolean(R.styleable.SafeCameraButton_auto_reset, true);
+		} 
+		finally {
+			ta.recycle();
+		}
+
 		paint.setAntiAlias(true);
 	    paint.setColor(getResources().getColor(R.color.sec_color));
 	    paint.setStyle(Style.STROKE);
@@ -39,7 +51,25 @@ public class SafeCameraButton extends Button {
 
 	@Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int sideSize = (widthMeasureSpec >= heightMeasureSpec ? widthMeasureSpec : heightMeasureSpec);
+		
+		
+		int sideSize;
+		if(widthMeasureSpec >= heightMeasureSpec){
+			if(shrinkDirection == 0){
+				sideSize = widthMeasureSpec;
+			}
+			else{
+				sideSize = heightMeasureSpec;
+			}
+		} 
+		else{
+			if(shrinkDirection == 0){
+				sideSize = heightMeasureSpec;
+			}
+			else{
+				sideSize = widthMeasureSpec;
+			}
+		}
         super.onMeasure(sideSize, sideSize);
     }
 	
@@ -93,12 +123,14 @@ public class SafeCameraButton extends Button {
 		        public void onAnimationEnd(Animator animation) {
 		            onClickListener.onClick(view);
 		            
-		            Handler handler = new Handler();
-		            handler.postDelayed(new Runnable(){
-		                  public void run(){
-		                    resetAnimation();
-		               }
-		            }, 1500);
+		            if(autoReset){
+			            Handler handler = new Handler();
+			            handler.postDelayed(new Runnable(){
+			                  public void run(){
+			                    resetAnimation();
+			               }
+			            }, 1500);
+		            }
 		        }
 	
 		        public void onAnimationCancel(Animator animation) {

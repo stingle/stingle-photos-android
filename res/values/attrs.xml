@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SafeCameraButton">
+        <attr name="shrink_direction" type="enum">
+	        <enum name="vertical" value="0" />
+		    <enum name="horizontal" value="1" />
+        </attr>
+        <attr name="auto_reset" format="boolean" />
+    </declare-styleable>
+</resources>

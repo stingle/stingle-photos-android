@@ -12,7 +12,6 @@ import java.util.StringTokenizer;
 
 import android.annotation.SuppressLint;
 import android.os.Environment;
-import android.util.Log;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -76,9 +75,9 @@ public class StorageUtils {
         try {
             buf_reader = new BufferedReader(new FileReader("/proc/mounts"));
             String line;
-            Log.d(TAG, "/proc/mounts");
+            //Log.d(TAG, "/proc/mounts");
             while ((line = buf_reader.readLine()) != null) {
-                Log.d(TAG, line);
+                //Log.d(TAG, line);
                 if (line.contains("vfat") || line.contains("/mnt")) {
                     StringTokenizer tokens = new StringTokenizer(line, " ");
                     String unused = tokens.nextToken(); //device
