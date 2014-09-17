@@ -3,13 +3,13 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
     
-    <LinearLayout 
+    <com.fenritz.safecam.widget.ImageHolderLayout 
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
 	    android:orientation="vertical"
 	    android:id="@+id/parent_layout"
 	    android:gravity="center" >
-	</LinearLayout>
+	</com.fenritz.safecam.widget.ImageHolderLayout>
 	
 	<TextView
 		    android:id="@+id/countLabel"
@@ -19,25 +19,4 @@
 		    android:layout_centerHorizontal="true"
 		    android:gravity="center" />
 	
-    <ImageButton
-            android:id="@+id/previousButton"
-            android:layout_height="50dp"
-            android:layout_width="50dp"
-            android:scaleType="centerCrop"
-            android:layout_alignParentBottom="true"
-            android:padding="0dp"
-            android:background="@null"
-            android:contentDescription="@string/decrypt"
-            android:src="@drawable/left_button" />
-    <ImageButton
-            android:id="@+id/nextButton"
-            android:layout_height="50dp"
-            android:layout_width="50dp"
-            android:scaleType="centerCrop"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:padding="0dp"
-            android:background="@null"
-            android:contentDescription="@string/decrypt"
-            android:src="@drawable/right_button" />
 </RelativeLayout>

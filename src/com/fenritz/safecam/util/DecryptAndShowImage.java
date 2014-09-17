@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -22,7 +23,7 @@ import android.widget.ProgressBar;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AESCrypt.CryptoProgress;
-import com.fenritz.safecam.widget.TouchImageView;
+import com.fenritz.safecam.widget.photoview.PhotoViewAttacher;
 
 public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 
@@ -89,15 +90,15 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		
 		if (onClickListener != null) {
 			progressBar.setOnClickListener(onClickListener);
-			parent.setOnClickListener(onClickListener);
+			//parent.setOnClickListener(onClickListener);
 		}
 		if (onLongClickListener != null) {
 			progressBar.setOnLongClickListener(onLongClickListener);
-			parent.setOnLongClickListener(onLongClickListener);
+			//parent.setOnLongClickListener(onLongClickListener);
 		}
 		if (touchListener != null) {
 			progressBar.setOnTouchListener(touchListener);
-			parent.setOnTouchListener(touchListener);
+			//parent.setOnTouchListener(touchListener);
 		}
 
 		parent.removeAllViews();
@@ -168,21 +169,29 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		return null;
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	protected void onPostExecute(Bitmap bitmap) {
 		super.onPostExecute(bitmap);
 
-		ImageView image;
+		ImageView image = new ImageView(context);
+		PhotoViewAttacher attacher = null;
 		if (zoomable) {
-			image = new TouchImageView(context);
+			attacher = new PhotoViewAttacher(image);
 			if(touchListener != null){
-				((TouchImageView)image).setTouchListener(touchListener);
+				parent.setOnTouchListener(touchListener);
+			}
+			if (onClickListener != null) {
+				attacher.setOnClickListener(onClickListener);
 			}
 		}
 		else {
-			image = new ImageView(context);
 			if(touchListener != null){
 				image.setOnTouchListener(touchListener);
+			}
+			
+			if (onClickListener != null) {
+				image.setOnClickListener(onClickListener);
 			}
 		}
 
@@ -195,11 +204,8 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		else {
 			image.setImageResource(R.drawable.no);
 		}
+		
 		image.setPadding(3, 3, 3, 3);
-
-		if (onClickListener != null) {
-			image.setOnClickListener(onClickListener);
-		}
 
 		if (onLongClickListener != null) {
 			image.setOnLongClickListener(onLongClickListener);
@@ -208,6 +214,11 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		if(progressBar != null){
 			parent.removeView(progressBar);
 		}
+		
+		if (zoomable && attacher!=null) {
+			attacher.update();
+		}
+		
 		parent.addView(image);
 		
 		onFinish();

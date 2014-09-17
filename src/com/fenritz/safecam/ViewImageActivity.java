@@ -24,7 +24,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,8 +46,6 @@ public class ViewImageActivity extends Activity {
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     
-    private static final int REQUEST_DECRYPT = 0;
-	
     private GestureDetector gestureDetector;
     private View.OnTouchListener gestureListener;
     
@@ -95,10 +92,6 @@ public class ViewImageActivity extends Activity {
 		
 		currentPosition = files.indexOf(photo);
 		
-		
-		((ImageButton)findViewById(R.id.previousButton)).setOnClickListener(navigateLeft());
-		((ImageButton)findViewById(R.id.nextButton)).setOnClickListener(navigateRight());
-		
 		gestureDetector = new GestureDetector(new SwipeGestureDetector());
 		gestureListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
@@ -119,8 +112,6 @@ public class ViewImageActivity extends Activity {
 		registerReceiver(receiver, intentFilter);
 		
 		viewsHideShow.add(findViewById(R.id.countLabel)); 
-		viewsHideShow.add(findViewById(R.id.previousButton)); 
-		viewsHideShow.add(findViewById(R.id.nextButton)); 
 		
 	}
 	
@@ -148,30 +139,6 @@ public class ViewImageActivity extends Activity {
 		Helpers.disableLockTimer(this);
 		
 		hideViews();
-	}
-	
-	private OnClickListener navigateLeft(){
-		return new OnClickListener() {
-			public void onClick(View v) {
-				if(currentPosition > 0){
-					cancelPendingTasks();
-					showImage(files.get(--currentPosition));
-					showViews();
-				}
-			}
-		};
-	}
-	
-	private OnClickListener navigateRight(){
-		return new OnClickListener() {
-			public void onClick(View v) {
-				if(currentPosition < files.size()-1){
-					cancelPendingTasks();
-					showImage(files.get(++currentPosition));
-					showViews();
-				}
-			}
-		};
 	}
 	
 	private void cancelPendingTasks(){
@@ -277,6 +244,7 @@ public class ViewImageActivity extends Activity {
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void fillFilesList() {
 		File dir = new File(currentPath);
 		File[] folderFiles = dir.listFiles();
@@ -328,7 +296,6 @@ public class ViewImageActivity extends Activity {
 				
 				builder.setMessage(getString(R.string.confirm_decrypt_files_s));
 				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-					@SuppressWarnings("unchecked")
 					public void onClick(DialogInterface dialog, int whichButton) {
 						Helpers.decryptSelected(ViewImageActivity.this, selectedFiles, finishTask);
 					}
