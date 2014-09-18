@@ -304,8 +304,8 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         // If we don't have an ImageView, call cleanup()
         if (null == imageView) {
             cleanup();
-            Log.i(LOG_TAG,
-                    "ImageView no longer exists. You should not use this PhotoViewAttacher any more.");
+            /*Log.i(LOG_TAG,
+                    "ImageView no longer exists. You should not use this PhotoViewAttacher any more.");*/
         }
 
         return imageView;
@@ -444,7 +444,24 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         if (getScale() < mMaxScale || scaleFactor < 1f) {
             mSuppMatrix.postScale(scaleFactor, scaleFactor, focusX, focusY);
             checkAndDisplayMatrix();
+            checkMinScale(null);
         }
+    }
+    
+    protected void checkMinScale(Float scale){
+    	if(scale == null){
+    		scale = getScale();
+    	}
+    	if(scale <= 1f){
+    		unblockParentEventInterception();
+        }
+    }
+    
+    protected void unblockParentEventInterception(){
+    	ViewParent parent = getImageView().getParent();
+    	if(null != parent){
+    		parent.requestDisallowInterceptTouchEvent(false);
+    	}
     }
 
     public boolean onTouch(View v, MotionEvent ev) {
@@ -594,6 +611,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                 mSuppMatrix.setScale(scale, scale, focalX, focalY);
                 checkAndDisplayMatrix();
             }
+            checkMinScale(scale);
         }
     }
 
@@ -719,9 +737,11 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         } else if (rect.left > 0) {
             mScrollEdge = EDGE_LEFT;
             deltaX = -rect.left;
+            //unblockParentEventInterception();
         } else if (rect.right < viewWidth) {
             deltaX = viewWidth - rect.right;
             mScrollEdge = EDGE_RIGHT;
+            //unblockParentEventInterception();
         } else {
             mScrollEdge = EDGE_NONE;
         }

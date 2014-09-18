@@ -102,6 +102,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		}
 
 		parent.removeAllViews();
+		System.gc();
 		parent.addView(progressBar);
 	}
 
