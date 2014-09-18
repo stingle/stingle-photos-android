@@ -88,6 +88,8 @@ public class CameraActivity extends Activity {
 	private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
 	private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
 	
+	public static final float DEMO_MAX_RES = 0.31f;
+	
 	private static final int DEFAULT_CAMERA = 0;
 	private int numberOfCameras = 1; 
 	private int currentCamera = 0; 
@@ -232,6 +234,21 @@ public class CameraActivity extends Activity {
 		};
 	}
 	
+	private int getMaxAvailableSizeIndex(List<Camera.Size> mSupportedPictureSizes){
+		if(Helpers.isDemo(CameraActivity.this)){
+			for(int i=mSupportedPictureSizes.size()-1; i>=0; i--){
+				Camera.Size sz = mSupportedPictureSizes.get(i);
+				if((sz.width * sz.height)/1000000f <= DEMO_MAX_RES){
+					return i;
+				}
+			}
+			return 0;
+		}
+		else{
+			return mSupportedPictureSizes.size()-1;
+		}
+	}
+	
 	@SuppressLint("NewApi")
 	private void startCamera(int cameraId){
 		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
@@ -263,34 +280,28 @@ public class CameraActivity extends Activity {
 		}
 
 		List<Size> mSupportedPictureSizes = getSupportedImageSizes();
-		int defaultPhotoSizeIndex = mSupportedPictureSizes.size()-1;
+		int bestAvailableSizeIndex = getMaxAvailableSizeIndex(mSupportedPictureSizes);
+		
 		if(isCurrentCameraFrontFacing()){
-			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, defaultPhotoSizeIndex);
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, bestAvailableSizeIndex);
 		}
 		else{
-			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, defaultPhotoSizeIndex);
+			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, bestAvailableSizeIndex);
 		}
 		
-		if(Helpers.isDemo(CameraActivity.this)){
-			for(int i=0;i<mSupportedPictureSizes.size();i++){
-				if(mSupportedPictureSizes.get(i).width <= 640){
-					photoSizeIndex = i;
-					/*if(isCurrentCameraFrontFacing()){
-						preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, photoSizeIndex).commit();
-					}
-					else{
-						preferences.edit().putInt(CameraActivity.PHOTO_SIZE, photoSizeIndex).commit();
-					}*/
-					break;
+		Size selectedSize = mSupportedPictureSizes.get(photoSizeIndex);
+		if(selectedSize != null){
+			if(Helpers.isDemo(CameraActivity.this)){
+				if((selectedSize.width * selectedSize.height)/1000000f > DEMO_MAX_RES){
+					selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
+					photoSizeIndex = bestAvailableSizeIndex;
 				}
 			}
 		}
-		Size seletectedSize = mSupportedPictureSizes.get(photoSizeIndex);
-		
-		if(seletectedSize == null){
-			seletectedSize = mSupportedPictureSizes.get(defaultPhotoSizeIndex);
+		else{
+			selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
 		}
-
+		
 		// Set flash mode from preferences and update button accordingly
 		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_AUTO);
 
@@ -332,9 +343,9 @@ public class CameraActivity extends Activity {
 		if(focusModes != null && focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
 			parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
-		parameters.setPictureSize(seletectedSize.width, seletectedSize.height);
+		parameters.setPictureSize(selectedSize.width, selectedSize.height);
 		
-		setMegapixelLabel(seletectedSize.width, seletectedSize.height);
+		setMegapixelLabel(selectedSize.width, selectedSize.height);
 		
 		mCamera.setParameters(parameters);
 
