@@ -84,7 +84,7 @@ public class GalleryActivity extends Activity {
 
 	private GridView photosGrid;
 
-	private final ArrayList<File> files = new ArrayList<File>();
+	private static ArrayList<File> files = new ArrayList<File>();
 	
 	private final ArrayList<File> selectedFiles = new ArrayList<File>();
 	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
@@ -282,60 +282,76 @@ public class GalleryActivity extends Activity {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	private void fillFilesList() {
-		if (thumbGenTask != null) {
-			thumbGenTask.cancel(true);
-			thumbGenTask = null;
-		}
+	private class FillFilesList extends AsyncTask<Void, Void, ArrayList<File>> {
 
-		ArrayList<File> folders = new ArrayList<File>();
-		ArrayList<File> files = new ArrayList<File>();
-		
-		File dir = new File(currentPath);
-		File[] folderFiles = dir.listFiles();
+		@SuppressWarnings("unchecked")
+		@Override
+		protected ArrayList<File> doInBackground(Void... params) {
 
-		if(folderFiles != null){
-			int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+			ArrayList<File> filesToReturn = new ArrayList<File>(); 
 			
-			Arrays.sort(folderFiles, (new NaturalOrderComparator(){
-				@Override
-				public int compare(Object o1, Object o2){
-					return -super.compare(o1, o2);
-				}
-			}));
-			//Arrays.sort(folderFiles, Collections.reverseOrder());
+			ArrayList<File> folders = new ArrayList<File>();
+			ArrayList<File> files = new ArrayList<File>();
 			
-			this.files.clear();
-			toGenerateThumbs.clear();
-			noThumbs.clear();
-			
-			for (File file : folderFiles) {
-				if(file.isDirectory() && !file.getName().startsWith(".")){
-					folders.add(file);
-				}
-				else if(file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
-					files.add(file);
-					
-					if(file.length() >= maxFileSize){
-						noThumbs.add(file);
+			File dir = new File(currentPath);
+			File[] folderFiles = dir.listFiles();
+
+			if(folderFiles != null){
+				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+				
+				Arrays.sort(folderFiles, (new NaturalOrderComparator(){
+					@Override
+					public int compare(Object o1, Object o2){
+						return -super.compare(o1, o2);
 					}
-					else{
-						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + Helpers.getThumbFileName(file);
-						File thumb = new File(thumbPath);
-						if (!thumb.exists()) {
-							toGenerateThumbs.add(file);
+				}));
+				
+				
+				toGenerateThumbs.clear();
+				noThumbs.clear();
+				
+				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this);
+				String fileExt = getString(R.string.file_extension);
+				
+				for (File file : folderFiles) {
+					if(file.isDirectory() && !file.getName().startsWith(".")){
+						folders.add(file);
+					}
+					else if(file.isFile() && file.getName().endsWith(fileExt)) {
+						files.add(file);
+						
+						if(file.length() >= maxFileSize){
+							noThumbs.add(file);
+						}
+						else{
+							String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(file);
+							File thumb = new File(thumbPath);
+							if (!thumb.exists()) {
+								toGenerateThumbs.add(file);
+							}
 						}
 					}
 				}
+		
+				Collections.sort(folders);
+				
+				filesToReturn.addAll(folders);
+				filesToReturn.addAll(files);
+				
 			}
-	
-			Collections.sort(folders);
+			return filesToReturn;
 			
-			this.files.addAll(folders);
-			this.files.addAll(files);
+		}
+
+		@SuppressLint("NewApi")
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void onPostExecute(ArrayList<File> files) {
+			super.onPostExecute(files);
+
+			GalleryActivity.files = files;
 			
-			if(this.files.size() == 0){
+			if(files.size() == 0){
 				findViewById(R.id.no_files).setVisibility(View.VISIBLE);
 			}
 			else{
@@ -343,8 +359,32 @@ public class GalleryActivity extends Activity {
 			}
 			
 			thumbGenTask = new GenerateThumbs();
-			thumbGenTask.execute(toGenerateThumbs);
+			if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.HONEYCOMB) {
+				thumbGenTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, toGenerateThumbs);
+			}
+			else {
+				thumbGenTask.execute(toGenerateThumbs);
+			}
+			
+			findViewById(R.id.photosGrid).setVisibility(View.VISIBLE);
+			findViewById(R.id.fillFilesProgress).setVisibility(View.GONE);
+			
+			galleryAdapter.notifyDataSetChanged();
 		}
+
+	}
+	
+	@SuppressLint("NewApi")
+	private void fillFilesList() {
+		if (thumbGenTask != null) {
+			thumbGenTask.cancel(true);
+			thumbGenTask = null;
+		}
+
+		findViewById(R.id.photosGrid).setVisibility(View.GONE);
+		findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);
+		
+		(new FillFilesList()).execute();
 	}
 	
 	@SuppressLint("NewApi")

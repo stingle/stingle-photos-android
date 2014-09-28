@@ -42,7 +42,7 @@ public class ViewImageActivity extends Activity {
 	private BroadcastReceiver receiver;
 	private int currentPosition = 0;
 	
-	private static final int SWIPE_MIN_DISTANCE = 50;
+	private static final int SWIPE_MIN_DISTANCE = 100;
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     

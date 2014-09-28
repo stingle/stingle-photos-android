@@ -452,7 +452,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
     	if(scale == null){
     		scale = getScale();
     	}
-    	if(scale <= 1f){
+    	if(mAllowParentInterceptOnEdge && !mScaleDragDetector.isScaling() && scale <= 1f){
     		unblockParentEventInterception();
         }
     }

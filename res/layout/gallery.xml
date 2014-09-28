@@ -3,7 +3,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="@color/main_bg_color" >
+    android:background="@color/main_bg_color"
+    android:gravity="center" >
 
     <TextView 
         android:id="@+id/no_files"
@@ -26,6 +27,15 @@
         android:smoothScrollbar="true"
         android:saveEnabled="true"
         android:persistentDrawingCache="all"
-        android:verticalSpacing="1dp" >
+        android:verticalSpacing="1dp"
+        android:visibility="gone" >
     </GridView>
+
+    <ProgressBar
+        android:id="@+id/fillFilesProgress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
 </LinearLayout>

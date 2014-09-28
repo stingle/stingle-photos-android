@@ -708,7 +708,10 @@ public class CameraActivity extends Activity {
 	}
 	
 	private void handleFocusAndTakePicture(){
-		if( !this.successfully_focused || System.currentTimeMillis() > this.successfully_focused_time + 5000 ) {
+		List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+		boolean hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
+
+		if( hasAutoFocus && (!this.successfully_focused || System.currentTimeMillis() > this.successfully_focused_time + 5000 )) {
 	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 				public void onAutoFocus(boolean success, Camera camera) {
 					takePicture();
