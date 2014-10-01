@@ -13,8 +13,8 @@
 
 	<ImageButton
         android:id="@+id/switchCamButton"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:scaleType="centerInside"
         android:padding="10dp"
         android:contentDescription="@string/camera"
