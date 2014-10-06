@@ -58,6 +58,10 @@ public class AsyncTasks {
 		}
 	}
 	
+	public static abstract class OnAsyncTaskStart {
+		public void onStart(){}
+	}
+	
 	
 	public static class DecryptPopulateImage extends LimitedThreadAsyncTask<Void, Integer, Bitmap> {
 

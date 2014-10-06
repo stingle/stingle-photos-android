@@ -178,7 +178,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE){
             	continue;
             }
-            if (Math.abs(size.height - targetHeight) < minDiff && size.height >= targetHeight) {
+            if (Math.abs(size.height - targetHeight) < minDiff) {
                 optimalSize = size;
                 minDiff = Math.abs(size.height - targetHeight);
             }
@@ -194,6 +194,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 }
             }
         }
+        
         return optimalSize;
     }
 

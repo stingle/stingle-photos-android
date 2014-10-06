@@ -2,7 +2,6 @@ package com.fenritz.safecam;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -446,61 +445,69 @@ public class CameraActivity extends Activity {
 		}
 	}
 	
-	private void showLastPhotoThumb(){
-		File dir = new File(Helpers.getHomeDir(CameraActivity.this));
-		final int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-		File[] folderFiles = dir.listFiles(new FileFilter() {
+	private class ShowLastPhotoThumb extends AsyncTask<Void, Void, File> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected File doInBackground(Void... params) {
 			
-			public boolean accept(File file) {
-				File thumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(file));
-				if(file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()){
-					return true;
+			File dir = new File(Helpers.getHomeDir(CameraActivity.this));
+			
+			final int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+			
+			File[] folderFiles = dir.listFiles();
+			
+			if(folderFiles != null && folderFiles.length > 0){
+				Arrays.sort(folderFiles, (new NaturalOrderComparator(){
+					@Override
+					public int compare(Object o1, Object o2){
+						return -super.compare(o1, o2);
+					}
+				}));
+				
+				for (File file : folderFiles){
+					File thumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(file));
+					if(file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()){
+						return file;
+					}
 				}
-				return false;
 			}
-		});
-		
-		if(folderFiles != null && folderFiles.length > 0){
-			Arrays.sort(folderFiles, (new NaturalOrderComparator(){
-				@Override
-				public int compare(Object o1, Object o2){
-					return -super.compare(o1, o2);
-				}
-			}));
-			//Arrays.sort(folderFiles, Collections.reverseOrder());
-			/*Arrays.sort(folderFiles, new Comparator<File>() {
-				public int compare(File lhs, File rhs) {
-					if(rhs.lastModified() > lhs.lastModified()){
-						return 1;
-					}
-					else if(rhs.lastModified() < lhs.lastModified()){
-						return -1;
-					}
-					return 0;
-				}
-			});*/
-		
-			lastFile = folderFiles[0];
-			final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(lastFile));
-			final int thumbSize = (int) Math.round(Helpers.getThumbSize(CameraActivity.this) / 1.4);
-			
-			DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
-			task.setSize(thumbSize);
-			task.setOnFinish(new OnAsyncTaskFinish() {
-				@Override
-				public void onFinish() {
-					super.onFinish();
-					//galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
-					changeRotation(mOrientation);
-					findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
-				}
-			});
-			task.execute();
-			
+			return null;
 		}
-		else{
-			findViewById(R.id.lastPhoto).setVisibility(View.INVISIBLE);
+
+		@Override
+		protected void onPostExecute(File file) {
+			super.onPostExecute(file);
+
+			lastFile = file;
+			
+			if(lastFile != null){
+				final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(lastFile));
+				final int thumbSize = (int) Math.round(Helpers.getThumbSize(CameraActivity.this) / 1.4);
+				
+				DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
+				task.setSize(thumbSize);
+				task.setOnFinish(new OnAsyncTaskFinish() {
+					@Override
+					public void onFinish() {
+						super.onFinish();
+						//galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
+						changeRotation(mOrientation);
+						findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
+					}
+				});
+				task.execute();
+			}
+			else{
+				findViewById(R.id.lastPhoto).setVisibility(View.INVISIBLE);
+			}
 		}
+
+	}
+	
+	
+	private void showLastPhotoThumb(){
+		(new ShowLastPhotoThumb()).execute();
 	}
 	
 	@Override
