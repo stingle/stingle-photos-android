@@ -288,7 +288,13 @@ public class CameraActivity extends Activity {
 			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, bestAvailableSizeIndex);
 		}
 		
-		Size selectedSize = mSupportedPictureSizes.get(photoSizeIndex);
+		Size selectedSize;
+		if(photoSizeIndex < mSupportedPictureSizes.size()){
+			selectedSize = mSupportedPictureSizes.get(photoSizeIndex);
+		}
+		else{
+			selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
+		}
 		if(selectedSize != null){
 			if(Helpers.isDemo(CameraActivity.this)){
 				if((selectedSize.width * selectedSize.height)/1000000f > DEMO_MAX_RES){
