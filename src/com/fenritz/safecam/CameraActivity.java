@@ -1268,9 +1268,9 @@ public class CameraActivity extends Activity {
 				    }
 	            }
 	        }
+	        mPreview.invalidate();
+			tryAutoFocus(false, true);
     	}
-    	mPreview.invalidate();
-		tryAutoFocus(false, true);
 		return true;
     }
 
