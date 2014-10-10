@@ -12,6 +12,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -153,6 +155,7 @@ public class ImportPhotosActivity extends Activity {
 			}
 		}
 		
+		@SuppressLint("NewApi")
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = mInflater.inflate(R.layout.gallery_item, null);
 			int thumbSize = Helpers.getThumbSize(ImportPhotosActivity.this);
@@ -186,7 +189,14 @@ public class ImportPhotosActivity extends Activity {
 				}
 			};
 			task.setOnFinish(onFinish);
-			task.execute(new File(arrPath.get(position)));
+			
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+				task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new File(arrPath.get(position)));
+			}
+		    else{
+		    	task.execute(new File(arrPath.get(position)));
+		    }
+			
 			tasks.put(position, task);
 
 			if (selectedItems.contains(position)) {

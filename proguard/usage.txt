@@ -2087,14 +2087,18 @@ com.fenritz.safecam.CameraActivity:
     private static final int ORIENTATION_PORTRAIT_INVERTED
     private static final int ORIENTATION_LANDSCAPE_NORMAL
     private static final int ORIENTATION_LANDSCAPE_INVERTED
+    public static final float DEMO_MAX_RES
     private static final int DEFAULT_CAMERA
-    192:193:private void startCamera()
-    726:748:public static byte[] FixFrontCamPhoto(byte[],int)
+    private static final int FOCUS_WAITING
+    private static final int FOCUS_SUCCESS
+    private static final int FOCUS_FAILED
+    private static final int FOCUS_DONE
+    789:811:public static byte[] FixFrontCamPhoto(byte[],int)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteFile:
-    895:896:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
+    980:981:public CameraActivity$EncryptAndWriteFile(com.fenritz.safecam.CameraActivity)
 com.fenritz.safecam.CameraActivity$EncryptAndWriteThumb:
-    941:942:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
-    945:946:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
+    1027:1028:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context)
+    1031:1032:public CameraActivity$EncryptAndWriteThumb(com.fenritz.safecam.CameraActivity,android.content.Context,java.lang.String)
 com.fenritz.safecam.FileDialog:
     public static final int MODE_CREATE
     public static final int MODE_OPEN
@@ -2116,30 +2120,32 @@ com.fenritz.safecam.FileDialog:
     private static final int SELECT_ALL
 com.fenritz.safecam.FileDialog$BitmapViewBinder
 com.fenritz.safecam.GalleryActivity:
-    protected static final int REQUEST_DECRYPT
-    protected static final int REQUEST_ENCRYPT
-    protected static final int REQUEST_IMPORT
-    protected static final int REQUEST_VIEW_PHOTO
+    public static final int REQUEST_DECRYPT
+    public static final int REQUEST_ENCRYPT
+    public static final int REQUEST_IMPORT
+    public static final int REQUEST_VIEW_PHOTO
+    public static final int REQUEST_LOGIN
     protected static final int ACTION_DECRYPT
     protected static final int ACTION_SHARE
     protected static final int ACTION_MOVE
     protected static final int ACTION_DELETE
     protected static final int ACTION_DELETE_FOLDER
-com.fenritz.safecam.R
+com.fenritz.safecam.R:
+    10:10:public R()
 com.fenritz.safecam.R$anim
 com.fenritz.safecam.R$array
 com.fenritz.safecam.R$attr
-com.fenritz.safecam.R$bool
 com.fenritz.safecam.R$color
-com.fenritz.safecam.R$dimen
 com.fenritz.safecam.R$drawable
 com.fenritz.safecam.R$id
-com.fenritz.safecam.R$integer
 com.fenritz.safecam.R$layout
 com.fenritz.safecam.R$menu
 com.fenritz.safecam.R$string
 com.fenritz.safecam.R$style
-com.fenritz.safecam.R$styleable
+com.fenritz.safecam.R$styleable:
+    public static final int SafeCameraButton_auto_reset
+    public static final int SafeCameraButton_shrink_direction
+    381:381:public R$styleable()
 com.fenritz.safecam.R$xml
 com.fenritz.safecam.SafeCameraActivity:
     public static final java.lang.String DEFAULT_PREFS
@@ -2151,11 +2157,12 @@ com.fenritz.safecam.SafeCameraActivity:
     public static final java.lang.String LOGINS_COUNT_FOR_POPUP
     public static final java.lang.String DONT_SHOW_POPUP
     public static final java.lang.String POPUP_LATERS_COUNT
+com.fenritz.safecam.SafeCameraApplication:
+    public static final java.lang.String TAG
 com.fenritz.safecam.ViewImageActivity:
     private static final int SWIPE_MIN_DISTANCE
     private static final int SWIPE_MAX_OFF_PATH
     private static final int SWIPE_THRESHOLD_VELOCITY
-    private static final int REQUEST_DECRYPT
 com.fenritz.safecam.util.AESCrypt:
     public static final java.lang.String PROVIDER
     public static final int SALT_LENGTH
@@ -2185,36 +2192,36 @@ com.fenritz.safecam.util.AESCrypt$CryptoProgress:
 com.fenritz.safecam.util.AESCryptException:
     private static final long serialVersionUID
 com.fenritz.safecam.util.AsyncTasks:
-    42:42:public AsyncTasks()
+    50:50:public AsyncTasks()
 com.fenritz.safecam.util.AsyncTasks$DecryptFiles:
-    325:326:public AsyncTasks$DecryptFiles(android.app.Activity,java.lang.String)
+    472:473:public AsyncTasks$DecryptFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$DecryptPopulateImage:
-    75:76:public void setCache(com.fenritz.safecam.util.MemoryCache)
+    87:88:public void setCache(com.fenritz.safecam.util.MemoryCache)
 com.fenritz.safecam.util.AsyncTasks$EncryptFiles:
-    520:521:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
+    671:672:public AsyncTasks$EncryptFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$ImportFiles:
     public static final int STATUS_OK
     public static final int STATUS_FAIL
     public static final int STATUS_CANCEL
-    619:620:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
+    790:791:public AsyncTasks$ImportFiles(android.app.Activity,java.lang.String)
 com.fenritz.safecam.util.AsyncTasks$MoveFiles:
-    234:235:public AsyncTasks$MoveFiles(android.app.Activity,java.io.File)
+    381:382:public AsyncTasks$MoveFiles(android.app.Activity,java.io.File)
+com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskStart
 com.fenritz.safecam.util.AsyncTasks$RotatePhoto:
     public static final int STATUS_OK
     public static final int STATUS_FAIL
     public static final int STATUS_CANCEL
     public static final int ROTATION_CW
     public static final int ROTATION_CCW
-    747:748:public AsyncTasks$RotatePhoto(android.app.Activity,java.lang.String,int)
-com.fenritz.safecam.util.AsyncTasks$ShowImageThumb:
-    985:986:public void setOnFinish(com.fenritz.safecam.util.AsyncTasks$OnAsyncTaskFinish)
+    918:919:public AsyncTasks$RotatePhoto(android.app.Activity,java.lang.String,int)
+com.fenritz.safecam.util.AsyncTasks$ShowImageThumb
 com.fenritz.safecam.util.CameraPreview:
-    71:82:public void switchCamera(android.hardware.Camera)
+    70:81:public void switchCamera(android.hardware.Camera)
 com.fenritz.safecam.util.DecryptAndShowImage:
-    42:43:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup)
-    46:47:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,com.fenritz.safecam.util.MemoryCache)
-    50:51:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener,android.view.View$OnLongClickListener)
-    54:55:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener)
+    43:44:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup)
+    47:48:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,com.fenritz.safecam.util.MemoryCache)
+    51:52:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener,android.view.View$OnLongClickListener)
+    55:56:public DecryptAndShowImage(java.lang.String,android.view.ViewGroup,android.view.View$OnClickListener)
 com.fenritz.safecam.util.Helpers:
     public static final java.lang.String JPEG_FILE_PREFIX
     protected static final int SHARE_AS_IS
@@ -2223,14 +2230,15 @@ com.fenritz.safecam.util.Helpers:
     public static final int HASH_SYNC_NOTHING_DONE
     public static final int HASH_SYNC_UPDATED_PREF
     public static final int HASH_SYNC_WROTE_FILE
-    71:71:public Helpers()
-    169:177:public static void registerForBroadcastReceiver(android.app.Activity)
-    205:214:public static void printMaxKeySizes()
-    302:302:public static java.lang.String readLoginHashFromFile(android.content.Context)
-    412:417:public static int getExifRotation(byte[])
-    422:427:public static int getExifRotation(java.io.File)
-    442:447:public static int getAltExifRotation(java.io.File)
-    451:481:private static int getRotationFromMetadata(org.apache.sanselan.common.IImageMetadata)
+    74:74:public Helpers()
+    170:178:public static void registerForBroadcastReceiver(android.app.Activity)
+    206:215:public static void printMaxKeySizes()
+    315:315:public static java.lang.String readLoginHashFromFile(android.content.Context)
+    425:430:public static int getExifRotation(byte[])
+    435:440:public static int getExifRotation(java.io.File)
+    455:460:public static int getAltExifRotation(java.io.File)
+    464:494:private static int getRotationFromMetadata(org.apache.sanselan.common.IImageMetadata)
+    931:932:public static void decryptSelected(android.app.Activity,java.util.ArrayList)
 com.fenritz.safecam.util.Helpers$1
 com.fenritz.safecam.util.LimitedThreadAsyncTask:
     private static final int CORE_POOL_SIZE
@@ -2240,10 +2248,20 @@ com.fenritz.safecam.util.MemoryCache:
     53:54:public void clear()
 com.fenritz.safecam.util.OptimizedCipherInputStream:
     177:180:protected OptimizedCipherInputStream(java.io.InputStream)
+com.fenritz.safecam.util.PRNGFixes:
+    private static final int VERSION_CODE_JELLY_BEAN
+    private static final int VERSION_CODE_JELLY_BEAN_MR2
+com.fenritz.safecam.util.PRNGFixes$LinuxPRNGSecureRandom:
+    private static final long serialVersionUID
+com.fenritz.safecam.util.PRNGFixes$LinuxPRNGSecureRandomProvider:
+    private static final long serialVersionUID
 com.fenritz.safecam.util.SerialExecutor
 com.fenritz.safecam.util.SerialExecutor$OnPostExecute
 com.fenritz.safecam.util.SerialExecutor$SerialTask
 com.fenritz.safecam.util.SerialExecutor$TaskParams
+com.fenritz.safecam.util.StorageUtils:
+    private static final java.lang.String TAG
+    19:19:public StorageUtils()
 com.fenritz.safecam.widget.DashboardLayout:
     private static final int UNEVEN_GRID_PENALTY_MULTIPLIER
     36:37:public DashboardLayout(android.content.Context)
@@ -2252,7 +2270,150 @@ com.fenritz.safecam.widget.TouchImageView:
     static final int DRAG
     static final int ZOOM
     static final int CLICK
+    51:53:public TouchImageView(android.content.Context)
+    61:62:public void setTouchListener(android.view.View$OnTouchListener)
     156:157:public void setMaxZoom(float)
+com.fenritz.safecam.widget.photoview.Compat:
+    private static final int SIXTY_FPS_INTERVAL
+    25:25:public Compat()
+com.fenritz.safecam.widget.photoview.IPhotoView:
+    public static final float DEFAULT_MAX_SCALE
+    public static final float DEFAULT_MID_SCALE
+    public static final float DEFAULT_MIN_SCALE
+    public static final int DEFAULT_ZOOM_DURATION
+    public abstract boolean canZoom()
+    public abstract android.graphics.RectF getDisplayRect()
+    public abstract boolean setDisplayMatrix(android.graphics.Matrix)
+    public abstract android.graphics.Matrix getDisplayMatrix()
+    public abstract float getMinScale()
+    public abstract float getMinimumScale()
+    public abstract float getMidScale()
+    public abstract float getMediumScale()
+    public abstract float getMaxScale()
+    public abstract float getMaximumScale()
+    public abstract float getScale()
+    public abstract android.widget.ImageView$ScaleType getScaleType()
+    public abstract void setAllowParentInterceptOnEdge(boolean)
+    public abstract void setMinScale(float)
+    public abstract void setMinimumScale(float)
+    public abstract void setMidScale(float)
+    public abstract void setMediumScale(float)
+    public abstract void setMaxScale(float)
+    public abstract void setMaximumScale(float)
+    public abstract void setOnLongClickListener(android.view.View$OnLongClickListener)
+    public abstract void setOnMatrixChangeListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnMatrixChangedListener)
+    public abstract void setOnPhotoTapListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnPhotoTapListener)
+    public abstract com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnPhotoTapListener getOnPhotoTapListener()
+    public abstract void setOnViewTapListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnViewTapListener)
+    public abstract void setRotationTo(float)
+    public abstract void setRotationBy(float)
+    public abstract com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnViewTapListener getOnViewTapListener()
+    public abstract void setScale(float)
+    public abstract void setScale(float,boolean)
+    public abstract void setScale(float,float,float,boolean)
+    public abstract void setScaleType(android.widget.ImageView$ScaleType)
+    public abstract void setZoomable(boolean)
+    public abstract void setPhotoViewRotation(float)
+    public abstract android.graphics.Bitmap getVisibleRectangleBitmap()
+    public abstract void setZoomTransitionDuration(int)
+    public abstract com.fenritz.safecam.widget.photoview.IPhotoView getIPhotoViewImplementation()
+    public abstract void setOnDoubleTapListener(android.view.GestureDetector$OnDoubleTapListener)
+com.fenritz.safecam.widget.photoview.PhotoView:
+    39:40:public PhotoView(android.content.Context)
+    62:63:public void setPhotoViewRotation(float)
+    66:67:public void setRotationTo(float)
+    70:71:public void setRotationBy(float)
+    74:74:public boolean canZoom()
+    78:78:public android.graphics.RectF getDisplayRect()
+    82:82:public android.graphics.Matrix getDisplayMatrix()
+    86:86:public boolean setDisplayMatrix(android.graphics.Matrix)
+    91:91:public float getMinScale()
+    95:95:public float getMinimumScale()
+    100:100:public float getMidScale()
+    104:104:public float getMediumScale()
+    109:109:public float getMaxScale()
+    113:113:public float getMaximumScale()
+    117:117:public float getScale()
+    126:127:public void setAllowParentInterceptOnEdge(boolean)
+    131:132:public void setMinScale(float)
+    135:136:public void setMinimumScale(float)
+    140:141:public void setMidScale(float)
+    144:145:public void setMediumScale(float)
+    149:150:public void setMaxScale(float)
+    153:154:public void setMaximumScale(float)
+    182:183:public void setOnMatrixChangeListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnMatrixChangedListener)
+    191:192:public void setOnPhotoTapListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnPhotoTapListener)
+    195:195:public com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnPhotoTapListener getOnPhotoTapListener()
+    199:200:public void setOnViewTapListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnViewTapListener)
+    203:203:public com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnViewTapListener getOnViewTapListener()
+    207:208:public void setScale(float)
+    211:212:public void setScale(float,boolean)
+    215:216:public void setScale(float,float,float,boolean)
+    228:229:public void setZoomable(boolean)
+    232:232:public android.graphics.Bitmap getVisibleRectangleBitmap()
+    236:237:public void setZoomTransitionDuration(int)
+    240:240:public com.fenritz.safecam.widget.photoview.IPhotoView getIPhotoViewImplementation()
+    244:245:public void setOnDoubleTapListener(android.view.GestureDetector$OnDoubleTapListener)
+com.fenritz.safecam.widget.photoview.PhotoViewAttacher:
+    private static final java.lang.String LOG_TAG
+    static final int EDGE_NONE
+    static final int EDGE_LEFT
+    static final int EDGE_RIGHT
+    static final int EDGE_BOTH
+    77:84:private static void checkZoomLevels(float,float,float)
+    200:204:public void setOnDoubleTapListener(android.view.GestureDetector$OnDoubleTapListener)
+    207:207:public boolean canZoom()
+    257:271:public boolean setDisplayMatrix(android.graphics.Matrix)
+    275:276:public void setAdditionalTouchListener(android.view.View$OnTouchListener)
+    283:285:public void setPhotoViewRotation(float)
+    288:290:public void setRotationTo(float)
+    293:295:public void setRotationBy(float)
+    316:316:public float getMinScale()
+    325:325:public float getMidScale()
+    334:334:public float getMaxScale()
+    517:518:public void setAllowParentInterceptOnEdge(boolean)
+    522:523:public void setMinScale(float)
+    526:528:public void setMinimumScale(float)
+    532:533:public void setMidScale(float)
+    536:538:public void setMediumScale(float)
+    542:543:public void setMaxScale(float)
+    546:548:public void setMaximumScale(float)
+    559:560:public void setOnMatrixChangeListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnMatrixChangedListener)
+    563:564:public void setOnPhotoTapListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnPhotoTapListener)
+    571:572:public void setOnViewTapListener(com.fenritz.safecam.widget.photoview.PhotoViewAttacher$OnViewTapListener)
+    579:580:public void setScale(float)
+    583:591:public void setScale(float,boolean)
+    650:650:public android.graphics.Matrix getDisplayMatrix()
+    776:777:public android.graphics.Bitmap getVisibleRectangleBitmap()
+    781:784:public void setZoomTransitionDuration(int)
+    787:787:public com.fenritz.safecam.widget.photoview.IPhotoView getIPhotoViewImplementation()
+com.fenritz.safecam.widget.photoview.gestures.CupcakeGestureDetector:
+    private static final java.lang.String LOG_TAG
+com.fenritz.safecam.widget.photoview.gestures.EclairGestureDetector:
+    private static final int INVALID_POINTER_ID
+com.fenritz.safecam.widget.photoview.gestures.VersionedGestureDetector:
+    22:22:public VersionedGestureDetector()
+com.fenritz.safecam.widget.photoview.log.LogManager:
+    23:23:public LogManager()
+    28:29:public static void setLogger(com.fenritz.safecam.widget.photoview.log.Logger)
+com.fenritz.safecam.widget.photoview.log.Logger:
+    public abstract int v(java.lang.String,java.lang.String)
+    public abstract int v(java.lang.String,java.lang.String,java.lang.Throwable)
+    public abstract int d(java.lang.String,java.lang.String,java.lang.Throwable)
+    public abstract int i(java.lang.String,java.lang.String,java.lang.Throwable)
+    public abstract int w(java.lang.String,java.lang.String)
+    public abstract int w(java.lang.String,java.lang.String,java.lang.Throwable)
+    public abstract int e(java.lang.String,java.lang.String)
+    public abstract int e(java.lang.String,java.lang.String,java.lang.Throwable)
+com.fenritz.safecam.widget.photoview.log.LoggerDefault:
+    26:26:public int v(java.lang.String,java.lang.String)
+    30:30:public int v(java.lang.String,java.lang.String,java.lang.Throwable)
+    38:38:public int d(java.lang.String,java.lang.String,java.lang.Throwable)
+    46:46:public int i(java.lang.String,java.lang.String,java.lang.Throwable)
+    50:50:public int w(java.lang.String,java.lang.String)
+    54:54:public int w(java.lang.String,java.lang.String,java.lang.Throwable)
+    58:58:public int e(java.lang.String,java.lang.String)
+    62:62:public int e(java.lang.String,java.lang.String,java.lang.Throwable)
 com.google.ads.Ad:
     public abstract boolean isReady()
     public abstract void loadAd(com.google.ads.AdRequest)
