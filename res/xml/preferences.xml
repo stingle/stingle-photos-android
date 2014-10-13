@@ -24,9 +24,15 @@
             android:summary="@string/home_folder_desc" />
     	 
     	 <EditTextPreference
+			android:key="home_folder_name"
+			android:title="@string/home_folder_name"
+			android:summary="@string/home_folder_name_desc"
+			android:defaultValue="@string/default_home_folder_name" />
+    	 
+    	 <EditTextPreference
 			android:key="dec_folder"
-			android:summary="@string/dec_folder_desc"
 			android:title="@string/dec_folder"
+			android:summary="@string/dec_folder_desc"
 			android:defaultValue="@string/dec_folder_def" />
     	 
     	 <ListPreference 

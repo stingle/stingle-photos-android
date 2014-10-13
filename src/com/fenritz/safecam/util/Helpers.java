@@ -67,6 +67,7 @@ import com.fenritz.safecam.GalleryActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraActivity;
 import com.fenritz.safecam.SafeCameraApplication;
+import com.fenritz.safecam.SettingsActivity;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.AsyncTasks.ReEncryptFiles;
 import com.fenritz.safecam.util.StorageUtils.StorageInfo;
@@ -222,16 +223,34 @@ public class Helpers {
 		dialog.show();
 	}
 
+	public static String getDefaultHomeDir(){
+		List<StorageInfo> storageList = StorageUtils.getStorageList();
+		if(storageList.size() > 0){
+			return storageList.get(0).path;
+		}
+		
+		return null;
+	}
+	
 	public static String getHomeDirParentPath(Context context){
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		String defaultHomeDir = Helpers.getDefaultHomeDir();
 		
-		return ensureLastSlash(sharedPrefs.getString("home_folder", defaultHomeDir));
+		String customHomeDir = sharedPrefs.getString("home_folder_location", null);
+		
+		String currentHomeDir = sharedPrefs.getString("home_folder", defaultHomeDir);
+		
+		if(currentHomeDir.equals(SettingsActivity.CUSTOM_HOME_VALUE) && customHomeDir != null){
+			currentHomeDir = customHomeDir;
+		}
+		
+		return ensureLastSlash(currentHomeDir);
 	}
 	
 	public static String getHomeDir(Context context) {
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		
-		String homeDirPath = getHomeDirParentPath(context) + context.getString(R.string.default_home_folder_name);
+		String homeDirPath = getHomeDirParentPath(context) + sharedPrefs.getString("home_folder_name", context.getString(R.string.default_home_folder_name));
 		
 		if(!new File(homeDirPath).exists()){
 			Helpers.createFolders(context, homeDirPath);
@@ -916,15 +935,6 @@ public class Helpers {
 		    // File not found in media store DB
 		}
 		c.close();
-	}
-	
-	public static String getDefaultHomeDir(){
-		List<StorageInfo> storageList = StorageUtils.getStorageList();
-		if(storageList.size() > 0){
-			return storageList.get(0).path;
-		}
-		
-		return null;
 	}
 	
 	public static void decryptSelected(final Activity activity, ArrayList<File> selectedFiles) {

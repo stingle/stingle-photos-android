@@ -139,6 +139,10 @@
     <string name="dec_folder">"Decrypted files folder"</string>
     <string name="dec_folder_desc">"Folder name for decrypted files"</string>
     <string name="dec_folder_def">"SafeCameraDecrypted"</string>
+    <string name="custom_folder">"Custom folder"</string>
+    <string name="no_such_folder">"There is no such folder %s"</string>
+    <string name="home_folder_name">"Home folder name"</string>
+    <string name="home_folder_name_desc">"Name of the SafeCamera folder in selected location"</string>
     
     
     <!-- File Dialog -->
