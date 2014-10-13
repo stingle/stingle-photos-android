@@ -131,7 +131,7 @@ public class SettingsActivity extends PreferenceActivity {
 		
 		final String homeFolderCurrentValue;
 		
-		if(homeDirCustomPath != null){
+		if(homeDirPath != null && homeDirPath.equals(CUSTOM_HOME_VALUE) && homeDirCustomPath != null){
 			homeFolderCurrentValue = String.valueOf(storageEntriesValues[storageEntriesValues.length-1]);
 		}
 		else if(homeDirPath == null){

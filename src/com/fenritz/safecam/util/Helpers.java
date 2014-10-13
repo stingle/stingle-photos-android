@@ -236,9 +236,8 @@ public class Helpers {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		String defaultHomeDir = Helpers.getDefaultHomeDir();
 		
-		String customHomeDir = sharedPrefs.getString("home_folder_location", null);
-		
 		String currentHomeDir = sharedPrefs.getString("home_folder", defaultHomeDir);
+		String customHomeDir = sharedPrefs.getString("home_folder_location", null);
 		
 		if(currentHomeDir.equals(SettingsActivity.CUSTOM_HOME_VALUE) && customHomeDir != null){
 			currentHomeDir = customHomeDir;

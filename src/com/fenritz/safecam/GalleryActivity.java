@@ -397,7 +397,12 @@ public class GalleryActivity extends Activity {
 		if(!newPath.equals(Helpers.getHomeDir(this))){
 			String[] splittedPath = newPath.split("/");
 			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-				getActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
+				if( splittedPath.length >0 ){
+					getActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
+				}
+				else{
+					getActionBar().setTitle(getString(R.string.title_gallery));
+				}
 			}
 		}
 		else{
@@ -527,14 +532,9 @@ public class GalleryActivity extends Activity {
 		dialog.show();
 	}
 	
-	private void moveSelected() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-		builder.setMessage(getString(R.string.choose_folder));
-		
-		final Spinner spinner = new Spinner(GalleryActivity.this);
-		
-		File homeFolder = new File(Helpers.getHomeDir(GalleryActivity.this));
-		File[] dirs = homeFolder.listFiles(new FileFilter() {
+	private ArrayList<File> getDirectoryTree(String path){
+		File myFolder = new File(path);
+		File[] dirs = myFolder.listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
 				if(pathname.isDirectory() && !pathname.getName().startsWith(".")){
 					return true;
@@ -542,35 +542,72 @@ public class GalleryActivity extends Activity {
 				return false;
 			}
 		});
-		
 		Arrays.sort(dirs, new Comparator<File>() {
 			public int compare(File lhs, File rhs) {
 				return lhs.getName().compareToIgnoreCase(rhs.getName());
 			}
 		});
 		
+		ArrayList<File> dirsToReturn = new ArrayList<File>(); 
+		
+		for(File dir : dirs){
+			dirsToReturn.add(dir);
+			dirsToReturn.addAll(getDirectoryTree(dir.getAbsolutePath()));
+		}
+		
+		return dirsToReturn;
+	}
+	
+	private void moveSelected() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+		builder.setMessage(getString(R.string.choose_folder));
+		
+		final Spinner spinner = new Spinner(GalleryActivity.this);
+		
+		String homeDir = Helpers.getHomeDir(GalleryActivity.this);
+		
+		ArrayList<File> dirs = getDirectoryTree(homeDir);
+		
 		String[] folderNames;
 		int count;
 		final boolean isInHome;
 		if(!currentPath.equals(Helpers.getHomeDir(GalleryActivity.this))){
-			folderNames = new String[dirs.length+2];
+			folderNames = new String[dirs.size()+2];
 			folderNames[0] = "--------";
 			folderNames[1] = getString(R.string.home_dir);
 			count = 2;
 			isInHome = false;
 		}
 		else{
-			folderNames = new String[dirs.length+1];
+			folderNames = new String[dirs.size()+1];
 			folderNames[0] = "--------";
 			count = 1;
 			isInHome = true;
 		}
 		
 		
-		final SparseArray<String> realFolderNames = new SparseArray<String>();
+		final SparseArray<String> realFolderPaths = new SparseArray<String>();
 		for(File dir : dirs){
-			realFolderNames.put(count, dir.getName());
-			folderNames[count] = Helpers.decryptFilename(GalleryActivity.this, dir.getName());
+			String parentFolder = dir.getParent();
+			String relativePath = parentFolder.substring(homeDir.length());
+			
+			realFolderPaths.put(count, dir.getPath());
+			
+			String[] relativePathMembers = relativePath.split("/");
+			relativePath = "";
+			for(String relativePathItem : relativePathMembers){
+				if(relativePathItem.startsWith("/")){
+					relativePathItem = relativePathItem.substring(1);
+				}
+				if(relativePathItem.endsWith("/")){
+					relativePathItem.substring(0, relativePathItem.length()-1);
+				}
+				if(relativePathItem.length() > 0){
+					relativePath += Helpers.decryptFilename(GalleryActivity.this, relativePathItem) + "/";
+				}
+			}
+			
+			folderNames[count] = relativePath + Helpers.decryptFilename(GalleryActivity.this, dir.getName());
 			count++;
 		}
 		spinner.setAdapter(new ArrayAdapter<String>(GalleryActivity.this, android.R.layout.simple_spinner_dropdown_item, folderNames));
@@ -584,9 +621,9 @@ public class GalleryActivity extends Activity {
 					destDir = new File(Helpers.getHomeDir(GalleryActivity.this));
 				}
 				else{
-					if(realFolderNames.indexOfKey(spinner.getSelectedItemPosition()) >= 0){
-						String folderName = realFolderNames.get(spinner.getSelectedItemPosition());
-						destDir = new File(Helpers.getHomeDir(GalleryActivity.this), folderName);
+					if(realFolderPaths.indexOfKey(spinner.getSelectedItemPosition()) >= 0){
+						String folderPath = realFolderPaths.get(spinner.getSelectedItemPosition());
+						destDir = new File(folderPath);
 					}
 				}
 				if(destDir != null && destDir.exists() && destDir.isDirectory()){

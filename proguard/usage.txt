@@ -2145,7 +2145,7 @@ com.fenritz.safecam.R$style
 com.fenritz.safecam.R$styleable:
     public static final int SafeCameraButton_auto_reset
     public static final int SafeCameraButton_shrink_direction
-    381:381:public R$styleable()
+    385:385:public R$styleable()
 com.fenritz.safecam.R$xml
 com.fenritz.safecam.SafeCameraActivity:
     public static final java.lang.String DEFAULT_PREFS
@@ -2230,15 +2230,15 @@ com.fenritz.safecam.util.Helpers:
     public static final int HASH_SYNC_NOTHING_DONE
     public static final int HASH_SYNC_UPDATED_PREF
     public static final int HASH_SYNC_WROTE_FILE
-    74:74:public Helpers()
-    170:178:public static void registerForBroadcastReceiver(android.app.Activity)
-    206:215:public static void printMaxKeySizes()
-    315:315:public static java.lang.String readLoginHashFromFile(android.content.Context)
-    425:430:public static int getExifRotation(byte[])
-    435:440:public static int getExifRotation(java.io.File)
-    455:460:public static int getAltExifRotation(java.io.File)
-    464:494:private static int getRotationFromMetadata(org.apache.sanselan.common.IImageMetadata)
-    931:932:public static void decryptSelected(android.app.Activity,java.util.ArrayList)
+    75:75:public Helpers()
+    171:179:public static void registerForBroadcastReceiver(android.app.Activity)
+    207:216:public static void printMaxKeySizes()
+    333:333:public static java.lang.String readLoginHashFromFile(android.content.Context)
+    443:448:public static int getExifRotation(byte[])
+    453:458:public static int getExifRotation(java.io.File)
+    473:478:public static int getAltExifRotation(java.io.File)
+    482:512:private static int getRotationFromMetadata(org.apache.sanselan.common.IImageMetadata)
+    940:941:public static void decryptSelected(android.app.Activity,java.util.ArrayList)
 com.fenritz.safecam.util.Helpers$1
 com.fenritz.safecam.util.LimitedThreadAsyncTask:
     private static final int CORE_POOL_SIZE
