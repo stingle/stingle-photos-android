@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:safecam="http://schemas.android.com/apk/res/com.fenritz.safecam"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:background="@color/main_bg_color">
+    
+
+	<com.fenritz.safecam.widget.SafeCameraButton
+	    android:id="@+id/gotoCamera"
+	    android:layout_width="wrap_content"
+	    android:layout_height="0dp"
+	    android:layout_weight="4"
+	    android:layout_marginTop="25dp"
+	    android:paddingTop="25dp"
+	    android:contentDescription="@string/camera"
+	    android:scaleType="fitCenter"
+	    android:background="@drawable/camera_bare"
+	    android:layout_gravity="center" />
+	
+	<ImageView
+		android:layout_width="6dp"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:layout_gravity="center"
+		android:layout_marginTop="10dp"
+		android:layout_marginBottom="10dp"
+		android:src="@drawable/vseparator"
+		android:scaleType="fitCenter"
+		android:contentDescription="@string/app_name" />
+	
+	<com.fenritz.safecam.widget.SafeCameraButton
+	    android:id="@+id/gotoGallery"
+	    android:layout_width="wrap_content"
+	    android:layout_height="0dp"
+	    android:layout_weight="4"
+	    android:layout_marginBottom="25dp"
+	    android:paddingBottom="25dp"
+	    android:contentDescription="@string/gallery"
+	    android:scaleType="fitCenter"
+	    android:background="@drawable/gallery_bare"
+	    android:layout_gravity="center" />
+
+	<TextView
+	    android:id="@+id/free_version_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:text="@string/free_version_text"
+        android:gravity="center"
+        android:autoLink="web"
+        android:textSize="12sp"
+        android:paddingBottom="2dp" />
+	<TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:text="@string/bottom_text"
+        android:gravity="center"
+        android:autoLink="web"
+        android:layout_marginBottom="10dp" />
+</LinearLayout><!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/layout/dashboard.xml -->

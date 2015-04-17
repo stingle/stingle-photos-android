@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/importBtn"
+        android:icon="@drawable/ic_action_ok"
+        android:title="@string/import_btn"
+        android:showAsAction="ifRoom|withText" />
+</menu><!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/menu/import_photos_menu.xml -->

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/app/libs/GoogleAdMobAdsSdk-6.0.1.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="e6b52dcd6402380542cb37557bd04e06e6d7e47d">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/app/build/intermediates/pre-dexed/debug/GoogleAdMobAdsSdk-6.0.1-99853a71478f33d399bd2e69d925683a3a68cef9.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/app/libs/metadata-extractor-2.6.2.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="b7ea6cf71907be41ec3f3e850d07831d605eb5ce">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/app/build/intermediates/pre-dexed/debug/metadata-extractor-2.6.2-6ec812624611294f8cf754a25c828bf8ad271009.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/app/libs/android-support-v13.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="664aa273737f809e07c9f8b05a3868d80ad2565e">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/app/build/intermediates/pre-dexed/debug/android-support-v13-d634b839f6fdc9266c93da4abf40959588837c04.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/app/libs/Sanselan.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="31398094b3a1d1b387992a3535afb7f308e17edc">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/app/build/intermediates/pre-dexed/debug/Sanselan-7b4b49626026478edee8d83469070707cc0c207f.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/app/libs/xmpcore.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="4446353e27911a01e038da46a5a09d5c63af485b">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/app/build/intermediates/pre-dexed/debug/xmpcore-0bb5ebc1ae0ebda636ecb48445662843dbb83dc3.jar" />
+    </item>
+
+</items>

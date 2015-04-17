@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="xmpcore">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/libs/xmpcore.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

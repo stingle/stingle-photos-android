@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:id="@+id/parentLayout"
+	android:background="@color/main_bg_color">
+	
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical"
+	    android:padding="10dp">
+
+	    <ImageView
+			android:id="@+id/imageView1"
+			android:layout_width="wrap_content"
+			android:layout_height="150dp"
+			android:layout_margin="15dp"
+			android:src="@drawable/safe_camera_logo"
+			android:scaleType="centerInside"
+			android:layout_gravity="center"
+			android:contentDescription="@string/app_name" />
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center"
+	        android:text="@string/setup"
+	        android:textSize="30sp"
+	        android:paddingBottom="10dp" />
+	    
+	    <TextView
+	        android:id="@+id/textView1"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center"
+	        android:text="@string/setup_info" />
+	
+	    <EditText
+	        android:id="@+id/password1"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:hint="@string/password"
+	        android:inputType="textPassword" >
+	
+	        <requestFocus />
+	    </EditText>
+	
+	    <EditText
+	        android:id="@+id/password2"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:hint="@string/confirm_password"
+	        android:inputType="textPassword" />
+	
+	    <Button
+	        android:id="@+id/setupButton"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:layout_marginTop="10dp"
+	        android:text="@string/save" />
+
+	</LinearLayout>
+</ScrollView><!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/layout/setup.xml -->

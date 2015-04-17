@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/arrays.xml -->
+    <eat-comment/>
+    <string-array name="beforeShareActions">
+        <item name="as_is">@string/share_as_is</item>
+        <item name="reencrypt">@string/share_reencrypt</item>
+        <item name="decrypt">@string/share_decrypt</item>
+    </string-array>
+    <string-array name="galleryFolderActions">
+        <item name="delete">@string/delete</item>
+    </string-array>
+    <string-array name="galleryItemActions">
+        <item name="decrypt">@string/decrypt</item>
+        <item name="share">@string/share</item>
+        <item name="move">@string/move</item>
+        <item name="delete">@string/delete</item>
+    </string-array>
+    <string-array name="importMenu">
+        <item name="photos">@string/import_photos</item>
+        <item name="unencrypted">@string/import_unencrypted</item>
+        <item name="encrypted">@string/import_encrypted</item>
+    </string-array>
+    <string-array name="lockTimes">
+        <item name="10">@string/seconds10</item>
+        <item name="30">@string/seconds30</item>
+        <item name="60">@string/minute1</item>
+        <item name="300">@string/minutes5</item>
+        <item name="600">@string/minutes10</item>
+        <item name="1800">@string/minutes30</item>
+        <item name="3600">@string/hour1</item>
+    </string-array>
+    <string-array name="lockTimesValues">
+        <item name="10">10</item>
+        <item name="30">30</item>
+        <item name="60">60</item>
+        <item name="300">300</item>
+        <item name="600">600</item>
+        <item name="1800">1800</item>
+        <item name="3600">3600</item>
+    </string-array>
+    <string-array name="timerDurationValues">
+        <item name="5">5</item>
+        <item name="10">10</item>
+        <item name="15">15</item>
+        <item name="20">20</item>
+    </string-array>
+    <string-array name="timerDurations">
+        <item name="5">@string/seconds5</item>
+        <item name="10">@string/seconds10</item>
+        <item name="15">@string/seconds15</item>
+        <item name="20">@string/seconds20</item>
+    </string-array>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/colors.xml -->
+    <eat-comment/>
+    <color name="dark_bg">#1e2535</color>
+    <color name="file_manager_selected">#e74c3c</color>
+    <color name="file_manager_text">#ffffff</color>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <color name="gray">#ffff0000</color>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/colors.xml -->
+    <eat-comment/>
+    <color name="main_bg_color">#273041</color>
+    <color name="main_bg_color_trans">#B2273041</color>
+    <color name="sec_color">#e74c3c</color>
+    <color name="sec_color_light">#fc6566</color>
+    <color name="transparent_black">#90000000</color>
+    <declare-styleable name="SafeCameraButton"><attr name="shrink_direction" type="enum"><enum name="vertical" value="0"/><enum name="horizontal" value="1"/></attr><attr format="boolean" name="auto_reset"/></declare-styleable>
+    <drawable name="ab_bg_black">#aa000000</drawable>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="actions">Actions</string>
+    <string name="add_files">Add Files</string>
+    <string name="app_name">SafeCamera</string>
+    <string name="attention">ATTENTION!!!</string>
+    <string name="before_sharing">Before sharing</string>
+    <string name="bottom_text">http://www.safecamera.org/</string>
+    <string name="camera">Camera</string>
+    <string name="cancel">Cancel</string>
+    <string name="cant_read_folder">folder can\'t be read!</string>
+    <string name="change">Change</string>
+    <string name="change_password">Change Password</string>
+    <string name="change_password_warning">Warning! Changing the master password will cause all your files to be decrypted and then encrypted again with the new password. Any encrypted files not currently on this device will remain encrypted with the previous password. To change their password automatically please move them to device before changing the master password. Alternatively, you can import them later (the old password will have to be entered at that time).</string>
+    <string name="changing_password">Changing password on files…</string>
+    <string name="choose_folder">Choose folder to move files to:</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache_desc">Clear thumbnail cache</string>
+    <string name="confirm_decrypt_files">You\'re about to decrypt %s files. They will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
+    <string name="confirm_decrypt_files_s">You\'re about to decrypt a file. It will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
+    <string name="confirm_delete_cache">Are you sure you want to delete whole thumbnail cache?</string>
+    <string name="confirm_delete_files">Do you really want to delete %s files?</string>
+    <string name="confirm_delete_photo">Do you really want to delete this photo?</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="create">Save</string>
+    <string name="current_password">Current Password</string>
+    <string name="custom_folder">"Custom folder"</string>
+    <string name="dec_folder">"Decrypted files folder name"</string>
+    <string name="dec_folder_def">"SafeCameraDecrypted"</string>
+    <string name="dec_folder_desc">"Folder name for decrypted files in selected location"</string>
+    <string name="decrypt">Decrypt</string>
+    <string name="decrypting_files">Decrypting file(s)…</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/config.xml -->
+    <eat-comment/>
+    <string name="default_home_folder_name">SafeCamera</string>
+    <string name="default_thumb_folder_name">.thumb</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="delete">Delete</string>
+    <string name="delete_after_import">Delete imported files</string>
+    <string name="delete_original_files">Do you want to delete original files?</string>
+    <string name="deleting_files">Deleting file(s)…</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="encrypt_files">Encrypt Files</string>
+    <string name="encrypting_files">Encrypting file(s)…</string>
+    <string name="encrypting_photo">Encrypting photo…</string>
+    <string name="enter_import_password">Please enter password for the file to be imported</string>
+    <string name="enter_new_folder_name">Please enter name for new folder</string>
+    <string name="enter_password">Please enter your master password</string>
+    <string name="enter_reencrypt_password">Please enter password for reencryption</string>
+    <string name="err">Error</string>
+    <string name="external_sd_card">"External SD card"</string>
+    <string name="failed_create_dir">Failed to create folder</string>
+    <string name="failed_move_files">Failed to move files into given folder</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/config.xml -->
+    <eat-comment/>
+    <string name="file_extension">.sc</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="file_name">File name:</string>
+    <string name="file_not_found">File not found!</string>
+    <string name="flash">Flash</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="free_version_text">Warning! This is a free version of SafeCamera. Size of your photos will be limited to 640x480 pixels. To remove restrictions and ads please consider purchasing Pro version key from the Play store.</string>
+    <string name="gallery">Gallery</string>
+    <string name="generating_key">Loging in. Please wait…</string>
+    <string name="get_pro">Get Pro Version</string>
+    <string name="home_dir">--Home Folder--</string>
+    <string name="home_folder">Home folder</string>
+    <string name="home_folder_desc">The folder on SD card to store your encrypted files</string>
+    <string name="home_folder_name">"Home folder name"</string>
+    <string name="home_folder_name_desc">"Name of the SafeCamera folder in selected location"</string>
+    <string name="hour">hour</string>
+    <string name="hour1">1 hour</string>
+    <string name="import_btn">Import</string>
+    <string name="import_desc">Import</string>
+    <string name="import_encrypted">Encrypted files</string>
+    <string name="import_fialed">Import failed! Either incorrect password has been entered or the file is corrupt</string>
+    <string name="import_photos">Photos</string>
+    <string name="import_unencrypted">Other files</string>
+    <string name="importing_files">Importing files…</string>
+    <string name="incorrect_password">Incorrect password</string>
+    <string name="internal_sd_card">"Internal SD card"</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/config.xml -->
+    <eat-comment/>
+    <string name="key_package_name">com.fenritz.safecamerapro</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="later">Later</string>
+    <string name="location">Location</string>
+    <string name="lock_time">Lock up the app after</string>
+    <string name="lock_time_desc">Lock app if inactive for specified amount of time</string>
+    <string name="log_out">Log Out</string>
+    <string name="login_to_proceed">Please login to proceed…</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/config.xml -->
+    <eat-comment/>
+    <string name="main_package_name">com.fenritz.safecam</string>
+    <string name="max_file_size">20</string>
+    <string name="min_pass_length">6</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="minute">minute</string>
+    <string name="minute1">1 minute</string>
+    <string name="minutes">minutes</string>
+    <string name="minutes10">10 minutes</string>
+    <string name="minutes30">30 minutes</string>
+    <string name="minutes5">5 minutes</string>
+    <string name="move">Move</string>
+    <string name="moving_files">Moving files…</string>
+    <string name="multi_select">Multi Select</string>
+    <string name="need_to_relogin">Master password in newly selected folder is different than the current one. Please login again.</string>
+    <string name="new_folder">New folder</string>
+    <string name="new_password">New Password</string>
+    <string name="nnew">New</string>
+    <string name="no">No</string>
+    <string name="no_data">No Data</string>
+    <string name="no_files">No files in this folder</string>
+    <string name="no_such_folder">"There is no such folder %s"</string>
+    <string name="ok">OK</string>
+    <string name="options">Options</string>
+    <string name="password">Password</string>
+    <string name="password_empty">Password can\'t be empty.</string>
+    <string name="password_not_match">Passwords don\'t match. Please enter the same password twice correctly.</string>
+    <string name="password_short">Password have to be at least %s characters long</string>
+    <string name="photo_size">Photo Size</string>
+    <string name="photo_size_choose">Please choose desired photo size</string>
+    <string name="photo_size_descr">Size of photos to take</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/config.xml -->
+    <eat-comment/>
+    <string name="popup_laters_limit">3</string>
+    <string name="popup_logins_limit">5</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="popup_text">If you like SafeCamera and use it on regular basis, we will really appreciate if you could leave review in play store and let others know what you think.</string>
+    <string name="popup_title">Enjoying SafeCamera?</string>
+    <string name="pro_version_warning">This feature is avalable in PRO version. Do you want to purchase SafeCamera PRO version?</string>
+    <string name="read_only">"Read Only"</string>
+    <string name="read_security">SafeCamera security</string>
+    <string name="reencrypting_files">Reencrypting files…</string>
+    <string name="reset_password">If you forgot your password thats very sad, because we can\'t help you to recover it. It was never stored anywhere! Sorry, that\'s the cost for absolute security. However we can reset your password so you can continue using SafeCamera, but all your existing photos will be unavailable.\n\nAre you sure you want to reset your password?</string>
+    <string name="review">Review</string>
+    <string name="rotate_ccw">Rotate counter clockwise</string>
+    <string name="rotate_cw">Rotate clockwise</string>
+    <string name="rotating">Rotating…</string>
+    <string name="same_password_alert">It seems that you already had SafeCamera on this device before.\nIf you want to be able to access photos that exist on this device setup with same master password that you have used before, otherwise SafeCamera will be unable to decrypt them.</string>
+    <string name="save">Save</string>
+    <string name="seconds">seconds</string>
+    <string name="seconds10">10 seconds</string>
+    <string name="seconds15">15 seconds</string>
+    <string name="seconds20">20 seconds</string>
+    <string name="seconds30">30 seconds</string>
+    <string name="seconds5">5 seconds</string>
+    <string name="secure_delete">Secure wipe files (takes longer)</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/config.xml -->
+    <eat-comment/>
+    <string name="security_page_link">http://www.safecamera.org/security</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="select">Select</string>
+    <string name="select_all">Select All</string>
+    <string name="settings">Settings</string>
+    <string name="setup">Setup</string>
+    <string name="setup_info">Please choose your master password. While no limit is put on what you enter here it is strongly advised that your password has at least 12 characters and contains lowercase and uppercase letters, digits and special symbols (!?/$%#). If your password is not secure enough then your encryptions may be vulnerable to brute force attacks.</string>
+    <string name="share">Share</string>
+    <string name="share_as_is">Share encrypted by the master password</string>
+    <string name="share_decrypt">Decrypt before sharing</string>
+    <string name="share_reencrypt">Reencrypt with a different password</string>
+    <string name="success_change_pass">Password has been successfully changed</string>
+    <string name="success_created">Successfully created</string>
+    <string name="success_decrypt">Successfully decrypted</string>
+    <string name="success_delete_originals">Successfully deleted original files</string>
+    <string name="success_import">Successfully imported</string>
+    <string name="timer">Timer</string>
+    <string name="timer_duartion_desc">Camera Timer Duration</string>
+    <string name="timer_duration">Timer Duration</string>
+    <string name="title_change_password">Change Password</string>
+    <string name="title_choose_file">Browse</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_gallery">SafeCamera</string>
+    <string name="title_gallery_for_app">Gallery</string>
+    <string name="title_import">Import</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_setup">Set Up</string>
+    <string name="title_view_photo">Photos</string>
+    <string name="unable_to_connect_camera">Sorry, unable to connect to camera. Probably camera is busy right now.</string>
+    <string name="understood">Understood!</string>
+    <string name="unexpected_error">Unexpected error %s</string>
+    <string name="volume_take_photo">Volume Up/Down</string>
+    <string name="volume_take_photo_desc">Volume Up/Down takes picture</string>
+    <string name="yes">Yes</string>
+    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values/styles.xml -->
+    <eat-comment/>
+    <style name="app_theme" parent="android:Theme.Black.NoTitleBar"/>
+</resources>

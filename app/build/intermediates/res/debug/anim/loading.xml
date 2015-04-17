@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rotate  
+    xmlns:android="http://schemas.android.com/apk/res/android"  
+    android:fromDegrees="0"  
+    android:toDegrees="359"  
+    android:pivotX="50%"  
+    android:pivotY="50%"  
+    android:repeatCount="infinite"  
+    android:duration="1000"  
+    android:interpolator="@anim/linear_interpolator" />  
+<!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/anim/loading.xml -->
