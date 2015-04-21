@@ -1,16 +1,5 @@
 package com.fenritz.safecam;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -28,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -63,6 +53,17 @@ import com.fenritz.safecam.util.MemoryCache;
 import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.CheckableLayout;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public class GalleryActivity extends Activity {
 
 	public final MemoryCache memCache = SafeCameraApplication.getCache();
@@ -79,6 +80,10 @@ public class GalleryActivity extends Activity {
 	protected static final int ACTION_DELETE = 3;
 	
 	protected static final int ACTION_DELETE_FOLDER = 0;
+
+    private int pageNumber = 1;
+    private int itemsInPage = 30;
+    private boolean isListLoading = false;
 
 	private boolean multiSelectModeActive = false;
 
@@ -312,8 +317,17 @@ public class GalleryActivity extends Activity {
 				
 				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this);
 				String fileExt = getString(R.string.file_extension);
-				
-				for (File file : folderFiles) {
+
+                int startingItemNum = (pageNumber-1) * itemsInPage;
+                int endingItemNum = startingItemNum + itemsInPage;
+
+                Log.d("qaq", String.valueOf(startingItemNum) + " - " + String.valueOf(endingItemNum));
+
+                if(endingItemNum > folderFiles.length){
+                    endingItemNum = folderFiles.length;
+                }
+				for (int i=startingItemNum;i<endingItemNum;i++) {
+                    File file = folderFiles[i];
 					if(file.isDirectory() && !file.getName().startsWith(".")){
 						folders.add(file);
 					}
@@ -349,7 +363,7 @@ public class GalleryActivity extends Activity {
 		protected void onPostExecute(ArrayList<File> files) {
 			super.onPostExecute(files);
 
-			GalleryActivity.files = files;
+			GalleryActivity.files.addAll(files);
 			
 			if(files.size() == 0){
 				findViewById(R.id.no_files).setVisibility(View.VISIBLE);
@@ -366,11 +380,13 @@ public class GalleryActivity extends Activity {
 				thumbGenTask.execute(toGenerateThumbs);
 			}
 			
-			findViewById(R.id.photosGrid).setVisibility(View.VISIBLE);
-			findViewById(R.id.fillFilesProgress).setVisibility(View.GONE);
-			
-			galleryAdapter.notifyDataSetChanged();
-		}
+			/*findViewById(R.id.photosGrid).setVisibility(View.VISIBLE);
+			findViewById(R.id.fillFilesProgress).setVisibility(View.GONE);*/
+
+            galleryAdapter.notifyDataSetChanged();
+
+            isListLoading = false;
+        }
 
 	}
 	
@@ -380,9 +396,10 @@ public class GalleryActivity extends Activity {
 			thumbGenTask.cancel(true);
 			thumbGenTask = null;
 		}
+        isListLoading = true;
 
-		findViewById(R.id.photosGrid).setVisibility(View.GONE);
-		findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);
+		/*findViewById(R.id.photosGrid).setVisibility(View.GONE);
+		findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);*/
 		
 		(new FillFilesList()).execute();
 	}
@@ -1199,8 +1216,10 @@ public class GalleryActivity extends Activity {
 	
 	private OnScrollListener getOnScrollListener(){
 		return new OnScrollListener() {
-			
-			public void onScrollStateChanged(AbsListView view, int scrollState) {
+            private static final String TAG = "EndlessScrollListener";
+
+
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
 				
 			}
 			
@@ -1208,6 +1227,11 @@ public class GalleryActivity extends Activity {
 				if(visibleItemCount >= 12){
 					currentVisibleItemCount = visibleItemCount;
 				}
+
+                if (!(isListLoading) && (totalItemCount - visibleItemCount) <= (firstVisibleItem)) {
+                    pageNumber++;
+                    fillFilesList();
+                }
 			}
 		};
 	}

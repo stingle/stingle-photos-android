@@ -28,7 +28,7 @@
         android:saveEnabled="true"
         android:persistentDrawingCache="all"
         android:verticalSpacing="1dp"
-        android:visibility="gone" >
+        android:visibility="visible" >
     </GridView>
 
     <ProgressBar
@@ -36,6 +36,7 @@
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:visibility="gone"/>
 
 </LinearLayout>

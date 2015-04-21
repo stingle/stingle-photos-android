@@ -10,14 +10,31 @@
   </component>
   <component name="AndroidLayouts">
     <shared>
-      <config />
+      <config>
+        <devices>
+          <device id="Nexus 6" />
+        </devices>
+      </config>
     </shared>
+    <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/gallery.xml">
+        <config>
+          <theme>@style/app_theme</theme>
+        </config>
+      </layout>
+    </layouts>
   </component>
   <component name="AndroidLogFilters">
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="app: com.fenritz.safecam" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e33ea250-845b-4545-8f57-678358994e8b" name="Default" comment="" />
+    <list default="true" id="e33ea250-845b-4545-8f57-678358994e8b" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/build/intermediates/resources/resources-debug.ap_" afterPath="$PROJECT_DIR$/app/build/intermediates/resources/resources-debug.ap_" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/gallery.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/gallery.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <ignored path="safe_camera.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -39,21 +56,64 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="AndroidManifest.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+      <file leaf-file-name="GalleryActivity.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="375" max-vertical-offset="1695">
-              <caret line="25" column="17" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
-              <folding />
+            <state vertical-scroll-proportion="0.6203593" vertical-offset="3232" max-vertical-offset="19155">
+              <caret line="337" column="47" selection-start-line="337" selection-start-column="47" selection-end-line="337" selection-end-column="47" />
+              <folding>
+                <element signature="e#4208#4249#0" expanded="true" />
+                <element signature="e#7172#7213#0" expanded="true" />
+                <element signature="e#7283#7306#0" expanded="true" />
+                <element signature="e#7351#7381#0" expanded="true" />
+                <element signature="e#7565#7587#0" expanded="true" />
+                <element signature="e#9095#9128#0" expanded="true" />
+                <element signature="e#9480#9514#0" expanded="true" />
+                <element signature="e#10660#10690#0" expanded="true" />
+                <element signature="e#12361#12394#0" expanded="true" />
+                <element signature="e#12534#12567#0" expanded="true" />
+                <element signature="e#14144#14175#0" expanded="true" />
+                <element signature="e#16836#16869#0" expanded="true" />
+                <element signature="e#17286#17314#0" expanded="true" />
+                <element signature="e#18545#18569#0" expanded="true" />
+                <element signature="e#18614#18644#0" expanded="true" />
+                <element signature="e#19425#19462#0" expanded="true" />
+                <element signature="e#19536#19562#0" expanded="true" />
+                <element signature="e#20050#20090#0" expanded="true" />
+                <element signature="e#20160#20183#0" expanded="true" />
+                <element signature="e#20228#20258#0" expanded="true" />
+                <element signature="e#20558#20580#0" expanded="true" />
+                <element signature="e#22906#22936#0" expanded="true" />
+                <element signature="e#23808#23842#0" expanded="true" />
+                <element signature="e#23985#24018#0" expanded="true" />
+                <element signature="e#24154#24180#0" expanded="true" />
+                <element signature="e#24249#24290#0" expanded="true" />
+                <element signature="e#24741#24782#0" expanded="true" />
+                <element signature="e#25019#25042#0" expanded="true" />
+                <element signature="e#25091#25121#0" expanded="true" />
+                <element signature="e#25949#25993#0" expanded="true" />
+                <element signature="e#26322#26344#0" expanded="true" />
+                <element signature="e#27064#27094#0" expanded="true" />
+                <element signature="e#42461#42491#0" expanded="true" />
+                <element signature="e#42517#42558#0" expanded="true" />
+                <element signature="e#42682#42708#0" expanded="true" />
+                <element signature="e#43067#43102#0" expanded="true" />
+                <element signature="e#43195#43232#0" expanded="true" />
+                <element signature="e#43335#43361#0" expanded="true" />
+                <element signature="e#44055#44093#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GalleryActivity.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
+      <file leaf-file-name="gallery.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/gallery.xml">
+          <provider editor-type-id="android-designer">
+            <state />
+          </provider>
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.054455444" vertical-offset="2971" max-vertical-offset="18810">
-              <caret line="284" column="18" selection-start-line="284" selection-start-column="18" selection-end-line="284" selection-end-column="18" />
+            <state vertical-scroll-proportion="-23.653847" vertical-offset="0" max-vertical-offset="705">
+              <caret line="41" column="15" selection-start-line="41" selection-start-column="15" selection-end-line="41" selection-end-column="15" />
               <folding />
             </state>
           </provider>
@@ -62,7 +122,7 @@
       <file leaf-file-name="Helpers.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/Helpers.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="2805" max-vertical-offset="13320">
+            <state vertical-scroll-proportion="0.0" vertical-offset="4365" max-vertical-offset="14520">
               <caret line="291" column="28" selection-start-line="291" selection-start-column="28" selection-end-line="291" selection-end-column="28" />
               <folding />
             </state>
@@ -75,6 +135,9 @@
     <FindUsagesManager>
       <setting name="OPEN_NEW_TAB" value="true" />
     </FindUsagesManager>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GradleLocalSettings">
     <option name="tasksExpandState">
@@ -810,6 +873,9 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/Helpers.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/widget/EndlessScrollListener.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/gallery.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java" />
       </list>
     </option>
   </component>
@@ -819,7 +885,7 @@
     <option name="width" value="1924" />
     <option name="height" value="1017" />
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
     <OptionsSetting value="true" id="Remove" />
     <OptionsSetting value="true" id="Checkout" />
@@ -845,9 +911,8 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
-      <pane id="PackagesPane" />
+      <pane id="ProjectPane" />
       <pane id="AndroidView">
         <subPane>
           <PATH>
@@ -869,6 +934,28 @@
               <option name="myItemId" value="app" />
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="safe_camera" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderTypeNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -888,8 +975,41 @@
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidPsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="safe_camera" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidSourceTypeNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="safecam" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="widget" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="safe_camera" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -908,6 +1028,12 @@
     <property name="DEBUGGABLE_DEVICE" value="motorola-nexus_6-ZX1G323N43" />
     <property name="DEBUGGABLE_PROCESS" value="com.fenritz.safecam" />
     <property name="SHOW_ALL_PROCESSES" value="false" />
+    <property name="OverrideImplement.combined" value="true" />
+    <property name="OverrideImplement.overriding.sorted" value="false" />
+    <property name="options.lastSelected" value="vcs.Git" />
+    <property name="options.splitter.main.proportions" value="0.3" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RunManager" selected="Android Application.app">
     <configuration default="true" type="JUnit" factoryName="JUnit">
@@ -1027,7 +1153,7 @@
       <option name="DEPLOY" value="true" />
       <option name="ARTIFACT_NAME" value="" />
       <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
-      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="true" />
       <option name="PREFERRED_AVD" value="" />
       <option name="USE_COMMAND_LINE" value="true" />
       <option name="COMMAND_LINE" value="" />
@@ -1083,14 +1209,16 @@
     <frame x="-2" y="32" width="1924" height="1017" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32914287" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32914287" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32914287" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1107,7 +1235,6 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -1129,9 +1256,75 @@
     </option>
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="375" max-vertical-offset="1695">
+          <caret line="25" column="17" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="18870">
+          <caret line="284" column="18" selection-start-line="284" selection-start-column="18" selection-end-line="284" selection-end-column="18" />
+          <folding>
+            <element signature="e#4208#4249#0" expanded="true" />
+            <element signature="e#7172#7213#0" expanded="true" />
+            <element signature="e#7283#7306#0" expanded="true" />
+            <element signature="e#7351#7381#0" expanded="true" />
+            <element signature="e#7565#7587#0" expanded="true" />
+            <element signature="e#9095#9128#0" expanded="true" />
+            <element signature="e#9480#9514#0" expanded="true" />
+            <element signature="e#10660#10690#0" expanded="true" />
+            <element signature="e#12361#12394#0" expanded="true" />
+            <element signature="e#12534#12567#0" expanded="true" />
+            <element signature="e#14144#14175#0" expanded="true" />
+            <element signature="e#16836#16869#0" expanded="true" />
+            <element signature="e#17286#17314#0" expanded="true" />
+            <element signature="e#18545#18569#0" expanded="true" />
+            <element signature="e#18614#18644#0" expanded="true" />
+            <element signature="e#19425#19462#0" expanded="true" />
+            <element signature="e#19536#19562#0" expanded="true" />
+            <element signature="e#20050#20090#0" expanded="true" />
+            <element signature="e#20160#20183#0" expanded="true" />
+            <element signature="e#20228#20258#0" expanded="true" />
+            <element signature="e#20558#20580#0" expanded="true" />
+            <element signature="e#22906#22936#0" expanded="true" />
+            <element signature="e#23808#23842#0" expanded="true" />
+            <element signature="e#23985#24018#0" expanded="true" />
+            <element signature="e#24154#24180#0" expanded="true" />
+            <element signature="e#24249#24290#0" expanded="true" />
+            <element signature="e#24741#24782#0" expanded="true" />
+            <element signature="e#25019#25042#0" expanded="true" />
+            <element signature="e#25091#25121#0" expanded="true" />
+            <element signature="e#25949#25993#0" expanded="true" />
+            <element signature="e#26322#26344#0" expanded="true" />
+            <element signature="e#27064#27094#0" expanded="true" />
+            <element signature="e#42461#42491#0" expanded="true" />
+            <element signature="e#42517#42558#0" expanded="true" />
+            <element signature="e#42682#42708#0" expanded="true" />
+            <element signature="e#43067#43102#0" expanded="true" />
+            <element signature="e#43195#43232#0" expanded="true" />
+            <element signature="e#43335#43361#0" expanded="true" />
+            <element signature="e#44055#44093#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/Helpers.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="14520">
+          <caret line="291" column="28" selection-start-line="291" selection-start-column="28" selection-end-line="291" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="375" max-vertical-offset="1695">
@@ -1188,17 +1381,68 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1695">
+        <state vertical-scroll-proportion="0.442217" vertical-offset="0" max-vertical-offset="1695">
           <caret line="25" column="17" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/gallery.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-23.653847" vertical-offset="0" max-vertical-offset="705">
+          <caret line="41" column="15" selection-start-line="41" selection-start-column="15" selection-end-line="41" selection-end-column="15" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.054455444" vertical-offset="2971" max-vertical-offset="18810">
-          <caret line="284" column="18" selection-start-line="284" selection-start-column="18" selection-end-line="284" selection-end-column="18" />
-          <folding />
+        <state vertical-scroll-proportion="0.6203593" vertical-offset="3232" max-vertical-offset="19155">
+          <caret line="337" column="47" selection-start-line="337" selection-start-column="47" selection-end-line="337" selection-end-column="47" />
+          <folding>
+            <element signature="e#4208#4249#0" expanded="true" />
+            <element signature="e#7172#7213#0" expanded="true" />
+            <element signature="e#7283#7306#0" expanded="true" />
+            <element signature="e#7351#7381#0" expanded="true" />
+            <element signature="e#7565#7587#0" expanded="true" />
+            <element signature="e#9095#9128#0" expanded="true" />
+            <element signature="e#9480#9514#0" expanded="true" />
+            <element signature="e#10660#10690#0" expanded="true" />
+            <element signature="e#12361#12394#0" expanded="true" />
+            <element signature="e#12534#12567#0" expanded="true" />
+            <element signature="e#14144#14175#0" expanded="true" />
+            <element signature="e#16836#16869#0" expanded="true" />
+            <element signature="e#17286#17314#0" expanded="true" />
+            <element signature="e#18545#18569#0" expanded="true" />
+            <element signature="e#18614#18644#0" expanded="true" />
+            <element signature="e#19425#19462#0" expanded="true" />
+            <element signature="e#19536#19562#0" expanded="true" />
+            <element signature="e#20050#20090#0" expanded="true" />
+            <element signature="e#20160#20183#0" expanded="true" />
+            <element signature="e#20228#20258#0" expanded="true" />
+            <element signature="e#20558#20580#0" expanded="true" />
+            <element signature="e#22906#22936#0" expanded="true" />
+            <element signature="e#23808#23842#0" expanded="true" />
+            <element signature="e#23985#24018#0" expanded="true" />
+            <element signature="e#24154#24180#0" expanded="true" />
+            <element signature="e#24249#24290#0" expanded="true" />
+            <element signature="e#24741#24782#0" expanded="true" />
+            <element signature="e#25019#25042#0" expanded="true" />
+            <element signature="e#25091#25121#0" expanded="true" />
+            <element signature="e#25949#25993#0" expanded="true" />
+            <element signature="e#26322#26344#0" expanded="true" />
+            <element signature="e#27064#27094#0" expanded="true" />
+            <element signature="e#42461#42491#0" expanded="true" />
+            <element signature="e#42517#42558#0" expanded="true" />
+            <element signature="e#42682#42708#0" expanded="true" />
+            <element signature="e#43067#43102#0" expanded="true" />
+            <element signature="e#43195#43232#0" expanded="true" />
+            <element signature="e#43335#43361#0" expanded="true" />
+            <element signature="e#44055#44093#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
