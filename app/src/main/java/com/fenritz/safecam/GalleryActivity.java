@@ -16,8 +16,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.util.LruCache;
 import android.text.TextUtils.TruncateAt;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -50,7 +50,6 @@ import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
-import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.CheckableLayout;
 
 import java.io.File;
@@ -67,6 +66,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class GalleryActivity extends Activity {
 
 	public final MemoryCache memCache = SafeCameraApplication.getCache();
+    protected final LruCache<String, String> labelCache = new LruCache<String, String>(100);
 
 	public static final int REQUEST_DECRYPT = 0;
 	public static final int REQUEST_ENCRYPT = 1;
@@ -84,6 +84,8 @@ public class GalleryActivity extends Activity {
     private int pageNumber = 1;
     private int itemsInPage = 30;
     private boolean isListLoading = false;
+    private boolean isReachedListEnd = false;
+    private File[] currentFolderFiles;
 
 	private boolean multiSelectModeActive = false;
 
@@ -139,6 +141,10 @@ public class GalleryActivity extends Activity {
 	
 	protected void startupActions(){
 		currentPath = Helpers.getHomeDir(this);
+        GalleryActivity.files.clear();
+        currentFolderFiles = null;
+        isReachedListEnd = false;
+        pageNumber = 1;
 		fillFilesList();
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
@@ -297,37 +303,44 @@ public class GalleryActivity extends Activity {
 			
 			ArrayList<File> folders = new ArrayList<File>();
 			ArrayList<File> files = new ArrayList<File>();
-			
-			File dir = new File(currentPath);
-			File[] folderFiles = dir.listFiles();
 
-			if(folderFiles != null){
+            if(currentFolderFiles == null) {
+                File dir = new File(currentPath);
+                currentFolderFiles = dir.listFiles();
+
+                if(currentFolderFiles != null) {
+                    Arrays.sort(currentFolderFiles, new FileNameComparator());
+                    Arrays.sort(currentFolderFiles, new FileTypeComparator());
+                }
+            }
+
+			if(currentFolderFiles != null){
+                int startingItemNum = (pageNumber-1) * itemsInPage;
+                int endingItemNum = startingItemNum + itemsInPage;
+
+                if(endingItemNum > currentFolderFiles.length){
+                    endingItemNum = currentFolderFiles.length;
+                }
+
+                if(endingItemNum > startingItemNum){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
+
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-				
-				Arrays.sort(folderFiles, (new NaturalOrderComparator(){
-					@Override
-					public int compare(Object o1, Object o2){
-						return -super.compare(o1, o2);
-					}
-				}));
-				
-				
+
 				toGenerateThumbs.clear();
 				noThumbs.clear();
 				
 				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this);
 				String fileExt = getString(R.string.file_extension);
 
-                int startingItemNum = (pageNumber-1) * itemsInPage;
-                int endingItemNum = startingItemNum + itemsInPage;
 
-                Log.d("qaq", String.valueOf(startingItemNum) + " - " + String.valueOf(endingItemNum));
-
-                if(endingItemNum > folderFiles.length){
-                    endingItemNum = folderFiles.length;
-                }
 				for (int i=startingItemNum;i<endingItemNum;i++) {
-                    File file = folderFiles[i];
+                    File file = currentFolderFiles[i];
 					if(file.isDirectory() && !file.getName().startsWith(".")){
 						folders.add(file);
 					}
@@ -357,6 +370,31 @@ public class GalleryActivity extends Activity {
 			
 		}
 
+        class FileTypeComparator implements Comparator<File> {
+
+            public int compare(File file1, File file2) {
+
+                if (file1.isDirectory() && file2.isFile())
+                    return -1;
+                if (file1.isDirectory() && file2.isDirectory()) {
+                    return 0;
+                }
+                if (file1.isFile() && file2.isFile()) {
+                    return 0;
+                }
+                return 1;
+            }
+        }
+
+        class FileNameComparator implements Comparator<File> {
+
+            public int compare(File file1, File file2) {
+
+                return String.CASE_INSENSITIVE_ORDER.compare(file2.getName(),
+                        file1.getName());
+            }
+        }
+
 		@SuppressLint("NewApi")
 		@SuppressWarnings("unchecked")
 		@Override
@@ -365,11 +403,16 @@ public class GalleryActivity extends Activity {
 
 			GalleryActivity.files.addAll(files);
 			
-			if(files.size() == 0){
+			if(files.size() == 0 && GalleryActivity.files.size() == 0){
 				findViewById(R.id.no_files).setVisibility(View.VISIBLE);
+                findViewById(R.id.photosGrid).setVisibility(View.GONE);
 			}
+            else if(files.size() == 0 && GalleryActivity.files.size() > 0){
+                isReachedListEnd =true;
+            }
 			else{
 				findViewById(R.id.no_files).setVisibility(View.GONE);
+                findViewById(R.id.photosGrid).setVisibility(View.VISIBLE);
 			}
 			
 			thumbGenTask = new GenerateThumbs();
@@ -380,8 +423,7 @@ public class GalleryActivity extends Activity {
 				thumbGenTask.execute(toGenerateThumbs);
 			}
 			
-			/*findViewById(R.id.photosGrid).setVisibility(View.VISIBLE);
-			findViewById(R.id.fillFilesProgress).setVisibility(View.GONE);*/
+			findViewById(R.id.fillFilesProgress).setVisibility(View.GONE);
 
             galleryAdapter.notifyDataSetChanged();
 
@@ -398,15 +440,16 @@ public class GalleryActivity extends Activity {
 		}
         isListLoading = true;
 
-		/*findViewById(R.id.photosGrid).setVisibility(View.GONE);
-		findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);*/
-		
 		(new FillFilesList()).execute();
 	}
 	
 	@SuppressLint("NewApi")
 	private void changeDir(String newPath){
 		currentPath = newPath;
+        GalleryActivity.files.clear();
+        currentFolderFiles = null;
+        pageNumber = 1;
+        isReachedListEnd = false;
 		selectedFiles.clear();
 		
 		refreshList();
@@ -1011,7 +1054,33 @@ public class GalleryActivity extends Activity {
 		
 		private TextView getLabel(File file){
 			TextView label = new TextView(GalleryActivity.this);
-			label.setText(Helpers.decryptFilename(GalleryActivity.this, file.getName()));
+
+            String decFilename = labelCache.get(file.getName());
+            if(decFilename != null){
+                label.setText(decFilename);
+            }
+            else{
+                boolean found = false;
+                for(Dec item : queue){
+                    if(item.fileName.equals(file.getName())){
+                        synchronized (item.labels) {
+                            item.labels.add(label);
+                        }
+                        found = true;
+                    }
+                }
+
+                if(!found){
+                    queue.add(new Dec(file.getName(), label));
+                    if(!decryptor.isAlive()){
+                        try{
+                            decryptor.start();
+                        }
+                        catch(IllegalThreadStateException e){ }
+                    }
+                }
+            }
+
 			label.setEllipsize(TruncateAt.END);
 			label.setMaxLines(2);
 			
@@ -1151,14 +1220,33 @@ public class GalleryActivity extends Activity {
 		}
 	}
 	
-	private class Dec{
-		public String fileName;
-		public CopyOnWriteArrayList<ImageView> images = new CopyOnWriteArrayList<ImageView>();
-		
+	private static class Dec{
+        public static int TYPE_IMAGE = 0;
+        public static int TYPE_LABEL = 1;
+
+        protected int type = TYPE_IMAGE;
+        protected String fileName;
+        public CopyOnWriteArrayList<ImageView> images = new CopyOnWriteArrayList<ImageView>();
+        public CopyOnWriteArrayList<TextView> labels = new CopyOnWriteArrayList<TextView>();
+
 		public Dec(String fileName, ImageView image){
+            this.type = TYPE_IMAGE;
 			this.fileName = fileName;
 			this.images.add(image);
 		}
+		public Dec(String fileName, TextView label){
+            this.type = TYPE_LABEL;
+			this.fileName = fileName;
+			this.labels.add(label);
+		}
+
+        public int getType(){
+            return this.type;
+        }
+
+        public String getFilename(){
+            return this.fileName;
+        }
 	}
 	
 	private final Thread decryptor = new Thread(){
@@ -1179,27 +1267,46 @@ public class GalleryActivity extends Activity {
 						
 						for(int i = 0; i < size; i++){
 							final Dec item = queue.get(i);
-							FileInputStream input = new FileInputStream(new File(item.fileName));
-							byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
+                            if(item.getType() == Dec.TYPE_IMAGE) {
+                                FileInputStream input = new FileInputStream(new File(item.getFilename()));
+                                byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
 
-							if (decryptedData != null) {
-								final Bitmap bitmap = Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(GalleryActivity.this));
-								decryptedData = null;
-								if (bitmap != null) {
-									if(memCache != null){
-										memCache.put(item.fileName, bitmap);
-									}
-									runOnUiThread(new Runnable() {
-										public void run() {
-											if(item.images.size() > 0){
-												for(ImageView image : item.images){
-													image.setImageBitmap(bitmap);
-												}
-											}
-										}
-									});
-								}
-							}
+                                if (decryptedData != null) {
+                                    final Bitmap bitmap = Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(GalleryActivity.this));
+                                    decryptedData = null;
+                                    if (bitmap != null) {
+                                        if (memCache != null) {
+                                            memCache.put(item.getFilename(), bitmap);
+                                        }
+                                        runOnUiThread(new Runnable() {
+                                            public void run() {
+                                                if (item.images.size() > 0) {
+                                                    for (ImageView image : item.images) {
+                                                        image.setImageBitmap(bitmap);
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                            else if(item.getType() == Dec.TYPE_LABEL) {
+                                final String decFilename = Helpers.decryptFilename(GalleryActivity.this, item.getFilename());
+                                if(decFilename != null){
+                                    if (labelCache != null) {
+                                        labelCache.put(item.getFilename(), decFilename);
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            if (item.labels.size() > 0) {
+                                                for (TextView label : item.labels) {
+                                                    label.setText(decFilename);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            }
 							
 							queue.remove(item);
 							i--;
@@ -1228,7 +1335,7 @@ public class GalleryActivity extends Activity {
 					currentVisibleItemCount = visibleItemCount;
 				}
 
-                if (!(isListLoading) && (totalItemCount - visibleItemCount) <= (firstVisibleItem)) {
+                if (!isReachedListEnd && !(isListLoading) && (totalItemCount - visibleItemCount) <= (firstVisibleItem)) {
                     pageNumber++;
                     fillFilesList();
                 }

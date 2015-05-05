@@ -32,7 +32,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/build/intermediates/resources/resources-debug.ap_" afterPath="$PROJECT_DIR$/app/build/intermediates/resources/resources-debug.ap_" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/gallery.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/gallery.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="safe_camera.iws" />
@@ -59,49 +58,69 @@
       <file leaf-file-name="GalleryActivity.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6203593" vertical-offset="3232" max-vertical-offset="19155">
-              <caret line="337" column="47" selection-start-line="337" selection-start-column="47" selection-end-line="337" selection-end-column="47" />
+            <state vertical-scroll-proportion="0.83299387" vertical-offset="16991" max-vertical-offset="20700">
+              <caret line="1333" column="43" selection-start-line="1333" selection-start-column="43" selection-end-line="1333" selection-end-column="43" />
               <folding>
-                <element signature="e#4208#4249#0" expanded="true" />
-                <element signature="e#7172#7213#0" expanded="true" />
-                <element signature="e#7283#7306#0" expanded="true" />
-                <element signature="e#7351#7381#0" expanded="true" />
-                <element signature="e#7565#7587#0" expanded="true" />
-                <element signature="e#9095#9128#0" expanded="true" />
-                <element signature="e#9480#9514#0" expanded="true" />
-                <element signature="e#10660#10690#0" expanded="true" />
-                <element signature="e#12361#12394#0" expanded="true" />
-                <element signature="e#12534#12567#0" expanded="true" />
-                <element signature="e#14144#14175#0" expanded="true" />
-                <element signature="e#16836#16869#0" expanded="true" />
-                <element signature="e#17286#17314#0" expanded="true" />
-                <element signature="e#18545#18569#0" expanded="true" />
-                <element signature="e#18614#18644#0" expanded="true" />
-                <element signature="e#19425#19462#0" expanded="true" />
-                <element signature="e#19536#19562#0" expanded="true" />
-                <element signature="e#20050#20090#0" expanded="true" />
-                <element signature="e#20160#20183#0" expanded="true" />
-                <element signature="e#20228#20258#0" expanded="true" />
-                <element signature="e#20558#20580#0" expanded="true" />
-                <element signature="e#22906#22936#0" expanded="true" />
-                <element signature="e#23808#23842#0" expanded="true" />
-                <element signature="e#23985#24018#0" expanded="true" />
-                <element signature="e#24154#24180#0" expanded="true" />
-                <element signature="e#24249#24290#0" expanded="true" />
-                <element signature="e#24741#24782#0" expanded="true" />
-                <element signature="e#25019#25042#0" expanded="true" />
-                <element signature="e#25091#25121#0" expanded="true" />
-                <element signature="e#25949#25993#0" expanded="true" />
-                <element signature="e#26322#26344#0" expanded="true" />
-                <element signature="e#27064#27094#0" expanded="true" />
-                <element signature="e#42461#42491#0" expanded="true" />
-                <element signature="e#42517#42558#0" expanded="true" />
-                <element signature="e#42682#42708#0" expanded="true" />
-                <element signature="e#43067#43102#0" expanded="true" />
-                <element signature="e#43195#43232#0" expanded="true" />
-                <element signature="e#43335#43361#0" expanded="true" />
-                <element signature="e#44055#44093#0" expanded="true" />
+                <element signature="e#4346#4387#0" expanded="true" />
+                <element signature="e#7442#7483#0" expanded="true" />
+                <element signature="e#7553#7576#0" expanded="true" />
+                <element signature="e#7621#7651#0" expanded="true" />
+                <element signature="e#7835#7857#0" expanded="true" />
+                <element signature="e#10272#10305#0" expanded="true" />
+                <element signature="e#10468#10502#0" expanded="true" />
+                <element signature="e#12034#12064#0" expanded="true" />
+                <element signature="e#13982#14015#0" expanded="true" />
+                <element signature="e#14155#14188#0" expanded="true" />
+                <element signature="e#15765#15796#0" expanded="true" />
+                <element signature="e#18457#18490#0" expanded="true" />
+                <element signature="e#18907#18935#0" expanded="true" />
+                <element signature="e#20166#20190#0" expanded="true" />
+                <element signature="e#20235#20265#0" expanded="true" />
+                <element signature="e#21046#21083#0" expanded="true" />
+                <element signature="e#21157#21183#0" expanded="true" />
+                <element signature="e#21671#21711#0" expanded="true" />
+                <element signature="e#21781#21804#0" expanded="true" />
+                <element signature="e#21849#21879#0" expanded="true" />
+                <element signature="e#22179#22201#0" expanded="true" />
+                <element signature="e#24527#24557#0" expanded="true" />
+                <element signature="e#25429#25463#0" expanded="true" />
+                <element signature="e#25606#25639#0" expanded="true" />
+                <element signature="e#25775#25801#0" expanded="true" />
+                <element signature="e#25870#25911#0" expanded="true" />
+                <element signature="e#26362#26403#0" expanded="true" />
+                <element signature="e#26640#26663#0" expanded="true" />
+                <element signature="e#26712#26742#0" expanded="true" />
+                <element signature="e#27570#27614#0" expanded="true" />
+                <element signature="e#27943#27965#0" expanded="true" />
+                <element signature="e#28685#28715#0" expanded="true" />
+                <element signature="e#47280#47310#0" expanded="true" />
+                <element signature="e#47336#47377#0" expanded="true" />
+                <element signature="e#47501#47527#0" expanded="true" />
+                <element signature="e#47886#47921#0" expanded="true" />
+                <element signature="e#48014#48051#0" expanded="true" />
+                <element signature="e#48154#48180#0" expanded="true" />
+                <element signature="e#48874#48912#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SafeCameraApplication.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/SafeCameraApplication.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="210" max-vertical-offset="675">
+              <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MemoryCache.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/MemoryCache.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="180" max-vertical-offset="900">
+              <caret line="12" column="43" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="43" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -112,8 +131,8 @@
             <state />
           </provider>
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-23.653847" vertical-offset="0" max-vertical-offset="705">
-              <caret line="41" column="15" selection-start-line="41" selection-start-column="15" selection-end-line="41" selection-end-column="15" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="435" max-vertical-offset="705">
+              <caret line="29" column="37" selection-start-line="29" selection-start-column="37" selection-end-line="29" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -913,6 +932,7 @@
     <panes>
       <pane id="Scope" />
       <pane id="ProjectPane" />
+      <pane id="PackagesPane" />
       <pane id="AndroidView">
         <subPane>
           <PATH>
@@ -1009,7 +1029,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -1218,11 +1237,10 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32914287" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32914287" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32914287" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32914287" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20447284" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -1236,6 +1254,7 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -1261,6 +1280,156 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3945" max-vertical-offset="21900">
+          <caret line="328" column="93" selection-start-line="328" selection-start-column="93" selection-end-line="328" selection-end-column="93" />
+          <folding>
+            <element signature="e#4346#4387#0" expanded="true" />
+            <element signature="e#7442#7483#0" expanded="true" />
+            <element signature="e#7553#7576#0" expanded="true" />
+            <element signature="e#7621#7651#0" expanded="true" />
+            <element signature="e#7835#7857#0" expanded="true" />
+            <element signature="e#10272#10305#0" expanded="true" />
+            <element signature="e#10468#10502#0" expanded="true" />
+            <element signature="e#12034#12064#0" expanded="true" />
+            <element signature="e#13982#14015#0" expanded="true" />
+            <element signature="e#14155#14188#0" expanded="true" />
+            <element signature="e#15765#15796#0" expanded="true" />
+            <element signature="e#18457#18490#0" expanded="true" />
+            <element signature="e#18907#18935#0" expanded="true" />
+            <element signature="e#20166#20190#0" expanded="true" />
+            <element signature="e#20235#20265#0" expanded="true" />
+            <element signature="e#21046#21083#0" expanded="true" />
+            <element signature="e#21157#21183#0" expanded="true" />
+            <element signature="e#21671#21711#0" expanded="true" />
+            <element signature="e#21781#21804#0" expanded="true" />
+            <element signature="e#21849#21879#0" expanded="true" />
+            <element signature="e#22179#22201#0" expanded="true" />
+            <element signature="e#24527#24557#0" expanded="true" />
+            <element signature="e#25429#25463#0" expanded="true" />
+            <element signature="e#25606#25639#0" expanded="true" />
+            <element signature="e#25775#25801#0" expanded="true" />
+            <element signature="e#25870#25911#0" expanded="true" />
+            <element signature="e#26362#26403#0" expanded="true" />
+            <element signature="e#26640#26663#0" expanded="true" />
+            <element signature="e#26712#26742#0" expanded="true" />
+            <element signature="e#27570#27614#0" expanded="true" />
+            <element signature="e#27943#27965#0" expanded="true" />
+            <element signature="e#28685#28715#0" expanded="true" />
+            <element signature="e#47280#47310#0" expanded="true" />
+            <element signature="e#47336#47377#0" expanded="true" />
+            <element signature="e#47501#47527#0" expanded="true" />
+            <element signature="e#47886#47921#0" expanded="true" />
+            <element signature="e#48014#48051#0" expanded="true" />
+            <element signature="e#48154#48180#0" expanded="true" />
+            <element signature="e#48874#48912#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/SafeCameraApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="210" max-vertical-offset="675">
+          <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/MemoryCache.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="180" max-vertical-offset="900">
+          <caret line="12" column="43" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/gallery.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="435" max-vertical-offset="705">
+          <caret line="29" column="37" selection-start-line="29" selection-start-column="37" selection-end-line="29" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/Helpers.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="4365" max-vertical-offset="14520">
+          <caret line="291" column="28" selection-start-line="291" selection-start-column="28" selection-end-line="291" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="20535">
+          <caret line="337" column="47" selection-start-line="337" selection-start-column="47" selection-end-line="337" selection-end-column="47" />
+          <folding>
+            <element signature="e#4346#4387#0" expanded="true" />
+            <element signature="e#7442#7483#0" expanded="true" />
+            <element signature="e#7553#7576#0" expanded="true" />
+            <element signature="e#7621#7651#0" expanded="true" />
+            <element signature="e#7835#7857#0" expanded="true" />
+            <element signature="e#10272#10305#0" expanded="true" />
+            <element signature="e#10468#10502#0" expanded="true" />
+            <element signature="e#12034#12064#0" expanded="true" />
+            <element signature="e#13982#14015#0" expanded="true" />
+            <element signature="e#14155#14188#0" expanded="true" />
+            <element signature="e#15765#15796#0" expanded="true" />
+            <element signature="e#18457#18490#0" expanded="true" />
+            <element signature="e#18907#18935#0" expanded="true" />
+            <element signature="e#20166#20190#0" expanded="true" />
+            <element signature="e#20235#20265#0" expanded="true" />
+            <element signature="e#21046#21083#0" expanded="true" />
+            <element signature="e#21157#21183#0" expanded="true" />
+            <element signature="e#21671#21711#0" expanded="true" />
+            <element signature="e#21781#21804#0" expanded="true" />
+            <element signature="e#21849#21879#0" expanded="true" />
+            <element signature="e#22179#22201#0" expanded="true" />
+            <element signature="e#24527#24557#0" expanded="true" />
+            <element signature="e#25429#25463#0" expanded="true" />
+            <element signature="e#25606#25639#0" expanded="true" />
+            <element signature="e#25775#25801#0" expanded="true" />
+            <element signature="e#25870#25911#0" expanded="true" />
+            <element signature="e#26362#26403#0" expanded="true" />
+            <element signature="e#26640#26663#0" expanded="true" />
+            <element signature="e#26712#26742#0" expanded="true" />
+            <element signature="e#27570#27614#0" expanded="true" />
+            <element signature="e#27943#27965#0" expanded="true" />
+            <element signature="e#28685#28715#0" expanded="true" />
+            <element signature="e#47280#47310#0" expanded="true" />
+            <element signature="e#47336#47377#0" expanded="true" />
+            <element signature="e#47501#47527#0" expanded="true" />
+            <element signature="e#47886#47921#0" expanded="true" />
+            <element signature="e#48014#48051#0" expanded="true" />
+            <element signature="e#48154#48180#0" expanded="true" />
+            <element signature="e#48874#48912#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/gallery.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="615" max-vertical-offset="705">
+          <caret line="41" column="15" selection-start-line="41" selection-start-column="15" selection-end-line="41" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/Helpers.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="4365" max-vertical-offset="14520">
+          <caret line="291" column="28" selection-start-line="291" selection-start-column="28" selection-end-line="291" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="375" max-vertical-offset="1695">
@@ -1274,45 +1443,45 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="18870">
           <caret line="284" column="18" selection-start-line="284" selection-start-column="18" selection-end-line="284" selection-end-column="18" />
           <folding>
-            <element signature="e#4208#4249#0" expanded="true" />
-            <element signature="e#7172#7213#0" expanded="true" />
-            <element signature="e#7283#7306#0" expanded="true" />
-            <element signature="e#7351#7381#0" expanded="true" />
-            <element signature="e#7565#7587#0" expanded="true" />
-            <element signature="e#9095#9128#0" expanded="true" />
-            <element signature="e#9480#9514#0" expanded="true" />
-            <element signature="e#10660#10690#0" expanded="true" />
-            <element signature="e#12361#12394#0" expanded="true" />
-            <element signature="e#12534#12567#0" expanded="true" />
-            <element signature="e#14144#14175#0" expanded="true" />
-            <element signature="e#16836#16869#0" expanded="true" />
-            <element signature="e#17286#17314#0" expanded="true" />
-            <element signature="e#18545#18569#0" expanded="true" />
-            <element signature="e#18614#18644#0" expanded="true" />
-            <element signature="e#19425#19462#0" expanded="true" />
-            <element signature="e#19536#19562#0" expanded="true" />
-            <element signature="e#20050#20090#0" expanded="true" />
-            <element signature="e#20160#20183#0" expanded="true" />
-            <element signature="e#20228#20258#0" expanded="true" />
-            <element signature="e#20558#20580#0" expanded="true" />
-            <element signature="e#22906#22936#0" expanded="true" />
-            <element signature="e#23808#23842#0" expanded="true" />
-            <element signature="e#23985#24018#0" expanded="true" />
-            <element signature="e#24154#24180#0" expanded="true" />
-            <element signature="e#24249#24290#0" expanded="true" />
-            <element signature="e#24741#24782#0" expanded="true" />
-            <element signature="e#25019#25042#0" expanded="true" />
-            <element signature="e#25091#25121#0" expanded="true" />
-            <element signature="e#25949#25993#0" expanded="true" />
-            <element signature="e#26322#26344#0" expanded="true" />
-            <element signature="e#27064#27094#0" expanded="true" />
-            <element signature="e#42461#42491#0" expanded="true" />
-            <element signature="e#42517#42558#0" expanded="true" />
-            <element signature="e#42682#42708#0" expanded="true" />
-            <element signature="e#43067#43102#0" expanded="true" />
-            <element signature="e#43195#43232#0" expanded="true" />
-            <element signature="e#43335#43361#0" expanded="true" />
-            <element signature="e#44055#44093#0" expanded="true" />
+            <element signature="e#4346#4387#0" expanded="true" />
+            <element signature="e#7442#7483#0" expanded="true" />
+            <element signature="e#7553#7576#0" expanded="true" />
+            <element signature="e#7621#7651#0" expanded="true" />
+            <element signature="e#7835#7857#0" expanded="true" />
+            <element signature="e#10272#10305#0" expanded="true" />
+            <element signature="e#10468#10502#0" expanded="true" />
+            <element signature="e#12034#12064#0" expanded="true" />
+            <element signature="e#13982#14015#0" expanded="true" />
+            <element signature="e#14155#14188#0" expanded="true" />
+            <element signature="e#15765#15796#0" expanded="true" />
+            <element signature="e#18457#18490#0" expanded="true" />
+            <element signature="e#18907#18935#0" expanded="true" />
+            <element signature="e#20166#20190#0" expanded="true" />
+            <element signature="e#20235#20265#0" expanded="true" />
+            <element signature="e#21046#21083#0" expanded="true" />
+            <element signature="e#21157#21183#0" expanded="true" />
+            <element signature="e#21671#21711#0" expanded="true" />
+            <element signature="e#21781#21804#0" expanded="true" />
+            <element signature="e#21849#21879#0" expanded="true" />
+            <element signature="e#22179#22201#0" expanded="true" />
+            <element signature="e#24527#24557#0" expanded="true" />
+            <element signature="e#25429#25463#0" expanded="true" />
+            <element signature="e#25606#25639#0" expanded="true" />
+            <element signature="e#25775#25801#0" expanded="true" />
+            <element signature="e#25870#25911#0" expanded="true" />
+            <element signature="e#26362#26403#0" expanded="true" />
+            <element signature="e#26640#26663#0" expanded="true" />
+            <element signature="e#26712#26742#0" expanded="true" />
+            <element signature="e#27570#27614#0" expanded="true" />
+            <element signature="e#27943#27965#0" expanded="true" />
+            <element signature="e#28685#28715#0" expanded="true" />
+            <element signature="e#47280#47310#0" expanded="true" />
+            <element signature="e#47336#47377#0" expanded="true" />
+            <element signature="e#47501#47527#0" expanded="true" />
+            <element signature="e#47886#47921#0" expanded="true" />
+            <element signature="e#48014#48051#0" expanded="true" />
+            <element signature="e#48154#48180#0" expanded="true" />
+            <element signature="e#48874#48912#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1387,61 +1556,77 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/SafeCameraApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="510">
+          <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/util/MemoryCache.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="780">
+          <caret line="12" column="43" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/gallery.xml">
       <provider editor-type-id="android-designer">
         <state />
       </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-23.653847" vertical-offset="0" max-vertical-offset="705">
-          <caret line="41" column="15" selection-start-line="41" selection-start-column="15" selection-end-line="41" selection-end-column="15" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="435" max-vertical-offset="705">
+          <caret line="29" column="37" selection-start-line="29" selection-start-column="37" selection-end-line="29" selection-end-column="37" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/fenritz/safecam/GalleryActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6203593" vertical-offset="3232" max-vertical-offset="19155">
-          <caret line="337" column="47" selection-start-line="337" selection-start-column="47" selection-end-line="337" selection-end-column="47" />
+        <state vertical-scroll-proportion="0.83299387" vertical-offset="16991" max-vertical-offset="20700">
+          <caret line="1333" column="43" selection-start-line="1333" selection-start-column="43" selection-end-line="1333" selection-end-column="43" />
           <folding>
-            <element signature="e#4208#4249#0" expanded="true" />
-            <element signature="e#7172#7213#0" expanded="true" />
-            <element signature="e#7283#7306#0" expanded="true" />
-            <element signature="e#7351#7381#0" expanded="true" />
-            <element signature="e#7565#7587#0" expanded="true" />
-            <element signature="e#9095#9128#0" expanded="true" />
-            <element signature="e#9480#9514#0" expanded="true" />
-            <element signature="e#10660#10690#0" expanded="true" />
-            <element signature="e#12361#12394#0" expanded="true" />
-            <element signature="e#12534#12567#0" expanded="true" />
-            <element signature="e#14144#14175#0" expanded="true" />
-            <element signature="e#16836#16869#0" expanded="true" />
-            <element signature="e#17286#17314#0" expanded="true" />
-            <element signature="e#18545#18569#0" expanded="true" />
-            <element signature="e#18614#18644#0" expanded="true" />
-            <element signature="e#19425#19462#0" expanded="true" />
-            <element signature="e#19536#19562#0" expanded="true" />
-            <element signature="e#20050#20090#0" expanded="true" />
-            <element signature="e#20160#20183#0" expanded="true" />
-            <element signature="e#20228#20258#0" expanded="true" />
-            <element signature="e#20558#20580#0" expanded="true" />
-            <element signature="e#22906#22936#0" expanded="true" />
-            <element signature="e#23808#23842#0" expanded="true" />
-            <element signature="e#23985#24018#0" expanded="true" />
-            <element signature="e#24154#24180#0" expanded="true" />
-            <element signature="e#24249#24290#0" expanded="true" />
-            <element signature="e#24741#24782#0" expanded="true" />
-            <element signature="e#25019#25042#0" expanded="true" />
-            <element signature="e#25091#25121#0" expanded="true" />
-            <element signature="e#25949#25993#0" expanded="true" />
-            <element signature="e#26322#26344#0" expanded="true" />
-            <element signature="e#27064#27094#0" expanded="true" />
-            <element signature="e#42461#42491#0" expanded="true" />
-            <element signature="e#42517#42558#0" expanded="true" />
-            <element signature="e#42682#42708#0" expanded="true" />
-            <element signature="e#43067#43102#0" expanded="true" />
-            <element signature="e#43195#43232#0" expanded="true" />
-            <element signature="e#43335#43361#0" expanded="true" />
-            <element signature="e#44055#44093#0" expanded="true" />
+            <element signature="e#4346#4387#0" expanded="true" />
+            <element signature="e#7442#7483#0" expanded="true" />
+            <element signature="e#7553#7576#0" expanded="true" />
+            <element signature="e#7621#7651#0" expanded="true" />
+            <element signature="e#7835#7857#0" expanded="true" />
+            <element signature="e#10272#10305#0" expanded="true" />
+            <element signature="e#10468#10502#0" expanded="true" />
+            <element signature="e#12034#12064#0" expanded="true" />
+            <element signature="e#13982#14015#0" expanded="true" />
+            <element signature="e#14155#14188#0" expanded="true" />
+            <element signature="e#15765#15796#0" expanded="true" />
+            <element signature="e#18457#18490#0" expanded="true" />
+            <element signature="e#18907#18935#0" expanded="true" />
+            <element signature="e#20166#20190#0" expanded="true" />
+            <element signature="e#20235#20265#0" expanded="true" />
+            <element signature="e#21046#21083#0" expanded="true" />
+            <element signature="e#21157#21183#0" expanded="true" />
+            <element signature="e#21671#21711#0" expanded="true" />
+            <element signature="e#21781#21804#0" expanded="true" />
+            <element signature="e#21849#21879#0" expanded="true" />
+            <element signature="e#22179#22201#0" expanded="true" />
+            <element signature="e#24527#24557#0" expanded="true" />
+            <element signature="e#25429#25463#0" expanded="true" />
+            <element signature="e#25606#25639#0" expanded="true" />
+            <element signature="e#25775#25801#0" expanded="true" />
+            <element signature="e#25870#25911#0" expanded="true" />
+            <element signature="e#26362#26403#0" expanded="true" />
+            <element signature="e#26640#26663#0" expanded="true" />
+            <element signature="e#26712#26742#0" expanded="true" />
+            <element signature="e#27570#27614#0" expanded="true" />
+            <element signature="e#27943#27965#0" expanded="true" />
+            <element signature="e#28685#28715#0" expanded="true" />
+            <element signature="e#47280#47310#0" expanded="true" />
+            <element signature="e#47336#47377#0" expanded="true" />
+            <element signature="e#47501#47527#0" expanded="true" />
+            <element signature="e#47886#47921#0" expanded="true" />
+            <element signature="e#48014#48051#0" expanded="true" />
+            <element signature="e#48154#48180#0" expanded="true" />
+            <element signature="e#48874#48912#0" expanded="true" />
           </folding>
         </state>
       </provider>
