@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/forgot_password" android:id="@+id/forgot_password" android:icon="@android:drawable/ic_menu_help"></item>
-    
-</menu>
-<!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/menu/main_menu.xml -->

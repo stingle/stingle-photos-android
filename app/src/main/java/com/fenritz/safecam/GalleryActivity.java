@@ -50,6 +50,7 @@ import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
+import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.CheckableLayout;
 
 import java.io.File;
@@ -121,8 +122,11 @@ public class GalleryActivity extends Activity {
 		//requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-			getActionBar().setHomeButtonEnabled(true);
+            try {
+                getActionBar().setDisplayHomeAsUpEnabled(true);
+                getActionBar().setHomeButtonEnabled(true);
+            }
+            catch(NullPointerException e){ }
 		}
 		setContentView(R.layout.gallery);
 		
@@ -145,6 +149,8 @@ public class GalleryActivity extends Activity {
         currentFolderFiles = null;
         isReachedListEnd = false;
         pageNumber = 1;
+        toGenerateThumbs.clear();
+        noThumbs.clear();
 		fillFilesList();
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
@@ -309,7 +315,14 @@ public class GalleryActivity extends Activity {
                 currentFolderFiles = dir.listFiles();
 
                 if(currentFolderFiles != null) {
-                    Arrays.sort(currentFolderFiles, new FileNameComparator());
+                    //Arrays.sort(currentFolderFiles, new FileNameComparator());
+                    Arrays.sort(currentFolderFiles, (new NaturalOrderComparator(){
+                              @Override
+                               public int compare(Object o1, Object o2){
+                                       return -super.compare(o1, o2);
+                               }
+                    }));
+
                     Arrays.sort(currentFolderFiles, new FileTypeComparator());
                 }
             }
@@ -332,9 +345,6 @@ public class GalleryActivity extends Activity {
 
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
 
-				toGenerateThumbs.clear();
-				noThumbs.clear();
-				
 				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this);
 				String fileExt = getString(R.string.file_extension);
 
@@ -434,10 +444,6 @@ public class GalleryActivity extends Activity {
 	
 	@SuppressLint("NewApi")
 	private void fillFilesList() {
-		if (thumbGenTask != null) {
-			thumbGenTask.cancel(true);
-			thumbGenTask = null;
-		}
         isListLoading = true;
 
 		(new FillFilesList()).execute();
@@ -451,25 +457,33 @@ public class GalleryActivity extends Activity {
         pageNumber = 1;
         isReachedListEnd = false;
 		selectedFiles.clear();
-		
+        toGenerateThumbs.clear();
+        noThumbs.clear();
+
+        if (thumbGenTask != null) {
+            thumbGenTask.cancel(true);
+            thumbGenTask = null;
+        }
+
+
 		refreshList();
-		
-		if(!newPath.equals(Helpers.getHomeDir(this))){
-			String[] splittedPath = newPath.split("/");
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-				if( splittedPath.length >0 ){
-					getActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
-				}
-				else{
-					getActionBar().setTitle(getString(R.string.title_gallery));
-				}
-			}
-		}
-		else{
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-				getActionBar().setTitle(getString(R.string.title_gallery));
-			}
-		}
+		try {
+            if (!newPath.equals(Helpers.getHomeDir(this))) {
+                String[] splittedPath = newPath.split("/");
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                    if (splittedPath.length > 0) {
+                        getActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
+                    } else {
+                        getActionBar().setTitle(getString(R.string.title_gallery));
+                    }
+                }
+            } else {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                    getActionBar().setTitle(getString(R.string.title_gallery));
+                }
+            }
+        }
+        catch (NullPointerException e) { }
 	}
 	
 	@Override
@@ -844,7 +858,7 @@ public class GalleryActivity extends Activity {
 				dialog.show();
 			}
 			else if (requestCode == REQUEST_VIEW_PHOTO) {
-				if(data.hasExtra("needToRefresh") && data.getBooleanExtra("needToRefresh", false) == true){
+				if(data.hasExtra("needToRefresh") && data.getBooleanExtra("needToRefresh", false)){
 					refreshList();
 				}
 			}
@@ -943,7 +957,7 @@ public class GalleryActivity extends Activity {
 								if (processedFiles != null && processedFiles.size() == 1) {
 									Uri fileUri = Uri.fromFile(processedFiles.get(0));
 									if(originalIntent != null){
-										if (fileUri != null) {
+										if (null != fileUri.getPath()) {
 											/*Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND, fileUri); //Create a new intent. First parameter means that you want to send the file. The second parameter is the URI pointing to a file on the sd card. (openprev has the datatype File)
 
 								            GalleryActivity.this.setResult(Activity.RESULT_OK, shareIntent); //set the file/intent as result
@@ -1293,9 +1307,7 @@ public class GalleryActivity extends Activity {
                             else if(item.getType() == Dec.TYPE_LABEL) {
                                 final String decFilename = Helpers.decryptFilename(GalleryActivity.this, item.getFilename());
                                 if(decFilename != null){
-                                    if (labelCache != null) {
-                                        labelCache.put(item.getFilename(), decFilename);
-                                    }
+                                    labelCache.put(item.getFilename(), decFilename);
                                     runOnUiThread(new Runnable() {
                                         public void run() {
                                             if (item.labels.size() > 0) {

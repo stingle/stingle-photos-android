@@ -410,10 +410,8 @@ public class CameraActivity extends Activity {
 
 					if (lastOrientation != mOrientation && mCamera != null) {
 						Camera.Parameters parameters = mCamera.getParameters();
-						if(parameters != null){
-							parameters.setRotation(changeRotation(mOrientation));
-							mCamera.setParameters(parameters);
-						}
+                        parameters.setRotation(changeRotation(mOrientation));
+                        mCamera.setParameters(parameters);
 					}
 				}
 			};

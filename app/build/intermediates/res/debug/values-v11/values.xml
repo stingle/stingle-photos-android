@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- From: file:/home/alex/AndroidstudioProjects/safe_camera/app/src/main/res/values-v11/styles.xml -->
-    <eat-comment/>
-    <style name="app_theme" parent="android:Theme.Holo"/>
-</resources>
