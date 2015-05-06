@@ -1,35 +1,5 @@
 package com.fenritz.safecam.util;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.crypto.Cipher;
-
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
-import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
-import org.apache.sanselan.formats.tiff.TiffField;
-import org.apache.sanselan.formats.tiff.constants.TiffConstants;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -71,6 +41,36 @@ import com.fenritz.safecam.SettingsActivity;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.AsyncTasks.ReEncryptFiles;
 import com.fenritz.safecam.util.StorageUtils.StorageInfo;
+
+import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
+import org.apache.sanselan.common.IImageMetadata;
+import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
+import org.apache.sanselan.formats.tiff.TiffField;
+import org.apache.sanselan.formats.tiff.constants.TiffConstants;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.crypto.Cipher;
 
 public class Helpers {
 	public static final String JPEG_FILE_PREFIX = "IMG_";
@@ -959,4 +959,35 @@ public class Helpers {
 			}
 		}).execute(selectedFiles);
 	}
+
+    public static void checkIsMainFolderWritable(final Activity activity){
+        String homeDir = getHomeDir(activity);
+
+        File homeDirFile = new File(homeDir);
+
+        if(!homeDirFile.exists() || !homeDirFile.canWrite()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setTitle(activity.getString(R.string.home_folder_problem_title));
+
+            builder.setMessage(activity.getString(R.string.home_folder_problem));
+            builder.setPositiveButton(activity.getString(R.string.yes), new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+
+                    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
+                    String defaultHomeDir = Helpers.getDefaultHomeDir();
+
+                    sharedPrefs.edit().putString("home_folder", defaultHomeDir).putString("home_folder_location", null).commit();
+
+                    Helpers.createFolders(activity);
+
+                    Helpers.synchronizePasswordHash(activity);
+                }
+            });
+            builder.setNegativeButton(activity.getString(R.string.no), null);
+            builder.setCancelable(false);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+    }
 }

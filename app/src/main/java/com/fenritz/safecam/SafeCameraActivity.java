@@ -11,8 +11,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -74,6 +72,7 @@ public class SafeCameraActivity extends Activity {
 		}
 
 		((Button) findViewById(R.id.login)).setOnClickListener(login());
+		((TextView) findViewById(R.id.forgot_password)).setOnClickListener(forgotPassword());
 		((EditText) findViewById(R.id.password)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_GO) {
@@ -178,40 +177,31 @@ public class SafeCameraActivity extends Activity {
 		}
 		finish();
 	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main_menu, menu);;
-        return super.onCreateOptionsMenu(menu);
-	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.forgot_password:
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.forgot_password));
-			builder.setMessage(getString(R.string.reset_password));
-			builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-					preferences.edit().remove(SafeCameraActivity.PASSWORD).commit();
-					Helpers.removeLoginHashFile(SafeCameraActivity.this);
-					((SafeCameraApplication) getApplication()).setKey(null);
-					
-					Intent intent = new Intent();
-					intent.setClass(SafeCameraActivity.this, SetUpActivity.class);
-					startActivity(intent);
-					finish();
-				}
-			});
-			builder.setNegativeButton(getString(R.string.no), null);
-			AlertDialog dialog = builder.create();
-			dialog.show();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+    protected OnClickListener forgotPassword(){
+        return new OnClickListener() {
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SafeCameraActivity.this);
+                builder.setTitle(getString(R.string.forgot_password));
+                builder.setMessage(getString(R.string.reset_password));
+                builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+                        preferences.edit().remove(SafeCameraActivity.PASSWORD).commit();
+                        Helpers.removeLoginHashFile(SafeCameraActivity.this);
+                        ((SafeCameraApplication) getApplication()).setKey(null);
+
+                        Intent intent = new Intent();
+                        intent.setClass(SafeCameraActivity.this, SetUpActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+                builder.setNegativeButton(getString(R.string.no), null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        };
+    }
+
 }

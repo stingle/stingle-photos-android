@@ -1,9 +1,5 @@
 package com.fenritz.safecam;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -22,6 +18,10 @@ import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.StorageUtils;
 import com.fenritz.safecam.util.StorageUtils.StorageInfo;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -86,6 +86,14 @@ public class SettingsActivity extends PreferenceActivity {
 				return true;
 			}
 		});
+
+        /*((Preference)findPreference("home_folder")).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+            }
+        });*/
 	}
 	
 	@Override
@@ -166,7 +174,7 @@ public class SettingsActivity extends PreferenceActivity {
 						public void onClick(DialogInterface dialog, int whichButton) {
 							File newLoc = new File(locationText.getText().toString());
 							
-							if(newLoc.exists() && newLoc.isDirectory()){
+							if(newLoc.exists() && newLoc.isDirectory() && newLoc.canWrite()){
 								sharedPrefs.edit().putString("home_folder_location", locationText.getText().toString()).commit();
 								initFolders(locationText.getText().toString());
 								initHomeFolderPref();
@@ -182,7 +190,8 @@ public class SettingsActivity extends PreferenceActivity {
 										homeFolderLocPref.setValue(storageEntriesValues[0].toString());
 										initHomeFolderPref();
 									};
-								});
+								}).setCancelable(false)
+                                  .show();
 							}
 						}
 					});

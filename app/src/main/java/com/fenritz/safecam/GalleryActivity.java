@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.util.LruCache;
 import android.text.TextUtils.TruncateAt;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -145,12 +146,7 @@ public class GalleryActivity extends Activity {
 	
 	protected void startupActions(){
 		currentPath = Helpers.getHomeDir(this);
-        GalleryActivity.files.clear();
-        currentFolderFiles = null;
-        isReachedListEnd = false;
-        pageNumber = 1;
-        toGenerateThumbs.clear();
-        noThumbs.clear();
+        resetListVars();
 		fillFilesList();
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
@@ -335,6 +331,8 @@ public class GalleryActivity extends Activity {
                     endingItemNum = currentFolderFiles.length;
                 }
 
+                Log.d("qaq", String.valueOf(startingItemNum) + " - " + String.valueOf(endingItemNum));
+
                 if(endingItemNum > startingItemNum){
                     runOnUiThread(new Runnable() {
                         public void run() {
@@ -371,10 +369,10 @@ public class GalleryActivity extends Activity {
 				}
 		
 				Collections.sort(folders);
-				
+
 				filesToReturn.addAll(folders);
 				filesToReturn.addAll(files);
-				
+
 			}
 			return filesToReturn;
 			
@@ -448,15 +446,14 @@ public class GalleryActivity extends Activity {
 
 		(new FillFilesList()).execute();
 	}
-	
-	@SuppressLint("NewApi")
-	private void changeDir(String newPath){
-		currentPath = newPath;
+
+
+    private void resetListVars(){
         GalleryActivity.files.clear();
         currentFolderFiles = null;
         pageNumber = 1;
         isReachedListEnd = false;
-		selectedFiles.clear();
+        selectedFiles.clear();
         toGenerateThumbs.clear();
         noThumbs.clear();
 
@@ -464,7 +461,11 @@ public class GalleryActivity extends Activity {
             thumbGenTask.cancel(true);
             thumbGenTask = null;
         }
+    }
 
+	@SuppressLint("NewApi")
+	private void changeDir(String newPath){
+		currentPath = newPath;
 
 		refreshList();
 		try {
@@ -529,7 +530,6 @@ public class GalleryActivity extends Activity {
 					thumbGenTask = new GenerateThumbs();
 					thumbGenTask.execute(toGenerateThumbs);
 				}
-				//generateVisibleThumbs();
 			}
 		}
 	}
@@ -723,8 +723,9 @@ public class GalleryActivity extends Activity {
 	}
 
 	private void refreshList(){
+        resetListVars();
 		fillFilesList();
-		galleryAdapter.notifyDataSetChanged();
+		//galleryAdapter.notifyDataSetChanged();
 		exitMultiSelect();
 		
 		//generateVisibleThumbs();

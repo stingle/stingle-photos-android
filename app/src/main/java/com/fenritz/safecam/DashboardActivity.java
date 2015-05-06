@@ -44,6 +44,7 @@ public class DashboardActivity extends Activity {
 		if(showPopup){
 			showPopup();
 		}
+
 	}
 	
 	private void initViews(){
@@ -79,7 +80,7 @@ public class DashboardActivity extends Activity {
 		}
 	}
 	
-	
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -128,6 +129,8 @@ public class DashboardActivity extends Activity {
 		
 		Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
+
+        Helpers.checkIsMainFolderWritable(this);
 	}
 	
 	@Override
