@@ -1,17 +1,5 @@
 package com.fenritz.safecam;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -66,6 +55,18 @@ import com.fenritz.safecam.util.CameraPreview;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.SafeCameraButton;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CameraActivity extends Activity {
 
@@ -413,6 +414,7 @@ public class CameraActivity extends Activity {
                         parameters.setRotation(changeRotation(mOrientation));
                         mCamera.setParameters(parameters);
 					}
+                    setCameraDisplayOrientation(CameraActivity.this, currentCamera, mCamera);
 				}
 			};
 		}
@@ -420,6 +422,41 @@ public class CameraActivity extends Activity {
 			mOrientationEventListener.enable();
 		}
 	}
+
+    private static int getCameraDisplayFinalOrientation(Activity activity,
+                                                 int cameraId, android.hardware.Camera camera){
+        android.hardware.Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(cameraId, info);
+        int rotation = activity.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+
+        return result;
+    }
+
+    @SuppressLint("NewApi")
+    private static void setCameraDisplayOrientation(Activity activity,
+                                                   int cameraId, android.hardware.Camera camera) {
+        int result = getCameraDisplayFinalOrientation(activity, cameraId, camera);
+        camera.setDisplayOrientation(result);
+
+
+    }
 	
 	private void destroyOrientationListener(){
 		if (mOrientationEventListener != null) {
@@ -758,9 +795,9 @@ public class CameraActivity extends Activity {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
 				isTakingPhoto = false;
-				/*if(isCurrentCameraFrontFacing()){
-					data = FixFrontCamPhoto(data, currentCamera);
-				}*/
+				if(isCurrentCameraFrontFacing()){
+					data = FixFrontCamPhoto(CameraActivity.this, data, currentCamera);
+				}
 				
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 				
@@ -783,7 +820,7 @@ public class CameraActivity extends Activity {
 		};
 	}
 	
-	public static byte[] FixFrontCamPhoto(byte[] data, int cameraID) {
+	public static byte[] FixFrontCamPhoto(Activity activity, byte[] data, int cameraID) {
 	    Matrix matrix = new Matrix();
 	    
 	    // Convert ByteArray to Bitmap
@@ -796,12 +833,18 @@ public class CameraActivity extends Activity {
 
         matrix.postConcat(matrixMirrorY);
 
+
+
+        matrix.postRotate(getCameraDisplayFinalOrientation(activity, cameraID, mCamera));
+        Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
+        bitPic.recycle();
+
 	    //matrix.postRotate(90);
 
 
 	    // Create new Bitmap out of the old one
-	    Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
-	    bitPic.recycle();
+	    /*Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
+	    bitPic.recycle();*/
 	    
 	    ByteArrayOutputStream stream = new ByteArrayOutputStream();
 	    bitPicFinal.compress(Bitmap.CompressFormat.JPEG, 100, stream);
@@ -849,7 +892,6 @@ public class CameraActivity extends Activity {
 	 * Performs required action to accommodate new orientation
 	 * 
 	 * @param orientation
-	 * @param lastOrientation
 	 */
 	private int changeRotation(int orientation) {
 		boolean isFrontCamera = isCurrentCameraFrontFacing();
@@ -873,7 +915,7 @@ public class CameraActivity extends Activity {
 				viewsRotation = 180;
 				break;
 		}
-		
+
 		int howMuchRotated = 0;
 		
 		switch(lastRotation){
