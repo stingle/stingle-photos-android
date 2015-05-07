@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.util.LruCache;
 import android.text.TextUtils.TruncateAt;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -330,8 +329,6 @@ public class GalleryActivity extends Activity {
                 if(endingItemNum > currentFolderFiles.length){
                     endingItemNum = currentFolderFiles.length;
                 }
-
-                Log.d("qaq", String.valueOf(startingItemNum) + " - " + String.valueOf(endingItemNum));
 
                 if(endingItemNum > startingItemNum){
                     runOnUiThread(new Runnable() {

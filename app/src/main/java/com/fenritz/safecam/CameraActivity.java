@@ -80,6 +80,7 @@ public class CameraActivity extends Activity {
 	int cameraCurrentlyLocked;
 	FrameLayout.LayoutParams origParams;
 	private int mOrientation = -1;
+	private int currentCameraRotation = 0;
 	private boolean app_is_paused = true;
 	private OrientationEventListener mOrientationEventListener;
 
@@ -93,7 +94,7 @@ public class CameraActivity extends Activity {
 	private static final int DEFAULT_CAMERA = 0;
 	private int numberOfCameras = 1; 
 	private int currentCamera = 0; 
-	
+
 	private boolean isTimerOn = false; 
 
 	private SafeCameraButton takePhotoButton;
@@ -363,7 +364,9 @@ public class CameraActivity extends Activity {
 		mPreview = new CameraPreview(CameraActivity.this);
 		((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
 		mPreview.setCamera(mCamera);
-		
+
+        setCameraDisplayOrientation(CameraActivity.this, currentCamera, mCamera);
+
 		getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putInt(SafeCameraActivity.LAST_CAM_ID, cameraId).commit();
 	}
 	
@@ -384,7 +387,18 @@ public class CameraActivity extends Activity {
 					if (orientation == ORIENTATION_UNKNOWN){
 						return;
 					}
-					
+
+                    orientation = (orientation + 45) / 90 * 90;
+                    int currentOrientation = orientation % 360;
+                    int newRotation = 0;
+                    int camera_orientation = getCameraOrientation();
+                    if( isCurrentCameraFrontFacing() ) {
+                        currentCameraRotation = (camera_orientation - orientation + 360) % 360;
+                    }
+                    else {
+                        currentCameraRotation = (camera_orientation + orientation) % 360;
+                    }
+
 					// determine our orientation based on sensor response
 					int lastOrientation = mOrientation;
 
@@ -410,11 +424,14 @@ public class CameraActivity extends Activity {
 					}
 
 					if (lastOrientation != mOrientation && mCamera != null) {
-						Camera.Parameters parameters = mCamera.getParameters();
-                        parameters.setRotation(changeRotation(mOrientation));
-                        mCamera.setParameters(parameters);
-					}
-                    setCameraDisplayOrientation(CameraActivity.this, currentCamera, mCamera);
+						/*Camera.Parameters parameters = mCamera.getParameters();
+
+                        parameters.setRotation(getCameraRotation());
+
+                        mCamera.setParameters(parameters);*/
+
+                        changeRotation(mOrientation);
+                    }
 				}
 			};
 		}
@@ -423,13 +440,47 @@ public class CameraActivity extends Activity {
 		}
 	}
 
-    private static int getCameraDisplayFinalOrientation(Activity activity,
-                                                 int cameraId, android.hardware.Camera camera){
-        android.hardware.Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
+    @SuppressLint("NewApi")
+    private int getCameraRotation(){
+
+        return currentCameraRotation;
+
+        /*int orientation = getCameraOrientation();
+        boolean isFrontCamera = isCurrentCameraFrontFacing();
+
+        int degrees = 0;
+        switch (mOrientation) {
+            case ORIENTATION_PORTRAIT_NORMAL:
+                degrees = (!isFrontCamera ? 90 : 270);
+                break;
+            case ORIENTATION_LANDSCAPE_NORMAL:
+                degrees = 0;
+                break;
+            case ORIENTATION_PORTRAIT_INVERTED:
+                degrees = (!isFrontCamera ? 270 : 90);
+                break;
+            case ORIENTATION_LANDSCAPE_INVERTED:
+                degrees = 180;
+                break;
+        }
+
+        int result;
+
+        if (isFrontCamera) {
+            result = (360  - orientation - degrees) % 360;
+        } else {  // back-facing camera
+            result = (orientation + degrees) % 360;
+        }
+
+        return result;*/
+    }
+
+    @SuppressLint("NewApi")
+    private void setCameraDisplayOrientation(Activity activity, int cameraId, android.hardware.Camera camera) {
+        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
-        int rotation = activity.getWindowManager().getDefaultDisplay()
-                .getRotation();
+
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0: degrees = 0; break;
@@ -442,20 +493,12 @@ public class CameraActivity extends Activity {
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
             result = (360 - result) % 360;  // compensate the mirror
-        } else {  // back-facing
+        }
+        else {  // back-facing
             result = (info.orientation - degrees + 360) % 360;
         }
 
-        return result;
-    }
-
-    @SuppressLint("NewApi")
-    private static void setCameraDisplayOrientation(Activity activity,
-                                                   int cameraId, android.hardware.Camera camera) {
-        int result = getCameraDisplayFinalOrientation(activity, cameraId, camera);
         camera.setDisplayOrientation(result);
-
-
     }
 	
 	private void destroyOrientationListener(){
@@ -695,7 +738,9 @@ public class CameraActivity extends Activity {
 	private void takePhoto() {
 		if (mCamera != null && !isTakingPhoto) {
 			Camera.Parameters parameters = mCamera.getParameters();
-			parameters.setRotation(changeRotation(mOrientation));
+			parameters.setRotation(getCameraRotation());
+            //parameters.setRotation(getCameraOrientation());
+            //parameters.setRotation(90);
 			mCamera.setParameters(parameters);
 			
 			if(isTimerOn){
@@ -795,9 +840,9 @@ public class CameraActivity extends Activity {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
 				isTakingPhoto = false;
-				if(isCurrentCameraFrontFacing()){
+				/*if(isCurrentCameraFrontFacing()){
 					data = FixFrontCamPhoto(CameraActivity.this, data, currentCamera);
-				}
+				}*/
 				
 				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 				
@@ -820,7 +865,7 @@ public class CameraActivity extends Activity {
 		};
 	}
 	
-	public static byte[] FixFrontCamPhoto(Activity activity, byte[] data, int cameraID) {
+	public byte[] FixFrontCamPhoto(Activity activity, byte[] data, int cameraID) {
 	    Matrix matrix = new Matrix();
 	    
 	    // Convert ByteArray to Bitmap
@@ -835,7 +880,8 @@ public class CameraActivity extends Activity {
 
 
 
-        matrix.postRotate(getCameraDisplayFinalOrientation(activity, cameraID, mCamera));
+        //matrix.postRotate(getCameraDisplayFinalOrientation(activity, cameraID, mCamera));
+
         Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
         bitPic.recycle();
 
@@ -866,7 +912,20 @@ public class CameraActivity extends Activity {
 		}
 		return false;
 	}
-	
+	@SuppressLint("NewApi")
+	private int getCameraOrientation(){
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
+			try{
+                Camera.CameraInfo info = new Camera.CameraInfo();
+                Camera.getCameraInfo(currentCamera, info);
+
+                return info.orientation;
+			}
+			catch(RuntimeException e){ }
+		}
+		return 0;
+	}
+
 	private int getRotationFromOrientation(int orientation){
 		int rotation = 0;
 		boolean isFrontCamera = isCurrentCameraFrontFacing();
