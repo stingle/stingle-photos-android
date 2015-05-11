@@ -1,11 +1,5 @@
 package com.fenritz.safecam;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -24,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -36,6 +31,12 @@ import android.widget.TextView;
 
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Activity para escolha de arquivos/diretorios.
@@ -153,7 +154,11 @@ public class FileDialog extends ListActivity {
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setHomeButtonEnabled(true);
 		}
-		
+
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        }
+
 		setContentView(R.layout.file_dialog_main);
 		
 		IntentFilter intentFilter = new IntentFilter();

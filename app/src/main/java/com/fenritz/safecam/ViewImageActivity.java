@@ -1,9 +1,5 @@
 package com.fenritz.safecam;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -34,6 +30,10 @@ import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.DecryptAndShowImage;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.NaturalOrderComparator;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ViewImageActivity extends Activity {
 
@@ -72,7 +72,11 @@ public class ViewImageActivity extends Activity {
 			getActionBar().setHomeButtonEnabled(true);
 			getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ab_bg_black));
 		}
-		
+
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        }
+
 		setContentView(R.layout.view_photo);
 
 		
