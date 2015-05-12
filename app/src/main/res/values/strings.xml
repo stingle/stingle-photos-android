@@ -146,6 +146,7 @@
     <string name="home_folder_problem_title">"Problem with SafeCamera folder"</string>
     <string name="home_folder_problem">"Main folder does not exist or is not writable. Do you want to reset main folder location?"</string>
     <string name="home_folder_incorrect">"Sorry, home folder is now pointing to non writable destination, please select valid home folder path"</string>
+    <string name="multiselect_exit">"Exit Multi Select"</string>
 
     
     <!-- File Dialog -->

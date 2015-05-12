@@ -1437,35 +1437,7 @@ public class GalleryActivity extends Activity {
 
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         	if (multiSelectModeActive) {
-	        	switch(item.getItemId()){
-	        		case R.id.decrypt:
-    					decryptSelected();
-	        			break;
-	        		case R.id.share:
-    					Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
-    						@Override
-    						public void onFinish() {
-    							super.onFinish();
-    							refreshList();
-    						}
-    					});
-	        			break;
-	        		case R.id.move:
-    					moveSelected();
-	        			break;
-	        		case R.id.delete:
-    					deleteSelected();
-	        			break;
-	        		case R.id.select_all:
-	    				selectedFiles.clear();
-	    				selectedFiles.addAll(files);
-	    				galleryAdapter.notifyDataSetChanged();
-	    				return true;
-	        		case R.id.deselect_all:
-	    				selectedFiles.clear();
-	    				galleryAdapter.notifyDataSetChanged();
-	    				return true;
-	        	}
+	        	return performMenuAction(item);
         	}
             return true;
         }
@@ -1486,7 +1458,13 @@ public class GalleryActivity extends Activity {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		if (Build.VERSION.SDK_INT < 11 && !sendBackDecryptedFile) {
-			getMenuInflater().inflate(R.menu.gallery_menu, menu);
+            menu.clear();
+            if(multiSelectModeActive){
+                getMenuInflater().inflate(R.menu.gallery_menu_multiselect, menu);
+            }
+            else {
+                getMenuInflater().inflate(R.menu.gallery_menu, menu);
+            }
 		}
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -1494,79 +1472,111 @@ public class GalleryActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
-		Intent intent = new Intent();
-		switch (item.getItemId()) {
-			case android.R.id.home:
-				if(currentPath != null && !currentPath.equals(Helpers.getHomeDir(this))){
-					changeDir((new File(currentPath)).getParent());
-				}
-				else{
-					intent.setClass(GalleryActivity.this, DashboardActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
-					finish();
-				}
-				return true;
-			case R.id.multi_select:
-				enterMultiSelect();
-				return true;
-			case R.id.goto_camera:
-				intent.setClass(GalleryActivity.this, CameraActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-				startActivity(intent);
-				finish();
-				return true;
-			case R.id.add_new_folder:
-				AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-				builder.setTitle(getString(R.string.new_folder));
-				builder.setMessage(getString(R.string.enter_new_folder_name));
-				final EditText input = new EditText(GalleryActivity.this);
-				builder.setView(input);
-				builder.setPositiveButton(getString(R.string.create), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						File newFolder = new File(currentPath + "/" + Helpers.getNextAvailableFilePrefix(currentPath) + Helpers.encryptString(GalleryActivity.this, input.getText().toString()));
-						if(newFolder.mkdir()){
-							Toast.makeText(GalleryActivity.this, getString(R.string.success_created), Toast.LENGTH_LONG).show();
-						}
-						else{
-							Toast.makeText(GalleryActivity.this, getString(R.string.failed_create_dir), Toast.LENGTH_LONG).show();
-						}
-						refreshList();
-					}
-				});
-				builder.setNegativeButton(getString(R.string.cancel), null);
-				AlertDialog dialog = builder.create();
-				dialog.show();
-				return true;
-			case R.id.importBtn:
-				importClick();
-				return true;
-			case R.id.select_all:
-				enterMultiSelect();
-				selectedFiles.clear();
-				selectedFiles.addAll(files);
-				galleryAdapter.notifyDataSetChanged();
-				return true;
-			case R.id.change_password:
-				intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);
-				startActivity(intent);
-				return true;
-			case R.id.settings:
-				intent.setClass(GalleryActivity.this, SettingsActivity.class);
-				startActivity(intent);
-				return true;
-			case R.id.read_security:
-				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));
-				startActivity(browserIntent);
-				return true;
-			case R.id.logout:
-				Helpers.logout(GalleryActivity.this);
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
-		}
+        return performMenuAction(item);
 	}
 
-	
+	private boolean performMenuAction(MenuItem item){
+        boolean returnVal = true;
+
+        Intent intent = new Intent();
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if(currentPath != null && !currentPath.equals(Helpers.getHomeDir(this))){
+                    changeDir((new File(currentPath)).getParent());
+                }
+                else{
+                    intent.setClass(GalleryActivity.this, DashboardActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                    finish();
+                }
+                break;
+            case R.id.multi_select:
+                enterMultiSelect();
+                break;
+            case R.id.multiselect_exit:
+                exitMultiSelect();
+                break;
+            case R.id.goto_camera:
+                intent.setClass(GalleryActivity.this, CameraActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.add_new_folder:
+                AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
+                builder.setTitle(getString(R.string.new_folder));
+                builder.setMessage(getString(R.string.enter_new_folder_name));
+                final EditText input = new EditText(GalleryActivity.this);
+                builder.setView(input);
+                builder.setPositiveButton(getString(R.string.create), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        File newFolder = new File(currentPath + "/" + Helpers.getNextAvailableFilePrefix(currentPath) + Helpers.encryptString(GalleryActivity.this, input.getText().toString()));
+                        if(newFolder.mkdir()){
+                            Toast.makeText(GalleryActivity.this, getString(R.string.success_created), Toast.LENGTH_LONG).show();
+                        }
+                        else{
+                            Toast.makeText(GalleryActivity.this, getString(R.string.failed_create_dir), Toast.LENGTH_LONG).show();
+                        }
+                        refreshList();
+                    }
+                });
+                builder.setNegativeButton(getString(R.string.cancel), null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                break;
+            case R.id.importBtn:
+                importClick();
+                break;
+            case R.id.select_all:
+                enterMultiSelect();
+                selectedFiles.clear();
+                selectedFiles.addAll(files);
+                galleryAdapter.notifyDataSetChanged();
+                break;
+            case R.id.deselect_all:
+                selectedFiles.clear();
+                galleryAdapter.notifyDataSetChanged();
+                break;
+            case R.id.change_password:
+                intent.setClass(GalleryActivity.this, ChangePasswordActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.settings:
+                intent.setClass(GalleryActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.read_security:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));
+                startActivity(browserIntent);
+                break;
+            case R.id.logout:
+                Helpers.logout(GalleryActivity.this);
+                break;
+            case R.id.decrypt:
+                decryptSelected();
+                break;
+            case R.id.share:
+                Helpers.share(GalleryActivity.this, selectedFiles, new OnAsyncTaskFinish() {
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        refreshList();
+                    }
+                });
+                break;
+            case R.id.move:
+                moveSelected();
+                break;
+            case R.id.delete:
+                deleteSelected();
+                break;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        return returnVal;
+    }
 
 }
