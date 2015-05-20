@@ -84,7 +84,7 @@ public class GalleryActivity extends Activity {
 	protected static final int ACTION_DELETE_FOLDER = 0;
 
     private int pageNumber = 1;
-    private int itemsInPage = 30;
+    private int itemsInPage = 50;
     private boolean isListLoading = false;
     private boolean isReachedListEnd = false;
     private File[] currentFolderFiles;
@@ -868,7 +868,7 @@ public class GalleryActivity extends Activity {
 			}
 		}
 		else if (resultCode == Activity.RESULT_CANCELED) {
-			//refreshList();
+			refreshList();
 		}
 
 	}
