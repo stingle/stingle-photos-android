@@ -130,7 +130,7 @@
     <string name="same_password_alert">It seems that you already had SafeCamera on this device before.\nIf you want to be able to access photos that exist on this device setup with same master password that you have used before, otherwise SafeCamera will be unable to decrypt them.</string>
     <string name="understood">Understood!</string>
     <string name="forgot_password">Forgot password?</string>
-    <string name="reset_password">If you forgot your password thats very sad, because we can\'t help you to recover it. It was never stored anywhere! Sorry, that\'s the cost for absolute security. However we can reset your password so you can continue using SafeCamera, but all your existing photos will be unavailable.\n\nAre you sure you want to reset your password?</string>
+    <string name="reset_password">If you forgot your password thats very sad, because we can\'t help you to recover it. It was never stored anywhere! Sorry, that\'s the cost for absolute security. However we can reset your password so you can continue using SafeCamera, but all your existing photos will become unavailable.\n\nAre you sure you want to reset your password?</string>
     <string name="need_to_relogin">Master password in newly selected folder is different than the current one. Please login again.</string>
     <string name="secure_delete">Secure wipe files (takes longer)</string>
     <string name="internal_sd_card">"Internal SD card"</string>
