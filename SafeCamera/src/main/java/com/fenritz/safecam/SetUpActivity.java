@@ -43,7 +43,7 @@ public class SetUpActivity  extends Activity{
 				}
 			});
 			
-			if(files.length > 0){
+			if(files != null && files.length > 0){
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(getString(R.string.attention));
 				builder.setMessage(getString(R.string.same_password_alert));

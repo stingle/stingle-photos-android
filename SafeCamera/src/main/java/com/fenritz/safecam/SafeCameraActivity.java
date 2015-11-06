@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,6 +26,9 @@ import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.PRNGFixes;
+
+import org.whispersystems.curve25519.Curve25519;
+import org.whispersystems.curve25519.Curve25519KeyPair;
 
 public class SafeCameraActivity extends Activity {
 
@@ -90,7 +94,18 @@ public class SafeCameraActivity extends Activity {
 				return false;
 			}
 		});
-		
+
+		Curve25519 cipher = Curve25519.getInstance(Curve25519.JAVA);
+		if(cipher.isNative()){
+			Log.d("qaq", "native");
+		}
+		else{
+			Log.d("qaq", "not native");
+		}
+		Curve25519KeyPair keyPair = cipher.generateKeyPair();
+
+		Log.d("qaq", "PriveKey - " + keyPair.getPrivateKey().toString());
+
 		displayVersionName();
 		
 		if(extraData != null && extraData.getBoolean("wentToLoginToProceed", false)){

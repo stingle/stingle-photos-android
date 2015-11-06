@@ -2,6 +2,48 @@
 <items version="2" >
 
     <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/android-support-v13.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="664aa273737f809e07c9f8b05a3868d80ad2565e">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/android-support-v13-a4cb549ad548cdc4cc70d23b04adf8451c9792d1.jar" />
+    </item>
+    <item
+        jar="/home/alex/.gradle/caches/modules-2/files-2.1/org.whispersystems/curve25519-java/0.2.4/7fa461e047c17f96ac6c6d85e66bfb399b9ab887/curve25519-java-0.2.4.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="7fa461e047c17f96ac6c6d85e66bfb399b9ab887">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/curve25519-java-0.2.4-909ae344af3a57c93849a1e4e6e2537385a19d8d.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/Sanselan.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="31398094b3a1d1b387992a3535afb7f308e17edc">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/Sanselan-9e2dd6f6ee6566e6c989074204fcd0fd63aef1de.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/exploded-aar/org.whispersystems/curve25519-android/0.2.4/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="6f8070d4d60e8d8cbb1e75243a0085076916473d">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/classes-380cf48fc9099fe97ee8a7b316576e0547c5309b.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/android-support-v13.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="664aa273737f809e07c9f8b05a3868d80ad2565e">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/android-support-v13-a4cb549ad548cdc4cc70d23b04adf8451c9792d1.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/GoogleAdMobAdsSdk-6.0.1.jar"
+        jumboMode="false"
+        revision="22.0.0"
+        sha1="e6b52dcd6402380542cb37557bd04e06e6d7e47d">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/GoogleAdMobAdsSdk-6.0.1-bd5d82efb5bab7a04412ecd90b9610da7bfbb3eb.jar" />
+    </item>
+    <item
         jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/xmpcore.jar"
         jumboMode="false"
         revision="22.0.0"
@@ -16,6 +58,13 @@
         <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/metadata-extractor-2.6.2-aab7a34fdf22b3b54190c05063b68f2973c82c41.jar" />
     </item>
     <item
+        jar="/home/alex/.gradle/caches/modules-2/files-2.1/org.whispersystems/curve25519-java/0.2.4/7fa461e047c17f96ac6c6d85e66bfb399b9ab887/curve25519-java-0.2.4.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="7fa461e047c17f96ac6c6d85e66bfb399b9ab887">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/curve25519-java-0.2.4-909ae344af3a57c93849a1e4e6e2537385a19d8d.jar" />
+    </item>
+    <item
         jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/Sanselan.jar"
         jumboMode="false"
         revision="22.0.0"
@@ -23,18 +72,25 @@
         <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/Sanselan-9e2dd6f6ee6566e6c989074204fcd0fd63aef1de.jar" />
     </item>
     <item
-        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/android-support-v13.jar"
-        jumboMode="false"
-        revision="22.0.0"
-        sha1="664aa273737f809e07c9f8b05a3868d80ad2565e">
-        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/android-support-v13-a4cb549ad548cdc4cc70d23b04adf8451c9792d1.jar" />
-    </item>
-    <item
         jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/GoogleAdMobAdsSdk-6.0.1.jar"
         jumboMode="false"
-        revision="22.0.0"
+        revision="23.0.1"
         sha1="e6b52dcd6402380542cb37557bd04e06e6d7e47d">
         <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/GoogleAdMobAdsSdk-6.0.1-bd5d82efb5bab7a04412ecd90b9610da7bfbb3eb.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/xmpcore.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="4446353e27911a01e038da46a5a09d5c63af485b">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/xmpcore-478060a90257f0ab127547d2771dd9bf5cec0705.jar" />
+    </item>
+    <item
+        jar="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/libs/metadata-extractor-2.6.2.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="b7ea6cf71907be41ec3f3e850d07831d605eb5ce">
+        <dex dex="/home/alex/AndroidstudioProjects/safe_camera/SafeCamera/build/intermediates/pre-dexed/debug/metadata-extractor-2.6.2-aab7a34fdf22b3b54190c05063b68f2973c82c41.jar" />
     </item>
 
 </items>

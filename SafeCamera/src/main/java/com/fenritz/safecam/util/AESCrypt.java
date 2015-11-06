@@ -1,5 +1,7 @@
 package com.fenritz.safecam.util;
 
+import android.os.AsyncTask;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,8 +21,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import android.os.AsyncTask;
 
 public class AESCrypt {
 	private Cipher encryptionCipher;
@@ -68,7 +68,7 @@ public class AESCrypt {
 		if(password == null){
 			return false;
 		}
-		
+
 		// Create an 8-byte initialization vector
 		if (paramIv != null) {
 			iv = paramIv;
