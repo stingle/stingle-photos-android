@@ -1,5 +1,6 @@
 package com.fenritz.safecam;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,9 +9,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,9 +30,6 @@ import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.PRNGFixes;
 
-import org.whispersystems.curve25519.Curve25519;
-import org.whispersystems.curve25519.Curve25519KeyPair;
-
 public class SafeCameraActivity extends Activity {
 
 	public static final String DEFAULT_PREFS = "default_prefs";
@@ -41,6 +41,9 @@ public class SafeCameraActivity extends Activity {
 	public static final String LOGINS_COUNT_FOR_POPUP = "logins_count_fp";
 	public static final String DONT_SHOW_POPUP = "dont_show_popup";
 	public static final String POPUP_LATERS_COUNT = "laters_count";
+
+	public static final int REQUEST_SD_CARD_PERMISSION = 1;
+	public static final int REQUEST_CAMERA_PERMISSION = 2;
 
 	private SharedPreferences preferences;
 	
@@ -61,15 +64,13 @@ public class SafeCameraActivity extends Activity {
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
 			getActionBar().hide();
 		}
-		
-		Helpers.createFolders(this);
-		
-		Helpers.deleteTmpDir(SafeCameraActivity.this);
-		
-		Helpers.synchronizePasswordHash(this);
-		
+
+		if(requestSDCardPermission()){
+			filesystemInit();
+		}
+
 		PRNGFixes.apply();
-		
+
 		justLogin = getIntent().getBooleanExtra(ACTION_JUST_LOGIN, false);
 		extraData = getIntent().getBundleExtra(PARAM_EXTRA_DATA);
 		
@@ -86,8 +87,8 @@ public class SafeCameraActivity extends Activity {
 		((EditText) findViewById(R.id.password)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_GO) {
-					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					doLogin();
 					return true;
 				}
@@ -95,21 +96,62 @@ public class SafeCameraActivity extends Activity {
 			}
 		});
 
-		Curve25519 cipher = Curve25519.getInstance(Curve25519.JAVA);
-		if(cipher.isNative()){
-			Log.d("qaq", "native");
-		}
-		else{
-			Log.d("qaq", "not native");
-		}
-		Curve25519KeyPair keyPair = cipher.generateKeyPair();
-
-		Log.d("qaq", "PriveKey - " + keyPair.getPrivateKey().toString());
-
 		displayVersionName();
 		
 		if(extraData != null && extraData.getBoolean("wentToLoginToProceed", false)){
 			Toast.makeText(this, getString(R.string.login_to_proceed), Toast.LENGTH_LONG).show();
+		}
+	}
+
+	public boolean requestSDCardPermission(){
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+				new AlertDialog.Builder(this)
+						.setMessage(getString(R.string.sdcard_perm_explain))
+						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								ActivityCompat.requestPermissions(SafeCameraActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_SD_CARD_PERMISSION);
+							}
+						})
+						.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int which) {
+									SafeCameraActivity.this.finish();
+								}
+							}
+						)
+						.create()
+						.show();
+
+			} else {
+				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_SD_CARD_PERMISSION);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public void filesystemInit(){
+		Helpers.createFolders(this);
+
+		Helpers.deleteTmpDir(SafeCameraActivity.this);
+
+		Helpers.synchronizePasswordHash(this);
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case REQUEST_SD_CARD_PERMISSION: {
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					filesystemInit();
+
+				} else {
+					finish();
+				}
+				return;
+			}
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.fenritz.safecam;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,6 +29,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -128,7 +131,9 @@ public class CameraActivity extends Activity {
 			finish();
 			return;
 		}
-		
+
+
+
 		// Hide the window title.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -177,11 +182,8 @@ public class CameraActivity extends Activity {
 		boolean logined = Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
 
-		if(logined){
-			int lastCamId = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).getInt(SafeCameraActivity.LAST_CAM_ID, DEFAULT_CAMERA);
-			startCamera(lastCamId);
-			initOrientationListener();
-			showLastPhotoThumb();
+		if(logined && requestCameraPermission()){
+			initCamera();
 		}
 	}
 
@@ -200,7 +202,58 @@ public class CameraActivity extends Activity {
 		// important to release it when the activity is paused.
 		releaseCamera();
 	}
-	
+
+	public void initCamera(){
+		int lastCamId = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).getInt(SafeCameraActivity.LAST_CAM_ID, DEFAULT_CAMERA);
+		startCamera(lastCamId);
+		initOrientationListener();
+		showLastPhotoThumb();
+	}
+
+	public boolean requestCameraPermission(){
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+
+				new AlertDialog.Builder(this)
+						.setMessage(getString(R.string.camera_perm_explain))
+						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								ActivityCompat.requestPermissions(CameraActivity.this, new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
+							}
+						})
+						.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int which) {
+										CameraActivity.this.finish();
+									}
+								}
+						)
+						.create()
+						.show();
+
+			} else {
+				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case SafeCameraActivity.REQUEST_CAMERA_PERMISSION: {
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					initCamera();
+				}
+				else {
+					finish();
+				}
+				return;
+			}
+		}
+	}
+
 	private OnClickListener switchCamera(){
 		return new OnClickListener() {
 			public void onClick(View v) {
