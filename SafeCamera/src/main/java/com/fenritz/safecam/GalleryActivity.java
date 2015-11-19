@@ -31,7 +31,6 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -83,10 +82,6 @@ public class GalleryActivity extends Activity {
 	
 	protected static final int ACTION_DELETE_FOLDER = 0;
 
-    private int pageNumber = 1;
-    private int itemsInPage = 50;
-    private boolean isListLoading = false;
-    private boolean isReachedListEnd = false;
     private File[] currentFolderFiles;
 
 	private boolean multiSelectModeActive = false;
@@ -101,7 +96,6 @@ public class GalleryActivity extends Activity {
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
 	private GenerateThumbs thumbGenTask;
-	//private final FillCache fillCacheTask = new FillCache();
 
 	private BroadcastReceiver receiver;
 	
@@ -110,6 +104,8 @@ public class GalleryActivity extends Activity {
 	private Intent originalIntent = null;
 	
 	private String currentPath;
+
+	private String thumbsDir;
 	
 	private final CopyOnWriteArrayList<Dec> queue = new CopyOnWriteArrayList<Dec>();
 	
@@ -138,6 +134,8 @@ public class GalleryActivity extends Activity {
 		
 		setTitle(getString(R.string.title_gallery_for_app));
 
+		this.thumbsDir = Helpers.getThumbsDir(this);
+
 		Bundle bundle = new Bundle();
 		bundle.putParcelable("intent", getIntent());
 		bundle.putBoolean("wentToLoginToProceed", true);
@@ -157,7 +155,7 @@ public class GalleryActivity extends Activity {
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
 		photosGrid.setAdapter(galleryAdapter);
 		photosGrid.setColumnWidth(Helpers.getThumbSize(GalleryActivity.this)-10);
-		photosGrid.setOnScrollListener(getOnScrollListener());
+		//photosGrid.setOnScrollListener(getOnScrollListener());
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -316,7 +314,6 @@ public class GalleryActivity extends Activity {
                 currentFolderFiles = dir.listFiles();
 
                 if(currentFolderFiles != null) {
-                    //Arrays.sort(currentFolderFiles, new FileNameComparator());
                     Arrays.sort(currentFolderFiles, (new NaturalOrderComparator(){
                               @Override
                                public int compare(Object o1, Object o2){
@@ -329,29 +326,18 @@ public class GalleryActivity extends Activity {
             }
 
 			if(currentFolderFiles != null){
-                int startingItemNum = (pageNumber-1) * itemsInPage;
-                int endingItemNum = startingItemNum + itemsInPage;
-
-                if(endingItemNum > currentFolderFiles.length){
-                    endingItemNum = currentFolderFiles.length;
-                }
-
-                if(endingItemNum > startingItemNum){
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);
-                        }
-                    });
-                }
+				runOnUiThread(new Runnable() {
+					public void run() {
+						findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);
+					}
+				});
 
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
 
-				String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this);
 				String fileExt = getString(R.string.file_extension);
 
 
-				for (int i=startingItemNum;i<endingItemNum;i++) {
-                    File file = currentFolderFiles[i];
+				for (File file : currentFolderFiles) {
 					if(file.isDirectory() && !file.getName().startsWith(".")){
 						folders.add(file);
 					}
@@ -412,15 +398,12 @@ public class GalleryActivity extends Activity {
 		protected void onPostExecute(ArrayList<File> files) {
 			super.onPostExecute(files);
 
-			GalleryActivity.files.addAll(files);
+			GalleryActivity.files  = files;
 			
 			if(files.size() == 0 && GalleryActivity.files.size() == 0){
 				findViewById(R.id.no_files).setVisibility(View.VISIBLE);
                 findViewById(R.id.photosGrid).setVisibility(View.GONE);
 			}
-            else if(files.size() == 0 && GalleryActivity.files.size() > 0){
-                isReachedListEnd =true;
-            }
 			else{
 				findViewById(R.id.no_files).setVisibility(View.GONE);
                 findViewById(R.id.photosGrid).setVisibility(View.VISIBLE);
@@ -438,15 +421,12 @@ public class GalleryActivity extends Activity {
 
             galleryAdapter.notifyDataSetChanged();
 
-            isListLoading = false;
         }
 
 	}
 	
 	@SuppressLint("NewApi")
 	private void fillFilesList() {
-        isListLoading = true;
-
 		(new FillFilesList()).execute();
 	}
 
@@ -454,8 +434,6 @@ public class GalleryActivity extends Activity {
     private void resetListVars(){
         GalleryActivity.files.clear();
         currentFolderFiles = null;
-        pageNumber = 1;
-        isReachedListEnd = false;
         selectedFiles.clear();
         toGenerateThumbs.clear();
         noThumbs.clear();
@@ -511,11 +489,7 @@ public class GalleryActivity extends Activity {
 			thumbGenTask.cancel(true);
 			thumbGenTask = null;
 		}
-		/*if(fillCacheTask != null){
-			fillCacheTask.cancel(true);
-			fillCacheTask = null;
-		}*/
-		
+
 		decryptor.interrupt();
 	}
 
@@ -728,10 +702,7 @@ public class GalleryActivity extends Activity {
 	private void refreshList(){
         resetListVars();
 		fillFilesList();
-		//galleryAdapter.notifyDataSetChanged();
 		exitMultiSelect();
-		
-		//generateVisibleThumbs();
 	}
 	
 	private void deleteSelected() {
@@ -867,10 +838,6 @@ public class GalleryActivity extends Activity {
 				}
 			}
 		}
-		else if (resultCode == Activity.RESULT_CANCELED) {
-			refreshList();
-		}
-
 	}
 
 	private void deleteOriginalsDialog(final String[] filePaths){
@@ -1139,7 +1106,7 @@ public class GalleryActivity extends Activity {
 						layout.addView(getLabel(file));
 					}
 					else{
-						String thumbPath = Helpers.getThumbsDir(GalleryActivity.this) + "/" + Helpers.getThumbFileName(file);
+						String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(file);
 						if (toGenerateThumbs.contains(file)) {
 							ProgressBar progress = new ProgressBar(GalleryActivity.this);
 							progress.setOnClickListener(onClick);
@@ -1337,8 +1304,8 @@ public class GalleryActivity extends Activity {
 	    }
 	};
 	
-	private OnScrollListener getOnScrollListener(){
-		return new OnScrollListener() {
+	private AbsListView.OnScrollListener getOnScrollListener(){
+		return new AbsListView.OnScrollListener() {
             private static final String TAG = "EndlessScrollListener";
 
 
@@ -1350,11 +1317,6 @@ public class GalleryActivity extends Activity {
 				if(visibleItemCount >= 12){
 					currentVisibleItemCount = visibleItemCount;
 				}
-
-                if (!isReachedListEnd && !(isListLoading) && (totalItemCount - visibleItemCount) <= (firstVisibleItem)) {
-                    pageNumber++;
-                    fillFilesList();
-                }
 			}
 		};
 	}
@@ -1374,7 +1336,6 @@ public class GalleryActivity extends Activity {
 						FileInputStream inputStream = new FileInputStream(file);
 						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 
-						String thumbsDir = Helpers.getThumbsDir(GalleryActivity.this) + "/";
 						String fileName = Helpers.getThumbFileName(file);
 						String key = thumbsDir + fileName;
 						if (decryptedData != null) {
