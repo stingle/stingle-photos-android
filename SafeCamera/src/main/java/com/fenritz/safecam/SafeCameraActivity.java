@@ -1,6 +1,5 @@
 package com.fenritz.safecam;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,8 +11,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -65,10 +62,6 @@ public class SafeCameraActivity extends Activity {
 			getActionBar().hide();
 		}
 
-		if(requestSDCardPermission()){
-			filesystemInit();
-		}
-
 		PRNGFixes.apply();
 
 		justLogin = getIntent().getBooleanExtra(ACTION_JUST_LOGIN, false);
@@ -80,6 +73,11 @@ public class SafeCameraActivity extends Activity {
 			intent.setClass(SafeCameraActivity.this, SetUpActivity.class);
 			startActivity(intent);
 			finish();
+			return;
+		}
+
+		if(Helpers.requestSDCardPermission(this)){
+			filesystemInit();
 		}
 
 		((Button) findViewById(R.id.login)).setOnClickListener(login());
@@ -101,35 +99,6 @@ public class SafeCameraActivity extends Activity {
 		if(extraData != null && extraData.getBoolean("wentToLoginToProceed", false)){
 			Toast.makeText(this, getString(R.string.login_to_proceed), Toast.LENGTH_LONG).show();
 		}
-	}
-
-	public boolean requestSDCardPermission(){
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-				new AlertDialog.Builder(this)
-						.setMessage(getString(R.string.sdcard_perm_explain))
-						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								ActivityCompat.requestPermissions(SafeCameraActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_SD_CARD_PERMISSION);
-							}
-						})
-						.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int which) {
-									SafeCameraActivity.this.finish();
-								}
-							}
-						)
-						.create()
-						.show();
-
-			} else {
-				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_SD_CARD_PERMISSION);
-			}
-			return false;
-		}
-		return true;
 	}
 
 	public void filesystemInit(){

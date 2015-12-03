@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -55,7 +56,31 @@ public class SetUpActivity  extends Activity{
 		
 		((Button) findViewById(R.id.setupButton)).setOnClickListener(setup());
 	}
-	
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if(Helpers.requestSDCardPermission(this)){
+			Helpers.createFolders(this);
+		}
+	}
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case SafeCameraActivity.REQUEST_SD_CARD_PERMISSION: {
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					Helpers.createFolders(this);
+
+				} else {
+					finish();
+				}
+				return;
+			}
+		}
+	}
+
+
 	private OnClickListener setup() {
 		return new OnClickListener() {
 			public void onClick(View v) {

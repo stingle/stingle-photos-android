@@ -1,5 +1,6 @@
 package com.fenritz.safecam.util;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -20,6 +21,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -676,7 +679,7 @@ public class Helpers {
 			}
 		}
 		
-		return "zzSC-" + String.valueOf(maxNumber+1) + "_";
+		return "zzSC-" + String.valueOf(maxNumber + 1) + "_";
 	}
 	
 	public static String encryptFilename(Context context, String fileName){
@@ -992,4 +995,32 @@ public class Helpers {
             dialog.show();
         }
     }
+
+	public static boolean requestSDCardPermission(final Activity activity){
+		if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+			if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+				new AlertDialog.Builder(activity)
+						.setMessage(activity.getString(R.string.sdcard_perm_explain))
+						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+							}
+						})
+						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int which) {
+										activity.finish();
+									}
+								}
+						)
+						.create()
+						.show();
+
+			} else {
+				ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+			}
+			return false;
+		}
+		return true;
+	}
 }
