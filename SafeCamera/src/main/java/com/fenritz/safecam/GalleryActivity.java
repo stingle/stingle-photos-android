@@ -50,13 +50,20 @@ import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
-import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.CheckableLayout;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,6 +100,7 @@ public class GalleryActivity extends Activity {
 	private final ArrayList<File> selectedFiles = new ArrayList<File>();
 	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
 	private final ArrayList<File> noThumbs = new ArrayList<File>();
+	private final HashMap<String, String> foldersMap = new HashMap<String, String>();
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
 	private GenerateThumbs thumbGenTask;
@@ -300,37 +308,97 @@ public class GalleryActivity extends Activity {
 	
 	private class FillFilesList extends AsyncTask<Void, Void, ArrayList<File>> {
 
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		protected ArrayList<File> doInBackground(Void... params) {
 
-			ArrayList<File> filesToReturn = new ArrayList<File>(); 
+			ArrayList<File> filesToReturn = new ArrayList<File>();
 			
 			ArrayList<File> folders = new ArrayList<File>();
 			ArrayList<File> files = new ArrayList<File>();
+
+			boolean isDirCacheFound = false;
+			foldersMap.clear();
+			File dircacheFile = new File(currentPath + "/" + ".dirnamecache");
+			if(dircacheFile.exists()){
+				try {
+					byte[] dirCacheBytes = Helpers.getAESCrypt(GalleryActivity.this).decrypt(new FileInputStream(dircacheFile));
+					if(dirCacheBytes != null){
+							ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(dirCacheBytes));
+							foldersMap.putAll((HashMap<String, String>) objIn.readObject());
+							isDirCacheFound = true;
+					}
+				}
+				catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 
             if(currentFolderFiles == null) {
                 File dir = new File(currentPath);
                 currentFolderFiles = dir.listFiles();
 
                 if(currentFolderFiles != null) {
-                    Arrays.sort(currentFolderFiles, (new NaturalOrderComparator(){
-                              @Override
-                               public int compare(Object o1, Object o2){
-                                       return -super.compare(o1, o2);
-                               }
-                    }));
+					// Sort all files by last modified time DESC
+					Arrays.sort(currentFolderFiles, new Comparator<File>() {
+						public int compare(File f1, File f2) {
+							return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
+						}
+					});
 
-                    Arrays.sort(currentFolderFiles, new FileTypeComparator());
+					// Rebuild dir cache file if latest modified directory is earlier than cache file
+					for (File file : currentFolderFiles){
+						if(file.isDirectory()){
+							if(!file.getName().startsWith(".") && file.lastModified() > dircacheFile.lastModified()){
+								isDirCacheFound = false;
+							}
+						}
+					}
+
+					try {
+
+						if(!isDirCacheFound) {
+							// Build folder filename cache
+
+							for (File file : currentFolderFiles) {
+								if (file.isDirectory() && !file.getName().startsWith(".")) {
+									foldersMap.put(file.getName(), Helpers.decryptFilename(GalleryActivity.this, file.getName()));
+								}
+							}
+
+							ByteArrayOutputStream out = new ByteArrayOutputStream();
+							ObjectOutputStream objOut = new ObjectOutputStream(out);
+							objOut.writeObject(foldersMap);
+							objOut.close();
+
+							FileOutputStream encOut = new FileOutputStream(dircacheFile);
+							Helpers.getAESCrypt(GalleryActivity.this).encrypt(out.toByteArray(), encOut);
+
+						}
+					}
+					catch (OptionalDataException e) {
+						e.printStackTrace();
+					}
+					catch (StreamCorruptedException e) {
+						e.printStackTrace();
+					}
+					catch (IOException e) {
+						e.printStackTrace();
+					}
+
                 }
             }
 
 			if(currentFolderFiles != null){
-				runOnUiThread(new Runnable() {
-					public void run() {
-						findViewById(R.id.fillFilesProgress).setVisibility(View.VISIBLE);
-					}
-				});
 
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
 
@@ -357,7 +425,18 @@ public class GalleryActivity extends Activity {
 					}
 				}
 		
-				Collections.sort(folders);
+				Collections.sort(folders, new Comparator<File>() {
+					public int compare(File f1, File f2) {
+						String f1Filename = foldersMap.get(f1.getName());
+						String f2Filename = foldersMap.get(f2.getName());
+						if(f1Filename != null && f2Filename != null) {
+							return String.CASE_INSENSITIVE_ORDER.compare(f1Filename, f2Filename);
+						}
+						return 0;
+					}
+				});
+
+
 
 				filesToReturn.addAll(folders);
 				filesToReturn.addAll(files);
@@ -1040,31 +1119,36 @@ public class GalleryActivity extends Activity {
 		private TextView getLabel(File file){
 			TextView label = new TextView(GalleryActivity.this);
 
-            String decFilename = labelCache.get(file.getName());
-            if(decFilename != null){
-                label.setText(decFilename);
-            }
-            else{
-                boolean found = false;
-                for(Dec item : queue){
-                    if(item.fileName.equals(file.getName())){
-                        synchronized (item.labels) {
-                            item.labels.add(label);
-                        }
-                        found = true;
-                    }
-                }
+			String labelFromMap = foldersMap.get(file.getName());
+			if(labelFromMap != null){
+				label.setText(labelFromMap);
+			}
+			else {
+				String decFilename = labelCache.get(file.getName());
+				if (decFilename != null) {
+					label.setText(decFilename);
+				} else {
+					boolean found = false;
+					for (Dec item : queue) {
+						if (item.fileName.equals(file.getName())) {
+							synchronized (item.labels) {
+								item.labels.add(label);
+							}
+							found = true;
+						}
+					}
 
-                if(!found){
-                    queue.add(new Dec(file.getName(), label));
-                    if(!decryptor.isAlive()){
-                        try{
-                            decryptor.start();
-                        }
-                        catch(IllegalThreadStateException e){ }
-                    }
-                }
-            }
+					if (!found) {
+						queue.add(new Dec(file.getName(), label));
+						if (!decryptor.isAlive()) {
+							try {
+								decryptor.start();
+							} catch (IllegalThreadStateException e) {
+							}
+						}
+					}
+				}
+			}
 
 			label.setEllipsize(TruncateAt.END);
 			label.setMaxLines(2);
