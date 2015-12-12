@@ -599,13 +599,12 @@ public class CameraActivity extends Activity {
 			File[] folderFiles = dir.listFiles();
 			
 			if(folderFiles != null && folderFiles.length > 0){
-				Arrays.sort(folderFiles, (new NaturalOrderComparator(){
-					@Override
-					public int compare(Object o1, Object o2){
-						return -super.compare(o1, o2);
+				Arrays.sort(folderFiles, new Comparator<File>() {
+					public int compare(File f1, File f2) {
+						return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
 					}
-				}));
-				
+				});
+
 				for (File file : folderFiles){
 					File thumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(file));
 					if(file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()){

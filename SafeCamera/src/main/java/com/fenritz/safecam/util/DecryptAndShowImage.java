@@ -1,9 +1,11 @@
 package com.fenritz.safecam.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -23,9 +25,10 @@ import android.widget.ProgressBar;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AESCrypt.CryptoProgress;
+import com.fenritz.safecam.widget.GifDecoderView;
 import com.fenritz.safecam.widget.photoview.PhotoViewAttacher;
 
-public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
+public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 
 	private final String filePath;
 
@@ -36,27 +39,28 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	private final OnLongClickListener onLongClickListener;
 	private final MemoryCache memCache;
 	private boolean zoomable = false;
+	private boolean isGif = false;
 	private final View.OnTouchListener touchListener;
 	
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent) {
-		this(pFilePath, pParent, null, null, null, false, null);
+		this(pFilePath, pParent, null, null, null, false, null, false);
 	}
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, MemoryCache pMemCache) {
-		this(pFilePath, pParent, null, null, pMemCache, false, null);
+		this(pFilePath, pParent, null, null, pMemCache, false, null, false);
 	}
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, OnLongClickListener pOnLongClickListener) {
-		this(pFilePath, pParent, pOnClickListener, pOnLongClickListener, null, false, null);
+		this(pFilePath, pParent, pOnClickListener, pOnLongClickListener, null, false, null, false);
 	}
 	
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener) {
-		this(pFilePath, pParent, pOnClickListener, null, null, false, null);
+		this(pFilePath, pParent, pOnClickListener, null, null, false, null, false);
 	}
 
 	public DecryptAndShowImage(String pFilePath, ViewGroup pParent, OnClickListener pOnClickListener, OnLongClickListener pOnLongClickListener,
-			MemoryCache pMemCache, boolean pZoomable, View.OnTouchListener pTouchListener) {
+			MemoryCache pMemCache, boolean pZoomable, View.OnTouchListener pTouchListener, boolean pisGif) {
 		super();
 		filePath = pFilePath;
 		parent = pParent;
@@ -66,6 +70,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		zoomable = pZoomable;
 		zoomable = pZoomable;
 		touchListener = pTouchListener;
+		isGif = pisGif;
 	}
 
 	@Override
@@ -107,13 +112,13 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 	}
 
 	@Override
-	protected Bitmap doInBackground(Void... params) {
-		if (memCache != null) {
+	protected byte[] doInBackground(Void... params) {
+		/*if (memCache != null) {
 			Bitmap cachedBitmap = memCache.get(filePath);
 			if (cachedBitmap != null) {
 				return cachedBitmap;
 			}
-		}
+		}*/
 		
 		
 		File thumbFile = new File(filePath);
@@ -129,30 +134,20 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 					}
 				};
 
-				byte[] decryptedData = Helpers.getAESCrypt(parent.getContext()).decrypt(input, progress, this);
+				byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, progress, this);
 
 				if (decryptedData != null) {
+					return decryptedData;
+
 					
-					WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-					DisplayMetrics metrics = new DisplayMetrics();
-					wm.getDefaultDisplay().getMetrics(metrics);
-					
-					int size;
-					if(metrics.widthPixels <= metrics.heightPixels){
-						size = (int) Math.floor(metrics.widthPixels * 2);
-					}
-					else{
-						size = (int) Math.floor(metrics.heightPixels * 2);
-					}
-					
-					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, size);
-					decryptedData = null;
+
+					/*decryptedData = null;
 					if (bitmap != null) {
 						if (memCache != null) {
 							memCache.put(filePath, bitmap);
 						}
 						return bitmap;
-					}
+					}*/
 
 				}
 				else {
@@ -170,58 +165,103 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, Bitmap> {
 		return null;
 	}
 
+	private int getSize(){
+		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics metrics = new DisplayMetrics();
+		wm.getDefaultDisplay().getMetrics(metrics);
+
+		int size;
+		if(metrics.widthPixels <= metrics.heightPixels){
+			size = (int) Math.floor(metrics.widthPixels * 2);
+		}
+		else{
+			size = (int) Math.floor(metrics.heightPixels * 2);
+		}
+
+		return size;
+	}
+
 	@SuppressLint("NewApi")
 	@Override
-	protected void onPostExecute(Bitmap bitmap) {
+	protected void onPostExecute(byte[] bitmap) {
 		super.onPostExecute(bitmap);
 
-		ImageView image = new ImageView(context);
-		PhotoViewAttacher attacher = null;
-		if (zoomable) {
-			attacher = new PhotoViewAttacher(image);
-			if(touchListener != null){
-				parent.setOnTouchListener(touchListener);
-			}
-			if (onClickListener != null) {
-				attacher.setOnClickListener(onClickListener);
-			}
-		}
-		else {
-			if(touchListener != null){
-				image.setOnTouchListener(touchListener);
-			}
-			
-			if (onClickListener != null) {
-				image.setOnClickListener(onClickListener);
-			}
-		}
-
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-		image.setLayoutParams(params);
 
-		if (bitmap != null) {
-			image.setImageBitmap(bitmap);
+		if(isGif){
+			InputStream stream = new ByteArrayInputStream(bitmap);
+			GifDecoderView gifMovie = new GifDecoderView(context, stream);
+
+			if(touchListener != null){
+				gifMovie.setOnTouchListener(touchListener);
+			}
+
+			if (onClickListener != null) {
+				gifMovie.setOnClickListener(onClickListener);
+			}
+
+			gifMovie.setLayoutParams(params);
+			gifMovie.setPadding(3, 3, 3, 3);
+
+			if (onLongClickListener != null) {
+				gifMovie.setOnLongClickListener(onLongClickListener);
+			}
+
+			if(progressBar != null){
+				parent.removeView(progressBar);
+			}
+
+			parent.addView(gifMovie);
 		}
 		else {
-			image.setImageResource(R.drawable.no);
-		}
-		
-		image.setPadding(3, 3, 3, 3);
+			ImageView image = new ImageView(context);
+			PhotoViewAttacher attacher = null;
+			if (zoomable) {
+				attacher = new PhotoViewAttacher(image);
+				if(touchListener != null){
+					parent.setOnTouchListener(touchListener);
+				}
+				if (onClickListener != null) {
+					attacher.setOnClickListener(onClickListener);
+				}
+			}
+			else {
+				if(touchListener != null){
+					image.setOnTouchListener(touchListener);
+				}
 
-		if (onLongClickListener != null) {
-			image.setOnLongClickListener(onLongClickListener);
+				if (onClickListener != null) {
+					image.setOnClickListener(onClickListener);
+				}
+			}
+
+
+			image.setLayoutParams(params);
+
+			if (bitmap != null) {
+				image.setImageBitmap(Helpers.decodeBitmap(bitmap, getSize()));
+			}
+			else {
+				image.setImageResource(R.drawable.no);
+			}
+
+			image.setPadding(3, 3, 3, 3);
+
+			if (onLongClickListener != null) {
+				image.setOnLongClickListener(onLongClickListener);
+			}
+
+			if(progressBar != null){
+				parent.removeView(progressBar);
+			}
+
+			if (zoomable && attacher!=null) {
+				attacher.update();
+			}
+
+			parent.addView(image);
 		}
 
-		if(progressBar != null){
-			parent.removeView(progressBar);
-		}
-		
-		if (zoomable && attacher!=null) {
-			attacher.update();
-		}
-		
-		parent.addView(image);
-		
 		onFinish();
 	}
 
