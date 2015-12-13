@@ -1,11 +1,9 @@
 package com.fenritz.safecam.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -25,7 +23,7 @@ import android.widget.ProgressBar;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.util.AESCrypt.CryptoProgress;
-import com.fenritz.safecam.widget.GifDecoderView;
+import com.fenritz.safecam.widget.AnimatedGifImageView;
 import com.fenritz.safecam.widget.photoview.PhotoViewAttacher;
 
 public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
@@ -186,11 +184,12 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 	protected void onPostExecute(byte[] bitmap) {
 		super.onPostExecute(bitmap);
 
-		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
 		if(isGif){
-			InputStream stream = new ByteArrayInputStream(bitmap);
-			GifDecoderView gifMovie = new GifDecoderView(context, stream);
+			//InputStream stream = new ByteArrayInputStream(bitmap);
+			AnimatedGifImageView gifMovie = new AnimatedGifImageView(context);
+			gifMovie.setAnimatedGif(bitmap, AnimatedGifImageView.TYPE.FIT_CENTER);
 
 			if(touchListener != null){
 				gifMovie.setOnTouchListener(touchListener);

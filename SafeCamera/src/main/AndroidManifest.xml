@@ -69,7 +69,8 @@
         <activity
             android:name=".ViewImageActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_view_photo" >
+            android:label="@string/title_view_photo"
+            android:hardwareAccelerated="false">
         </activity>
         <activity
             android:name=".SetUpActivity"
