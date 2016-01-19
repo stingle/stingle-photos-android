@@ -24,7 +24,12 @@ import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.MediaActionSound;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -104,7 +109,12 @@ public class CameraActivity extends Activity {
 	private ImageButton flashButton;
 	private ImageButton timerButton;
 	private ImageView galleryButton;
-	
+
+	private MediaPlayer _shootMP;
+	private SharedPreferences sharedPrefs;
+
+	private boolean isShutterSoundEnabled = true;
+
 	private int timerTotalSeconds = 10; 
 	private int timerTimePassed = 0;
 	private boolean isTimerRunning = false;
@@ -143,7 +153,9 @@ public class CameraActivity extends Activity {
         }
 
 		setContentView(R.layout.camera);
-		
+
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
+
 		takePhotoButton = (SafeCameraButton) findViewById(R.id.take_photo);
 		takePhotoButton.setOnClickListener(takePhotoClick());
 
@@ -181,6 +193,8 @@ public class CameraActivity extends Activity {
 		this.app_is_paused = false;
 		boolean logined = Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
+
+		isShutterSoundEnabled = sharedPrefs.getBoolean("shutter_sound", true);
 
 		if(logined && requestCameraPermission()){
 			initCamera();
@@ -668,8 +682,6 @@ public class CameraActivity extends Activity {
 				return true;
 			case KeyEvent.KEYCODE_VOLUME_UP:
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
-				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
-				
 				if(sharedPrefs.getBoolean("volume_take_photo", true)){
 					takePhoto();
 					return true;
@@ -687,7 +699,6 @@ public class CameraActivity extends Activity {
 			return true;
 		}
 		
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
 		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", true);
 		
 		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
@@ -705,7 +716,6 @@ public class CameraActivity extends Activity {
 			return true;
 		}
 		
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
 		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", true);
 		
 		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
@@ -806,7 +816,6 @@ public class CameraActivity extends Activity {
 					((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.VISIBLE);
 					timerTimePassed = 0;
 					
-					SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
 					timerTotalSeconds = Integer.valueOf(sharedPrefs.getString("timerDuration", "10"));
 					
 					isTimerRunning = true;
@@ -891,11 +900,44 @@ public class CameraActivity extends Activity {
 		}
 	}
 
+	@SuppressLint("NewApi")
+	private void shootSound()
+	{
+		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
+			MediaActionSound sound = new MediaActionSound();
+			sound.play(MediaActionSound.SHUTTER_CLICK);
+		}
+		else {
+			AudioManager meng = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+			int volume = meng.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+
+			if (volume != 0) {
+				if (_shootMP == null) {
+					Uri soundUri = Uri.parse("file:///system/media/audio/ui/camera_click.ogg");
+					File file = new File(soundUri.getPath());
+					if (file.exists()) {
+						_shootMP = MediaPlayer.create(this, soundUri);
+					} else {
+						_shootMP = MediaPlayer.create(this, R.raw.camera_click);
+					}
+				}
+				if (_shootMP != null)
+					_shootMP.start();
+			}
+		}
+
+	}
+
 	private PictureCallback getPictureCallback() {
 
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
+				if(isShutterSoundEnabled) {
+					shootSound();
+				}
+
+
 				isTakingPhoto = false;
 				/*if(isCurrentCameraFrontFacing()){
 					data = FixFrontCamPhoto(CameraActivity.this, data, currentCamera);
@@ -1606,16 +1648,15 @@ public class CameraActivity extends Activity {
 			return;
 		}
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final float scale = getResources().getDisplayMetrics().density;
-		if( mCamera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_3x3") ) {
+		if( mCamera != null && sharedPrefs.getString("preference_grid", "preference_grid_none").equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
 			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
 		}
-		if( mCamera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_4x2") ) {
+		if( mCamera != null && sharedPrefs.getString("preference_grid", "preference_grid_none").equals("preference_grid_4x2") ) {
 			p.setColor(Color.GRAY);
 			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);

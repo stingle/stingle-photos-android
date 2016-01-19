@@ -48,6 +48,12 @@
     	    android:title="@string/volume_take_photo"
     	    android:summary="@string/volume_take_photo_desc"
     	    android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="shutter_sound"
+            android:title="@string/shutter_sound"
+            android:summary="@string/shutter_sound_desc"
+            android:defaultValue="true" />
 		
 		<ListPreference 
             android:key="timerDuration"
