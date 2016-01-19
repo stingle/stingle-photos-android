@@ -34,6 +34,7 @@ import com.fenritz.safecam.util.NaturalOrderComparator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class ViewImageActivity extends Activity {
 
@@ -231,7 +232,12 @@ public class ViewImageActivity extends Activity {
 	
 	@SuppressLint("NewApi")
 	private void showImage(File photo){
-		DecryptAndShowImage task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener){
+		String realFilename = Helpers.decryptFilename(ViewImageActivity.this, photo.getName());
+		boolean isGif = false;
+		if(realFilename.endsWith(".gif")){
+			isGif = true;
+		}
+		DecryptAndShowImage task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener, isGif){
 			@Override
 			protected void onFinish() {
 				super.onFinish();
@@ -243,7 +249,7 @@ public class ViewImageActivity extends Activity {
 		taskStack.add(task);
 		
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-			getActionBar().setTitle(Helpers.decryptFilename(ViewImageActivity.this, photo.getName()));
+			getActionBar().setTitle(realFilename);
 		}
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
 	}
@@ -253,13 +259,12 @@ public class ViewImageActivity extends Activity {
 		File dir = new File(currentPath);
 		File[] folderFiles = dir.listFiles();
 
-		Arrays.sort(folderFiles, (new NaturalOrderComparator(){
-			@Override
-			public int compare(Object o1, Object o2){
-				return -super.compare(o1, o2);
+		Arrays.sort(folderFiles, new Comparator<File>() {
+			public int compare(File f1, File f2) {
+				return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
 			}
-		}));
-		
+		});
+
 		files.clear();
 		
 		int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
