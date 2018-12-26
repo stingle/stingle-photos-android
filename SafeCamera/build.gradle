@@ -7,7 +7,7 @@ android {
         }
     }
     compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "com.fenritz.safecam"
         minSdkVersion 8
@@ -33,9 +33,9 @@ android {
 }
 
 dependencies {
-    compile files('libs/Sanselan.jar')
-    compile files('libs/metadata-extractor-2.6.2.jar')
-    compile files('libs/xmpcore.jar')
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:support-v4:23.1.1'
+    implementation files('libs/Sanselan.jar')
+    implementation files('libs/metadata-extractor-2.6.2.jar')
+    implementation files('libs/xmpcore.jar')
+    implementation 'com.android.support:appcompat-v7:23.1.1'
+    implementation 'com.android.support:support-v4:23.1.1'
 }
