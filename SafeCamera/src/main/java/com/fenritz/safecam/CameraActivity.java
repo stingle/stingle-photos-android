@@ -34,8 +34,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -225,15 +223,15 @@ public class CameraActivity extends Activity {
 	}
 
 	public boolean requestCameraPermission(){
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+		if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
-			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+			if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
 
 				new AlertDialog.Builder(this)
 						.setMessage(getString(R.string.camera_perm_explain))
 						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
-								ActivityCompat.requestPermissions(CameraActivity.this, new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
+								requestPermissions(new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
 							}
 						})
 						.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -246,7 +244,7 @@ public class CameraActivity extends Activity {
 						.show();
 
 			} else {
-				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
+				requestPermissions(new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
 			}
 			return false;
 		}

@@ -215,7 +215,7 @@ public class AnimatedGifImageView extends ImageView {
                 }
                 int relTime = (int) ((now - mMovieStart) % dur);
                 mMovie.setTime(relTime);
-                canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                canvas.save();
                 canvas.scale(mScaleW, mScaleH);
                 mMovie.draw(canvas, mLeft / mScaleW, mTop / mScaleH);
                 canvas.restore();

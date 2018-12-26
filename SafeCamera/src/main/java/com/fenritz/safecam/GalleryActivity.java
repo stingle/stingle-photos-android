@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.util.LruCache;
 import android.text.TextUtils.TruncateAt;
 import android.util.SparseArray;
 import android.view.ActionMode;
@@ -70,6 +69,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import android.util.LruCache;
 
 public class GalleryActivity extends Activity {
 

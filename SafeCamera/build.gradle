@@ -6,12 +6,12 @@ android {
             storeFile file('/home/alex/Desktop/encfs/encfs/APK Signing Key/alex')
         }
     }
-    compileSdkVersion 23
+    compileSdkVersion 28
     buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "com.fenritz.safecam"
-        minSdkVersion 8
-        targetSdkVersion 23
+        minSdkVersion 23
+        targetSdkVersion 28
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_1_5
             targetCompatibility JavaVersion.VERSION_1_5
@@ -36,6 +36,4 @@ dependencies {
     implementation files('libs/Sanselan.jar')
     implementation files('libs/metadata-extractor-2.6.2.jar')
     implementation files('libs/xmpcore.jar')
-    implementation 'com.android.support:appcompat-v7:23.1.1'
-    implementation 'com.android.support:support-v4:23.1.1'
 }

@@ -2,6 +2,7 @@ package com.fenritz.safecam.util;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -21,8 +22,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -997,14 +996,14 @@ public class Helpers {
     }
 
 	public static boolean requestSDCardPermission(final Activity activity){
-		if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+		if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-			if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 				new AlertDialog.Builder(activity)
 						.setMessage(activity.getString(R.string.sdcard_perm_explain))
 						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
-								ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+								activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
 							}
 						})
 						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -1017,7 +1016,7 @@ public class Helpers {
 						.show();
 
 			} else {
-				ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
 			}
 			return false;
 		}
