@@ -1,10 +1,5 @@
 package com.fenritz.safecam.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,9 +17,13 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
 
 import com.fenritz.safecam.R;
-import com.fenritz.safecam.util.AESCrypt.CryptoProgress;
 import com.fenritz.safecam.widget.AnimatedGifImageView;
 import com.fenritz.safecam.widget.photoview.PhotoViewAttacher;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 
@@ -123,7 +122,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 		if (thumbFile.exists() && thumbFile.isFile()) {
 			try {
 				FileInputStream input = new FileInputStream(filePath);
-				AESCrypt.CryptoProgress progress = new CryptoProgress(input.getChannel().size()) {
+				CryptoProgress progress = new CryptoProgress(input.getChannel().size()) {
 					@Override
 					public void setProgress(long pCurrent) {
 						super.setProgress(pCurrent);

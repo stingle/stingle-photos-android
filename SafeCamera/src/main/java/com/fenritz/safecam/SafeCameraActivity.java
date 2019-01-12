@@ -25,7 +25,6 @@ import android.widget.Toast;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.PRNGFixes;
 
 public class SafeCameraActivity extends Activity {
 
@@ -61,8 +60,6 @@ public class SafeCameraActivity extends Activity {
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
 			getActionBar().hide();
 		}
-
-		PRNGFixes.apply();
 
 		justLogin = getIntent().getBooleanExtra(ACTION_JUST_LOGIN, false);
 		extraData = getIntent().getBundleExtra(PARAM_EXTRA_DATA);

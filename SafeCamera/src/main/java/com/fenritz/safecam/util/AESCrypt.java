@@ -511,6 +511,7 @@ public class AESCrypt {
 			return md.digest(string.getBytes("UTF-8"));
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			throw new AESCryptException("Unable to get hash");
 		}
 	}
@@ -562,34 +563,4 @@ public class AESCrypt {
         return ba;
     }
     
-    public static class CryptoProgress{
-    	private long total = 0;
-    	private long current = 0;
-    	
-    	public CryptoProgress(long pTotal){
-    		total = pTotal;
-    	}
-    	
-    	public void setProgress(long pCurrent){
-    		current = pCurrent;
-    	}
-    	
-    	public long getTotal(){
-    		return total;
-    	}
-    	
-    	public int getProgressPercents(){
-    		if(total == 0){
-    			return 0;
-    		}
-    		return (int) (current * 100 / total);
-    	}
-    	
-    	public long getProgress(){
-    		if(total == 0){
-    			return 0;
-    		}
-    		return current;
-    	}
-    }
 }

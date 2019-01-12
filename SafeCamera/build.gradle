@@ -12,10 +12,6 @@ android {
         applicationId "com.fenritz.safecam"
         minSdkVersion 23
         targetSdkVersion 28
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_5
-            targetCompatibility JavaVersion.VERSION_1_5
-        }
     }
     buildTypes {
         release {
@@ -36,4 +32,7 @@ dependencies {
     implementation files('libs/Sanselan.jar')
     implementation files('libs/metadata-extractor-2.6.2.jar')
     implementation files('libs/xmpcore.jar')
+    //implementation files('libs/Robosodium.aar')
+    implementation "com.goterl.lazycode:lazysodium-android:3.5.0@aar"
+    implementation "net.java.dev.jna:jna:4.5.2@aar"
 }

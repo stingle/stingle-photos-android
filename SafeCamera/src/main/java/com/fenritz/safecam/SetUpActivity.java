@@ -5,7 +5,10 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -14,10 +17,14 @@ import android.widget.EditText;
 
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
+import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.Helpers;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 public class SetUpActivity  extends Activity{
 
@@ -55,6 +62,173 @@ public class SetUpActivity  extends Activity{
 		}
 		
 		((Button) findViewById(R.id.setupButton)).setOnClickListener(setup());
+
+
+
+		/*LazySodiumAndroid ls = new LazySodiumAndroid(new SodiumAndroid());
+
+		Box.Lazy box = (Box.Lazy) ls;*/
+        /*
+        try {
+			// This is our keypair.
+			KeyPair myKeyPair = box.cryptoBoxKeypair();
+			KeyPair hisKeyPair = box.cryptoBoxKeypair();
+
+			String myPrivate = myKeyPair.getSecretKey().getAsHexString();
+			String myPublic = myKeyPair.getPublicKey().getAsHexString();
+
+			String hisPrivate = hisKeyPair.getSecretKey().getAsHexString();
+			String hisPublic = hisKeyPair.getPublicKey().getAsHexString();
+
+			KeyPair encryptionKeyPair = new KeyPair(hisKeyPair.getPublicKey(), myKeyPair.getSecretKey());
+
+			byte[] nonce = ls.randomBytesBuf(SecretBox.NONCEBYTES);
+
+			String cipherText = box.cryptoBoxEasy(
+					"Qaqem glxid",
+					nonce,
+					encryptionKeyPair
+			);
+
+            KeyPair decryptionKeyPair = new KeyPair(myKeyPair.getPublicKey(), hisKeyPair.getSecretKey());
+            String plainText = box.cryptoBoxOpenEasy(
+                    cipherText,
+                    nonce,
+                    decryptionKeyPair
+            );
+            Log.d("cipherText", cipherText);
+            Log.d("plainText", plainText);
+			Log.d("myPrivate", myPrivate);
+			Log.d("myPublic", myPublic);
+			Log.d("hisPrivate", hisPrivate);
+			Log.d("hisPublic", hisPublic);
+			Log.d("cypher", cipherText);
+
+			} catch (SodiumException e) {
+			e.printStackTrace();
+		}
+			*/
+		/*AEAD.Lazy aead = (AEAD.Lazy) ls;
+
+		//if(ls.cryptoAeadAES256GCMIsAvailable()) {
+		byte[] nonce = ls.randomBytesBuf(SecretBox.NONCEBYTES);
+		Key key = aead.keygen(AEAD.Method.CHACHA20_POLY1305_IETF);
+
+		String cipher = aead.encrypt("Qaqem vorid cerin", null, nonce, key, AEAD.Method.CHACHA20_POLY1305_IETF);
+
+		String plain = aead.decrypt(cipher, null, nonce, key, AEAD.Method.CHACHA20_POLY1305_IETF);
+
+		Log.d("cipherText", cipher);
+		Log.d("plainText", plain);*/
+
+		//aead.encrypt()
+
+
+		//new EncryptAndWriteFile("pic.jpg", "pic.jpg.enc", true, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
+		new EncryptAndWriteFile("pic.jpg.enc", "picDec.jpg", false, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
+
+		//new EncryptAndWriteFile("qaq.txt", "qaq.txt.enc", true, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
+		//new EncryptAndWriteFile("qaq.txt.enc", "qaqDec.txt", false, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
+
+		//new EncryptAndWriteFile("qaq.txt", "qaqik.txt").execute();
+
+		/*Log.e("qaqik", "Starting...");
+		String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+		Log.e("qaqik", path);
+		try {
+
+			FileInputStream in = new FileInputStream(new File(path + "/" + "pic.jpg"));
+			FileOutputStream out = new FileOutputStream(new File(path + "/" + "pic.jpg.enc"), false);
+
+			LazySodiumAndroid ls = new LazySodiumAndroid(new SodiumAndroid());
+			SecretStream.Lazy secretStream = (SecretStream.Lazy) ls;
+			int bufSize = 1024*4;
+			byte[] buf = new byte[bufSize];
+
+			Key key = secretStream.cryptoSecretStreamKeygen();
+			byte[] header = new byte[SecretStream.HEADERBYTES];
+
+			SecretStream.State state = secretStream.cryptoSecretStreamInitPush(header, key);
+			out.write(header);
+
+			int numRead = 0;
+			while ((numRead = in.read(buf)) >= 0) {
+				byte tag = (numRead < bufSize ? SecretStream.XCHACHA20POLY1305_TAG_FINAL : 0);
+				String enc = secretStream.cryptoSecretStreamPush(state, String.valueOf(buf), tag);
+				byte[] encBytes = enc.getBytes();
+				out.write(encBytes);
+
+
+			}
+			out.flush();
+			out.close();
+			in.close();
+		} catch (SodiumException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Log.e("qaqik", "Finished...");*/
+
+
+	}
+
+	public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
+
+		private final String inFile;
+		private final String outFile;
+		private boolean encrypt;
+		private String key = null;
+
+		public EncryptAndWriteFile(String inFile, String outFile, boolean encrypt, String key) {
+			super();
+
+			this.inFile = inFile;
+			this.outFile = outFile;
+			this.encrypt = encrypt;
+			this.key = key;
+		}
+
+
+		@Override
+		protected Void doInBackground(byte[]... params) {
+			if(isExternalStorageWritable()) {
+				try {
+
+					Log.e("qaqik", "Starting...");
+					String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+					Log.e("qaqik", path);
+					File inFileHandle = new File(path + "/" + inFile);
+					Log.d("inFile", String.valueOf(inFileHandle.length()));
+					FileInputStream in = new FileInputStream(inFileHandle);
+					FileOutputStream out = new FileOutputStream(new File(path + "/" + outFile));
+					Crypto crypto = new Crypto();
+					if(encrypt) {
+						crypto.encrypt(key, in, out);
+					}
+					else{
+						crypto.decrypt(key, in, out);
+					}
+					Log.e("qaqik", "Finished...");
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+			else{
+				Log.e("qaqik", "Not writable...");
+			}
+			return null;
+		}
+
+		public boolean isExternalStorageWritable() {
+			String state = Environment.getExternalStorageState();
+			if (Environment.MEDIA_MOUNTED.equals(state)) {
+				return true;
+			}
+			return false;
+		}
+
 	}
 
 	@Override
