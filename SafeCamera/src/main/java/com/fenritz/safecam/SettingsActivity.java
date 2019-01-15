@@ -13,7 +13,6 @@ import android.preference.PreferenceManager;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
@@ -223,13 +222,6 @@ public class SettingsActivity extends PreferenceActivity {
 	
 	protected void initFolders(String homePath){
 		Helpers.createFolders(SettingsActivity.this, homePath);
-		int result = Helpers.synchronizePasswordHash(SettingsActivity.this, homePath);
-		
-		if(result == Helpers.HASH_SYNC_UPDATED_PREF){
-			Toast.makeText(SettingsActivity.this, getString(R.string.need_to_relogin), Toast.LENGTH_LONG).show();
-			Helpers.logout(SettingsActivity.this);
-			finish();
-		}
 	}
 	
 	@Override

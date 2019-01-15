@@ -188,8 +188,9 @@ public class ChangePasswordActivity extends Activity {
 		}
 		
 		private String reencryptFilename(String oldFilename, AESCrypt crypt){
-			String decryptedFilename = Helpers.decryptFilename(ChangePasswordActivity.this, oldFilename);
-			
+			//String decryptedFilename = Helpers.decryptFilename(ChangePasswordActivity.this, oldFilename);
+			String decryptedFilename = "qaq";
+
 			Integer num = null;
 			Pattern p = Pattern.compile("^zzSC\\-\\d+\\_.+");
 			Matcher m = p.matcher(oldFilename);
@@ -285,9 +286,8 @@ public class ChangePasswordActivity extends Activity {
 				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 				String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(passwordHash + newPassword));
 				preferences.edit().putString(SafeCameraActivity.PASSWORD, loginHash).commit();
-				Helpers.writeLoginHashToFile(ChangePasswordActivity.this, loginHash);
-				
-				((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(passwordHash);
+
+				//((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(passwordHash);
 			}
 			catch (AESCryptException e1) {
 				e1.printStackTrace();

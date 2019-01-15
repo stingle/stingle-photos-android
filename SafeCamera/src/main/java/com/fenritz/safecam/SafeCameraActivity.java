@@ -22,8 +22,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecam.util.AESCrypt;
-import com.fenritz.safecam.util.AESCryptException;
+import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 
 public class SafeCameraActivity extends Activity {
@@ -102,8 +101,6 @@ public class SafeCameraActivity extends Activity {
 		Helpers.createFolders(this);
 
 		Helpers.deleteTmpDir(SafeCameraActivity.this);
-
-		Helpers.synchronizePasswordHash(this);
 	}
 
 	@Override
@@ -146,8 +143,7 @@ public class SafeCameraActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		String key = ((SafeCameraApplication) this.getApplicationContext()).getKey();
-		if(key != null){
+		if(SafeCameraApplication.getKey() != null){
 			Intent intent = new Intent();
 			intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -164,17 +160,14 @@ public class SafeCameraActivity extends Activity {
 		String savedHash = preferences.getString(PASSWORD, "");
 		String enteredPassword = ((EditText) findViewById(R.id.password)).getText().toString();
 		try{
-			String enteredPasswordHash = AESCrypt.byteToHex(AESCrypt.getHash(enteredPassword));
-			String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(AESCrypt.byteToHex(AESCrypt.getHash(enteredPassword)) + enteredPassword));
-			
-			if (!loginHash.equals(savedHash)) {
+			if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, enteredPassword)){
 				Helpers.showAlertDialog(SafeCameraActivity.this, getString(R.string.incorrect_password));
 				return;
 			}
 
-			((SafeCameraApplication) getApplication()).setKey(enteredPasswordHash);
+			SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(enteredPassword));
 		}
-		catch (AESCryptException e) {
+		catch (CryptoException e) {
 			Helpers.showAlertDialog(SafeCameraActivity.this, String.format(getString(R.string.unexpected_error), "102"));
 			e.printStackTrace();
 		}
@@ -217,8 +210,7 @@ public class SafeCameraActivity extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
                         preferences.edit().remove(SafeCameraActivity.PASSWORD).commit();
-                        Helpers.removeLoginHashFile(SafeCameraActivity.this);
-                        ((SafeCameraApplication) getApplication()).setKey(null);
+						SafeCameraApplication.setKey(null);
 
                         Intent intent = new Intent();
                         intent.setClass(SafeCameraActivity.this, SetUpActivity.class);

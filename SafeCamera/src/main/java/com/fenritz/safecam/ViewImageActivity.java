@@ -29,7 +29,6 @@ import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.DecryptAndShowImage;
 import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.NaturalOrderComparator;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -232,7 +231,7 @@ public class ViewImageActivity extends Activity {
 	
 	@SuppressLint("NewApi")
 	private void showImage(File photo){
-		String realFilename = Helpers.decryptFilename(ViewImageActivity.this, photo.getName());
+		String realFilename = Helpers.decryptFilename(photo.getPath());
 		boolean isGif = false;
 		if(realFilename.endsWith(".gif")){
 			isGif = true;
@@ -248,9 +247,7 @@ public class ViewImageActivity extends Activity {
 		task.execute();
 		taskStack.add(task);
 		
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-			getActionBar().setTitle(realFilename);
-		}
+		getActionBar().setTitle(realFilename);
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
 	}
 	

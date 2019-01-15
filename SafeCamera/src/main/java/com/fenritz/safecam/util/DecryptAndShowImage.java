@@ -17,6 +17,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
 
 import com.fenritz.safecam.R;
+import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.widget.AnimatedGifImageView;
 import com.fenritz.safecam.widget.photoview.PhotoViewAttacher;
 
@@ -131,7 +132,8 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 					}
 				};
 
-				byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, progress, this);
+				//byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, progress, this);
+				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(input, progress, this);
 
 				if (decryptedData != null) {
 					return decryptedData;
@@ -156,6 +158,8 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 				e.printStackTrace();
 			}
 			catch (IOException e) {
+				e.printStackTrace();
+			} catch (CryptoException e) {
 				e.printStackTrace();
 			}
 		}

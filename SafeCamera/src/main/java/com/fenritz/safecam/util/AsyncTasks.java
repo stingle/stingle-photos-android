@@ -97,7 +97,8 @@ public class AsyncTasks {
 			if (file.exists() && file.isFile()) {
 				try {
 					FileInputStream input = new FileInputStream(file);
-					byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, null, this);
+					//byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, null, this);
+					byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(input);
 
 					if (decryptedData != null) {
 						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, size);
@@ -114,6 +115,8 @@ public class AsyncTasks {
 					}
 				}
 				catch (FileNotFoundException e) { }
+				catch (IOException e) { }
+				catch (CryptoException e) { }
 			}
 			return null;
 		}
@@ -507,7 +510,7 @@ public class AsyncTasks {
 			for (int i = 0; i < filesToDecrypt.size(); i++) {
 				File file = filesToDecrypt.get(i);
 				if (file.exists() && file.isFile()) {
-					String destFileName = Helpers.decryptFilename(activity, file.getName());
+					String destFileName = Helpers.decryptFilename(file.getPath());
 					
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
@@ -614,7 +617,7 @@ public class AsyncTasks {
 			for (File file : files) {
 				try {
 					FileInputStream inputStream = new FileInputStream(file);
-					String tmpFilename = Helpers.decryptFilename(activity, file.getName());
+					String tmpFilename = Helpers.decryptFilename(file.getPath());
 					String tmpFilePath = Helpers.getNewDestinationPath(activity, Helpers.getHomeDir(activity) + "/.tmp/", tmpFilename, newCrypt);
 					
 					File tmpFile = new File(tmpFilePath);
@@ -843,7 +846,7 @@ public class AsyncTasks {
 					try {
 						FileInputStream inputStream = new FileInputStream(origFile);
 
-						String dstFilename = Helpers.decryptFilename(activity, origFile.getName(), newCrypt);
+						String dstFilename = Helpers.decryptFilename(origFile.getPath());
 						String destFilePath = Helpers.getNewDestinationPath(activity, destinationFolder, dstFilename);
 
 						FileOutputStream outputStream = new FileOutputStream(destFilePath);

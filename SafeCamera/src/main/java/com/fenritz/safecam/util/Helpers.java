@@ -98,9 +98,7 @@ public class Helpers {
 		return checkLoginedState(activity, extraData, true);
 	}
 	public static boolean checkLoginedState(Activity activity, Bundle extraData, boolean redirect) {
-		String key = ((SafeCameraApplication) activity.getApplicationContext()).getKey();
-
-		if (key == null) {
+		if (SafeCameraApplication.getKey() == null) {
 			if(redirect){
 				doLogout(activity);
 				redirectToLogin(activity, extraData);
@@ -153,7 +151,7 @@ public class Helpers {
 		broadcastIntent.setAction("com.fenritz.safecam.ACTION_LOGOUT");
 		activity.sendBroadcast(broadcastIntent);
 
-		((SafeCameraApplication) activity.getApplication()).setKey(null);
+		SafeCameraApplication.setKey(null);
 		
 		deleteTmpDir(activity);
 	}
@@ -186,23 +184,30 @@ public class Helpers {
 	}
 
 	public static AESCrypt getAESCrypt(String pKey, Context context) {
-		String keyToUse;
+		/*String keyToUse;
 		if (pKey != null) {
 			keyToUse = pKey;
 		}
 		else{
 			// Lilitiky dmboya
 			keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
-		}
+		}*/
 
-		return new AESCrypt(keyToUse);
+		return new AESCrypt("");
 	}
 
 	public static String getFilename(Context context, String prefix) {
+		return getFilename(context, prefix, null);
+	}
+
+	public static String getFilename(Context context, String prefix, String extension) {
+		if(extension == null){
+			extension = "";
+		}
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
 		String imageFileName = prefix + timeStamp;
 
-		return imageFileName + ".jpg";
+		return imageFileName + extension;
 	}
 
 	public static void printMaxKeySizes() {
@@ -303,91 +308,6 @@ public class Helpers {
 		}
 	}
 	
-	
-	public static void writeLoginHashToFile(Context context, String hash){
-		writeLoginHashToFile(context, hash, null);
-	}
-	public static void writeLoginHashToFile(Context context, String hash, String homeDir){
-		File hashFile;
-		if(homeDir != null){
-			hashFile = new File(homeDir + "/.hash");
-		}
-		else{
-			hashFile = new File(Helpers.getHomeDir(context) + "/.hash");
-		}
-		
-		try {
-			FileOutputStream out = new FileOutputStream(hashFile);
-			out.write(hash.getBytes());
-			out.close();
-		}
-		catch (FileNotFoundException e) {}
-		catch (IOException e) {}
-	}
-	
-	public static void removeLoginHashFile(Context context){
-		File hashFile = new File(Helpers.getHomeDir(context) + "/.hash");
-		if(hashFile.exists() && hashFile.isFile()){
-			hashFile.delete();
-		}
-	}
-	
-	public static String readLoginHashFromFile(Context context){
-		return readLoginHashFromFile(context, null);
-	}
-	public static String readLoginHashFromFile(Context context, String homeDir){
-		File hashFile;
-		
-		if(homeDir != null){
-			hashFile = new File(homeDir + "/.hash");
-		}
-		else{
-			hashFile = new File(Helpers.getHomeDir(context) + "/.hash");
-		}
-		
-		if(hashFile.exists() && hashFile.isFile()){
-			try {
-				FileInputStream in = new FileInputStream(hashFile);
-				ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-				int numRead = 0;
-				byte[] buf = new byte[1024];
-				while ((numRead = in.read(buf)) >= 0) {
-					bytes.write(buf, 0, numRead);
-				}
-				in.close();
-				
-				return bytes.toString();
-			}
-			catch (FileNotFoundException e) {}
-			catch (IOException e) {}
-		}
-		
-		return null;
-	}
-	
-	
-	public static int synchronizePasswordHash(Context context){
-		return synchronizePasswordHash(context, null);
-	}
-	public static int synchronizePasswordHash(Context context, String homeDir){
-		SharedPreferences preferences = context.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Activity.MODE_PRIVATE);
-		String fileHash = readLoginHashFromFile(context, homeDir);
-		String preferenceHash = null;
-		if (preferences.contains(SafeCameraActivity.PASSWORD)){
-			preferenceHash = preferences.getString(SafeCameraActivity.PASSWORD, null);
-		}
-		
-		if((preferenceHash == null && fileHash != null) || (preferenceHash != null && fileHash != null && !preferenceHash.equals(fileHash))) {
-			preferences.edit().putString(SafeCameraActivity.PASSWORD, fileHash).commit();
-			return HASH_SYNC_UPDATED_PREF;
-		}
-		else if(preferenceHash != null && fileHash == null) {
-			writeLoginHashToFile(context, preferenceHash, homeDir);
-			return HASH_SYNC_WROTE_FILE;
-		}
-		
-		return HASH_SYNC_NOTHING_DONE;
-	}
 
 	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
@@ -400,7 +320,16 @@ public class Helpers {
 			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
-			Helpers.getAESCrypt(context).encrypt(stream.toByteArray(), out);
+			try {
+				SafeCameraApplication.getCrypto().encryptAndWriteToFile(out, stream.toByteArray(), fileName);
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (CryptoException e) {
+				e.printStackTrace();
+			}
+
+			//Helpers.getAESCrypt(context).encrypt(stream.toByteArray(), out);
 		}
 		return thumbBitmap;
 	}
@@ -626,12 +555,7 @@ public class Helpers {
 	}
 	
 	public static String getThumbFileName(String filePath){
-		try{
-			return AESCrypt.byteToHex(AESCrypt.getHash(filePath, "SHA-1"));
-		}
-		catch(AESCryptException e){
-			return filePath;
-		}
+		return SafeCameraApplication.getCrypto().byte2hex(SafeCameraApplication.getCrypto().sha256(filePath.getBytes()));
 	}
 	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
@@ -701,22 +625,28 @@ public class Helpers {
 		}
 	}
 	
-	public static String decryptFilename(Context context, String fileName){
-		return decryptFilename(context, fileName, null);
-	}
-	
-	public static String decryptFilename(Context context, String fileName, AESCrypt crypt){
+	public static String decryptFilename(String filePath){
+		try {
+			FileInputStream in = new FileInputStream(filePath);
+
+			return SafeCameraApplication.getCrypto().getFilename(in);
+		}
+		catch (IOException e){
+			return "";
+		}
+
+		/*
 		String encryptedString = fileName;
-		
+
 		int extensionIndex = fileName.indexOf(context.getString(R.string.file_extension));
 		if(extensionIndex > 0){
 			encryptedString = fileName.substring(0, extensionIndex);
 		}
-		
+
 		if(encryptedString.length() >= 4 && encryptedString.substring(0, 4).equals("zzSC")){
 			encryptedString = encryptedString.substring(fileName.indexOf("_")+1);
 		}
-		
+
 		String decryptedFilename;
 		if(crypt != null){
 			decryptedFilename = crypt.decrypt(encryptedString);
@@ -725,17 +655,17 @@ public class Helpers {
 			decryptedFilename = getAESCrypt(context).decrypt(encryptedString);
 		}
 
-		
+
 		if(decryptedFilename == null){
 			String extension = context.getString(R.string.file_extension);
-			
+
 			if(fileName.endsWith(extension)){
 				fileName = fileName.substring(0, fileName.length() - extension.length());
 			}
-			
+
 			return fileName;
 		}
-		return decryptedFilename;
+		return decryptedFilename;*/
 	}
 	
 	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
@@ -983,8 +913,6 @@ public class Helpers {
                     sharedPrefs.edit().putString("home_folder", defaultHomeDir).putString("home_folder_location", null).commit();
 
                     Helpers.createFolders(activity);
-
-                    Helpers.synchronizePasswordHash(activity);
                 }
             });
             builder.setNegativeButton(activity.getString(R.string.no), null);

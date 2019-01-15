@@ -5,26 +5,18 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fenritz.safecam.util.AESCrypt;
-import com.fenritz.safecam.util.AESCryptException;
-import com.fenritz.safecam.util.Crypto;
+import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 
 public class SetUpActivity  extends Activity{
 
@@ -125,10 +117,10 @@ public class SetUpActivity  extends Activity{
 
 
 		//new EncryptAndWriteFile("pic.jpg", "pic.jpg.enc", true, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
-		new EncryptAndWriteFile("pic.jpg.enc", "picDec.jpg", false, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
+		//new EncryptAndWriteFile("pic.jpg.enc", "picDec.jpg", false, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
 
-		//new EncryptAndWriteFile("qaq.txt", "qaq.txt.enc", true, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
-		//new EncryptAndWriteFile("qaq.txt.enc", "qaqDec.txt", false, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
+		//new EncryptAndWriteFile("test.txt", "test.txt.enc", true, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
+		//new EncryptAndWriteFile("test.txt.enc", "testDec.txt", false, "65B41D81D9D5419B3502247A4BC26DEF7E23CD6C1855E6CA67AE9BF4E72F25C0").execute();
 
 		//new EncryptAndWriteFile("qaq.txt", "qaqik.txt").execute();
 
@@ -174,7 +166,7 @@ public class SetUpActivity  extends Activity{
 
 	}
 
-	public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
+	/*public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
 
 		private final String inFile;
 		private final String outFile;
@@ -196,27 +188,22 @@ public class SetUpActivity  extends Activity{
 			if(isExternalStorageWritable()) {
 				try {
 
-					Log.e("qaqik", "Starting...");
 					String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-					Log.e("qaqik", path);
 					File inFileHandle = new File(path + "/" + inFile);
-					Log.d("inFile", String.valueOf(inFileHandle.length()));
 					FileInputStream in = new FileInputStream(inFileHandle);
 					FileOutputStream out = new FileOutputStream(new File(path + "/" + outFile));
-					Crypto crypto = new Crypto();
 					if(encrypt) {
-						crypto.encrypt(key, in, out);
+						SafeCameraApplication.getCrypto().encrypt(key, in, out);
 					}
 					else{
-						crypto.decrypt(key, in, out);
+						SafeCameraApplication.getCrypto().decrypt(key, in, out);
 					}
-					Log.e("qaqik", "Finished...");
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
 			}
 			else{
-				Log.e("qaqik", "Not writable...");
+				Log.e("debug", "Not writable...");
 			}
 			return null;
 		}
@@ -229,7 +216,7 @@ public class SetUpActivity  extends Activity{
 			return false;
 		}
 
-	}
+	}*/
 
 	@Override
 	protected void onResume() {
@@ -278,19 +265,15 @@ public class SetUpActivity  extends Activity{
 				
 				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
 				try {
-					String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(AESCrypt.byteToHex(AESCrypt.getHash(password1)) + password1));
+					String loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
 					preferences.edit().putString(SafeCameraActivity.PASSWORD, loginHash).commit();
-					Helpers.writeLoginHashToFile(SetUpActivity.this, loginHash);
+
+					SafeCameraApplication.getCrypto().generateMainKeypair(password1);
+
+					((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password1));
 				}
-				catch (AESCryptException e) {
-					Helpers.showAlertDialog(SetUpActivity.this, String.format(getString(R.string.unexpected_error), "102"));
+				catch (CryptoException e) {
 					e.printStackTrace();
-				}
-				
-				try {
-					((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(AESCrypt.byteToHex(AESCrypt.getHash(password1)));
-				}
-				catch (AESCryptException e) {
 					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.unexpected_error));
 					return;
 				}

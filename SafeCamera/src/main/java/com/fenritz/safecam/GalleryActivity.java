@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils.TruncateAt;
+import android.util.LruCache;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -47,6 +48,7 @@ import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
 import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.MemoryCache;
 import com.fenritz.safecam.widget.CheckableLayout;
@@ -69,7 +71,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import android.util.LruCache;
 
 public class GalleryActivity extends Activity {
 
@@ -328,7 +329,7 @@ public class GalleryActivity extends Activity {
 			File dircacheFile = new File(currentPath + "/" + ".dirnamecache");
 			if(dircacheFile.exists()){
 				try {
-					byte[] dirCacheBytes = Helpers.getAESCrypt(GalleryActivity.this).decrypt(new FileInputStream(dircacheFile));
+					byte[] dirCacheBytes = SafeCameraApplication.getCrypto().decryptAndReturnFile(new FileInputStream(dircacheFile));
 					if(dirCacheBytes != null){
 							ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(dirCacheBytes));
 							foldersMap.putAll((HashMap<String, String>) objIn.readObject());
@@ -339,6 +340,8 @@ public class GalleryActivity extends Activity {
 					e.printStackTrace();
 				}
 				catch (IOException e) {
+					e.printStackTrace();
+				} catch (CryptoException e) {
 					e.printStackTrace();
 				}
 			}
@@ -371,7 +374,7 @@ public class GalleryActivity extends Activity {
 
 							for (File file : currentFolderFiles) {
 								if (file.isDirectory() && !file.getName().startsWith(".")) {
-									foldersMap.put(file.getName(), Helpers.decryptFilename(GalleryActivity.this, file.getName()));
+									foldersMap.put(file.getName(), Helpers.decryptFilename(file.getPath()));
 								}
 							}
 
@@ -381,8 +384,7 @@ public class GalleryActivity extends Activity {
 							objOut.close();
 
 							FileOutputStream encOut = new FileOutputStream(dircacheFile);
-							Helpers.getAESCrypt(GalleryActivity.this).encrypt(out.toByteArray(), encOut);
-
+							SafeCameraApplication.getCrypto().encryptAndWriteToFile(encOut, out.toByteArray(), null);
 						}
 					}
 					catch (OptionalDataException e) {
@@ -393,9 +395,11 @@ public class GalleryActivity extends Activity {
 					}
 					catch (IOException e) {
 						e.printStackTrace();
+					} catch (CryptoException e) {
+						e.printStackTrace();
 					}
 
-                }
+				}
             }
 
 			if(currentFolderFiles != null){
@@ -533,7 +537,7 @@ public class GalleryActivity extends Activity {
                 String[] splittedPath = newPath.split("/");
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
                     if (splittedPath.length > 0) {
-                        getActionBar().setTitle(Helpers.decryptFilename(GalleryActivity.this, splittedPath[splittedPath.length - 1]));
+                        getActionBar().setTitle(Helpers.decryptFilename(splittedPath[splittedPath.length - 1]));
                     } else {
                         getActionBar().setTitle(getString(R.string.title_gallery));
                     }
@@ -733,11 +737,11 @@ public class GalleryActivity extends Activity {
 					relativePathItem.substring(0, relativePathItem.length()-1);
 				}
 				if(relativePathItem.length() > 0){
-					relativePath += Helpers.decryptFilename(GalleryActivity.this, relativePathItem) + "/";
+					relativePath += "qaq/";
 				}
 			}
 			
-			folderNames[count] = relativePath + Helpers.decryptFilename(GalleryActivity.this, dir.getName());
+			folderNames[count] = relativePath + Helpers.decryptFilename(dir.getPath());
 			count++;
 		}
 		spinner.setAdapter(new ArrayAdapter<String>(GalleryActivity.this, android.R.layout.simple_spinner_dropdown_item, folderNames));
@@ -1082,7 +1086,7 @@ public class GalleryActivity extends Activity {
 			CharSequence[] listEntries = getResources().getStringArray(R.array.galleryItemActions);
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-			builder.setTitle(Helpers.decryptFilename(GalleryActivity.this, file.getName()));
+			builder.setTitle(Helpers.decryptFilename(file.getPath()));
 			builder.setItems(listEntries, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int item) {
 					selectedFiles.clear();
@@ -1262,7 +1266,7 @@ public class GalleryActivity extends Activity {
 							CharSequence[] listEntries = getResources().getStringArray(R.array.galleryFolderActions);
 
 							AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-							builder.setTitle(Helpers.decryptFilename(GalleryActivity.this, file.getName()));
+							builder.setTitle(Helpers.decryptFilename(file.getPath()));
 							builder.setItems(listEntries, new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int item) {
 									selectedFiles.clear();
@@ -1338,7 +1342,8 @@ public class GalleryActivity extends Activity {
 							final Dec item = queue.get(i);
                             if(item.getType() == Dec.TYPE_IMAGE) {
                                 FileInputStream input = new FileInputStream(new File(item.getFilename()));
-                                byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
+                                byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(input);
+                                //byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
 
                                 if (decryptedData != null) {
                                     final Bitmap bitmap = Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(GalleryActivity.this));
@@ -1360,7 +1365,7 @@ public class GalleryActivity extends Activity {
                                 }
                             }
                             else if(item.getType() == Dec.TYPE_LABEL) {
-                                final String decFilename = Helpers.decryptFilename(GalleryActivity.this, item.getFilename());
+                                final String decFilename = Helpers.decryptFilename(item.getFilename());
                                 if(decFilename != null){
                                     labelCache.put(item.getFilename(), decFilename);
                                     runOnUiThread(new Runnable() {
@@ -1384,6 +1389,11 @@ public class GalleryActivity extends Activity {
 				}
 				catch (InterruptedException e) { }
 				catch (FileNotFoundException e) { }
+				catch (IOException e) {
+					e.printStackTrace();
+				} catch (CryptoException e) {
+					e.printStackTrace();
+				}
 			}
 	    }
 	};
@@ -1418,7 +1428,8 @@ public class GalleryActivity extends Activity {
 				if (file.exists() && file.isFile()) {
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
-						byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
+						//byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
+						byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(inputStream);
 
 						String fileName = Helpers.getThumbFileName(file);
 						String key = thumbsDir + fileName;
@@ -1437,6 +1448,10 @@ public class GalleryActivity extends Activity {
 						}
 					}
 					catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (CryptoException e) {
 						e.printStackTrace();
 					}
 					toGenerateThumbs.remove(file);

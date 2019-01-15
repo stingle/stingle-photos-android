@@ -58,14 +58,15 @@ import android.widget.Toast;
 import com.fenritz.safecam.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
+import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.NaturalOrderComparator;
 import com.fenritz.safecam.widget.SafeCameraButton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -940,13 +941,15 @@ public class CameraActivity extends Activity {
 					data = FixFrontCamPhoto(CameraActivity.this, data, currentCamera);
 				}*/
 				
-				String filename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
-				
+				String filenameBase = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
+				String filename = filenameBase + ".jpg";
+				String filenameEnc = filenameBase + ".sc";
+
 				String path = Helpers.getHomeDir(CameraActivity.this);
-				String newFileName = Helpers.getNextAvailableFilePrefix(path) + Helpers.encryptFilename(CameraActivity.this, filename);
-				String finalPath = path + "/" + newFileName;
+				//String newFileName = Helpers.getNextAvailableFilePrefix(path) + Helpers.encryptFilename(CameraActivity.this, filename);
+				String finalPath = path + "/" + filenameEnc;
 				
-				new EncryptAndWriteFile(finalPath).execute(data);
+				new EncryptAndWriteFile(filename, finalPath).execute(data);
 				new EncryptAndWriteThumb(CameraActivity.this, Helpers.getThumbFileName(finalPath), new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
@@ -1168,20 +1171,15 @@ public class CameraActivity extends Activity {
 
 	public class EncryptAndWriteFile extends AsyncTask<byte[], Void, Void> {
 
-		private final String filename;
+		private final String fileName;
+		private final String filePath;
 		private ProgressDialog progressDialog;
 
-		public EncryptAndWriteFile() {
-			this(null);
-		}
-
-		public EncryptAndWriteFile(String pFilename) {
+		public EncryptAndWriteFile(String fileName, String filePath) {
 			super();
-			if (pFilename == null) {
-				pFilename = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
-			}
 
-			filename = pFilename;
+			this.fileName = fileName;
+			this.filePath = filePath;
 		}
 
 		@Override
@@ -1193,10 +1191,16 @@ public class CameraActivity extends Activity {
 		@Override
 		protected Void doInBackground(byte[]... params) {
 			try {
-				FileOutputStream out = new FileOutputStream(filename);
-				Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
+				FileOutputStream out = new FileOutputStream(filePath);
+				SafeCameraApplication.getCrypto().encryptAndWriteToFile(out, params[0], fileName);
+				out.close();
+				//Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
 			}
 			catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (CryptoException e) {
 				e.printStackTrace();
 			}
 			// new EncryptAndWriteThumb(filename).execute(params[0]);
@@ -1230,7 +1234,7 @@ public class CameraActivity extends Activity {
 			super();
 			context = pContext;
 			if (pFilename == null) {
-				pFilename = Helpers.getFilename(context, Helpers.JPEG_FILE_PREFIX);
+				pFilename = Helpers.getFilename(context, Helpers.JPEG_FILE_PREFIX, ".sc");
 			}
 			if(onFinish != null){
 				this.onFinish = onFinish;
