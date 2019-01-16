@@ -98,7 +98,7 @@ public class AsyncTasks {
 				try {
 					FileInputStream input = new FileInputStream(file);
 					//byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, null, this);
-					byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(input);
+					byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
 
 					if (decryptedData != null) {
 						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, size);
@@ -518,7 +518,8 @@ public class AsyncTasks {
 						String finalWritePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, destFileName);
 						FileOutputStream outputStream = new FileOutputStream(new File(finalWritePath));
 
-						Helpers.getAESCrypt(activity).decrypt(inputStream, outputStream, null, this);
+						SafeCameraApplication.getCrypto().decryptFile(inputStream, outputStream, null, this);
+						//Helpers.getAESCrypt(activity).decrypt(inputStream, outputStream, null, this);
 
 						publishProgress(i+1);
 						File decryptedFile = new File(finalWritePath);
@@ -526,6 +527,8 @@ public class AsyncTasks {
 						decryptedFiles.add(decryptedFile);
 					}
 					catch (FileNotFoundException e) { }
+					catch (IOException e) {	}
+					catch (CryptoException e) { }
 				}
 
 				if (isCancelled()) {
@@ -718,7 +721,8 @@ public class AsyncTasks {
 
 						FileOutputStream outputStream = new FileOutputStream(destFilePath);
 
-						Helpers.getAESCrypt(activity).encrypt(inputStream, outputStream, null, this);
+						SafeCameraApplication.getCrypto().encryptFile(inputStream, outputStream, origFile.getName(), origFile.length());
+						//Helpers.getAESCrypt(activity).encrypt(inputStream, outputStream, null, this);
 						
 						File destFile = new File(destFilePath);
 						String fileName = Helpers.getThumbFileName(destFile);
@@ -742,6 +746,8 @@ public class AsyncTasks {
 						e.printStackTrace();
 					}
 					catch (IOException e) {
+						e.printStackTrace();
+					} catch (CryptoException e) {
 						e.printStackTrace();
 					}
 				}

@@ -159,7 +159,6 @@ public class GalleryActivity extends Activity {
 	protected void startupActions(){
 		currentPath = Helpers.getHomeDir(this);
         resetListVars();
-		fillFilesList();
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
 		photosGrid.setAdapter(galleryAdapter);
@@ -180,6 +179,25 @@ public class GalleryActivity extends Activity {
 		registerReceiver(receiver, intentFilter);
 
 		handleIntentFilters(getIntent());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if(!isWentToLogin){
+			boolean logined = Helpers.checkLoginedState(this);
+			Helpers.disableLockTimer(this);
+
+			if (logined){
+				if(thumbGenTask == null) {
+					thumbGenTask = new GenerateThumbs();
+					thumbGenTask.execute(toGenerateThumbs);
+				}
+				fillFilesList();
+			}
+		}
 	}
 
 	@Override
@@ -329,7 +347,7 @@ public class GalleryActivity extends Activity {
 			File dircacheFile = new File(currentPath + "/" + ".dirnamecache");
 			if(dircacheFile.exists()){
 				try {
-					byte[] dirCacheBytes = SafeCameraApplication.getCrypto().decryptAndReturnFile(new FileInputStream(dircacheFile));
+					byte[] dirCacheBytes = SafeCameraApplication.getCrypto().decryptFile(new FileInputStream(dircacheFile));
 					if(dirCacheBytes != null){
 							ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(dirCacheBytes));
 							foldersMap.putAll((HashMap<String, String>) objIn.readObject());
@@ -384,7 +402,7 @@ public class GalleryActivity extends Activity {
 							objOut.close();
 
 							FileOutputStream encOut = new FileOutputStream(dircacheFile);
-							SafeCameraApplication.getCrypto().encryptAndWriteToFile(encOut, out.toByteArray(), null);
+							SafeCameraApplication.getCrypto().encryptFile(encOut, out.toByteArray(), null);
 						}
 					}
 					catch (OptionalDataException e) {
@@ -574,24 +592,6 @@ public class GalleryActivity extends Activity {
 		}
 
 		decryptor.interrupt();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void onResume() {
-		super.onResume();
-
-		if(!isWentToLogin){
-			boolean logined = Helpers.checkLoginedState(this);
-			Helpers.disableLockTimer(this);
-	
-			if (logined){
-				if(thumbGenTask == null) {
-					thumbGenTask = new GenerateThumbs();
-					thumbGenTask.execute(toGenerateThumbs);
-				}
-			}
-		}
 	}
 
 	@SuppressLint("NewApi")
@@ -1328,72 +1328,72 @@ public class GalleryActivity extends Activity {
 	    	while(!isInterrupted()){
 				try {
 					int size = queue.size();
-					if(size > 0){
-						
-						if(size > currentVisibleItemCount + 3){
-							for(int i = 0; i < size - (currentVisibleItemCount + 3); i++){
+					if (size > 0) {
+
+						if (size > currentVisibleItemCount + 3) {
+							for (int i = 0; i < size - (currentVisibleItemCount + 3); i++) {
 								queue.remove(queue.get(i));
 								i--;
 								size--;
 							}
 						}
-						
-						for(int i = 0; i < size; i++){
-							final Dec item = queue.get(i);
-                            if(item.getType() == Dec.TYPE_IMAGE) {
-                                FileInputStream input = new FileInputStream(new File(item.getFilename()));
-                                byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(input);
-                                //byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
 
-                                if (decryptedData != null) {
-                                    final Bitmap bitmap = Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(GalleryActivity.this));
-                                    decryptedData = null;
-                                    if (bitmap != null) {
-                                        if (memCache != null) {
-                                            memCache.put(item.getFilename(), bitmap);
-                                        }
-                                        runOnUiThread(new Runnable() {
-                                            public void run() {
-                                                if (item.images.size() > 0) {
-                                                    for (ImageView image : item.images) {
-                                                        image.setImageBitmap(bitmap);
-                                                    }
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            }
-                            else if(item.getType() == Dec.TYPE_LABEL) {
-                                final String decFilename = Helpers.decryptFilename(item.getFilename());
-                                if(decFilename != null){
-                                    labelCache.put(item.getFilename(), decFilename);
-                                    runOnUiThread(new Runnable() {
-                                        public void run() {
-                                            if (item.labels.size() > 0) {
-                                                for (TextView label : item.labels) {
-                                                    label.setText(decFilename);
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-							
-							queue.remove(item);
-							i--;
-							size--;
+						for (int i = 0; i < size; i++) {
+							final Dec item = queue.get(i);
+							try {
+								if (item.getType() == Dec.TYPE_IMAGE) {
+									FileInputStream input = new FileInputStream(new File(item.getFilename()));
+									byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
+									//byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
+
+									if (decryptedData != null) {
+										final Bitmap bitmap = Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(GalleryActivity.this));
+										decryptedData = null;
+										if (bitmap != null) {
+											if (memCache != null) {
+												memCache.put(item.getFilename(), bitmap);
+											}
+											runOnUiThread(new Runnable() {
+												public void run() {
+													if (item.images.size() > 0) {
+														for (ImageView image : item.images) {
+															image.setImageBitmap(bitmap);
+														}
+													}
+												}
+											});
+										}
+									}
+								} else if (item.getType() == Dec.TYPE_LABEL) {
+									final String decFilename = Helpers.decryptFilename(item.getFilename());
+									if (decFilename != null) {
+										labelCache.put(item.getFilename(), decFilename);
+										runOnUiThread(new Runnable() {
+											public void run() {
+												if (item.labels.size() > 0) {
+													for (TextView label : item.labels) {
+														label.setText(decFilename);
+													}
+												}
+											}
+										});
+									}
+								}
+
+								queue.remove(item);
+								i--;
+								size--;
+							}
+							catch (Exception e) {
+								queue.remove(item);
+								i--;
+								size--;
+							}
 						}
 					}
 					sleep(50);
 				}
 				catch (InterruptedException e) { }
-				catch (FileNotFoundException e) { }
-				catch (IOException e) {
-					e.printStackTrace();
-				} catch (CryptoException e) {
-					e.printStackTrace();
-				}
 			}
 	    }
 	};
@@ -1429,7 +1429,7 @@ public class GalleryActivity extends Activity {
 					try {
 						FileInputStream inputStream = new FileInputStream(file);
 						//byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
-						byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(inputStream);
+						byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(inputStream);
 
 						String fileName = Helpers.getThumbFileName(file);
 						String key = thumbsDir + fileName;

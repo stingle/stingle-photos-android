@@ -229,7 +229,7 @@ public class SetUpActivity  extends Activity{
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 		switch (requestCode) {
-			case SafeCameraActivity.REQUEST_SD_CARD_PERMISSION: {
+			case LoginActivity.REQUEST_SD_CARD_PERMISSION: {
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					Helpers.createFolders(this);
 
@@ -263,10 +263,10 @@ public class SetUpActivity  extends Activity{
 					return;
 				}
 				
-				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 				try {
 					String loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
-					preferences.edit().putString(SafeCameraActivity.PASSWORD, loginHash).commit();
+					preferences.edit().putString(SafeCameraApplication.PASSWORD, loginHash).commit();
 
 					SafeCameraApplication.getCrypto().generateMainKeypair(password1);
 

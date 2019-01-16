@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.fenritz.safecam.util.Helpers;
 
@@ -28,9 +27,7 @@ public class DashboardActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		//requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        }
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
 		setContentView(R.layout.dashboard);
 		
@@ -71,19 +68,6 @@ public class DashboardActivity extends Activity {
 				startActivity(intent);
 			}
 		});
-		
-		TextView freeVersionText = (TextView)findViewById(R.id.free_version_text);
-		
-		if(Helpers.isDemo(DashboardActivity.this)){
-		    if(freeVersionText != null){
-		    	freeVersionText.setVisibility(View.VISIBLE);
-		    }
-		}
-		else{
-			if(freeVersionText != null){
-				freeVersionText.setVisibility(View.GONE);
-			}
-		}
 	}
 	
 
@@ -101,7 +85,7 @@ public class DashboardActivity extends Activity {
 	}
 
 	private void showPopup(){
-		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		final SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(DashboardActivity.this);
 		builder.setTitle(getString(R.string.popup_title));
@@ -111,18 +95,18 @@ public class DashboardActivity extends Activity {
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				intent.setData(Uri.parse("market://details?id=" + getString(R.string.main_package_name)));
 				startActivity(intent);
-				preferences.edit().putBoolean(SafeCameraActivity.DONT_SHOW_POPUP, true).commit();
+				preferences.edit().putBoolean(LoginActivity.DONT_SHOW_POPUP, true).commit();
 			}
 		});
 		builder.setNegativeButton(getString(R.string.later), new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				int latersCount = preferences.getInt(SafeCameraActivity.POPUP_LATERS_COUNT, 0);
+				int latersCount = preferences.getInt(LoginActivity.POPUP_LATERS_COUNT, 0);
 				latersCount++;
 				
 				if(latersCount >= Integer.valueOf(getString(R.string.popup_laters_limit))){
-					preferences.edit().putBoolean(SafeCameraActivity.DONT_SHOW_POPUP, true).commit();
+					preferences.edit().putBoolean(LoginActivity.DONT_SHOW_POPUP, true).commit();
 				}
-				preferences.edit().putInt(SafeCameraActivity.POPUP_LATERS_COUNT, latersCount).commit();
+				preferences.edit().putInt(LoginActivity.POPUP_LATERS_COUNT, latersCount).commit();
 			}
 		});
 		AlertDialog dialog = builder.create();
@@ -133,7 +117,6 @@ public class DashboardActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
 
         Helpers.checkIsMainFolderWritable(this);
@@ -157,9 +140,6 @@ public class DashboardActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.dashborad_menu, menu);
-		if(!Helpers.isDemo(DashboardActivity.this)){
-			menu.removeItem(R.id.go_pro);
-		}
         return super.onCreateOptionsMenu(menu);
 	}
 
@@ -177,11 +157,6 @@ public class DashboardActivity extends Activity {
 				intent = new Intent();
 				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
 				startActivity(intent);
-				return true;
-			case R.id.go_pro:
-				 intent = new Intent(Intent.ACTION_VIEW);
-				 intent.setData(Uri.parse("market://details?id=" + getString(R.string.key_package_name)));
-				 startActivity(intent);
 				return true;
 			case R.id.read_security:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));

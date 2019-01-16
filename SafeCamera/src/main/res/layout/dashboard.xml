@@ -44,16 +44,6 @@
 	    android:layout_gravity="center" />
 
 	<TextView
-	    android:id="@+id/free_version_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:text="@string/free_version_text"
-        android:gravity="center"
-        android:autoLink="web"
-        android:textSize="12sp"
-        android:paddingBottom="2dp" />
-	<TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"

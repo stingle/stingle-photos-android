@@ -133,7 +133,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 				};
 
 				//byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, progress, this);
-				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptAndReturnFile(input, progress, this);
+				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input, progress, this);
 
 				if (decryptedData != null) {
 					return decryptedData;

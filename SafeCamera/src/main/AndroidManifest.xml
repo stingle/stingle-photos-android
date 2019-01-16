@@ -22,7 +22,8 @@
         android:theme="@style/app_theme"
         android:allowBackup="true">
         <activity
-            android:name=".SafeCameraActivity"
+            android:name=".DashboardActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,10 +31,18 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".LoginActivity"
+            android:label="@string/login">
+        </activity>
+        <activity
             android:name=".CameraActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="Camera"
             android:screenOrientation="landscape" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".GalleryActivity"
@@ -76,11 +85,6 @@
             android:name=".SetUpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_setup" >
-        </activity>
-        <activity
-            android:name=".DashboardActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_dashboard" >
         </activity>
         <activity
             android:name=".SettingsActivity"

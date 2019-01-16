@@ -34,8 +34,7 @@ public class Crypto {
     private static final String HEADER = "SC";
     private static final int CURRENT_VERSION = 2;
 
-    protected int bufSize = 4096;
-    protected int bufDecSize = bufSize + SecretStream.ABYTES;
+    protected int bufSize = 1024*256;
 
     String PWD_SALT_FILENAME = "pwdSalt";
     String SK_NONCE_FILENAME = "skNonce";
@@ -119,7 +118,7 @@ public class Crypto {
         return false;
     }
 
-    public byte[] encryptSymmetric(byte[] key, byte[] nonce, byte[] data){
+    protected byte[] encryptSymmetric(byte[] key, byte[] nonce, byte[] data){
         if(key.length != SecretBox.KEYBYTES){
             throw new InvalidParameterException("Invalid size of the key");
         }
@@ -133,7 +132,7 @@ public class Crypto {
         return cypherText;
     }
 
-    public byte[] decryptSymmetric(byte[] key, byte[] nonce, byte[] data) throws CryptoException{
+    protected byte[] decryptSymmetric(byte[] key, byte[] nonce, byte[] data) throws CryptoException{
         if(key.length != SecretBox.KEYBYTES){
             throw new InvalidParameterException("Invalid size of the key");
         }
@@ -191,13 +190,12 @@ public class Crypto {
             encFilenameDataLength = filenameBytes.length + Box.SEALBYTES;
             byte[] encryptedFilename = new byte[encFilenameDataLength];
             so.crypto_box_seal(encryptedFilename, filenameBytes, filenameBytes.length, publicKey);
-
-            out.write(encFilenameDataLength);
+            out.write(intToByteArray(encFilenameDataLength));
             out.write(encryptedFilename);
 
         }
         else{
-            out.write(encFilenameDataLength);
+            out.write(intToByteArray(encFilenameDataLength));
         }
 
         byte[] encryptedKey = new byte[symmetricKey.length + Box.SEALBYTES];
@@ -218,8 +216,9 @@ public class Crypto {
             throw new IOException("Unsupported version number: " + fileVersion);
         }
 
-        int encFilenameLength = in.read();
-
+        byte[] encFilenameLengthBytes = new byte[4];
+        in.read(encFilenameLengthBytes);
+        int encFilenameLength = byteArrayToInt(encFilenameLengthBytes);
         return encFilenameLength;
     }
 
@@ -247,7 +246,7 @@ public class Crypto {
 
         try {
             int encFilenameLength = readHeaderBeggining(in);
-            if(encFilenameLength > 0) {
+            if(encFilenameLength > 0 && encFilenameLength < 1024*1024*16) {
                 byte[] encFilename = new byte[encFilenameLength];
                 in.read(encFilename);
 
@@ -265,7 +264,12 @@ public class Crypto {
         return filename;
     }
 
-    public void encryptAndWriteToFile(OutputStream out, byte[] data, String filename) throws IOException, CryptoException {
+    public void encryptFile(OutputStream out, byte[] data, String filename) throws IOException, CryptoException {
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        encryptFile(in, out, filename, data.length);
+    }
+
+    public void encryptFile(InputStream in, OutputStream out, String filename, long inputLength) throws IOException, CryptoException {
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
 
         byte[] symmetricKey = new byte[AEAD.CHACHA20POLY1305_KEYBYTES];
@@ -273,37 +277,44 @@ public class Crypto {
 
         generateAndWriteHeader(out, publicKey, filename, symmetricKey);
 
-        ByteArrayInputStream in = new ByteArrayInputStream(data);
-
-        encrypt(symmetricKey, in, out, data.length);
+        encrypt(symmetricKey, in, out, inputLength);
     }
 
-    public byte[] decryptAndReturnFile(InputStream in) throws IOException, CryptoException{
-        return decryptAndReturnFile(in, null, null);
+
+    public byte[] decryptFile(InputStream in) throws IOException, CryptoException{
+        return decryptFile(in, null, null);
     }
 
-    public byte[] decryptAndReturnFile(InputStream in,CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException{
-        byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
-        byte[] privateKey = SafeCameraApplication.getKey();
-
-        byte[] symmetricKey = getFileSymmetricKey(in, publicKey, privateKey);
+    public byte[] decryptFile(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException{
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        decrypt(symmetricKey, in, out, progress, task);
+        decryptFile(in, out, progress, task);
 
         return out.toByteArray();
     }
 
+    public void decryptFile(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException{
+        long time = System.nanoTime();
+        byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
+        byte[] privateKey = SafeCameraApplication.getKey();
 
-    public boolean encrypt(byte[] key, InputStream in, OutputStream out, long inputLength) throws IOException, CryptoException {
+        byte[] symmetricKey = getFileSymmetricKey(in, publicKey, privateKey);
+
+        decrypt(symmetricKey, in, out, progress, task);
+        long time2 = System.nanoTime();
+    }
+
+
+    protected boolean encrypt(byte[] key, InputStream in, OutputStream out, long inputLength) throws IOException, CryptoException {
         return this.encrypt(key, in, out, inputLength, null, null);
     }
 
-    public boolean encrypt(byte[] key, InputStream in, OutputStream out, long inputLength, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+    protected boolean encrypt(byte[] key, InputStream in, OutputStream out, long inputLength, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
         if(key == null) {
-            key = new byte[AEAD.CHACHA20POLY1305_KEYBYTES];
-            so.crypto_secretstream_xchacha20poly1305_keygen(key);
+            throw new CryptoException("Key is empty");
         }
+
+        out.write(intToByteArray(bufSize));
 
         byte[] header = new byte[SecretStream.HEADERBYTES];
         SecretStream.State state = new SecretStream.State.ByReference();
@@ -314,7 +325,7 @@ public class Crypto {
         int count = 0;
         byte[] buf = new byte[bufSize];
         long totalRead = header.length;
-        int chunkCount = (int)Math.ceil(inputLength/(long)bufSize);
+        int chunkCount = (int)Math.ceil((double)inputLength/(double)bufSize);
         while ((numRead = in.read(buf)) >= 0) {
             count++;
             byte tag = SecretStream.XCHACHA20POLY1305_TAG_MESSAGE;
@@ -346,10 +357,21 @@ public class Crypto {
         return true;
     }
 
-    public boolean decrypt(byte[] key, InputStream in, OutputStream out) throws IOException, CryptoException {
+    protected boolean decrypt(byte[] key, InputStream in, OutputStream out) throws IOException, CryptoException {
         return this.decrypt(key, in, out, null, null);
     }
-    public boolean decrypt(byte[] key, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+    protected boolean decrypt(byte[] key, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+        //int curBufSize = bufSize;
+
+        byte[] curBufSizeBytes = new byte[4];
+        in.read(curBufSizeBytes);
+
+        int curBufSize = byteArrayToInt(curBufSizeBytes);
+
+        if(curBufSize < 1 || curBufSize > 1024*1024*16){
+            curBufSize = bufSize;
+        }
+
         byte[] header = new byte[SecretStream.HEADERBYTES];
 
         in.read(header);
@@ -361,12 +383,11 @@ public class Crypto {
         }
 
         int numRead = 0;
-        byte[] buf = new byte[bufSize];
-        byte[] bufDec = new byte[bufDecSize];
+        byte[] bufDec = new byte[curBufSize+SecretStream.ABYTES];
         long totalRead = header.length;
         byte[] tag = new byte[1];
         while ((numRead = in.read(bufDec)) >= 0) {
-            byte[] decBytes = new byte[bufSize];
+            byte[] decBytes = new byte[curBufSize];
             long[] decSize = new long[1];
             int res = so.crypto_secretstream_xchacha20poly1305_pull(state, decBytes, decSize, tag, bufDec, numRead, null, 0);
 
@@ -389,7 +410,6 @@ public class Crypto {
                 }
             }
         }
-
         out.close();
         in.close();
 
@@ -411,5 +431,19 @@ public class Crypto {
 
     public byte[] hex2byte(String data){
         return ls.sodiumHex2Bin(data);
+    }
+
+    public byte[] intToByteArray(int a){
+        byte[] ret = new byte[4];
+        ret[3] = (byte) (a & 0xFF);
+        ret[2] = (byte) ((a >> 8) & 0xFF);
+        ret[1] = (byte) ((a >> 16) & 0xFF);
+        ret[0] = (byte) ((a >> 24) & 0xFF);
+        return ret;
+    }
+
+    public int byteArrayToInt(byte[] b)
+    {
+        return (b[3] & 0xFF) + ((b[2] & 0xFF) << 8) + ((b[1] & 0xFF) << 16) + ((b[0] & 0xFF) << 24);
     }
 }

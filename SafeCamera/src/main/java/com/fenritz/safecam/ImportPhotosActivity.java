@@ -148,13 +148,6 @@ public class ImportPhotosActivity extends Activity {
 		private void toggleCheckboxSelected(CheckBox cb){
 			int id = Integer.valueOf(((String)cb.getTag()).split("-")[1]);
 			if (cb.isChecked()) {
-				if(Helpers.isDemo(ImportPhotosActivity.this)){
-					if(selectedItems.size() >= 1){
-						Helpers.warnProVersion(ImportPhotosActivity.this);
-						cb.setChecked(false);
-						return;
-					}
-				}
 				selectedItems.add(id);
 			}
 			else {

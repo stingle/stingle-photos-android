@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">SafeCamera</string>
+    <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="enter_password">Please enter your master password</string>
     <string name="ok">OK</string>
@@ -101,7 +102,6 @@
     <string name="unable_to_connect_camera">Sorry, unable to connect to camera. Probably camera is busy right now.</string>
     <string name="setup">Setup</string>
     <string name="bottom_text">http://www.safecamera.org/</string>
-    <string name="free_version_text">Warning! This is a free version of SafeCamera. Size of your photos will be limited to 640x480 pixels. To remove restrictions and ads please consider purchasing Pro version key from the Play store.</string>
     <string name="popup_title">Enjoying SafeCamera?</string>
     <string name="popup_text">If you like SafeCamera and use it on regular basis, we will really appreciate if you could leave review in play store and let others know what you think.</string>
     <string name="review">Review</string>
@@ -147,6 +147,8 @@
     <string name="home_folder_problem">"Main folder does not exist or is not writable. Do you want to reset main folder location?"</string>
     <string name="home_folder_incorrect">"Sorry, home folder is now pointing to non writable destination, please select valid home folder path"</string>
     <string name="multiselect_exit">"Exit Multi Select"</string>
+    <string name="please_enter_password">"Please enter password"</string>
+    <string name="please_enter_password_desc">"To view gallery you need to provide password"</string>
 
     
     <!-- File Dialog -->

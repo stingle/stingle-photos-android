@@ -147,9 +147,7 @@ public class CameraActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        }
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
 		setContentView(R.layout.camera);
 
@@ -190,12 +188,11 @@ public class CameraActivity extends Activity {
 
 		isTakingPhoto = false;
 		this.app_is_paused = false;
-		boolean logined = Helpers.checkLoginedState(this);
 		Helpers.disableLockTimer(this);
 
 		isShutterSoundEnabled = sharedPrefs.getBoolean("shutter_sound", true);
 
-		if(logined && requestCameraPermission()){
+		if(requestCameraPermission()){
 			initCamera();
 		}
 	}
@@ -206,7 +203,6 @@ public class CameraActivity extends Activity {
 
 		this.app_is_paused = true;
 		
-		Helpers.checkLoginedState(this);
 		Helpers.setLockedTime(this);
 
 		destroyOrientationListener();
@@ -217,7 +213,7 @@ public class CameraActivity extends Activity {
 	}
 
 	public void initCamera(){
-		int lastCamId = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).getInt(SafeCameraActivity.LAST_CAM_ID, DEFAULT_CAMERA);
+		int lastCamId = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getInt(LoginActivity.LAST_CAM_ID, DEFAULT_CAMERA);
 		startCamera(lastCamId);
 		initOrientationListener();
 		showLastPhotoThumb();
@@ -232,7 +228,7 @@ public class CameraActivity extends Activity {
 						.setMessage(getString(R.string.camera_perm_explain))
 						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
-								requestPermissions(new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
+								requestPermissions(new String[]{Manifest.permission.CAMERA}, LoginActivity.REQUEST_CAMERA_PERMISSION);
 							}
 						})
 						.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -245,7 +241,7 @@ public class CameraActivity extends Activity {
 						.show();
 
 			} else {
-				requestPermissions(new String[]{Manifest.permission.CAMERA}, SafeCameraActivity.REQUEST_CAMERA_PERMISSION);
+				requestPermissions(new String[]{Manifest.permission.CAMERA}, LoginActivity.REQUEST_CAMERA_PERMISSION);
 			}
 			return false;
 		}
@@ -255,7 +251,7 @@ public class CameraActivity extends Activity {
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 		switch (requestCode) {
-			case SafeCameraActivity.REQUEST_CAMERA_PERMISSION: {
+			case LoginActivity.REQUEST_CAMERA_PERMISSION: {
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					initCamera();
 				}
@@ -306,23 +302,12 @@ public class CameraActivity extends Activity {
 	}
 	
 	private int getMaxAvailableSizeIndex(List<Camera.Size> mSupportedPictureSizes){
-		if(Helpers.isDemo(CameraActivity.this)){
-			for(int i=mSupportedPictureSizes.size()-1; i>=0; i--){
-				Camera.Size sz = mSupportedPictureSizes.get(i);
-				if((sz.width * sz.height)/1000000f <= DEMO_MAX_RES){
-					return i;
-				}
-			}
-			return 0;
-		}
-		else{
-			return mSupportedPictureSizes.size()-1;
-		}
+		return mSupportedPictureSizes.size()-1;
 	}
 	
 	@SuppressLint("NewApi")
 	private void startCamera(int cameraId){
-		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		final SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 		
 		// Open the default i.e. the first rear facing camera.
 		
@@ -367,18 +352,11 @@ public class CameraActivity extends Activity {
 		else{
 			selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
 		}
-		if(selectedSize != null){
-			if(Helpers.isDemo(CameraActivity.this)){
-				if((selectedSize.width * selectedSize.height)/1000000f > DEMO_MAX_RES){
-					selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
-					photoSizeIndex = bestAvailableSizeIndex;
-				}
-			}
-		}
-		else{
+
+		if(selectedSize == null){
 			selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
 		}
-		
+
 		// Set flash mode from preferences and update button accordingly
 		String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_AUTO);
 
@@ -437,7 +415,7 @@ public class CameraActivity extends Activity {
 
         setCameraDisplayOrientation(CameraActivity.this, currentCamera, mCamera);
 
-		getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putInt(SafeCameraActivity.LAST_CAM_ID, cameraId).commit();
+		getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putInt(LoginActivity.LAST_CAM_ID, cameraId).commit();
 	}
 	
 	private void releaseCamera(){
@@ -660,7 +638,9 @@ public class CameraActivity extends Activity {
 	
 	
 	private void showLastPhotoThumb(){
-		(new ShowLastPhotoThumb()).execute();
+		if(SafeCameraApplication.getKey() != null) {
+			(new ShowLastPhotoThumb()).execute();
+		}
 	}
 	
 	@Override
@@ -726,6 +706,7 @@ public class CameraActivity extends Activity {
 	private OnClickListener openGallery() {
 		return new OnClickListener() {
 			public void onClick(View v) {
+				Helpers.checkLoginedState(CameraActivity.this);
 				if(lastFile != null && lastFile.isFile()){
 					Intent intent = new Intent();
 					intent.setClass(CameraActivity.this, ViewImageActivity.class);
@@ -740,7 +721,7 @@ public class CameraActivity extends Activity {
 	private OnClickListener toggleFlash() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 				String flashMode = preferences.getString(CameraActivity.FLASH_MODE, Parameters.FLASH_MODE_OFF);
 
 				int flashButtonImage = R.drawable.flash_auto;
@@ -775,7 +756,7 @@ public class CameraActivity extends Activity {
 	private OnClickListener toggleTimer() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 				
 				if (isTimerOn) {
 					timerButton.setImageResource(R.drawable.timer_disabled);
@@ -1192,7 +1173,7 @@ public class CameraActivity extends Activity {
 		protected Void doInBackground(byte[]... params) {
 			try {
 				FileOutputStream out = new FileOutputStream(filePath);
-				SafeCameraApplication.getCrypto().encryptAndWriteToFile(out, params[0], fileName);
+				SafeCameraApplication.getCrypto().encryptFile(out, params[0], fileName);
 				out.close();
 				//Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
 			}
@@ -1279,7 +1260,7 @@ public class CameraActivity extends Activity {
 			listEntries[i] = megapixel + " MP - " + String.valueOf(size.width) + "x" + String.valueOf(size.height);
 		}
 		
-		final SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
+		final SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(getString(R.string.photo_size_choose));
@@ -1291,12 +1272,6 @@ public class CameraActivity extends Activity {
 				double megapixel = mSupportedPictureSizes.get(item).width * mSupportedPictureSizes.get(item).height;
 				megapixel = megapixel / 1000000;
 				megapixel = (double)Math.round(megapixel * 10) / 10;
-				
-				if(Helpers.isDemo(CameraActivity.this) && megapixel > 0.3){
-					Helpers.warnProVersion(CameraActivity.this);
-					dialog.cancel();
-					return;
-				}
 				
 				if(isCurrentCameraFrontFacing()){
 					preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, item).commit();

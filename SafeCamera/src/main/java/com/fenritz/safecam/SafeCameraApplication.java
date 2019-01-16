@@ -16,6 +16,9 @@ public class SafeCameraApplication extends Application{
 	private static MemoryCache cache;
 	private static Crypto crypto;
 
+    public static final String DEFAULT_PREFS = "default_prefs";
+    public static final String PASSWORD = "password";
+
     @Override
 	public void onCreate(){
         super.onCreate();

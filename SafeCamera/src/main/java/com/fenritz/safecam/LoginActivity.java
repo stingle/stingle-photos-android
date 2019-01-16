@@ -25,10 +25,8 @@ import android.widget.Toast;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 
-public class SafeCameraActivity extends Activity {
+public class LoginActivity extends Activity {
 
-	public static final String DEFAULT_PREFS = "default_prefs";
-	public static final String PASSWORD = "password";
 	public static final String LAST_CAM_ID = "last_cam_id";
 	public static final String LAST_LOCK_TIME = "lock_time";
 	public static final String ACTION_JUST_LOGIN = "just_login";
@@ -50,23 +48,19 @@ public class SafeCameraActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        }
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
 		setContentView(R.layout.startup);
 
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-			getActionBar().hide();
-		}
+        getActionBar().hide();
 
 		justLogin = getIntent().getBooleanExtra(ACTION_JUST_LOGIN, false);
 		extraData = getIntent().getBundleExtra(PARAM_EXTRA_DATA);
 		
-		preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-		if (!preferences.contains(SafeCameraActivity.PASSWORD)) {
+		preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
+		if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
 			Intent intent = new Intent();
-			intent.setClass(SafeCameraActivity.this, SetUpActivity.class);
+			intent.setClass(LoginActivity.this, SetUpActivity.class);
 			startActivity(intent);
 			finish();
 			return;
@@ -100,7 +94,7 @@ public class SafeCameraActivity extends Activity {
 	public void filesystemInit(){
 		Helpers.createFolders(this);
 
-		Helpers.deleteTmpDir(SafeCameraActivity.this);
+		Helpers.deleteTmpDir(LoginActivity.this);
 	}
 
 	@Override
@@ -145,7 +139,7 @@ public class SafeCameraActivity extends Activity {
 		
 		if(SafeCameraApplication.getKey() != null){
 			Intent intent = new Intent();
-			intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
+			intent.setClass(LoginActivity.this, DashboardActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
@@ -157,18 +151,18 @@ public class SafeCameraActivity extends Activity {
 	}
 	
 	private void doLogin() {
-		String savedHash = preferences.getString(PASSWORD, "");
+		String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
 		String enteredPassword = ((EditText) findViewById(R.id.password)).getText().toString();
 		try{
 			if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, enteredPassword)){
-				Helpers.showAlertDialog(SafeCameraActivity.this, getString(R.string.incorrect_password));
+				Helpers.showAlertDialog(LoginActivity.this, getString(R.string.incorrect_password));
 				return;
 			}
 
 			SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(enteredPassword));
 		}
 		catch (CryptoException e) {
-			Helpers.showAlertDialog(SafeCameraActivity.this, String.format(getString(R.string.unexpected_error), "102"));
+			Helpers.showAlertDialog(LoginActivity.this, String.format(getString(R.string.unexpected_error), "102"));
 			e.printStackTrace();
 		}
 		
@@ -180,7 +174,7 @@ public class SafeCameraActivity extends Activity {
 		}
 		else{
 			Intent intent = new Intent();
-			intent.setClass(SafeCameraActivity.this, DashboardActivity.class);
+			intent.setClass(LoginActivity.this, DashboardActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			
@@ -193,7 +187,7 @@ public class SafeCameraActivity extends Activity {
 					intent.putExtra("showPopup", true);
 					loginsCount = 0;
 				}
-				preferences.edit().putInt(SafeCameraActivity.LOGINS_COUNT_FOR_POPUP, loginsCount).commit();
+				preferences.edit().putInt(LoginActivity.LOGINS_COUNT_FOR_POPUP, loginsCount).commit();
 			}
 			startActivity(intent);
 		}
@@ -203,17 +197,17 @@ public class SafeCameraActivity extends Activity {
     protected OnClickListener forgotPassword(){
         return new OnClickListener() {
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(SafeCameraActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                 builder.setTitle(getString(R.string.forgot_password));
                 builder.setMessage(getString(R.string.reset_password));
                 builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences preferences = getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, MODE_PRIVATE);
-                        preferences.edit().remove(SafeCameraActivity.PASSWORD).commit();
+                        SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
+                        preferences.edit().remove(SafeCameraApplication.PASSWORD).commit();
 						SafeCameraApplication.setKey(null);
 
                         Intent intent = new Intent();
-                        intent.setClass(SafeCameraActivity.this, SetUpActivity.class);
+                        intent.setClass(LoginActivity.this, SetUpActivity.class);
                         startActivity(intent);
                         finish();
                     }

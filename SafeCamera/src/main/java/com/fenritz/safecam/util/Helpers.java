@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,10 +35,11 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
-import com.fenritz.safecam.GalleryActivity;
+import com.fenritz.safecam.DashboardActivity;
+import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.R;
-import com.fenritz.safecam.SafeCameraActivity;
 import com.fenritz.safecam.SafeCameraApplication;
+import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.SettingsActivity;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.AsyncTasks.ReEncryptFiles;
@@ -83,14 +85,6 @@ public class Helpers {
 	public static final int HASH_SYNC_UPDATED_PREF = 1;
 	public static final int HASH_SYNC_WROTE_FILE = 2;
 	
-	public static boolean isDemo(Context context){
-		PackageManager manager = context.getPackageManager();
-		if(manager.checkSignatures(context.getString(R.string.main_package_name), context.getString(R.string.key_package_name)) == PackageManager.SIGNATURE_MATCH) {
-		    return false;
-		}
-		return true;
-	}
-	
 	public static boolean checkLoginedState(Activity activity) {
 		return checkLoginedState(activity, null, true);
 	}
@@ -99,10 +93,56 @@ public class Helpers {
 	}
 	public static boolean checkLoginedState(Activity activity, Bundle extraData, boolean redirect) {
 		if (SafeCameraApplication.getKey() == null) {
-			if(redirect){
+
+			final Activity activityFinal = activity;
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setTitle(activity.getString(R.string.please_enter_password));
+			builder.setMessage(activity.getString(R.string.please_enter_password_desc));
+			final EditText input = new EditText(activity);
+			input.setHint("Password");
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+			builder.setView(input);
+			builder.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					SharedPreferences preferences = activityFinal.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+					if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
+						Intent intent = new Intent();
+						intent.setClass(activityFinal, SetUpActivity.class);
+						activityFinal.startActivity(intent);
+						activityFinal.finish();
+						return;
+					}
+					String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
+					String enteredPassword = input.getText().toString();
+					try{
+						if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, enteredPassword)){
+							Helpers.showAlertDialog(activityFinal, activityFinal.getString(R.string.incorrect_password));
+							return;
+						}
+
+						SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(enteredPassword));
+					}
+					catch (CryptoException e) {
+						Helpers.showAlertDialog(activityFinal, String.format(activityFinal.getString(R.string.unexpected_error), "102"));
+						e.printStackTrace();
+					}
+					Intent intent = activityFinal.getIntent();
+					activityFinal.finish();
+					activityFinal.startActivity(intent);
+				}
+			});
+			builder.setNegativeButton(activity.getString(R.string.cancel), null);
+			AlertDialog dialog = builder.create();
+			dialog.show();
+
+
+
+
+			/*if(redirect){
 				doLogout(activity);
 				redirectToLogin(activity, extraData);
-			}
+			}*/
 			return false;
 		}
 
@@ -110,7 +150,7 @@ public class Helpers {
 		int lockTimeout = Integer.valueOf(sharedPrefs.getString("lock_time", "60")) * 1000;
 
 		long currentTimestamp = System.currentTimeMillis();
-		long lockedTime = activity.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(SafeCameraActivity.LAST_LOCK_TIME, 0);;
+		long lockedTime = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(LoginActivity.LAST_LOCK_TIME, 0);;
 
 		if (lockedTime != 0) {
 			if (currentTimestamp - lockedTime > lockTimeout) {
@@ -126,11 +166,11 @@ public class Helpers {
 	}
 
 	public static void setLockedTime(Context context) {
-		context.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(SafeCameraActivity.LAST_LOCK_TIME, System.currentTimeMillis()).commit();
+		context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LoginActivity.LAST_LOCK_TIME, System.currentTimeMillis()).commit();
 	}
 
 	public static void disableLockTimer(Context context) {
-		context.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(SafeCameraActivity.LAST_LOCK_TIME, 0).commit();
+		context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LoginActivity.LAST_LOCK_TIME, 0).commit();
 	}
 
 	public static void logout(Activity activity){
@@ -140,10 +180,9 @@ public class Helpers {
 	
 	private static void redirectToLogin(Activity activity, Bundle extraData) {
 		Intent intent = new Intent();
-		intent.setClass(activity, SafeCameraActivity.class);
-		intent.putExtra(SafeCameraActivity.ACTION_JUST_LOGIN, true);
-		intent.putExtra(SafeCameraActivity.PARAM_EXTRA_DATA, extraData);
-		activity.startActivityForResult(intent, GalleryActivity.REQUEST_LOGIN);
+		intent.setClass(activity, DashboardActivity.class);
+		activity.startActivity(intent);
+		activity.finish();
 	}
 	
 	private static void doLogout(Activity activity) {
@@ -321,7 +360,7 @@ public class Helpers {
 
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			try {
-				SafeCameraApplication.getCrypto().encryptAndWriteToFile(out, stream.toByteArray(), fileName);
+				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -818,23 +857,6 @@ public class Helpers {
 		}
 	}
 	
-	public static void warnProVersion(final Activity activity) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage(activity.getString(R.string.pro_version_warning));
-		
-		builder.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				Intent intent = new Intent(Intent.ACTION_VIEW);
-				intent.setData(Uri.parse("market://details?id=" + activity.getString(R.string.key_package_name)));
-				activity.startActivity(intent);
-			}
-		});
-		builder.setNegativeButton(activity.getString(R.string.later), null);
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
-	
-	
 	public static void scanFile(final Context context, File file) {
 	    try {
 	    	if( file.isFile() ) {
@@ -875,7 +897,7 @@ public class Helpers {
 	
 	@SuppressWarnings("unchecked")
 	public static void decryptSelected(final Activity activity, ArrayList<File> selectedFiles, final AsyncTasks.OnAsyncTaskFinish finishTask) {
-		SharedPreferences preferences = activity.getSharedPreferences(SafeCameraActivity.DEFAULT_PREFS, Activity.MODE_PRIVATE);
+		SharedPreferences preferences = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Activity.MODE_PRIVATE);
 		
 		String filePath = Helpers.getHomeDirParentPath(activity) + preferences.getString("dec_folder", activity.getString(R.string.dec_folder_def));
 		File destinationFolder = new File(filePath);
@@ -930,7 +952,7 @@ public class Helpers {
 						.setMessage(activity.getString(R.string.sdcard_perm_explain))
 						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
-								activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+								activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
 							}
 						})
 						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -943,7 +965,7 @@ public class Helpers {
 						.show();
 
 			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
 			}
 			return false;
 		}
@@ -954,7 +976,7 @@ public class Helpers {
 						.setMessage(activity.getString(R.string.sdcard_perm_explain))
 						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
-								activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+								activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
 							}
 						})
 						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -967,7 +989,7 @@ public class Helpers {
 						.show();
 
 			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SafeCameraActivity.REQUEST_SD_CARD_PERMISSION);
+				activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
 			}
 			return false;
 		}
