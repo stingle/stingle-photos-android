@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2008 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,57 +14,61 @@
 -->
 
 <!-- This is a primitive example showing the different types of preferences available. -->
-<PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    	 <ListPreference 
-            android:key="home_folder"
-            android:title="@string/home_folder"
-            android:summary="@string/home_folder_desc" />
-    	 
-    	 <EditTextPreference
-			android:key="home_folder_name"
-			android:title="@string/home_folder_name"
-			android:summary="@string/home_folder_name_desc"
-			android:defaultValue="@string/default_home_folder_name" />
-    	 
-    	 <EditTextPreference
-			android:key="dec_folder"
-			android:title="@string/dec_folder"
-			android:summary="@string/dec_folder_desc"
-			android:defaultValue="@string/dec_folder_def" />
-    	 
-    	 <ListPreference 
-            android:key="lock_time"
-            android:title="@string/lock_time"
-            android:summary="@string/lock_time_desc"
-            android:defaultValue="60" 
-            android:entries="@array/lockTimes"
-            android:entryValues="@array/lockTimesValues" />
-    	 
-		<CheckBoxPreference
-    	    android:key="volume_take_photo"
-    	    android:title="@string/volume_take_photo"
-    	    android:summary="@string/volume_take_photo_desc"
-    	    android:defaultValue="true" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="fingerprint"
+        android:summary="@string/use_fingerprint_desc"
+        android:title="@string/use_fingerprint" />
+    <ListPreference
+        android:key="home_folder"
+        android:summary="@string/home_folder_desc"
+        android:title="@string/home_folder" />
 
-        <CheckBoxPreference
-            android:key="shutter_sound"
-            android:title="@string/shutter_sound"
-            android:summary="@string/shutter_sound_desc"
-            android:defaultValue="true" />
-		
-		<ListPreference 
-            android:key="timerDuration"
-            android:title="@string/timer_duration"
-            android:summary="@string/timer_duartion_desc"
-            android:defaultValue="10" 
-            android:entries="@array/timerDurations"
-            android:entryValues="@array/timerDurationValues" />
-		
-		<Preference
-		    android:key="clear_cache"
-    	    android:title="@string/clear_cache"
-    	    android:summary="@string/clear_cache_desc" />
+    <EditTextPreference
+        android:defaultValue="@string/default_home_folder_name"
+        android:key="home_folder_name"
+        android:summary="@string/home_folder_name_desc"
+        android:title="@string/home_folder_name" />
+
+    <EditTextPreference
+        android:defaultValue="@string/dec_folder_def"
+        android:key="dec_folder"
+        android:summary="@string/dec_folder_desc"
+        android:title="@string/dec_folder" />
+
+    <ListPreference
+        android:defaultValue="60"
+        android:entries="@array/lockTimes"
+        android:entryValues="@array/lockTimesValues"
+        android:key="lock_time"
+        android:summary="@string/lock_time_desc"
+        android:title="@string/lock_time" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="volume_take_photo"
+        android:summary="@string/volume_take_photo_desc"
+        android:title="@string/volume_take_photo" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="shutter_sound"
+        android:summary="@string/shutter_sound_desc"
+        android:title="@string/shutter_sound" />
+
+    <ListPreference
+        android:defaultValue="10"
+        android:entries="@array/timerDurations"
+        android:entryValues="@array/timerDurationValues"
+        android:key="timerDuration"
+        android:summary="@string/timer_duartion_desc"
+        android:title="@string/timer_duration" />
+
+    <Preference
+        android:key="clear_cache"
+        android:summary="@string/clear_cache_desc"
+        android:title="@string/clear_cache" />
 
 </PreferenceScreen>

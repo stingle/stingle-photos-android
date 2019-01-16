@@ -1,0 +1,31 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="60"
+        android:entries="@array/lockTimes"
+        android:entryValues="@array/lockTimesValues"
+        android:key="lock_time"
+        android:summary="@string/lock_time_desc"
+        android:title="@string/lock_time" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="volume_take_photo"
+        android:summary="@string/volume_take_photo_desc"
+        android:title="@string/volume_take_photo" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="shutter_sound"
+        android:summary="@string/shutter_sound_desc"
+        android:title="@string/shutter_sound" />
+
+    <ListPreference
+        android:defaultValue="10"
+        android:entries="@array/timerDurations"
+        android:entryValues="@array/timerDurationValues"
+        android:key="timerDuration"
+        android:summary="@string/timer_duartion_desc"
+        android:title="@string/timer_duration" />
+
+</PreferenceScreen>

@@ -21,13 +21,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.drew.imaging.ImageMetadataReader;
@@ -96,46 +100,22 @@ public class Helpers {
 
 			final Activity activityFinal = activity;
 
-			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-			builder.setTitle(activity.getString(R.string.please_enter_password));
-			builder.setMessage(activity.getString(R.string.please_enter_password_desc));
-			final EditText input = new EditText(activity);
-			input.setHint("Password");
-			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-			builder.setView(input);
-			builder.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					SharedPreferences preferences = activityFinal.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-					if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
-						Intent intent = new Intent();
-						intent.setClass(activityFinal, SetUpActivity.class);
-						activityFinal.startActivity(intent);
-						activityFinal.finish();
-						return;
-					}
-					String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
-					String enteredPassword = input.getText().toString();
-					try{
-						if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, enteredPassword)){
-							Helpers.showAlertDialog(activityFinal, activityFinal.getString(R.string.incorrect_password));
-							return;
-						}
+			SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
+			boolean isFingerprintSetup = defaultSharedPrefs.getBoolean("fingerprint", false);
 
-						SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(enteredPassword));
-					}
-					catch (CryptoException e) {
-						Helpers.showAlertDialog(activityFinal, String.format(activityFinal.getString(R.string.unexpected_error), "102"));
-						e.printStackTrace();
-					}
-					Intent intent = activityFinal.getIntent();
-					activityFinal.finish();
-					activityFinal.startActivity(intent);
-				}
-			});
-			builder.setNegativeButton(activity.getString(R.string.cancel), null);
-			AlertDialog dialog = builder.create();
-			dialog.show();
+			if(isFingerprintSetup) {
 
+				FingerprintManagerWrapper fingerprintManager = new FingerprintManagerWrapper(activity);
+				fingerprintManager.unlock(new FingerprintManagerWrapper.PasswordReceivedHandler() {
+					@Override
+					public void onPasswordReceived(String password) {
+						unlockWithPassword(activityFinal, password);
+					}
+				});
+			}
+			else{
+				showEnterPasswordToUnlock(activity);
+			}
 
 
 
@@ -163,6 +143,98 @@ public class Helpers {
 		}
 		
 		return true;
+	}
+
+	public static void showEnterPasswordToUnlock(Activity activity){
+		final Activity activityFinal = activity;
+		getPasswordFromUser(activity, new PasswordReturnListener() {
+			@Override
+			public void passwordReceived(String enteredPassword) {
+				unlockWithPassword(activityFinal, enteredPassword);
+			}
+
+			@Override
+			public void passwordCanceled() {
+
+			}
+		});
+	}
+
+	public static void unlockWithPassword(Activity activity, String password){
+
+		SharedPreferences preferences = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
+			Intent intent = new Intent();
+			intent.setClass(activity, SetUpActivity.class);
+			activity.startActivity(intent);
+			activity.finish();
+			return;
+		}
+		String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
+		try{
+			if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, password)){
+				Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
+				return;
+			}
+
+			SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
+		}
+		catch (CryptoException e) {
+			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "102"));
+			e.printStackTrace();
+		}
+		Intent intent = activity.getIntent();
+		activity.finish();
+		activity.startActivity(intent);
+
+	}
+
+	public static void getPasswordFromUser(Context context, final PasswordReturnListener listener){
+		final Context myContext = context;
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setView(R.layout.password);
+		final AlertDialog dialog = builder.create();
+		dialog.show();
+
+
+
+		Button okButton = (Button)dialog.findViewById(R.id.okButton);
+		final EditText passwordField = (EditText)dialog.findViewById(R.id.password);
+		Button cancelButton = (Button)dialog.findViewById(R.id.cancelButton);
+
+		final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+
+		okButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+				listener.passwordReceived(passwordField.getText().toString());
+				dialog.dismiss();
+			}
+		});
+
+		passwordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_GO) {
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					listener.passwordReceived(passwordField.getText().toString());
+					dialog.dismiss();
+					return true;
+				}
+				return false;
+			}
+		});
+
+
+		cancelButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+				listener.passwordCanceled();
+				dialog.cancel();
+			}
+		});
 	}
 
 	public static void setLockedTime(Context context) {
@@ -262,10 +334,10 @@ public class Helpers {
 		}
 	}
 
-	public static void showAlertDialog(Activity activity, String message) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+	public static void showAlertDialog(Context context, String message) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(message);
-		builder.setNegativeButton(activity.getString(R.string.ok), null);
+		builder.setNegativeButton(context.getString(R.string.ok), null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}

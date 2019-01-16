@@ -1,29 +1,5 @@
 package com.fenritz.safecam.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.ImageWriteException;
-import org.apache.sanselan.Sanselan;
-import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
-import org.apache.sanselan.formats.jpeg.exifRewrite.ExifRewriter;
-import org.apache.sanselan.formats.tiff.TiffField;
-import org.apache.sanselan.formats.tiff.TiffImageMetadata;
-import org.apache.sanselan.formats.tiff.constants.TiffConstants;
-import org.apache.sanselan.formats.tiff.write.TiffOutputDirectory;
-import org.apache.sanselan.formats.tiff.write.TiffOutputField;
-import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,6 +22,30 @@ import android.widget.TextView;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
+
+import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.ImageWriteException;
+import org.apache.sanselan.Sanselan;
+import org.apache.sanselan.common.IImageMetadata;
+import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
+import org.apache.sanselan.formats.jpeg.exifRewrite.ExifRewriter;
+import org.apache.sanselan.formats.tiff.TiffField;
+import org.apache.sanselan.formats.tiff.TiffImageMetadata;
+import org.apache.sanselan.formats.tiff.constants.TiffConstants;
+import org.apache.sanselan.formats.tiff.write.TiffOutputDirectory;
+import org.apache.sanselan.formats.tiff.write.TiffOutputField;
+import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AsyncTasks {
 	public static abstract class OnAsyncTaskFinish {
@@ -147,20 +147,20 @@ public class AsyncTasks {
 		private TextView progressSecPercent;
 
 		
-		private final Activity activity;
+		private final Context activity;
 		private final OnAsyncTaskFinish finishListener;
 		private PowerManager.WakeLock wl;
 		private boolean secureDelete = false;
 
-		public DeleteFiles(Activity activity){
+		public DeleteFiles(Context activity){
 			this(activity, null, false);
 		}
 		
-		public DeleteFiles(Activity activity, OnAsyncTaskFinish finishListener){
+		public DeleteFiles(Context activity, OnAsyncTaskFinish finishListener){
 			this(activity, finishListener, false);
 		}
 		
-		public DeleteFiles(Activity activity, OnAsyncTaskFinish finishListener, boolean secureDelete){
+		public DeleteFiles(Context activity, OnAsyncTaskFinish finishListener, boolean secureDelete){
 			this.activity = activity;
 			this.finishListener = finishListener;
 			this.secureDelete = secureDelete;

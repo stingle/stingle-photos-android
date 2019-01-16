@@ -1,0 +1,9 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="fingerprint"
+        android:summary="@string/use_fingerprint_desc"
+        android:title="@string/use_fingerprint" />
+
+</PreferenceScreen>

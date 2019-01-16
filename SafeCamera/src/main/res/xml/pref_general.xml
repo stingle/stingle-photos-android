@@ -1,0 +1,25 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="home_folder"
+        android:summary="@string/home_folder_desc"
+        android:title="@string/home_folder" />
+
+    <EditTextPreference
+        android:defaultValue="@string/default_home_folder_name"
+        android:key="home_folder_name"
+        android:summary="@string/home_folder_name_desc"
+        android:title="@string/home_folder_name" />
+
+    <EditTextPreference
+        android:defaultValue="@string/dec_folder_def"
+        android:key="dec_folder"
+        android:summary="@string/dec_folder_desc"
+        android:title="@string/dec_folder" />
+
+    <Preference
+        android:key="clear_cache"
+        android:summary="@string/clear_cache_desc"
+        android:title="@string/clear_cache" />
+
+</PreferenceScreen>
