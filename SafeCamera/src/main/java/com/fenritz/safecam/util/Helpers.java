@@ -18,20 +18,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.drew.imaging.ImageMetadataReader;
@@ -39,11 +33,9 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
-import com.fenritz.safecam.DashboardActivity;
 import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.SettingsActivity;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.AsyncTasks.ReEncryptFiles;
@@ -89,183 +81,8 @@ public class Helpers {
 	public static final int HASH_SYNC_UPDATED_PREF = 1;
 	public static final int HASH_SYNC_WROTE_FILE = 2;
 	
-	public static boolean checkLoginedState(Activity activity) {
-		return checkLoginedState(activity, null, true);
-	}
-	public static boolean checkLoginedState(Activity activity, Bundle extraData) {
-		return checkLoginedState(activity, extraData, true);
-	}
-	public static boolean checkLoginedState(Activity activity, Bundle extraData, boolean redirect) {
-		if (SafeCameraApplication.getKey() == null) {
-
-			final Activity activityFinal = activity;
-
-			SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-			boolean isFingerprintSetup = defaultSharedPrefs.getBoolean("fingerprint", false);
-
-			if(isFingerprintSetup) {
-
-				FingerprintManagerWrapper fingerprintManager = new FingerprintManagerWrapper(activity);
-				fingerprintManager.unlock(new FingerprintManagerWrapper.PasswordReceivedHandler() {
-					@Override
-					public void onPasswordReceived(String password) {
-						unlockWithPassword(activityFinal, password);
-					}
-				});
-			}
-			else{
-				showEnterPasswordToUnlock(activity);
-			}
 
 
-
-			/*if(redirect){
-				doLogout(activity);
-				redirectToLogin(activity, extraData);
-			}*/
-			return false;
-		}
-
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-		int lockTimeout = Integer.valueOf(sharedPrefs.getString("lock_time", "60")) * 1000;
-
-		long currentTimestamp = System.currentTimeMillis();
-		long lockedTime = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(LoginActivity.LAST_LOCK_TIME, 0);;
-
-		if (lockedTime != 0) {
-			if (currentTimestamp - lockedTime > lockTimeout) {
-				doLogout(activity);
-				if(redirect){
-					redirectToLogin(activity, extraData);
-				}
-				return false;
-			}
-		}
-		
-		return true;
-	}
-
-	public static void showEnterPasswordToUnlock(Activity activity){
-		final Activity activityFinal = activity;
-		getPasswordFromUser(activity, new PasswordReturnListener() {
-			@Override
-			public void passwordReceived(String enteredPassword) {
-				unlockWithPassword(activityFinal, enteredPassword);
-			}
-
-			@Override
-			public void passwordCanceled() {
-
-			}
-		});
-	}
-
-	public static void unlockWithPassword(Activity activity, String password){
-
-		SharedPreferences preferences = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
-			Intent intent = new Intent();
-			intent.setClass(activity, SetUpActivity.class);
-			activity.startActivity(intent);
-			activity.finish();
-			return;
-		}
-		String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
-		try{
-			if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, password)){
-				Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
-				return;
-			}
-
-			SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
-		}
-		catch (CryptoException e) {
-			Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "102"));
-			e.printStackTrace();
-		}
-		Intent intent = activity.getIntent();
-		activity.finish();
-		activity.startActivity(intent);
-
-	}
-
-	public static void getPasswordFromUser(Context context, final PasswordReturnListener listener){
-		final Context myContext = context;
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setView(R.layout.password);
-		final AlertDialog dialog = builder.create();
-		dialog.show();
-
-
-
-		Button okButton = (Button)dialog.findViewById(R.id.okButton);
-		final EditText passwordField = (EditText)dialog.findViewById(R.id.password);
-		Button cancelButton = (Button)dialog.findViewById(R.id.cancelButton);
-
-		final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
-
-		okButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				listener.passwordReceived(passwordField.getText().toString());
-				dialog.dismiss();
-			}
-		});
-
-		passwordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_GO) {
-					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-					listener.passwordReceived(passwordField.getText().toString());
-					dialog.dismiss();
-					return true;
-				}
-				return false;
-			}
-		});
-
-
-		cancelButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				listener.passwordCanceled();
-				dialog.cancel();
-			}
-		});
-	}
-
-	public static void setLockedTime(Context context) {
-		context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LoginActivity.LAST_LOCK_TIME, System.currentTimeMillis()).commit();
-	}
-
-	public static void disableLockTimer(Context context) {
-		context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LoginActivity.LAST_LOCK_TIME, 0).commit();
-	}
-
-	public static void logout(Activity activity){
-		doLogout(activity);
-		redirectToLogin(activity, null);
-	}
-	
-	private static void redirectToLogin(Activity activity, Bundle extraData) {
-		Intent intent = new Intent();
-		intent.setClass(activity, DashboardActivity.class);
-		activity.startActivity(intent);
-		activity.finish();
-	}
-	
-	private static void doLogout(Activity activity) {
-		Intent broadcastIntent = new Intent();
-		broadcastIntent.setAction("com.fenritz.safecam.ACTION_LOGOUT");
-		activity.sendBroadcast(broadcastIntent);
-
-		SafeCameraApplication.setKey(null);
-		
-		deleteTmpDir(activity);
-	}
 
 	public static void deleteTmpDir(Context context) {
 		File dir = new File(Helpers.getHomeDir(context) + "/" + ".tmp");

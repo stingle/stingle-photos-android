@@ -24,16 +24,15 @@ import android.widget.Toast;
 
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 
 public class LoginActivity extends Activity {
 
 	public static final String LAST_CAM_ID = "last_cam_id";
-	public static final String LAST_LOCK_TIME = "lock_time";
+
 	public static final String ACTION_JUST_LOGIN = "just_login";
 	public static final String PARAM_EXTRA_DATA = "extra_data";
-	public static final String LOGINS_COUNT_FOR_POPUP = "logins_count_fp";
-	public static final String DONT_SHOW_POPUP = "dont_show_popup";
-	public static final String POPUP_LATERS_COUNT = "laters_count";
+
 
 	public static final int REQUEST_SD_CARD_PERMISSION = 1;
 	public static final int REQUEST_CAMERA_PERMISSION = 2;
@@ -147,7 +146,7 @@ public class LoginActivity extends Activity {
 			return;
 		}
 		
-		Helpers.disableLockTimer(this);
+		LoginManager.disableLockTimer(this);
 	}
 	
 	private void doLogin() {
@@ -178,7 +177,7 @@ public class LoginActivity extends Activity {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			
-			boolean dontShowPopup = preferences.getBoolean(DONT_SHOW_POPUP, false);
+			/*boolean dontShowPopup = preferences.getBoolean(DONT_SHOW_POPUP, false);
 			
 			if(!dontShowPopup){
 				int loginsCount = preferences.getInt(LOGINS_COUNT_FOR_POPUP, 0);
@@ -188,7 +187,7 @@ public class LoginActivity extends Activity {
 					loginsCount = 0;
 				}
 				preferences.edit().putInt(LoginActivity.LOGINS_COUNT_FOR_POPUP, loginsCount).commit();
-			}
+			}*/
 			startActivity(intent);
 		}
 		finish();

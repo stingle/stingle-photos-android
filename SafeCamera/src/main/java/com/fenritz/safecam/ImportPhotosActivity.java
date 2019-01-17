@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 import com.fenritz.safecam.util.MemoryCache;
 
 import java.io.File;
@@ -115,15 +116,15 @@ public class ImportPhotosActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 
-		Helpers.setLockedTime(this);
+		LoginManager.setLockedTime(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		Helpers.checkLoginedState(this);
-		Helpers.disableLockTimer(this);
+		LoginManager.checkLogin(this);
+		LoginManager.disableLockTimer(this);
 	}
 
 	public class ImageAdapter extends BaseAdapter {

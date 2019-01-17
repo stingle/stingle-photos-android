@@ -60,6 +60,7 @@ import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 import com.fenritz.safecam.widget.SafeCameraButton;
 
 import java.io.ByteArrayOutputStream;
@@ -188,7 +189,7 @@ public class CameraActivity extends Activity {
 
 		isTakingPhoto = false;
 		this.app_is_paused = false;
-		Helpers.disableLockTimer(this);
+		LoginManager.disableLockTimer(this);
 
 		isShutterSoundEnabled = sharedPrefs.getBoolean("shutter_sound", true);
 
@@ -203,7 +204,7 @@ public class CameraActivity extends Activity {
 
 		this.app_is_paused = true;
 		
-		Helpers.setLockedTime(this);
+		LoginManager.setLockedTime(this);
 
 		destroyOrientationListener();
 
@@ -706,14 +707,24 @@ public class CameraActivity extends Activity {
 	private OnClickListener openGallery() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				Helpers.checkLoginedState(CameraActivity.this);
-				if(lastFile != null && lastFile.isFile()){
-					Intent intent = new Intent();
-					intent.setClass(CameraActivity.this, ViewImageActivity.class);
-					intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
-					intent.putExtra("EXTRA_CURRENT_PATH", Helpers.getHomeDir(CameraActivity.this));
-					startActivityForResult(intent, GalleryActivity.REQUEST_VIEW_PHOTO);
-				}
+				LoginManager.checkLogin(CameraActivity.this, new LoginManager.UserLogedinCallback() {
+					@Override
+					public void onUserLoginSuccess() {
+						if(lastFile != null && lastFile.isFile()){
+							Intent intent = new Intent();
+							intent.setClass(CameraActivity.this, ViewImageActivity.class);
+							intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
+							intent.putExtra("EXTRA_CURRENT_PATH", Helpers.getHomeDir(CameraActivity.this));
+							startActivityForResult(intent, GalleryActivity.REQUEST_VIEW_PHOTO);
+						}
+					}
+
+					@Override
+					public void onUserLoginFail() {
+
+					}
+				});
+
 			}
 		};
 	}
@@ -1350,7 +1361,7 @@ public class CameraActivity extends Activity {
 				showPhotoSizeChooser();
 				return true;
 			case R.id.logout:
-				Helpers.logout(CameraActivity.this);
+				LoginManager.logout(CameraActivity.this);
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);

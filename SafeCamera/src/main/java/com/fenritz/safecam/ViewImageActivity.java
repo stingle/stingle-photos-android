@@ -29,6 +29,7 @@ import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.DecryptAndShowImage;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -102,8 +103,8 @@ public class ViewImageActivity extends Activity {
                 return gestureDetector.onTouchEvent(event);
             }
         };
-        
-        showImage(photo);
+
+		showImage(photo);
         
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
@@ -130,17 +131,17 @@ public class ViewImageActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
-		Helpers.setLockedTime(this);
+
+		LoginManager.setLockedTime(this);
 		cancelPendingTasks();
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		Helpers.checkLoginedState(this);
-		Helpers.disableLockTimer(this);
+
+		LoginManager.checkLogin(this);
+		LoginManager.disableLockTimer(this);
 		
 		hideViews();
 	}

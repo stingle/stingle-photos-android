@@ -128,7 +128,7 @@ public class FingerprintManagerWrapper {
             FingerprintHandler helper = new FingerprintHandler(context, new FingerprintHandler.OnFingerprintSuccess() {
                 @Override
                 public void onSuccess(final Cipher cipher) {
-                    Helpers.getPasswordFromUser(context, new PasswordReturnListener() {
+                    LoginManager.getPasswordFromUser(context, new PasswordReturnListener() {
                         @Override
                         public void passwordReceived(String password) {
                             try {
@@ -177,13 +177,13 @@ public class FingerprintManagerWrapper {
                     });
                 }
             });
-            helper.startAuth(fingerprintManager, cryptoObject);
+            helper.startAuth(fingerprintManager, cryptoObject, null, false);
         }
 
         return false;
     }
 
-    public boolean unlock(final PasswordReceivedHandler passwordHandler){
+    public boolean unlock(final PasswordReceivedHandler passwordHandler, final LoginManager.UserLogedinCallback loginCallback){
 
         // Obtain a reference to the Keystore using the standard Android keystore container identifier (“AndroidKeystore”)//
         try {
@@ -244,7 +244,7 @@ public class FingerprintManagerWrapper {
                     }
                 }
             });
-            helper.startAuth(fingerprintManager, cryptoObject);
+            helper.startAuth(fingerprintManager, cryptoObject, loginCallback, true);
         }
 
 

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,10 +18,13 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 
 public class DashboardActivity extends Activity {
 	
 	private BroadcastReceiver receiver;
+	public static final int REQUEST_SD_CARD_PERMISSION = 1;
+	public static final int REQUEST_CAMERA_PERMISSION = 2;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +52,30 @@ public class DashboardActivity extends Activity {
 			showPopup();
 		}
 
+		if(Helpers.requestSDCardPermission(this)){
+			filesystemInit();
+		}
+	}
+
+	public void filesystemInit(){
+		Helpers.createFolders(this);
+
+		Helpers.deleteTmpDir(this);
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case REQUEST_SD_CARD_PERMISSION: {
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					filesystemInit();
+
+				} else {
+					finish();
+				}
+				return;
+			}
+		}
 	}
 	
 	private void initViews(){
@@ -95,18 +123,18 @@ public class DashboardActivity extends Activity {
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				intent.setData(Uri.parse("market://details?id=" + getString(R.string.main_package_name)));
 				startActivity(intent);
-				preferences.edit().putBoolean(LoginActivity.DONT_SHOW_POPUP, true).commit();
+				preferences.edit().putBoolean(LoginManager.DONT_SHOW_POPUP, true).commit();
 			}
 		});
 		builder.setNegativeButton(getString(R.string.later), new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				int latersCount = preferences.getInt(LoginActivity.POPUP_LATERS_COUNT, 0);
+				int latersCount = preferences.getInt(LoginManager.POPUP_LATERS_COUNT, 0);
 				latersCount++;
 				
 				if(latersCount >= Integer.valueOf(getString(R.string.popup_laters_limit))){
-					preferences.edit().putBoolean(LoginActivity.DONT_SHOW_POPUP, true).commit();
+					preferences.edit().putBoolean(LoginManager.DONT_SHOW_POPUP, true).commit();
 				}
-				preferences.edit().putInt(LoginActivity.POPUP_LATERS_COUNT, latersCount).commit();
+				preferences.edit().putInt(LoginManager.POPUP_LATERS_COUNT, latersCount).commit();
 			}
 		});
 		AlertDialog dialog = builder.create();
@@ -116,8 +144,8 @@ public class DashboardActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		Helpers.disableLockTimer(this);
+
+		LoginManager.disableLockTimer(this);
 
         Helpers.checkIsMainFolderWritable(this);
 	}
@@ -125,8 +153,8 @@ public class DashboardActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
-		Helpers.setLockedTime(this);
+
+		LoginManager.setLockedTime(this);
 	}
 	
 	@Override
@@ -163,7 +191,7 @@ public class DashboardActivity extends Activity {
 				startActivity(browserIntent);
 				return true;
 			case R.id.logout:
-				Helpers.logout(DashboardActivity.this);
+				LoginManager.logout(DashboardActivity.this);
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);

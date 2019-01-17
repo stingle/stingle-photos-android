@@ -30,6 +30,7 @@ import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 import com.fenritz.safecam.util.MemoryCache;
 
 import java.io.File;
@@ -596,16 +597,16 @@ public class FileDialog extends ListActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
-		Helpers.setLockedTime(this);
+
+		LoginManager.setLockedTime(this);
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		Helpers.checkLoginedState(this);
-		Helpers.disableLockTimer(this);
+
+		LoginManager.checkLogin(this);
+		LoginManager.disableLockTimer(this);
 	}
 	
 	@Override

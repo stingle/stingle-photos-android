@@ -26,6 +26,7 @@ import android.widget.EditText;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.FingerprintManagerWrapper;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 import com.fenritz.safecam.util.StorageUtils;
 
 import java.io.File;
@@ -59,7 +60,7 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onResume() {
         super.onResume();
 
-        Helpers.disableLockTimer(this);
+        LoginManager.disableLockTimer(this);
     }
     /**
      * A preference value change listener that updates the preference's summary

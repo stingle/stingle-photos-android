@@ -16,6 +16,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils.TruncateAt;
 import android.util.LruCache;
 import android.util.SparseArray;
@@ -50,6 +52,7 @@ import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 import com.fenritz.safecam.util.MemoryCache;
 import com.fenritz.safecam.widget.CheckableLayout;
 
@@ -144,16 +147,6 @@ public class GalleryActivity extends Activity {
 		setTitle(getString(R.string.title_gallery_for_app));
 
 		this.thumbsDir = Helpers.getThumbsDir(this);
-
-		Bundle bundle = new Bundle();
-		bundle.putParcelable("intent", getIntent());
-		bundle.putBoolean("wentToLoginToProceed", true);
-		if(!Helpers.checkLoginedState(this, bundle)){
-			isWentToLogin = true;
-		}
-		else{
-			startupActions();
-		}
 	}
 	
 	protected void startupActions(){
@@ -186,18 +179,30 @@ public class GalleryActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 
-		if(!isWentToLogin){
-			boolean logined = Helpers.checkLoginedState(this);
-			Helpers.disableLockTimer(this);
-
-			if (logined){
-				if(thumbGenTask == null) {
-					thumbGenTask = new GenerateThumbs();
-					thumbGenTask.execute(toGenerateThumbs);
-				}
-				fillFilesList();
+		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
+			@Override
+			public void onUserLoginSuccess() {
+				Handler mainHandler = new Handler(Looper.getMainLooper());
+				Runnable myRunnable = new Runnable() {
+					@Override
+					public void run() {
+						startupActions();
+						if(thumbGenTask == null) {
+							thumbGenTask = new GenerateThumbs();
+							thumbGenTask.execute(toGenerateThumbs);
+						}
+						fillFilesList();
+					}
+				};
+				mainHandler.post(myRunnable);
 			}
-		}
+
+			@Override
+			public void onUserLoginFail() {
+				LoginManager.redirectToDashboard(GalleryActivity.this);
+			}
+		});
+		LoginManager.disableLockTimer(this);
 	}
 
 	@Override
@@ -545,7 +550,6 @@ public class GalleryActivity extends Activity {
         }
     }
 
-	@SuppressLint("NewApi")
 	private void changeDir(String newPath){
 		currentPath = newPath;
 
@@ -584,7 +588,7 @@ public class GalleryActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 
-		Helpers.setLockedTime(this);
+		LoginManager.setLockedTime(this);
 
 		if (thumbGenTask != null) {
 			thumbGenTask.cancel(true);
@@ -1165,7 +1169,6 @@ public class GalleryActivity extends Activity {
 			return label;
 		}
 		
-		@SuppressLint("NewApi")
 		public View getView(int position, View convertView, ViewGroup parent) {
 			final CheckableLayout layout = new CheckableLayout(GalleryActivity.this);
 			int thumbSize = Helpers.getThumbSize(GalleryActivity.this);
@@ -1611,7 +1614,7 @@ public class GalleryActivity extends Activity {
                 startActivity(browserIntent);
                 break;
             case R.id.logout:
-                Helpers.logout(GalleryActivity.this);
+                LoginManager.logout(GalleryActivity.this);
                 break;
             case R.id.decrypt:
                 decryptSelected();

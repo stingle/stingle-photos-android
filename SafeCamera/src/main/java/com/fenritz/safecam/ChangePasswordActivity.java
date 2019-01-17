@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.fenritz.safecam.util.AESCrypt;
 import com.fenritz.safecam.util.AESCryptException;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -321,15 +322,15 @@ public class ChangePasswordActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 		
-		Helpers.setLockedTime(this);
+		LoginManager.setLockedTime(this);
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		
-		Helpers.checkLoginedState(this);
-		Helpers.disableLockTimer(this);
+		LoginManager.checkLogin(this);
+		LoginManager.disableLockTimer(this);
 	}
 	
 	@Override

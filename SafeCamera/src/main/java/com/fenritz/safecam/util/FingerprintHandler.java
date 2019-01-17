@@ -34,7 +34,7 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
 
     //Implement the startAuth method, which is responsible for starting the fingerprint authentication process//
 
-    public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject) {
+    public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject, final LoginManager.UserLogedinCallback loginCallback, boolean showPasswordOption) {
 
         this.cipher = cryptoObject.getCipher();
 
@@ -49,15 +49,18 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
         dialog = builder.create();
         dialog.show();
 
-        Button usePasswordButton = (Button)dialog.findViewById(R.id.usePasswordButton);
-        usePasswordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.cancel();
-                dialog = null;
-                Helpers.showEnterPasswordToUnlock((Activity) context);
-            }
-        });
+        if(showPasswordOption) {
+            Button usePasswordButton = (Button) dialog.findViewById(R.id.usePasswordButton);
+            usePasswordButton.setVisibility(View.VISIBLE);
+            usePasswordButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.cancel();
+                    dialog = null;
+                    LoginManager.showEnterPasswordToUnlock((Activity) context, loginCallback);
+                }
+            });
+        }
 
         Button cancelButton = (Button)dialog.findViewById(R.id.cancelButton);
         cancelButton.setOnClickListener(new View.OnClickListener() {
