@@ -96,14 +96,14 @@ public class CameraActivity extends Activity {
 	private static final int ORIENTATION_PORTRAIT_INVERTED = 2;
 	private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
 	private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
-	
-	public static final float DEMO_MAX_RES = 0.31f;
-	
-	private static final int DEFAULT_CAMERA = 0;
-	private int numberOfCameras = 1; 
-	private int currentCamera = 0; 
 
-	private boolean isTimerOn = false; 
+	public static final float DEMO_MAX_RES = 0.31f;
+
+	private static final int DEFAULT_CAMERA = 0;
+	private int numberOfCameras = 1;
+	private int currentCamera = 0;
+
+	private boolean isTimerOn = false;
 
 	private SafeCameraButton takePhotoButton;
 	private ImageButton flashButton;
@@ -115,18 +115,18 @@ public class CameraActivity extends Activity {
 
 	private boolean isShutterSoundEnabled = true;
 
-	private int timerTotalSeconds = 10; 
+	private int timerTotalSeconds = 10;
 	private int timerTimePassed = 0;
 	private boolean isTimerRunning = false;
-	
+
 	private File lastFile;
 	private int lastRotation = 0;
 	private int overallRotation = 0;
-	
+
 	private boolean isTakingPhoto = false;
-	
+
 	private Timer timer;
-	
+
 	private int photoSizeIndex = 0;
 
 	// The first rear facing camera
@@ -137,11 +137,10 @@ public class CameraActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if(!checkCameraHardware()){
+		if (!checkCameraHardware()) {
 			finish();
 			return;
 		}
-
 
 
 		// Hide the window title.
@@ -162,16 +161,16 @@ public class CameraActivity extends Activity {
 
 		flashButton = (ImageButton) findViewById(R.id.flashButton);
 		flashButton.setOnClickListener(toggleFlash());
-		
+
 		timerButton = (ImageButton) findViewById(R.id.timerButton);
 		timerButton.setOnClickListener(toggleTimer());
-		
+
 		findViewById(R.id.switchCamButton).setOnClickListener(switchCamera());
 		findViewById(R.id.photoSizeLabel).setOnClickListener(showPhotoSizes());
 		findViewById(R.id.optionsButton).setOnClickListener(showOptions());
-		
+
 		showLastPhotoThumb();
-		
+
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -193,7 +192,7 @@ public class CameraActivity extends Activity {
 
 		isShutterSoundEnabled = sharedPrefs.getBoolean("shutter_sound", true);
 
-		if(requestCameraPermission()){
+		if (requestCameraPermission()) {
 			initCamera();
 		}
 	}
@@ -203,7 +202,7 @@ public class CameraActivity extends Activity {
 		super.onPause();
 
 		this.app_is_paused = true;
-		
+
 		LoginManager.setLockedTime(this);
 
 		destroyOrientationListener();
@@ -213,14 +212,14 @@ public class CameraActivity extends Activity {
 		releaseCamera();
 	}
 
-	public void initCamera(){
+	public void initCamera() {
 		int lastCamId = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getInt(LoginActivity.LAST_CAM_ID, DEFAULT_CAMERA);
 		startCamera(lastCamId);
 		initOrientationListener();
 		showLastPhotoThumb();
 	}
 
-	public boolean requestCameraPermission(){
+	public boolean requestCameraPermission() {
 		if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
 			if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
@@ -255,8 +254,7 @@ public class CameraActivity extends Activity {
 			case LoginActivity.REQUEST_CAMERA_PERMISSION: {
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					initCamera();
-				}
-				else {
+				} else {
 					finish();
 				}
 				return;
@@ -264,18 +262,18 @@ public class CameraActivity extends Activity {
 		}
 	}
 
-	private OnClickListener switchCamera(){
+	private OnClickListener switchCamera() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				if(numberOfCameras > 1){
+				if (numberOfCameras > 1) {
 					releaseCamera();
-					
+
 					currentCamera++;
-					
-					if(currentCamera == numberOfCameras){
+
+					if (currentCamera == numberOfCameras) {
 						currentCamera = 0;
 					}
-					
+
 					mPreview = null;
 					mPreview = new CameraPreview(CameraActivity.this);
 					((LinearLayout) findViewById(R.id.camera_preview_container)).removeAllViews();
@@ -286,51 +284,46 @@ public class CameraActivity extends Activity {
 			}
 		};
 	}
-	private OnClickListener showOptions(){
+
+	private OnClickListener showOptions() {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				openOptionsMenu();
 			}
 		};
 	}
-	
-	private OnClickListener showPhotoSizes(){
+
+	private OnClickListener showPhotoSizes() {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				showPhotoSizeChooser();
 			}
 		};
 	}
-	
-	private int getMaxAvailableSizeIndex(List<Camera.Size> mSupportedPictureSizes){
-		return mSupportedPictureSizes.size()-1;
+
+	private int getMaxAvailableSizeIndex(List<Camera.Size> mSupportedPictureSizes) {
+		return mSupportedPictureSizes.size() - 1;
 	}
-	
+
 	@SuppressLint("NewApi")
-	private void startCamera(int cameraId){
+	private void startCamera(int cameraId) {
 		final SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
-		
+
 		// Open the default i.e. the first rear facing camera.
-		
-		try{
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
-				numberOfCameras = Camera.getNumberOfCameras();
-				if(numberOfCameras > 1){
-					findViewById(R.id.switchCamButton).setVisibility(View.VISIBLE);
-					mCamera = Camera.open(cameraId);
-					currentCamera = cameraId;
-				}
-				else{
-					findViewById(R.id.switchCamButton).setVisibility(View.GONE);
-					mCamera = Camera.open(DEFAULT_CAMERA);
-					currentCamera = DEFAULT_CAMERA;
-				}
+
+		try {
+			numberOfCameras = Camera.getNumberOfCameras();
+			if (numberOfCameras > 1) {
+				findViewById(R.id.switchCamButton).setVisibility(View.VISIBLE);
+				mCamera = Camera.open(cameraId);
+				currentCamera = cameraId;
+			} else {
+				findViewById(R.id.switchCamButton).setVisibility(View.GONE);
+				mCamera = Camera.open(DEFAULT_CAMERA);
+				currentCamera = DEFAULT_CAMERA;
 			}
-			else{
-				mCamera = Camera.open();
-			}
-		}
-		catch(RuntimeException e){
+
+		} catch (RuntimeException e) {
 			Toast.makeText(CameraActivity.this, getText(R.string.unable_to_connect_camera), Toast.LENGTH_LONG).show();
 			showLastPhotoThumb();
 			return;
@@ -338,23 +331,21 @@ public class CameraActivity extends Activity {
 
 		List<Size> mSupportedPictureSizes = getSupportedImageSizes();
 		int bestAvailableSizeIndex = getMaxAvailableSizeIndex(mSupportedPictureSizes);
-		
-		if(isCurrentCameraFrontFacing()){
+
+		if (isCurrentCameraFrontFacing()) {
 			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE_FRONT, bestAvailableSizeIndex);
-		}
-		else{
+		} else {
 			photoSizeIndex = preferences.getInt(CameraActivity.PHOTO_SIZE, bestAvailableSizeIndex);
 		}
-		
+
 		Size selectedSize;
-		if(photoSizeIndex < mSupportedPictureSizes.size()){
+		if (photoSizeIndex < mSupportedPictureSizes.size()) {
 			selectedSize = mSupportedPictureSizes.get(photoSizeIndex);
-		}
-		else{
+		} else {
 			selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
 		}
 
-		if(selectedSize == null){
+		if (selectedSize == null) {
 			selectedSize = mSupportedPictureSizes.get(bestAvailableSizeIndex);
 		}
 
@@ -363,21 +354,18 @@ public class CameraActivity extends Activity {
 
 		if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
 			flashButton.setImageResource(R.drawable.flash_off);
-		}
-		else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
+		} else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
 			flashButton.setImageResource(R.drawable.flash_on);
-		}
-		else if (flashMode.equals(Parameters.FLASH_MODE_AUTO)) {
+		} else if (flashMode.equals(Parameters.FLASH_MODE_AUTO)) {
 			flashButton.setImageResource(R.drawable.flash_auto);
 		}
-		
+
 		boolean timerMode = preferences.getBoolean(CameraActivity.TIMER_MODE, false);
-		
-		if(timerMode){
+
+		if (timerMode) {
 			isTimerOn = true;
 			timerButton.setImageResource(R.drawable.timer);
-		}
-		else{
+		} else {
 			isTimerOn = false;
 			timerButton.setImageResource(R.drawable.timer_disabled);
 		}
@@ -385,28 +373,27 @@ public class CameraActivity extends Activity {
 		Camera.Parameters parameters = mCamera.getParameters();
 		List<String> flashModes = parameters.getSupportedFlashModes();
 		List<String> focusModes = parameters.getSupportedFocusModes();
-		
-		if(flashModes == null || flashModes.size() == 0){
+
+		if (flashModes == null || flashModes.size() == 0) {
 			flashButton.setVisibility(View.INVISIBLE);
-		}
-		else{
+		} else {
 			flashButton.setVisibility(View.VISIBLE);
 		}
-		
-		if(flashModes != null && flashModes.contains(flashMode)){
+
+		if (flashModes != null && flashModes.contains(flashMode)) {
 			parameters.setFlashMode(flashMode);
 		}
-		if(focusModes != null && focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
+		if (focusModes != null && focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 			parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
 		parameters.setPictureSize(selectedSize.width, selectedSize.height);
-		
+
 		setMegapixelLabel(selectedSize.width, selectedSize.height);
-		
+
 		mCamera.setParameters(parameters);
 
 		cameraCurrentlyLocked = defaultCameraId;
-		if(mPreview != null){
+		if (mPreview != null) {
 			((LinearLayout) findViewById(R.id.camera_preview_container)).removeView(mPreview);
 		}
 		mPreview = null;
@@ -414,39 +401,38 @@ public class CameraActivity extends Activity {
 		((LinearLayout) findViewById(R.id.camera_preview_container)).addView(mPreview);
 		mPreview.setCamera(mCamera);
 
-        setCameraDisplayOrientation(CameraActivity.this, currentCamera, mCamera);
+		setCameraDisplayOrientation(CameraActivity.this, currentCamera, mCamera);
 
 		getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putInt(LoginActivity.LAST_CAM_ID, cameraId).commit();
 	}
-	
-	private void releaseCamera(){
+
+	private void releaseCamera() {
 		if (mCamera != null) {
 			mPreview.setCamera(null);
 			mCamera.release();
 			mCamera = null;
 		}
 	}
-	
-	private void initOrientationListener(){
+
+	private void initOrientationListener() {
 		if (mOrientationEventListener == null) {
 			mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
 
 				@Override
 				public void onOrientationChanged(int orientation) {
-					if (orientation == ORIENTATION_UNKNOWN){
+					if (orientation == ORIENTATION_UNKNOWN) {
 						return;
 					}
 
-                    orientation = (orientation + 45) / 90 * 90;
-                    int currentOrientation = orientation % 360;
-                    int newRotation = 0;
-                    int camera_orientation = getCameraOrientation();
-                    if( isCurrentCameraFrontFacing() ) {
-                        currentCameraRotation = (camera_orientation - orientation + 360) % 360;
-                    }
-                    else {
-                        currentCameraRotation = (camera_orientation + orientation) % 360;
-                    }
+					orientation = (orientation + 45) / 90 * 90;
+					int currentOrientation = orientation % 360;
+					int newRotation = 0;
+					int camera_orientation = getCameraOrientation();
+					if (isCurrentCameraFrontFacing()) {
+						currentCameraRotation = (camera_orientation - orientation + 360) % 360;
+					} else {
+						currentCameraRotation = (camera_orientation + orientation) % 360;
+					}
 
 					// determine our orientation based on sensor response
 					int lastOrientation = mOrientation;
@@ -455,18 +441,15 @@ public class CameraActivity extends Activity {
 						if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {
 							mOrientation = ORIENTATION_PORTRAIT_NORMAL;
 						}
-					}
-					else if (orientation < 315 && orientation >= 225) {
+					} else if (orientation < 315 && orientation >= 225) {
 						if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
 							mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
 						}
-					}
-					else if (orientation < 225 && orientation >= 135) {
+					} else if (orientation < 225 && orientation >= 135) {
 						if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
 							mOrientation = ORIENTATION_PORTRAIT_INVERTED;
 						}
-					}
-					else { // orientation <135 && orientation > 45
+					} else { // orientation <135 && orientation > 45
 						if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
 							mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
 						}
@@ -479,8 +462,8 @@ public class CameraActivity extends Activity {
 
                         mCamera.setParameters(parameters);*/
 
-                        changeRotation(mOrientation);
-                    }
+						changeRotation(mOrientation);
+					}
 				}
 			};
 		}
@@ -489,10 +472,10 @@ public class CameraActivity extends Activity {
 		}
 	}
 
-    @SuppressLint("NewApi")
-    private int getCameraRotation(){
+	@SuppressLint("NewApi")
+	private int getCameraRotation() {
 
-        return currentCameraRotation;
+		return currentCameraRotation;
 
         /*int orientation = getCameraOrientation();
         boolean isFrontCamera = isCurrentCameraFrontFacing();
@@ -522,84 +505,90 @@ public class CameraActivity extends Activity {
         }
 
         return result;*/
-    }
+	}
 
-    @SuppressLint("NewApi")
-    private void setCameraDisplayOrientation(Activity activity, int cameraId, android.hardware.Camera camera) {
-        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-        android.hardware.Camera.getCameraInfo(cameraId, info);
+	@SuppressLint("NewApi")
+	private void setCameraDisplayOrientation(Activity activity, int cameraId, android.hardware.Camera camera) {
+		android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+		android.hardware.Camera.getCameraInfo(cameraId, info);
 
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-        int degrees = 0;
-        switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
-        }
+		int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+		int degrees = 0;
+		switch (rotation) {
+			case Surface.ROTATION_0:
+				degrees = 0;
+				break;
+			case Surface.ROTATION_90:
+				degrees = 90;
+				break;
+			case Surface.ROTATION_180:
+				degrees = 180;
+				break;
+			case Surface.ROTATION_270:
+				degrees = 270;
+				break;
+		}
 
-        int result;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
-        }
-        else {  // back-facing
-            result = (info.orientation - degrees + 360) % 360;
-        }
+		int result;
+		if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+			result = (info.orientation + degrees) % 360;
+			result = (360 - result) % 360;  // compensate the mirror
+		} else {  // back-facing
+			result = (info.orientation - degrees + 360) % 360;
+		}
 
-        camera.setDisplayOrientation(result);
-    }
-	
-	private void destroyOrientationListener(){
+		camera.setDisplayOrientation(result);
+	}
+
+	private void destroyOrientationListener() {
 		if (mOrientationEventListener != null) {
 			mOrientationEventListener.disable();
 			mOrientationEventListener = null;
 		}
 	}
-	
+
 	private boolean checkCameraHardware() {
-	    if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) || getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)){
-	        // this device has a camera
-	        return true;
-	    } else {
-	        // no camera on this device
-	        return false;
-	    }
+		if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) || getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)) {
+			// this device has a camera
+			return true;
+		} else {
+			// no camera on this device
+			return false;
+		}
 	}
 
-	private void setMegapixelLabel(int width, int height){
-		try{
-			String megapixel = String.format("%.1f", (double)width * (double)height / 1000000);
-			
-			((TextView)findViewById(R.id.photoSizeLabel)).setText(megapixel + " MP");
-		}
-		catch(NumberFormatException e){
-			((TextView)findViewById(R.id.photoSizeLabel)).setText("");
+	private void setMegapixelLabel(int width, int height) {
+		try {
+			String megapixel = String.format("%.1f", (double) width * (double) height / 1000000);
+
+			((TextView) findViewById(R.id.photoSizeLabel)).setText(megapixel + " MP");
+		} catch (NumberFormatException e) {
+			((TextView) findViewById(R.id.photoSizeLabel)).setText("");
 		}
 	}
-	
+
 	private class ShowLastPhotoThumb extends AsyncTask<Void, Void, File> {
 
 		@SuppressWarnings("unchecked")
 		@Override
 		protected File doInBackground(Void... params) {
-			
+
 			File dir = new File(Helpers.getHomeDir(CameraActivity.this));
-			
+
 			final int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-			
+
 			File[] folderFiles = dir.listFiles();
-			
-			if(folderFiles != null && folderFiles.length > 0){
+
+			if (folderFiles != null && folderFiles.length > 0) {
 				Arrays.sort(folderFiles, new Comparator<File>() {
 					public int compare(File f1, File f2) {
 						return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
 					}
 				});
 
-				for (File file : folderFiles){
+				for (File file : folderFiles) {
 					File thumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(file));
-					if(file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()){
+					if (file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()) {
 						return file;
 					}
 				}
@@ -612,41 +601,40 @@ public class CameraActivity extends Activity {
 			super.onPostExecute(file);
 
 			lastFile = file;
-			
-			if(lastFile != null){
+
+			if (lastFile != null) {
 				final File lastFileThumb = new File(Helpers.getThumbsDir(CameraActivity.this) + "/" + Helpers.getThumbFileName(lastFile));
 				final int thumbSize = (int) Math.round(Helpers.getThumbSize(CameraActivity.this) / 1.4);
-				
-				DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
-				task.setSize(thumbSize);
-				task.setOnFinish(new OnAsyncTaskFinish() {
-					@Override
-					public void onFinish() {
-						super.onFinish();
-						//galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
-						changeRotation(mOrientation);
-						findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
-					}
-				});
-				task.execute();
-			}
-			else{
+
+				if (SafeCameraApplication.getKey() != null) {
+					DecryptPopulateImage task = new DecryptPopulateImage(CameraActivity.this, lastFileThumb.getPath(), galleryButton);
+					task.setSize(thumbSize);
+					task.setOnFinish(new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							//galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
+							changeRotation(mOrientation);
+							findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
+						}
+					});
+					task.execute();
+				}
+			} else {
 				findViewById(R.id.lastPhoto).setVisibility(View.INVISIBLE);
 			}
 		}
 
 	}
-	
-	
-	private void showLastPhotoThumb(){
-		if(SafeCameraApplication.getKey() != null) {
-			(new ShowLastPhotoThumb()).execute();
-		}
+
+
+	private void showLastPhotoThumb() {
+		(new ShowLastPhotoThumb()).execute();
 	}
-	
+
 	@Override
 	protected void onDestroy() {
-		if(receiver != null){
+		if (receiver != null) {
 			unregisterReceiver(receiver);
 		}
 		super.onDestroy();
@@ -670,61 +658,61 @@ public class CameraActivity extends Activity {
 		}
 	}*/
 
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
 			takePhoto();
 			return true;
 		}
-		
+
 		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", true);
-		
-		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+
+		if (volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
 			takePhoto();
 			return true;
 		}
-		
+
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	
+
+
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
 			return true;
 		}
-		
+
 		boolean volumeKeysTakePhoto = sharedPrefs.getBoolean("volume_take_photo", true);
-		
-		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+
+		if (volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
 			return true;
 		}
-		
+
 		return super.onKeyUp(keyCode, event);
 	}
-	
+
 	private OnClickListener openGallery() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				LoginManager.checkLogin(CameraActivity.this, new LoginManager.UserLogedinCallback() {
-					@Override
-					public void onUserLoginSuccess() {
-						if(lastFile != null && lastFile.isFile()){
+				if (lastFile != null && lastFile.isFile()) {
+					LoginManager.checkLogin(CameraActivity.this, new LoginManager.UserLogedinCallback() {
+						@Override
+						public void onUserLoginSuccess() {
 							Intent intent = new Intent();
 							intent.setClass(CameraActivity.this, ViewImageActivity.class);
 							intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
 							intent.putExtra("EXTRA_CURRENT_PATH", Helpers.getHomeDir(CameraActivity.this));
 							startActivityForResult(intent, GalleryActivity.REQUEST_VIEW_PHOTO);
+
 						}
-					}
 
-					@Override
-					public void onUserLoginFail() {
+						@Override
+						public void onUserLoginFail() {
 
-					}
-				});
-
+						}
+					});
+				}
 			}
 		};
 	}
@@ -739,20 +727,18 @@ public class CameraActivity extends Activity {
 				if (flashMode.equals(Parameters.FLASH_MODE_AUTO)) {
 					flashMode = Parameters.FLASH_MODE_OFF;
 					flashButtonImage = R.drawable.flash_off;
-				}
-				else if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
+				} else if (flashMode.equals(Parameters.FLASH_MODE_OFF)) {
 					flashMode = Parameters.FLASH_MODE_ON;
 					flashButtonImage = R.drawable.flash_on;
-				}
-				else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
+				} else if (flashMode.equals(Parameters.FLASH_MODE_ON)) {
 					flashMode = Parameters.FLASH_MODE_AUTO;
 					flashButtonImage = R.drawable.flash_auto;
 				}
 
-				if (mCamera != null){
+				if (mCamera != null) {
 					Camera.Parameters parameters = mCamera.getParameters();
 					List<String> flashModes = parameters.getSupportedFlashModes();
-					if(flashModes != null && flashModes.contains(flashMode)){
+					if (flashModes != null && flashModes.contains(flashMode)) {
 						parameters.setFlashMode(flashMode);
 						mCamera.setParameters(parameters);
 						flashButton.setImageResource(flashButtonImage);
@@ -763,21 +749,20 @@ public class CameraActivity extends Activity {
 			}
 		};
 	}
-	
+
 	private OnClickListener toggleTimer() {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
-				
+
 				if (isTimerOn) {
 					timerButton.setImageResource(R.drawable.timer_disabled);
 					isTimerOn = false;
-				}
-				else{
+				} else {
 					timerButton.setImageResource(R.drawable.timer);
 					isTimerOn = true;
 				}
-				
+
 				preferences.edit().putBoolean(CameraActivity.TIMER_MODE, isTimerOn).commit();
 				changeRotation(mOrientation);
 			}
@@ -791,23 +776,23 @@ public class CameraActivity extends Activity {
 			}
 		};
 	}
-	
+
 	private void takePhoto() {
 		if (mCamera != null && !isTakingPhoto) {
 			Camera.Parameters parameters = mCamera.getParameters();
 			parameters.setRotation(getCameraRotation());
-            //parameters.setRotation(getCameraOrientation());
-            //parameters.setRotation(90);
+			//parameters.setRotation(getCameraOrientation());
+			//parameters.setRotation(90);
 			mCamera.setParameters(parameters);
-			
-			if(isTimerOn){
-				if(!isTimerRunning){
-					((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf(timerTotalSeconds));
-					((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.VISIBLE);
+
+			if (isTimerOn) {
+				if (!isTimerRunning) {
+					((TextView) findViewById(R.id.timerLabel)).setText(String.valueOf(timerTotalSeconds));
+					((LinearLayout) findViewById(R.id.timerLabelContainer)).setVisibility(View.VISIBLE);
 					timerTimePassed = 0;
-					
+
 					timerTotalSeconds = Integer.valueOf(sharedPrefs.getString("timerDuration", "10"));
-					
+
 					isTimerRunning = true;
 					timer = new Timer();
 					timer.schedule(new TimerTask() {
@@ -816,16 +801,16 @@ public class CameraActivity extends Activity {
 							runOnUiThread(
 									new Runnable() {
 										public void run() {
-											((TextView)findViewById(R.id.timerLabel)).setText(String.valueOf((timerTotalSeconds-timerTimePassed)+1));
-											if(timerTimePassed > timerTotalSeconds){
-												((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
+											((TextView) findViewById(R.id.timerLabel)).setText(String.valueOf((timerTotalSeconds - timerTimePassed) + 1));
+											if (timerTimePassed > timerTotalSeconds) {
+												((LinearLayout) findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
 											}
 										}
 									}
 							);
-							
-							if(timerTimePassed > timerTotalSeconds){
-								if(mCamera != null){
+
+							if (timerTimePassed > timerTotalSeconds) {
+								if (mCamera != null) {
 									isTakingPhoto = true;
 									handleFocusAndTakePicture();
 								}
@@ -833,49 +818,45 @@ public class CameraActivity extends Activity {
 								timer.cancel();
 								isTimerRunning = false;
 							}
-							
+
 							timerTimePassed++;
 						}
 					}, 0, 1000);
-				}
-				else if(timer != null){
+				} else if (timer != null) {
 					timer.cancel();
-					((LinearLayout)findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
+					((LinearLayout) findViewById(R.id.timerLabelContainer)).setVisibility(View.GONE);
 					isTimerRunning = false;
 				}
-			}
-			else{
+			} else {
 				isTakingPhoto = true;
 				handleFocusAndTakePicture();
 			}
 		}
 	}
-	
-	private void takePicture(){
+
+	private void takePicture() {
 		successfully_focused = false;
 		mCamera.takePicture(null, null, getPictureCallback());
 	}
-	
-	private void handleFocusAndTakePicture(){
+
+	private void handleFocusAndTakePicture() {
 		List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
 		boolean hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
 
-		if( hasAutoFocus && (!this.successfully_focused || System.currentTimeMillis() > this.successfully_focused_time + 5000 )) {
-	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+		if (hasAutoFocus && (!this.successfully_focused || System.currentTimeMillis() > this.successfully_focused_time + 5000)) {
+			Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 				public void onAutoFocus(boolean success, Camera camera) {
 					takePicture();
 				}
-	        };
-    		try {
-    	    	mCamera.autoFocus(autoFocusCallback);
-    			count_cameraAutoFocus++;
-    		}
-    		catch(RuntimeException e) {
-    			autoFocusCallback.onAutoFocus(false, mCamera);
-    			e.printStackTrace();
-    		}
-		}
-		else {
+			};
+			try {
+				mCamera.autoFocus(autoFocusCallback);
+				count_cameraAutoFocus++;
+			} catch (RuntimeException e) {
+				autoFocusCallback.onAutoFocus(false, mCamera);
+				e.printStackTrace();
+			}
+		} else {
 			takePicture();
 		}
 	}
@@ -891,13 +872,11 @@ public class CameraActivity extends Activity {
 	}
 
 	@SuppressLint("NewApi")
-	private void shootSound()
-	{
-		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
+	private void shootSound() {
+		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			MediaActionSound sound = new MediaActionSound();
 			sound.play(MediaActionSound.SHUTTER_CLICK);
-		}
-		else {
+		} else {
 			AudioManager meng = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 			int volume = meng.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
 
@@ -923,7 +902,7 @@ public class CameraActivity extends Activity {
 		return new PictureCallback() {
 
 			public void onPictureTaken(byte[] data, Camera camera) {
-				if(isShutterSoundEnabled) {
+				if (isShutterSoundEnabled) {
 					shootSound();
 				}
 
@@ -932,7 +911,7 @@ public class CameraActivity extends Activity {
 				/*if(isCurrentCameraFrontFacing()){
 					data = FixFrontCamPhoto(CameraActivity.this, data, currentCamera);
 				}*/
-				
+
 				String filenameBase = Helpers.getFilename(CameraActivity.this, Helpers.JPEG_FILE_PREFIX);
 				String filename = filenameBase + ".jpg";
 				String filenameEnc = filenameBase + ".sc";
@@ -940,7 +919,7 @@ public class CameraActivity extends Activity {
 				String path = Helpers.getHomeDir(CameraActivity.this);
 				//String newFileName = Helpers.getNextAvailableFilePrefix(path) + Helpers.encryptFilename(CameraActivity.this, filename);
 				String finalPath = path + "/" + filenameEnc;
-				
+
 				new EncryptAndWriteFile(filename, finalPath).execute(data);
 				new EncryptAndWriteThumb(CameraActivity.this, Helpers.getThumbFileName(finalPath), new OnAsyncTaskFinish() {
 					@Override
@@ -955,69 +934,69 @@ public class CameraActivity extends Activity {
 			}
 		};
 	}
-	
+
 	public byte[] FixFrontCamPhoto(Activity activity, byte[] data, int cameraID) {
-	    Matrix matrix = new Matrix();
-	    
-	    // Convert ByteArray to Bitmap
-	    Bitmap bitPic = Helpers.decodeBitmap(data, 999999999, true);
+		Matrix matrix = new Matrix();
 
-	    // Perform matrix rotations/mirrors depending on camera that took the photo
-        float[] mirrorY = { -1, 0, 0, 0, 1, 0, 0, 0, 1};
-        Matrix matrixMirrorY = new Matrix();
-        matrixMirrorY.setValues(mirrorY);
+		// Convert ByteArray to Bitmap
+		Bitmap bitPic = Helpers.decodeBitmap(data, 999999999, true);
 
-        matrix.postConcat(matrixMirrorY);
+		// Perform matrix rotations/mirrors depending on camera that took the photo
+		float[] mirrorY = {-1, 0, 0, 0, 1, 0, 0, 0, 1};
+		Matrix matrixMirrorY = new Matrix();
+		matrixMirrorY.setValues(mirrorY);
 
-
-
-        //matrix.postRotate(getCameraDisplayFinalOrientation(activity, cameraID, mCamera));
-
-        Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
-        bitPic.recycle();
-
-	    //matrix.postRotate(90);
+		matrix.postConcat(matrixMirrorY);
 
 
-	    // Create new Bitmap out of the old one
+		//matrix.postRotate(getCameraDisplayFinalOrientation(activity, cameraID, mCamera));
+
+		Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
+		bitPic.recycle();
+
+		//matrix.postRotate(90);
+
+
+		// Create new Bitmap out of the old one
 	    /*Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, bitPic.getWidth(), bitPic.getHeight(), matrix, true);
 	    bitPic.recycle();*/
-	    
-	    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-	    bitPicFinal.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-	    
-	    return stream.toByteArray();
+
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		bitPicFinal.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+		return stream.toByteArray();
 	}
 
 	@SuppressLint("NewApi")
-	private boolean isCurrentCameraFrontFacing(){
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
-			try{
+	private boolean isCurrentCameraFrontFacing() {
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+			try {
 				Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
 				Camera.getCameraInfo(currentCamera, cameraInfo);
-				if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
+				if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
 					return true;
 				}
+			} catch (RuntimeException e) {
 			}
-			catch(RuntimeException e){ }
 		}
 		return false;
 	}
-	@SuppressLint("NewApi")
-	private int getCameraOrientation(){
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
-			try{
-                Camera.CameraInfo info = new Camera.CameraInfo();
-                Camera.getCameraInfo(currentCamera, info);
 
-                return info.orientation;
+	@SuppressLint("NewApi")
+	private int getCameraOrientation() {
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+			try {
+				Camera.CameraInfo info = new Camera.CameraInfo();
+				Camera.getCameraInfo(currentCamera, info);
+
+				return info.orientation;
+			} catch (RuntimeException e) {
 			}
-			catch(RuntimeException e){ }
 		}
 		return 0;
 	}
 
-	private int getRotationFromOrientation(int orientation){
+	private int getRotationFromOrientation(int orientation) {
 		int rotation = 0;
 		boolean isFrontCamera = isCurrentCameraFrontFacing();
 		switch (orientation) {
@@ -1034,13 +1013,13 @@ public class CameraActivity extends Activity {
 				rotation = 180;
 				break;
 		}
-		
+
 		return rotation;
 	}
-	
+
 	/**
 	 * Performs required action to accommodate new orientation
-	 * 
+	 *
 	 * @param orientation
 	 */
 	private int changeRotation(int orientation) {
@@ -1067,10 +1046,10 @@ public class CameraActivity extends Activity {
 		}
 
 		int howMuchRotated = 0;
-		
-		switch(lastRotation){
+
+		switch (lastRotation) {
 			case 0:
-				switch(viewsRotation){
+				switch (viewsRotation) {
 					case 0:
 						howMuchRotated = 0;
 						break;
@@ -1086,7 +1065,7 @@ public class CameraActivity extends Activity {
 				}
 				break;
 			case 90:
-				switch(viewsRotation){
+				switch (viewsRotation) {
 					case 0:
 						howMuchRotated = -90;
 						break;
@@ -1102,7 +1081,7 @@ public class CameraActivity extends Activity {
 				}
 				break;
 			case 180:
-				switch(viewsRotation){
+				switch (viewsRotation) {
 					case 0:
 						howMuchRotated = 180;
 						break;
@@ -1118,7 +1097,7 @@ public class CameraActivity extends Activity {
 				}
 				break;
 			case 270:
-				switch(viewsRotation){
+				switch (viewsRotation) {
 					case 0:
 						howMuchRotated = 90;
 						break;
@@ -1135,29 +1114,29 @@ public class CameraActivity extends Activity {
 				break;
 		}
 
-		
+
 		int oldOverallRotation = overallRotation;
 		overallRotation += howMuchRotated;
-		
+
 		//rotateElement(takePhotoButton, oldOverallRotation, overallRotation);
 		rotateElement(galleryButton, oldOverallRotation, overallRotation);
 		rotateElement(flashButton, oldOverallRotation, overallRotation);
 		rotateElement(timerButton, oldOverallRotation, overallRotation);
 		rotateElement(findViewById(R.id.switchCamButton), oldOverallRotation, overallRotation);
 		rotateElement(findViewById(R.id.optionsButton), oldOverallRotation, overallRotation);
-		
+
 		lastRotation = viewsRotation;
-		
+
 		return rotation;
 	}
-	
-	private void rotateElement(View view, int start, int end){
+
+	private void rotateElement(View view, int start, int end) {
 		RotateAnimation rotateAnimation = new RotateAnimation(start, end, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		rotateAnimation.setInterpolator(new LinearInterpolator());
 		rotateAnimation.setDuration(500);
 		rotateAnimation.setFillAfter(true);
 		rotateAnimation.setFillEnabled(true);
-		
+
 		view.startAnimation(rotateAnimation);
 	}
 
@@ -1165,7 +1144,7 @@ public class CameraActivity extends Activity {
 
 		private final String fileName;
 		private final String filePath;
-		private ProgressDialog progressDialog;
+		//private ProgressDialog progressDialog;
 
 		public EncryptAndWriteFile(String fileName, String filePath) {
 			super();
@@ -1177,7 +1156,7 @@ public class CameraActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			progressDialog = ProgressDialog.show(CameraActivity.this, "", getString(R.string.encrypting_photo), false, false);
+			//progressDialog = ProgressDialog.show(CameraActivity.this, "", getString(R.string.encrypting_photo), false, false);
 		}
 
 		@Override
@@ -1187,8 +1166,7 @@ public class CameraActivity extends Activity {
 				SafeCameraApplication.getCrypto().encryptFile(out, params[0], fileName);
 				out.close();
 				//Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
-			}
-			catch (FileNotFoundException e) {
+			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -1202,13 +1180,13 @@ public class CameraActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			progressDialog.dismiss();
+			//progressDialog.dismiss();
 			takePhotoButton.resetAnimation();
 		}
 
 	}
 
-	public class EncryptAndWriteThumb extends AsyncTask<byte[], Void, Void> {
+	public class EncryptAndWriteThumb extends AsyncTask<byte[], Void, Bitmap> {
 
 		private final String fileName;
 		private final Context context;
@@ -1221,14 +1199,14 @@ public class CameraActivity extends Activity {
 		public EncryptAndWriteThumb(Context pContext, String pFilename) {
 			this(pContext, pFilename, null);
 		}
-		
+
 		public EncryptAndWriteThumb(Context pContext, String pFilename, OnAsyncTaskFinish onFinish) {
 			super();
 			context = pContext;
 			if (pFilename == null) {
 				pFilename = Helpers.getFilename(context, Helpers.JPEG_FILE_PREFIX, ".sc");
 			}
-			if(onFinish != null){
+			if (onFinish != null) {
 				this.onFinish = onFinish;
 			}
 
@@ -1236,112 +1214,113 @@ public class CameraActivity extends Activity {
 		}
 
 		@Override
-		protected Void doInBackground(byte[]... params) {
+		protected Bitmap doInBackground(byte[]... params) {
 			try {
-				Helpers.generateThumbnail(context, params[0], fileName);
-			}
-			catch (FileNotFoundException e) {
+				return Helpers.generateThumbnail(context, params[0], fileName);
+			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 			return null;
 		}
-		
+
 		@Override
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(Bitmap result) {
 			super.onPostExecute(result);
-			
-			if(onFinish != null){
+
+			if(SafeCameraApplication.getKey() == null){
+				galleryButton.setImageBitmap(result);
+			}
+
+			if (onFinish != null) {
 				onFinish.onFinish();
 			}
 		}
 	}
 
-	private void showPhotoSizeChooser(){
+	private void showPhotoSizeChooser() {
 		if (mCamera == null) {
 			return;
 		}
-		
+
 		final List<Size> mSupportedPictureSizes = getSupportedImageSizes();
-		
+
 		CharSequence[] listEntries = new CharSequence[mSupportedPictureSizes.size()];
-		
+
 		for (int i = 0; i < mSupportedPictureSizes.size(); i++) {
 			Camera.Size size = mSupportedPictureSizes.get(i);
-			String megapixel = String.format("%.1f", (double)size.width * (double)size.height / 1000000);
+			String megapixel = String.format("%.1f", (double) size.width * (double) size.height / 1000000);
 			listEntries[i] = megapixel + " MP - " + String.valueOf(size.width) + "x" + String.valueOf(size.height);
 		}
-		
+
 		final SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(getString(R.string.photo_size_choose));
-		builder.setSingleChoiceItems(listEntries, 
-				photoSizeIndex, 
+		builder.setSingleChoiceItems(listEntries,
+				photoSizeIndex,
 				new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int item) {
-			
-				double megapixel = mSupportedPictureSizes.get(item).width * mSupportedPictureSizes.get(item).height;
-				megapixel = megapixel / 1000000;
-				megapixel = (double)Math.round(megapixel * 10) / 10;
-				
-				if(isCurrentCameraFrontFacing()){
-					preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, item).commit();
-				}
-				else{
-					preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
-				}
-				
-				mPreview.setCamera(null);
-				
-				Camera.Parameters parameters = mCamera.getParameters();
-				parameters.setPictureSize(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
-				mCamera.setParameters(parameters);
-				
-				setMegapixelLabel(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
-				
-				mPreview.setCamera(mCamera);
-				mPreview.requestLayout();
-				
-				photoSizeIndex = item;
-				
-				dialog.dismiss();
-			}
-		}).show();
+					public void onClick(DialogInterface dialog, int item) {
+
+						double megapixel = mSupportedPictureSizes.get(item).width * mSupportedPictureSizes.get(item).height;
+						megapixel = megapixel / 1000000;
+						megapixel = (double) Math.round(megapixel * 10) / 10;
+
+						if (isCurrentCameraFrontFacing()) {
+							preferences.edit().putInt(CameraActivity.PHOTO_SIZE_FRONT, item).commit();
+						} else {
+							preferences.edit().putInt(CameraActivity.PHOTO_SIZE, item).commit();
+						}
+
+						mPreview.setCamera(null);
+
+						Camera.Parameters parameters = mCamera.getParameters();
+						parameters.setPictureSize(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
+						mCamera.setParameters(parameters);
+
+						setMegapixelLabel(mSupportedPictureSizes.get(item).width, mSupportedPictureSizes.get(item).height);
+
+						mPreview.setCamera(mCamera);
+						mPreview.requestLayout();
+
+						photoSizeIndex = item;
+
+						dialog.dismiss();
+					}
+				}).show();
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.camera_menu, menu);;
-        return super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.camera_menu, menu);
+		;
+		return super.onCreateOptionsMenu(menu);
 	}
 
-	private List<Size> getSupportedImageSizes(){
+	private List<Size> getSupportedImageSizes() {
 		List<Size> mSupportedPictureSizes = mCamera.getParameters().getSupportedPictureSizes();
 
-		if(mSupportedPictureSizes.size() > 0){
+		if (mSupportedPictureSizes.size() > 0) {
 			Collections.sort(mSupportedPictureSizes, new Comparator<Size>() {
-	
+
 				public int compare(Size lhs, Size rhs) {
-					double megapixel1 = (double)lhs.width * (double)lhs.height / 1000000;
-					double megapixel2 = (double)rhs.width * (double)rhs.height / 1000000;
-					
-					if(megapixel1 == megapixel2){
+					double megapixel1 = (double) lhs.width * (double) lhs.height / 1000000;
+					double megapixel2 = (double) rhs.width * (double) rhs.height / 1000000;
+
+					if (megapixel1 == megapixel2) {
 						return 0;
-					}
-					else if(megapixel1 < megapixel2){
+					} else if (megapixel1 < megapixel2) {
 						return -1;
-					}
-					else{
+					} else {
 						return 1;
 					}
 				}
-				
+
 			});
 		}
-		
+
 		return mSupportedPictureSizes;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
@@ -1367,9 +1346,9 @@ public class CameraActivity extends Activity {
 				return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
 	private boolean touch_was_multitouch = false;
-    private boolean has_focus_area = false;
+	private boolean has_focus_area = false;
 	private int focus_screen_x = 0;
 	private int focus_screen_y = 0;
 	private long focus_complete_time = -1;
@@ -1383,86 +1362,82 @@ public class CameraActivity extends Activity {
 	private long successfully_focused_time = -1;
 	public int count_cameraAutoFocus = 0;
 	private final Paint p = new Paint();
-	
+
 	private final Matrix camera_to_preview_matrix = new Matrix();
-    private final Matrix preview_to_camera_matrix = new Matrix();
-    
-	
-	
-    @SuppressLint("NewApi")
+	private final Matrix preview_to_camera_matrix = new Matrix();
+
+
+	@SuppressLint("NewApi")
 	public boolean handleTouchEvent(MotionEvent event) {
-    	if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH){
-	        //scaleGestureDetector.onTouchEvent(event);
-			if( event.getPointerCount() != 1 ) {
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			//scaleGestureDetector.onTouchEvent(event);
+			if (event.getPointerCount() != 1) {
 				touch_was_multitouch = true;
 				return true;
 			}
-			if( event.getAction() != MotionEvent.ACTION_UP ) {
-				if( event.getAction() == MotionEvent.ACTION_DOWN && event.getPointerCount() == 1 ) {
+			if (event.getAction() != MotionEvent.ACTION_UP) {
+				if (event.getAction() == MotionEvent.ACTION_DOWN && event.getPointerCount() == 1) {
 					touch_was_multitouch = false;
 				}
 				return true;
 			}
-			if( touch_was_multitouch ) {
+			if (touch_was_multitouch) {
 				return true;
 			}
 			/*if( this.isTakingPhotoOrOnTimer() ) {
 				return true;
 			}*/
-	
-			// note, we always try to force start the preview (in case is_preview_paused has become false)
-	        //startCameraPreview();
-	        cancelAutoFocus();
-	
-	        if( mCamera != null ) {
-	            Camera.Parameters parameters = mCamera.getParameters();
-				String focus_mode = parameters.getFocusMode();
-	    		this.has_focus_area = false;
-	            if( parameters.getMaxNumFocusAreas() != 0 && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
-					this.has_focus_area = true;
-					this.focus_screen_x = (int)event.getX();
-					this.focus_screen_y = (int)event.getY();
-	
-					ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
-				    parameters.setFocusAreas(areas);
-	
-				    // also set metering areas
-				    if( parameters.getMaxNumMeteringAreas() > 0 ) {
-				    	parameters.setMeteringAreas(areas);
-				    }
-	
-				    try {
-				    	mCamera.setParameters(parameters);
-				    }
-				    catch(RuntimeException e) {
-				    	// just in case something has gone wrong
-		        		e.printStackTrace();
-				    }
-	            }
-	            else if( parameters.getMaxNumMeteringAreas() != 0 ) {
-	        		// don't set has_focus_area in this mode
-					ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
-			    	parameters.setMeteringAreas(areas);
-	
-				    try {
-				    	mCamera.setParameters(parameters);
-				    }
-				    catch(RuntimeException e) {
-				    	// just in case something has gone wrong
-		        		e.printStackTrace();
-				    }
-	            }
-	        }
-	        mPreview.invalidate();
-			tryAutoFocus(false, true);
-    	}
-		return true;
-    }
 
-    
-    private void tryAutoFocus(final boolean startup, final boolean manual) {
-    	// manual: whether user has requested autofocus (by touching screen)
-		if( mCamera == null ) {
+			// note, we always try to force start the preview (in case is_preview_paused has become false)
+			//startCameraPreview();
+			cancelAutoFocus();
+
+			if (mCamera != null) {
+				Camera.Parameters parameters = mCamera.getParameters();
+				String focus_mode = parameters.getFocusMode();
+				this.has_focus_area = false;
+				if (parameters.getMaxNumFocusAreas() != 0 && (focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))) {
+					this.has_focus_area = true;
+					this.focus_screen_x = (int) event.getX();
+					this.focus_screen_y = (int) event.getY();
+
+					ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
+					parameters.setFocusAreas(areas);
+
+					// also set metering areas
+					if (parameters.getMaxNumMeteringAreas() > 0) {
+						parameters.setMeteringAreas(areas);
+					}
+
+					try {
+						mCamera.setParameters(parameters);
+					} catch (RuntimeException e) {
+						// just in case something has gone wrong
+						e.printStackTrace();
+					}
+				} else if (parameters.getMaxNumMeteringAreas() != 0) {
+					// don't set has_focus_area in this mode
+					ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
+					parameters.setMeteringAreas(areas);
+
+					try {
+						mCamera.setParameters(parameters);
+					} catch (RuntimeException e) {
+						// just in case something has gone wrong
+						e.printStackTrace();
+					}
+				}
+			}
+			mPreview.invalidate();
+			tryAutoFocus(false, true);
+		}
+		return true;
+	}
+
+
+	private void tryAutoFocus(final boolean startup, final boolean manual) {
+		// manual: whether user has requested autofocus (by touching screen)
+		if (mCamera == null) {
 			Log.d(SafeCameraApplication.TAG, "no camera");
 		}
 		/*else if( !mPreview.has_surface ) {
@@ -1470,78 +1445,73 @@ public class CameraActivity extends Activity {
 		else if( !this.is_preview_started ) {
 		}*/
 		//else if( is_taking_photo ) {
-		else if( isTakingPhoto || isTimerRunning ) {
+		else if (isTakingPhoto || isTimerRunning) {
 			Log.d(SafeCameraApplication.TAG, "currently taking a photo");
-		}
-		else {
+		} else {
 			// it's only worth doing autofocus when autofocus has an effect (i.e., auto or macro mode)
-            Camera.Parameters parameters = mCamera.getParameters();
+			Camera.Parameters parameters = mCamera.getParameters();
 			String focus_mode = parameters.getFocusMode();
 			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
 			// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
-	        if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) ) {
-    			String old_flash = parameters.getFlashMode();
-    			set_flash_after_autofocus = "";
-    			// getFlashMode() may return null if flash not supported!
-    			if( startup && old_flash != null && old_flash != Camera.Parameters.FLASH_MODE_OFF ) {
-        			set_flash_after_autofocus = old_flash;
-    				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-    				mCamera.setParameters(parameters);
-    			}
-		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+			if (focus_mode != null && (focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO))) {
+				String old_flash = parameters.getFlashMode();
+				set_flash_after_autofocus = "";
+				// getFlashMode() may return null if flash not supported!
+				if (startup && old_flash != null && old_flash != Camera.Parameters.FLASH_MODE_OFF) {
+					set_flash_after_autofocus = old_flash;
+					parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+					mCamera.setParameters(parameters);
+				}
+				Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 					public void onAutoFocus(boolean success, Camera camera) {
 						autoFocusCompleted(manual, success, false);
 					}
-		        };
-	
+				};
+
 				this.focus_success = FOCUS_WAITING;
-	    		this.focus_complete_time = -1;
-	    		this.successfully_focused = false;
-	    		mPreview.invalidate();
-	    		try {
-	    			mCamera.autoFocus(autoFocusCallback);
-	    			count_cameraAutoFocus++;
-	    		}
-	    		catch(RuntimeException e) {
-	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
-	    			autoFocusCallback.onAutoFocus(false, mCamera);
-	    			e.printStackTrace();
-	    		}
-	        }
-	        else if( has_focus_area ) {
-	        	// do this so we get the focus box, for focus modes that support focus area, but don't support autofocus
+				this.focus_complete_time = -1;
+				this.successfully_focused = false;
+				mPreview.invalidate();
+				try {
+					mCamera.autoFocus(autoFocusCallback);
+					count_cameraAutoFocus++;
+				} catch (RuntimeException e) {
+					// just in case? We got a RuntimeException report here from 1 user on Google Play
+					autoFocusCallback.onAutoFocus(false, mCamera);
+					e.printStackTrace();
+				}
+			} else if (has_focus_area) {
+				// do this so we get the focus box, for focus modes that support focus area, but don't support autofocus
 				focus_success = FOCUS_SUCCESS;
 				focus_complete_time = System.currentTimeMillis();
-	        }
+			}
 		}
-    }
-    
-    private void cancelAutoFocus() {
-        if( mCamera != null ) {
+	}
+
+	private void cancelAutoFocus() {
+		if (mCamera != null) {
 			try {
 				mCamera.cancelAutoFocus();
+			} catch (RuntimeException e) {
+				e.printStackTrace();
 			}
-			catch(RuntimeException e) {
-	    		e.printStackTrace();
-			}
-    		autoFocusCompleted(false, false, true);
-        }
-    }
-    
-    private void autoFocusCompleted(boolean manual, boolean success, boolean cancelled) {
-		if( cancelled ) {
-			focus_success = FOCUS_DONE;
+			autoFocusCompleted(false, false, true);
 		}
-		else {
+	}
+
+	private void autoFocusCompleted(boolean manual, boolean success, boolean cancelled) {
+		if (cancelled) {
+			focus_success = FOCUS_DONE;
+		} else {
 			focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
 			focus_complete_time = System.currentTimeMillis();
 		}
-		if( manual && !cancelled && success ) {
+		if (manual && !cancelled && success) {
 			successfully_focused = true;
 			successfully_focused_time = focus_complete_time;
 		}
-		if( set_flash_after_autofocus.length() > 0 && mCamera != null ) {
-			
+		if (set_flash_after_autofocus.length() > 0 && mCamera != null) {
+
 			Camera.Parameters parameters = mCamera.getParameters();
 			parameters.setFlashMode(set_flash_after_autofocus);
 			set_flash_after_autofocus = "";
@@ -1561,57 +1531,55 @@ public class CameraActivity extends Activity {
 			}
 		}*/
 		mPreview.invalidate();
-    }
-    
-    @SuppressLint("NewApi")
+	}
+
+	@SuppressLint("NewApi")
 	private ArrayList<Camera.Area> getAreas(float x, float y) {
-		float [] coords = {x, y};
+		float[] coords = {x, y};
 		calculatePreviewToCameraMatrix();
 		preview_to_camera_matrix.mapPoints(coords);
 		float focus_x = coords[0];
 		float focus_y = coords[1];
-		
+
 		int focus_size = 50;
 		Rect rect = new Rect();
-		rect.left = (int)focus_x - focus_size;
-		rect.right = (int)focus_x + focus_size;
-		rect.top = (int)focus_y - focus_size;
-		rect.bottom = (int)focus_y + focus_size;
-		if( rect.left < -1000 ) {
+		rect.left = (int) focus_x - focus_size;
+		rect.right = (int) focus_x + focus_size;
+		rect.top = (int) focus_y - focus_size;
+		rect.bottom = (int) focus_y + focus_size;
+		if (rect.left < -1000) {
 			rect.left = -1000;
-			rect.right = rect.left + 2*focus_size;
-		}
-		else if( rect.right > 1000 ) {
+			rect.right = rect.left + 2 * focus_size;
+		} else if (rect.right > 1000) {
 			rect.right = 1000;
-			rect.left = rect.right - 2*focus_size;
+			rect.left = rect.right - 2 * focus_size;
 		}
-		if( rect.top < -1000 ) {
+		if (rect.top < -1000) {
 			rect.top = -1000;
-			rect.bottom = rect.top + 2*focus_size;
-		}
-		else if( rect.bottom > 1000 ) {
+			rect.bottom = rect.top + 2 * focus_size;
+		} else if (rect.bottom > 1000) {
 			rect.bottom = 1000;
-			rect.top = rect.bottom - 2*focus_size;
+			rect.top = rect.bottom - 2 * focus_size;
 		}
 
-	    ArrayList<Camera.Area> areas = new ArrayList<Camera.Area>();
-	    if (android.os.Build.VERSION.SDK_INT >= 14){
-	    	areas.add(new Camera.Area(rect, 1000));
-	    }
-	    return areas;
+		ArrayList<Camera.Area> areas = new ArrayList<Camera.Area>();
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			areas.add(new Camera.Area(rect, 1000));
+		}
+		return areas;
 	}
-    
-    @SuppressLint("NewApi")
+
+	@SuppressLint("NewApi")
 	private void calculateCameraToPreviewMatrix() {
-    	int facing = 0;
-    	if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD){
+		int facing = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
 			Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
 			Camera.getCameraInfo(currentCamera, cameraInfo);
 			facing = cameraInfo.facing;
-    	}
-    	
+		}
+
 		camera_to_preview_matrix.reset();
-		
+
 		// Need mirror for front camera.
 		boolean mirror = (facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
 		camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
@@ -1625,36 +1593,36 @@ public class CameraActivity extends Activity {
 
 	private void calculatePreviewToCameraMatrix() {
 		calculateCameraToPreviewMatrix();
-		if( !camera_to_preview_matrix.invert(preview_to_camera_matrix) ) {
+		if (!camera_to_preview_matrix.invert(preview_to_camera_matrix)) {
 		}
 	}
-	
+
 	public void handleOnDraw(Canvas canvas) {
 
-		if( this.app_is_paused ) {
+		if (this.app_is_paused) {
 			return;
 		}
 
 		final float scale = getResources().getDisplayMetrics().density;
-		if( mCamera != null && sharedPrefs.getString("preference_grid", "preference_grid_none").equals("preference_grid_3x3") ) {
+		if (mCamera != null && sharedPrefs.getString("preference_grid", "preference_grid_none").equals("preference_grid_3x3")) {
 			p.setColor(Color.WHITE);
-			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
-			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
+			canvas.drawLine(canvas.getWidth() / 3.0f, 0.0f, canvas.getWidth() / 3.0f, canvas.getHeight() - 1.0f, p);
+			canvas.drawLine(2.0f * canvas.getWidth() / 3.0f, 0.0f, 2.0f * canvas.getWidth() / 3.0f, canvas.getHeight() - 1.0f, p);
+			canvas.drawLine(0.0f, canvas.getHeight() / 3.0f, canvas.getWidth() - 1.0f, canvas.getHeight() / 3.0f, p);
+			canvas.drawLine(0.0f, 2.0f * canvas.getHeight() / 3.0f, canvas.getWidth() - 1.0f, 2.0f * canvas.getHeight() / 3.0f, p);
 		}
-		if( mCamera != null && sharedPrefs.getString("preference_grid", "preference_grid_none").equals("preference_grid_4x2") ) {
+		if (mCamera != null && sharedPrefs.getString("preference_grid", "preference_grid_none").equals("preference_grid_4x2")) {
 			p.setColor(Color.GRAY);
-			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(3.0f*canvas.getWidth()/4.0f, 0.0f, 3.0f*canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/2.0f, canvas.getWidth()-1.0f, canvas.getHeight()/2.0f, p);
+			canvas.drawLine(canvas.getWidth() / 4.0f, 0.0f, canvas.getWidth() / 4.0f, canvas.getHeight() - 1.0f, p);
+			canvas.drawLine(canvas.getWidth() / 2.0f, 0.0f, canvas.getWidth() / 2.0f, canvas.getHeight() - 1.0f, p);
+			canvas.drawLine(3.0f * canvas.getWidth() / 4.0f, 0.0f, 3.0f * canvas.getWidth() / 4.0f, canvas.getHeight() - 1.0f, p);
+			canvas.drawLine(0.0f, canvas.getHeight() / 2.0f, canvas.getWidth() - 1.0f, canvas.getHeight() / 2.0f, p);
 			p.setColor(Color.WHITE);
 			int crosshairs_radius = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
-			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
+			canvas.drawLine(canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f - crosshairs_radius, canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f + crosshairs_radius, p);
+			canvas.drawLine(canvas.getWidth() / 2.0f - crosshairs_radius, canvas.getHeight() / 2.0f, canvas.getWidth() / 2.0f + crosshairs_radius, canvas.getHeight() / 2.0f, p);
 		}
-		
+
 		//canvas.save();
 		
 
@@ -1670,32 +1638,31 @@ public class CameraActivity extends Activity {
 				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}*/
-		
-		
-		if( this.focus_success != FOCUS_DONE ) {
+
+
+		if (this.focus_success != FOCUS_DONE) {
 			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
-			if( this.focus_success == FOCUS_SUCCESS )
+			if (this.focus_success == FOCUS_SUCCESS)
 				p.setColor(Color.GREEN);
-			else if( this.focus_success == FOCUS_FAILED )
+			else if (this.focus_success == FOCUS_FAILED)
 				p.setColor(Color.RED);
 			else
 				p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			int pos_x = 0;
 			int pos_y = 0;
-			if( has_focus_area ) {
+			if (has_focus_area) {
 				pos_x = focus_screen_x;
 				pos_y = focus_screen_y;
-			}
-			else {
+			} else {
 				pos_x = canvas.getWidth() / 2;
 				pos_y = canvas.getHeight() / 2;
 			}
 			canvas.drawRect(pos_x - size, pos_y - size, pos_x + size, pos_y + size, p);
-			if( focus_complete_time != -1 && System.currentTimeMillis() > focus_complete_time + 1000 ) {
+			if (focus_complete_time != -1 && System.currentTimeMillis() > focus_complete_time + 1000) {
 				focus_success = FOCUS_DONE;
 			}
-			
+
 			final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 				public void run() {
@@ -1704,7 +1671,7 @@ public class CameraActivity extends Activity {
 			}, 1020);
 			p.setStyle(Paint.Style.FILL); // reset
 		}
-		
+
 	}
 
 }

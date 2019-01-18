@@ -6,15 +6,12 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.ProgressBar;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -32,7 +29,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 
 	private Context context;
 	private final ViewGroup parent;
-	private ProgressBar progressBar;
+
 	private final OnClickListener onClickListener;
 	private final OnLongClickListener onLongClickListener;
 	private final MemoryCache memCache;
@@ -83,30 +80,9 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 			}
 		}
 
-		progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
-		// progressBar = new ProgressBar(context);
-		progressBar.setProgress(0);
-		LayoutParams layoutParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-		layoutParams.gravity = Gravity.CENTER;
-		layoutParams.setMargins(10, 10, 10, 10);
-		progressBar.setLayoutParams(layoutParams);
-		
-		if (onClickListener != null) {
-			progressBar.setOnClickListener(onClickListener);
-			//parent.setOnClickListener(onClickListener);
-		}
-		if (onLongClickListener != null) {
-			progressBar.setOnLongClickListener(onLongClickListener);
-			//parent.setOnLongClickListener(onLongClickListener);
-		}
-		if (touchListener != null) {
-			progressBar.setOnTouchListener(touchListener);
-			//parent.setOnTouchListener(touchListener);
-		}
 
 		parent.removeAllViews();
 		System.gc();
-		parent.addView(progressBar);
 	}
 
 	@Override
@@ -123,17 +99,9 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 		if (thumbFile.exists() && thumbFile.isFile()) {
 			try {
 				FileInputStream input = new FileInputStream(filePath);
-				CryptoProgress progress = new CryptoProgress(input.getChannel().size()) {
-					@Override
-					public void setProgress(long pCurrent) {
-						super.setProgress(pCurrent);
-						int newProgress = this.getProgressPercents();
-						publishProgress(newProgress);
-					}
-				};
 
 				//byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, progress, this);
-				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input, progress, this);
+				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input, null, this);
 
 				if (decryptedData != null) {
 					return decryptedData;
@@ -209,10 +177,6 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 				gifMovie.setOnLongClickListener(onLongClickListener);
 			}
 
-			if(progressBar != null){
-				parent.removeView(progressBar);
-			}
-
 			parent.addView(gifMovie);
 		}
 		else {
@@ -253,10 +217,6 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 				image.setOnLongClickListener(onLongClickListener);
 			}
 
-			if(progressBar != null){
-				parent.removeView(progressBar);
-			}
-
 			if (zoomable && attacher!=null) {
 				attacher.update();
 			}
@@ -274,13 +234,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 		onFinish();
 	}
 	
-	@Override
-	protected void onProgressUpdate(Integer... values) {
-		super.onProgressUpdate(values);
 
-		progressBar.setProgress(values[0]);
-	}
-	
 	protected void onFinish(){
 		
 	}
