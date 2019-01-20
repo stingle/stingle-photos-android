@@ -5,55 +5,54 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
+
+
+    <RelativeLayout
+        android:id="@+id/topPanel"
+        android:layout_width="50dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentStart="true"
+        android:background="@color/main_bg_color">
+
+        <ImageButton
+            android:id="@+id/timerButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@null"
+            android:contentDescription="@string/timer"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/timer_disabled" />
+
+        <ImageButton
+            android:id="@+id/flashButton"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:background="@null"
+            android:contentDescription="@string/flash"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/flash_off" />
+
+        <ImageButton
+            android:id="@+id/optionsButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:background="@null"
+            android:contentDescription="@string/options"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_action_options" />
+    </RelativeLayout>
+
     <com.fenritz.safecam.AutoFitTextureView
         android:id="@+id/texture"
+        android:layout_toRightOf="@id/topPanel"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
-
-    <ImageButton
-        android:id="@+id/switchCamButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@null"
-        android:contentDescription="@string/camera"
-        android:padding="10dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_action_switch_camera"
-        android:visibility="visible" />
-
-    <ImageButton
-        android:id="@+id/timerButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_below="@+id/switchCamButton"
-        android:background="@null"
-        android:contentDescription="@string/timer"
-        android:padding="10dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/timer_disabled" />
-
-    <TextView
-        android:id="@+id/photoSizeLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toStartOf="@+id/rightPanel"
-        android:layout_toLeftOf="@+id/rightPanel"
-        android:padding="10dp"
-        android:textColor="@android:color/white"
-        android:textSize="15sp" />
-
-    <ImageButton
-        android:id="@+id/optionsButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:background="@null"
-        android:contentDescription="@string/options"
-        android:padding="10dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_action_options" />
+        android:layout_height="wrap_content"/>
 
     <LinearLayout
         android:id="@+id/timerLabelContainer"
@@ -82,17 +81,18 @@
         android:layout_alignParentRight="true"
         android:background="@color/main_bg_color_trans">
 
-
         <ImageButton
-            android:id="@+id/flashButton"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
+            android:id="@+id/switchCamButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:background="@null"
-            android:contentDescription="@string/flash"
-            android:padding="10dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/flash_off" />
+            android:contentDescription="@string/camera"
+            android:src="@drawable/ic_switch_camera"
+            android:scaleType="fitXY"
+            android:layout_marginTop="10dp"
+            android:visibility="visible" />
 
 
         <ImageButton
@@ -101,8 +101,8 @@
             android:layout_height="70dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/camera_bare_no_text_sm"
-            android:src="@drawable/button_shutter"/>
+            android:background="@null"
+            android:src="@drawable/button_shutter" />
 
         <ImageView
             android:id="@+id/lastPhoto"

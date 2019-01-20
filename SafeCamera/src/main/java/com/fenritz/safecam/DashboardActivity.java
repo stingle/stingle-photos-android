@@ -83,7 +83,7 @@ public class DashboardActivity extends Activity {
 			
 			public void onClick(View v) {
 				Intent intent = new Intent();
-				intent.setClass(DashboardActivity.this, Camera2ActivityRaw.class);
+				intent.setClass(DashboardActivity.this, Camera2Activity.class);
 				startActivity(intent);
 			}
 		});

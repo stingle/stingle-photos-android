@@ -64,12 +64,6 @@
             android:screenOrientation="landscape">
         </activity>
         <activity
-            android:name=".Camera2ActivityRaw"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="Camera"
-            android:screenOrientation="landscape">
-        </activity>
-        <activity
             android:name=".GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_gallery"
