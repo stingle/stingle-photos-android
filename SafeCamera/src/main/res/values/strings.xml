@@ -160,6 +160,7 @@
     <string name="fingerprint_auth_success">"Success!"</string>
     <string name="fingerprint_auth_help">"Authentication help\n%s"</string>
     <string name="enter_password_desc">"Please enter your password to continue"</string>
+    <string name="other">"Other"</string>
 
 
     <!-- File Dialog -->

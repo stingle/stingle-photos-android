@@ -54,6 +54,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <ImageButton
+        android:id="@+id/modeChanger"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_photo"
+        android:layout_toLeftOf="@id/rightPanel">
+
+    </ImageButton>
     <LinearLayout
         android:id="@+id/timerLabelContainer"
         android:layout_width="50dp"
@@ -90,7 +99,7 @@
             android:background="@null"
             android:contentDescription="@string/camera"
             android:src="@drawable/ic_switch_camera"
-            android:scaleType="fitXY"
+            android:scaleType="fitCenter"
             android:layout_marginTop="10dp"
             android:visibility="visible" />
 

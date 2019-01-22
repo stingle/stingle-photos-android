@@ -56,6 +56,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -109,6 +110,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private static final int MAX_PREVIEW_HEIGHT = 1080;
 
     private boolean mFlashSupported = false;
+    private boolean mAESupported = false;
     private OrientationEventListener mOrientationListener;
 
     private AutoFitTextureView mTextureView;
@@ -123,7 +125,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private CameraCharacteristics mCharacteristics;
     private Handler mBackgroundHandler;
     private RefCountedAutoCloseable<ImageReader> mJpegImageReader;
-    private RefCountedAutoCloseable<ImageReader> mRawImageReader;
+    //private RefCountedAutoCloseable<ImageReader> mRawImageReader;
     private boolean mNoAFRun = false;
     private int mPendingUserCaptures = 0;
     private final TreeMap<Integer, ImageSaver.ImageSaverBuilder> mJpegResultQueue = new TreeMap<>();
@@ -159,8 +161,20 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     public static final String PHOTO_SIZE_FRONT = "photo_size_front2";
 
     private ImageButton flashButton;
+    private ImageButton modeChangerButton;
     private int flashMode = FLASH_MODE_AUTO;
     private SharedPreferences preferences;
+
+    private boolean isFrontCamera = false;
+    private OrientationEventListener mOrientationEventListener;
+    private int mOrientation = -1;
+
+    private static final int ORIENTATION_PORTRAIT_NORMAL = 1;
+    private static final int ORIENTATION_PORTRAIT_INVERTED = 2;
+    private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
+    private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
+
+    private boolean isInVideoMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,18 +191,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         findViewById(R.id.take_photo).setOnClickListener(this);
         mTextureView = (AutoFitTextureView) findViewById(R.id.texture);
 
-        // Setup a new OrientationEventListener.  This is used to handle rotation events like a
-        // 180 degree rotation that do not normally trigger a call to onCreate to do view re-layout
-        // or otherwise cause the preview TextureView's size to change.
-        mOrientationListener = new OrientationEventListener(this,
-                SensorManager.SENSOR_DELAY_NORMAL) {
-            @Override
-            public void onOrientationChanged(int orientation) {
-                if (mTextureView != null && mTextureView.isAvailable()) {
-                    configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
-                }
-            }
-        };
+
 
         preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
         flashMode = preferences.getInt(FLASH_MODE_PREF, FLASH_MODE_AUTO);
@@ -196,12 +199,18 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         flashButton = (ImageButton) findViewById(R.id.flashButton);
         flashButton.setOnClickListener(toggleFlash());
 
+        modeChangerButton = (ImageButton) findViewById(R.id.modeChanger);
+        modeChangerButton.setOnClickListener(toggleCameraMode());
+
+        findViewById(R.id.switchCamButton).setOnClickListener(toggleCamera());
+
         setFlashButtonImage();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        initOrientationListener();
         startBackgroundThread();
         openCamera();
 
@@ -226,6 +235,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
         closeCamera();
         stopBackgroundThread();
+        destroyOrientationListener();
         super.onPause();
     }
 
@@ -290,6 +300,73 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
     }
 
+    private void initOrientationListener() {
+        if (mOrientationEventListener == null) {
+            mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+
+                @Override
+                public void onOrientationChanged(int orientation) {
+                    if (orientation == ORIENTATION_UNKNOWN) {
+                        return;
+                    }
+
+                    orientation = (orientation + 45) / 90 * 90;
+                    int currentOrientation = orientation % 360;
+                    int newRotation = 0;
+
+                    // determine our orientation based on sensor response
+                    int lastOrientation = mOrientation;
+
+                    if (orientation >= 315 || orientation < 45) {
+                        if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {
+                            mOrientation = ORIENTATION_PORTRAIT_NORMAL;
+                        }
+                    } else if (orientation < 315 && orientation >= 225) {
+                        if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
+                            mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
+                        }
+                    } else if (orientation < 225 && orientation >= 135) {
+                        if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
+                            mOrientation = ORIENTATION_PORTRAIT_INVERTED;
+                        }
+                    } else { // orientation <135 && orientation > 45
+                        if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
+                            mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
+                        }
+                    }
+
+                    if (lastOrientation != mOrientation) {
+                        //changeRotation(mOrientation);
+                    }
+                }
+            };
+        }
+        if (mOrientationEventListener.canDetectOrientation()) {
+            mOrientationEventListener.enable();
+        }
+    }
+
+    private void destroyOrientationListener() {
+        if (mOrientationEventListener != null) {
+            mOrientationEventListener.disable();
+            mOrientationEventListener = null;
+        }
+    }
+
+    private int getCurrentDeviceRotation(){
+        switch (mOrientation){
+            case ORIENTATION_PORTRAIT_NORMAL:
+                return 0;
+            case ORIENTATION_PORTRAIT_INVERTED:
+                return 180;
+            case ORIENTATION_LANDSCAPE_NORMAL:
+                return 90;
+            case ORIENTATION_LANDSCAPE_INVERTED:
+                return 270;
+        }
+        return -1;
+    }
+
 
     private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
 
@@ -350,11 +427,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     };
 
-    /**
-     * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
-     * RAW image is ready to be saved.
-     */
-    private final ImageReader.OnImageAvailableListener mOnRawImageAvailableListener  = new ImageReader.OnImageAvailableListener() {
+
+    /*private final ImageReader.OnImageAvailableListener mOnRawImageAvailableListener  = new ImageReader.OnImageAvailableListener() {
 
         @Override
         public void onImageAvailable(ImageReader reader) {
@@ -362,7 +436,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             dequeueAndSaveImage(mRawResultQueue, mRawImageReader);
         }
 
-    };
+    };*/
 
     /**
      * A {@link CameraCaptureSession.CaptureCallback} that handles events for the preview and
@@ -462,16 +536,30 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     private void runPrecaptureSequence() {
         try {
+            final CaptureRequest.Builder precaptureBuilder = createPreviewRequestBuilder();
+            //precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+
+            setupControls(precaptureBuilder);
+            precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+            precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+
+            //precaptureBuilder.addTarget(mPreviewSurface);
+
+            mCaptureSession.capture(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+            //mCaptureSession.setRepeatingRequest(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+
+            // now set precapture
+            precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            mCaptureSession.capture(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
             // This is how to tell the camera to trigger.
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-            // Tell #mCaptureCallback to wait for the precapture sequence to be set.
             mState = STATE_WAITING_PRECAPTURE;
-            mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+
+            /*mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);*/
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
-
 
     private void captureStillPicture() {
         try {
@@ -483,9 +571,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             mState = STATE_PICTURE_TAKEN;
             // This is the CaptureRequest.Builder that we use to take a picture.
             final CaptureRequest.Builder captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-
+            captureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
             captureBuilder.addTarget(mJpegImageReader.get().getSurface());
-            captureBuilder.addTarget(mRawImageReader.get().getSurface());
+            //captureBuilder.addTarget(mRawImageReader.get().getSurface());
 
             // Use the same AE and AF modes as the preview.
             setupControls(captureBuilder);
@@ -493,8 +581,21 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             //applyFlashMode();
 
             // Set orientation.
-            int rotation = Camera2Activity.this.getWindowManager().getDefaultDisplay().getRotation();
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, sensorToDeviceRotation(mCharacteristics, rotation));
+            //int rotation = Camera2Activity.this.getWindowManager().getDefaultDisplay().getRotation();
+            int sensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+            int deviceRotation = getCurrentDeviceRotation();
+            Log.d("sensorOrientation", String.valueOf(sensorOrientation));
+            Log.d("getCurrentDeviceRotation", String.valueOf(deviceRotation));
+
+            int invert = 0;
+            if(!isFrontCamera && (deviceRotation == 90 || deviceRotation == 270)){
+                invert = 180;
+            }
+
+            int jpegRotation = (sensorOrientation + deviceRotation + invert) % 360;
+            Log.d("jpegRotation", String.valueOf(jpegRotation));
+
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
 
             // Set request tag to easily track results in callbacks.
             captureBuilder.setTag(mRequestCounter.getAndIncrement());
@@ -517,6 +618,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             e.printStackTrace();
         }
     }
+
     /**
      * A {@link CameraCaptureSession.CaptureCallback} that handles the still JPEG and RAW capture
      * request.
@@ -625,27 +727,24 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         try {
             // Find a CameraDevice that supports RAW captures, and configure state.
             for (String cameraId : manager.getCameraIdList()) {
-                CameraCharacteristics characteristics
-                        = manager.getCameraCharacteristics(cameraId);
+                CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
 
                 // We only use a camera that supports RAW in this sample.
-                if (!contains(characteristics.get(
-                                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
-                        CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
+                /*if (!contains(characteristics.get( CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES), CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
+                    continue;
+                }*/
+
+                Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+                if(isFrontCamera && facing != CameraCharacteristics.LENS_FACING_FRONT){
                     continue;
                 }
 
-                StreamConfigurationMap map = characteristics.get(
-                        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
                 // For still image captures, we use the largest available size.
-                Size largestJpeg = Collections.max(
-                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
-                        new CompareSizesByArea());
+                Size largestJpeg = Collections.max( Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
 
-                Size largestRaw = Collections.max(
-                        Arrays.asList(map.getOutputSizes(ImageFormat.RAW_SENSOR)),
-                        new CompareSizesByArea());
+                //Size largestRaw = Collections.max( Arrays.asList(map.getOutputSizes(ImageFormat.RAW_SENSOR)), new CompareSizesByArea());
 
                 synchronized (mCameraStateLock) {
                     // Set up ImageReaders for JPEG and RAW outputs.  Place these in a reference
@@ -656,14 +755,21 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     }
                     mJpegImageReader.get().setOnImageAvailableListener(mOnJpegImageAvailableListener, mBackgroundHandler);
 
-                    if (mRawImageReader == null || mRawImageReader.getAndRetain() == null) {
-                        mRawImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestRaw.getWidth(), largestRaw.getHeight(), ImageFormat.RAW_SENSOR, /*maxImages*/ 5));
+                    /*if (mRawImageReader == null || mRawImageReader.getAndRetain() == null) {
+                        mRawImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestRaw.getWidth(), largestRaw.getHeight(), ImageFormat.RAW_SENSOR, 5));
                     }
-                    mRawImageReader.get().setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);
+                    mRawImageReader.get().setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);*/
 
                     // Check if the flash is supported.
-                    Boolean available = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
-                    mFlashSupported = available == null ? false : available;
+                    mFlashSupported = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == null ? false : true;
+                    mAESupported = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES) == null ? false : true;
+
+                    if(!mFlashSupported){
+                        flashButton.setVisibility(View.INVISIBLE);
+                    }
+                    else{
+                        flashButton.setVisibility(View.VISIBLE);
+                    }
 
                     mCharacteristics = characteristics;
                     mCameraId = cameraId;
@@ -674,9 +780,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             e.printStackTrace();
         }
 
-        // If we found no suitable cameras for capturing RAW, warn the user.
-        ErrorDialog.buildErrorDialog("This device doesn't support capturing RAW photos").
-                show(getFragmentManager(), "dialog");
         return false;
     }
 
@@ -797,10 +900,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     mJpegImageReader.close();
                     mJpegImageReader = null;
                 }
-                if (null != mRawImageReader) {
+                /*if (null != mRawImageReader) {
                     mRawImageReader.close();
                     mRawImageReader = null;
-                }
+                }*/
             }
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
@@ -855,10 +958,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
             // We set up a CaptureRequest.Builder with the output Surface.
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
             mPreviewRequestBuilder.addTarget(mPreviewSurface);
 
             // Here, we create a CameraCaptureSession for camera preview.
-            mCameraDevice.createCaptureSession(Arrays.asList(mPreviewSurface,  mJpegImageReader.get().getSurface(), mRawImageReader.get().getSurface()), new CameraCaptureSession.StateCallback() {
+            mCameraDevice.createCaptureSession(Arrays.asList(mPreviewSurface,  mJpegImageReader.get().getSurface()/*, mRawImageReader.get().getSurface()*/), new CameraCaptureSession.StateCallback() {
                         @Override
                         public void onConfigured(CameraCaptureSession cameraCaptureSession) {
                             synchronized (mCameraStateLock) {
@@ -935,7 +1039,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         // If there is an auto-magical flash control mode available, use it, otherwise default to
         // the "on" mode, which is guaranteed to always be available.
-        if (contains(mCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES), CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)) {
+        if (mFlashSupported && contains(mCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES), CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)) {
             switch (flashMode){
                 case FLASH_MODE_AUTO:
                     builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
@@ -977,12 +1081,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 return;
             }
 
-            StreamConfigurationMap map = mCharacteristics.get(
-                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            StreamConfigurationMap map = mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
             // For still image captures, we always use the largest available size.
-            Size largestJpeg = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
-                    new CompareSizesByArea());
+            Size largestJpeg = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
 
             // Find the rotation of the device relative to the native device orientation.
             int deviceRotation = Camera2Activity.this.getWindowManager().getDefaultDisplay().getRotation();
@@ -1017,23 +1119,18 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             }
 
             // Find the best preview size for these view dimensions and configured JPEG size.
-            Size previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
-                    rotatedViewWidth, rotatedViewHeight, maxPreviewWidth, maxPreviewHeight,
-                    largestJpeg);
+            Size previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedViewWidth, rotatedViewHeight, maxPreviewWidth, maxPreviewHeight, largestJpeg);
 
             if (swappedDimensions) {
-                mTextureView.setAspectRatio(
-                        previewSize.getHeight(), previewSize.getWidth());
+                mTextureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
             } else {
-                mTextureView.setAspectRatio(
-                        previewSize.getWidth(), previewSize.getHeight());
+                mTextureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
             }
 
             // Find rotation of device in degrees (reverse device orientation for front-facing
             // cameras).
-            int rotation = (mCharacteristics.get(CameraCharacteristics.LENS_FACING) ==
-                    CameraCharacteristics.LENS_FACING_FRONT) ?
-                    (360 + ORIENTATIONS.get(deviceRotation)) % 360 :
+            int rotation = (mCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) ?
+                    (360 - ORIENTATIONS.get(deviceRotation)) % 360 :
                     (360 - ORIENTATIONS.get(deviceRotation)) % 360;
 
             Matrix matrix = new Matrix();
@@ -1164,11 +1261,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             try {
                 if (!mNoAFRun) {
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-
                     mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-
 
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
                     mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
@@ -1177,6 +1272,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
                     mState = STATE_PREVIEW;
 
+                    mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+                }
+                else{
+                    mState = STATE_PREVIEW;
                     mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
                 }
             } catch (CameraAccessException e) {
@@ -1213,6 +1312,30 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    private View.OnClickListener toggleCamera() {
+        return new View.OnClickListener() {
+            public void onClick(View v) {
+                isFrontCamera = !isFrontCamera;
+                closeCamera();
+                openCamera();
+            }
+        };
+    }
+    private View.OnClickListener toggleCameraMode() {
+        return new View.OnClickListener() {
+            public void onClick(View v) {
+                isInVideoMode = !isInVideoMode;
+
+                if(!isInVideoMode){
+                    modeChangerButton.setImageResource(R.drawable.ic_photo);
+                }
+                else{
+                    modeChangerButton.setImageResource(R.drawable.ic_video);
+                }
+            }
+        };
     }
 
     /**
