@@ -104,7 +104,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
-    private static final long PRECAPTURE_TIMEOUT_MS = 1000;
+    private static final long PRECAPTURE_TIMEOUT_MS = 5000;
     private static final double ASPECT_RATIO_TOLERANCE = 0.005;
     private static final int MAX_PREVIEW_WIDTH = 1920;
     private static final int MAX_PREVIEW_HEIGHT = 1080;
@@ -469,6 +469,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                                 Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AE_STATE)));
                                 runPrecaptureSequence();
                                 mState = STATE_WAITING_PRECAPTURE;
+                                startTimer();
                             }
                             //readyToCapture = true;
                         }
@@ -478,12 +479,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         }
 
                         Log.d("ready", String.valueOf(readyToCapture));
-                        if (readyToCapture && mPendingUserCaptures > 0) {
-                            // Capture once for each user tap of the "Picture" button.
-                            while (mPendingUserCaptures > 0) {
-                                captureStillPicture();
-                                mPendingUserCaptures--;
-                            }
+                        if (readyToCapture || hitTimeout()) {
+                            takePictureAfterPrecapture();
                             // After this, the camera will go back to the normal state of preview.
                             mState = STATE_PREVIEW;
                         }
@@ -496,6 +493,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         Log.d("aeState", String.valueOf(aeState));
                         if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE || aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
                             mState = STATE_WAITING_NON_PRECAPTURE;
+                            startTimer();
+                        }
+                        else if(hitTimeout()){
+                            takePictureAfterPrecapture();
                         }
                         break;
                     }
@@ -505,15 +506,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                         Log.d("aeState", String.valueOf(aeState));
                         if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
-                            if (mPendingUserCaptures > 0) {
-                                // Capture once for each user tap of the "Picture" button.
-                                while (mPendingUserCaptures > 0) {
-                                    captureStillPicture();
-                                    mPendingUserCaptures--;
-                                }
-                                // After this, the camera will go back to the normal state of preview.
-                                mState = STATE_PREVIEW;
-                            }
+                            takePictureAfterPrecapture();
+                            mState = STATE_PREVIEW;
+                        }
+                        else if(hitTimeout()){
+                            takePictureAfterPrecapture();
                         }
                         break;
                     }
@@ -533,6 +530,18 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
 
     };
+
+    private void takePictureAfterPrecapture(){
+        if (mPendingUserCaptures > 0) {
+            // Capture once for each user tap of the "Picture" button.
+            while (mPendingUserCaptures > 0) {
+                captureStillPicture();
+                mPendingUserCaptures--;
+            }
+            // After this, the camera will go back to the normal state of preview.
+            mState = STATE_PREVIEW;
+        }
+    }
 
     private void runPrecaptureSequence() {
         try {
@@ -761,13 +770,16 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     mRawImageReader.get().setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);*/
 
                     // Check if the flash is supported.
-                    mFlashSupported = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == null ? false : true;
+                    Log.d("flashSupport", characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE).toString());
+                    mFlashSupported = (boolean)characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
                     mAESupported = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES) == null ? false : true;
 
                     if(!mFlashSupported){
+                        Log.d("flash", "FLASH NOT SUPPORTED");
                         flashButton.setVisibility(View.INVISIBLE);
                     }
                     else{
+                        Log.d("flash", "FLASH IS SUPPORTED");
                         flashButton.setVisibility(View.VISIBLE);
                     }
 
@@ -1203,6 +1215,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             } else {
                 captureStillPicture();
             }
+
+            startTimer();
 
             /*try {
                 // Trigger an auto-focus run if camera is capable. If the camera is already focused,
@@ -1878,7 +1892,12 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
      * @return true if the timeout occurred.
      */
     private boolean hitTimeout() {
-        return (SystemClock.elapsedRealtime() - mCaptureTimer) > PRECAPTURE_TIMEOUT_MS;
+        boolean isHit = (SystemClock.elapsedRealtime() - mCaptureTimer) > PRECAPTURE_TIMEOUT_MS;
+        if(isHit){
+            Log.d("timeout", "HIT TIMEOUT");
+        }
+
+        return isHit;
     }
 
 
