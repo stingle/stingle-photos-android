@@ -291,7 +291,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         Log.d("Func", "applyFlashMode");
         if ((mState == STATE_PREVIEW || mState == STATE_RECORDING) && mFlashSupported) {
             try {
-                mPreviewRequestBuilder = createPreviewRequestBuilder();
+                mPreviewRequestBuilder = createPreviewRequestBuilder(CameraDevice.TEMPLATE_PREVIEW);
                 setupControls(mPreviewRequestBuilder);
                 mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
             } catch (CameraAccessException e) {
@@ -445,6 +445,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private CameraCaptureSession.CaptureCallback mPreCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
+            //Log.d("AF_STATE", String.valueOf(result.get(CaptureResult.CONTROL_AF_STATE)));
+            //Log.d("AE_STATE", String.valueOf(result.get(CaptureResult.CONTROL_AE_STATE)));
                 switch (mState) {
                     case STATE_PREVIEW: {
                         //Log.d("Func", "PREVIEW");
@@ -491,7 +493,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         // CONTROL_AE_STATE can be null on some devices
                         Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                         Log.d("aeState", String.valueOf(aeState));
-                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE || aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
+                        Log.d("awbState", String.valueOf(result.get(CaptureResult.CONTROL_AWB_STATE)));
+                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
                             mState = STATE_WAITING_NON_PRECAPTURE;
                             startTimer();
                         }
@@ -505,11 +508,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         // CONTROL_AE_STATE can be null on some devices
                         Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                         Log.d("aeState", String.valueOf(aeState));
-                        if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
-                            takePictureAfterPrecapture();
-                            mState = STATE_PREVIEW;
-                        }
-                        else if(hitTimeout()){
+                        Log.d("awbState", String.valueOf(result.get(CaptureResult.CONTROL_AWB_STATE)));
+                        if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE || hitTimeout()) {
                             takePictureAfterPrecapture();
                         }
                         break;
@@ -521,12 +521,14 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
             //Log.d("Func", "onCaptureProgressed");
             //process(partialResult);
+            super.onCaptureProgressed(session, request, partialResult);
         }
 
         @Override
         public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
             //Log.d("Func", "onCaptureCompleted");
             process(result);
+            super.onCaptureCompleted(session, request, result);
         }
 
     };
@@ -539,33 +541,38 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 mPendingUserCaptures--;
             }
             // After this, the camera will go back to the normal state of preview.
-            mState = STATE_PREVIEW;
+            //mState = STATE_PREVIEW;
         }
     }
 
     private void runPrecaptureSequence() {
         try {
-            final CaptureRequest.Builder precaptureBuilder = createPreviewRequestBuilder();
-            //precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+            /*CaptureRequest.Builder precaptureBuilder = createPreviewRequestBuilder(CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 
-            setupControls(precaptureBuilder);
             precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
             precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
 
-            //precaptureBuilder.addTarget(mPreviewSurface);
-
             mCaptureSession.capture(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
-            //mCaptureSession.setRepeatingRequest(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+            mCaptureSession.setRepeatingRequest(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 
             // now set precapture
             precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-            mCaptureSession.capture(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
-            // This is how to tell the camera to trigger.
             mState = STATE_WAITING_PRECAPTURE;
+            mCaptureSession.capture(precaptureBuilder.build(), mPreCaptureCallback, mBackgroundHandler);*/
 
-            /*mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-            mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);*/
-        } catch (CameraAccessException e) {
+            //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+            //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+
+            //mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+            //mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+
+            // now set precapture
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            mState = STATE_WAITING_PRECAPTURE;
+            mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+
+        }
+        catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
@@ -614,13 +621,13 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             // Create an ImageSaverBuilder in which to collect results, and add it to the queue
             // of active requests.
             ImageSaver.ImageSaverBuilder jpegBuilder = new ImageSaver.ImageSaverBuilder(Camera2Activity.this).setCharacteristics(mCharacteristics);
-            ImageSaver.ImageSaverBuilder rawBuilder = new ImageSaver.ImageSaverBuilder(Camera2Activity.this).setCharacteristics(mCharacteristics);
+            //ImageSaver.ImageSaverBuilder rawBuilder = new ImageSaver.ImageSaverBuilder(Camera2Activity.this).setCharacteristics(mCharacteristics);
 
             mJpegResultQueue.put((int) request.getTag(), jpegBuilder);
-            mRawResultQueue.put((int) request.getTag(), rawBuilder);
+           // mRawResultQueue.put((int) request.getTag(), rawBuilder);
 
             mCaptureSession.stopRepeating();
-            mCaptureSession.abortCaptures();
+            //mCaptureSession.abortCaptures();
             mCaptureSession.capture(request, mCaptureCallback, mBackgroundHandler);
 
         } catch (CameraAccessException e) {
@@ -638,9 +645,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 									 long timestamp, long frameNumber) {
             Log.d("Func", "mCaptureCallback - onCaptureStarted");
             String currentDateTime = generateTimestamp();
-            File rawFile = new File(Environment.
+            /*File rawFile = new File(Environment.
                     getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                    "RAW_" + currentDateTime + ".dng");
+                    "RAW_" + currentDateTime + ".dng");*/
             File jpegFile = new File(Environment.
                     getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
                     "JPEG_" + currentDateTime + ".jpg");
@@ -648,15 +655,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             // Look up the ImageSaverBuilder for this request and update it with the file name
             // based on the capture start time.
             ImageSaver.ImageSaverBuilder jpegBuilder;
-            ImageSaver.ImageSaverBuilder rawBuilder;
+            //ImageSaver.ImageSaverBuilder rawBuilder;
             int requestId = (int) request.getTag();
             synchronized (mCameraStateLock) {
                 jpegBuilder = mJpegResultQueue.get(requestId);
-                rawBuilder = mRawResultQueue.get(requestId);
+                //rawBuilder = mRawResultQueue.get(requestId);
             }
 
             if (jpegBuilder != null) jpegBuilder.setFile(jpegFile);
-            if (rawBuilder != null) rawBuilder.setFile(rawFile);
+            //if (rawBuilder != null) rawBuilder.setFile(rawFile);
         }
 
         @Override
@@ -665,29 +672,29 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             Log.d("Func", "mCaptureCallback - onCaptureCompleted");
             int requestId = (int) request.getTag();
             ImageSaver.ImageSaverBuilder jpegBuilder;
-            ImageSaver.ImageSaverBuilder rawBuilder;
+            //ImageSaver.ImageSaverBuilder rawBuilder;
             StringBuilder sb = new StringBuilder();
 
             // Look up the ImageSaverBuilder for this request and update it with the CaptureResult
             synchronized (mCameraStateLock) {
                 jpegBuilder = mJpegResultQueue.get(requestId);
-                rawBuilder = mRawResultQueue.get(requestId);
+                //rawBuilder = mRawResultQueue.get(requestId);
 
                 if (jpegBuilder != null) {
                     jpegBuilder.setResult(result);
                     sb.append("Saving JPEG as: ");
                     sb.append(jpegBuilder.getSaveLocation());
                 }
-                if (rawBuilder != null) {
+                /*if (rawBuilder != null) {
                     rawBuilder.setResult(result);
                     if (jpegBuilder != null) sb.append(", ");
                     sb.append("Saving RAW as: ");
                     sb.append(rawBuilder.getSaveLocation());
-                }
+                }*/
 
                 // If we have all the results necessary, save the image to a file in the background.
                 handleCompletion(requestId, jpegBuilder, mJpegResultQueue);
-                handleCompletion(requestId, rawBuilder, mRawResultQueue);
+                //handleCompletion(requestId, rawBuilder, mRawResultQueue);
 
                 //finishedCapture();
                 unlockFocus();
@@ -704,7 +711,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             synchronized (mCameraStateLock) {
                 mJpegResultQueue.remove(requestId);
                 mRawResultQueue.remove(requestId);
-                finishedCapture();
+                unlockFocus();
             }
             showToast("Capture failed!");
         }
@@ -1009,9 +1016,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
     }
 
-    private CaptureRequest.Builder createPreviewRequestBuilder(){
+    private CaptureRequest.Builder createPreviewRequestBuilder(int intent){
         try {
             CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            builder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, intent);
             builder.addTarget(mPreviewSurface);
             setupControls(builder);
 
@@ -1049,6 +1057,16 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             }
         }
 
+        setAEMode(builder);
+
+        // If there is an auto-magical white balance control mode available, use it.
+        if (contains(mCharacteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES), CaptureRequest.CONTROL_AWB_MODE_AUTO)) {
+            // Allow AWB to run auto-magically if this device supports this
+            builder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
+        }
+    }
+
+    private void setAEMode(CaptureRequest.Builder builder){
         // If there is an auto-magical flash control mode available, use it, otherwise default to
         // the "on" mode, which is guaranteed to always be available.
         if (mFlashSupported && contains(mCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES), CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)) {
@@ -1063,16 +1081,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
                     break;
             }
-
+            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
         }
         else {
             builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-        }
-
-        // If there is an auto-magical white balance control mode available, use it.
-        if (contains(mCharacteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES), CaptureRequest.CONTROL_AWB_MODE_AUTO)) {
-            // Allow AWB to run auto-magically if this device supports this
-            builder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
         }
     }
 
@@ -1273,14 +1285,24 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             Log.d("Func", "unLockFocus");
 
             try {
+                //mPreviewRequestBuilder = createPreviewRequestBuilder(CameraDevice.TEMPLATE_PREVIEW);
                 if (!mNoAFRun) {
+
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
+                    //setAEMode(mPreviewRequestBuilder);
                     mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
-                    mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+                    //mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+
+
+                    //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+                    //mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+
+                    //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
+                    //mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
 
