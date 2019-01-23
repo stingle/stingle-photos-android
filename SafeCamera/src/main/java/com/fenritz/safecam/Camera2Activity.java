@@ -498,6 +498,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                             mState = STATE_WAITING_NON_PRECAPTURE;
                             startTimer();
                         }
+                        else if (aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED){
+                            takePictureAfterPrecapture();
+                            Log.d("flash", "qaq");
+                        }
                         else if(hitTimeout()){
                             takePictureAfterPrecapture();
                         }
@@ -592,7 +596,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             //captureBuilder.addTarget(mRawImageReader.get().getSurface());
 
             // Use the same AE and AF modes as the preview.
-            setupControls(captureBuilder);
+            //setupControls(captureBuilder);
             //captureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
             //applyFlashMode();
 
@@ -626,7 +630,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             mJpegResultQueue.put((int) request.getTag(), jpegBuilder);
            // mRawResultQueue.put((int) request.getTag(), rawBuilder);
 
-            mCaptureSession.stopRepeating();
+            //mCaptureSession.stopRepeating();
             //mCaptureSession.abortCaptures();
             mCaptureSession.capture(request, mCaptureCallback, mBackgroundHandler);
 
