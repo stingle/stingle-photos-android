@@ -291,7 +291,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         Log.d("Func", "applyFlashMode");
         if ((mState == STATE_PREVIEW || mState == STATE_RECORDING) && mFlashSupported) {
             try {
-                mPreviewRequestBuilder = createPreviewRequestBuilder(CameraDevice.TEMPLATE_PREVIEW);
+                //mPreviewRequestBuilder = createPreviewRequestBuilder(CameraDevice.TEMPLATE_PREVIEW);
                 setupControls(mPreviewRequestBuilder);
                 mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
             } catch (CameraAccessException e) {
@@ -455,33 +455,57 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     }
                     case STATE_WAITING_LOCK: {
                         Log.d("Func", "WAITING LOCK");
-                        boolean readyToCapture = false;
+                        boolean readyAF = false;
+                        boolean readyAE = false;
+                        boolean readyAWB = false;
+
                         Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                        Integer awbState = result.get(CaptureResult.CONTROL_AWB_STATE);
+                        Integer flashState = result.get(CaptureResult.FLASH_STATE);
+
                         if (afState == null) {
-                            Log.d("REASON", "afState is null");
-                            readyToCapture = true;
-                        } else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
-                            Log.d("REASON", "afState is ok");
-                            Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                            if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-                                Log.d("REASON", "aeState is ok");
-                                readyToCapture = true;
-                            } else {
-                                Log.d("REASON", "AE NOT READY");
-                                Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AE_STATE)));
-                                runPrecaptureSequence();
-                                mState = STATE_WAITING_PRECAPTURE;
-                                startTimer();
-                            }
-                            //readyToCapture = true;
+                            Log.d("REASON", "AF IS NULL");
+                            readyAF = true;
+                        }
+                        else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                            readyAF = true;
+                            Log.d("REASON", "AF IS OK");
                         }
                         else{
                             Log.d("REASON", "AF NOT READY");
                             Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AF_STATE)));
                         }
 
-                        Log.d("ready", String.valueOf(readyToCapture));
-                        if (readyToCapture || hitTimeout()) {
+
+                        if(awbState == null || awbState == CaptureResult.CONTROL_AWB_STATE_CONVERGED){
+                            readyAWB = true;
+                            Log.d("REASON", "AWB IS OK");
+                        }
+                        else{
+                            Log.d("REASON", "AWB NOT READY");
+                        }
+                        if(flashState == CaptureResult.FLASH_STATE_FIRED){
+                            Log.d("REASON", "FLASH FIRED READY");
+                        }
+                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
+                            readyAE = true;
+                            Log.d("REASON", "AE IS OK");
+                        }
+                        else if (aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED){
+                            readyAE = true;
+                            Log.d("REASON", "AE NEED FLASH");
+                        }
+                        else {
+                            Log.d("REASON", "AE NOT READY");
+                            Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AE_STATE)));
+
+                            //runPrecaptureSequence();
+                            //mState = STATE_WAITING_PRECAPTURE;
+                            //startTimer();
+                        }
+
+                        if ((readyAF && readyAE && readyAWB) || hitTimeout()) {
                             takePictureAfterPrecapture();
                             // After this, the camera will go back to the normal state of preview.
                             mState = STATE_PREVIEW;
@@ -596,12 +620,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             //captureBuilder.addTarget(mRawImageReader.get().getSurface());
 
             // Use the same AE and AF modes as the preview.
-            //setupControls(captureBuilder);
-            //captureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-            //applyFlashMode();
+            setupControls(captureBuilder);
 
             // Set orientation.
-            //int rotation = Camera2Activity.this.getWindowManager().getDefaultDisplay().getRotation();
             int sensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
             int deviceRotation = getCurrentDeviceRotation();
             Log.d("sensorOrientation", String.valueOf(sensorOrientation));
@@ -981,6 +1002,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
             // We set up a CaptureRequest.Builder with the output Surface.
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
             mPreviewRequestBuilder.addTarget(mPreviewSurface);
 
@@ -1024,6 +1046,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         try {
             CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             builder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, intent);
+            //builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
             builder.addTarget(mPreviewSurface);
             setupControls(builder);
 
@@ -1085,7 +1108,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
                     break;
             }
-            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+            //builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
         }
         else {
             builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
@@ -1227,6 +1250,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             }
 
             if (!mNoAFRun) {
+                unlockFocus();
                 lockFocus();
             } else {
                 captureStillPicture();
@@ -1273,9 +1297,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         synchronized (mCameraStateLock) {
             Log.d("Func", "lockFocus");
             try {
-                // This is how to tell the camera to lock focus.
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-                //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
                 mState = STATE_WAITING_LOCK;
                 mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
             } catch (CameraAccessException e) {
@@ -1294,20 +1317,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
-                    //setAEMode(mPreviewRequestBuilder);
                     mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-
-                    //mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
-
-
-                    //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
-                    //mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
-
-                    //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
-                    //mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
-
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
 
                     mState = STATE_PREVIEW;
