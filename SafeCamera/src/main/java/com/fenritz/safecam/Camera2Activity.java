@@ -23,8 +23,10 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -45,6 +47,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -55,8 +58,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.ViewPager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -67,7 +69,15 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.fenritz.safecam.util.AsyncTasks;
+import com.fenritz.safecam.util.CryptoException;
+import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.LoginManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -101,6 +111,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private static final int REQUEST_CAMERA_PERMISSIONS = 1;
     private static final String[] CAMERA_PERMISSIONS = {
             Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
@@ -161,6 +172,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     public static final String PHOTO_SIZE_FRONT = "photo_size_front2";
 
     private ImageButton flashButton;
+	private ImageView galleryButton;
     private ImageButton modeChangerButton;
     private int flashMode = FLASH_MODE_AUTO;
     private SharedPreferences preferences;
@@ -175,6 +187,32 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
 
     private boolean isInVideoMode = false;
+    private Size mVideoSize;
+    private MediaRecorder mMediaRecorder;
+    private boolean mIsRecordingVideo = false;
+    private Integer mSensorOrientation;
+
+    private static Bitmap mLastThumbBitmap;
+	private File lastFile;
+
+    private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
+    private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
+    private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
+    private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
+
+    static {
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_90, 0);
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_180, 270);
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_270, 180);
+    }
+
+    static {
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_0, 270);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_90, 180);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,13 +229,14 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         findViewById(R.id.take_photo).setOnClickListener(this);
         mTextureView = (AutoFitTextureView) findViewById(R.id.texture);
 
-
-
         preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
         flashMode = preferences.getInt(FLASH_MODE_PREF, FLASH_MODE_AUTO);
 
         flashButton = (ImageButton) findViewById(R.id.flashButton);
         flashButton.setOnClickListener(toggleFlash());
+
+		galleryButton = (ImageView) findViewById(R.id.lastPhoto);
+		galleryButton.setOnClickListener(openGallery());
 
         modeChangerButton = (ImageButton) findViewById(R.id.modeChanger);
         modeChangerButton.setOnClickListener(toggleCameraMode());
@@ -210,9 +249,13 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+
+		mLastThumbBitmap = null;
+
         initOrientationListener();
         startBackgroundThread();
         openCamera();
+		showLastPhotoThumb();
 
         // When the screen is turned off and turned back on, the SurfaceTexture is already
         // available, and "onSurfaceTextureAvailable" will not be called. In that case, we should
@@ -447,102 +490,102 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         private void process(CaptureResult result) {
             //Log.d("AF_STATE", String.valueOf(result.get(CaptureResult.CONTROL_AF_STATE)));
             //Log.d("AE_STATE", String.valueOf(result.get(CaptureResult.CONTROL_AE_STATE)));
-                switch (mState) {
-                    case STATE_PREVIEW: {
-                        //Log.d("Func", "PREVIEW");
-                        // We have nothing to do when the camera preview is running normally.
-                        break;
-                    }
-                    case STATE_WAITING_LOCK: {
-                        Log.d("Func", "WAITING LOCK");
-                        boolean readyAF = false;
-                        boolean readyAE = false;
-                        boolean readyAWB = false;
-
-                        Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        Integer awbState = result.get(CaptureResult.CONTROL_AWB_STATE);
-                        Integer flashState = result.get(CaptureResult.FLASH_STATE);
-
-                        if (afState == null) {
-                            Log.d("REASON", "AF IS NULL");
-                            readyAF = true;
-                        }
-                        else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
-                            readyAF = true;
-                            Log.d("REASON", "AF IS OK");
-                        }
-                        else{
-                            Log.d("REASON", "AF NOT READY");
-                            Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AF_STATE)));
-                        }
-
-
-                        if(awbState == null || awbState == CaptureResult.CONTROL_AWB_STATE_CONVERGED){
-                            readyAWB = true;
-                            Log.d("REASON", "AWB IS OK");
-                        }
-                        else{
-                            Log.d("REASON", "AWB NOT READY");
-                        }
-                        if(flashState == CaptureResult.FLASH_STATE_FIRED){
-                            Log.d("REASON", "FLASH FIRED READY");
-                        }
-                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-                            readyAE = true;
-                            Log.d("REASON", "AE IS OK");
-                        }
-                        else if (aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED){
-                            readyAE = true;
-                            Log.d("REASON", "AE NEED FLASH");
-                        }
-                        else {
-                            Log.d("REASON", "AE NOT READY");
-                            Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AE_STATE)));
-
-                            //runPrecaptureSequence();
-                            //mState = STATE_WAITING_PRECAPTURE;
-                            //startTimer();
-                        }
-
-                        if ((readyAF && readyAE && readyAWB) || hitTimeout()) {
-                            takePictureAfterPrecapture();
-                            // After this, the camera will go back to the normal state of preview.
-                            mState = STATE_PREVIEW;
-                        }
-                        break;
-                    }
-                    case STATE_WAITING_PRECAPTURE: {
-                        Log.d("Func", "WAITING PRECAPTURE");
-                        // CONTROL_AE_STATE can be null on some devices
-                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        Log.d("aeState", String.valueOf(aeState));
-                        Log.d("awbState", String.valueOf(result.get(CaptureResult.CONTROL_AWB_STATE)));
-                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
-                            mState = STATE_WAITING_NON_PRECAPTURE;
-                            startTimer();
-                        }
-                        else if (aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED){
-                            takePictureAfterPrecapture();
-                            Log.d("flash", "qaq");
-                        }
-                        else if(hitTimeout()){
-                            takePictureAfterPrecapture();
-                        }
-                        break;
-                    }
-                    case STATE_WAITING_NON_PRECAPTURE: {
-                        Log.d("Func", "WAITING NON PRECAPTURE");
-                        // CONTROL_AE_STATE can be null on some devices
-                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        Log.d("aeState", String.valueOf(aeState));
-                        Log.d("awbState", String.valueOf(result.get(CaptureResult.CONTROL_AWB_STATE)));
-                        if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE || hitTimeout()) {
-                            takePictureAfterPrecapture();
-                        }
-                        break;
-                    }
+            switch (mState) {
+                case STATE_PREVIEW: {
+                    //Log.d("Func", "PREVIEW");
+                    // We have nothing to do when the camera preview is running normally.
+                    break;
                 }
+                case STATE_WAITING_LOCK: {
+                    Log.d("Func", "WAITING LOCK");
+                    boolean readyAF = false;
+                    boolean readyAE = false;
+                    boolean readyAWB = false;
+
+                    Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    Integer awbState = result.get(CaptureResult.CONTROL_AWB_STATE);
+                    Integer flashState = result.get(CaptureResult.FLASH_STATE);
+
+                    if (afState == null) {
+                        Log.d("REASON", "AF IS NULL");
+                        readyAF = true;
+                    }
+                    else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                        readyAF = true;
+                        Log.d("REASON", "AF IS OK");
+                    }
+                    else{
+                        Log.d("REASON", "AF NOT READY");
+                        Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AF_STATE)));
+                    }
+
+
+                    if(awbState == null || awbState == CaptureResult.CONTROL_AWB_STATE_CONVERGED){
+                        readyAWB = true;
+                        Log.d("REASON", "AWB IS OK");
+                    }
+                    else{
+                        Log.d("REASON", "AWB NOT READY");
+                    }
+                    if(flashState == CaptureResult.FLASH_STATE_FIRED){
+                        Log.d("REASON", "FLASH FIRED READY");
+                    }
+                    if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
+                        readyAE = true;
+                        Log.d("REASON", "AE IS OK");
+                    }
+                    else if (aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED){
+                        readyAE = true;
+                        Log.d("REASON", "AE NEED FLASH");
+                    }
+                    else {
+                        Log.d("REASON", "AE NOT READY");
+                        Log.d("REASON", String.valueOf(result.get(CaptureResult.CONTROL_AE_STATE)));
+
+                        //runPrecaptureSequence();
+                        //mState = STATE_WAITING_PRECAPTURE;
+                        //startTimer();
+                    }
+
+                    if ((readyAF && readyAE && readyAWB) || hitTimeout()) {
+                        takePictureAfterPrecapture();
+                        // After this, the camera will go back to the normal state of preview.
+                        mState = STATE_PREVIEW;
+                    }
+                    break;
+                }
+                case STATE_WAITING_PRECAPTURE: {
+                    Log.d("Func", "WAITING PRECAPTURE");
+                    // CONTROL_AE_STATE can be null on some devices
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    Log.d("aeState", String.valueOf(aeState));
+                    Log.d("awbState", String.valueOf(result.get(CaptureResult.CONTROL_AWB_STATE)));
+                    if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
+                        mState = STATE_WAITING_NON_PRECAPTURE;
+                        startTimer();
+                    }
+                    else if (aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED){
+                        takePictureAfterPrecapture();
+                        Log.d("flash", "qaq");
+                    }
+                    else if(hitTimeout()){
+                        takePictureAfterPrecapture();
+                    }
+                    break;
+                }
+                case STATE_WAITING_NON_PRECAPTURE: {
+                    Log.d("Func", "WAITING NON PRECAPTURE");
+                    // CONTROL_AE_STATE can be null on some devices
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    Log.d("aeState", String.valueOf(aeState));
+                    Log.d("awbState", String.valueOf(result.get(CaptureResult.CONTROL_AWB_STATE)));
+                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE || hitTimeout()) {
+                        takePictureAfterPrecapture();
+                    }
+                    break;
+                }
+            }
         }
 
         @Override
@@ -623,9 +666,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             setupControls(captureBuilder);
 
             // Set orientation.
-            int sensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+            mSensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
             int deviceRotation = getCurrentDeviceRotation();
-            Log.d("sensorOrientation", String.valueOf(sensorOrientation));
+            Log.d("sensorOrientation", String.valueOf(mSensorOrientation));
             Log.d("getCurrentDeviceRotation", String.valueOf(deviceRotation));
 
             int invert = 0;
@@ -633,7 +676,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 invert = 180;
             }
 
-            int jpegRotation = (sensorOrientation + deviceRotation + invert) % 360;
+            int jpegRotation = (mSensorOrientation + deviceRotation + invert) % 360;
             Log.d("jpegRotation", String.valueOf(jpegRotation));
 
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
@@ -649,7 +692,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             //ImageSaver.ImageSaverBuilder rawBuilder = new ImageSaver.ImageSaverBuilder(Camera2Activity.this).setCharacteristics(mCharacteristics);
 
             mJpegResultQueue.put((int) request.getTag(), jpegBuilder);
-           // mRawResultQueue.put((int) request.getTag(), rawBuilder);
+            // mRawResultQueue.put((int) request.getTag(), rawBuilder);
 
             //mCaptureSession.stopRepeating();
             //mCaptureSession.abortCaptures();
@@ -667,33 +710,43 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private final CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() {
         @Override
         public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request,
-									 long timestamp, long frameNumber) {
+                                     long timestamp, long frameNumber) {
             Log.d("Func", "mCaptureCallback - onCaptureStarted");
             String currentDateTime = generateTimestamp();
-            /*File rawFile = new File(Environment.
-                    getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                    "RAW_" + currentDateTime + ".dng");*/
-            File jpegFile = new File(Environment.
-                    getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                    "JPEG_" + currentDateTime + ".jpg");
+
+            String filenameBase = Helpers.getFilename(Camera2Activity.this, Helpers.JPEG_FILE_PREFIX);
+            String filename = filenameBase + ".jpg";
+            String filenameEnc = filenameBase + ".sc";
+
+            String path = Helpers.getHomeDir(Camera2Activity.this);
+            String finalPath = path + "/" + filenameEnc;
 
             // Look up the ImageSaverBuilder for this request and update it with the file name
             // based on the capture start time.
             ImageSaver.ImageSaverBuilder jpegBuilder;
-            //ImageSaver.ImageSaverBuilder rawBuilder;
             int requestId = (int) request.getTag();
             synchronized (mCameraStateLock) {
                 jpegBuilder = mJpegResultQueue.get(requestId);
                 //rawBuilder = mRawResultQueue.get(requestId);
             }
 
-            if (jpegBuilder != null) jpegBuilder.setFile(jpegFile);
+            if (jpegBuilder != null) {
+            	jpegBuilder.setFile(new File(finalPath));
+            	jpegBuilder.setFileName(filename);
+            	jpegBuilder.setOnFinish(new AsyncTasks.OnAsyncTaskFinish() {
+					@Override
+					public void onFinish() {
+						super.onFinish();
+						showLastPhotoThumb();
+					}
+				});
+			}
             //if (rawBuilder != null) rawBuilder.setFile(rawFile);
         }
 
         @Override
         public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request,
-									   TotalCaptureResult result) {
+                                       TotalCaptureResult result) {
             Log.d("Func", "mCaptureCallback - onCaptureCompleted");
             int requestId = (int) request.getTag();
             ImageSaver.ImageSaverBuilder jpegBuilder;
@@ -730,7 +783,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         @Override
         public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request,
-									CaptureFailure failure) {
+                                    CaptureFailure failure) {
             Log.d("Func", "mCaptureCallback - onCaptureFailed");
             int requestId = (int) request.getTag();
             synchronized (mCameraStateLock) {
@@ -761,8 +814,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         Log.d("Func", "setUpCameraOutputs");
         CameraManager manager = (CameraManager) Camera2Activity.this.getSystemService(Context.CAMERA_SERVICE);
         if (manager == null) {
-            ErrorDialog.buildErrorDialog("This device doesn't support Camera2 API.").
-                    show(getFragmentManager(), "dialog");
+            ErrorDialog.buildErrorDialog("This device doesn't support Camera2 API.").show(getFragmentManager(), "dialog");
             return false;
         }
         try {
@@ -782,8 +834,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
                 StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-                // For still image captures, we use the largest available size.
-                Size largestJpeg = Collections.max( Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
+                Size largestJpeg = null;
+                if(!isInVideoMode) {
+                    largestJpeg = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
+                }
+                else {
+                    mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+                }
+
+                mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 
                 //Size largestRaw = Collections.max( Arrays.asList(map.getOutputSizes(ImageFormat.RAW_SENSOR)), new CompareSizesByArea());
 
@@ -791,10 +850,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     // Set up ImageReaders for JPEG and RAW outputs.  Place these in a reference
                     // counted wrapper to ensure they are only closed when all background tasks
                     // using them are finished.
-                    if (mJpegImageReader == null || mJpegImageReader.getAndRetain() == null) {
-                        mJpegImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestJpeg.getWidth(), largestJpeg.getHeight(), ImageFormat.JPEG, /*maxImages*/5));
+                    if(!isInVideoMode && largestJpeg != null) {
+                        if (mJpegImageReader == null || mJpegImageReader.getAndRetain() == null) {
+                            mJpegImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestJpeg.getWidth(), largestJpeg.getHeight(), ImageFormat.JPEG, /*maxImages*/5));
+                        }
+                        mJpegImageReader.get().setOnImageAvailableListener(mOnJpegImageAvailableListener, mBackgroundHandler);
                     }
-                    mJpegImageReader.get().setOnImageAvailableListener(mOnJpegImageAvailableListener, mBackgroundHandler);
+                    else{
+                        mMediaRecorder = new MediaRecorder();
+                    }
 
                     /*if (mRawImageReader == null || mRawImageReader.getAndRetain() == null) {
                         mRawImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestRaw.getWidth(), largestRaw.getHeight(), ImageFormat.RAW_SENSOR, 5));
@@ -802,7 +866,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     mRawImageReader.get().setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);*/
 
                     // Check if the flash is supported.
-                    Log.d("flashSupport", characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE).toString());
                     mFlashSupported = (boolean)characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
                     mAESupported = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES) == null ? false : true;
 
@@ -827,10 +890,19 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         return false;
     }
 
+    private static Size chooseVideoSize(Size[] choices) {
+        for (Size size : choices) {
+            if (size.getWidth() == size.getHeight() * 4 / 3 && size.getWidth() <= 1080) {
+                return size;
+            }
+        }
+        Log.e(TAG, "Couldn't find any suitable video size");
+        return choices[choices.length - 1];
+    }
+
     private boolean hasAllPermissionsGranted() {
         for (String permission : CAMERA_PERMISSIONS) {
-            if (ActivityCompat.checkSelfPermission(Camera2Activity.this, permission)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
         }
@@ -847,6 +919,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
         if (!hasAllPermissionsGranted()) {
             requestCameraPermission();
+            requestAudioPermission();
             return;
         }
         Log.d("Func", "openCamera");
@@ -902,13 +975,43 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
         return true;
     }
+    public boolean requestAudioPermission() {
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+
+                new AlertDialog.Builder(this)
+                        .setMessage(getString(R.string.camera_perm_explain))
+                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, LoginActivity.REQUEST_AUDIO_PERMISSION);
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Camera2Activity.this.finish();
+                                    }
+                                }
+                        )
+                        .create()
+                        .show();
+
+            } else {
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, LoginActivity.REQUEST_AUDIO_PERMISSION);
+            }
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case LoginActivity.REQUEST_CAMERA_PERMISSION: {
+            case LoginActivity.REQUEST_CAMERA_PERMISSION:
+            case LoginActivity.REQUEST_AUDIO_PERMISSION:{
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //initCamera();
+                    closeCamera();
+                    openCamera();
                 } else {
                     finish();
                 }
@@ -943,6 +1046,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 if (null != mJpegImageReader) {
                     mJpegImageReader.close();
                     mJpegImageReader = null;
+                }
+                if (null != mMediaRecorder) {
+                    mMediaRecorder.release();
+                    mMediaRecorder = null;
                 }
                 /*if (null != mRawImageReader) {
                     mRawImageReader.close();
@@ -1006,8 +1113,17 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
             mPreviewRequestBuilder.addTarget(mPreviewSurface);
 
+            List<Surface> surfaces = new ArrayList<>();
+
+            surfaces.add(mPreviewSurface);
+
+            Surface surface;
+            if(!isInVideoMode){
+                surfaces.add(mJpegImageReader.get().getSurface());
+            }
+
             // Here, we create a CameraCaptureSession for camera preview.
-            mCameraDevice.createCaptureSession(Arrays.asList(mPreviewSurface,  mJpegImageReader.get().getSurface()/*, mRawImageReader.get().getSurface()*/), new CameraCaptureSession.StateCallback() {
+            mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
                         @Override
                         public void onConfigured(CameraCaptureSession cameraCaptureSession) {
                             synchronized (mCameraStateLock) {
@@ -1134,8 +1250,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
             StreamConfigurationMap map = mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-            // For still image captures, we always use the largest available size.
-            Size largestJpeg = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
 
             // Find the rotation of the device relative to the native device orientation.
             int deviceRotation = Camera2Activity.this.getWindowManager().getDefaultDisplay().getRotation();
@@ -1170,7 +1284,14 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             }
 
             // Find the best preview size for these view dimensions and configured JPEG size.
-            Size previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedViewWidth, rotatedViewHeight, maxPreviewWidth, maxPreviewHeight, largestJpeg);
+            Size chosedSize;
+            if(!isInVideoMode){
+                chosedSize = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());;
+            }
+            else{
+                chosedSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+            }
+            Size previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedViewWidth, rotatedViewHeight, maxPreviewWidth, maxPreviewHeight, chosedSize);
 
             if (swappedDimensions) {
                 mTextureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
@@ -1223,7 +1344,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             // if its aspect ratio changed significantly.
             if (mPreviewSize == null || !checkAspectsEqual(previewSize, mPreviewSize)) {
                 mPreviewSize = previewSize;
-                if (mState != STATE_CAMERA_CLOSED) {
+                if (mCameraDevice != null && mState != STATE_CAMERA_CLOSED) {
+                    Log.d("cameraState", String.valueOf(mState));
                     createCameraPreviewSession();
                 }
             }
@@ -1249,45 +1371,131 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 return;
             }
 
-            if (!mNoAFRun) {
-                unlockFocus();
-                lockFocus();
-            } else {
-                captureStillPicture();
+            if(!isInVideoMode) {
+                if (!mNoAFRun) {
+                    unlockFocus();
+                    lockFocus();
+                } else {
+                    captureStillPicture();
+                }
+
+                startTimer();
+            }
+            else{
+                if (!mIsRecordingVideo) {
+                    startRecordingVideo();
+                } else {
+                    stopRecordingVideo();
+                }
             }
 
-            startTimer();
-
-            /*try {
-                // Trigger an auto-focus run if camera is capable. If the camera is already focused,
-                // this should do nothing.
-                if (!mNoAFRun) {
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
-                            CameraMetadata.CONTROL_AF_TRIGGER_START);
-                }
-
-                // If this is not a legacy device, we can also trigger an auto-exposure metering
-                // run.
-                if (!isLegacy()) {
-                    // Tell the camera to lock focus.
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
-                            CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-                }
-
-                // Update state machine to wait for auto-focus, auto-exposure, and
-                // auto-white-balance (aka. "3A") to converge.
-                mState = STATE_WAITING_FOR_3A_CONVERGENCE;
-
-                // Start a timer for the pre-capture sequence.
-                //startTimer();
-
-                // Replace the existing repeating request with one with updated 3A triggers.
-                mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback,
-                        mBackgroundHandler);
-            } catch (CameraAccessException e) {
-                e.printStackTrace();
-            }*/
         }
+    }
+
+    private void startRecordingVideo() {
+        if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
+            return;
+        }
+        try {
+            closePreviewSession();
+            setUpMediaRecorder();
+            SurfaceTexture texture = mTextureView.getSurfaceTexture();
+            assert texture != null;
+            texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+            List<Surface> surfaces = new ArrayList<>();
+
+            // Set up Surface for the camera preview
+            Surface previewSurface = new Surface(texture);
+            surfaces.add(previewSurface);
+            mPreviewRequestBuilder.addTarget(previewSurface);
+
+            // Set up Surface for the MediaRecorder
+            Surface recorderSurface = mMediaRecorder.getSurface();
+            surfaces.add(recorderSurface);
+            mPreviewRequestBuilder.addTarget(recorderSurface);
+
+            // Start a capture session
+            // Once the session starts, we can update the UI and start recording
+            mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
+
+                @Override
+                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    mCaptureSession = cameraCaptureSession;
+                    try {
+                        setupControls(mPreviewRequestBuilder);
+                        mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, mBackgroundHandler);
+                        mIsRecordingVideo = true;
+
+                        // Start recording
+                        mMediaRecorder.start();
+                    } catch (CameraAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    Toast.makeText(Camera2Activity.this, "Failed", Toast.LENGTH_SHORT).show();
+                }
+            }, mBackgroundHandler);
+        } catch (CameraAccessException | IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void stopRecordingVideo() {
+        // UI
+        mIsRecordingVideo = false;
+        // Stop recording
+        mMediaRecorder.stop();
+        mMediaRecorder.reset();
+
+        Toast.makeText(Camera2Activity.this, "Video saved: " + mNextVideoAbsolutePath,
+                Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Video saved: " + mNextVideoAbsolutePath);
+        mNextVideoAbsolutePath = null;
+        createCameraPreviewSession();
+    }
+
+    private void closePreviewSession() {
+        if (mCaptureSession != null) {
+            mCaptureSession.close();
+            mCaptureSession = null;
+        }
+    }
+
+    private String mNextVideoAbsolutePath;
+    private void setUpMediaRecorder() throws IOException {
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
+            mNextVideoAbsolutePath = getVideoFilePath(this);
+        }
+        mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
+        mMediaRecorder.setVideoEncodingBitRate(10000000);
+        mMediaRecorder.setVideoFrameRate(30);
+        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        int rotation = getWindowManager().getDefaultDisplay().getRotation();
+        switch (mSensorOrientation) {
+            case SENSOR_ORIENTATION_DEFAULT_DEGREES:
+                mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
+                break;
+            case SENSOR_ORIENTATION_INVERSE_DEGREES:
+                mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
+                break;
+        }
+        mMediaRecorder.prepare();
+    }
+
+    private String getVideoFilePath(Context context) {
+        final File dir = context.getExternalFilesDir(null);
+        return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
+                + System.currentTimeMillis() + ".mp4";
     }
 
     /**
@@ -1386,6 +1594,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 else{
                     modeChangerButton.setImageResource(R.drawable.ic_video);
                 }
+                closeCamera();
+                openCamera();
             }
         };
     }
@@ -1452,6 +1662,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
          * The file we save the image into.
          */
         private final File mFile;
+		private String mFileName;
 
         /**
          * The CaptureResult for this image capture.
@@ -1468,20 +1679,22 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
          */
         private final Context mContext;
 
+		private AsyncTasks.OnAsyncTaskFinish mOnFinish;
+
         /**
          * A reference counted wrapper for the ImageReader that owns the given image.
          */
         private final RefCountedAutoCloseable<ImageReader> mReader;
 
-        private ImageSaver(Image image, File file, CaptureResult result,
-						   CameraCharacteristics characteristics, Context context,
-						   RefCountedAutoCloseable<ImageReader> reader) {
+        private ImageSaver(Image image, File file, String fileName, CaptureResult result, CameraCharacteristics characteristics, Context context, RefCountedAutoCloseable<ImageReader> reader, AsyncTasks.OnAsyncTaskFinish onFinish) {
             mImage = image;
             mFile = file;
+            mFileName = fileName;
             mCaptureResult = result;
             mCharacteristics = characteristics;
             mContext = context;
             mReader = reader;
+			mOnFinish = onFinish;
         }
 
         @Override
@@ -1496,10 +1709,12 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     FileOutputStream output = null;
                     try {
                         output = new FileOutputStream(mFile);
-                        output.write(bytes);
-                        Log.e("qaq", "saved");
+                        SafeCameraApplication.getCrypto().encryptFile(output, bytes, mFileName);
+                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, Helpers.getThumbFileName(mFile.getPath()));
                         success = true;
                     } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (CryptoException e) {
                         e.printStackTrace();
                     } finally {
                         mImage.close();
@@ -1507,7 +1722,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     }
                     break;
                 }
-                case ImageFormat.RAW_SENSOR: {
+                /*case ImageFormat.RAW_SENSOR: {
                     DngCreator dngCreator = new DngCreator(mCharacteristics, mCaptureResult);
                     FileOutputStream output = null;
                     try {
@@ -1521,7 +1736,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         closeOutput(output);
                     }
                     break;
-                }
+                }*/
                 default: {
                     Log.e(TAG, "Cannot save image, unexpected image format:" + format);
                     break;
@@ -1533,19 +1748,22 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
             // If saving the file succeeded, update MediaStore.
             if (success) {
+				if (mOnFinish != null) {
+					mOnFinish.onFinish();
+				}
                 MediaScannerConnection.scanFile(mContext, new String[]{mFile.getPath()},
-                /*mimeTypes*/null, new MediaScannerConnection.MediaScannerConnectionClient() {
-                    @Override
-                    public void onMediaScannerConnected() {
-                        // Do nothing
-                    }
+                        /*mimeTypes*/null, new MediaScannerConnection.MediaScannerConnectionClient() {
+                            @Override
+                            public void onMediaScannerConnected() {
+                                // Do nothing
+                            }
 
-                    @Override
-                    public void onScanCompleted(String path, Uri uri) {
-                        Log.i(TAG, "Scanned " + path + ":");
-                        Log.i(TAG, "-> uri=" + uri);
-                    }
-                });
+                            @Override
+                            public void onScanCompleted(String path, Uri uri) {
+                                Log.i(TAG, "Scanned " + path + ":");
+                                Log.i(TAG, "-> uri=" + uri);
+                            }
+                        });
             }
         }
 
@@ -1557,9 +1775,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         public static class ImageSaverBuilder {
             private Image mImage;
             private File mFile;
+            private String mFileName;
             private CaptureResult mCaptureResult;
             private CameraCharacteristics mCharacteristics;
             private Context mContext;
+            private AsyncTasks.OnAsyncTaskFinish mOnFinish;
             private RefCountedAutoCloseable<ImageReader> mReader;
 
             /**
@@ -1592,9 +1812,20 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 return this;
             }
 
+            public synchronized ImageSaverBuilder setFileName(final String fileName) {
+                if (fileName == null) throw new NullPointerException();
+                mFileName = fileName;
+                return this;
+            }
+
             public synchronized ImageSaverBuilder setResult(final CaptureResult result) {
                 if (result == null) throw new NullPointerException();
                 mCaptureResult = result;
+                return this;
+            }
+            public synchronized ImageSaverBuilder setOnFinish(final AsyncTasks.OnAsyncTaskFinish onFinish) {
+                if (onFinish == null) throw new NullPointerException();
+				mOnFinish = onFinish;
                 return this;
             }
 
@@ -1609,8 +1840,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 if (!isComplete()) {
                     return null;
                 }
-                return new ImageSaver(mImage, mFile, mCaptureResult, mCharacteristics, mContext,
-                        mReader);
+                return new ImageSaver(mImage, mFile, mFileName, mCaptureResult, mCharacteristics, mContext, mReader, mOnFinish);
             }
 
             public synchronized String getSaveLocation() {
@@ -1618,8 +1848,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             }
 
             private boolean isComplete() {
-                return mImage != null && mFile != null && mCaptureResult != null
-                        && mCharacteristics != null;
+                return mImage != null && mFile != null && mCaptureResult != null && mCharacteristics != null;
             }
         }
     }
@@ -1753,7 +1982,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
      * @return The optimal {@code Size}, or an arbitrary one if none were big enough
      */
     private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
-										  int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
+                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
         // Collect the supported resolutions that are at least as big as the preview Surface
         List<Size> bigEnough = new ArrayList<>();
         // Collect the supported resolutions that are smaller than the preview Surface
@@ -1764,7 +1993,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
                     option.getHeight() == option.getWidth() * h / w) {
                 if (option.getWidth() >= textureViewWidth &&
-                    option.getHeight() >= textureViewHeight) {
+                        option.getHeight() >= textureViewHeight) {
                     bigEnough.add(option);
                 } else {
                     notBigEnough.add(option);
@@ -1892,7 +2121,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
      * @param queue     the queue to remove this request from, if completed.
      */
     private void handleCompletion(int requestId, ImageSaver.ImageSaverBuilder builder,
-                                        TreeMap<Integer, ImageSaver.ImageSaverBuilder> queue) {
+                                  TreeMap<Integer, ImageSaver.ImageSaverBuilder> queue) {
         if (builder == null) return;
         ImageSaver saver = builder.buildIfComplete();
         if (saver != null) {
@@ -1965,5 +2194,100 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
 
     };
+
+	private class ShowLastPhotoThumb extends AsyncTask<Void, Void, File> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected File doInBackground(Void... params) {
+
+			File dir = new File(Helpers.getHomeDir(Camera2Activity.this));
+
+			final int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+
+			File[] folderFiles = dir.listFiles();
+
+			if (folderFiles != null && folderFiles.length > 0) {
+				Arrays.sort(folderFiles, new Comparator<File>() {
+					public int compare(File f1, File f2) {
+						return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
+					}
+				});
+
+				for (File file : folderFiles) {
+					File thumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + Helpers.getThumbFileName(file));
+					if (file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()) {
+						return file;
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(File file) {
+			super.onPostExecute(file);
+
+			lastFile = file;
+
+			if (lastFile != null) {
+				final File lastFileThumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + Helpers.getThumbFileName(lastFile));
+				final int thumbSize = (int) Math.round(Helpers.getThumbSize(Camera2Activity.this) / 1.4);
+
+				if (SafeCameraApplication.getKey() != null) {
+					AsyncTasks.DecryptPopulateImage task = new AsyncTasks.DecryptPopulateImage(Camera2Activity.this, lastFileThumb.getPath(), galleryButton);
+					task.setSize(thumbSize);
+					task.setOnFinish(new AsyncTasks.OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							//galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
+							//changeRotation(mOrientation);
+							findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
+						}
+					});
+					task.execute();
+				}
+				else if(mLastThumbBitmap != null){
+					galleryButton.setImageBitmap(mLastThumbBitmap);
+					galleryButton.setVisibility(View.VISIBLE);
+				}
+			} else {
+				findViewById(R.id.lastPhoto).setVisibility(View.INVISIBLE);
+			}
+		}
+
+	}
+
+
+	private void showLastPhotoThumb() {
+		(new Camera2Activity.ShowLastPhotoThumb()).execute();
+	}
+
+	private View.OnClickListener openGallery() {
+		return new View.OnClickListener() {
+			public void onClick(View v) {
+				if (lastFile != null && lastFile.isFile()) {
+					LoginManager.checkLogin(Camera2Activity.this, new LoginManager.UserLogedinCallback() {
+						@Override
+						public void onUserLoginSuccess() {
+							Log.d("FILE", lastFile.getPath());
+							Intent intent = new Intent();
+							intent.setClass(Camera2Activity.this, ViewImageActivity.class);
+							intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
+							intent.putExtra("EXTRA_CURRENT_PATH", Helpers.getHomeDir(Camera2Activity.this));
+							startActivityForResult(intent, GalleryActivity.REQUEST_VIEW_PHOTO);
+
+						}
+
+						@Override
+						public void onUserLoginFail() {
+
+						}
+					});
+				}
+			}
+		};
+	}
 
 }
