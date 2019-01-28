@@ -47,7 +47,13 @@ public class Crypto {
     protected static final String PUBLIC_KEY_FILENAME = "public";
 
     public static final String XCHACHA20POLY1305_IETF_CONTEXT = "__data__";
-    protected static final int MAX_BUFFER_LENGTH = 1024*1024*64;
+    public static final int MAX_BUFFER_LENGTH = 1024*1024*64;
+
+    public static final int FILE_BEGGINIG_LEN = FILE_BEGGINING.length();
+    public static final int FILE_FILE_VERSION_LEN = 1;
+    public static final int FILE_CHUNK_SIZE_LEN = 4;
+    public static final int FILE_DATA_SIZE_LEN = 8;
+    public static final int FILE_HEADER_SIZE_LEN = 4;
 
     protected int bufSize = 1024 * 1024;
 
@@ -241,9 +247,9 @@ public class Crypto {
         byte[] privateKey = SafeCameraApplication.getKey();
 
         // Read and validate file beginning
-        byte[] fileBeginning = new byte[FILE_BEGGINING.length()];
+        byte[] fileBeginning = new byte[FILE_BEGGINIG_LEN];
         in.read(fileBeginning);
-        overallHeaderSize += FILE_BEGGINING.length();
+        overallHeaderSize += FILE_BEGGINIG_LEN;
 
         if (!new String(fileBeginning, "UTF-8").equals(FILE_BEGGINING)) {
             throw new CryptoException("Invalid file header, not our file");
@@ -254,33 +260,33 @@ public class Crypto {
         if (header.fileVersion != CURRENT_FILE_VERSION) {
             throw new CryptoException("Unsupported version number: " + header.fileVersion);
         }
-        overallHeaderSize += 1;
+        overallHeaderSize += FILE_FILE_VERSION_LEN;
 
         // Read chunk size
-        byte[] chunkSizeBytes = new byte[4];
+        byte[] chunkSizeBytes = new byte[FILE_CHUNK_SIZE_LEN];
         in.read(chunkSizeBytes);
         header.chunkSize = byteArrayToInt(chunkSizeBytes);
 
         if(header.chunkSize < 1 || header.chunkSize > MAX_BUFFER_LENGTH){
             throw new CryptoException("Invalid chunk size");
         }
-        overallHeaderSize += 4;
+        overallHeaderSize += FILE_CHUNK_SIZE_LEN;
 
-        // Read chunk size
-        byte[] dataSizeBytes = new byte[8];
+        // Read data size
+        byte[] dataSizeBytes = new byte[FILE_DATA_SIZE_LEN];
         in.read(dataSizeBytes);
         header.dataSize = byteArrayToLong(dataSizeBytes);
-        overallHeaderSize += 8;
+        overallHeaderSize += FILE_DATA_SIZE_LEN;
 
         // Read header size
-        byte[] headerSizeBytes = new byte[4];
+        byte[] headerSizeBytes = new byte[FILE_HEADER_SIZE_LEN];
         in.read(headerSizeBytes);
         int headerSize = byteArrayToInt(headerSizeBytes);
 
         if(headerSize < 1 || headerSize > MAX_BUFFER_LENGTH){
             throw new CryptoException("Invalid header size");
         }
-        overallHeaderSize += 4;
+        overallHeaderSize += FILE_HEADER_SIZE_LEN;
 
         // Read header
         byte[] encHeader = new byte[headerSize];

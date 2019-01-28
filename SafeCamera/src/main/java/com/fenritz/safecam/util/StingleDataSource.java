@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 public class StingleDataSource implements DataSource {
 
-	private RandomAccessFile file;
+	//private RandomAccessFile file;
 	private Uri uri;
 	private long bytesRemaining;
 	private boolean opened;
@@ -31,23 +31,53 @@ public class StingleDataSource implements DataSource {
 	private int positionInChunk = 0;
 	private int currentChunkNumber = 1;
 	private byte[] currentChunk;
+	private DataSource upstream;
 
-	public StingleDataSource(Context context) {
-		so = new SodiumAndroid();
-		crypto = new Crypto(context);
+	public StingleDataSource(Context context, DataSource upstream) {
+		this.so = new SodiumAndroid();
+		this.crypto = new Crypto(context);
+		this.upstream = upstream;
 	}
 
+	private void getHeader(DataSpec dataSpec) throws IOException {
+		DataSpec specUp = new DataSpec(dataSpec.uri, 0, C.LENGTH_UNSET, null, 0);
+		upstream.open(specUp);
+
+		int headerLen = Crypto.FILE_BEGGINIG_LEN + Crypto.FILE_FILE_VERSION_LEN + Crypto.FILE_CHUNK_SIZE_LEN + Crypto.FILE_DATA_SIZE_LEN + Crypto.FILE_HEADER_SIZE_LEN;
+		byte[] buf = new byte[headerLen];
+		int bytesRead = upstream.read(buf, 0, headerLen);
+		if(bytesRead != headerLen){
+			throw new IOException("Invalid header length");
+		}
+		int encHeaderSize = Crypto.byteArrayToInt(Arrays.copyOfRange(buf, headerLen-Crypto.FILE_HEADER_SIZE_LEN, headerLen));
+		if(encHeaderSize < 1 || encHeaderSize > Crypto.MAX_BUFFER_LENGTH){
+			throw new IOException("Invalid header length");
+		}
+
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		bytes.write(buf);
+		buf = new byte[encHeaderSize];
+		bytesRead = upstream.read(buf, 0, encHeaderSize);
+		if(bytesRead != encHeaderSize){
+			throw new IOException("Invalid header length");
+		}
+		bytes.write(buf);
+		upstream.close();
+
+		try {
+			header = crypto.getFileHeader(new ByteArrayInputStream(bytes.toByteArray()));
+		} catch (CryptoException e) {
+			throw new IOException("Error getting file header");
+		}
+	}
 
 	@Override
 	public long open(DataSpec dataSpec) throws StingleDataSourceException {
 		try {
 			uri = dataSpec.uri;
-			String path = dataSpec.uri.getPath();
-			FileInputStream in = new FileInputStream(path);
-			header = crypto.getFileHeader(in);
-
-			file = new RandomAccessFile(dataSpec.uri.getPath(), "r");
-
+			if(header == null){
+				getHeader(dataSpec);
+			}
 
 			long chunkOffset = header.overallHeaderSize;
 			if(dataSpec.absoluteStreamPosition > 0){
@@ -61,18 +91,17 @@ public class StingleDataSource implements DataSource {
 				currentChunk = null;
 				currentChunkNumber = 1;
 			}
-			file.seek(chunkOffset);
+			//file.seek(chunkOffset);
+			DataSpec specUp = new DataSpec(dataSpec.uri, chunkOffset, C.LENGTH_UNSET, null, 0);
+			upstream.open(specUp);
 
 			bytesRemaining = dataSpec.length == C.LENGTH_UNSET ? header.dataSize - dataSpec.position : dataSpec.length;
 			if (bytesRemaining < 0) {
 				throw new EOFException();
 			}
 
-			Log.d("open", "pos:" + String.valueOf(dataSpec.absoluteStreamPosition) + " - pos:" + String.valueOf(positionInChunk) + " - off:" + String.valueOf(chunkOffset) + " - rem:"+String.valueOf(bytesRemaining));
 
 			currentChunk = getChunk();
-
-
 
 		} catch (IOException | CryptoException e) {
 			throw new StingleDataSourceException(e);
@@ -99,7 +128,6 @@ public class StingleDataSource implements DataSource {
 				while(data.size() < howMuchNeeded){
 					try {
 						if(bytesRemainingInChunk < howMuchNeeded){
-							Log.d("read", "next chunk");
 							byte[] neededBytes = Arrays.copyOfRange(currentChunk, positionInChunk, currentChunk.length);
 							howMuchNeeded -= currentChunk.length - positionInChunk;
 							data.write(neededBytes);
@@ -107,13 +135,11 @@ public class StingleDataSource implements DataSource {
 							positionInChunk = 0;
 							currentChunk = getChunk();
 							bytesRemainingInChunk = currentChunk.length;
-							Log.d("readNext", "len:" + String.valueOf(readLength) + " | need:" + String.valueOf(howMuchNeeded) + " | chunkNum:" +String.valueOf(currentChunkNumber) + " | bytesRem:" +String.valueOf(bytesRemainingInChunk) + " | position:" +String.valueOf(positionInChunk));
 						}
 						else {
 							byte[] neededBytes = Arrays.copyOfRange(currentChunk, positionInChunk, positionInChunk+howMuchNeeded);
 							data.write(neededBytes);
 							positionInChunk += howMuchNeeded;
-							Log.d("readNormal", "len:" + String.valueOf(readLength) + " | need:" + String.valueOf(howMuchNeeded) + " | chunkNum:" +String.valueOf(currentChunkNumber) + " | bytesRem:" +String.valueOf(bytesRemainingInChunk) + " | position:" +String.valueOf(positionInChunk));
 						}
 
 					} catch (CryptoException e) {
@@ -146,11 +172,14 @@ public class StingleDataSource implements DataSource {
 
 		byte[] encChunkBytes = new byte[header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES];
 
-		int numRead = file.read(chunkNonce);
+		int numRead;
+		//numRead= file.read(chunkNonce);
+		numRead = upstream.read(chunkNonce, 0, chunkNonce.length);
 		if(numRead != AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES){
 			throw new CryptoException("Invalid nonce length");
 		}
-		numRead = file.read(encChunkBytes);
+		//numRead = file.read(encChunkBytes);
+		numRead = upstream.read(encChunkBytes, 0, encChunkBytes.length);
 
 		so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, currentChunkNumber, contextBytes, header.symmentricKey);
 
@@ -170,10 +199,14 @@ public class StingleDataSource implements DataSource {
 	}
 
 	@Override
-	public void close() throws com.google.android.exoplayer2.upstream.FileDataSource.FileDataSourceException {
-		Log.d("close", "close qaq");
+	public void close() throws StingleDataSourceException {
 		uri = null;
 		try {
+			upstream.close();
+		} catch (IOException e) {
+			throw new StingleDataSourceException(e);
+		}
+		/*try {
 			if (file != null) {
 				file.close();
 			}
@@ -184,7 +217,7 @@ public class StingleDataSource implements DataSource {
 			if (opened) {
 				opened = false;
 			}
-		}
+		}*/
 	}
 
 	/**

@@ -18,6 +18,7 @@ import com.fenritz.safecam.util.MyFileDataSource;
 import com.fenritz.safecam.util.MyFileDataSourceFactory;
 import com.fenritz.safecam.util.StingleDataSource;
 import com.fenritz.safecam.util.StingleDataSourceFactory;
+import com.fenritz.safecam.util.StingleHttpDataSource;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -27,8 +28,11 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.FileDataSource;
+import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.crypto.AesCipherDataSource;
 import com.goterl.lazycode.lazysodium.LazySodiumAndroid;
 import com.goterl.lazycode.lazysodium.SodiumAndroid;
@@ -213,9 +217,10 @@ public class TestActivity extends Activity {
 
 		playerView.setPlayer(player);
 		//AesCipherDataSource
-		String path = Helpers.getHomeDir(this) + "/vid.sc";
+		String path = Helpers.getHomeDir(this) + "/vid1.sc";
 		//path = "/storage/emulated/0/vid.mp4";
-		Uri uri = Uri.fromFile(new File(path));
+		//Uri uri = Uri.fromFile(new File(path));
+		Uri uri = Uri.parse("https://www.safecamera.org/vid1.sc");
 		MediaSource mediaSource = buildMediaSource(uri);
 		player.prepare(mediaSource, true, false);
 
@@ -224,8 +229,10 @@ public class TestActivity extends Activity {
 	}
 
 	private MediaSource buildMediaSource(Uri uri) {
-		StingleDataSourceFactory stingle = new StingleDataSourceFactory(this);
 		//MyFileDataSourceFactory stingle = new MyFileDataSourceFactory();
+		//FileDataSource file = new FileDataSource();
+		StingleHttpDataSource http = new StingleHttpDataSource("stingle", null);
+		StingleDataSourceFactory stingle = new StingleDataSourceFactory(this, http);
 
 		return new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
 	}
