@@ -71,6 +71,8 @@ public final class MyFileDataSource implements DataSource {
 			file.seek(dataSpec.position);
 			bytesRemaining = dataSpec.length == C.LENGTH_UNSET ? file.length() - dataSpec.position
 					: dataSpec.length;
+
+			Log.d("open", "pos:" + String.valueOf(dataSpec.position) + " - filelen:" + String.valueOf(file.length()) + " - rem:"+String.valueOf(bytesRemaining));
 			if (bytesRemaining < 0) {
 				throw new EOFException();
 			}
@@ -119,6 +121,7 @@ public final class MyFileDataSource implements DataSource {
 	@Override
 	public void close() throws com.google.android.exoplayer2.upstream.FileDataSource.FileDataSourceException {
 		uri = null;
+		Log.d("close", "close qaq");
 		try {
 			if (file != null) {
 				file.close();

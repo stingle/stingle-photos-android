@@ -28,7 +28,6 @@ public class StingleDataSource implements DataSource {
 	private Crypto crypto;
 	private Crypto.Header header;
 
-	private int chunkOffset = 0;
 	private int positionInChunk = 0;
 	private int currentChunkNumber = 1;
 	private byte[] currentChunk;
@@ -48,27 +47,33 @@ public class StingleDataSource implements DataSource {
 			header = crypto.getFileHeader(in);
 
 			file = new RandomAccessFile(dataSpec.uri.getPath(), "r");
-			//file.seek(dataSpec.position);
 
-			Log.d("open", String.valueOf(dataSpec.position));
 
-			if(dataSpec.position == 0){
-				file.seek(header.overallHeaderSize);
+			long chunkOffset = header.overallHeaderSize;
+			if(dataSpec.absoluteStreamPosition > 0){
+				currentChunkNumber = (int) Math.floor(dataSpec.absoluteStreamPosition / header.chunkSize) + 1;
+				chunkOffset = header.overallHeaderSize +  (currentChunkNumber - 1) * (AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES + header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES);
+
+				positionInChunk = (int)(dataSpec.absoluteStreamPosition - ((currentChunkNumber-1) * header.chunkSize));
 			}
-			else{
-				int chunkWanted = (int) Math.floor(dataSpec.position / header.chunkSize);
-				long chunkOffset = (chunkWanted - 1) * (AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES + header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES);
-				file.seek(header.overallHeaderSize + chunkOffset);
-
-				chunkOffset = dataSpec.position - (chunkWanted * header.chunkSize);
-				currentChunkNumber = chunkWanted + 1;
+			else {
+				positionInChunk = 0;
+				currentChunk = null;
+				currentChunkNumber = 1;
 			}
+			file.seek(chunkOffset);
 
-			bytesRemaining = header.dataSize - dataSpec.position;
-
+			bytesRemaining = dataSpec.length == C.LENGTH_UNSET ? header.dataSize - dataSpec.position : dataSpec.length;
 			if (bytesRemaining < 0) {
 				throw new EOFException();
 			}
+
+			Log.d("open", "pos:" + String.valueOf(dataSpec.absoluteStreamPosition) + " - pos:" + String.valueOf(positionInChunk) + " - off:" + String.valueOf(chunkOffset) + " - rem:"+String.valueOf(bytesRemaining));
+
+			currentChunk = getChunk();
+
+
+
 		} catch (IOException | CryptoException e) {
 			throw new StingleDataSourceException(e);
 		}
@@ -89,27 +94,28 @@ public class StingleDataSource implements DataSource {
 			int bytesRead;
 			int howMuchNeeded = (int) Math.min(bytesRemaining, readLength);
 			try {
+				int bytesRemainingInChunk = currentChunk.length - positionInChunk;
 				ByteArrayOutputStream data = new ByteArrayOutputStream();
 				while(data.size() < howMuchNeeded){
 					try {
-						if(currentChunk == null) {
+						if(bytesRemainingInChunk < howMuchNeeded){
+							Log.d("read", "next chunk");
+							byte[] neededBytes = Arrays.copyOfRange(currentChunk, positionInChunk, currentChunk.length);
+							howMuchNeeded -= currentChunk.length - positionInChunk;
+							data.write(neededBytes);
+							currentChunkNumber++;
+							positionInChunk = 0;
 							currentChunk = getChunk();
+							bytesRemainingInChunk = currentChunk.length;
+							Log.d("readNext", "len:" + String.valueOf(readLength) + " | need:" + String.valueOf(howMuchNeeded) + " | chunkNum:" +String.valueOf(currentChunkNumber) + " | bytesRem:" +String.valueOf(bytesRemainingInChunk) + " | position:" +String.valueOf(positionInChunk));
 						}
-
-						if(currentChunk.length - positionInChunk > howMuchNeeded){
+						else {
 							byte[] neededBytes = Arrays.copyOfRange(currentChunk, positionInChunk, positionInChunk+howMuchNeeded);
 							data.write(neededBytes);
 							positionInChunk += howMuchNeeded;
+							Log.d("readNormal", "len:" + String.valueOf(readLength) + " | need:" + String.valueOf(howMuchNeeded) + " | chunkNum:" +String.valueOf(currentChunkNumber) + " | bytesRem:" +String.valueOf(bytesRemainingInChunk) + " | position:" +String.valueOf(positionInChunk));
 						}
-						else {
-							Log.d("read", "next chunk");
-							byte[] neededBytes = Arrays.copyOfRange(currentChunk, positionInChunk, positionInChunk + howMuchNeeded - (currentChunk.length - positionInChunk));
-							data.write(neededBytes);
-							currentChunkNumber++;
-							chunkOffset = 0;
-							positionInChunk = 0;
-							currentChunk = getChunk();
-						}
+
 					} catch (CryptoException e) {
 						throw new StingleDataSourceException(e);
 					}
@@ -118,7 +124,7 @@ public class StingleDataSource implements DataSource {
 
 				ByteArrayInputStream in = new ByteArrayInputStream(data.toByteArray());
 
-				bytesRead = in.read(buffer, offset, howMuchNeeded);
+				bytesRead = in.read(buffer, offset, readLength);
 			} catch (IOException e) {
 				throw new StingleDataSourceException(e);
 			}
@@ -128,7 +134,6 @@ public class StingleDataSource implements DataSource {
 				bytesRemaining -= bytesRead;
 			}
 
-			Log.d("read", String.valueOf(offset) + " - " +String.valueOf(readLength) + " - " +String.valueOf(bytesRead) + " - " +String.valueOf(currentChunkNumber) + " - " +String.valueOf(positionInChunk));
 
 			return bytesRead;
 		}
@@ -155,7 +160,7 @@ public class StingleDataSource implements DataSource {
 			throw new CryptoException("Error when decrypting data.");
 		}
 
-		return Arrays.copyOfRange(decBytes, chunkOffset, (int)decSize[0]);
+		return Arrays.copyOfRange(decBytes, 0, (int)decSize[0]);
 
 	}
 
@@ -166,6 +171,7 @@ public class StingleDataSource implements DataSource {
 
 	@Override
 	public void close() throws com.google.android.exoplayer2.upstream.FileDataSource.FileDataSourceException {
+		Log.d("close", "close qaq");
 		uri = null;
 		try {
 			if (file != null) {
