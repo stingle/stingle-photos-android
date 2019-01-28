@@ -57,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.text.SimpleDateFormat;
@@ -249,7 +250,7 @@ public class Helpers {
 
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			try {
-				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName);
+				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName, Crypto.FILE_TYPE_PHOTO);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -883,5 +884,26 @@ public class Helpers {
 			return false;
 		}
 		return true;
+	}
+
+	public static boolean isImageFile(String path) {
+		String mimeType = URLConnection.guessContentTypeFromName(path);
+		return mimeType != null && mimeType.startsWith("image");
+	}
+	public static boolean isVideoFile(String path) {
+		String mimeType = URLConnection.guessContentTypeFromName(path);
+		return mimeType != null && mimeType.startsWith("video");
+	}
+
+	public static int getFileType(String path){
+		int fileType = Crypto.FILE_TYPE_GENERAL;
+		if(Helpers.isImageFile(path)){
+			fileType = Crypto.FILE_TYPE_PHOTO;
+		}
+		else if(Helpers.isVideoFile(path)){
+			fileType = Crypto.FILE_TYPE_VIDEO;
+		}
+
+		return fileType;
 	}
 }

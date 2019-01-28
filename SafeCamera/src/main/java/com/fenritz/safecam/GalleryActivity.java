@@ -50,6 +50,7 @@ import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
 import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.LoginManager;
@@ -407,7 +408,7 @@ public class GalleryActivity extends Activity {
 							objOut.close();
 
 							FileOutputStream encOut = new FileOutputStream(dircacheFile);
-							SafeCameraApplication.getCrypto().encryptFile(encOut, out.toByteArray(), null);
+							SafeCameraApplication.getCrypto().encryptFile(encOut, out.toByteArray(), null, Crypto.FILE_TYPE_GENERAL);
 						}
 					}
 					catch (OptionalDataException e) {

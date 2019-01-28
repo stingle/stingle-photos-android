@@ -186,6 +186,11 @@ public class DashboardActivity extends Activity {
 				intent.setClass(DashboardActivity.this, ChangePasswordActivity.class);
 				startActivity(intent);
 				return true;
+			case R.id.test:
+				intent = new Intent();
+				intent.setClass(DashboardActivity.this, TestActivity.class);
+				startActivity(intent);
+				return true;
 			case R.id.read_security:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));
 				startActivity(browserIntent);

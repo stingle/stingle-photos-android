@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
         android:name="android.hardware.camera2.full"
@@ -47,6 +48,9 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/login"></activity>
+        <activity
+            android:name=".TestActivity"
+            android:label="Test"></activity>
         <activity
             android:name=".CameraActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

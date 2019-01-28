@@ -35,5 +35,7 @@ dependencies {
     //implementation files('libs/Robosodium.aar')
     implementation 'com.goterl.lazycode:lazysodium-android:3.5.0@aar'
     implementation 'net.java.dev.jna:jna:4.5.2@aar'
-    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.7.3'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
 }

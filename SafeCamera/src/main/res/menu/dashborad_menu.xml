@@ -19,5 +19,9 @@
         android:id="@+id/read_security"
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="@string/read_security" />
+    <item
+        android:id="@+id/test"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="Test" />
 
 </menu>

@@ -58,6 +58,7 @@ import android.widget.Toast;
 import com.fenritz.safecam.util.AsyncTasks.DecryptPopulateImage;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.CameraPreview;
+import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.LoginManager;
@@ -1163,7 +1164,7 @@ public class CameraActivity extends Activity {
 		protected Void doInBackground(byte[]... params) {
 			try {
 				FileOutputStream out = new FileOutputStream(filePath);
-				SafeCameraApplication.getCrypto().encryptFile(out, params[0], fileName);
+				SafeCameraApplication.getCrypto().encryptFile(out, params[0], fileName, Crypto.FILE_TYPE_PHOTO);
 				out.close();
 				//Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
 			} catch (FileNotFoundException e) {

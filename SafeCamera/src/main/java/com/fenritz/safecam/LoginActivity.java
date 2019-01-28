@@ -43,7 +43,6 @@ public class LoginActivity extends Activity {
 	private boolean justLogin = false;
 	private Bundle extraData;
 
-	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

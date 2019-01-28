@@ -42,23 +42,26 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -70,18 +73,20 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fenritz.safecam.util.AsyncTasks;
+import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.LoginManager;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
@@ -194,6 +199,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     private static Bitmap mLastThumbBitmap;
 	private File lastFile;
+	private ParcelFileDescriptor parcelRead;
+	private ParcelFileDescriptor parcelWrite;
 
     private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
     private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
@@ -1397,6 +1404,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             return;
         }
         try {
+
             closePreviewSession();
             setUpMediaRecorder();
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -1420,26 +1428,33 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
 
                 @Override
-                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                public void onConfigured(CameraCaptureSession cameraCaptureSession) {
                     mCaptureSession = cameraCaptureSession;
                     try {
                         setupControls(mPreviewRequestBuilder);
                         mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, mBackgroundHandler);
                         mIsRecordingVideo = true;
-
-                        // Start recording
+                        new Thread(new SockMonitor()).start();
+                        Thread.sleep(1000);
                         mMediaRecorder.start();
+                        // Start recording
                     } catch (CameraAccessException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
 
                 @Override
-                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+                public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
                     Toast.makeText(Camera2Activity.this, "Failed", Toast.LENGTH_SHORT).show();
                 }
             }, mBackgroundHandler);
-        } catch (CameraAccessException | IOException e) {
+        } catch (CameraAccessException/* | IOException*/ e) {
+            e.printStackTrace();
+		} catch (ErrnoException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -1467,14 +1482,25 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     }
 
     private String mNextVideoAbsolutePath;
-    private void setUpMediaRecorder() throws IOException {
+    private void setUpMediaRecorder() throws IOException, ErrnoException {
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.WEBM);
         if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
             mNextVideoAbsolutePath = getVideoFilePath(this);
         }
-        mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
+
+
+		ParcelFileDescriptor[] parcelFileDescriptors =ParcelFileDescriptor.createReliablePipe();
+		parcelRead = new ParcelFileDescriptor(parcelFileDescriptors[0]);
+		parcelWrite  = new ParcelFileDescriptor(parcelFileDescriptors[1]);
+
+		mMediaRecorder.setOutputFile(parcelWrite.getFileDescriptor());
+
+
+
+
+		//mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
         mMediaRecorder.setVideoEncodingBitRate(10000000);
         mMediaRecorder.setVideoFrameRate(30);
         mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
@@ -1489,7 +1515,53 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
                 break;
         }
-        mMediaRecorder.prepare();
+		mMediaRecorder.prepare();
+
+    }
+
+    private class SockMonitor implements Runnable {
+
+        InputStream in;
+        FileOutputStream out;
+
+        public SockMonitor(){
+
+        }
+
+        @Override
+        public void run() {
+            try {
+                try {
+                    File dir = Camera2Activity.this.getExternalFilesDir(null);
+                    String path = dir.getAbsolutePath() + "/" + System.currentTimeMillis() + ".mp4";
+
+                    out = new FileOutputStream(path);
+                    in = new ParcelFileDescriptor.AutoCloseInputStream(parcelRead);
+                    Log.d("write", "Init streams");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                byte[] buffer = new byte[1024];
+                while (!Thread.interrupted()) {
+                    Log.d("write", "RUN");
+                    int read;
+                    if((read = in.read(buffer)) > 0) {
+                        try {
+                            out.write(buffer,0, read);
+                            out.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                Log.d("write", "writeFinish");
+                out.close();
+
+            }
+            catch (IOException e){}
+        }
+
     }
 
     private String getVideoFilePath(Context context) {
@@ -1709,7 +1781,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     FileOutputStream output = null;
                     try {
                         output = new FileOutputStream(mFile);
-                        SafeCameraApplication.getCrypto().encryptFile(output, bytes, mFileName);
+                        SafeCameraApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO);
                         mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, Helpers.getThumbFileName(mFile.getPath()));
                         success = true;
                     } catch (IOException e) {
