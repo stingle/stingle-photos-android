@@ -2,7 +2,6 @@ package com.fenritz.safecam.util;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -20,7 +19,6 @@ import java.util.Arrays;
 
 public class StingleDataSource implements DataSource {
 
-	//private RandomAccessFile file;
 	private Uri uri;
 	private long bytesRemaining;
 	private boolean opened;
@@ -91,7 +89,6 @@ public class StingleDataSource implements DataSource {
 				currentChunk = null;
 				currentChunkNumber = 1;
 			}
-			//file.seek(chunkOffset);
 			DataSpec specUp = new DataSpec(dataSpec.uri, chunkOffset, C.LENGTH_UNSET, null, 0);
 			upstream.open(specUp);
 
@@ -99,7 +96,6 @@ public class StingleDataSource implements DataSource {
 			if (bytesRemaining < 0) {
 				throw new EOFException();
 			}
-
 
 			currentChunk = getChunk();
 
@@ -155,11 +151,9 @@ public class StingleDataSource implements DataSource {
 				throw new StingleDataSourceException(e);
 			}
 
-
 			if (bytesRead > 0) {
 				bytesRemaining -= bytesRead;
 			}
-
 
 			return bytesRead;
 		}
@@ -173,12 +167,11 @@ public class StingleDataSource implements DataSource {
 		byte[] encChunkBytes = new byte[header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES];
 
 		int numRead;
-		//numRead= file.read(chunkNonce);
 		numRead = upstream.read(chunkNonce, 0, chunkNonce.length);
 		if(numRead != AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES){
 			throw new CryptoException("Invalid nonce length");
 		}
-		//numRead = file.read(encChunkBytes);
+
 		numRead = upstream.read(encChunkBytes, 0, encChunkBytes.length);
 
 		so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, currentChunkNumber, contextBytes, header.symmentricKey);
@@ -206,18 +199,6 @@ public class StingleDataSource implements DataSource {
 		} catch (IOException e) {
 			throw new StingleDataSourceException(e);
 		}
-		/*try {
-			if (file != null) {
-				file.close();
-			}
-		} catch (IOException e) {
-			throw new com.google.android.exoplayer2.upstream.FileDataSource.FileDataSourceException(e);
-		} finally {
-			file = null;
-			if (opened) {
-				opened = false;
-			}
-		}*/
 	}
 
 	/**

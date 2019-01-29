@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -84,6 +85,7 @@ import com.fenritz.safecam.util.LoginManager;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -199,13 +201,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     private static Bitmap mLastThumbBitmap;
 	private File lastFile;
-	private ParcelFileDescriptor parcelRead;
-	private ParcelFileDescriptor parcelWrite;
 
     private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
     private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
     private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
+
+    public static final String VIDEO_FOLDER_NAME = "tmp_video";
+    private String lastVideoFilename = "";
+    private String lastVideoFilenameEnc = "";
 
     static {
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -1115,9 +1119,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             mPreviewSurface = new Surface(texture);
 
             // We set up a CaptureRequest.Builder with the output Surface.
-            mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(isInVideoMode ? CameraDevice.TEMPLATE_RECORD : CameraDevice.TEMPLATE_PREVIEW);
             //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, isInVideoMode ? CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD : CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
             mPreviewRequestBuilder.addTarget(mPreviewSurface);
 
             List<Surface> surfaces = new ArrayList<>();
@@ -1434,13 +1438,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         setupControls(mPreviewRequestBuilder);
                         mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, mBackgroundHandler);
                         mIsRecordingVideo = true;
-                        new Thread(new SockMonitor()).start();
-                        Thread.sleep(1000);
+
                         mMediaRecorder.start();
                         // Start recording
                     } catch (CameraAccessException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
@@ -1472,6 +1473,64 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         Log.d(TAG, "Video saved: " + mNextVideoAbsolutePath);
         mNextVideoAbsolutePath = null;
         createCameraPreviewSession();
+        (new EncryptAndSaveVideo(this, lastVideoFilename, lastVideoFilenameEnc)).execute();
+    }
+
+    public class EncryptAndSaveVideo extends AsyncTask<Void, Void, Void> {
+
+        private final Context context;
+        private final String fileName;
+        private final String encFileName;
+        private ProgressDialog progressDialog;
+
+        public EncryptAndSaveVideo(Context context, String fileName, String encFileName) {
+            super();
+            this.context = context;
+            this.fileName = fileName;
+            this.encFileName = encFileName;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = ProgressDialog.show(Camera2Activity.this, "", getString(R.string.encrypting_video), false, false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                File tmpVideoFolder = context.getDir(VIDEO_FOLDER_NAME, Context.MODE_PRIVATE);
+                if(!tmpVideoFolder.exists()){
+                    tmpVideoFolder.mkdir();
+                }
+                File tmpFile = new File(tmpVideoFolder.getAbsolutePath() + "/" + fileName);
+                FileInputStream in = new FileInputStream(tmpFile);
+                FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(Camera2Activity.this) + "/" + encFileName);
+
+                SafeCameraApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size());
+
+                out.close();
+
+                tmpFile.delete();
+
+                //Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (CryptoException e) {
+                e.printStackTrace();
+            }
+            // new EncryptAndWriteThumb(filename).execute(params[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            progressDialog.dismiss();
+        }
+
     }
 
     private void closePreviewSession() {
@@ -1485,27 +1544,20 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private void setUpMediaRecorder() throws IOException, ErrnoException {
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.WEBM);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
             mNextVideoAbsolutePath = getVideoFilePath(this);
         }
 
-
-		ParcelFileDescriptor[] parcelFileDescriptors =ParcelFileDescriptor.createReliablePipe();
-		parcelRead = new ParcelFileDescriptor(parcelFileDescriptors[0]);
-		parcelWrite  = new ParcelFileDescriptor(parcelFileDescriptors[1]);
-
-		mMediaRecorder.setOutputFile(parcelWrite.getFileDescriptor());
-
-
+		mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
 
 
 		//mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
         mMediaRecorder.setVideoEncodingBitRate(10000000);
-        mMediaRecorder.setVideoFrameRate(30);
+        mMediaRecorder.setVideoFrameRate(60);
         mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
         switch (mSensorOrientation) {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:
@@ -1519,55 +1571,18 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     }
 
-    private class SockMonitor implements Runnable {
-
-        InputStream in;
-        FileOutputStream out;
-
-        public SockMonitor(){
-
-        }
-
-        @Override
-        public void run() {
-            try {
-                try {
-                    File dir = Camera2Activity.this.getExternalFilesDir(null);
-                    String path = dir.getAbsolutePath() + "/" + System.currentTimeMillis() + ".mp4";
-
-                    out = new FileOutputStream(path);
-                    in = new ParcelFileDescriptor.AutoCloseInputStream(parcelRead);
-                    Log.d("write", "Init streams");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                byte[] buffer = new byte[1024];
-                while (!Thread.interrupted()) {
-                    Log.d("write", "RUN");
-                    int read;
-                    if((read = in.read(buffer)) > 0) {
-                        try {
-                            out.write(buffer,0, read);
-                            out.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                Log.d("write", "writeFinish");
-                out.close();
-
-            }
-            catch (IOException e){}
-        }
-
-    }
 
     private String getVideoFilePath(Context context) {
-        final File dir = context.getExternalFilesDir(null);
-        return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
-                + System.currentTimeMillis() + ".mp4";
+        String filenameBase = Helpers.getFilename(Camera2Activity.this, Helpers.VIDEO_FILE_PREFIX);
+        lastVideoFilename = filenameBase + ".mp4";
+        lastVideoFilenameEnc = filenameBase + ".sc";
+
+        File tmpVideoFolder = getDir(VIDEO_FOLDER_NAME, Context.MODE_PRIVATE);
+        if(!tmpVideoFolder.exists()){
+            tmpVideoFolder.mkdir();
+        }
+        Log.d("path", tmpVideoFolder.getAbsolutePath() + "/" + lastVideoFilename);
+        return tmpVideoFolder.getAbsolutePath() + "/" + lastVideoFilename;
     }
 
     /**

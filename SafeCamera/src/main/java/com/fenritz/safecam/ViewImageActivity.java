@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.GestureDetector;
@@ -17,6 +18,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
@@ -27,11 +29,27 @@ import android.widget.Toast;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.util.Crypto;
+import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.DecryptAndShowImage;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.LoginManager;
+import com.fenritz.safecam.util.StingleDataSourceFactory;
+import com.fenritz.safecam.util.StingleHttpDataSource;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.FileDataSource;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -57,6 +75,8 @@ public class ViewImageActivity extends Activity {
     private final ArrayList<DecryptAndShowImage> taskStack = new ArrayList<DecryptAndShowImage>();
     
     private final ArrayList<View> viewsHideShow = new ArrayList<View>();
+	private SimpleExoPlayer player;
+	private PlayerView playerView;
     
 	@SuppressLint("NewApi")
 	@Override
@@ -68,15 +88,11 @@ public class ViewImageActivity extends Activity {
         
 		super.onCreate(savedInstanceState);
 		
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-			getActionBar().setHomeButtonEnabled(true);
-			getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ab_bg_black));
-		}
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setHomeButtonEnabled(true);
+		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ab_bg_black));
 
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        }
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
 		setContentView(R.layout.view_photo);
 
@@ -134,6 +150,7 @@ public class ViewImageActivity extends Activity {
 
 		LoginManager.setLockedTime(this);
 		cancelPendingTasks();
+		releasePlayer();
 	}
 	
 	@Override
@@ -163,12 +180,14 @@ public class ViewImageActivity extends Activity {
                 if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 	if(currentPosition < files.size()-1){
                 		cancelPendingTasks();
+                		releasePlayer();
     					showImage(files.get(++currentPosition));
     				}
                 }  
                 else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 	if(currentPosition > 0){
                 		cancelPendingTasks();
+						releasePlayer();
     					showImage(files.get(--currentPosition));
     				}
                 }
@@ -233,23 +252,80 @@ public class ViewImageActivity extends Activity {
 	@SuppressLint("NewApi")
 	private void showImage(File photo){
 		String realFilename = Helpers.decryptFilename(photo.getPath());
-		boolean isGif = false;
-		if(realFilename.endsWith(".gif")){
-			isGif = true;
+
+		int fileType = Crypto.FILE_TYPE_PHOTO;
+
+		try {
+			Crypto.Header fileHeader = SafeCameraApplication.getCrypto().getFileHeader(new FileInputStream(photo));
+			fileType = fileHeader.fileType;
 		}
-		DecryptAndShowImage task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout)findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener, isGif){
-			@Override
-			protected void onFinish() {
-				super.onFinish();
-				//task = null;
-				taskStack.remove(this);
+		catch (IOException | CryptoException e) {
+			e.printStackTrace();
+		}
+
+		if(fileType == Crypto.FILE_TYPE_PHOTO) {
+			boolean isGif = false;
+			if (realFilename.endsWith(".gif")) {
+				isGif = true;
 			}
-		};
-		task.execute();
-		taskStack.add(task);
+			DecryptAndShowImage task = new DecryptAndShowImage(photo.getPath(), ((LinearLayout) findViewById(R.id.parent_layout)), showControls(), null, null, true, gestureListener, isGif) {
+				@Override
+				protected void onFinish() {
+					super.onFinish();
+					//task = null;
+					taskStack.remove(this);
+				}
+			};
+			task.execute();
+			taskStack.add(task);
+		}
+		else if(fileType == Crypto.FILE_TYPE_VIDEO){
+			ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+			playerView = new PlayerView(this);
+			playerView.setLayoutParams(params);
+
+			LinearLayout parentView = (LinearLayout) findViewById(R.id.parent_layout);
+			parentView.removeAllViews();
+			parentView.addView(playerView);
+			if(gestureListener != null){
+				parentView.setOnTouchListener(gestureListener);
+			}
+			parentView.setOnClickListener(showControls());
+
+			player = ExoPlayerFactory.newSimpleInstance(
+					new DefaultRenderersFactory(this),
+					new DefaultTrackSelector(), new DefaultLoadControl());
+
+			playerView.setPlayer(player);
+
+			String path = Helpers.getHomeDir(this) + "/vid1.sc";
+			Uri uri = Uri.fromFile(photo);
+
+			//Uri uri = Uri.parse("https://www.safecamera.org/vid1.sc");
+
+			//StingleHttpDataSource http = new StingleHttpDataSource("stingle", null);
+			FileDataSource file = new FileDataSource();
+			StingleDataSourceFactory stingle = new StingleDataSourceFactory(this, file);
+
+			MediaSource mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
+			player.setPlayWhenReady(true);
+			playerView.setShowShuffleButton(false);
+			player.prepare(mediaSource, true, false);
+
+		}
 		
 		getActionBar().setTitle(realFilename);
 		((TextView)findViewById(R.id.countLabel)).setText(String.valueOf(currentPosition+1) + "/" + String.valueOf(files.size()));
+	}
+
+	private void releasePlayer() {
+		if (player != null) {
+			//playbackPosition = player.getCurrentPosition();
+			//currentWindow = player.getCurrentWindowIndex();
+			//playWhenReady = player.getPlayWhenReady();
+			player.release();
+			player = null;
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -267,7 +343,7 @@ public class ViewImageActivity extends Activity {
 		
 		int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
 		for (File file : folderFiles) {
-			if (file.getName().endsWith(getString(R.string.file_extension)) && file.length() < maxFileSize) {
+			if (file.getName().endsWith(getString(R.string.file_extension))) {
 				files.add(file);
 			}
 		}

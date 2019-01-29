@@ -439,14 +439,21 @@ public class GalleryActivity extends Activity {
 					}
 					else if(file.isFile() && file.getName().endsWith(fileExt)) {
 						files.add(file);
-						
-						if(file.length() >= maxFileSize){
+
+						Crypto.Header header = null;
+
+						try {
+							header = SafeCameraApplication.getCrypto().getFileHeader(new FileInputStream(file));
+						}
+						catch (IOException | CryptoException e) { }
+
+						if(header != null && header.fileType == Crypto.FILE_TYPE_GENERAL){
 							noThumbs.add(file);
 						}
 						else{
 							String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(file);
 							File thumb = new File(thumbPath);
-							if (!thumb.exists()) {
+							if (!thumb.exists() && (header == null || header.fileType != Crypto.FILE_TYPE_VIDEO)) {
 								toGenerateThumbs.add(file);
 							}
 						}

@@ -356,6 +356,9 @@ public class Crypto {
     }
 
     public void encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength) throws IOException, CryptoException {
+        encryptFile(in, out, filename, fileType, dataLength, null, null);
+    }
+    public void encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
         long time = System.nanoTime();
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
 
@@ -365,7 +368,7 @@ public class Crypto {
         Header header = getNewHeader(symmetricKey, dataLength, filename, fileType);
         writeHeader(out, header, publicKey);
 
-        encryptData(in, out, header);
+        encryptData(in, out, header, progress, task);
         long time2 = System.nanoTime();
         long diff = time2 - time;
         Log.d("time", String.valueOf((double)diff / 1000000000.0));

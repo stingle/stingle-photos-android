@@ -22,6 +22,7 @@
     <string name="decrypting_files">Decrypting file(s)…</string>
     <string name="encrypting_files">Encrypting file(s)…</string>
     <string name="encrypting_photo">Encrypting photo…</string>
+    <string name="encrypting_video">Encrypting video…</string>
     <string name="confirm_delete_files">Do you really want to delete %s files?</string>
     <string name="confirm_decrypt_files">You\'re about to decrypt %s files. They will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
     <string name="confirm_decrypt_files_s">You\'re about to decrypt a file. It will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
