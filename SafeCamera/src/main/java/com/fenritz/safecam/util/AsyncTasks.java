@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.fenritz.safecam.Camera2Activity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 
@@ -713,19 +714,27 @@ public class AsyncTasks {
 					try {
 						inputStream = new FileInputStream(origFile);
 
-						//String destFilePath = Helpers.findNewFileNameIfNeeded(activity, destinationFolder, origFile.getName())  + activity.getString(R.string.file_extension);
-						String destFilePath = Helpers.getNewDestinationPath(activity, destinationFolder, origFile.getName());
-						// String destFilePath =
-						// findNewFileNameIfNeeded(Helpers.getHomeDir(GalleryActivity.this),
-						// origFile.getName());
+						String prefix = Helpers.GENERAL_FILE_PREFIX;
+						int fileType = Helpers.getFileType(origFile.getAbsolutePath());
+						switch (fileType){
+							case Crypto.FILE_TYPE_PHOTO:
+								prefix = Helpers.JPEG_FILE_PREFIX;
+								break;
+							case Crypto.FILE_TYPE_VIDEO:
+								prefix = Helpers.VIDEO_FILE_PREFIX;
+								break;
+						}
 
-						FileOutputStream outputStream = new FileOutputStream(destFilePath);
 
-						SafeCameraApplication.getCrypto().encryptFile(inputStream, outputStream, origFile.getName(), Helpers.getFileType(params[i]), origFile.length());
+						String encFilePath = Helpers.getHomeDir(activity) + "/" + Helpers.getFilename(activity, prefix) + ".sc";
+
+						FileOutputStream outputStream = new FileOutputStream(encFilePath);
+
+						SafeCameraApplication.getCrypto().encryptFile(inputStream, outputStream, origFile.getName(), fileType, origFile.length());
 						//Helpers.getAESCrypt(activity).encrypt(inputStream, outputStream, null, this);
 
 						if(Helpers.isImageFile(origFile.getAbsolutePath())) {
-							File destFile = new File(destFilePath);
+							File destFile = new File(encFilePath);
 							String fileName = Helpers.getThumbFileName(destFile);
 
 							FileInputStream in = new FileInputStream(origFile);
@@ -740,6 +749,15 @@ public class AsyncTasks {
 							System.gc();
 
 							Helpers.generateThumbnail(activity, bytes.toByteArray(), fileName);
+						}
+						else if(Helpers.isVideoFile(origFile.getAbsolutePath())){
+							String thumbFilename = Helpers.getThumbFileName(encFilePath);
+
+							Bitmap thumb = ThumbnailUtils.createVideoThumbnail(origFile.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
+							ByteArrayOutputStream bos = new ByteArrayOutputStream();
+							thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
+
+							Helpers.generateThumbnail(activity, bos.toByteArray(), thumbFilename);
 						}
 						
 						publishProgress(i+1);

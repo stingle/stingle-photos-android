@@ -66,15 +66,26 @@ public class ImportPhotosActivity extends Activity {
         setContentView(R.layout.import_photos);
 
 
-        final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.ORIENTATION };
-		final String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
-		Cursor imagecursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
+        //final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.ORIENTATION };
+        final String[] columns = { MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns._ID };
+
+		String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+				+ MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+				+ " OR "
+				+ MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+				+ MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+
+		final String orderBy = MediaStore.Files.FileColumns.DATE_ADDED + " DESC";
+		//Cursor imagecursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, selection, null, orderBy);
+		Cursor imagecursor = getContentResolver().query(MediaStore.Files.getContentUri("external"), columns, selection, null, orderBy);
+
+		//Cursor imagecursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, selection, null, orderBy);
 		if(imagecursor != null){
-			int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
+			int image_column_index = imagecursor.getColumnIndex(MediaStore.Files.FileColumns._ID);
 			int count = imagecursor.getCount();
 			for (int i = 0; i < count; i++) {
 				imagecursor.moveToPosition(i);
-				int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
+				int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Files.FileColumns.DATA);
 				imgIds.add(imagecursor.getInt(image_column_index));
 				
 				/*int orientationIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
@@ -82,7 +93,7 @@ public class ImportPhotosActivity extends Activity {
 				if(orientation != null){
 					imgOrientations.add(Integer.valueOf(orientation));
 				}*/
-				imgOrientations.add(imagecursor.getInt(imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION)));
+				//imgOrientations.add(imagecursor.getInt(imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION)));
 				arrPath.add(imagecursor.getString(dataColumnIndex));
 			}
 			imagecursor.close();
@@ -182,7 +193,13 @@ public class ImportPhotosActivity extends Activity {
 				} 
 			});
 
-			final AsyncTasks.ShowSystemImageThumb task = new AsyncTasks.ShowSystemImageThumb(imageview, imgIds.get(position), imgOrientations.get(position), cache);
+			int rotation = 0;
+			try {
+				position = imgOrientations.get(position);
+			}
+			catch (IndexOutOfBoundsException e) {}
+
+			final AsyncTasks.ShowSystemImageThumb task = new AsyncTasks.ShowSystemImageThumb(imageview, imgIds.get(position), rotation, cache);
 			AsyncTasks.OnAsyncTaskFinish onFinish = new AsyncTasks.OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {

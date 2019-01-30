@@ -45,10 +45,12 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
+import android.media.ThumbnailUtils;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.Uri;
@@ -60,10 +62,12 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
+import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.OrientationEventListener;
@@ -76,12 +80,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.fenritz.safecam.Camera.VideoSize;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.LoginManager;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -194,7 +200,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
 
     private boolean isInVideoMode = false;
-    private Size mVideoSize;
+    private VideoSize mVideoSize;
     private MediaRecorder mMediaRecorder;
     private boolean mIsRecordingVideo = false;
     private Integer mSensorOrientation;
@@ -207,7 +213,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
 
-    public static final String VIDEO_FOLDER_NAME = "tmp_video";
     private String lastVideoFilename = "";
     private String lastVideoFilenameEnc = "";
 
@@ -850,7 +855,32 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     largestJpeg = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
                 }
                 else {
-                    mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+                    //mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+                    ArrayList<VideoSize> video_sizes = new ArrayList<>();
+                    ArrayList<int[]> ae_fps_ranges = new ArrayList<>();
+                    for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
+                        ae_fps_ranges.add(new int[] {r.getLower(), r.getUpper()});
+                    }
+                    Collections.sort(ae_fps_ranges, new VideoSize.RangeSorter());
+
+                    int min_fps = 9999;
+                    for(int[] r : ae_fps_ranges) {
+                        min_fps = Math.min(min_fps, r[0]);
+                    }
+
+                    android.util.Size [] camera_video_sizes = map.getOutputSizes(MediaRecorder.class);
+                    for(android.util.Size camera_size : camera_video_sizes) {
+                        if( camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160 )
+                            continue; // Nexus 6 returns these, even though not supported?!
+                        long mfd = map.getOutputMinFrameDuration(MediaRecorder.class, camera_size);
+                        int  max_fps = (int)((1.0 / mfd) * 1000000000L);
+                        ArrayList<int[]> fr = new ArrayList<>();
+                        fr.add(new int[] {min_fps, max_fps});
+                        VideoSize normal_video_size = new VideoSize(camera_size.getWidth(), camera_size.getHeight(), fr, false);
+                        video_sizes.add(normal_video_size);
+                    }
+                    Collections.sort(video_sizes, new VideoSize.SizeSorter());
+                    mVideoSize = video_sizes.get(0);
                 }
 
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
@@ -1297,10 +1327,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             // Find the best preview size for these view dimensions and configured JPEG size.
             Size chosedSize;
             if(!isInVideoMode){
-                chosedSize = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());;
+                chosedSize = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
             }
             else{
-                chosedSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+                //chosedSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+                chosedSize = Collections.max(Arrays.asList(map.getOutputSizes(MediaRecorder.class)), new CompareSizesByArea());
             }
             Size previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedViewWidth, rotatedViewHeight, maxPreviewWidth, maxPreviewHeight, chosedSize);
 
@@ -1468,9 +1499,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         mMediaRecorder.stop();
         mMediaRecorder.reset();
 
-        Toast.makeText(Camera2Activity.this, "Video saved: " + mNextVideoAbsolutePath,
-                Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "Video saved: " + mNextVideoAbsolutePath);
         mNextVideoAbsolutePath = null;
         createCameraPreviewSession();
         (new EncryptAndSaveVideo(this, lastVideoFilename, lastVideoFilenameEnc)).execute();
@@ -1499,17 +1527,24 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                File tmpVideoFolder = context.getDir(VIDEO_FOLDER_NAME, Context.MODE_PRIVATE);
-                if(!tmpVideoFolder.exists()){
-                    tmpVideoFolder.mkdir();
-                }
-                File tmpFile = new File(tmpVideoFolder.getAbsolutePath() + "/" + fileName);
+                File cacheDir = context.getCacheDir();
+
+                File tmpFile = new File(cacheDir.getAbsolutePath() + "/" + fileName);
                 FileInputStream in = new FileInputStream(tmpFile);
-                FileOutputStream out = new FileOutputStream(Helpers.getHomeDir(Camera2Activity.this) + "/" + encFileName);
+                String encFilePath = Helpers.getHomeDir(Camera2Activity.this) + "/" + encFileName;
+                FileOutputStream out = new FileOutputStream(encFilePath);
 
                 SafeCameraApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size());
 
                 out.close();
+
+                String thumbFilename = Helpers.getThumbFileName(encFilePath);
+
+                Bitmap thumb = ThumbnailUtils.createVideoThumbnail(tmpFile.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
+
+                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), thumbFilename);
 
                 tmpFile.delete();
 
@@ -1529,6 +1564,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             progressDialog.dismiss();
+            showLastPhotoThumb();
         }
 
     }
@@ -1542,9 +1578,21 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     private String mNextVideoAbsolutePath;
     private void setUpMediaRecorder() throws IOException, ErrnoException {
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+
+        Log.d("format", String.valueOf(profile.fileFormat));
+        Log.d("videoBitRate", String.valueOf(profile.videoBitRate));
+        Log.d("audioBitRate", String.valueOf(profile.audioBitRate));
+        Log.d("videoFrameRate", String.valueOf(profile.videoFrameRate));
+        Log.d("videoCodec", String.valueOf(profile.videoCodec));
+        Log.d("audioCodec", String.valueOf(profile.audioCodec));
+        Log.d("width", String.valueOf(mVideoSize.width));
+        Log.d("height", String.valueOf( mVideoSize.height));
+        Log.d("framerate", String.valueOf( mVideoSize.getMaxFramerate()));
+
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mMediaRecorder.setOutputFormat(profile.fileFormat);
         if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
             mNextVideoAbsolutePath = getVideoFilePath(this);
         }
@@ -1552,12 +1600,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 		mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
 
 
-		//mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
-        mMediaRecorder.setVideoEncodingBitRate(10000000);
-        mMediaRecorder.setVideoFrameRate(60);
-        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
-        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+        mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
+        mMediaRecorder.setAudioEncodingBitRate(profile.audioBitRate);
+        mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
+        mMediaRecorder.setAudioChannels(profile.audioChannels);
+
+        mMediaRecorder.setVideoFrameRate(mVideoSize.getMaxFramerate());
+        mMediaRecorder.setVideoSize(mVideoSize.width, mVideoSize.height);
+        mMediaRecorder.setVideoEncoder(profile.videoCodec);
+        mMediaRecorder.setAudioEncoder(profile.audioCodec);
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
         switch (mSensorOrientation) {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:
@@ -1577,12 +1628,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         lastVideoFilename = filenameBase + ".mp4";
         lastVideoFilenameEnc = filenameBase + ".sc";
 
-        File tmpVideoFolder = getDir(VIDEO_FOLDER_NAME, Context.MODE_PRIVATE);
-        if(!tmpVideoFolder.exists()){
-            tmpVideoFolder.mkdir();
-        }
-        Log.d("path", tmpVideoFolder.getAbsolutePath() + "/" + lastVideoFilename);
-        return tmpVideoFolder.getAbsolutePath() + "/" + lastVideoFilename;
+        File cacheDir = getCacheDir();
+        Log.d("path", cacheDir.getAbsolutePath() + "/" + lastVideoFilename);
+        return cacheDir.getAbsolutePath() + "/" + lastVideoFilename;
     }
 
     /**
@@ -2290,8 +2338,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
 			File dir = new File(Helpers.getHomeDir(Camera2Activity.this));
 
-			final int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-
 			File[] folderFiles = dir.listFiles();
 
 			if (folderFiles != null && folderFiles.length > 0) {
@@ -2303,7 +2349,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
 				for (File file : folderFiles) {
 					File thumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + Helpers.getThumbFileName(file));
-					if (file.length() < maxFileSize && file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()) {
+					if (file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()) {
 						return file;
 					}
 				}

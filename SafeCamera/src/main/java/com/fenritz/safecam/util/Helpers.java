@@ -73,6 +73,7 @@ import java.util.regex.Pattern;
 import javax.crypto.Cipher;
 
 public class Helpers {
+	public static final String GENERAL_FILE_PREFIX = "FILE_";
 	public static final String JPEG_FILE_PREFIX = "IMG_";
 	public static final String VIDEO_FILE_PREFIX = "VID_";
 	protected static final int SHARE_AS_IS = 0;
@@ -237,7 +238,7 @@ public class Helpers {
 			tmpFile.mkdirs();
 		}
 	}
-	
+
 
 	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
