@@ -42,13 +42,13 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
-import com.fenritz.safecam.util.AsyncTasks.ImportFiles;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.CryptoException;
@@ -79,33 +79,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class GalleryActivity extends Activity {
 
 	public final MemoryCache memCache = SafeCameraApplication.getCache();
-    protected final LruCache<String, String> labelCache = new LruCache<String, String>(100);
 
 	public static final int REQUEST_DECRYPT = 0;
 	public static final int REQUEST_ENCRYPT = 1;
-	public static final int REQUEST_IMPORT = 2;
-	public static final int REQUEST_VIEW_PHOTO = 3;
-	public static final int REQUEST_LOGIN = 4;
+	public static final int REQUEST_VIEW_PHOTO = 2;
+	public static final int REQUEST_LOGIN = 3;
 
 	protected static final int ACTION_DECRYPT = 0;
 	protected static final int ACTION_SHARE = 1;
-	protected static final int ACTION_MOVE = 2;
-	protected static final int ACTION_DELETE = 3;
+	protected static final int ACTION_DELETE = 2;
 	
 	protected static final int ACTION_DELETE_FOLDER = 0;
-
-    private File[] currentFolderFiles;
 
 	private boolean multiSelectModeActive = false;
 
 	private GridView photosGrid;
 
-	private static ArrayList<File> files = new ArrayList<File>();
-	
-	private final ArrayList<File> selectedFiles = new ArrayList<File>();
+	private ArrayList<GalleryItem> galleryItems = new ArrayList<GalleryItem>();
+	private ArrayList<File> selectedFiles = new ArrayList<File>();
+
 	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
 	private final ArrayList<File> noThumbs = new ArrayList<File>();
-	private final HashMap<String, String> foldersMap = new HashMap<String, String>();
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
 	private GenerateThumbs thumbGenTask;
@@ -116,8 +110,6 @@ public class GalleryActivity extends Activity {
 	private boolean sendBackDecryptedFile = false;
 	private Intent originalIntent = null;
 	
-	private String currentPath;
-
 	private String thumbsDir;
 	
 	private final CopyOnWriteArrayList<Dec> queue = new CopyOnWriteArrayList<Dec>();
@@ -151,7 +143,6 @@ public class GalleryActivity extends Activity {
 	}
 	
 	protected void startupActions(){
-		currentPath = Helpers.getHomeDir(this);
         resetListVars();
 
 		photosGrid = (GridView) findViewById(R.id.photosGrid);
@@ -255,7 +246,7 @@ public class GalleryActivity extends Activity {
 			}
 			
 			final String[] filePaths = {filePath};
-			new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
+			new EncryptFiles(GalleryActivity.this, Helpers.getHomeDir(this), new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
@@ -318,7 +309,7 @@ public class GalleryActivity extends Activity {
 			
 			final String[] finalFilePaths = filePaths;
 			
-			new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
+			new EncryptFiles(GalleryActivity.this, Helpers.getHomeDir(this), new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
@@ -331,7 +322,7 @@ public class GalleryActivity extends Activity {
 		}
 	}
 	
-	private class FillFilesList extends AsyncTask<Void, Void, ArrayList<File>> {
+	private class FillFilesList extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected void onPreExecute() {
@@ -341,104 +332,19 @@ public class GalleryActivity extends Activity {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		protected ArrayList<File> doInBackground(Void... params) {
+		protected Void doInBackground(Void... params) {
 
-			ArrayList<File> filesToReturn = new ArrayList<File>();
-			
-			ArrayList<File> folders = new ArrayList<File>();
-			ArrayList<File> files = new ArrayList<File>();
-
-			boolean isDirCacheFound = false;
-			foldersMap.clear();
-			File dircacheFile = new File(currentPath + "/" + ".dirnamecache");
-			if(dircacheFile.exists()){
-				try {
-					byte[] dirCacheBytes = SafeCameraApplication.getCrypto().decryptFile(new FileInputStream(dircacheFile));
-					if(dirCacheBytes != null){
-							ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(dirCacheBytes));
-							foldersMap.putAll((HashMap<String, String>) objIn.readObject());
-							isDirCacheFound = true;
-					}
-				}
-				catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				} catch (CryptoException e) {
-					e.printStackTrace();
-				}
-			}
-
-            if(currentFolderFiles == null) {
-                File dir = new File(currentPath);
-                currentFolderFiles = dir.listFiles();
-
-                if(currentFolderFiles != null) {
-					// Sort all files by last modified time DESC
-					Arrays.sort(currentFolderFiles, new Comparator<File>() {
-						public int compare(File f1, File f2) {
-							return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
-						}
-					});
-
-					// Rebuild dir cache file if latest modified directory is earlier than cache file
-					for (File file : currentFolderFiles){
-						if(file.isDirectory()){
-							if(!file.getName().startsWith(".") && file.lastModified() > dircacheFile.lastModified()){
-								isDirCacheFound = false;
-							}
-						}
-					}
-
-					try {
-
-						if(!isDirCacheFound) {
-							// Build folder filename cache
-
-							for (File file : currentFolderFiles) {
-								if (file.isDirectory() && !file.getName().startsWith(".")) {
-									foldersMap.put(file.getName(), Helpers.decryptFilename(file.getPath()));
-								}
-							}
-
-							ByteArrayOutputStream out = new ByteArrayOutputStream();
-							ObjectOutputStream objOut = new ObjectOutputStream(out);
-							objOut.writeObject(foldersMap);
-							objOut.close();
-
-							FileOutputStream encOut = new FileOutputStream(dircacheFile);
-							SafeCameraApplication.getCrypto().encryptFile(encOut, out.toByteArray(), null, Crypto.FILE_TYPE_GENERAL);
-						}
-					}
-					catch (OptionalDataException e) {
-						e.printStackTrace();
-					}
-					catch (StreamCorruptedException e) {
-						e.printStackTrace();
-					}
-					catch (IOException e) {
-						e.printStackTrace();
-					} catch (CryptoException e) {
-						e.printStackTrace();
-					}
-
-				}
-            }
-
-			if(currentFolderFiles != null){
+			if(galleryItems.size() == 0){
 
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
+				File dir = new File(Helpers.getHomeDir(GalleryActivity.this));
 
-				String fileExt = getString(R.string.file_extension);
-
+				File[] currentFolderFiles = dir.listFiles();
 
 				for (File file : currentFolderFiles) {
-					if(file.isDirectory() && !file.getName().startsWith(".")){
-						folders.add(file);
-					}
-					else if(file.isFile() && file.getName().endsWith(fileExt)) {
-						files.add(file);
+					if(file.isFile() && file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION)) {
+
+						GalleryItem item = new GalleryItem();
 
 						Crypto.Header header = null;
 
@@ -447,74 +353,49 @@ public class GalleryActivity extends Activity {
 						}
 						catch (IOException | CryptoException e) { }
 
-						if(header != null && header.fileType == Crypto.FILE_TYPE_GENERAL){
-							noThumbs.add(file);
-						}
-						else{
+						item.file = file;
+						item.header = header;
+
+						if(header != null && (header.fileType == Crypto.FILE_TYPE_PHOTO || header.fileType == Crypto.FILE_TYPE_VIDEO)){
 							String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(file);
 							File thumb = new File(thumbPath);
 							if (!thumb.exists() && (header == null || header.fileType != Crypto.FILE_TYPE_VIDEO)) {
 								toGenerateThumbs.add(file);
 							}
 						}
+						else{
+							noThumbs.add(file);
+						}
+
+						galleryItems.add(item);
 					}
 				}
 		
-				Collections.sort(folders, new Comparator<File>() {
-					public int compare(File f1, File f2) {
-						String f1Filename = foldersMap.get(f1.getName());
-						String f2Filename = foldersMap.get(f2.getName());
-						if(f1Filename != null && f2Filename != null) {
-							return String.CASE_INSENSITIVE_ORDER.compare(f1Filename, f2Filename);
+				Collections.sort(galleryItems, new Comparator<GalleryItem>() {
+					public int compare(GalleryItem f1, GalleryItem f2) {
+						long mod1 = f1.file.lastModified();
+						long mod2 = f2.file.lastModified();
+						if(mod1 != 0L && mod2 != 0L) {
+							if(mod1<mod2){
+								return 1;
+							}
+							else{
+								return -1;
+							}
 						}
 						return 0;
 					}
 				});
-
-
-
-				filesToReturn.addAll(folders);
-				filesToReturn.addAll(files);
-
 			}
-			return filesToReturn;
-			
+			return null;
 		}
 
-        class FileTypeComparator implements Comparator<File> {
 
-            public int compare(File file1, File file2) {
-
-                if (file1.isDirectory() && file2.isFile())
-                    return -1;
-                if (file1.isDirectory() && file2.isDirectory()) {
-                    return 0;
-                }
-                if (file1.isFile() && file2.isFile()) {
-                    return 0;
-                }
-                return 1;
-            }
-        }
-
-        class FileNameComparator implements Comparator<File> {
-
-            public int compare(File file1, File file2) {
-
-                return String.CASE_INSENSITIVE_ORDER.compare(file2.getName(),
-                        file1.getName());
-            }
-        }
-
-		@SuppressLint("NewApi")
-		@SuppressWarnings("unchecked")
 		@Override
-		protected void onPostExecute(ArrayList<File> files) {
-			super.onPostExecute(files);
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
 
-			GalleryActivity.files  = files;
-			
-			if(files.size() == 0 && GalleryActivity.files.size() == 0){
+			if(galleryItems.size() == 0){
 				findViewById(R.id.no_files).setVisibility(View.VISIBLE);
                 findViewById(R.id.photosGrid).setVisibility(View.GONE);
 			}
@@ -522,15 +403,10 @@ public class GalleryActivity extends Activity {
 				findViewById(R.id.no_files).setVisibility(View.GONE);
                 findViewById(R.id.photosGrid).setVisibility(View.VISIBLE);
 			}
-			
+
 			thumbGenTask = new GenerateThumbs();
-			if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.HONEYCOMB) {
-				thumbGenTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, toGenerateThumbs);
-			}
-			else {
-				thumbGenTask.execute(toGenerateThumbs);
-			}
-			
+			thumbGenTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, toGenerateThumbs);
+
 			findViewById(R.id.fillFilesProgress).setVisibility(View.GONE);
 
             galleryAdapter.notifyDataSetChanged();
@@ -546,8 +422,7 @@ public class GalleryActivity extends Activity {
 
 
     private void resetListVars(){
-        GalleryActivity.files.clear();
-        currentFolderFiles = null;
+		galleryItems.clear();
         selectedFiles.clear();
         toGenerateThumbs.clear();
         noThumbs.clear();
@@ -557,40 +432,6 @@ public class GalleryActivity extends Activity {
             thumbGenTask = null;
         }
     }
-
-	private void changeDir(String newPath){
-		currentPath = newPath;
-
-		refreshList();
-		try {
-            if (!newPath.equals(Helpers.getHomeDir(this))) {
-                String[] splittedPath = newPath.split("/");
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-                    if (splittedPath.length > 0) {
-                        getActionBar().setTitle(Helpers.decryptFilename(splittedPath[splittedPath.length - 1]));
-                    } else {
-                        getActionBar().setTitle(getString(R.string.title_gallery));
-                    }
-                }
-            } else {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-                    getActionBar().setTitle(getString(R.string.title_gallery));
-                }
-            }
-        }
-        catch (NullPointerException e) { }
-	}
-	
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			if(currentPath != null && !currentPath.equals(Helpers.getHomeDir(this))){
-				changeDir((new File(currentPath)).getParent());
-				return true;
-			}
-		} 
-		return super.onKeyDown(keyCode, event);
-	}
 
 	@Override
 	protected void onPause() {
@@ -608,9 +449,7 @@ public class GalleryActivity extends Activity {
 
 	@SuppressLint("NewApi")
 	private void enterMultiSelect(){
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-			mMode = startActionMode(new MultiselectMode());
-		}
+		mMode = startActionMode(new MultiselectMode());
 	    multiSelectModeActive = true;
 	}
 	
@@ -621,61 +460,6 @@ public class GalleryActivity extends Activity {
         }
 	    clearSelection();
 	    multiSelectModeActive = false;
-	}
-	
-	private void importClick() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-		builder.setTitle(getString(R.string.import_desc));
-		
-		CharSequence[] items = getResources().getStringArray(R.array.importMenu);
-		
-		builder.setItems(items, new DialogInterface.OnClickListener() {
-			
-			public void onClick(DialogInterface dialog, int which) {
-				Intent intent = new Intent(getBaseContext(), FileDialog.class);
-				switch (which){
-					case 0:
-						Intent photosIntent = new Intent();
-						photosIntent.setClass(GalleryActivity.this, ImportPhotosActivity.class);
-						startActivityForResult(photosIntent, REQUEST_ENCRYPT);
-						
-						break;
-					case 1:
-						
-						intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-						// can user select directories or not
-						intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
-						intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-						intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
-						intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
-
-						// alternatively you can set file filter
-						// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-						// "png" });
-
-						startActivityForResult(intent, REQUEST_ENCRYPT);
-						break;
-					case 2:
-						intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-						// can user select directories or not
-						intent.putExtra(FileDialog.CAN_SELECT_FILE, true);
-						intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-						intent.putExtra(FileDialog.SELECTION_MODE, FileDialog.MODE_OPEN);
-						intent.putExtra(FileDialog.FILE_SELECTION_MODE, FileDialog.MODE_MULTIPLE);
-
-						// alternatively you can set file filter
-						// intent.putExtra(FileDialog.FORMAT_FILTER, new String[] {
-						// "png" });
-
-						startActivityForResult(intent, REQUEST_IMPORT);
-				}
-			}
-		});
-		
-		AlertDialog dialog = builder.create();
-		dialog.show();
 	}
 	
 	private ArrayList<File> getDirectoryTree(String path){
@@ -704,96 +488,6 @@ public class GalleryActivity extends Activity {
 		return dirsToReturn;
 	}
 	
-	private void moveSelected() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-		builder.setMessage(getString(R.string.choose_folder));
-		
-		final Spinner spinner = new Spinner(GalleryActivity.this);
-		
-		String homeDir = Helpers.getHomeDir(GalleryActivity.this);
-		
-		ArrayList<File> dirs = getDirectoryTree(homeDir);
-		
-		String[] folderNames;
-		int count;
-		final boolean isInHome;
-		if(!currentPath.equals(Helpers.getHomeDir(GalleryActivity.this))){
-			folderNames = new String[dirs.size()+2];
-			folderNames[0] = "--------";
-			folderNames[1] = getString(R.string.home_dir);
-			count = 2;
-			isInHome = false;
-		}
-		else{
-			folderNames = new String[dirs.size()+1];
-			folderNames[0] = "--------";
-			count = 1;
-			isInHome = true;
-		}
-		
-		
-		final SparseArray<String> realFolderPaths = new SparseArray<String>();
-		for(File dir : dirs){
-			String parentFolder = dir.getParent();
-			String relativePath = parentFolder.substring(homeDir.length());
-			
-			realFolderPaths.put(count, dir.getPath());
-			
-			String[] relativePathMembers = relativePath.split("/");
-			relativePath = "";
-			for(String relativePathItem : relativePathMembers){
-				if(relativePathItem.startsWith("/")){
-					relativePathItem = relativePathItem.substring(1);
-				}
-				if(relativePathItem.endsWith("/")){
-					relativePathItem.substring(0, relativePathItem.length()-1);
-				}
-				if(relativePathItem.length() > 0){
-					relativePath += "qaq/";
-				}
-			}
-			
-			folderNames[count] = relativePath + Helpers.decryptFilename(dir.getPath());
-			count++;
-		}
-		spinner.setAdapter(new ArrayAdapter<String>(GalleryActivity.this, android.R.layout.simple_spinner_dropdown_item, folderNames));
-		builder.setView(spinner);
-		
-		builder.setPositiveButton(getString(R.string.move), new DialogInterface.OnClickListener() {
-			@SuppressWarnings("unchecked")
-			public void onClick(DialogInterface dialog, int whichButton) {
-				File destDir = null;
-				if(!isInHome && spinner.getSelectedItemPosition() == 1){
-					destDir = new File(Helpers.getHomeDir(GalleryActivity.this));
-				}
-				else{
-					if(realFolderPaths.indexOfKey(spinner.getSelectedItemPosition()) >= 0){
-						String folderPath = realFolderPaths.get(spinner.getSelectedItemPosition());
-						destDir = new File(folderPath);
-					}
-				}
-				if(destDir != null && destDir.exists() && destDir.isDirectory()){
-					new AsyncTasks.MoveFiles(GalleryActivity.this, destDir, new AsyncTasks.OnAsyncTaskFinish() {
-						@Override
-						public void onFinish() {
-							refreshList();
-						}
-					}).execute(selectedFiles);
-				}
-				else{
-					Toast.makeText(GalleryActivity.this, getString(R.string.failed_move_files), Toast.LENGTH_LONG).show();
-				}
-			}
-		});
-		builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				refreshList();
-			}
-		});
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
-
 	private void refreshList(){
         resetListVars();
 		fillFilesList();
@@ -871,7 +565,7 @@ public class GalleryActivity extends Activity {
 					}
 				});
 				
-				new EncryptFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
+				new EncryptFiles(GalleryActivity.this, Helpers.getHomeDir(this), new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
@@ -881,51 +575,6 @@ public class GalleryActivity extends Activity {
 						refreshList();
 					}
 				}).execute(filePaths);
-			}
-			else if (requestCode == REQUEST_IMPORT) {
-				final String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
-
-				AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
-				LayoutInflater layoutInflater = LayoutInflater.from(this);
-				final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_import_password, null);
-
-				dialog.setPositiveButton(getString(R.string.import_btn), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						String importPassword = ((EditText) enterPasswordView.findViewById(R.id.password)).getText().toString();
-						Boolean deleteAfterImport = ((CheckBox) enterPasswordView.findViewById(R.id.deleteAfterImport)).isChecked();
-
-						HashMap<String, Object> params = new HashMap<String, Object>();
-
-						params.put("filePaths", filePaths);
-						params.put("password", importPassword);
-						params.put("deleteAfterImport", deleteAfterImport);
-
-						new ImportFiles(GalleryActivity.this, currentPath, new OnAsyncTaskFinish() {
-							@Override
-							public void onFinish(Integer result) {
-								super.onFinish();
-								refreshList();
-
-								switch (result) {
-									case AsyncTasks.ImportFiles.STATUS_OK:
-										Toast.makeText(GalleryActivity.this, getString(R.string.success_import), Toast.LENGTH_LONG).show();
-										break;
-									case AsyncTasks.ImportFiles.STATUS_FAIL:
-										Toast.makeText(GalleryActivity.this, getString(R.string.import_fialed), Toast.LENGTH_LONG).show();
-										break;
-								}
-							}
-						}).execute(params);
-					}
-				});
-
-				dialog.setNegativeButton(getString(R.string.cancel), null);
-
-				dialog.setView(enterPasswordView);
-				dialog.setTitle(getString(R.string.enter_import_password));
-
-				dialog.show();
 			}
 			else if (requestCode == REQUEST_VIEW_PHOTO) {
 				if(data.hasExtra("needToRefresh") && data.getBooleanExtra("needToRefresh", false)){
@@ -997,11 +646,11 @@ public class GalleryActivity extends Activity {
 	public class GalleryAdapter extends BaseAdapter {
 
 		public int getCount() {
-			return files.size();
+			return galleryItems.size();
 		}
 
 		public Object getItem(int position) {
-			return files.get(position);
+			return galleryItems.get(position);
 		}
 
 		public long getItemId(int position) {
@@ -1058,7 +707,6 @@ public class GalleryActivity extends Activity {
 						Intent intent = new Intent();
 						intent.setClass(GalleryActivity.this, ViewImageActivity.class);
 						intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
-						intent.putExtra("EXTRA_CURRENT_PATH", currentPath);
 						startActivityForResult(intent, REQUEST_VIEW_PHOTO);
 					}
 				}
@@ -1117,9 +765,6 @@ public class GalleryActivity extends Activity {
 								}
 							});
 							break;
-						case ACTION_MOVE:
-							moveSelected();
-							break;
 						case ACTION_DELETE:
 							deleteSelected();
 							break;
@@ -1132,38 +777,12 @@ public class GalleryActivity extends Activity {
 			return true;
 		}
 		
-		private TextView getLabel(File file){
+		private TextView getLabel(GalleryItem item){
 			TextView label = new TextView(GalleryActivity.this);
 
-			String labelFromMap = foldersMap.get(file.getName());
+			String labelFromMap = item.header.filename;
 			if(labelFromMap != null){
 				label.setText(labelFromMap);
-			}
-			else {
-				String decFilename = labelCache.get(file.getName());
-				if (decFilename != null) {
-					label.setText(decFilename);
-				} else {
-					boolean found = false;
-					for (Dec item : queue) {
-						if (item.fileName.equals(file.getName())) {
-							synchronized (item.labels) {
-								item.labels.add(label);
-							}
-							found = true;
-						}
-					}
-
-					if (!found) {
-						queue.add(new Dec(file.getName(), label));
-						if (!decryptor.isAlive()) {
-							try {
-								decryptor.start();
-							} catch (IllegalThreadStateException e) {
-							}
-						}
-					}
-				}
 			}
 
 			label.setEllipsize(TruncateAt.END);
@@ -1182,31 +801,31 @@ public class GalleryActivity extends Activity {
 			int thumbSize = Helpers.getThumbSize(GalleryActivity.this);
 			layout.setGravity(Gravity.CENTER);
 			layout.setLayoutParams(new GridView.LayoutParams(thumbSize, thumbSize));
-			layout.setOrientation(LinearLayout.VERTICAL);
+			//layout.setOrientation(LinearLayout.VERTICAL);
 			
-			final File file = files.get(position);
-			
-			if(file != null){
-				if(file.isFile()){
-					if(selectedFiles.contains(file)){
+			final GalleryItem item = galleryItems.get(position);
+
+			if(item.file != null){
+				if(item.file.isFile()){
+					if(selectedFiles.contains(item.file)){
 						layout.setChecked(true);
 					}
 		
-					OnClickListener onClick = getOnClickListener(layout, file);
-					OnLongClickListener onLongClick = getOnLongClickListener(file);
+					OnClickListener onClick = getOnClickListener(layout, item.file);
+					OnLongClickListener onLongClick = getOnLongClickListener(item.file);
 		
-					if(noThumbs.contains(file)){
+					if(noThumbs.contains(item.file)){
 						ImageView fileImage = new ImageView(GalleryActivity.this);
 						fileImage.setImageResource(R.drawable.file);
 						fileImage.setPadding(3, 3, 3, 3);
-						fileImage.setOnClickListener(getNoThumbClickListener(layout, file));
+						fileImage.setOnClickListener(getNoThumbClickListener(layout, item.file));
 						fileImage.setOnLongClickListener(onLongClick);
 						layout.addView(fileImage);
-						layout.addView(getLabel(file));
+						layout.addView(getLabel(item));
 					}
 					else{
-						String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(file);
-						if (toGenerateThumbs.contains(file)) {
+						String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(item.file);
+						if (toGenerateThumbs.contains(item.file)) {
 							ProgressBar progress = new ProgressBar(GalleryActivity.this);
 							progress.setOnClickListener(onClick);
 							progress.setOnLongClickListener(onLongClick);
@@ -1224,10 +843,10 @@ public class GalleryActivity extends Activity {
 								imageView.setImageResource(R.drawable.file);
 								
 								boolean found = false;
-								for(Dec item : queue){
-									if(item.fileName.equals(thumbPath)){
-										synchronized (item.images) {
-											item.images.add(imageView);
+								for(Dec ditem : queue){
+									if(ditem.fileName.equals(thumbPath)){
+										synchronized (ditem.images) {
+											ditem.images.add(imageView);
 										}
 										found = true;
 									}
@@ -1248,56 +867,18 @@ public class GalleryActivity extends Activity {
 							imageView.setPadding(3, 3, 3, 3);
 							imageView.setScaleType(ScaleType.FIT_CENTER);
 							layout.addView(imageView);
+
+							if(item.header != null && item.header.fileType == Crypto.FILE_TYPE_VIDEO){
+								ImageView videoIcon = new ImageView(GalleryActivity.this);
+								videoIcon.setImageResource(R.drawable.ic_video);
+								videoIcon.setTop(0);
+								RelativeLayout.LayoutParams layParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+								layParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+								videoIcon.setLayoutParams(layParams);
+								layout.addView(videoIcon);
+							}
 						}
 					}
-				}
-				else if(file.isDirectory()){
-					ImageView folderImage = new ImageView(GalleryActivity.this);
-					folderImage.setImageResource(R.drawable.folder);
-					folderImage.setPadding(3, 3, 3, 3);
-					folderImage.setOnClickListener(new OnClickListener() {
-						public void onClick(View v) {
-							if (multiSelectModeActive) {
-								layout.toggle();
-								if (layout.isChecked()) {
-									selectedFiles.add(file);
-								}
-								else {
-									selectedFiles.remove(file);
-								}
-							}
-							else {
-								changeDir(file.getPath());
-							}
-						}
-					});
-					folderImage.setOnLongClickListener(new OnLongClickListener() {
-						
-						public boolean onLongClick(View v) {
-							CharSequence[] listEntries = getResources().getStringArray(R.array.galleryFolderActions);
-
-							AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-							builder.setTitle(Helpers.decryptFilename(file.getPath()));
-							builder.setItems(listEntries, new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int item) {
-									selectedFiles.clear();
-									selectedFiles.add(file);
-									
-									switch (item) {
-										case ACTION_DELETE_FOLDER:
-											deleteSelected();
-											break;
-									}
-									dialog.dismiss();
-								}
-							}).show();
-
-							return true;
-						}
-					});
-					
-					layout.addView(folderImage);
-					layout.addView(getLabel(file));
 				}
 			}
 			return layout;
@@ -1306,7 +887,6 @@ public class GalleryActivity extends Activity {
 	
 	private static class Dec{
         public static int TYPE_IMAGE = 0;
-        public static int TYPE_LABEL = 1;
 
         protected int type = TYPE_IMAGE;
         protected String fileName;
@@ -1317,11 +897,6 @@ public class GalleryActivity extends Activity {
             this.type = TYPE_IMAGE;
 			this.fileName = fileName;
 			this.images.add(image);
-		}
-		public Dec(String fileName, TextView label){
-            this.type = TYPE_LABEL;
-			this.fileName = fileName;
-			this.labels.add(label);
 		}
 
         public int getType(){
@@ -1355,7 +930,6 @@ public class GalleryActivity extends Activity {
 								if (item.getType() == Dec.TYPE_IMAGE) {
 									FileInputStream input = new FileInputStream(new File(item.getFilename()));
 									byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
-									//byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(input);
 
 									if (decryptedData != null) {
 										final Bitmap bitmap = Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(GalleryActivity.this));
@@ -1374,20 +948,6 @@ public class GalleryActivity extends Activity {
 												}
 											});
 										}
-									}
-								} else if (item.getType() == Dec.TYPE_LABEL) {
-									final String decFilename = Helpers.decryptFilename(item.getFilename());
-									if (decFilename != null) {
-										labelCache.put(item.getFilename(), decFilename);
-										runOnUiThread(new Runnable() {
-											public void run() {
-												if (item.labels.size() > 0) {
-													for (TextView label : item.labels) {
-														label.setText(decFilename);
-													}
-												}
-											}
-										});
 									}
 								}
 
@@ -1528,7 +1088,7 @@ public class GalleryActivity extends Activity {
 	}
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (Build.VERSION.SDK_INT < 11 && !sendBackDecryptedFile) {
+		if (!sendBackDecryptedFile) {
             menu.clear();
             if(multiSelectModeActive){
                 getMenuInflater().inflate(R.menu.gallery_menu_multiselect, menu);
@@ -1551,17 +1111,6 @@ public class GalleryActivity extends Activity {
 
         Intent intent = new Intent();
         switch (item.getItemId()) {
-            case android.R.id.home:
-                if(currentPath != null && !currentPath.equals(Helpers.getHomeDir(this))){
-                    changeDir((new File(currentPath)).getParent());
-                }
-                else{
-                    intent.setClass(GalleryActivity.this, DashboardActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
-                }
-                break;
             case R.id.multi_select:
                 enterMultiSelect();
                 break;
@@ -1569,40 +1118,22 @@ public class GalleryActivity extends Activity {
                 exitMultiSelect();
                 break;
             case R.id.goto_camera:
-                intent.setClass(GalleryActivity.this, CameraActivity.class);
+                intent.setClass(GalleryActivity.this, Camera2Activity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
                 startActivity(intent);
                 finish();
                 break;
-            case R.id.add_new_folder:
-                AlertDialog.Builder builder = new AlertDialog.Builder(GalleryActivity.this);
-                builder.setTitle(getString(R.string.new_folder));
-                builder.setMessage(getString(R.string.enter_new_folder_name));
-                final EditText input = new EditText(GalleryActivity.this);
-                builder.setView(input);
-                builder.setPositiveButton(getString(R.string.create), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        File newFolder = new File(currentPath + "/" + Helpers.getNextAvailableFilePrefix(currentPath) + Helpers.encryptString(GalleryActivity.this, input.getText().toString()));
-                        if(newFolder.mkdir()){
-                            Toast.makeText(GalleryActivity.this, getString(R.string.success_created), Toast.LENGTH_LONG).show();
-                        }
-                        else{
-                            Toast.makeText(GalleryActivity.this, getString(R.string.failed_create_dir), Toast.LENGTH_LONG).show();
-                        }
-                        refreshList();
-                    }
-                });
-                builder.setNegativeButton(getString(R.string.cancel), null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-                break;
             case R.id.importBtn:
-                importClick();
+				Intent photosIntent = new Intent();
+				photosIntent.setClass(GalleryActivity.this, ImportPhotosActivity.class);
+				startActivityForResult(photosIntent, REQUEST_ENCRYPT);
                 break;
             case R.id.select_all:
                 enterMultiSelect();
                 selectedFiles.clear();
-                selectedFiles.addAll(files);
+                for(Object galleryItem : galleryItems.toArray()){
+					selectedFiles.add(((GalleryItem)galleryItem).file);
+				}
                 galleryAdapter.notifyDataSetChanged();
                 break;
             case R.id.deselect_all:
@@ -1636,9 +1167,6 @@ public class GalleryActivity extends Activity {
                     }
                 });
                 break;
-            case R.id.move:
-                moveSelected();
-                break;
             case R.id.delete:
                 deleteSelected();
                 break;
@@ -1649,5 +1177,10 @@ public class GalleryActivity extends Activity {
 
         return returnVal;
     }
+
+    public class GalleryItem{
+		public File file = null;
+		public Crypto.Header header;
+	}
 
 }

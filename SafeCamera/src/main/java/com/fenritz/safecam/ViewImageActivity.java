@@ -69,7 +69,6 @@ public class ViewImageActivity extends Activity {
     private View.OnTouchListener gestureListener;
     
     private final Handler handler = new Handler();
-    private String currentPath;
     private boolean isViewsVisible = true;;
     
     private final ArrayList<DecryptAndShowImage> taskStack = new ArrayList<DecryptAndShowImage>();
@@ -100,13 +99,6 @@ public class ViewImageActivity extends Activity {
 		Intent intent = getIntent();
 		String imagePath = intent.getStringExtra("EXTRA_IMAGE_PATH");
 		
-		if(intent.hasExtra("EXTRA_CURRENT_PATH")){
-			currentPath = intent.getStringExtra("EXTRA_CURRENT_PATH");
-		}
-		else{
-			currentPath = Helpers.getHomeDir(this);
-		}
-
 		fillFilesList();
 		
 		File photo = new File(imagePath);
@@ -213,9 +205,7 @@ public class ViewImageActivity extends Activity {
 	
 	@SuppressLint("NewApi")
 	private void hideViewsInternal(){
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
-			getActionBar().hide();
-		}
+		getActionBar().hide();
 		for(View view : viewsHideShow){
 			if(view.getVisibility() == View.VISIBLE) {
 				view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_out));
@@ -330,7 +320,7 @@ public class ViewImageActivity extends Activity {
 	
 	@SuppressWarnings("unchecked")
 	private void fillFilesList() {
-		File dir = new File(currentPath);
+		File dir = new File(Helpers.getHomeDir(this));
 		File[] folderFiles = dir.listFiles();
 
 		Arrays.sort(folderFiles, new Comparator<File>() {

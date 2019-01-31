@@ -65,12 +65,10 @@
     <string name="share">Share</string>
     <string name="actions">Actions</string>
     <string name="share_as_is">Share encrypted by the master password</string>
-    <string name="share_reencrypt">Reencrypt with a different password</string>
     <string name="share_decrypt">Decrypt before sharing</string>
     <string name="before_sharing">Before sharing</string>
     <string name="enter_reencrypt_password">Please enter password for reencryption</string>
     <string name="reencrypting_files">Reencrypting files…</string>
-    <string name="new_folder">New folder</string>
     <string name="move">Move</string>
     <string name="enter_new_folder_name">Please enter name for new folder</string>
     <string name="success_created">Successfully created</string>
@@ -95,8 +93,6 @@
     <string name="no_files">No files in this folder</string>
     <string name="password_short">Password have to be at least %s characters long</string>
     <string name="import_photos">Photos</string>
-    <string name="import_unencrypted">Other files</string>
-    <string name="import_encrypted">Encrypted files</string>
     <string name="flash">Flash</string>
     <string name="timer">Timer</string>
     <string name="get_pro">Get Pro Version</string>

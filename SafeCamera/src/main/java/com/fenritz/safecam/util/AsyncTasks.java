@@ -21,6 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.fenritz.safecam.Camera2Activity;
+import com.fenritz.safecam.GalleryActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 
@@ -224,17 +225,18 @@ public class AsyncTasks {
 
 		@Override
 		protected ArrayList<File> doInBackground(ArrayList<File>... params) {
-			ArrayList<File> filesToDelete = params[0];
-			progressBarMain.setMax(filesToDelete.size());
-			progressMainCount.setText("0/"+ String.valueOf(filesToDelete.size()));
+			ArrayList<File> deletedFiles = new ArrayList<File>();
+			progressBarMain.setMax(params[0].size());
+			progressMainCount.setText("0/"+ String.valueOf(params[0].size()));
 			
-			for (int i = 0; i < filesToDelete.size(); i++) {
-				File file = filesToDelete.get(i);
+			for (int i = 0; i < params[0].size(); i++) {
+				File file = params[0].get(i);
 				Bundle fileProgress = new Bundle();
 				fileProgress.putString("currentFileName", file.getName());
 				publishProgress(fileProgress);
 				if (file.exists()){
 					if(file.isFile()) {
+						deletedFiles.add(file);
 						if(secureDelete){
 							secureDelete(file);
 						}
@@ -257,9 +259,6 @@ public class AsyncTasks {
 							broadcastDeletedFile(thumb);
 						}
 					}
-					else if(file.isDirectory()){
-						deleteFileFolder(file);
-					}
 				}
 
 				Bundle progress = new Bundle();
@@ -272,7 +271,7 @@ public class AsyncTasks {
 				}
 			}
 
-			return filesToDelete;
+			return deletedFiles;
 		}
 		
 		private void broadcastDeletedFile(File file){
@@ -313,23 +312,6 @@ public class AsyncTasks {
 			return false;
 		}
 		
-		private void deleteFileFolder(File fileOrDirectory) {
-		    if (fileOrDirectory.isDirectory()){
-		        for (File child : fileOrDirectory.listFiles()){
-		        	deleteFileFolder(child);
-		        }
-		    }
-
-		    if(secureDelete && fileOrDirectory.isFile()){
-		    	secureDelete(fileOrDirectory);
-		    }
-		    else{
-		    	fileOrDirectory.delete();
-		    }
-		    
-		    broadcastDeletedFile(fileOrDirectory);
-		}
-
 		@Override
 		protected void onCancelled() {
 			super.onCancelled();
@@ -369,97 +351,6 @@ public class AsyncTasks {
 			
 			if (finishListener != null) {
 				finishListener.onFinish(deletedFiles);
-			}
-		}
-	}
-	
-	public static class MoveFiles extends AsyncTask<ArrayList<File>, Integer, Void> {
-
-		private ProgressDialog progressDialog;
-		private final Activity activity;
-		private final File destination;
-		private final OnAsyncTaskFinish finishListener;
-		private PowerManager.WakeLock wl;
-
-		public MoveFiles(Activity activity, File destination){
-			this(activity, destination, null);
-		}
-		
-		public MoveFiles(Activity activity, File destination, OnAsyncTaskFinish finishListener){
-			this.activity = activity;
-			this.finishListener = finishListener;
-			this.destination = destination;
-		}
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			progressDialog = new ProgressDialog(activity);
-			progressDialog.setCancelable(true);
-			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				public void onCancel(DialogInterface dialog) {
-					MoveFiles.this.cancel(false);
-				}
-			});
-			progressDialog.setMessage(activity.getString(R.string.moving_files));
-			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			progressDialog.show();
-			
-			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "move");
-			wl.acquire();
-		}
-
-		@Override
-		protected Void doInBackground(ArrayList<File>... params) {
-			ArrayList<File> filesToMove = params[0];
-			progressDialog.setMax(filesToMove.size());
-			for (int i = 0; i < filesToMove.size(); i++) {
-				File file = filesToMove.get(i);
-				if (file.exists() && file.isFile()) {
-					File thumb = new File(Helpers.getThumbsDir(activity) + "/" + Helpers.getThumbFileName(file));
-					
-					File newPath = new File(destination, file.getName());
-					file.renameTo(new File(destination, file.getName()));
-					
-					if (thumb.exists() && thumb.isFile()) {
-						thumb.renameTo(new File(Helpers.getThumbsDir(activity), Helpers.getThumbFileName(newPath)));
-					}
-				}
-
-				publishProgress(i + 1);
-
-				if (isCancelled()) {
-					break;
-				}
-			}
-
-			return null;
-		}
-
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
-
-			this.onPostExecute(null);
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-
-			progressDialog.setProgress(values[0]);
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-
-			progressDialog.dismiss();
-			wl.release();
-			
-			if (finishListener != null) {
-				finishListener.onFinish();
 			}
 		}
 	}
@@ -567,105 +458,7 @@ public class AsyncTasks {
 		}
 	}
 	
-	public static class ReEncryptFiles extends AsyncTask<HashMap<String, Object>, Integer, ArrayList<File>> {
 
-		private ProgressDialog progressDialog;
-		private final OnAsyncTaskFinish finishListener;
-		private final Activity activity;
-		private PowerManager.WakeLock wl;
-
-		public ReEncryptFiles(Activity activity, OnAsyncTaskFinish pFinishListener) {
-			this.activity = activity;
-			finishListener = pFinishListener;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			progressDialog = new ProgressDialog(activity);
-			progressDialog.setCancelable(true);
-			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				public void onCancel(DialogInterface dialog) {
-					ReEncryptFiles.this.cancel(false);
-				}
-			});
-			progressDialog.setMessage(activity.getString(R.string.reencrypting_files));
-			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			progressDialog.show();
-			
-			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "reencrypt");
-			wl.acquire();
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		protected ArrayList<File> doInBackground(HashMap<String, Object>... params) {
-			ArrayList<File> reencryptedFiles = new ArrayList<File>();
-			String newPassword = params[0].get("newPassword").toString();
-			ArrayList<File> files = (ArrayList<File>) params[0].get("files");
-
-			try {
-				newPassword = AESCrypt.byteToHex(AESCrypt.getHash(newPassword));
-			}
-			catch (AESCryptException e1) {
-				return null;
-			}
-			
-			AESCrypt newCrypt = Helpers.getAESCrypt(newPassword, activity);
-
-			progressDialog.setMax(files.size());
-
-
-			int counter = 0;
-			for (File file : files) {
-				try {
-					FileInputStream inputStream = new FileInputStream(file);
-					String tmpFilename = Helpers.decryptFilename(file.getPath());
-					String tmpFilePath = Helpers.getNewDestinationPath(activity, Helpers.getHomeDir(activity) + "/.tmp/", tmpFilename, newCrypt);
-					
-					File tmpFile = new File(tmpFilePath);
-					FileOutputStream outputStream = new FileOutputStream(tmpFile);
-
-					if(Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
-						reencryptedFiles.add(tmpFile);
-					}
-					else{
-						if(tmpFile.isFile()){
-							tmpFile.delete();
-						}
-					}
-					publishProgress(++counter);
-				}
-				catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
-
-			return reencryptedFiles;
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-
-			progressDialog.setProgress(values[0]);
-		}
-
-		@Override
-		protected void onPostExecute(ArrayList<File> reencryptedFiles) {
-			super.onPostExecute(reencryptedFiles);
-
-			progressDialog.dismiss();
-			wl.release();
-			
-			if (finishListener != null) {
-				finishListener.onFinish(reencryptedFiles);
-			}
-
-		}
-	}
-	
 	public static class EncryptFiles extends AsyncTask<String, Integer, Void> {
 
 		private ProgressDialog progressDialog;
@@ -801,129 +594,6 @@ public class AsyncTasks {
 				finishListener.onFinish();
 			}
 		}
-	}
-	
-	public static class ImportFiles extends AsyncTask<HashMap<String, Object>, Integer, Integer> {
-
-		public static final int STATUS_OK = 0;
-		public static final int STATUS_FAIL = 1;
-		public static final int STATUS_CANCEL = 2;
-
-		private ProgressDialog progressDialog;
-		private final Activity activity;
-		private final OnAsyncTaskFinish finishListener;
-		private final String destinationFolder;
-		private PowerManager.WakeLock wl;
-		
-		public ImportFiles(Activity activity, String destinationFolder){
-			this(activity, destinationFolder, null);
-		}
-		
-		public ImportFiles(Activity activity, String destinationFolder, OnAsyncTaskFinish finishListener){
-			this.activity = activity;
-			this.finishListener = finishListener;
-			this.destinationFolder = destinationFolder;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			progressDialog = new ProgressDialog(activity);
-			progressDialog.setCancelable(true);
-			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				public void onCancel(DialogInterface dialog) {
-					ImportFiles.this.cancel(false);
-				}
-			});
-			progressDialog.setMessage(activity.getString(R.string.importing_files));
-			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			progressDialog.show();
-			
-			PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "import");
-			wl.acquire();
-		}
-
-		@Override
-		protected Integer doInBackground(HashMap<String, Object>... rparams) {
-			HashMap<String, Object> params = rparams[0];
-			int returnStatus = STATUS_OK;
-
-			String[] filePaths = (String[]) params.get("filePaths");
-			String password = (String) params.get("password");
-			Boolean deleteAfterImport = (Boolean) params.get("deleteAfterImport");
-
-			try {
-				password = AESCrypt.byteToHex(AESCrypt.getHash(password));
-			}
-			catch (AESCryptException e1) {
-				returnStatus = STATUS_FAIL;
-				return returnStatus;
-			}
-			
-			AESCrypt newCrypt = Helpers.getAESCrypt(password, activity);
-
-			progressDialog.setMax(filePaths.length);
-			for (int i = 0; i < filePaths.length; i++) {
-
-				File origFile = new File(filePaths[i]);
-
-				if (origFile.exists() && origFile.isFile()) {
-					try {
-						FileInputStream inputStream = new FileInputStream(origFile);
-
-						String dstFilename = Helpers.decryptFilename(origFile.getPath());
-						String destFilePath = Helpers.getNewDestinationPath(activity, destinationFolder, dstFilename);
-
-						FileOutputStream outputStream = new FileOutputStream(destFilePath);
-						if(Helpers.getAESCrypt(activity).reEncrypt(inputStream, outputStream, newCrypt, null, this, true)){
-							if (deleteAfterImport) {
-								origFile.delete();
-							}
-						}
-						else{
-							File dstFile = new File(destFilePath);
-							if(dstFile.isFile()){
-								dstFile.delete();
-							}
-							returnStatus = STATUS_FAIL;
-						}
-						publishProgress(i+1);
-					}
-					catch (FileNotFoundException e) {
-						returnStatus = STATUS_FAIL;
-					}
-				}
-			}
-
-			return returnStatus;
-		}
-
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
-
-			this.onPostExecute(STATUS_CANCEL);
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-
-			progressDialog.setProgress(values[0]);
-		}
-
-		@Override
-		protected void onPostExecute(Integer result) {
-			super.onPostExecute(result);
-
-			progressDialog.dismiss();
-			wl.release();
-			if (finishListener != null) {
-				finishListener.onFinish(result);
-			}
-		}
-
 	}
 	
 	public static class RotatePhoto extends AsyncTask<Void, Void, Integer> {

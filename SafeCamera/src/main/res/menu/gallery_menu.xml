@@ -12,11 +12,6 @@
         android:title="@string/camera"
         android:showAsAction="always|withText" />
     <item
-        android:id="@+id/add_new_folder"
-        android:icon="@drawable/ic_action_folder"
-        android:title="@string/new_folder"
-        android:showAsAction="always|withText" />
-    <item
         android:id="@+id/importBtn"
         android:icon="@drawable/ic_action_import"
         android:title="@string/import_btn"

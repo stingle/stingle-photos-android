@@ -9,6 +9,7 @@ import com.fenritz.safecam.util.MemoryCache;
 public class SafeCameraApplication extends Application{
 
 	public final static String TAG = "SCCam";
+	public final static String FILE_EXTENSION = ".sc";
 
 	private static byte[] key = null;
 	

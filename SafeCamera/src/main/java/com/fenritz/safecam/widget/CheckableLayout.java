@@ -5,8 +5,9 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.Checkable;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
-public class CheckableLayout extends LinearLayout implements Checkable {
+public class CheckableLayout extends RelativeLayout implements Checkable {
     private boolean mChecked;
 
     public CheckableLayout(Context context, AttributeSet attrs) {

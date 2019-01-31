@@ -38,7 +38,6 @@ import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.SettingsActivity;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecam.util.AsyncTasks.ReEncryptFiles;
 import com.fenritz.safecam.util.StorageUtils.StorageInfo;
 
 import org.apache.sanselan.ImageReadException;
@@ -76,9 +75,7 @@ public class Helpers {
 	public static final String GENERAL_FILE_PREFIX = "FILE_";
 	public static final String JPEG_FILE_PREFIX = "IMG_";
 	public static final String VIDEO_FILE_PREFIX = "VID_";
-	protected static final int SHARE_AS_IS = 0;
-	protected static final int SHARE_REENCRYPT = 1;
-	protected static final int SHARE_DECRYPT = 2;
+	protected static final int SHARE_DECRYPT = 0;
 	
 	public static final int HASH_SYNC_NOTHING_DONE = 0;
 	public static final int HASH_SYNC_UPDATED_PREF = 1;
@@ -643,63 +640,6 @@ public class Helpers {
 			@SuppressWarnings("unchecked")
 			public void onClick(DialogInterface dialog, int item) {
 				switch (item) {
-					case SHARE_AS_IS:
-						shareFiles(activity, files);
-						if(onDecrypt != null){
-							onDecrypt.onFinish();
-						}
-						break;
-					case SHARE_REENCRYPT:
-						AlertDialog.Builder passwordDialog = new AlertDialog.Builder(activity);
-
-						LayoutInflater layoutInflater = LayoutInflater.from(activity);
-						final View enterPasswordView = layoutInflater.inflate(R.layout.dialog_reencrypt_password, null);
-
-						passwordDialog.setPositiveButton(activity.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								String password = ((EditText) enterPasswordView.findViewById(R.id.password)).getText().toString();
-								String password2 = ((EditText) enterPasswordView.findViewById(R.id.password2)).getText().toString();
-
-								if (password.equals(password2)) {
-									HashMap<String, Object> params = new HashMap<String, Object>();
-
-									params.put("newPassword", password);
-									params.put("files", files);
-
-									OnAsyncTaskFinish onReencrypt = new OnAsyncTaskFinish() {
-										@Override
-										public void onFinish(java.util.ArrayList<File> processedFiles) {
-											if (processedFiles != null && processedFiles.size() > 0) {
-												shareFiles(activity, processedFiles);
-											}
-											if(onDecrypt != null){
-												onDecrypt.onFinish();
-											}
-										};
-									};
-									new ReEncryptFiles(activity, onReencrypt).execute(params);
-								}
-								else {
-									Toast.makeText(activity, activity.getString(R.string.password_not_match), Toast.LENGTH_LONG).show();
-								}
-							}
-						});
-
-						passwordDialog.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
-							
-							public void onClick(DialogInterface dialog, int which) {
-								if(onDecrypt != null){
-									onDecrypt.onFinish();
-								}
-							}
-						});
-
-						passwordDialog.setView(enterPasswordView);
-						passwordDialog.setTitle(activity.getString(R.string.enter_reencrypt_password));
-
-						passwordDialog.show();
-
-						break;
 					case SHARE_DECRYPT:
 						String filePath = Helpers.getHomeDir(activity) + "/" + ".tmp";
 						File destinationFolder = new File(filePath);

@@ -37,7 +37,6 @@
     <string-array name="galleryItemActions">
         <item name="decrypt">@string/decrypt</item>
         <item name="share">@string/share</item>
-        <item name="move">@string/move</item>
         <item name="delete">@string/delete</item>
     </string-array>
      <string-array name="galleryFolderActions">
@@ -46,14 +45,7 @@
     
     <string-array name="beforeShareActions">
         <item name="as_is">@string/share_as_is</item>
-        <item name="reencrypt">@string/share_reencrypt</item>
         <item name="decrypt">@string/share_decrypt</item>
-    </string-array>
-    
-    <string-array name="importMenu">
-        <item name="photos">@string/import_photos</item>
-        <item name="unencrypted">@string/import_unencrypted</item>
-        <item name="encrypted">@string/import_encrypted</item>
     </string-array>
     
 </resources>
