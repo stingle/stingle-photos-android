@@ -1,13 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
-        android:defaultValue="60"
-        android:entries="@array/lockTimes"
-        android:entryValues="@array/lockTimesValues"
-        android:key="lock_time"
-        android:summary="@string/lock_time_desc"
-        android:title="@string/lock_time" />
-
     <SwitchPreference
         android:defaultValue="true"
         android:key="volume_take_photo"
@@ -27,5 +19,29 @@
         android:key="timerDuration"
         android:summary="@string/timer_duartion_desc"
         android:title="@string/timer_duration" />
+
+    <PreferenceCategory
+        android:title="@string/photo"
+        android:key="photo_res"
+        android:selectable="false">
+        <ListPreference
+            android:key="back_photo_res"
+            android:title="@string/back_camera_photo_res" />
+        <ListPreference
+            android:key="front_photo_res"
+            android:title="@string/front_camera_photo_res" />
+    </PreferenceCategory>
+    
+    <PreferenceCategory
+        android:title="@string/video"
+        android:key="video_res"
+        android:selectable="false">
+        <ListPreference
+            android:key="back_video_res"
+            android:title="@string/back_camera_video_res" />
+        <ListPreference
+            android:key="front_video_res"
+            android:title="@string/front_camera_video_res" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

@@ -62,6 +62,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -80,7 +81,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.fenritz.safecam.Camera.VideoSize;
+import com.fenritz.safecam.Camera.CameraImageSize;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.CryptoException;
@@ -200,7 +201,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
 
     private boolean isInVideoMode = false;
-    private VideoSize mVideoSize;
+    private CameraImageSize mVideoSize;
     private MediaRecorder mMediaRecorder;
     private boolean mIsRecordingVideo = false;
     private Integer mSensorOrientation;
@@ -215,6 +216,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     private String lastVideoFilename = "";
     private String lastVideoFilenameEnc = "";
+    private SharedPreferences sharedPrefs;
+    private Range<Integer> mPreviewFpsRange = null;
 
     static {
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -260,6 +263,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         findViewById(R.id.switchCamButton).setOnClickListener(toggleCamera());
 
         setFlashButtonImage();
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(Camera2Activity.this);
     }
 
     @Override
@@ -850,37 +854,14 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
                 StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-                Size largestJpeg = null;
+                CameraImageSize largestJpeg = null;
                 if(!isInVideoMode) {
-                    largestJpeg = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
+                    largestJpeg = getPhotoSize(map, characteristics);
+                    mPreviewFpsRange = largestJpeg.fpsRange;
                 }
                 else {
-                    //mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                    ArrayList<VideoSize> video_sizes = new ArrayList<>();
-                    ArrayList<int[]> ae_fps_ranges = new ArrayList<>();
-                    for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
-                        ae_fps_ranges.add(new int[] {r.getLower(), r.getUpper()});
-                    }
-                    Collections.sort(ae_fps_ranges, new VideoSize.RangeSorter());
-
-                    int min_fps = 9999;
-                    for(int[] r : ae_fps_ranges) {
-                        min_fps = Math.min(min_fps, r[0]);
-                    }
-
-                    android.util.Size [] camera_video_sizes = map.getOutputSizes(MediaRecorder.class);
-                    for(android.util.Size camera_size : camera_video_sizes) {
-                        if( camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160 )
-                            continue; // Nexus 6 returns these, even though not supported?!
-                        long mfd = map.getOutputMinFrameDuration(MediaRecorder.class, camera_size);
-                        int  max_fps = (int)((1.0 / mfd) * 1000000000L);
-                        ArrayList<int[]> fr = new ArrayList<>();
-                        fr.add(new int[] {min_fps, max_fps});
-                        VideoSize normal_video_size = new VideoSize(camera_size.getWidth(), camera_size.getHeight(), fr, false);
-                        video_sizes.add(normal_video_size);
-                    }
-                    Collections.sort(video_sizes, new VideoSize.SizeSorter());
-                    mVideoSize = video_sizes.get(0);
+                    mVideoSize = getVideoSize(map, characteristics);
+                    mPreviewFpsRange = mVideoSize.fpsRange;
                 }
 
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
@@ -893,13 +874,16 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     // using them are finished.
                     if(!isInVideoMode && largestJpeg != null) {
                         if (mJpegImageReader == null || mJpegImageReader.getAndRetain() == null) {
-                            mJpegImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestJpeg.getWidth(), largestJpeg.getHeight(), ImageFormat.JPEG, /*maxImages*/5));
+                            mJpegImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestJpeg.width, largestJpeg.height, ImageFormat.JPEG, /*maxImages*/5));
                         }
                         mJpegImageReader.get().setOnImageAvailableListener(mOnJpegImageAvailableListener, mBackgroundHandler);
                     }
                     else{
                         mMediaRecorder = new MediaRecorder();
                     }
+
+
+
 
                     /*if (mRawImageReader == null || mRawImageReader.getAndRetain() == null) {
                         mRawImageReader = new RefCountedAutoCloseable<>(ImageReader.newInstance(largestRaw.getWidth(), largestRaw.getHeight(), ImageFormat.RAW_SENSOR, 5));
@@ -1270,6 +1254,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         else {
             builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
         }
+
+        if(mPreviewFpsRange != null) {
+            Log.d("prevewFps", String.valueOf(mPreviewFpsRange));
+            builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, mPreviewFpsRange);
+        }
     }
 
     /**
@@ -1288,9 +1277,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             if (null == mTextureView) {
                 return;
             }
-
-            StreamConfigurationMap map = mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-
 
             // Find the rotation of the device relative to the native device orientation.
             int deviceRotation = Camera2Activity.this.getWindowManager().getDefaultDisplay().getRotation();
@@ -1324,14 +1310,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 maxPreviewHeight = MAX_PREVIEW_HEIGHT;
             }
 
+            StreamConfigurationMap map = mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             // Find the best preview size for these view dimensions and configured JPEG size.
             Size chosedSize;
             if(!isInVideoMode){
-                chosedSize = Collections.max(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), new CompareSizesByArea());
+                chosedSize = getPhotoSize(map, mCharacteristics).getSize();
             }
             else{
                 //chosedSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                chosedSize = Collections.max(Arrays.asList(map.getOutputSizes(MediaRecorder.class)), new CompareSizesByArea());
+                chosedSize = getVideoSize(map, mCharacteristics).getSize();
             }
             Size previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedViewWidth, rotatedViewHeight, maxPreviewWidth, maxPreviewHeight, chosedSize);
 
@@ -1392,6 +1379,32 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 }
             }
         }
+    }
+
+    public CameraImageSize getPhotoSize(StreamConfigurationMap map, CameraCharacteristics characteristics){
+        ArrayList<CameraImageSize> photoSizes = Helpers.parsePhotoOutputs(this, map, characteristics);
+        String sizeIndex = "0";
+        if(isFrontCamera){
+            sizeIndex = sharedPrefs.getString("front_photo_res", "0");
+        }
+        else{
+            sizeIndex = sharedPrefs.getString("back_photo_res", "0");
+        }
+
+        return photoSizes.get(Integer.parseInt(sizeIndex));
+    }
+
+    public CameraImageSize getVideoSize(StreamConfigurationMap map, CameraCharacteristics characteristics){
+        ArrayList<CameraImageSize> videoSizes = Helpers.parseVideoOutputs(this, map, characteristics);
+        String sizeIndex = "0";
+        if(isFrontCamera){
+            sizeIndex = sharedPrefs.getString("front_video_res", "0");
+        }
+        else{
+            sizeIndex = sharedPrefs.getString("back_video_res", "0");
+        }
+
+        return videoSizes.get(Integer.parseInt(sizeIndex));
     }
 
     /**
@@ -1588,7 +1601,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         Log.d("audioCodec", String.valueOf(profile.audioCodec));
         Log.d("width", String.valueOf(mVideoSize.width));
         Log.d("height", String.valueOf( mVideoSize.height));
-        Log.d("framerate", String.valueOf( mVideoSize.getMaxFramerate()));
+        Log.d("framerate", String.valueOf( mVideoSize.maxFps));
 
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
@@ -1605,11 +1618,30 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
         mMediaRecorder.setAudioChannels(profile.audioChannels);
 
-        mMediaRecorder.setVideoFrameRate(mVideoSize.getMaxFramerate());
+        mMediaRecorder.setVideoFrameRate(mVideoSize.maxFps);
         mMediaRecorder.setVideoSize(mVideoSize.width, mVideoSize.height);
         mMediaRecorder.setVideoEncoder(profile.videoCodec);
         mMediaRecorder.setAudioEncoder(profile.audioCodec);
-        int rotation = getWindowManager().getDefaultDisplay().getRotation();
+
+
+        // Set orientation.
+        mSensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+        int deviceRotation = getCurrentDeviceRotation();
+        Log.d("sensorOrientation", String.valueOf(mSensorOrientation));
+        Log.d("getCurrentDeviceRotation", String.valueOf(deviceRotation));
+
+        int invert = 0;
+        if(!isFrontCamera && (deviceRotation == 90 || deviceRotation == 270)){
+            invert = 180;
+        }
+
+        int videoRotation = (mSensorOrientation + deviceRotation + invert) % 360;
+        Log.d("videoRotation", String.valueOf(videoRotation));
+
+        mMediaRecorder.setOrientationHint(videoRotation);
+
+
+        /*int rotation = getWindowManager().getDefaultDisplay().getRotation();
         switch (mSensorOrientation) {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:
                 mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
@@ -1617,7 +1649,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             case SENSOR_ORIENTATION_INVERSE_DEGREES:
                 mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
                 break;
-        }
+        }*/
 		mMediaRecorder.prepare();
 
     }
@@ -1715,6 +1747,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 isFrontCamera = !isFrontCamera;
                 closeCamera();
                 openCamera();
+                configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
             }
         };
     }
@@ -1731,6 +1764,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 }
                 closeCamera();
                 openCamera();
+                configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
             }
         };
     }

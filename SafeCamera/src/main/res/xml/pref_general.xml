@@ -1,6 +1,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
+        android:defaultValue="60"
+        android:entries="@array/lockTimes"
+        android:entryValues="@array/lockTimesValues"
+        android:key="lock_time"
+        android:summary="@string/lock_time_desc"
+        android:title="@string/lock_time" />
+    <ListPreference
         android:key="home_folder"
         android:summary="@string/home_folder_desc"
         android:title="@string/home_folder" />

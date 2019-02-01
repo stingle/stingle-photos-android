@@ -7,6 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -20,9 +25,11 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
 import android.text.TextUtils;
+import android.util.Size;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.fenritz.safecam.Camera.CameraImageSize;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.FingerprintManagerWrapper;
 import com.fenritz.safecam.util.Helpers;
@@ -83,29 +90,8 @@ public class SettingsActivity extends PreferenceActivity {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
-            } else if (preference instanceof RingtonePreference) {
-                // For ringtone preferences, look up the correct display value
-                // using RingtoneManager.
-                if (TextUtils.isEmpty(stringValue)) {
-                    // Empty values correspond to 'silent' (no ringtone).
-                    preference.setSummary(R.string.pref_ringtone_silent);
-
-                } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(
-                            preference.getContext(), Uri.parse(stringValue));
-
-                    if (ringtone == null) {
-                        // Clear the summary if there was a lookup error.
-                        preference.setSummary(null);
-                    } else {
-                        // Set the summary to reflect the new ringtone display
-                        // name.
-                        String name = ringtone.getTitle(preference.getContext());
-                        preference.setSummary(name);
-                    }
-                }
-
-            } else {
+            }
+            else {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
@@ -211,11 +197,13 @@ public class SettingsActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("home_folder_name"));
-            bindPreferenceSummaryToValue(findPreference("dec_folder"));
 
             initHomeFolderPref();
             initClearCacheButton();
+
+            bindPreferenceSummaryToValue(findPreference("lock_time"));
+            bindPreferenceSummaryToValue(findPreference("home_folder_name"));
+            bindPreferenceSummaryToValue(findPreference("dec_folder"));
         }
 
         @Override
@@ -424,12 +412,12 @@ public class SettingsActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_camera);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("lock_time"));
+            initCameraResolution();
             bindPreferenceSummaryToValue(findPreference("timerDuration"));
+            bindPreferenceSummaryToValue(findPreference("front_photo_res"));
+            bindPreferenceSummaryToValue(findPreference("front_video_res"));
+            bindPreferenceSummaryToValue(findPreference("back_photo_res"));
+            bindPreferenceSummaryToValue(findPreference("back_video_res"));
         }
 
         @Override
@@ -440,6 +428,60 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+
+        public void initCameraResolution(){
+            try {
+                CameraManager manager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
+                if (manager != null) {
+                    for (String cameraId : manager.getCameraIdList()) {
+                        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+                        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+                        StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+                        ArrayList<CameraImageSize> imageSizes = Helpers.parsePhotoOutputs(getContext(), map, characteristics);
+                        ArrayList<CameraImageSize> videoSizes = Helpers.parseVideoOutputs(getContext(), map, characteristics);
+
+                        ListPreference photoRes;
+                        ListPreference videoRes;
+                        if(facing == CameraCharacteristics.LENS_FACING_FRONT) {
+                            photoRes = (ListPreference) findPreference("front_photo_res");
+                            videoRes = (ListPreference) findPreference("front_video_res");
+                        }
+                        else {
+                            photoRes = (ListPreference) findPreference("back_photo_res");
+                            videoRes = (ListPreference) findPreference("back_video_res");
+                        }
+
+                        CharSequence[] imageEntries = new CharSequence[imageSizes.size()];
+                        CharSequence[] imageEntriesValues = new CharSequence[imageSizes.size()];
+                        CharSequence[] videoEntries = new CharSequence[videoSizes.size()];
+                        CharSequence[] videoEntriesValues = new CharSequence[videoSizes.size()];
+
+                        for(int i=0;i<imageSizes.size();i++){
+                            imageEntries[i] = imageSizes.get(i).getPhotoString();
+                            imageEntriesValues[i] = String.valueOf(i);
+                        }
+                        for(int i=0;i<videoSizes.size();i++){
+                            videoEntries[i] = videoSizes.get(i).getVideoString();
+                            videoEntriesValues[i] = String.valueOf(i);
+                        }
+                        photoRes.setEntries(imageEntries);
+                        photoRes.setEntryValues(imageEntriesValues);
+                        if(photoRes.getValue() == null) {
+                            photoRes.setValueIndex(0);
+                        }
+
+                        videoRes.setEntries(videoEntries);
+                        videoRes.setEntryValues(videoEntriesValues);
+                        if(videoRes.getValue() == null) {
+                            videoRes.setValueIndex(0);
+                        }
+
+                    }
+                }
+            }
+            catch (Exception e){}
         }
     }
 }
