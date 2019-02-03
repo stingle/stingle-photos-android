@@ -48,11 +48,14 @@
             android:src="@drawable/ic_action_options" />
     </RelativeLayout>
 
-    <com.fenritz.safecam.AutoFitTextureView
-        android:id="@+id/texture"
+
+    <LinearLayout
+        android:id="@+id/textureHolder"
         android:layout_toRightOf="@id/topPanel"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/modeChanger"

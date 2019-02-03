@@ -16,8 +16,11 @@
 
 package com.fenritz.safecam;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.TextureView;
 
 /**
@@ -27,18 +30,14 @@ public class AutoFitTextureView extends TextureView {
 
     private int mRatioWidth = 0;
     private int mRatioHeight = 0;
+    private Camera2Activity activity;
 
-    public AutoFitTextureView(Context context) {
-        this(context, null);
+    public AutoFitTextureView(Camera2Activity activity) {
+        super(activity.getBaseContext(), null, 0);
+        this.activity = activity;
     }
 
-    public AutoFitTextureView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
 
-    public AutoFitTextureView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
 
     /**
      * Sets the aspect ratio for this view. The size of the view will be measured based on the ratio
@@ -71,6 +70,12 @@ public class AutoFitTextureView extends TextureView {
                 setMeasuredDimension(height * mRatioWidth / mRatioHeight, height);
             }
         }
+    }
+
+    @Override
+    public void onDrawForeground(Canvas canvas) {
+        activity.onDrawPreview(canvas);
+        super.onDrawForeground(canvas);
     }
 
 }

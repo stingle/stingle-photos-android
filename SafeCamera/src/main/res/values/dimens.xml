@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="ind_stroke_width"			>1dp</dimen>
+    <dimen name="ind_take_photo_border"		>5dp</dimen>
+    <dimen name="ind_focus_min_radius"		>40dp</dimen>
+    <dimen name="ind_focus_max_radius"		>45dp</dimen>
+    <dimen name="ind_focus_thickness"		>3dp</dimen>
+    <dimen name="ind_focus_thickness_old"	>1.5dp</dimen>
+    <dimen name="ind_metering_ring"			>9dp</dimen>
+    <dimen name="ind_metering_ray"			>14dp</dimen>
+    <dimen name="ind_multitouch_zoom_thickness">3dp</dimen>
+</resources>
