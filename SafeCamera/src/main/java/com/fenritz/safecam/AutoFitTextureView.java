@@ -72,10 +72,4 @@ public class AutoFitTextureView extends TextureView {
         }
     }
 
-    @Override
-    public void onDrawForeground(Canvas canvas) {
-        activity.onDrawPreview(canvas);
-        super.onDrawForeground(canvas);
-    }
-
 }

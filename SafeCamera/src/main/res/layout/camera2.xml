@@ -2,6 +2,7 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:safecam="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/parentLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -56,6 +57,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
     </LinearLayout>
+
+    <com.fenritz.safecam.widget.FocusCircleView
+        android:id="@+id/focusCircle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/topPanel"/>
 
     <ImageButton
         android:id="@+id/modeChanger"

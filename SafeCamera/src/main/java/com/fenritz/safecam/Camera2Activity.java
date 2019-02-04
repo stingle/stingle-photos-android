@@ -84,11 +84,13 @@ import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.fenritz.safecam.Camera.CameraImageSize;
@@ -97,6 +99,7 @@ import com.fenritz.safecam.util.Crypto;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 import com.fenritz.safecam.util.LoginManager;
+import com.fenritz.safecam.widget.FocusCircleView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -254,6 +257,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 	public boolean isSetFocusPoint = false;
 	public float focusPointX = 0;
 	public float focusPointY = 0;
+	private FocusCircleView mFocusCircleView;
+	private final Handler clearFocusHandler = new Handler();
+	private Runnable clearFocusRunnable = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -266,6 +272,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
         setContentView(R.layout.camera2);
+
+        mFocusCircleView = (FocusCircleView)findViewById(R.id.focusCircle);
 
         findViewById(R.id.take_photo).setOnClickListener(this);
         LinearLayout textureHolder = (LinearLayout)findViewById(R.id.textureHolder);
@@ -289,6 +297,20 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 							focusPointY = event.getY();
 							ArrayList<Area> areas = getAreas(event.getX(), event.getY());
 							setMeteringArea(areas);
+							mFocusCircleView.drawFocusCircle(event.getX(), event.getY());
+
+							/*removeFocusClearCallback();
+
+							clearFocusRunnable = new Runnable() {
+								@Override
+								public void run() {
+									Log.d("focus", "removeFocus");
+									clearFocusRunnable = null;
+									clearMeteringArea();
+								}
+							};
+
+							clearFocusHandler.postDelayed(clearFocusRunnable, 10000);*/
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -308,6 +330,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 		});
 		textureHolder.addView(mTextureView);
 
+
         preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
         flashMode = preferences.getInt(FLASH_MODE_PREF, FLASH_MODE_AUTO);
 
@@ -326,6 +349,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(Camera2Activity.this);
     }
 
+
+
     @Override
     public void onResume() {
         super.onResume();
@@ -337,10 +362,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         openCamera();
 		showLastPhotoThumb();
 
-        // When the screen is turned off and turned back on, the SurfaceTexture is already
-        // available, and "onSurfaceTextureAvailable" will not be called. In that case, we should
-        // configure the preview bounds here (otherwise, we wait until the surface is ready in
-        // the SurfaceTextureListener).
         if (mTextureView.isAvailable()) {
             configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
         } else {
@@ -373,6 +394,12 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
     }
 
+	public void removeFocusClearCallback(){
+		if(clearFocusRunnable != null){
+			clearFocusHandler.removeCallbacks(clearFocusRunnable);
+			clearFocusRunnable = null;
+		}
+	}
 
     private View.OnClickListener toggleFlash() {
         return new View.OnClickListener() {
@@ -565,6 +592,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
      * A {@link CameraCaptureSession.CaptureCallback} that handles events for the preview and
      * pre-capture sequence.
      */
+    private boolean isPassiveFocused = false;
     private CameraCaptureSession.CaptureCallback mPreCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
@@ -574,6 +602,21 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 case STATE_PREVIEW: {
                     //Log.d("Func", "PREVIEW");
                     // We have nothing to do when the camera preview is running normally.
+					if(isSetFocusPoint){
+						int afState = result.get(CaptureResult.CONTROL_AF_STATE);
+
+						if(!isPassiveFocused && afState == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED){
+							isPassiveFocused = true;
+							Log.d("afState", "Focused");
+						}
+						else if(isPassiveFocused && afState == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN){
+							removeFocusClearCallback();
+							clearMeteringArea();
+							isPassiveFocused = false;
+							Log.d("afState", "Reset naxuy");
+						}
+					}
+
                     break;
                 }
                 case STATE_WAITING_LOCK: {
@@ -1679,7 +1722,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
 		mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
 
-
         mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
         mMediaRecorder.setAudioEncodingBitRate(profile.audioBitRate);
         mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
@@ -2524,227 +2566,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 		};
 	}
 
-	/*public boolean mManualFocusEngaged = false;
-
-
-	public boolean onPreviewTouch(View view, MotionEvent motionEvent) {
-		final int actionMasked = motionEvent.getActionMasked();
-		try {
-			if (actionMasked != MotionEvent.ACTION_DOWN) {
-				return false;
-			}
-			if (mManualFocusEngaged) {
-				Log.d(TAG, "Manual focus already engaged");
-				return true;
-			}
-
-			final Rect sensorArraySize = mCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-
-			//TODO: here I just flip x,y, but this needs to correspond with the sensor orientation (via SENSOR_ORIENTATION)
-			final int y = (int)((motionEvent.getX() / (float)view.getWidth())  * (float)sensorArraySize.height());
-			final int x = (int)((motionEvent.getY() / (float)view.getHeight()) * (float)sensorArraySize.width());
-			final int halfTouchWidth  = 150; //(int)motionEvent.getTouchMajor(); //TODO: this doesn't represent actual touch size in pixel. Values range in [3, 10]...
-			final int halfTouchHeight = 150; //(int)motionEvent.getTouchMinor();
-			MeteringRectangle focusAreaTouch = new MeteringRectangle(Math.max(x - halfTouchWidth,  0),
-					Math.max(y - halfTouchHeight, 0),
-					halfTouchWidth  * 2,
-					halfTouchHeight * 2,
-					MeteringRectangle.METERING_WEIGHT_MAX - 1);
-
-			CameraCaptureSession.CaptureCallback captureCallbackHandler = new CameraCaptureSession.CaptureCallback() {
-				@Override
-				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-					super.onCaptureCompleted(session, request, result);
-					mManualFocusEngaged = false;
-
-					if (request.getTag() == "FOCUS_TAG") {
-						//the focus trigger is complete -
-						//resume repeating (preview surface will get frames), clear AF trigger
-						mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null);
-
-						try {
-							mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, null);
-						} catch (CameraAccessException e) {
-							e.printStackTrace();
-						}
-
-					}
-				}
-
-				@Override
-				public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
-					super.onCaptureFailed(session, request, failure);
-					Log.e(TAG, "Manual AF failure: " + failure);
-					mManualFocusEngaged = false;
-				}
-			};
-
-			//first stop the existing repeating request
-			mCaptureSession.stopRepeating();
-
-			//cancel any existing AF trigger (repeated touches, etc.)
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
-			mCaptureSession.capture(mPreviewRequestBuilder.build(), captureCallbackHandler, mBackgroundHandler);
-
-			//Now add a new AF trigger with focus region
-			if (isMeteringAreaAFSupported()) {
-				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{focusAreaTouch});
-			}
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-			mPreviewRequestBuilder.setTag("FOCUS_TAG"); //we'll capture this later for resuming the preview
-
-			//then we ask for a single request (not repeating!)
-			mCaptureSession.capture(mPreviewRequestBuilder.build(), captureCallbackHandler, mBackgroundHandler);
-			mManualFocusEngaged = true;
-
-		} catch (CameraAccessException e) {
-			e.printStackTrace();
-		}
-
-		return true;
-	}
-
-	private boolean isMeteringAreaAFSupported() {
-		return mCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) >= 1;
-	}
-
-	public float mLastFocusX;
-	public float mLastFocusY;
-	public final String FOCUS_TAG = "focus_tag";
-
-	private void focusArea(float x, float y, boolean drawCircle) {
-		mLastFocusX = x;
-		mLastFocusY = y;
-		if (drawCircle) {
-			//mActivity.drawFocusCircle(x, y)
-		}
-
-		CameraCaptureSession.CaptureCallback captureCallbackHandler = new CameraCaptureSession.CaptureCallback() {
-			@Override
-			public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-				super.onCaptureCompleted(session, request, result);
-
-				if (request.getTag() == FOCUS_TAG) {
-					try {
-						mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
-					} catch (CameraAccessException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-
-		try {
-			mCaptureSession.stopRepeating();
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-			mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
-
-			// touch-to-focus inspired by OpenCamera
-			if (mCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) >= 1) {
-				FocusArea focusArea = getFocusArea(x, y);
-				Rect sensorRect = mCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-				MeteringRectangle meteringRect = convertAreaToMeteringRectangle(sensorRect, focusArea);
-				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{meteringRect});
-			}
-
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO);
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-			mPreviewRequestBuilder.setTag(FOCUS_TAG);
-			mCaptureSession.capture(mPreviewRequestBuilder.build(), captureCallbackHandler, mBackgroundHandler);
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-			//mPreviewRequestBuilder.setTag(null);
-		} catch (CameraAccessException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public static class FocusArea{
-		public Rect rect;
-		public int weight;
-
-		public FocusArea(Rect rect, int weight){
-			this.rect = rect;
-			this.weight = weight;
-		}
-    }
-
-	private MeteringRectangle convertAreaToMeteringRectangle(Rect sensorRect, FocusArea focusArea){
-		Rect camera2Rect = convertRectToCamera2(sensorRect, focusArea.rect);
-		return new MeteringRectangle(camera2Rect, focusArea.weight);
-	}
-
-	private Rect convertRectToCamera2(Rect cropRect, Rect rect){
-		float leftF = (rect.left + 1000) / 2000f;
-		float topF = (rect.top + 1000) / 2000f;
-		float rightF = (rect.right + 1000) / 2000f;
-		float bottomF = (rect.bottom + 1000) / 2000f;
-		int left = (int)(cropRect.left + leftF * (cropRect.width() - 1));
-		int right = (int)(cropRect.left + rightF * (cropRect.width() - 1));
-		int top = (int)(cropRect.top + topF * (cropRect.height() - 1));
-		int bottom = (int)(cropRect.top + bottomF * (cropRect.height() - 1));
-		left = Math.max(left, cropRect.left);
-		right = Math.max(right, cropRect.left);
-		top = Math.max(top, cropRect.top);
-		bottom = Math.max(bottom, cropRect.top);
-		left = Math.min(left, cropRect.right);
-		right = Math.min(right, cropRect.right);
-		top = Math.min(top, cropRect.bottom);
-		bottom = Math.min(bottom, cropRect.bottom);
-
-		return new Rect(left, top, right, bottom);
-	}
-
-	private FocusArea getFocusArea(float x, float y){
-		float[] coords = {x, y};
-		calculateCameraToPreviewMatrix();
-		mPreviewToCameraMatrix.mapPoints(coords);
-		int focusX = (int)coords[0];
-		int focusY = (int)coords[1];
-
-		int focusSize = 50;
-		Rect rect = new Rect();
-		rect.left = focusX - focusSize;
-		rect.right = focusX + focusSize;
-		rect.top = focusY - focusSize;
-		rect.bottom = focusY + focusSize;
-
-		if (rect.left < -1000) {
-			rect.left = -1000;
-			rect.right = rect.left + 2 * focusSize;
-		} else if (rect.right > 1000) {
-			rect.right = 1000;
-			rect.left = rect.right - 2 * focusSize;
-		}
-
-		if (rect.top < -1000) {
-			rect.top = -1000;
-			rect.bottom = rect.top + 2 * focusSize;
-		} else if (rect.bottom > 1000) {
-			rect.bottom = 1000;
-			rect.top = rect.bottom - 2 * focusSize;
-		}
-
-		return new FocusArea(rect, MeteringRectangle.METERING_WEIGHT_MAX);
-	}
-
-	public Matrix mCameraToPreviewMatrix = new Matrix();
-	public Matrix mPreviewToCameraMatrix = new Matrix();
-
-	private void calculateCameraToPreviewMatrix() {
-		int yScale = (isFrontCamera ? -1 : 1);
-		mCameraToPreviewMatrix.reset();
-		mCameraToPreviewMatrix.setScale(1f, (float)yScale);
-		mCameraToPreviewMatrix.postRotate((float)mSensorOrientation);
-		mCameraToPreviewMatrix.postScale(mTextureView.getWidth() / 2000f, mTextureView.getHeight() / 2000f);
-		mCameraToPreviewMatrix.postTranslate(mTextureView.getWidth() / 2f, mTextureView.getHeight() / 2f);
-		mCameraToPreviewMatrix.invert(mPreviewToCameraMatrix);
-	}*/
-
 	private ArrayList<Area> getAreas(float x, float y) {
 		float [] coords = {x, y};
 		calculatePreviewToCameraMatrix();
@@ -2843,15 +2664,56 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 	public boolean setMeteringArea(List<Area> areas) {
 		Rect sensor_rect = getViewableRect();
 
+		MeteringRectangle[] regions = new MeteringRectangle[areas.size()];
+		int i = 0;
+		for (Area area : areas) {
+			regions[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
+		}
+
+		boolean isAny = false;
 		if( mCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
-			MeteringRectangle[] ae_regions = new MeteringRectangle[areas.size()];
-			int i = 0;
-			for(Area area : areas) {
-				ae_regions[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
+			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, regions);
+			isAny = true;
+		}
+		if( mCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
+			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, regions);
+			isAny = true;
+		}
+		if(isAny){
+			try {
+				mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 			}
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, ae_regions);
-			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, ae_regions);
-			time_focus_started = System.currentTimeMillis();
+			catch(CameraAccessException e) {
+				e.printStackTrace();
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean clearMeteringArea() {
+		Rect sensor_rect = getViewableRect();
+
+		focusPointX = 0;
+		focusPointY = 0;
+		isSetFocusPoint = false;
+
+		MeteringRectangle[] regions = new MeteringRectangle[1];
+		regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+
+		boolean isAny = false;
+		if( mCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
+
+			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, regions);
+			isAny = true;
+		}
+		if( mCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
+			mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, regions);
+			isAny = true;
+		}
+		if(isAny){
 			try {
 				mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 			}
@@ -2931,57 +2793,4 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 		return new Rect(left, top, right, bottom);
 	}
 
-	private long time_focus_started = 0;
-	public void onDrawPreview(Canvas canvas) {
-		Log.d("draw", "draw");
-		if(isSetFocusPoint) {
-			Paint p = new Paint();
-			long time_since_focus_started = System.currentTimeMillis() - time_focus_started;
-			float min_radius = getResources().getDimension(R.dimen.ind_focus_min_radius);
-			float max_radius = getResources().getDimension(R.dimen.ind_focus_max_radius);
-			float radius = min_radius;
-			if (time_since_focus_started > 0) {
-				final long length = 500;
-				float frac = ((float) time_since_focus_started) / (float) length;
-				if (frac > 1.0f)
-					frac = 1.0f;
-				if (frac < 0.5f) {
-					float alpha = frac * 2.0f;
-					radius = (1.0f - alpha) * min_radius + alpha * max_radius;
-				} else {
-					float alpha = (frac - 0.5f) * 2.0f;
-					radius = (1.0f - alpha) * max_radius + alpha * min_radius;
-				}
-			}
-
-			p.setColor(Color.RED);
-
-			p.setStyle(Paint.Style.STROKE);
-			p.setStrokeWidth(getResources().getDimension(R.dimen.ind_stroke_width));
-			int pos_x = (int) focusPointX;
-			int pos_y = (int) focusPointY;
-
-			int size = (int) radius;
-
-			Log.d("draw", String.valueOf(pos_x) + " - " + String.valueOf(pos_y) + " - " + String.valueOf(size));
-
-			float frac = 0.5f;
-
-
-			p.setStrokeWidth(getResources().getDimension(R.dimen.ind_focus_thickness_old));
-			// horizontal strokes
-			canvas.drawLine(pos_x - size, pos_y - size, pos_x - frac * size, pos_y - size, p);
-			canvas.drawLine(pos_x + frac * size, pos_y - size, pos_x + size, pos_y - size, p);
-			canvas.drawLine(pos_x - size, pos_y + size, pos_x - frac * size, pos_y + size, p);
-			canvas.drawLine(pos_x + frac * size, pos_y + size, pos_x + size, pos_y + size, p);
-			// vertical strokes
-			canvas.drawLine(pos_x - size, pos_y - size + getResources().getDimension(R.dimen.ind_stroke_width), pos_x - size, pos_y - frac * size, p);
-			canvas.drawLine(pos_x - size, pos_y + frac * size, pos_x - size, pos_y + size - getResources().getDimension(R.dimen.ind_stroke_width), p);
-			canvas.drawLine(pos_x + size, pos_y - size + getResources().getDimension(R.dimen.ind_stroke_width), pos_x + size, pos_y - frac * size, p);
-			canvas.drawLine(pos_x + size, pos_y + frac * size, pos_x + size, pos_y + size - getResources().getDimension(R.dimen.ind_stroke_width), p);
-			p.setStrokeWidth(getResources().getDimension(R.dimen.ind_stroke_width));
-
-			canvas.save();
-		}
-	}
 }
