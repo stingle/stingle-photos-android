@@ -295,6 +295,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 							isSetFocusPoint = true;
 							focusPointX = event.getX();
 							focusPointY = event.getY();
+							isPassiveFocused = false;
+							focusMovedTime = 0;
 							ArrayList<Area> areas = getAreas(event.getX(), event.getY());
 							setMeteringArea(areas);
 							mFocusCircleView.drawFocusCircle(event.getX(), event.getY());
@@ -593,6 +595,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
      * pre-capture sequence.
      */
     private boolean isPassiveFocused = false;
+    private long focusMovedTime = 0;
     private CameraCaptureSession.CaptureCallback mPreCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
@@ -604,16 +607,34 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     // We have nothing to do when the camera preview is running normally.
 					if(isSetFocusPoint){
 						int afState = result.get(CaptureResult.CONTROL_AF_STATE);
+						//Log.d("afState", String.valueOf(afState));
 
-						if(!isPassiveFocused && afState == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED){
+						boolean isScanning = afState == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN || afState == CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN;
+						boolean isFocused = afState == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED;
+
+						if(!isPassiveFocused && isFocused){
 							isPassiveFocused = true;
-							Log.d("afState", "Focused");
+							Log.d("afState", "Focused - " + String.valueOf(afState));
 						}
-						else if(isPassiveFocused && afState == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN){
-							removeFocusClearCallback();
-							clearMeteringArea();
-							isPassiveFocused = false;
-							Log.d("afState", "Reset naxuy");
+						else{
+							if(isScanning) {
+								if (focusMovedTime == 0) {
+									focusMovedTime = System.currentTimeMillis();
+									Log.d("afState", "Reset start - " + String.valueOf(afState));
+								} else if (System.currentTimeMillis() - focusMovedTime > 1000) {
+									//removeFocusClearCallback();
+									clearMeteringArea();
+									isPassiveFocused = false;
+									focusMovedTime = 0;
+									Log.d("afState", "Reset naxuy - " + String.valueOf(afState));
+								}
+							}
+							else if(isFocused){
+								if(focusMovedTime !=0) {
+									Log.d("afState", "Reset to focused - " + String.valueOf(afState));
+								}
+								focusMovedTime = 0;
+							}
 						}
 					}
 
@@ -2681,6 +2702,18 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 		}
 		if(isAny){
 			try {
+				/*mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
+				mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);*/
+
+				/*mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO);
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+				mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);*/
+
+				/*mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+				mCaptureSession.capture(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);*/
 				mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
 			}
 			catch(CameraAccessException e) {
