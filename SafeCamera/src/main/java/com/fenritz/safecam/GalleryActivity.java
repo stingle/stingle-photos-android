@@ -153,6 +153,14 @@ public class GalleryActivity extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
+		handleIntentFilters(getIntent());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void onResume() {
+		super.onResume();
+
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
@@ -162,14 +170,6 @@ public class GalleryActivity extends Activity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
-
-		handleIntentFilters(getIntent());
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void onResume() {
-		super.onResume();
 
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
@@ -198,12 +198,26 @@ public class GalleryActivity extends Activity {
 	}
 
 	@Override
-	protected void onDestroy() {
-		decryptor.interrupt();
-		
+	protected void onPause() {
+		super.onPause();
+
+		LoginManager.setLockedTime(this);
+
+		if (thumbGenTask != null) {
+			thumbGenTask.cancel(true);
+			thumbGenTask = null;
+		}
 		if(receiver != null){
 			unregisterReceiver(receiver);
 		}
+
+		decryptor.interrupt();
+	}
+
+	@Override
+	protected void onDestroy() {
+		decryptor.interrupt();
+		
 		super.onDestroy();
 	}
 	
@@ -433,19 +447,6 @@ public class GalleryActivity extends Activity {
         }
     }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-
-		LoginManager.setLockedTime(this);
-
-		if (thumbGenTask != null) {
-			thumbGenTask.cancel(true);
-			thumbGenTask = null;
-		}
-
-		decryptor.interrupt();
-	}
 
 	@SuppressLint("NewApi")
 	private void enterMultiSelect(){

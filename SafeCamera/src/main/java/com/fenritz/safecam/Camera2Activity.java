@@ -80,6 +80,7 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -260,6 +261,12 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 	private FocusCircleView mFocusCircleView;
 	private final Handler clearFocusHandler = new Handler();
 	private Runnable clearFocusRunnable = null;
+	private ScaleGestureDetector scaleGestureDetector;
+
+	private int currentZoomValue;
+	private ArrayList<Integer> mZoomRatios;
+	private float mMaxZoom;
+	private boolean mIsTouchIsMulti = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -276,11 +283,25 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         mFocusCircleView = (FocusCircleView)findViewById(R.id.focusCircle);
 
         findViewById(R.id.take_photo).setOnClickListener(this);
+
+		scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+
         LinearLayout textureHolder = (LinearLayout)findViewById(R.id.textureHolder);
         mTextureView = new AutoFitTextureView(this);
 		mTextureView.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
+
+				if (scaleGestureDetector != null) {
+					scaleGestureDetector.onTouchEvent(event);
+				}
+				if( event.getPointerCount() > 1 ) {
+					//multitouch_time = System.currentTimeMillis();
+					mIsTouchIsMulti = true;
+					return true;
+				}
+				mIsTouchIsMulti = false;
+
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					mDownEventAtMS = System.currentTimeMillis();
 					mDownEventAtX = event.getX();
@@ -1024,6 +1045,22 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 					mIsZoomSupported = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM) > 0f;
 					mIsFocusSupported = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) >= 1;
 
+					// Get zoom params
+					mZoomRatios = new ArrayList<>();
+					mZoomRatios.add(100);
+					double zoom = 1.0;
+					mMaxZoom = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
+					final int steps_per_2x_factor = 20;
+					int n_steps =(int)( (steps_per_2x_factor * Math.log(mMaxZoom + 1.0e-11)) / Math.log(2.0));
+					final double scale_factor = Math.pow(mMaxZoom, 1.0/(double)n_steps);
+					for(int i=0;i<n_steps-1;i++) {
+						zoom *= scale_factor;
+						mZoomRatios.add((int)(zoom*100));
+					}
+					mZoomRatios.add((int)(mMaxZoom*100));
+					mMaxZoom = mZoomRatios.size()-1;
+					////////////////
+
                     if(!mFlashSupported){
                         Log.d("flash", "FLASH NOT SUPPORTED");
                         flashButton.setVisibility(View.INVISIBLE);
@@ -1357,6 +1394,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         }
 
         setAEMode(builder);
+        setCameraZoom(currentZoomValue, builder, false);
 
         // If there is an auto-magical white balance control mode available, use it.
         if (contains(mCharacteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES), CaptureRequest.CONTROL_AWB_MODE_AUTO)) {
@@ -2824,6 +2862,126 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 		bottom = Math.min(bottom, crop_rect.bottom);
 
 		return new Rect(left, top, right, bottom);
+	}
+
+	private float scaleZoomFactor = 1;
+	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+		@Override
+		public boolean onScale(ScaleGestureDetector detector) {
+			if( mCameraDevice != null && mIsZoomSupported ) {
+				scaleZoomFactor = detector.getScaleFactor();
+				if (scaleZoomFactor >= 1.025f || scaleZoomFactor <= 0.9756f) {
+					scaleZoom(scaleZoomFactor);
+					scaleZoomFactor = 1;
+				}
+			}
+			return true;
+		}
+	}
+
+
+	public void scaleZoom(float scale_factor) {
+		if( mCaptureSession != null && mIsZoomSupported ) {
+			int zoom_factor = currentZoomValue;
+			float zoom_ratio = mZoomRatios.get(zoom_factor)/100.0f;
+			zoom_ratio *= scale_factor;
+
+			int new_zoom_factor = zoom_factor;
+			int max_zoom_factor = (int)mMaxZoom;
+			if( zoom_ratio <= 1.0f ) {
+				new_zoom_factor = 0;
+			}
+			else if( zoom_ratio >= mZoomRatios.get(max_zoom_factor)/100.0f ) {
+				new_zoom_factor = max_zoom_factor;
+			}
+			else {
+				// find the closest zoom level
+				if( scale_factor > 1.0f ) {
+					// zooming in
+					for(int i=zoom_factor;i<mZoomRatios.size();i++) {
+						if( mZoomRatios.get(i)/100.0f >= zoom_ratio ) {
+							new_zoom_factor = i;
+							break;
+						}
+					}
+				}
+				else {
+					// zooming out
+					for(int i=zoom_factor;i>=0;i--) {
+						if( mZoomRatios.get(i)/100.0f <= zoom_ratio ) {
+							new_zoom_factor = i;
+							break;
+						}
+					}
+				}
+			}
+
+			/*final int zoomFactor = new_zoom_factor;
+			mBackgroundHandler.postAtFrontOfQueue(new Runnable() {
+				@Override
+				public void run() {
+					zoomTo(zoomFactor);
+				}
+			});*/
+			zoomTo(new_zoom_factor);
+
+			// n.b., don't call zoomTo; this should be called indirectly by applicationInterface.multitouchZoom()
+			//applicationInterface.multitouchZoom(new_zoom_factor);
+		}
+	}
+
+	public void zoomTo(int new_zoom_factor) {
+		if( new_zoom_factor < 0 ) {
+			new_zoom_factor = 0;
+		}
+		else if( new_zoom_factor > mMaxZoom ) {
+			new_zoom_factor = (int) mMaxZoom;
+		}
+		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
+		if( mCaptureSession != null ) {
+			if( mIsZoomSupported ) {
+				// don't cancelAutoFocus() here, otherwise we get sluggish zoom behaviour on Camera2 API
+				setCameraZoom(new_zoom_factor, mPreviewRequestBuilder, true);
+//				Prefs.setZoomPref(new_zoom_factor);
+
+				// Reset focus points
+				clearMeteringArea();
+				isPassiveFocused = false;
+				focusMovedTime = 0;
+			}
+		}
+	}
+
+	public void setCameraZoom(int value, CaptureRequest.Builder requestBuilder, boolean setRepeatingRequest) {
+		if( mZoomRatios == null || mCaptureSession == null ) {
+			return;
+		}
+		if( value < 0 || value > mZoomRatios.size() ) {
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		float zoom = mZoomRatios.get(value)/100.0f;
+		Rect sensor_rect = mCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		int left = sensor_rect.width()/2;
+		int right = left;
+		int top = sensor_rect.height()/2;
+		int bottom = top;
+		int hwidth = (int)(sensor_rect.width() / (2.0*zoom));
+		int hheight = (int)(sensor_rect.height() / (2.0*zoom));
+		left -= hwidth;
+		right += hwidth;
+		top -= hheight;
+		bottom += hheight;
+
+		Rect scalar_crop_region = new Rect(left, top, right, bottom);
+		requestBuilder.set(CaptureRequest.SCALER_CROP_REGION, scalar_crop_region);
+		currentZoomValue = value;
+		if(setRepeatingRequest) {
+			try {
+				mCaptureSession.setRepeatingRequest(requestBuilder.build(), mPreCaptureCallback, mBackgroundHandler);
+			} catch (CameraAccessException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
