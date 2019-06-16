@@ -262,7 +262,9 @@
     <string name="front_camera_video_res">Front camera video resolution</string>
     <string name="megapixels">megapixels</string>
     <string name="fps">fps</string>
-
+    <string name="export_keys">Export keys</string>
+    <string name="share_keys">Share Keys</string>
+    <string name="import_keys">Import Keys</string>
 
 
 </resources>

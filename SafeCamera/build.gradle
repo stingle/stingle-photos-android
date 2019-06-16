@@ -33,9 +33,11 @@ dependencies {
     implementation files('libs/metadata-extractor-2.6.2.jar')
     implementation files('libs/xmpcore.jar')
     //implementation files('libs/Robosodium.aar')
-    implementation 'com.goterl.lazycode:lazysodium-android:3.5.0@aar'
+    //implementation 'com.goterl.lazycode:lazysodium-android:3.5.0@aar'
+    implementation "com.goterl.lazycode:lazysodium-android:3.7.0@aar"
     implementation 'net.java.dev.jna:jna:4.5.2@aar'
     implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.7.3'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
+    implementation 'androidx.core:core:1.0.2'
 }

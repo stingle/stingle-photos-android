@@ -97,6 +97,41 @@ public class Crypto {
         return decryptSymmetric(encKey, readPrivateFile(SK_NONCE_FILENAME), encPrivKey);
     }
 
+    public byte[] exportKeys() throws IOException {
+        ByteArrayOutputStream keys = new ByteArrayOutputStream();
+        keys.write(FILE_BEGGINING.getBytes());
+        keys.write(readPrivateFile(PUBLIC_KEY_FILENAME));
+        keys.write(readPrivateFile(PRIVATE_KEY_FILENAME));
+        keys.write(readPrivateFile(PWD_SALT_FILENAME));
+        keys.write(readPrivateFile(SK_NONCE_FILENAME));
+        return keys.toByteArray();
+    }
+
+    public void importKeys(byte[] keys) throws IOException, CryptoException {
+        ByteArrayInputStream in = new ByteArrayInputStream(keys);
+
+        byte[] fileBeginning = new byte[FILE_BEGGINIG_LEN];
+        in.read(fileBeginning);
+
+        if (!new String(fileBeginning, "UTF-8").equals(FILE_BEGGINING)) {
+            throw new CryptoException("Invalid file header, not our file");
+        }
+        byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
+        byte[] encryptedPrivateKey = new byte[Box.SECRETKEYBYTES + SecretBox.MACBYTES];
+        byte[] pwdSalt = new byte[PwHash.ARGON2ID_SALTBYTES];
+        byte[] skNonce = new byte[SecretBox.NONCEBYTES];
+
+        in.read(publicKey);
+        in.read(encryptedPrivateKey);
+        in.read(pwdSalt);
+        in.read(skNonce);
+
+        savePrivateFile(PUBLIC_KEY_FILENAME, publicKey);
+        savePrivateFile(PRIVATE_KEY_FILENAME, encryptedPrivateKey);
+        savePrivateFile(PWD_SALT_FILENAME, pwdSalt);
+        savePrivateFile(SK_NONCE_FILENAME, skNonce);
+    }
+
     public byte[] getKeyFromPassword(String password) throws CryptoException{
         byte[] salt = readPrivateFile(PWD_SALT_FILENAME);
         if(salt.length != PwHash.ARGON2ID_SALTBYTES){

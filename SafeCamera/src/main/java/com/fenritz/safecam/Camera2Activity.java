@@ -428,14 +428,14 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         return new View.OnClickListener() {
             public void onClick(View v) {
 
-                if (flashMode == FLASH_MODE_AUTO) {
-                    flashMode = FLASH_MODE_OFF;
+                if (flashMode == FLASH_MODE_OFF) {
+                    flashMode = FLASH_MODE_AUTO;
                 }
-                else if (flashMode == FLASH_MODE_OFF) {
+                else if (flashMode == FLASH_MODE_AUTO) {
                     flashMode = FLASH_MODE_ON;
                 }
                 else if (flashMode == FLASH_MODE_ON) {
-                    flashMode = FLASH_MODE_AUTO;
+                    flashMode = FLASH_MODE_OFF;
                 }
 
                 setFlashButtonImage();
