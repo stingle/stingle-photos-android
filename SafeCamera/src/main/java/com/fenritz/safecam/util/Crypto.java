@@ -38,8 +38,10 @@ public class Crypto {
     public static final int FILE_TYPE_VIDEO = 3;
 
     protected static final String FILE_BEGGINING = "SC";
+    protected static final String KEY_FILE_BEGGINING = "SPK";
     protected static final int CURRENT_FILE_VERSION = 2;
     protected static final int CURRENT_HEADER_VERSION = 1;
+    protected static final int CURRENT_KEY_FILE_VERSION = 1;
 
     protected static final String PWD_SALT_FILENAME = "pwdSalt";
     protected static final String SK_NONCE_FILENAME = "skNonce";
@@ -50,10 +52,14 @@ public class Crypto {
     public static final int MAX_BUFFER_LENGTH = 1024*1024*64;
 
     public static final int FILE_BEGGINIG_LEN = FILE_BEGGINING.length();
+    public static final int KEY_FILE_BEGGINIG_LEN = KEY_FILE_BEGGINING.length();
     public static final int FILE_FILE_VERSION_LEN = 1;
     public static final int FILE_CHUNK_SIZE_LEN = 4;
     public static final int FILE_DATA_SIZE_LEN = 8;
     public static final int FILE_HEADER_SIZE_LEN = 4;
+
+    public static final int KEY_FILE_TYPE_ENCRYPTED = 0;
+    public static final int KEY_FILE_TYPE_PLAIN = 1;
 
     protected int bufSize = 1024 * 1024;
 
@@ -98,13 +104,15 @@ public class Crypto {
     }
 
     public byte[] exportKeys() throws IOException {
-        ByteArrayOutputStream keys = new ByteArrayOutputStream();
-        keys.write(FILE_BEGGINING.getBytes());
-        keys.write(readPrivateFile(PUBLIC_KEY_FILENAME));
-        keys.write(readPrivateFile(PRIVATE_KEY_FILENAME));
-        keys.write(readPrivateFile(PWD_SALT_FILENAME));
-        keys.write(readPrivateFile(SK_NONCE_FILENAME));
-        return keys.toByteArray();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(KEY_FILE_BEGGINING.getBytes());
+        out.write(CURRENT_KEY_FILE_VERSION);
+        out.write(KEY_FILE_TYPE_ENCRYPTED);
+        out.write(readPrivateFile(PUBLIC_KEY_FILENAME));
+        out.write(readPrivateFile(PRIVATE_KEY_FILENAME));
+        out.write(readPrivateFile(PWD_SALT_FILENAME));
+        out.write(readPrivateFile(SK_NONCE_FILENAME));
+        return out.toByteArray();
     }
 
     public void importKeys(byte[] keys) throws IOException, CryptoException {
@@ -116,6 +124,17 @@ public class Crypto {
         if (!new String(fileBeginning, "UTF-8").equals(FILE_BEGGINING)) {
             throw new CryptoException("Invalid file header, not our file");
         }
+
+        int keyFileVersion = in.read();
+        if (keyFileVersion != CURRENT_KEY_FILE_VERSION) {
+            throw new CryptoException("Unsupported key file version number: " + String.valueOf(keyFileVersion));
+        }
+
+        int keyFileType = in.read();
+        if (keyFileType != KEY_FILE_TYPE_ENCRYPTED) {
+            throw new CryptoException("Can't import! This is not a encrypted key file");
+        }
+
         byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
         byte[] encryptedPrivateKey = new byte[Box.SECRETKEYBYTES + SecretBox.MACBYTES];
         byte[] pwdSalt = new byte[PwHash.ARGON2ID_SALTBYTES];
@@ -293,7 +312,7 @@ public class Crypto {
         // Read and validate file version
         header.fileVersion = in.read();
         if (header.fileVersion != CURRENT_FILE_VERSION) {
-            throw new CryptoException("Unsupported version number: " + header.fileVersion);
+            throw new CryptoException("Unsupported version number: " + String.valueOf(header.fileVersion));
         }
         overallHeaderSize += FILE_FILE_VERSION_LEN;
 

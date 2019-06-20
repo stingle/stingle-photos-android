@@ -3,22 +3,22 @@
 
     <item
         android:id="@+id/multi_select"
-        android:icon="@drawable/ic_action_ok"
+        android:icon="@android:drawable/ic_menu_edit"
         android:title="@string/multi_select"
         android:showAsAction="always|withText" />
     <item
         android:id="@+id/goto_camera"
-        android:icon="@drawable/ic_action_camera"
+        android:icon="@android:drawable/ic_menu_camera"
         android:title="@string/camera"
         android:showAsAction="always|withText" />
     <item
         android:id="@+id/importBtn"
-        android:icon="@drawable/ic_action_import"
+        android:icon="@android:drawable/ic_menu_add"
         android:title="@string/import_btn"
         android:showAsAction="always|withText" />
     <item
         android:id="@+id/select_all"
-        android:icon="@drawable/ic_action_checkbox_checked"
+        android:icon="@android:drawable/checkbox_on_background"
         android:title="@string/select_all" />
     <item
         android:id="@+id/change_password"

@@ -34,7 +34,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@android:style/Theme.Material">
+        android:theme="@android:style/Theme.Material.Light">
         <activity
             android:name=".DashboardActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

@@ -18,6 +18,7 @@ import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.Helpers;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,13 +44,14 @@ import javax.net.ssl.SSLContext;
 
 public class HttpsClient {
 
-	public static void post(String urlStr, HashMap<String, String> params, OnNetworkFinish onFinish) {
-		new NetworkRequest(urlStr, params, onFinish).execute();
+	public static void post(Context context, String urlStr, HashMap<String, String> params, OnNetworkFinish onFinish) {
+		new NetworkRequest(context, urlStr, params, onFinish).execute();
 	}
 
 	public static JSONObject postFunc(String urlStr, HashMap<String, String> params) {
 		JSONObject json = null;
 		try {
+			Log.e("url", urlStr);
 			URL url = new URL(urlStr);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
@@ -72,8 +74,10 @@ public class HttpsClient {
 
 			// Add any data you wish to post here
 			String data = "";
-			for (String key : params.keySet()) {
-				data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
+			if(params != null) {
+				for (String key : params.keySet()) {
+					data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
+				}
 			}
 
 			if (data.length() > 0) {
@@ -94,7 +98,7 @@ public class HttpsClient {
 				// Append server response in string
 				sb.append(line + "\n");
 			}
-
+			Log.e("resultStr", sb.toString());
 			json = new JSONObject(sb.toString());
 
 			reader.close();
@@ -115,11 +119,21 @@ public class HttpsClient {
 
 	public static class NetworkRequest extends AsyncTask<Void, Void, JSONObject> {
 
+		protected Context context;
 		protected String url;
 		protected HashMap<String, String> params;
 		protected OnNetworkFinish onFinish;
 
-		public NetworkRequest(String url, HashMap<String, String> params, OnNetworkFinish onFinish){
+		public NetworkRequest(Context context, String url){
+			this(context, url, null, null);
+		}
+
+		public NetworkRequest(Context context, String url, HashMap<String, String> params){
+			this(context, url, params, null);
+		}
+
+		public NetworkRequest(Context context, String url, HashMap<String, String> params, OnNetworkFinish onFinish){
+			this.context = context;
 			this.url = url;
 			this.params = params;
 			this.onFinish = onFinish;
@@ -133,12 +147,14 @@ public class HttpsClient {
 		@Override
 		protected void onPostExecute(JSONObject result) {
 			super.onPostExecute(result);
-			onFinish.onFinish(result);
+			if(this.onFinish != null) {
+				this.onFinish.onFinish(new StingleResponse(this.context, result));
+			}
 		}
 	}
 
 	abstract public static class OnNetworkFinish {
-		abstract public void onFinish(JSONObject result);
+		abstract public void onFinish(StingleResponse response);
 	}
 
 }

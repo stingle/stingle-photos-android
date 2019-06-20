@@ -4,8 +4,7 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:baselineAligned="false"
-    android:background="@color/main_bg_color">
+    android:baselineAligned="false">
 
     <LinearLayout
     	android:layout_width="wrap_content"

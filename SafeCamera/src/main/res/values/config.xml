@@ -21,7 +21,10 @@
     <string name="min_pass_length">6</string>
     <string name="popup_logins_limit">5</string>
     <string name="popup_laters_limit">3</string>
-    
+
+    <string name="api_server_url">https://api.stingle.org/</string>
+    <string name="registration_path">register/action:createAccount</string>
+
     <string name="security_page_link">http://www.safecamera.org/security</string>
     
     <string name="main_package_name">com.fenritz.safecam</string>

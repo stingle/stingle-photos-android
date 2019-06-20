@@ -6,17 +6,25 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.fenritz.safecam.net.HttpsClient;
+import com.fenritz.safecam.net.StingleResponse;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileFilter;
+import java.util.HashMap;
 
 public class SetUpActivity  extends Activity{
 
@@ -24,13 +32,11 @@ public class SetUpActivity  extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        }
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
 		setContentView(R.layout.setup);
 
-		File homeFolder = new File(Helpers.getHomeDir(this));
+		/*File homeFolder = new File(Helpers.getHomeDir(this));
 		
 		if(homeFolder.exists()){
 			File[] files = homeFolder.listFiles(new FileFilter() {
@@ -51,9 +57,9 @@ public class SetUpActivity  extends Activity{
 				AlertDialog dialog = builder.create();
 				dialog.show();
 			}
-		}
+		}*/
 		
-		((Button) findViewById(R.id.setupButton)).setOnClickListener(setup());
+		((Button) findViewById(R.id.signup)).setOnClickListener(signup());
 
 
 
@@ -241,13 +247,18 @@ public class SetUpActivity  extends Activity{
 		}
 	}
 
-
-	private OnClickListener setup() {
+	private OnClickListener signup() {
 		return new OnClickListener() {
 			public void onClick(View v) {
+				String email = ((EditText)findViewById(R.id.email)).getText().toString();
 				String password1 = ((EditText)findViewById(R.id.password1)).getText().toString();
 				String password2 = ((EditText)findViewById(R.id.password2)).getText().toString();
-				
+
+				if(!Helpers.isValidEmail(email)){
+					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.invalid_email));
+					return;
+				}
+
 				if(password1.equals("")){
 					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.password_empty));
 					return;
@@ -262,10 +273,37 @@ public class SetUpActivity  extends Activity{
 					Helpers.showAlertDialog(SetUpActivity.this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
 					return;
 				}
-				
-				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
+
 				try {
 					String loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
+
+					HashMap<String, String> postParams = new HashMap<String, String>();
+
+					postParams.put("email", email);
+					postParams.put("password", loginHash);
+
+					HttpsClient.post(SetUpActivity.this, getString(R.string.api_server_url) + getString(R.string.registration_path), postParams, new HttpsClient.OnNetworkFinish() {
+						@Override
+						public void onFinish(StingleResponse response) {
+
+							if(response.isStatusOk()) {
+								Log.e("token", response.get("token"));
+							}
+						//	Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
+
+						}
+					});
+				}
+				catch (CryptoException e) {
+					e.printStackTrace();
+					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.unexpected_error));
+					return;
+				}
+
+				/*
+				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
+				try {
+
 					preferences.edit().putString(SafeCameraApplication.PASSWORD, loginHash).commit();
 
 					SafeCameraApplication.getCrypto().generateMainKeypair(password1);
@@ -283,7 +321,7 @@ public class SetUpActivity  extends Activity{
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
-				finish();
+				finish();*/
 			}
 		};
 	}

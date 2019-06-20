@@ -24,6 +24,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Range;
@@ -938,5 +939,13 @@ public class Helpers {
 		Collections.sort(photoSizes, new CameraImageSize.SizeSorter());
 
 		return photoSizes;
+	}
+
+	public final static boolean isValidEmail(CharSequence target) {
+		if (TextUtils.isEmpty(target)) {
+			return false;
+		} else {
+			return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+		}
 	}
 }

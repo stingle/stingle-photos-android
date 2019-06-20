@@ -292,7 +292,7 @@ public class DashboardActivity extends Activity {
 				return true;
 			case R.id.share_keys:
 				try {
-					String filePath = Helpers.getHomeDir(this) + "/.tmp/stingle.key";
+					String filePath = Helpers.getHomeDir(this) + "/.tmp/stingle_keys.skey";
 					File destinationFile = new File(filePath);
 
 					FileOutputStream outputStream = new FileOutputStream(destinationFile);
