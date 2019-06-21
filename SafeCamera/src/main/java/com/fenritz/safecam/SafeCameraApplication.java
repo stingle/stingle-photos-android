@@ -18,7 +18,7 @@ public class SafeCameraApplication extends Application{
 	private static Crypto crypto;
 
     public static final String DEFAULT_PREFS = "default_prefs";
-    public static final String PASSWORD = "password";
+    public static final String API_TOKEN = "api_token";
     public static final String PASSWORD_FINGERPRINT = "password_finger";
     public static final String PASSWORD_FINGERPRINT_IV = "password_finger_iv";
 

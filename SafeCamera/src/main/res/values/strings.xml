@@ -269,6 +269,7 @@
     <string name="invalid_email">Invalid email address specified</string>
     <string name="success_reg">Your account have been successfully created.</string>
     <string name="fail_reg">Something went wrong, please try again.</string>
+    <string name="creating_account">Creating account...</string>
 
 
 </resources>

@@ -57,13 +57,13 @@ public class LoginActivity extends Activity {
 		extraData = getIntent().getBundleExtra(PARAM_EXTRA_DATA);
 		
 		preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
-		if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
+		/*if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
 			Intent intent = new Intent();
 			intent.setClass(LoginActivity.this, SetUpActivity.class);
 			startActivity(intent);
 			finish();
 			return;
-		}
+		}*/
 
 		if(Helpers.requestSDCardPermission(this)){
 			filesystemInit();
@@ -150,7 +150,7 @@ public class LoginActivity extends Activity {
 	}
 	
 	private void doLogin() {
-		String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
+		/*String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
 		String enteredPassword = ((EditText) findViewById(R.id.password)).getText().toString();
 		try{
 			if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, enteredPassword)){
@@ -187,16 +187,16 @@ public class LoginActivity extends Activity {
 					loginsCount = 0;
 				}
 				preferences.edit().putInt(LoginActivity.LOGINS_COUNT_FOR_POPUP, loginsCount).commit();
-			}*/
+			}
 			startActivity(intent);
 		}
-		finish();
+		finish();*/
 	}
 
     protected OnClickListener forgotPassword(){
         return new OnClickListener() {
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                /*AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                 builder.setTitle(getString(R.string.forgot_password));
                 builder.setMessage(getString(R.string.reset_password));
                 builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
@@ -213,7 +213,7 @@ public class LoginActivity extends Activity {
                 });
                 builder.setNegativeButton(getString(R.string.no), null);
                 AlertDialog dialog = builder.create();
-                dialog.show();
+                dialog.show();*/
             }
         };
     }

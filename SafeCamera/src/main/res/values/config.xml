@@ -24,6 +24,7 @@
 
     <string name="api_server_url">https://api.stingle.org/</string>
     <string name="registration_path">register/action:createAccount</string>
+    <string name="upload_key_bundle_path">keys/action:uploadKeyBundle</string>
 
     <string name="security_page_link">http://www.safecamera.org/security</string>
     

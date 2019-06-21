@@ -58,8 +58,9 @@ public class Crypto {
     public static final int FILE_DATA_SIZE_LEN = 8;
     public static final int FILE_HEADER_SIZE_LEN = 4;
 
-    public static final int KEY_FILE_TYPE_ENCRYPTED = 0;
-    public static final int KEY_FILE_TYPE_PLAIN = 1;
+    public static final int KEY_FILE_TYPE_BUNDLE_ENCRYPTED = 0;
+    public static final int KEY_FILE_TYPE_BUNDLE_PLAIN = 1;
+    public static final int KEY_FILE_TYPE_PUBLIC_PLAIN = 2;
 
     protected int bufSize = 1024 * 1024;
 
@@ -103,11 +104,11 @@ public class Crypto {
         return decryptSymmetric(encKey, readPrivateFile(SK_NONCE_FILENAME), encPrivKey);
     }
 
-    public byte[] exportKeys() throws IOException {
+    public byte[] exportKeyBundle() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(KEY_FILE_BEGGINING.getBytes());
         out.write(CURRENT_KEY_FILE_VERSION);
-        out.write(KEY_FILE_TYPE_ENCRYPTED);
+        out.write(KEY_FILE_TYPE_BUNDLE_ENCRYPTED);
         out.write(readPrivateFile(PUBLIC_KEY_FILENAME));
         out.write(readPrivateFile(PRIVATE_KEY_FILENAME));
         out.write(readPrivateFile(PWD_SALT_FILENAME));
@@ -115,13 +116,22 @@ public class Crypto {
         return out.toByteArray();
     }
 
-    public void importKeys(byte[] keys) throws IOException, CryptoException {
+    public byte[] exportPublicKey() throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(KEY_FILE_BEGGINING.getBytes());
+        out.write(CURRENT_KEY_FILE_VERSION);
+        out.write(KEY_FILE_TYPE_PUBLIC_PLAIN);
+        out.write(readPrivateFile(PUBLIC_KEY_FILENAME));
+        return out.toByteArray();
+    }
+
+    public void importKeyBundle(byte[] keys) throws IOException, CryptoException {
         ByteArrayInputStream in = new ByteArrayInputStream(keys);
 
-        byte[] fileBeginning = new byte[FILE_BEGGINIG_LEN];
+        byte[] fileBeginning = new byte[KEY_FILE_BEGGINIG_LEN];
         in.read(fileBeginning);
 
-        if (!new String(fileBeginning, "UTF-8").equals(FILE_BEGGINING)) {
+        if (!new String(fileBeginning, "UTF-8").equals(KEY_FILE_BEGGINING)) {
             throw new CryptoException("Invalid file header, not our file");
         }
 
@@ -131,7 +141,7 @@ public class Crypto {
         }
 
         int keyFileType = in.read();
-        if (keyFileType != KEY_FILE_TYPE_ENCRYPTED) {
+        if (keyFileType != KEY_FILE_TYPE_BUNDLE_ENCRYPTED) {
             throw new CryptoException("Can't import! This is not a encrypted key file");
         }
 

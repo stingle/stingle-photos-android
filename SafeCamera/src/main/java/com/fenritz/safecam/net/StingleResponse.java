@@ -54,7 +54,7 @@ public class StingleResponse{
 	}
 
 	public boolean isStatusOk(){
-		return (this.status == "ok" ? true : false);
+		return (this.status.equals("ok") ? true : false);
 	}
 
 	public String get(String name){
@@ -75,7 +75,7 @@ public class StingleResponse{
 		for (int i = 0; i < this.infos.length(); i++) {
 			String info = this.infos.optString(i);
 			if(info != null){
-				Helpers.showAlertDialog(this.context, info);
+				Helpers.showInfoDialog(this.context, info);
 			}
 		}
 	}

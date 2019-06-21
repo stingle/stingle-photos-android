@@ -2,6 +2,8 @@ package com.fenritz.safecam;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -16,8 +18,10 @@ import android.widget.EditText;
 
 import com.fenritz.safecam.net.HttpsClient;
 import com.fenritz.safecam.net.StingleResponse;
+import com.fenritz.safecam.util.AsyncTasks;
 import com.fenritz.safecam.util.CryptoException;
 import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.util.KeyManagement;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -251,7 +255,7 @@ public class SetUpActivity  extends Activity{
 		return new OnClickListener() {
 			public void onClick(View v) {
 				String email = ((EditText)findViewById(R.id.email)).getText().toString();
-				String password1 = ((EditText)findViewById(R.id.password1)).getText().toString();
+				final String password1 = ((EditText)findViewById(R.id.password1)).getText().toString();
 				String password2 = ((EditText)findViewById(R.id.password2)).getText().toString();
 
 				if(!Helpers.isValidEmail(email)){
@@ -274,8 +278,14 @@ public class SetUpActivity  extends Activity{
 					return;
 				}
 
+
+				final ProgressDialog progressDialog = new ProgressDialog(SetUpActivity.this);
+				progressDialog.setMessage(getString(R.string.creating_account));
+				progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				progressDialog.show();
+
 				try {
-					String loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
+					final String loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
 
 					HashMap<String, String> postParams = new HashMap<String, String>();
 
@@ -286,10 +296,48 @@ public class SetUpActivity  extends Activity{
 						@Override
 						public void onFinish(StingleResponse response) {
 
+							boolean result = false;
 							if(response.isStatusOk()) {
-								Log.e("token", response.get("token"));
+								String token = response.get("token");
+								if(token != null) {
+									KeyManagement.setApiToken(SetUpActivity.this, token);
+
+									try {
+										SafeCameraApplication.getCrypto().generateMainKeypair(password1);
+										((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password1));
+
+										KeyManagement.uploadKeyBundle(SetUpActivity.this, new HttpsClient.OnNetworkFinish() {
+											@Override
+											public void onFinish(StingleResponse response) {
+												progressDialog.dismiss();
+
+												if(response.isStatusOk()) {
+													Intent intent = new Intent();
+													intent.setClass(SetUpActivity.this, DashboardActivity.class);
+													intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+													intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+													SetUpActivity.this.startActivity(intent);
+													SetUpActivity.this.finish();
+												}
+												else{
+													Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
+												}
+
+											}
+										});
+
+										result = true;
+									}
+									catch (CryptoException e) {
+										e.printStackTrace();
+									}
+								}
 							}
-						//	Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
+
+							if(!result) {
+								Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
+								progressDialog.dismiss();
+							}
 
 						}
 					});
@@ -297,6 +345,7 @@ public class SetUpActivity  extends Activity{
 				catch (CryptoException e) {
 					e.printStackTrace();
 					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.unexpected_error));
+					progressDialog.dismiss();
 					return;
 				}
 

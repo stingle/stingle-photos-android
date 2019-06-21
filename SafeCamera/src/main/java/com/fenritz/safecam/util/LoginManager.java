@@ -97,28 +97,28 @@ public class LoginManager {
 
     public static void unlockWithPassword(Activity activity, String password, UserLogedinCallback loginCallback){
 
-        SharedPreferences preferences = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+        /*SharedPreferences preferences = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
         if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
             redirectToSetup(activity);
             return;
         }
-        String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
+        String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");*/
         try{
-            if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, password)){
-                if(loginCallback != null) {
-                    loginCallback.onUserLoginFail();
-                }
-                Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
+           /* if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, password)){
+
                 return;
             }
+            */
+            SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
             if(loginCallback != null) {
                 loginCallback.onUserLoginSuccess();
             }
-            SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
         }
         catch (CryptoException e) {
-            Helpers.showAlertDialog(activity, String.format(activity.getString(R.string.unexpected_error), "102"));
-            e.printStackTrace();
+            if(loginCallback != null) {
+                loginCallback.onUserLoginFail();
+            }
+            Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
         }
     }
 

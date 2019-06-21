@@ -135,28 +135,17 @@ public class FingerprintManagerWrapper {
                                 byte[] encPassword = cipher.doFinal(password.getBytes());
                                 SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
 
-                                if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
-                                    return;
-                                }
-                                String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
                                 try{
-                                    if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, password)){
-                                        Helpers.showAlertDialog(context, context.getString(R.string.incorrect_password));
-                                        return;
-                                    }
-
                                     SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
                                 }
                                 catch (CryptoException e) {
-                                    Helpers.showAlertDialog(context, String.format(context.getString(R.string.unexpected_error), "102"));
-                                    e.printStackTrace();
+                                    Helpers.showAlertDialog(context, context.getString(R.string.incorrect_password));
                                     return;
                                 }
 
 
                                 preferences.edit().putString(SafeCameraApplication.PASSWORD_FINGERPRINT, SafeCameraApplication.getCrypto().byte2hex(encPassword)).commit();
                                 preferences.edit().putString(SafeCameraApplication.PASSWORD_FINGERPRINT_IV, SafeCameraApplication.getCrypto().byte2hex(iv)).commit();
-                                Log.e("encPass", SafeCameraApplication.getCrypto().byte2hex(encPassword));
 
                                 SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
                                 defaultSharedPrefs.edit().putBoolean("fingerprint", true).commit();

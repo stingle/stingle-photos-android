@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -226,7 +227,7 @@ public class DashboardActivity extends Activity {
 
 				OutputStream os = getContentResolver().openOutputStream(outputUri);
 				if( os != null ) {
-					os.write(SafeCameraApplication.getCrypto().exportKeys());
+					os.write(SafeCameraApplication.getCrypto().exportKeyBundle());
 					os.close();
 				}
 			} catch (FileNotFoundException e) {
@@ -243,14 +244,19 @@ public class DashboardActivity extends Activity {
 
 				InputStream is = getContentResolver().openInputStream(inputUri);
 				if( is != null ) {
-					SafeCameraApplication.getCrypto().importKeys(IOUtils.getInputStreamBytes(is));
+					SafeCameraApplication.getCrypto().importKeyBundle(IOUtils.getInputStreamBytes(is));
 					is.close();
+					SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+					defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();
+					LoginManager.logout(this);
+					Helpers.showInfoDialog(this, "Import successful");
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (CryptoException e) {
+				Helpers.showAlertDialog(this, e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -296,7 +302,7 @@ public class DashboardActivity extends Activity {
 					File destinationFile = new File(filePath);
 
 					FileOutputStream outputStream = new FileOutputStream(destinationFile);
-					outputStream.write(SafeCameraApplication.getCrypto().exportKeys());
+					outputStream.write(SafeCameraApplication.getCrypto().exportKeyBundle());
 					outputStream.close();
 
 					Intent share = new Intent(Intent.ACTION_SEND);

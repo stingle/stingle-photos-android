@@ -79,7 +79,7 @@ public class ChangePasswordActivity extends Activity {
 		return new OnClickListener() {
 
 			public void onClick(View v) {
-				String currentPassword = ((EditText)findViewById(R.id.current_password)).getText().toString();
+				/*String currentPassword = ((EditText)findViewById(R.id.current_password)).getText().toString();
 				
 				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 				String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
@@ -108,7 +108,7 @@ public class ChangePasswordActivity extends Activity {
 				}
 				catch (AESCryptException e) {
 					e.printStackTrace();
-				}
+				}*/
 			}
 		};
 	}
@@ -284,9 +284,9 @@ public class ChangePasswordActivity extends Activity {
 					}
 				}
 				
-				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
+				/*SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 				String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(passwordHash + newPassword));
-				preferences.edit().putString(SafeCameraApplication.PASSWORD, loginHash).commit();
+				preferences.edit().putString(SafeCameraApplication.PASSWORD, loginHash).commit();*/
 
 				//((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(passwordHash);
 			}

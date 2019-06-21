@@ -781,7 +781,10 @@ public class GalleryActivity extends Activity {
 		private TextView getLabel(GalleryItem item){
 			TextView label = new TextView(GalleryActivity.this);
 
-			String labelFromMap = item.header.filename;
+			String labelFromMap = null;
+			if(item.header != null){
+				labelFromMap = item.header.filename;
+			}
 			if(labelFromMap != null){
 				label.setText(labelFromMap);
 			}

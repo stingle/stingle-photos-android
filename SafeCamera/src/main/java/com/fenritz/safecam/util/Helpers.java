@@ -43,7 +43,10 @@ import com.fenritz.safecam.Camera.CameraImageSize;
 import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
+import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.SettingsActivity;
+import com.fenritz.safecam.net.HttpsClient;
+import com.fenritz.safecam.net.StingleResponse;
 import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.util.StorageUtils.StorageInfo;
 
@@ -163,6 +166,16 @@ public class Helpers {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(message);
 		builder.setNegativeButton(context.getString(R.string.ok), null);
+		builder.setIcon(android.R.drawable.ic_dialog_alert);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	public static void showInfoDialog(Context context, String message) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(message);
+		builder.setNegativeButton(context.getString(R.string.ok), null);
+		builder.setIcon(android.R.drawable.ic_dialog_info);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
