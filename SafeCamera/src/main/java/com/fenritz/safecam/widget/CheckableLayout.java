@@ -1,10 +1,9 @@
-package com.fenritz.safecam.widget;
+package com.fenritz.safecam.Widget;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.Checkable;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 public class CheckableLayout extends RelativeLayout implements Checkable {

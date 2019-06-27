@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fenritz.safecam.widget.photoview;
+package com.fenritz.safecam.Widget.photoview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -34,10 +34,10 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
-import com.fenritz.safecam.widget.photoview.gestures.OnGestureListener;
-import com.fenritz.safecam.widget.photoview.gestures.VersionedGestureDetector;
-import com.fenritz.safecam.widget.photoview.log.LogManager;
-import com.fenritz.safecam.widget.photoview.scrollerproxy.ScrollerProxy;
+import com.fenritz.safecam.Widget.photoview.gestures.OnGestureListener;
+import com.fenritz.safecam.Widget.photoview.gestures.VersionedGestureDetector;
+import com.fenritz.safecam.Widget.photoview.log.LogManager;
+import com.fenritz.safecam.Widget.photoview.scrollerproxy.ScrollerProxy;
 
 import java.lang.ref.WeakReference;
 
@@ -126,7 +126,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
 
     // Gesture Detectors
     private GestureDetector mGestureDetector;
-    private com.fenritz.safecam.widget.photoview.gestures.GestureDetector mScaleDragDetector;
+    private com.fenritz.safecam.Widget.photoview.gestures.GestureDetector mScaleDragDetector;
 
     // These are set so we don't keep allocating them on the heap
     private final Matrix mBaseMatrix = new Matrix();
@@ -210,7 +210,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
      * Clean-up the resources attached to this object. This needs to be called when the ImageView is
      * no longer used. A good example is from {@link android.view.View#onDetachedFromWindow()} or
      * from {@link android.app.Activity#onDestroy()}. This is automatically called if you are using
-     * {@link com.fenritz.safecam.widget.photoview.PhotoView}.
+     * {@link com.fenritz.safecam.Widget.photoview.PhotoView}.
      */
     @SuppressWarnings("deprecation")
     public void cleanup() {

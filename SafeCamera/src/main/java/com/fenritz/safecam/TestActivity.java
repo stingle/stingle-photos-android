@@ -1,24 +1,13 @@
 package com.fenritz.safecam;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
-import android.widget.MediaController;
-import android.widget.VideoView;
 
-import com.fenritz.safecam.util.CryptoException;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
-import com.fenritz.safecam.util.MyFileDataSource;
-import com.fenritz.safecam.util.MyFileDataSourceFactory;
-import com.fenritz.safecam.util.StingleDataSource;
-import com.fenritz.safecam.util.StingleDataSourceFactory;
-import com.fenritz.safecam.util.StingleHttpDataSource;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Video.StingleDataSourceFactory;
+import com.fenritz.safecam.Video.StingleHttpDataSource;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -27,24 +16,6 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.upstream.FileDataSource;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
-import com.google.android.exoplayer2.upstream.crypto.AesCipherDataSource;
-import com.goterl.lazycode.lazysodium.LazySodiumAndroid;
-import com.goterl.lazycode.lazysodium.SodiumAndroid;
-import com.goterl.lazycode.lazysodium.interfaces.AEAD;
-import com.goterl.lazycode.lazysodium.interfaces.SecretStream;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class TestActivity extends Activity {
 

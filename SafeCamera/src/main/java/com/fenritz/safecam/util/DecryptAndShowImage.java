@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Util;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,10 +13,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.widget.AnimatedGifImageView;
-import com.fenritz.safecam.widget.photoview.PhotoViewAttacher;
+import com.fenritz.safecam.Widget.AnimatedGifImageView;
+import com.fenritz.safecam.Widget.photoview.PhotoViewAttacher;
 
 import java.io.File;
 import java.io.FileInputStream;

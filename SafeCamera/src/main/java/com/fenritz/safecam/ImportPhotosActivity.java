@@ -27,10 +27,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.fenritz.safecam.util.AsyncTasks;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
-import com.fenritz.safecam.util.MemoryCache;
+import com.fenritz.safecam.Util.AsyncTasks;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Util.MemoryCache;
 
 import java.io.File;
 import java.util.ArrayList;

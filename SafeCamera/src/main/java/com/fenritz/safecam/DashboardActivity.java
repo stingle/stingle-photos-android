@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,14 +11,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,25 +22,20 @@ import android.view.WindowManager;
 
 import androidx.core.content.FileProvider;
 
-import com.fenritz.safecam.net.HttpsClient;
-import com.fenritz.safecam.util.CryptoException;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Sync.SyncManager;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Auth.LoginManager;
 
 import org.apache.sanselan.util.IOUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 
 public class DashboardActivity extends Activity {
 
@@ -98,6 +87,7 @@ public class DashboardActivity extends Activity {
 			}
 		});*/
 
+		SyncManager.syncFSToDB(this);
 	}
 
 	public void filesystemInit() {

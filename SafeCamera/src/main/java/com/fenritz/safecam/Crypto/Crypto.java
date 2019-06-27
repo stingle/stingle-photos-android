@@ -1,19 +1,16 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Crypto;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.fenritz.safecam.SafeCameraApplication;
-import com.goterl.lazycode.lazysodium.LazySodium;
-import com.goterl.lazycode.lazysodium.LazySodiumAndroid;
 import com.goterl.lazycode.lazysodium.SodiumAndroid;
 import com.goterl.lazycode.lazysodium.interfaces.AEAD;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.interfaces.KeyDerivation;
 import com.goterl.lazycode.lazysodium.interfaces.PwHash;
 import com.goterl.lazycode.lazysodium.interfaces.SecretBox;
-import com.goterl.lazycode.lazysodium.interfaces.SecretStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,6 +24,7 @@ import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 
 public class Crypto {
 
@@ -57,6 +55,14 @@ public class Crypto {
     public static final int FILE_CHUNK_SIZE_LEN = 4;
     public static final int FILE_DATA_SIZE_LEN = 8;
     public static final int FILE_HEADER_SIZE_LEN = 4;
+    public static final int FILE_FILE_ID_LEN = 32;
+    public static final int FILE_HEADER_BEGINNING_LEN =
+            FILE_BEGGINIG_LEN +
+            FILE_FILE_VERSION_LEN +
+            FILE_FILE_ID_LEN +
+            FILE_CHUNK_SIZE_LEN +
+            FILE_DATA_SIZE_LEN +
+            FILE_HEADER_SIZE_LEN;
 
     public static final int KEY_FILE_TYPE_BUNDLE_ENCRYPTED = 0;
     public static final int KEY_FILE_TYPE_BUNDLE_PLAIN = 1;
@@ -228,7 +234,7 @@ public class Crypto {
     }
 
 
-    protected Header getNewHeader(byte[] symmetricKey, long dataSize, String filename, int fileType) throws CryptoException {
+    protected Header getNewHeader(byte[] symmetricKey, long dataSize, String filename, int fileType, byte[] fileId) throws CryptoException {
         if(symmetricKey.length != KeyDerivation.MASTER_KEY_BYTES){
             throw new CryptoException("Symmetric key length is incorrect");
         }
@@ -241,6 +247,7 @@ public class Crypto {
         header.chunkSize = bufSize;
         header.dataSize = dataSize;
         header.symmentricKey = symmetricKey;
+        header.fileId = fileId;
         header.filename = filename;
 
         return header;
@@ -253,6 +260,9 @@ public class Crypto {
 
         // File version number - 1 byte
         out.write(CURRENT_FILE_VERSION);
+
+        // File ID - 32 bytes
+        out.write(header.fileId);
 
         // Chunk size - 4 bytes
         out.write(intToByteArray(header.chunkSize));
@@ -325,6 +335,11 @@ public class Crypto {
             throw new CryptoException("Unsupported version number: " + String.valueOf(header.fileVersion));
         }
         overallHeaderSize += FILE_FILE_VERSION_LEN;
+
+        // Read File ID
+        header.fileId = new byte[FILE_FILE_ID_LEN];
+        in.read(header.fileId);
+        overallHeaderSize += FILE_FILE_ID_LEN;
 
         // Read chunk size
         byte[] chunkSizeBytes = new byte[FILE_CHUNK_SIZE_LEN];
@@ -414,28 +429,43 @@ public class Crypto {
         return filename;
     }
 
-    public void encryptFile(OutputStream out, byte[] data, String filename, int fileType) throws IOException, CryptoException {
-        ByteArrayInputStream in = new ByteArrayInputStream(data);
-        encryptFile(in, out, filename, fileType, data.length);
+    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType) throws IOException, CryptoException {
+        return encryptFile(out, data, filename, fileType, null);
     }
 
-    public void encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength) throws IOException, CryptoException {
-        encryptFile(in, out, filename, fileType, dataLength, null, null);
+    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, byte[] fileId) throws IOException, CryptoException {
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        return encryptFile(in, out, filename, fileType, data.length, fileId);
     }
-    public void encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength) throws IOException, CryptoException {
+        return encryptFile(in, out, filename, fileType, dataLength, null, null, null);
+    }
+
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId) throws IOException, CryptoException {
+        return encryptFile(in, out, filename, fileType, dataLength, fileId, null, null);
+    }
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
         long time = System.nanoTime();
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
 
         byte[] symmetricKey = new byte[KeyDerivation.MASTER_KEY_BYTES];
         so.crypto_kdf_keygen(symmetricKey);
 
-        Header header = getNewHeader(symmetricKey, dataLength, filename, fileType);
+        if(fileId == null) {
+            fileId = new byte[FILE_FILE_ID_LEN];
+            so.randombytes_buf(fileId, FILE_FILE_ID_LEN);
+        }
+
+        Header header = getNewHeader(symmetricKey, dataLength, filename, fileType, fileId);
         writeHeader(out, header, publicKey);
 
         encryptData(in, out, header, progress, task);
         long time2 = System.nanoTime();
         long diff = time2 - time;
         Log.d("time", String.valueOf((double)diff / 1000000000.0));
+
+        return fileId;
     }
 
 
@@ -460,6 +490,12 @@ public class Crypto {
         long time2 = System.nanoTime();
         long diff = time2 - time;
         Log.d("time", String.valueOf((double)diff / 1000000000.0));
+    }
+
+    public byte[] getRandomData(int length){
+        byte[] data = new byte[length];
+        so.randombytes_buf(data, data.length);
+        return data;
     }
 
 
@@ -659,12 +695,20 @@ public class Crypto {
         return buffer.getLong();
     }
 
+    public static String byteArrayToBase64(byte[] bytes) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); //base64 encoding
+    }
+    public static byte[] base64ToByteArray(String base64str) {
+        return Base64.getUrlDecoder().decode(base64str); //base64 decoding
+    }
+
     public class Header{
         public int fileVersion;
         public int headerVersion;
         public int fileType;
         public int chunkSize;
         public long dataSize;
+        public byte[] fileId;
         public byte[] symmentricKey;
         public String filename;
         public int overallHeaderSize = 0;

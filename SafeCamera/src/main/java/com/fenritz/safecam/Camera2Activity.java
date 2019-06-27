@@ -28,16 +28,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -57,8 +53,6 @@ import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
-import android.net.LocalServerSocket;
-import android.net.LocalSocket;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -66,15 +60,11 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -82,34 +72,30 @@ import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.ScaleGestureDetector;
 import android.view.Surface;
-import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.fenritz.safecam.Camera.CameraImageSize;
-import com.fenritz.safecam.util.AsyncTasks;
-import com.fenritz.safecam.util.Crypto;
-import com.fenritz.safecam.util.CryptoException;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
-import com.fenritz.safecam.widget.FocusCircleView;
+import com.fenritz.safecam.Util.AsyncTasks;
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Widget.AutoFitTextureView;
+import com.fenritz.safecam.Widget.FocusCircleView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
@@ -879,9 +865,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             Log.d("Func", "mCaptureCallback - onCaptureStarted");
             String currentDateTime = generateTimestamp();
 
-            String filenameBase = Helpers.getFilename(Camera2Activity.this, Helpers.JPEG_FILE_PREFIX);
-            String filename = filenameBase + ".jpg";
-            String filenameEnc = filenameBase + ".sc";
+            String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
+            String filenameEnc = Helpers.getNewEncFilename();
 
             String path = Helpers.getHomeDir(Camera2Activity.this);
             String finalPath = path + "/" + filenameEnc;
@@ -1716,17 +1701,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 String encFilePath = Helpers.getHomeDir(Camera2Activity.this) + "/" + encFileName;
                 FileOutputStream out = new FileOutputStream(encFilePath);
 
-                SafeCameraApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size());
+                byte[] fileId = SafeCameraApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size());
 
                 out.close();
-
-                String thumbFilename = Helpers.getThumbFileName(encFilePath);
 
                 Bitmap thumb = ThumbnailUtils.createVideoThumbnail(tmpFile.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), thumbFilename);
+                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), encFileName, fileId);
 
                 tmpFile.delete();
 
@@ -1824,12 +1807,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
 
     private String getVideoFilePath(Context context) {
-        String filenameBase = Helpers.getFilename(Camera2Activity.this, Helpers.VIDEO_FILE_PREFIX);
-        lastVideoFilename = filenameBase + ".mp4";
-        lastVideoFilenameEnc = filenameBase + ".sc";
+		lastVideoFilename = Helpers.getTimestampedFilename(Helpers.VIDEO_FILE_PREFIX, ".mp4");
+        lastVideoFilenameEnc = Helpers.getNewEncFilename();
 
         File cacheDir = getCacheDir();
-        Log.d("path", cacheDir.getAbsolutePath() + "/" + lastVideoFilename);
         return cacheDir.getAbsolutePath() + "/" + lastVideoFilename;
     }
 
@@ -2046,8 +2027,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     FileOutputStream output = null;
                     try {
                         output = new FileOutputStream(mFile);
-                        SafeCameraApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO);
-                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, Helpers.getThumbFileName(mFile.getPath()));
+                        byte[] fileId = SafeCameraApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO);
+                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, mFile.getName(), fileId);
                         success = true;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -2550,8 +2531,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 				});
 
 				for (File file : folderFiles) {
-					File thumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + Helpers.getThumbFileName(file));
-					if (file.getName().endsWith(getString(R.string.file_extension)) && thumb.exists() && thumb.isFile()) {
+					File thumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + file.getName());
+					if (file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION) && thumb.exists() && thumb.isFile()) {
 						return file;
 					}
 				}
@@ -2566,7 +2547,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 			lastFile = file;
 
 			if (lastFile != null) {
-				final File lastFileThumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + Helpers.getThumbFileName(lastFile));
+				final File lastFileThumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + lastFile.getName());
 				final int thumbSize = (int) Math.round(Helpers.getThumbSize(Camera2Activity.this) / 1.4);
 
 				if (SafeCameraApplication.getKey() != null) {

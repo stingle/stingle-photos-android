@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fenritz.safecam.widget.photoview.scrollerproxy;
+package com.fenritz.safecam.Widget.photoview.scrollerproxy;
 
 import android.annotation.TargetApi;
 import android.content.Context;

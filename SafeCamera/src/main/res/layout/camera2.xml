@@ -59,7 +59,7 @@
         android:orientation="horizontal">
     </LinearLayout>
 
-    <com.fenritz.safecam.widget.FocusCircleView
+    <com.fenritz.safecam.Widget.FocusCircleView
         android:id="@+id/focusCircle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

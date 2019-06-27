@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Auth;
 
 import android.Manifest;
 import android.app.Activity;

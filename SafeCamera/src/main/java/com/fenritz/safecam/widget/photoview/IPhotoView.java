@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fenritz.safecam.widget.photoview;
+package com.fenritz.safecam.Widget.photoview;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;

@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fenritz.safecam.widget.photoview.gestures;
+package com.fenritz.safecam.Widget.photoview.gestures;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.fenritz.safecam.widget.photoview.Compat;
+import com.fenritz.safecam.Widget.photoview.Compat;
 
 @TargetApi(5)
 public class EclairGestureDetector extends CupcakeGestureDetector {

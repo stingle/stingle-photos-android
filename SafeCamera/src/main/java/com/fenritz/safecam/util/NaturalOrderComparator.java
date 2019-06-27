@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Util;
 
 /*
 NaturalOrderComparator.java -- Perform 'natural order' comparisons of strings in Java.

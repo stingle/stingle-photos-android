@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Auth;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,6 +18,8 @@ import com.fenritz.safecam.DashboardActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.SetUpActivity;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Util.Helpers;
 
 public class LoginManager {
 

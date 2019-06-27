@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.fenritz.safecam;
+package com.fenritz.safecam.Widget;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,6 +22,8 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.TextureView;
+
+import com.fenritz.safecam.Camera2Activity;
 
 /**
  * A {@link TextureView} that can be adjusted to a specified aspect ratio.

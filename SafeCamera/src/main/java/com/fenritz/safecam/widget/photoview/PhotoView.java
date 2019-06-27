@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fenritz.safecam.widget.photoview;
+package com.fenritz.safecam.Widget.photoview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,9 +25,9 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.widget.ImageView;
 
-import com.fenritz.safecam.widget.photoview.PhotoViewAttacher.OnMatrixChangedListener;
-import com.fenritz.safecam.widget.photoview.PhotoViewAttacher.OnPhotoTapListener;
-import com.fenritz.safecam.widget.photoview.PhotoViewAttacher.OnViewTapListener;
+import com.fenritz.safecam.Widget.photoview.PhotoViewAttacher.OnMatrixChangedListener;
+import com.fenritz.safecam.Widget.photoview.PhotoViewAttacher.OnPhotoTapListener;
+import com.fenritz.safecam.Widget.photoview.PhotoViewAttacher.OnViewTapListener;
 
 public class PhotoView extends ImageView implements IPhotoView {
 

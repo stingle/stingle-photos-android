@@ -1,11 +1,8 @@
-package com.fenritz.safecam.net;
+package com.fenritz.safecam.Net;
 
 import android.content.Context;
 
-import com.fenritz.safecam.R;
-import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.SetUpActivity;
-import com.fenritz.safecam.util.Helpers;
+import com.fenritz.safecam.Util.Helpers;
 
 import org.json.JSONArray;
 import org.json.JSONException;

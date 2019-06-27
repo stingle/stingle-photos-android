@@ -26,20 +26,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecam.util.AsyncTasks;
-import com.fenritz.safecam.util.AsyncTasks.DeleteFiles;
-import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecam.util.Crypto;
-import com.fenritz.safecam.util.CryptoException;
-import com.fenritz.safecam.util.DecryptAndShowImage;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
-import com.fenritz.safecam.util.StingleDataSourceFactory;
-import com.fenritz.safecam.util.StingleHttpDataSource;
+import com.fenritz.safecam.Util.AsyncTasks;
+import com.fenritz.safecam.Util.AsyncTasks.DeleteFiles;
+import com.fenritz.safecam.Util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Util.DecryptAndShowImage;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Video.StingleDataSourceFactory;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -288,7 +286,7 @@ public class ViewImageActivity extends Activity {
 
 			playerView.setPlayer(player);
 
-			String path = Helpers.getHomeDir(this) + "/vid1.sc";
+			//String path = Helpers.getHomeDir(this) + "/vid1.sc";
 			Uri uri = Uri.fromFile(photo);
 
 			//Uri uri = Uri.parse("https://www.safecamera.org/vid1.sc");
@@ -333,7 +331,7 @@ public class ViewImageActivity extends Activity {
 		
 		int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
 		for (File file : folderFiles) {
-			if (file.getName().endsWith(getString(R.string.file_extension))) {
+			if (file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION)) {
 				files.add(file);
 			}
 		}
@@ -423,7 +421,7 @@ public class ViewImageActivity extends Activity {
 					public void onFinish(Integer result) {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
-							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + Helpers.getThumbFileName(files.get(currentPosition));
+							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + files.get(currentPosition).getName();
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();
@@ -439,7 +437,7 @@ public class ViewImageActivity extends Activity {
 					public void onFinish(Integer result) {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
-							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + Helpers.getThumbFileName(files.get(currentPosition));
+							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + files.get(currentPosition).getName();
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();

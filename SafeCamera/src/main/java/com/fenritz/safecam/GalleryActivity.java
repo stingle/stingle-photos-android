@@ -15,16 +15,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils.TruncateAt;
-import android.util.LruCache;
-import android.util.SparseArray;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,47 +29,36 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fenritz.safecam.util.AsyncTasks;
-import com.fenritz.safecam.util.AsyncTasks.EncryptFiles;
-import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecam.util.Crypto;
-import com.fenritz.safecam.util.CryptoException;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
-import com.fenritz.safecam.util.MemoryCache;
-import com.fenritz.safecam.widget.CheckableLayout;
+import com.fenritz.safecam.Util.AsyncTasks;
+import com.fenritz.safecam.Util.AsyncTasks.EncryptFiles;
+import com.fenritz.safecam.Util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Util.MemoryCache;
+import com.fenritz.safecam.Widget.CheckableLayout;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GalleryActivity extends Activity {
@@ -98,7 +83,7 @@ public class GalleryActivity extends Activity {
 	private ArrayList<GalleryItem> galleryItems = new ArrayList<GalleryItem>();
 	private ArrayList<File> selectedFiles = new ArrayList<File>();
 
-	private final ArrayList<File> toGenerateThumbs = new ArrayList<File>();
+	private final ArrayList<GalleryItem> toGenerateThumbs = new ArrayList<GalleryItem>();
 	private final ArrayList<File> noThumbs = new ArrayList<File>();
 	private final GalleryAdapter galleryAdapter = new GalleryAdapter();
 
@@ -371,10 +356,10 @@ public class GalleryActivity extends Activity {
 						item.header = header;
 
 						if(header != null && (header.fileType == Crypto.FILE_TYPE_PHOTO || header.fileType == Crypto.FILE_TYPE_VIDEO)){
-							String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(file);
+							String thumbPath = thumbsDir + "/" + file.getName();
 							File thumb = new File(thumbPath);
 							if (!thumb.exists() && (header == null || header.fileType != Crypto.FILE_TYPE_VIDEO)) {
-								toGenerateThumbs.add(file);
+								toGenerateThumbs.add(item);
 							}
 						}
 						else{
@@ -828,7 +813,7 @@ public class GalleryActivity extends Activity {
 						layout.addView(getLabel(item));
 					}
 					else{
-						String thumbPath = thumbsDir + "/" + Helpers.getThumbFileName(item.file);
+						String thumbPath = thumbsDir + "/" + item.file.getName();
 						if (toGenerateThumbs.contains(item.file)) {
 							ProgressBar progress = new ProgressBar(GalleryActivity.this);
 							progress.setOnClickListener(onClick);
@@ -871,6 +856,8 @@ public class GalleryActivity extends Activity {
 							imageView.setPadding(3, 3, 3, 3);
 							imageView.setScaleType(ScaleType.FIT_CENTER);
 							layout.addView(imageView);
+
+							Log.e("ID", Crypto.byte2hex(item.header.fileId));
 
 							if(item.header != null && item.header.fileType == Crypto.FILE_TYPE_VIDEO){
 								ImageView videoIcon = new ImageView(GalleryActivity.this);
@@ -991,29 +978,28 @@ public class GalleryActivity extends Activity {
 	}
 	
 	
-	private class GenerateThumbs extends AsyncTask<ArrayList<File>, Integer, Void> {
+	private class GenerateThumbs extends AsyncTask<ArrayList<GalleryItem>, Integer, Void> {
 
 		@Override
-		protected Void doInBackground(ArrayList<File>... params) {
+		protected Void doInBackground(ArrayList<GalleryItem>... params) {
 
 			int i = 0;
 			while (toGenerateThumbs.size() > 0) {
-				File file = toGenerateThumbs.get(0);
+				GalleryItem item = toGenerateThumbs.get(0);
 
-				if (file.exists() && file.isFile()) {
+				if (item.file.exists() && item.file.isFile()) {
 					try {
-						FileInputStream inputStream = new FileInputStream(file);
+						FileInputStream inputStream = new FileInputStream(item.file);
 						//byte[] decryptedData = Helpers.getAESCrypt(GalleryActivity.this).decrypt(inputStream, null, this);
 						byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(inputStream);
 
-						String fileName = Helpers.getThumbFileName(file);
-						String key = thumbsDir + fileName;
+						String key = thumbsDir + item.file.getName();
 						if (decryptedData != null) {
-							memCache.put(key, Helpers.generateThumbnail(GalleryActivity.this, decryptedData, fileName));
+							memCache.put(key, Helpers.generateThumbnail(GalleryActivity.this, decryptedData, item.file.getName(), item.header.fileId));
 						}
 						
 						if(memCache.get(key) == null){
-							noThumbs.add(file);
+							noThumbs.add(item.file);
 						}
 
 						publishProgress(++i);
@@ -1029,7 +1015,7 @@ public class GalleryActivity extends Activity {
 					} catch (CryptoException e) {
 						e.printStackTrace();
 					}
-					toGenerateThumbs.remove(file);
+					toGenerateThumbs.remove(item);
 				}
 
 			}

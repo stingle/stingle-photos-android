@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -16,13 +15,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import com.fenritz.safecam.util.AESCrypt;
-import com.fenritz.safecam.util.AESCryptException;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Auth.LoginManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,8 +48,8 @@ public class ChangePasswordActivity extends Activity {
 
 		setContentView(R.layout.change_password);
 		
-		findViewById(R.id.change).setOnClickListener(changeClick());
-		findViewById(R.id.cancel).setOnClickListener(cancelClick());
+		//findViewById(R.id.change).setOnClickListener(changeClick());
+		//findViewById(R.id.cancel).setOnClickListener(cancelClick());
 		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
@@ -75,11 +71,11 @@ public class ChangePasswordActivity extends Activity {
 		}
 	}
 	
-	private OnClickListener changeClick() {
+	/*private OnClickListener changeClick() {
 		return new OnClickListener() {
 
 			public void onClick(View v) {
-				/*String currentPassword = ((EditText)findViewById(R.id.current_password)).getText().toString();
+				String currentPassword = ((EditText)findViewById(R.id.current_password)).getText().toString();
 				
 				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 				String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");
@@ -108,7 +104,7 @@ public class ChangePasswordActivity extends Activity {
 				}
 				catch (AESCryptException e) {
 					e.printStackTrace();
-				}*/
+				}
 			}
 		};
 	}
@@ -157,11 +153,11 @@ public class ChangePasswordActivity extends Activity {
 				if (file.isFile() && file.getName().endsWith(getString(R.string.file_extension))) {
 					files.add(file);
 					
-					/*String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
+					String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
 					File thumb = new File(thumbPath);
 					if(thumb.exists() && thumb.isFile()){
 						files.add(thumb);
-					}*/
+					}
 				}
 				else if(file.isDirectory() && !file.getName().startsWith(".")){
 					files.addAll(getFilesList(file.getPath()));
@@ -247,7 +243,7 @@ public class ChangePasswordActivity extends Activity {
 						if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(inputStream, outputStream, newCrypt, null, this)){
 							String finalFilePath = file.getParent() + "/" + reencryptFilename(file.getName(), newCrypt);
 							
-							/*String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
+							String thumbPath = Helpers.getThumbsDir(ChangePasswordActivity.this) + "/" + Helpers.getThumbFileName(file);
 							File thumb = new File(thumbPath);
 							if(thumb.exists() && thumb.isFile()){
 								FileInputStream thumbInputStream = new FileInputStream(thumb);
@@ -256,7 +252,7 @@ public class ChangePasswordActivity extends Activity {
 								if(Helpers.getAESCrypt(ChangePasswordActivity.this).reEncrypt(thumbInputStream, thumbOutputStream, newCrypt, null, this)){
 									thumb.delete();
 								}
-							}*/
+							}
 							
 							file.delete();
 							tmpFile.renameTo(new File(finalFilePath));
@@ -284,9 +280,9 @@ public class ChangePasswordActivity extends Activity {
 					}
 				}
 				
-				/*SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
+				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
 				String loginHash = AESCrypt.byteToHex(AESCrypt.getHash(passwordHash + newPassword));
-				preferences.edit().putString(SafeCameraApplication.PASSWORD, loginHash).commit();*/
+				preferences.edit().putString(SafeCameraApplication.PASSWORD, loginHash).commit();
 
 				//((SafeCameraApplication) ChangePasswordActivity.this.getApplication()).setKey(passwordHash);
 			}
@@ -343,5 +339,5 @@ public class ChangePasswordActivity extends Activity {
 			default:
 				return super.onOptionsItemSelected(item);
 		}
-	}
+	}*/
 }

@@ -1,8 +1,10 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Video;
 
 import android.content.Context;
 import android.net.Uri;
 
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Crypto.CryptoException;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
@@ -12,9 +14,7 @@ import com.goterl.lazycode.lazysodium.interfaces.AEAD;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Arrays;
 
 public class StingleDataSource implements DataSource {
@@ -41,7 +41,7 @@ public class StingleDataSource implements DataSource {
 		DataSpec specUp = new DataSpec(dataSpec.uri, 0, C.LENGTH_UNSET, null, 0);
 		upstream.open(specUp);
 
-		int headerLen = Crypto.FILE_BEGGINIG_LEN + Crypto.FILE_FILE_VERSION_LEN + Crypto.FILE_CHUNK_SIZE_LEN + Crypto.FILE_DATA_SIZE_LEN + Crypto.FILE_HEADER_SIZE_LEN;
+		int headerLen = Crypto.FILE_HEADER_BEGINNING_LEN;
 		byte[] buf = new byte[headerLen];
 		int bytesRead = upstream.read(buf, 0, headerLen);
 		if(bytesRead != headerLen){

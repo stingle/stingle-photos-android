@@ -29,9 +29,8 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.LoginManager;
-import com.fenritz.safecam.util.MemoryCache;
+import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Util.MemoryCache;
 
 import java.io.File;
 import java.util.ArrayList;

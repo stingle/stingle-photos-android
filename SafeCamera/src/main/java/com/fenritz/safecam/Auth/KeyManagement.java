@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Auth;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,8 +6,7 @@ import android.util.Base64;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.net.HttpsClient;
-import com.fenritz.safecam.net.StingleResponse;
+import com.fenritz.safecam.Net.HttpsClient;
 
 import java.io.IOException;
 import java.util.HashMap;

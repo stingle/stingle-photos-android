@@ -1,4 +1,4 @@
-package com.fenritz.safecam.widget;
+package com.fenritz.safecam.Widget;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;

@@ -40,4 +40,5 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.7.3'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
     implementation 'androidx.core:core:1.0.2'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
 }

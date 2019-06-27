@@ -1,4 +1,4 @@
-package com.fenritz.safecam.widget;
+package com.fenritz.safecam.Widget;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

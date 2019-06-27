@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fenritz.safecam.widget.photoview.gestures;
+package com.fenritz.safecam.Widget.photoview.gestures;
 
 import android.view.MotionEvent;
 

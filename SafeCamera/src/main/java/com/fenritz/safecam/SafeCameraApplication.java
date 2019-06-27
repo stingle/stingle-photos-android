@@ -3,13 +3,14 @@ package com.fenritz.safecam;
 import android.app.Application;
 import android.content.Context;
 
-import com.fenritz.safecam.util.Crypto;
-import com.fenritz.safecam.util.MemoryCache;
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Util.MemoryCache;
 
 public class SafeCameraApplication extends Application{
 
-	public final static String TAG = "SCCam";
-	public final static String FILE_EXTENSION = ".sc";
+	public final static String TAG = "StinglePhotos";
+	public final static String FILE_EXTENSION = ".sp";
+	public final static int FILENAME_LENGTH = 32;
 
 	private static byte[] key = null;
 	

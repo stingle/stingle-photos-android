@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Auth;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -13,10 +13,11 @@ import android.preference.SwitchPreference;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
-import android.util.Log;
 
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Util.Helpers;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;

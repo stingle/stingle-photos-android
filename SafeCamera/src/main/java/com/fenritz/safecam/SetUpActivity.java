@@ -1,33 +1,22 @@
 package com.fenritz.safecam;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fenritz.safecam.net.HttpsClient;
-import com.fenritz.safecam.net.StingleResponse;
-import com.fenritz.safecam.util.AsyncTasks;
-import com.fenritz.safecam.util.CryptoException;
-import com.fenritz.safecam.util.Helpers;
-import com.fenritz.safecam.util.KeyManagement;
+import com.fenritz.safecam.Net.HttpsClient;
+import com.fenritz.safecam.Net.StingleResponse;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Auth.KeyManagement;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.FileFilter;
 import java.util.HashMap;
 
 public class SetUpActivity  extends Activity{

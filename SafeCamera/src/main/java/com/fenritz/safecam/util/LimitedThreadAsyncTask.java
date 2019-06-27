@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Util;
 
 import android.os.AsyncTask;
 

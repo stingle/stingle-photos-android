@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Util;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -20,8 +20,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.fenritz.safecam.Camera2Activity;
-import com.fenritz.safecam.GalleryActivity;
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 
@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class AsyncTasks {
 	public static abstract class OnAsyncTaskFinish {
@@ -246,7 +245,7 @@ public class AsyncTasks {
 						
 						broadcastDeletedFile(file);
 						
-						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + Helpers.getThumbFileName(file));
+						File thumb = new File(Helpers.getThumbsDir(activity) + "/" + file.getName());
 
 						if (thumb.exists() && thumb.isFile()) {
 							if(secureDelete){
@@ -511,7 +510,7 @@ public class AsyncTasks {
 						int fileType = Helpers.getFileType(origFile.getAbsolutePath());
 						switch (fileType){
 							case Crypto.FILE_TYPE_PHOTO:
-								prefix = Helpers.JPEG_FILE_PREFIX;
+								prefix = Helpers.IMAGE_FILE_PREFIX;
 								break;
 							case Crypto.FILE_TYPE_VIDEO:
 								prefix = Helpers.VIDEO_FILE_PREFIX;
@@ -519,16 +518,15 @@ public class AsyncTasks {
 						}
 
 
-						String encFilePath = Helpers.getHomeDir(activity) + "/" + Helpers.getFilename(activity, prefix) + ".sc";
+						String encFilePath = Helpers.getHomeDir(activity) + "/" + Helpers.getNewEncFilename();
 
 						FileOutputStream outputStream = new FileOutputStream(encFilePath);
 
-						SafeCameraApplication.getCrypto().encryptFile(inputStream, outputStream, origFile.getName(), fileType, origFile.length());
+						byte[] fileId = SafeCameraApplication.getCrypto().encryptFile(inputStream, outputStream, origFile.getName(), fileType, origFile.length());
 						//Helpers.getAESCrypt(activity).encrypt(inputStream, outputStream, null, this);
 
 						if(Helpers.isImageFile(origFile.getAbsolutePath())) {
 							File destFile = new File(encFilePath);
-							String fileName = Helpers.getThumbFileName(destFile);
 
 							FileInputStream in = new FileInputStream(origFile);
 							ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -541,16 +539,16 @@ public class AsyncTasks {
 
 							System.gc();
 
-							Helpers.generateThumbnail(activity, bytes.toByteArray(), fileName);
+							Helpers.generateThumbnail(activity, bytes.toByteArray(), destFile.getName(), fileId);
 						}
 						else if(Helpers.isVideoFile(origFile.getAbsolutePath())){
-							String thumbFilename = Helpers.getThumbFileName(encFilePath);
+							File destFile = new File(encFilePath);
 
 							Bitmap thumb = ThumbnailUtils.createVideoThumbnail(origFile.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
 							ByteArrayOutputStream bos = new ByteArrayOutputStream();
 							thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-							Helpers.generateThumbnail(activity, bos.toByteArray(), thumbFilename);
+							Helpers.generateThumbnail(activity, bos.toByteArray(), destFile.getName(), fileId);
 						}
 						
 						publishProgress(i+1);
@@ -647,7 +645,7 @@ public class AsyncTasks {
 		protected Integer doInBackground(Void... rparams) {
 			int returnStatus = STATUS_FAIL;
 
-			try {
+			/*try {
 				byte[] data = Helpers.getAESCrypt(activity).decrypt(new FileInputStream(filePath));
 				int currentRotation = 1;
 				
@@ -740,7 +738,7 @@ public class AsyncTasks {
 
 				Helpers.getAESCrypt(activity).encrypt(data, outputStream);
 
-				Helpers.generateThumbnail(activity, data, Helpers.getThumbFileName(filePath));
+				//Helpers.generateThumbnail(activity, data, Helpers.getThumbFileName(filePath));
 				
 				//new File(Helpers.getThumbsDir(ViewImageActivity.this) + "/" + files.get(currentPosition).getName()).delete();
 				/*
@@ -802,14 +800,14 @@ public class AsyncTasks {
 		        FileOutputStream outputStream = new FileOutputStream(filePath);
 
 				Helpers.getAESCrypt(activity).encrypt(data, outputStream);
-				*/
+
 				returnStatus = STATUS_OK;
 			}
 			catch (FileNotFoundException e) {}
 			catch (ImageReadException e) {}
 			catch (IOException e) {}
 			catch (ImageWriteException e) {}
-
+			*/
 			return returnStatus;
 		}
 		

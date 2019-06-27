@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Util;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

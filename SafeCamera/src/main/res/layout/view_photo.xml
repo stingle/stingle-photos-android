@@ -3,13 +3,13 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
     
-    <com.fenritz.safecam.widget.ImageHolderLayout 
+    <com.fenritz.safecam.Widget.ImageHolderLayout
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
 	    android:orientation="vertical"
 	    android:id="@+id/parent_layout"
 	    android:gravity="center" >
-	</com.fenritz.safecam.widget.ImageHolderLayout>
+	</com.fenritz.safecam.Widget.ImageHolderLayout>
 	
 	<TextView
 		    android:id="@+id/countLabel"

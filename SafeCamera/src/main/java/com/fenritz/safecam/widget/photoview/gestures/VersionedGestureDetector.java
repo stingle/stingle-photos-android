@@ -1,4 +1,4 @@
-package com.fenritz.safecam.widget.photoview.gestures;
+package com.fenritz.safecam.Widget.photoview.gestures;
 
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.

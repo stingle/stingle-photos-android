@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fenritz.safecam.widget.photoview.log;
+package com.fenritz.safecam.Widget.photoview.log;
 
 /**
  * interface for a logger class to replace the static calls to {@link android.util.Log}

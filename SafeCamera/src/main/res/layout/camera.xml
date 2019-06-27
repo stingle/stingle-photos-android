@@ -93,7 +93,7 @@
                android:src="@drawable/flash_off" />
            
             
-           <com.fenritz.safecam.widget.SafeCameraButton
+           <com.fenritz.safecam.Widget.SafeCameraButton
                android:id="@+id/take_photo"
                android:layout_width="70dp"
                android:layout_height="70dp"

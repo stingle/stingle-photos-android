@@ -1,4 +1,4 @@
-package com.fenritz.safecam.widget;
+package com.fenritz.safecam.Widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewGroup;
 
 public class FocusCircleView extends ViewGroup {

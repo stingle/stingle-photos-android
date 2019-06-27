@@ -1,4 +1,4 @@
-package com.fenritz.safecam.util;
+package com.fenritz.safecam.Util;
 
 import android.Manifest;
 import android.app.Activity;
@@ -28,11 +28,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Range;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -40,15 +36,14 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fenritz.safecam.Camera.CameraImageSize;
+import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.SettingsActivity;
-import com.fenritz.safecam.net.HttpsClient;
-import com.fenritz.safecam.net.StingleResponse;
-import com.fenritz.safecam.util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecam.util.StorageUtils.StorageInfo;
+import com.fenritz.safecam.Util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.Util.StorageUtils.StorageInfo;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -67,34 +62,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.crypto.Cipher;
-
 public class Helpers {
 	public static final String GENERAL_FILE_PREFIX = "FILE_";
-	public static final String JPEG_FILE_PREFIX = "IMG_";
+	public static final String IMAGE_FILE_PREFIX = "IMG_";
 	public static final String VIDEO_FILE_PREFIX = "VID_";
 	protected static final int SHARE_DECRYPT = 0;
 	
-	public static final int HASH_SYNC_NOTHING_DONE = 0;
-	public static final int HASH_SYNC_UPDATED_PREF = 1;
-	public static final int HASH_SYNC_WROTE_FILE = 2;
-	
-
-
-
 	public static void deleteTmpDir(Context context) {
 		File dir = new File(Helpers.getHomeDir(context) + "/" + ".tmp");
 		if (dir.isDirectory()) {
@@ -118,28 +100,13 @@ public class Helpers {
 		}, intentFilter);
 	}
 
-	public static AESCrypt getAESCrypt(Context context) {
-		return getAESCrypt(null, context);
+	public static String getNewEncFilename() {
+		String filename = Crypto.byteArrayToBase64(SafeCameraApplication.getCrypto().getRandomData(SafeCameraApplication.FILENAME_LENGTH));
+
+		return filename + SafeCameraApplication.FILE_EXTENSION;
 	}
 
-	public static AESCrypt getAESCrypt(String pKey, Context context) {
-		/*String keyToUse;
-		if (pKey != null) {
-			keyToUse = pKey;
-		}
-		else{
-			// Lilitiky dmboya
-			keyToUse = ((SafeCameraApplication) context.getApplicationContext()).getKey();
-		}*/
-
-		return new AESCrypt("");
-	}
-
-	public static String getFilename(Context context, String prefix) {
-		return getFilename(context, prefix, null);
-	}
-
-	public static String getFilename(Context context, String prefix, String extension) {
+	public static String getTimestampedFilename(String prefix, String extension) {
 		if(extension == null){
 			extension = "";
 		}
@@ -147,19 +114,6 @@ public class Helpers {
 		String imageFileName = prefix + timeStamp;
 
 		return imageFileName + extension;
-	}
-
-	public static void printMaxKeySizes() {
-		try {
-			Set<String> algorithms = Security.getAlgorithms("Cipher");
-			for (String algorithm : algorithms) {
-				int max = Cipher.getMaxAllowedKeyLength(algorithm);
-				Log.d("keys", String.format("%s: %dbit", algorithm, max));
-			}
-		}
-		catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public static void showAlertDialog(Context context, String message) {
@@ -258,7 +212,7 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName, byte[] fileId) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		Bitmap thumbBitmap = null;
@@ -270,7 +224,7 @@ public class Helpers {
 
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			try {
-				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName, Crypto.FILE_TYPE_PHOTO);
+				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName, Crypto.FILE_TYPE_PHOTO, fileId);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -499,14 +453,6 @@ public class Helpers {
 		}
 	}
 	
-	public static String getThumbFileName(File file){
-		return getThumbFileName(file.getPath());
-	}
-	
-	public static String getThumbFileName(String filePath){
-		return SafeCameraApplication.getCrypto().byte2hex(SafeCameraApplication.getCrypto().sha256(filePath.getBytes()));
-	}
-	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
         Cursor cursor = activity.getContentResolver().query(contentUri, proj, null, null, null);
@@ -519,61 +465,6 @@ public class Helpers {
         return null;
     }
 	
-	public static String getNewDestinationPath(Context context, String path, String fileName){
-		return getNewDestinationPath(context, path, fileName, null);
-	}
-	
-	public static String getNewDestinationPath(Context context, String path, String fileName, AESCrypt crypt){
-		return path + "/" + getNextAvailableFilePrefix(path) + encryptFilename(context, fileName, crypt);
-	}
-	
-	public static String getNextAvailableFilePrefix(String path){
-		File dir = new File(path);
-		File[] folderFiles = dir.listFiles();
-
-		int maxNumber = 0;
-		
-		if(folderFiles != null){
-			for (File file : folderFiles) {
-				String fileName = file.getName();
-				Pattern p = Pattern.compile("^zzSC\\-\\d+\\_.+");
-				Matcher m = p.matcher(fileName);
-				if (m.find()) {
-					try{
-						int num = Integer.parseInt(fileName.substring(5, fileName.indexOf("_")));
-						if(num > maxNumber){
-							maxNumber = num;
-						}
-					}
-					catch(NumberFormatException e){}
-				}
-			}
-		}
-		
-		return "zzSC-" + String.valueOf(maxNumber + 1) + "_";
-	}
-	
-	public static String encryptFilename(Context context, String fileName){
-		return encryptFilename(context, fileName, null);
-	}
-	
-	public static String encryptFilename(Context context, String fileName, AESCrypt crypt){
-		return encryptString(context, fileName, crypt) + context.getString(R.string.file_extension);
-	}
-	
-	public static String encryptString(Context context, String fileName){
-		return encryptString(context, fileName, null);
-	}
-	
-	public static String encryptString(Context context, String fileName, AESCrypt crypt){
-		if(crypt != null){
-			return crypt.encrypt(fileName);
-		}
-		else{
-			return getAESCrypt(context).encrypt(fileName);
-		}
-	}
-	
 	public static String decryptFilename(String filePath){
 		try {
 			FileInputStream in = new FileInputStream(filePath);
@@ -583,38 +474,6 @@ public class Helpers {
 		catch (IOException e){
 			return "";
 		}
-
-		/*
-		String encryptedString = fileName;
-
-		int extensionIndex = fileName.indexOf(context.getString(R.string.file_extension));
-		if(extensionIndex > 0){
-			encryptedString = fileName.substring(0, extensionIndex);
-		}
-
-		if(encryptedString.length() >= 4 && encryptedString.substring(0, 4).equals("zzSC")){
-			encryptedString = encryptedString.substring(fileName.indexOf("_")+1);
-		}
-
-		String decryptedFilename;
-		if(crypt != null){
-			decryptedFilename = crypt.decrypt(encryptedString);
-		}
-		else{
-			decryptedFilename = getAESCrypt(context).decrypt(encryptedString);
-		}
-
-
-		if(decryptedFilename == null){
-			String extension = context.getString(R.string.file_extension);
-
-			if(fileName.endsWith(extension)){
-				fileName = fileName.substring(0, fileName.length() - extension.length());
-			}
-
-			return fileName;
-		}
-		return decryptedFilename;*/
 	}
 	
 	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
