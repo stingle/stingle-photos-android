@@ -22,8 +22,11 @@ import android.view.WindowManager;
 
 import androidx.core.content.FileProvider;
 
+import com.fenritz.safecam.Auth.KeyManagement;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Net.HttpsClient;
+import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.LoginManager;
@@ -31,11 +34,14 @@ import com.fenritz.safecam.Auth.LoginManager;
 import org.apache.sanselan.util.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DashboardActivity extends Activity {
 
@@ -87,7 +93,6 @@ public class DashboardActivity extends Activity {
 			}
 		});*/
 
-		SyncManager.syncFSToDB(this);
 	}
 
 	public void filesystemInit() {
@@ -313,6 +318,37 @@ public class DashboardActivity extends Activity {
 				// Note: This is not documented, but works: Show the Internal Storage menu item in the drawer!
 				openerIntent.putExtra("android.content.extra.SHOW_ADVANCED", true);
 				startActivityForResult(openerIntent, 20);
+				return true;
+			case R.id.upload:
+				SyncManager.syncFSToDB(this);
+
+				HashMap<String, String> postParams = new HashMap<String, String>();
+
+				postParams.put("token", KeyManagement.getApiToken(this));
+
+				File dir = new File(Helpers.getHomeDir(this));
+				final ArrayList<String> files = new ArrayList<String>();
+				files.add(dir.getPath() + "/" + "gySd8bPDOZe3kTqSeSvn-Uma7b6uo7x5e9ysC-NNi_0.sp");
+
+				try {
+					Crypto.Header h = SafeCameraApplication.getCrypto().getFileHeader(new FileInputStream(dir.getPath() + "/" + "gySd8bPDOZe3kTqSeSvn-Uma7b6uo7x5e9ysC-NNi_0.sp"));
+					Log.e("header", h.toString());
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (CryptoException e) {
+					e.printStackTrace();
+				}
+
+
+				HttpsClient.uploadFiles(this, getString(R.string.api_server_url) + getString(R.string.upload_file_path), postParams, files, new HttpsClient.OnUploadFinish(){
+
+					@Override
+					public void onFinish(HashMap<String, StingleResponse> responses) {
+						for(String file : responses.keySet()){
+							Log.e("file", responses.get(file).getRawOutput());
+						}
+					}
+				});
 				return true;
 			case R.id.read_security:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));

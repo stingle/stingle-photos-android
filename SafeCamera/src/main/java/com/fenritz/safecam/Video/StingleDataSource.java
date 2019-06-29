@@ -174,7 +174,7 @@ public class StingleDataSource implements DataSource {
 
 		numRead = upstream.read(encChunkBytes, 0, encChunkBytes.length);
 
-		so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, currentChunkNumber, contextBytes, header.symmentricKey);
+		so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, currentChunkNumber, contextBytes, header.symmetricKey);
 
 		byte[] decBytes = new byte[header.chunkSize];
 		long[] decSize = new long[1];

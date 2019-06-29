@@ -47,6 +47,7 @@ public class SyncManager {
 					db.insertFile(file.getName(), true, false, String.valueOf(file.lastModified()));
 				}
 			}
+			db.close();
 			return null;
 		}
 

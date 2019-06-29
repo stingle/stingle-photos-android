@@ -33,6 +33,10 @@
         android:icon="@android:drawable/ic_menu_save"
         android:title="@string/import_keys" />
     <item
+        android:id="@+id/upload"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Upload" />
+    <item
         android:id="@+id/read_security"
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="@string/read_security" />

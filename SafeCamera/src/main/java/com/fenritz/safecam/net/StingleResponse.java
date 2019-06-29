@@ -61,6 +61,13 @@ public class StingleResponse{
 		return parts.optString(name);
 	}
 
+	public String getRawOutput(){
+		if(this.result != null) {
+			return this.result.toString();
+		}
+		return "";
+	}
+
 	protected void showErrorsInfos(){
 		for (int i = 0; i < this.errors.length(); i++) {
 			String error = this.errors.optString(i);

@@ -246,7 +246,7 @@ public class Crypto {
         header.fileType = fileType;
         header.chunkSize = bufSize;
         header.dataSize = dataSize;
-        header.symmentricKey = symmetricKey;
+        header.symmetricKey = symmetricKey;
         header.fileId = fileId;
         header.filename = filename;
 
@@ -279,7 +279,7 @@ public class Crypto {
         headerByteStream.write(header.headerVersion);
 
         // Symmentric key - KeyDerivation.MASTER_KEY_BYTES(32 bytes)
-        headerByteStream.write(header.symmentricKey);
+        headerByteStream.write(header.symmetricKey);
 
         // File type - 1 byte
         headerByteStream.write(header.fileType);
@@ -365,6 +365,7 @@ public class Crypto {
         if(headerSize < 1 || headerSize > MAX_BUFFER_LENGTH){
             throw new CryptoException("Invalid header size");
         }
+        header.headerSize = headerSize;
         overallHeaderSize += FILE_HEADER_SIZE_LEN;
 
         // Read header
@@ -392,7 +393,7 @@ public class Crypto {
         // Read symmetric master key
         byte[] symmetricKey = new byte[KeyDerivation.MASTER_KEY_BYTES];
         headerStream.read(symmetricKey);
-        header.symmentricKey = symmetricKey;
+        header.symmetricKey = symmetricKey;
 
         // Read file type
         header.fileType = headerStream.read();
@@ -504,7 +505,7 @@ public class Crypto {
     }
 
     protected boolean encryptData(InputStream in, OutputStream out, Header header, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
-        if(header.symmentricKey == null) {
+        if(header.symmetricKey == null) {
             throw new CryptoException("Key is empty");
         }
 
@@ -520,7 +521,7 @@ public class Crypto {
 
         while ((numRead = in.read(buf)) >= 0) {
             so.randombytes_buf(chunkNonce, chunkNonce.length);
-            so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, chunkNumber, contextBytes, header.symmentricKey);
+            so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, chunkNumber, contextBytes, header.symmetricKey);
 
             byte[] encBytes = new byte[header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES];
             long[] encSize = new long[1];
@@ -576,7 +577,7 @@ public class Crypto {
             }
             chunkNonce = Arrays.copyOfRange(bufIn, 0, AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES);
             encChunkBytes = Arrays.copyOfRange(bufIn, AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES, numRead);
-            so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, chunkNumber, contextBytes, header.symmentricKey);
+            so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, chunkNumber, contextBytes, header.symmetricKey);
 
             byte[] decBytes = new byte[header.chunkSize];
             long[] decSize = new long[1];
@@ -704,13 +705,32 @@ public class Crypto {
 
     public class Header{
         public int fileVersion;
-        public int headerVersion;
-        public int fileType;
+        public byte[] fileId;
         public int chunkSize;
         public long dataSize;
-        public byte[] fileId;
-        public byte[] symmentricKey;
+        public int headerSize;
+
+        public int headerVersion;
+        public byte[] symmetricKey;
+        public int fileType;
         public String filename;
+
         public int overallHeaderSize = 0;
+
+        public String toString(){
+            return "\n" +
+                    "File Version - " + String.valueOf(fileVersion) + "\n" +
+                    "File ID - " + byteArrayToBase64(fileId) + "\n" +
+                    "Chunk Size - " + String.valueOf(chunkSize) + "\n" +
+                    "Data Size - " + String.valueOf(dataSize) + "\n" +
+                    "Header Size - " + String.valueOf(headerSize) + "\n\n" +
+
+                    "Header Version - " + String.valueOf(headerVersion) + "\n" +
+                    "Symmetric Key - " + byteArrayToBase64(symmetricKey) + "\n" +
+                    "File Type - " + String.valueOf(fileType) + "\n" +
+                    "Filename - " + filename + "\n\n" +
+
+                    "Overall Header Size - " + String.valueOf(overallHeaderSize);
+        }
     }
 }
