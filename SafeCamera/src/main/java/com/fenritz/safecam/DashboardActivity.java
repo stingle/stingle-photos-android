@@ -328,10 +328,10 @@ public class DashboardActivity extends Activity {
 
 				File dir = new File(Helpers.getHomeDir(this));
 				final ArrayList<String> files = new ArrayList<String>();
-				files.add(dir.getPath() + "/" + "gySd8bPDOZe3kTqSeSvn-Uma7b6uo7x5e9ysC-NNi_0.sp");
+				files.add(dir.getPath() + "/" + "o4sFzk6dezbg4-G9icoljzy6L5w7U5VYMaoARULotig.sp");
 
 				try {
-					Crypto.Header h = SafeCameraApplication.getCrypto().getFileHeader(new FileInputStream(dir.getPath() + "/" + "gySd8bPDOZe3kTqSeSvn-Uma7b6uo7x5e9ysC-NNi_0.sp"));
+					Crypto.Header h = SafeCameraApplication.getCrypto().getFileHeader(new FileInputStream(dir.getPath() + "/" + "o4sFzk6dezbg4-G9icoljzy6L5w7U5VYMaoARULotig.sp"));
 					Log.e("header", h.toString());
 				} catch (IOException e) {
 					e.printStackTrace();

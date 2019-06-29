@@ -35,9 +35,9 @@ public class Crypto {
     public static final int FILE_TYPE_PHOTO = 2;
     public static final int FILE_TYPE_VIDEO = 3;
 
-    protected static final String FILE_BEGGINING = "SC";
+    protected static final String FILE_BEGGINING = "SP";
     protected static final String KEY_FILE_BEGGINING = "SPK";
-    protected static final int CURRENT_FILE_VERSION = 2;
+    protected static final int CURRENT_FILE_VERSION = 1;
     protected static final int CURRENT_HEADER_VERSION = 1;
     protected static final int CURRENT_KEY_FILE_VERSION = 1;
 
@@ -60,8 +60,6 @@ public class Crypto {
             FILE_BEGGINIG_LEN +
             FILE_FILE_VERSION_LEN +
             FILE_FILE_ID_LEN +
-            FILE_CHUNK_SIZE_LEN +
-            FILE_DATA_SIZE_LEN +
             FILE_HEADER_SIZE_LEN;
 
     public static final int KEY_FILE_TYPE_BUNDLE_ENCRYPTED = 0;
@@ -264,12 +262,6 @@ public class Crypto {
         // File ID - 32 bytes
         out.write(header.fileId);
 
-        // Chunk size - 4 bytes
-        out.write(intToByteArray(header.chunkSize));
-
-        // Data size - 8 bytes
-        out.write(longToByteArray(header.dataSize));
-
         ///////////////////////////
         // Create encrypted header
         ///////////////////////////
@@ -277,6 +269,12 @@ public class Crypto {
         ByteArrayOutputStream headerByteStream = new ByteArrayOutputStream();
         // Current header version - 1 byte
         headerByteStream.write(header.headerVersion);
+
+        // Chunk size - 4 bytes
+        headerByteStream.write(intToByteArray(header.chunkSize));
+
+        // Data size - 8 bytes
+        headerByteStream.write(longToByteArray(header.dataSize));
 
         // Symmentric key - KeyDerivation.MASTER_KEY_BYTES(32 bytes)
         headerByteStream.write(header.symmetricKey);
@@ -341,21 +339,6 @@ public class Crypto {
         in.read(header.fileId);
         overallHeaderSize += FILE_FILE_ID_LEN;
 
-        // Read chunk size
-        byte[] chunkSizeBytes = new byte[FILE_CHUNK_SIZE_LEN];
-        in.read(chunkSizeBytes);
-        header.chunkSize = byteArrayToInt(chunkSizeBytes);
-
-        if(header.chunkSize < 1 || header.chunkSize > MAX_BUFFER_LENGTH){
-            throw new CryptoException("Invalid chunk size");
-        }
-        overallHeaderSize += FILE_CHUNK_SIZE_LEN;
-
-        // Read data size
-        byte[] dataSizeBytes = new byte[FILE_DATA_SIZE_LEN];
-        in.read(dataSizeBytes);
-        header.dataSize = byteArrayToLong(dataSizeBytes);
-        overallHeaderSize += FILE_DATA_SIZE_LEN;
 
         // Read header size
         byte[] headerSizeBytes = new byte[FILE_HEADER_SIZE_LEN];
@@ -390,13 +373,31 @@ public class Crypto {
             throw new CryptoException("Unsupported header version number: " + header.headerVersion);
         }
 
+        // Read chunk size
+        byte[] chunkSizeBytes = new byte[FILE_CHUNK_SIZE_LEN];
+        headerStream.read(chunkSizeBytes);
+        header.chunkSize = byteArrayToInt(chunkSizeBytes);
+
+        if(header.chunkSize < 1 || header.chunkSize > MAX_BUFFER_LENGTH){
+            throw new CryptoException("Invalid chunk size");
+        }
+
+
+        // Read data size
+        byte[] dataSizeBytes = new byte[FILE_DATA_SIZE_LEN];
+        headerStream.read(dataSizeBytes);
+        header.dataSize = byteArrayToLong(dataSizeBytes);
+
+
         // Read symmetric master key
         byte[] symmetricKey = new byte[KeyDerivation.MASTER_KEY_BYTES];
         headerStream.read(symmetricKey);
         header.symmetricKey = symmetricKey;
 
+
         // Read file type
         header.fileType = headerStream.read();
+
 
         // Read filename size
         byte[] filenameSizeBytes = new byte[4];
@@ -706,11 +707,11 @@ public class Crypto {
     public class Header{
         public int fileVersion;
         public byte[] fileId;
-        public int chunkSize;
-        public long dataSize;
         public int headerSize;
 
         public int headerVersion;
+        public int chunkSize;
+        public long dataSize;
         public byte[] symmetricKey;
         public int fileType;
         public String filename;
@@ -721,11 +722,11 @@ public class Crypto {
             return "\n" +
                     "File Version - " + String.valueOf(fileVersion) + "\n" +
                     "File ID - " + byteArrayToBase64(fileId) + "\n" +
-                    "Chunk Size - " + String.valueOf(chunkSize) + "\n" +
-                    "Data Size - " + String.valueOf(dataSize) + "\n" +
                     "Header Size - " + String.valueOf(headerSize) + "\n\n" +
 
                     "Header Version - " + String.valueOf(headerVersion) + "\n" +
+                    "Chunk Size - " + String.valueOf(chunkSize) + "\n" +
+                    "Data Size - " + String.valueOf(dataSize) + "\n" +
                     "Symmetric Key - " + byteArrayToBase64(symmetricKey) + "\n" +
                     "File Type - " + String.valueOf(fileType) + "\n" +
                     "Filename - " + filename + "\n\n" +
