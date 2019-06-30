@@ -6,11 +6,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 public class StingleDbHelper extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database version.
 	public static final int DATABASE_VERSION = 1;
 	public static final String DATABASE_NAME = "stingleFiles.db";
+
+	public static final int GET_MODE_ALL = 0;
+	public static final int GET_MODE_ONLY_LOCAL = 1;
+	public static final int GET_MODE_ONLY_REMOTE = 2;
 
 	protected SQLiteDatabase dbWrite;
 	protected SQLiteDatabase dbRead;
@@ -88,7 +93,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		return openWriteDb().delete(StingleDbContract.Files.TABLE_NAME, selection, selectionArgs);
 	}
 
-	public Cursor getFilesList(){
+	public Cursor getFilesList(int mode){
 
 		String[] projection = {
 				BaseColumns._ID,
@@ -97,14 +102,34 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE
 		};
 
+		String selection = null;
+
+		String[] selectionArgs = new String[2];
+		switch(mode){
+			case GET_MODE_ALL:
+				selectionArgs = null;
+				break;
+			case GET_MODE_ONLY_LOCAL:
+				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs[0] = "1";
+				selectionArgs[1] = "0";
+				break;
+			case GET_MODE_ONLY_REMOTE:
+				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs[0] = "0";
+				selectionArgs[1] = "1";
+				break;
+		}
+
+
 		String sortOrder =
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + " DESC";
 
 		return openReadDb().query(
 				StingleDbContract.Files.TABLE_NAME,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
-				null,              // The columns for the WHERE clause
-				null,          // The values for the WHERE clause
+				selection,              // The columns for the WHERE clause
+				selectionArgs,          // The values for the WHERE clause
 				null,                   // don't group the rows
 				null,                   // don't filter by row groups
 				sortOrder               // The sort order

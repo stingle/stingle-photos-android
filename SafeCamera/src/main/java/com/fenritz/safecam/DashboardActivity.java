@@ -321,8 +321,9 @@ public class DashboardActivity extends Activity {
 				return true;
 			case R.id.upload:
 				SyncManager.syncFSToDB(this);
+				SyncManager.uploadToCloud(this);
 
-				HashMap<String, String> postParams = new HashMap<String, String>();
+				/*HashMap<String, String> postParams = new HashMap<String, String>();
 
 				postParams.put("token", KeyManagement.getApiToken(this));
 
@@ -348,7 +349,7 @@ public class DashboardActivity extends Activity {
 							Log.e("file", responses.get(file).getRawOutput());
 						}
 					}
-				});
+				});*/
 				return true;
 			case R.id.read_security:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.security_page_link)));

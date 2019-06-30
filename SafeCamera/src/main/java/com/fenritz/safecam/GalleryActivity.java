@@ -857,8 +857,6 @@ public class GalleryActivity extends Activity {
 							imageView.setScaleType(ScaleType.FIT_CENTER);
 							layout.addView(imageView);
 
-							Log.e("ID", Crypto.byte2hex(item.header.fileId));
-
 							if(item.header != null && item.header.fileType == Crypto.FILE_TYPE_VIDEO){
 								ImageView videoIcon = new ImageView(GalleryActivity.this);
 								videoIcon.setImageResource(R.drawable.ic_video);
