@@ -820,4 +820,37 @@ public class Helpers {
 			return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
 		}
 	}
+
+	public static void storePreference(Context context, String key, String value){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		preferences.edit().putString(key, value).commit();
+	}
+	public static void storePreference(Context context, String key, int value){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		preferences.edit().putInt(key, value).commit();
+	}
+	public static void storePreference(Context context, String key, long value){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		preferences.edit().putLong(key, value).commit();
+	}
+	public static void storePreference(Context context, String key, boolean value){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		preferences.edit().putBoolean(key, value).commit();
+	}
+	public static String getPreference(Context context, String key, String defaultValue){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		return preferences.getString(key, defaultValue);
+	}
+	public static int getPreference(Context context, String key, int defaultValue){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		return preferences.getInt(key, defaultValue);
+	}
+	public static long getPreference(Context context, String key, long defaultValue){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		return preferences.getLong(key, defaultValue);
+	}
+	public static boolean getPreference(Context context, String key, boolean defaultValue){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		return preferences.getBoolean(key, defaultValue);
+	}
 }

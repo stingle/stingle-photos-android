@@ -3,10 +3,12 @@ package com.fenritz.safecam.Db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.util.Log;
+
+import java.util.HashMap;
 
 public class StingleDbHelper extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database version.
@@ -48,33 +50,40 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		return this.dbRead;
 	}
 
-	public long insertFile(String filename, boolean isLocal, boolean isRemote, String date){
+	public long insertFile(String filename, boolean isLocal, boolean isRemote, long dateCreated, long dateModified){
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, filename);
 		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
 		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
 
-		if(date != null){
-			values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, date);
-			values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, date);
-		}
+		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
+		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
 
 		return openWriteDb().insertWithOnConflict(StingleDbContract.Files.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
 	}
 
-	public int updateFile(String filename, boolean isLocal, boolean isRemote, String dateCreated, String dateModified){
-
+	public int updateFile(StingleDbFile file){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
-		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
+		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (file.isLocal ? 1 : 0));
+		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (file.isRemote ? 1 : 0));
 
-		if(dateCreated != null){
-			values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
-		}
-		if(dateModified != null){
-			values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
-		}
+		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, file.dateCreated);
+		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, file.dateModified);
+
+		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String[] selectionArgs = { file.filename };
+
+		return openWriteDb().update(
+				StingleDbContract.Files.TABLE_NAME,
+				values,
+				selection,
+				selectionArgs);
+	}
+
+	public int markFileAsRemote(String filename){
+		ContentValues values = new ContentValues();
+		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, 1);
 
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
@@ -91,6 +100,35 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String[] selectionArgs = { filename };
 
 		return openWriteDb().delete(StingleDbContract.Files.TABLE_NAME, selection, selectionArgs);
+	}
+
+	public StingleDbFile getFileIfExists(String filename){
+		String[] projection = {
+				StingleDbContract.Files.COLUMN_NAME_FILENAME,
+				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+		};
+
+		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String[] selectionArgs = {filename};
+
+		Cursor result = openReadDb().query(
+				StingleDbContract.Files.TABLE_NAME,   // The table to query
+				projection,             // The array of columns to return (pass null to get all)
+				selection,              // The columns for the WHERE clause
+				selectionArgs,          // The values for the WHERE clause
+				null,                   // don't group the rows
+				null,                   // don't filter by row groups
+				null               // The sort order
+		);
+
+		if(result.getCount() > 0){
+			result.moveToNext();
+			return new StingleDbFile(result);
+		}
+		return null;
 	}
 
 	public Cursor getFilesList(int mode){
@@ -135,6 +173,39 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				sortOrder               // The sort order
 		);
 
+	}
+
+	public StingleDbFile getFileAtPosition(int pos){
+		String[] projection = {
+				StingleDbContract.Files.COLUMN_NAME_FILENAME,
+				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE
+		};
+
+		String sortOrder =
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + " DESC";
+
+		Cursor result = openReadDb().query(
+				false,
+				StingleDbContract.Files.TABLE_NAME,
+				projection,
+				null,
+				null,
+				null,
+				null,
+				sortOrder,
+				String.valueOf(pos) + ", 1"
+		);
+
+		if(result.getCount() > 0){
+			result.moveToNext();
+			return new StingleDbFile(result);
+		}
+		return null;
+	}
+
+	public long getTotalFilesCount(){
+		return DatabaseUtils.queryNumEntries(openReadDb(), StingleDbContract.Files.TABLE_NAME);
 	}
 
 	public void close(){

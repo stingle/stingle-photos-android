@@ -1,41 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:gravity="center" >
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <TextView 
-        android:id="@+id/no_files"
-        android:text="@string/no_files"
-        android:layout_width="wrap_content" 
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:visibility="gone" />
-    
-    <GridView
-        android:id="@+id/photosGrid"
+    <include
+        layout="@layout/app_bar_gallery"
         android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        android:columnWidth="100dp"
-        android:gravity="center"
-        android:horizontalSpacing="1dp"
-        android:numColumns="auto_fit"
-        android:stretchMode="columnWidth"
-        android:smoothScrollbar="true"
-        android:saveEnabled="true"
-        android:persistentDrawingCache="all"
-        android:verticalSpacing="1dp"
-        android:visibility="visible" >
-    </GridView>
+        android:layout_height="match_parent" />
 
-    <ProgressBar
-        android:id="@+id/fillFilesProgress"
-        style="?android:attr/progressBarStyleLarge"
+
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_gallery"
+        app:menu="@menu/gallery_drawer" >
 
-</LinearLayout>
+    </com.google.android.material.navigation.NavigationView>
+
+</androidx.drawerlayout.widget.DrawerLayout>

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.fenritz.safecam.Auth.KeyManagement;
 import com.fenritz.safecam.Db.StingleDbContract;
+import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.R;
@@ -16,6 +17,8 @@ import com.fenritz.safecam.Db.StingleDbHelper;
 import com.fenritz.safecam.Util.Helpers;
 import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -26,6 +29,7 @@ public class SyncManager {
 
 	protected Context context;
 	protected SQLiteDatabase db;
+	public static final String PREF_LAST_SEEN_TIME = "file_last_seen_time";
 
 	public SyncManager(Context context){
 		this.context = context;
@@ -40,6 +44,9 @@ public class SyncManager {
 	}
 	public static void uploadToCloud(Context context){
 		(new UploadToCloudAsyncTask(context)).execute();
+	}
+	public static void syncCloudToLocalDb(Context context){
+		(new SyncCloudToLocalDbAsyncTask(context)).execute();
 	}
 
 	public static class FsSyncAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -58,10 +65,16 @@ public class SyncManager {
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
 
 			while(result.moveToNext()) {
-				String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_FILENAME));
-				File file = new File(dir.getPath() + "/" + filename);
+				StingleDbFile dbFile = new StingleDbFile(result);
+				File file = new File(dir.getPath() + "/" + dbFile.filename);
 				if(!file.exists()){
-					db.deleteFile(filename);
+					if(dbFile.isRemote){
+						dbFile.isLocal = false;
+						db.updateFile(dbFile);
+					}
+					else {
+						db.deleteFile(dbFile.filename);
+					}
 				}
 			}
 
@@ -69,7 +82,7 @@ public class SyncManager {
 
 			for (File file : currentFolderFiles) {
 				if (file.isFile() && file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION)) {
-					db.insertFile(file.getName(), true, false, String.valueOf(file.lastModified()));
+					db.insertFile(file.getName(), true, false, file.lastModified(), file.lastModified());
 				}
 			}
 			db.close();
@@ -120,7 +133,7 @@ public class SyncManager {
 				);
 				StingleResponse response = new StingleResponse(this.context, resp);
 				if(response.isStatusOk()){
-					db.updateFile(file, true, true, null, null);
+					db.markFileAsRemote(file);
 				}
 			}
 
@@ -132,6 +145,78 @@ public class SyncManager {
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 
+		}
+	}
+
+	public static class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		protected Context context;
+		protected StingleDbHelper db;
+		protected long lastSeenTime = 0;
+
+		public SyncCloudToLocalDbAsyncTask(Context context){
+			this.context = context;
+			db = new StingleDbHelper(context);
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			lastSeenTime = Helpers.getPreference(context, PREF_LAST_SEEN_TIME, (long)0);
+
+			HashMap<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("lastSeenTime", String.valueOf(lastSeenTime));
+
+
+			JSONObject resp = HttpsClient.postFunc(
+					context.getString(R.string.api_server_url) + context.getString(R.string.get_server_files_path),
+					postParams
+			);
+			StingleResponse response = new StingleResponse(this.context, resp);
+			if(response.isStatusOk()){
+				String filesStr = response.get("files");
+				if(filesStr != null){
+					try {
+						JSONArray files = new JSONArray(filesStr);
+						for(int i=0; i<files.length(); i++){
+							JSONObject file = files.optJSONObject(i);
+							if(file != null){
+								processFile(new StingleDbFile(file));
+							}
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			Helpers.storePreference(context, PREF_LAST_SEEN_TIME, lastSeenTime);
+
+			return null;
+		}
+
+		protected void processFile(StingleDbFile remoteFile){
+			StingleDbFile file = db.getFileIfExists(remoteFile.filename);
+
+			if(file == null){
+				db.insertFile(remoteFile.filename, false, true, remoteFile.dateCreated, remoteFile.dateModified);
+			}
+			else {
+				if (file.dateModified != remoteFile.dateModified) {
+					file.dateModified = remoteFile.dateModified;
+					db.updateFile(file);
+				}
+			}
+
+			if(remoteFile.dateCreated > lastSeenTime) {
+				lastSeenTime = remoteFile.dateCreated;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			db.close();
 		}
 	}
 }

@@ -22,11 +22,7 @@ import android.view.WindowManager;
 
 import androidx.core.content.FileProvider;
 
-import com.fenritz.safecam.Auth.KeyManagement;
-import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
-import com.fenritz.safecam.Net.HttpsClient;
-import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.LoginManager;
@@ -34,14 +30,11 @@ import com.fenritz.safecam.Auth.LoginManager;
 import org.apache.sanselan.util.IOUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class DashboardActivity extends Activity {
 
@@ -130,7 +123,7 @@ public class DashboardActivity extends Activity {
 
 			public void onClick(View v) {
 				Intent intent = new Intent();
-				intent.setClass(DashboardActivity.this, GalleryActivity.class);
+				intent.setClass(DashboardActivity.this, GalleryActivityOld.class);
 				startActivity(intent);
 			}
 		});
@@ -282,6 +275,11 @@ public class DashboardActivity extends Activity {
 				intent.setClass(DashboardActivity.this, TestActivity.class);
 				startActivity(intent);
 				return true;
+			case R.id.gallery:
+				intent = new Intent();
+				intent.setClass(DashboardActivity.this, GalleryActivity.class);
+				startActivity(intent);
+				return true;
 			case R.id.export_keys:
 				Intent chooserIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
 				chooserIntent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -322,6 +320,7 @@ public class DashboardActivity extends Activity {
 			case R.id.upload:
 				SyncManager.syncFSToDB(this);
 				SyncManager.uploadToCloud(this);
+				SyncManager.syncCloudToLocalDb(this);
 
 				/*HashMap<String, String> postParams = new HashMap<String, String>();
 

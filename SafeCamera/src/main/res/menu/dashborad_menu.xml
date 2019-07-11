@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
         android:id="@+id/logout"
         android:icon="@android:drawable/ic_lock_power_off"
         android:title="@string/log_out"
-        android:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/settings"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/settings"
-        android:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/setup"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="Setup"
-        android:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/change_password"
         android:icon="@android:drawable/ic_lock_lock"
@@ -44,5 +45,9 @@
         android:id="@+id/test"
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="Test" />
+    <item
+        android:id="@+id/gallery"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="Gallery" />
 
 </menu>

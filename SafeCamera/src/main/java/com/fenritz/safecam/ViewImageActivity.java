@@ -448,7 +448,7 @@ public class ViewImageActivity extends Activity {
 				}).execute();
 				return true;
 			case R.id.gotoGallery:
-				intent.setClass(ViewImageActivity.this, GalleryActivity.class);
+				intent.setClass(ViewImageActivity.this, GalleryActivityOld.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
 				startActivity(intent);
 				finish();

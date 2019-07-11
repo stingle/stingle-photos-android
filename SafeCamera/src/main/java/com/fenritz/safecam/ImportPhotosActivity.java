@@ -169,7 +169,7 @@ public class ImportPhotosActivity extends Activity {
 		
 		@SuppressLint("NewApi")
 		public View getView(int position, View convertView, ViewGroup parent) {
-			View view = mInflater.inflate(R.layout.gallery_item, null);
+			View view = mInflater.inflate(R.layout.gallery_item_old, null);
 			int thumbSize = Helpers.getThumbSize(ImportPhotosActivity.this);
 			view.setLayoutParams(new GridView.LayoutParams(thumbSize, thumbSize));
 			ImageView imageview = (ImageView) view.findViewById(R.id.thumbImage);
