@@ -30,6 +30,7 @@ public class SyncManager {
 	protected Context context;
 	protected SQLiteDatabase db;
 	public static final String PREF_LAST_SEEN_TIME = "file_last_seen_time";
+	public static final String SP_FILE_MIME_TYPE = "application/stinglephoto";
 
 	public SyncManager(Context context){
 		this.context = context;
@@ -62,7 +63,7 @@ public class SyncManager {
 			StingleDbHelper db = new StingleDbHelper(context);
 			File dir = new File(Helpers.getHomeDir(this.context));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
+			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_LOCAL);
 
 			while(result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
@@ -113,6 +114,7 @@ public class SyncManager {
 			postParams.put("token", KeyManagement.getApiToken(context));
 
 			File dir = new File(Helpers.getHomeDir(context));
+			File thumbDir = new File(Helpers.getThumbsDir(context));
 			final ArrayList<String> files = new ArrayList<String>();
 
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
@@ -124,12 +126,17 @@ public class SyncManager {
 			result.close();
 
 			for(String file : files) {
-				JSONObject resp = HttpsClient.multipartRequest(
+				HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + file, SP_FILE_MIME_TYPE);
+				HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumbDir.getPath() + "/" + file, SP_FILE_MIME_TYPE);
+
+				ArrayList<HttpsClient.FileToUpload> filesToUpload = new ArrayList<HttpsClient.FileToUpload>();
+				filesToUpload.add(fileToUpload);
+				filesToUpload.add(thumbToUpload);
+
+				JSONObject resp = HttpsClient.multipartUpload(
 						context.getString(R.string.api_server_url) + context.getString(R.string.upload_file_path),
 						postParams,
-						dir.getPath() + "/" + file,
-						"file",
-						"application/stinglephoto"
+						filesToUpload
 				);
 				StingleResponse response = new StingleResponse(this.context, resp);
 				if(response.isStatusOk()){

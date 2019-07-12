@@ -471,6 +471,11 @@ public class Crypto {
     }
 
 
+    public byte[] decryptFile(byte[] bytes) throws IOException, CryptoException{
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        return decryptFile(in, null, null);
+    }
+
     public byte[] decryptFile(InputStream in) throws IOException, CryptoException{
         return decryptFile(in, null, null);
     }

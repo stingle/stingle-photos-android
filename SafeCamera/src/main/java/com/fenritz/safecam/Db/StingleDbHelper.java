@@ -18,6 +18,8 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	public static final int GET_MODE_ALL = 0;
 	public static final int GET_MODE_ONLY_LOCAL = 1;
 	public static final int GET_MODE_ONLY_REMOTE = 2;
+	public static final int GET_MODE_LOCAL = 3;
+	public static final int GET_MODE_REMOTE = 4;
 
 	protected SQLiteDatabase dbWrite;
 	protected SQLiteDatabase dbRead;
@@ -137,25 +139,39 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				BaseColumns._ID,
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,
 				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE
+				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
 		};
 
 		String selection = null;
 
-		String[] selectionArgs = new String[2];
+		String[] selectionArgs = null;
 		switch(mode){
 			case GET_MODE_ALL:
-				selectionArgs = null;
+
 				break;
 			case GET_MODE_ONLY_LOCAL:
 				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs = new String[2];
 				selectionArgs[0] = "1";
 				selectionArgs[1] = "0";
 				break;
 			case GET_MODE_ONLY_REMOTE:
 				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs = new String[2];
 				selectionArgs[0] = "0";
 				selectionArgs[1] = "1";
+				break;
+			case GET_MODE_LOCAL:
+				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ?";
+				selectionArgs = new String[1];
+				selectionArgs[0] = "1";
+				break;
+			case GET_MODE_REMOTE:
+				selection = StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs = new String[1];
+				selectionArgs[0] = "1";
 				break;
 		}
 
