@@ -823,7 +823,7 @@ public class GalleryActivityOld extends Activity {
 						else{
 							ImageView imageView = new ImageView(GalleryActivityOld.this);
 							
-							Bitmap image = memCache.get(thumbPath);
+							Bitmap image = (Bitmap) memCache.get(thumbPath);
 							if(image != null){
 								imageView.setImageBitmap(image);
 							}
@@ -992,7 +992,7 @@ public class GalleryActivityOld extends Activity {
 
 						String key = thumbsDir + item.file.getName();
 						if (decryptedData != null) {
-							memCache.put(key, Helpers.generateThumbnail(GalleryActivityOld.this, decryptedData, item.file.getName(), item.header.fileId));
+							memCache.put(key, Helpers.generateThumbnail(GalleryActivityOld.this, decryptedData, item.file.getName(), item.header.fileId, Crypto.FILE_TYPE_PHOTO));
 						}
 						
 						if(memCache.get(key) == null){

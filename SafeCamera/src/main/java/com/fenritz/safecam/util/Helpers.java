@@ -212,7 +212,7 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName, byte[] fileId) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName, byte[] fileId, int type) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		Bitmap thumbBitmap = null;
@@ -224,7 +224,7 @@ public class Helpers {
 
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			try {
-				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName, Crypto.FILE_TYPE_PHOTO, fileId);
+				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName, type, fileId);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -236,7 +236,12 @@ public class Helpers {
 		}
 		return thumbBitmap;
 	}
-	
+
+	public static int convertDpToPixels(Context context, int dp){
+		float scale = context.getResources().getDisplayMetrics().density;
+		return (int) (dp * scale + 0.5f);
+	}
+
 	public static int getThumbSize(Context context){
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();

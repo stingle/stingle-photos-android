@@ -311,6 +311,11 @@ public class Crypto {
     }
 
 
+    public Header getFileHeader(byte[] bytes) throws IOException, CryptoException{
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        return getFileHeader(in);
+    }
+
     public Header getFileHeader(InputStream in) throws IOException, CryptoException{
         int overallHeaderSize = 0;
         Header header = new Header();

@@ -75,7 +75,7 @@ public class DecryptAndShowImage extends AsyncTask<Void, Integer, byte[]> {
 		context = parent.getContext();
 		
 		if (memCache != null) {
-			Bitmap cachedBitmap = memCache.get(filePath);
+			Bitmap cachedBitmap = (Bitmap) memCache.get(filePath);
 			if (cachedBitmap != null) {
 				return;
 			}

@@ -9,11 +9,14 @@ import android.os.Bundle;
 import com.fenritz.safecam.Auth.LoginManager;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
 import com.fenritz.safecam.Gallery.GalleryAdapter;
+import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Widget.DragSelectRecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 import androidx.core.view.GravityCompat;
@@ -33,10 +36,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
 
 public class GalleryActivity extends AppCompatActivity
-		implements NavigationView.OnNavigationItemSelectedListener {
+		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapter.Listener {
 
-	private RecyclerView recyclerView;
-	private RecyclerView.Adapter mAdapter;
+	private DragSelectRecyclerView recyclerView;
+	private GalleryAdapter adapter;
 	private RecyclerView.LayoutManager layoutManager;
 
 
@@ -62,7 +65,7 @@ public class GalleryActivity extends AppCompatActivity
 		toggle.syncState();
 		navigationView.setNavigationItemSelectedListener(this);
 
-		recyclerView = (RecyclerView) findViewById(R.id.gallery_recycler_view);
+		recyclerView = (DragSelectRecyclerView) findViewById(R.id.gallery_recycler_view);
 
 		// use this setting to improve performance if you know that changes
 		// in content do not change the layout size of the RecyclerView
@@ -82,10 +85,11 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserLoginSuccess() {
-				mAdapter = new GalleryAdapter(GalleryActivity.this);
-				recyclerView.setAdapter(mAdapter);
-				AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, 400);
+				adapter = new GalleryAdapter(GalleryActivity.this, GalleryActivity.this);
+				recyclerView.setAdapter(adapter);
+				AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
 				recyclerView.setLayoutManager(layoutManager);
+				recyclerView.setHasFixedSize(true);
 			}
 
 			@Override
@@ -101,7 +105,11 @@ public class GalleryActivity extends AppCompatActivity
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
 			drawer.closeDrawer(GravityCompat.START);
-		} else {
+		}
+		else if (!adapter.getSelectedIndices().isEmpty()) {
+				adapter.clearSelected();
+		}
+		else {
 			super.onBackPressed();
 		}
 	}
@@ -152,4 +160,25 @@ public class GalleryActivity extends AppCompatActivity
 		drawer.closeDrawer(GravityCompat.START);
 		return true;
 	}
+
+	@Override
+	public void onClick(int index) {
+		Log.d("click", "click");
+		if (adapter.isSelectionModeActive()){
+			adapter.toggleSelected(index);
+		}
+	}
+
+	@Override
+	public void onLongClick(int index) {
+		Log.d("longclick", "longclick");
+		recyclerView.setDragSelectActive(true, index);
+		adapter.setSelectionModeActive(true);
+	}
+
+	@Override
+	public void onSelectionChanged(int count) {
+
+	}
+
 }

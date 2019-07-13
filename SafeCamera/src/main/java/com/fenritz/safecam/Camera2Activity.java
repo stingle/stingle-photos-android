@@ -1709,7 +1709,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), encFileName, fileId);
+                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), encFileName, fileId, Crypto.FILE_TYPE_VIDEO);
 
                 tmpFile.delete();
 
@@ -2028,7 +2028,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     try {
                         output = new FileOutputStream(mFile);
                         byte[] fileId = SafeCameraApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO);
-                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, mFile.getName(), fileId);
+                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, mFile.getName(), fileId, Crypto.FILE_TYPE_PHOTO);
                         success = true;
                     } catch (IOException e) {
                         e.printStackTrace();

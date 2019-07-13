@@ -10,4 +10,5 @@
     <color name="sec_color">#e74c3c</color>
     <color name="sec_color_light">#fc6566</color>
     <color name="dark_bg">#1e2535</color>
+    <color name="galery_item_bg">#66B6B6B6</color>
 </resources>

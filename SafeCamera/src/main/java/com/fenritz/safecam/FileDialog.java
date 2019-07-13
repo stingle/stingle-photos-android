@@ -450,7 +450,7 @@ public class FileDialog extends ListActivity {
 			Bitmap fileIcon = BitmapFactory.decodeResource(getResources(), R.drawable.file);
 			switch(type){
 				case TYPE_FILE:
-					Bitmap cachedImage = cache.get(filePath);
+					Bitmap cachedImage = (Bitmap) cache.get(filePath);
 					if(cachedImage != null){
 						fileIcon = cachedImage;
 					}

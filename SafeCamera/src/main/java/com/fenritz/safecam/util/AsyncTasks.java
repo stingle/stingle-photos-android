@@ -539,7 +539,7 @@ public class AsyncTasks {
 
 							System.gc();
 
-							Helpers.generateThumbnail(activity, bytes.toByteArray(), destFile.getName(), fileId);
+							Helpers.generateThumbnail(activity, bytes.toByteArray(), destFile.getName(), fileId, Crypto.FILE_TYPE_PHOTO);
 						}
 						else if(Helpers.isVideoFile(origFile.getAbsolutePath())){
 							File destFile = new File(encFilePath);
@@ -548,7 +548,7 @@ public class AsyncTasks {
 							ByteArrayOutputStream bos = new ByteArrayOutputStream();
 							thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-							Helpers.generateThumbnail(activity, bos.toByteArray(), destFile.getName(), fileId);
+							Helpers.generateThumbnail(activity, bos.toByteArray(), destFile.getName(), fileId, Crypto.FILE_TYPE_VIDEO);
 						}
 						
 						publishProgress(i+1);
@@ -927,7 +927,7 @@ public class AsyncTasks {
 		protected Bitmap doInBackground(File... params) {
 			
 			// Get from cache
-			Bitmap image = cache.get(params[0].getPath());
+			Bitmap image = (Bitmap)cache.get(params[0].getPath());
 			if(image != null){
 				return image;
 			}
