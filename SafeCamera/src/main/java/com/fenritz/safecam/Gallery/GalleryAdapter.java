@@ -1,10 +1,8 @@
 package com.fenritz.safecam.Gallery;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,37 +11,27 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fenritz.safecam.Auth.KeyManagement;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
-import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Db.StingleDbHelper;
-import com.fenritz.safecam.GalleryActivityOld;
 import com.fenritz.safecam.Net.HttpsClient;
-import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.Util.Helpers;
-import com.fenritz.safecam.Util.MemcacheSizeable;
 import com.fenritz.safecam.Util.MemoryCache;
-import com.fenritz.safecam.Widget.IDragSelectAdapter;
-
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryVH> implements IDragSelectAdapter {
 	private Context context;
@@ -54,6 +42,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 	private final ArrayList<Integer> selectedIndices = new ArrayList<Integer>();
 	private int thumbSize;
 	private boolean isSelectModeActive = false;
+	private AutoFitGridLayoutManager lm;
 
 	// Provide a reference to the views for each data item
 	// Complex data items may need more than one view per item, and
@@ -64,6 +53,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 		public ImageView image;
 		public ImageView videoIcon;
 		public CheckBox checkbox;
+		public int currentPos = -1;
 
 		public GalleryVH(RelativeLayout v) {
 			super(v);
@@ -100,11 +90,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 	}
 
 	// Provide a suitable constructor (depends on the kind of dataset)
-	public GalleryAdapter(Context context, Listener callback) {
+	public GalleryAdapter(Context context, Listener callback, AutoFitGridLayoutManager lm) {
 		this.context = context;
 		this.callback = callback;
 		this.db = new StingleDbHelper(context);
 		this.thumbSize = Helpers.getThumbSize(context);
+		this.lm = lm;
 	}
 
 	// Create new views (invoked by the layout manager)
@@ -127,7 +118,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 	public void onBindViewHolder(GalleryVH holder, int position) {
 		// - get element from your dataset at this position
 		// - replace the contents of the view with that element
-
 		//image.setImageDrawable(null);
 		if(isSelectModeActive){
 			int size = Helpers.convertDpToPixels(context, 20);
@@ -148,26 +138,40 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 		}
 
 		holder.image.setImageBitmap(null);
+		holder.videoIcon.setVisibility(View.GONE);
 		holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
 
-		GalleryDecItem item = (GalleryDecItem) memCache.get(String.valueOf(position));
+		/*GalleryDecItem item = (GalleryDecItem) memCache.get(String.valueOf(position));
 		if(item != null){
+			Log.e("cached", String.valueOf(position));
 			holder.image.setImageBitmap(item.bitmap);
-			if(item.header != null && item.header.fileType == Crypto.FILE_TYPE_VIDEO){
+			if(item.fileType == Crypto.FILE_TYPE_VIDEO){
 				holder.videoIcon.setVisibility(View.VISIBLE);
 			}
 			else{
 				holder.videoIcon.setVisibility(View.GONE);
 			}
 		}
-		else{
-			holder.image.setTag("p" + String.valueOf(position));
-			if(!tasksQueue.containsKey(position)) {
-				GetDecryptedBitmap decTask = new GetDecryptedBitmap(context, db, position, holder);
-				decTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-				tasksQueue.put(position, decTask);
+		else{*/
+			if(holder.currentPos != -1 && holder.currentPos != position && tasksQueue.containsKey(holder.currentPos)){
+				tasksQueue.get(holder.currentPos).cancel(true);
+				tasksQueue.remove(holder.currentPos);
+				Log.e("interrupt", String.valueOf(holder.currentPos) + " - " + String.valueOf(position));
 			}
-		}
+			holder.currentPos = position;
+			if (!tasksQueue.containsKey(position)) {
+				getItemAtPos(position, holder);
+			}
+			else {
+				Log.e("alreadyinqueue", String.valueOf(position));
+			}
+		//}
+	}
+
+	private void getItemAtPos(int position, GalleryVH holder){
+		GetDecryptedBitmap decTask = new GetDecryptedBitmap(context, db, position, holder);
+		decTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		tasksQueue.put(position, decTask);
 	}
 
 	@Override
@@ -257,6 +261,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 		@Override
 		protected GalleryDecItem doInBackground(Void... params) {
 			Log.d("start", String.valueOf(position));
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				//Log.e("interrupted", String.valueOf(position));
+			}
 			StingleDbFile file = db.getFileAtPosition(position);
 			if(file.isLocal) {
 				try {
@@ -268,10 +277,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 						GalleryDecItem item = new GalleryDecItem();
 						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
 
-						Crypto.Header header = SafeCameraApplication.getCrypto().getFileHeader(new FileInputStream(fileToDec));
+						FileInputStream streamForHeader = new FileInputStream(fileToDec);
+						Crypto.Header header = SafeCameraApplication.getCrypto().getFileHeader(streamForHeader);
+						streamForHeader.close();
 
 						item.bitmap = bitmap;
-						item.header = header;
+						item.fileType = header.fileType;
 
 						memCache.put(String.valueOf(position), item);
 						return item;
@@ -316,7 +327,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 						Crypto.Header header = SafeCameraApplication.getCrypto().getFileHeader(encFile);
 
 						item.bitmap = bitmap;
-						item.header = header;
+						item.fileType = header.fileType;
 
 						memCache.put(String.valueOf(position), item);
 						return item;
@@ -334,9 +345,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 		@Override
 		protected void onPostExecute(GalleryDecItem item) {
 			super.onPostExecute(item);
-			if(!holder.image.getTag().toString().equals("p" + String.valueOf(position))) {
+			Log.d("finish", String.valueOf(position));
+			if(holder.currentPos != position) {
 				tasksQueue.remove(position);
 				memCache.remove(String.valueOf(position));
+				Log.e("tagnotmatch", String.valueOf(holder.currentPos) + " - " + String.valueOf(position));
+				//getItemAtPos(holder.currentPos, holder);
 				return;
 			}
 
@@ -344,7 +358,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 				item = new GalleryDecItem();
 			}
 
-			if(item.header != null && item.header.fileType == Crypto.FILE_TYPE_VIDEO){
+			if(item.fileType == Crypto.FILE_TYPE_VIDEO){
 				holder.videoIcon.setVisibility(View.VISIBLE);
 			}
 			else{
@@ -357,20 +371,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 			}
 
 			holder.image.setImageBitmap(item.bitmap);
-			Log.d("finish", String.valueOf(position));
 
 			tasksQueue.remove(position);
 			//adapter.notifyItemChanged(position);
-		}
-	}
-
-	public class GalleryDecItem implements MemcacheSizeable {
-		public Bitmap bitmap = null;
-		public Crypto.Header header = null;
-
-		@Override
-		public int getSize() {
-			return bitmap.getRowBytes() * bitmap.getHeight();
 		}
 	}
 }

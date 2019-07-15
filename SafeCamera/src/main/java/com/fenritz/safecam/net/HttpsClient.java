@@ -264,7 +264,7 @@ public class HttpsClient {
 			return output.toByteArray();
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (KeyManagementException e) {

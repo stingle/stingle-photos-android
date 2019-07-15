@@ -1,21 +1,15 @@
 package com.fenritz.safecam;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 
 import com.fenritz.safecam.Auth.LoginManager;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
-import com.fenritz.safecam.Gallery.GalleryAdapter;
+import com.fenritz.safecam.Gallery.GalleryAdapterPisasso;
 import com.fenritz.safecam.Util.Helpers;
-import com.fenritz.safecam.Widget.DragSelectRecyclerView;
+import com.fenritz.safecam.Gallery.DragSelectRecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
@@ -30,16 +24,15 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
 
 public class GalleryActivity extends AppCompatActivity
-		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapter.Listener {
+		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapterPisasso.Listener {
 
 	private DragSelectRecyclerView recyclerView;
-	private GalleryAdapter adapter;
+	private GalleryAdapterPisasso adapter;
 	private RecyclerView.LayoutManager layoutManager;
 
 
@@ -59,8 +52,7 @@ public class GalleryActivity extends AppCompatActivity
 		});
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
 		NavigationView navigationView = findViewById(R.id.nav_view);
-		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-				this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 		drawer.addDrawerListener(toggle);
 		toggle.syncState();
 		navigationView.setNavigationItemSelectedListener(this);
@@ -85,9 +77,9 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserLoginSuccess() {
-				adapter = new GalleryAdapter(GalleryActivity.this, GalleryActivity.this);
-				recyclerView.setAdapter(adapter);
 				AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
+				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager);
+				recyclerView.setAdapter(adapter);
 				recyclerView.setLayoutManager(layoutManager);
 				recyclerView.setHasFixedSize(true);
 			}
@@ -163,7 +155,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public void onClick(int index) {
-		Log.d("click", "click");
+		Log.d("click", String.valueOf(index));
 		if (adapter.isSelectionModeActive()){
 			adapter.toggleSelected(index);
 		}

@@ -1,1 +1,1 @@
-include ':SafeCamera'
+include ':SafeCamera', ':picasso'

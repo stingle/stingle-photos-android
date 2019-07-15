@@ -470,7 +470,7 @@ public class Crypto {
         encryptData(in, out, header, progress, task);
         long time2 = System.nanoTime();
         long diff = time2 - time;
-        Log.d("time", String.valueOf((double)diff / 1000000000.0));
+        //Log.d("time", String.valueOf((double)diff / 1000000000.0));
 
         return fileId;
     }
@@ -501,7 +501,7 @@ public class Crypto {
         decryptData(in, out, header, progress, task);
         long time2 = System.nanoTime();
         long diff = time2 - time;
-        Log.d("time", String.valueOf((double)diff / 1000000000.0));
+        //Log.d("time", String.valueOf((double)diff / 1000000000.0));
     }
 
     public byte[] getRandomData(int length){

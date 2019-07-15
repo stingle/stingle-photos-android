@@ -1,4 +1,4 @@
-package com.fenritz.safecam.Widget;
+package com.fenritz.safecam.Gallery;
 
 import android.content.Context;
 import android.content.res.TypedArray;

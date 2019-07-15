@@ -38,7 +38,7 @@
         <activity
             android:name=".GalleryActivity"
             android:label="@string/title_activity_gallery"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"></activity>
+            android:theme="@style/AppTheme"></activity>
         <activity
             android:name=".DashboardActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

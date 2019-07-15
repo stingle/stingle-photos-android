@@ -39,27 +39,21 @@ public class MemoryCache {
     
     public Object get(String id){
     	Object obj;
-		synchronized(cache) {
 			obj = cache.get(id);
-		}
-    	
+
         return obj;
     }
     
     @SuppressLint("NewApi")
 	public void put(String id, Object obj){
-        synchronized(cache) {
         	if(obj != null){
         		cache.put(id, obj);
         	}
-		}
     }
     
     @SuppressLint("NewApi")
 	public void remove(String id){
-        synchronized(cache) {
         	cache.remove(id);
-		}
     }
 
     public void clear() {

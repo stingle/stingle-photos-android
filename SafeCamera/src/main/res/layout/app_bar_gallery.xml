@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.fenritz.safecam.GalleryActivity">
+    tools:context="com.fenritz.safecam.GalleryActivity"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppBarOverlay">
+        android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"

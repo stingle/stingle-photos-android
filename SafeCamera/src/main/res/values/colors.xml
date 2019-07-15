@@ -11,4 +11,10 @@
     <color name="sec_color_light">#fc6566</color>
     <color name="dark_bg">#1e2535</color>
     <color name="galery_item_bg">#66B6B6B6</color>
+
+    <color name="primaryColor">#0277bd</color>
+    <color name="primaryLightColor">#58a5f0</color>
+    <color name="primaryDarkColor">#004c8c</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="colorAccent">#0277bd</color>
 </resources>
