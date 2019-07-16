@@ -7,7 +7,9 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class StingleDbHelper extends SQLiteOpenHelper {
@@ -218,6 +220,15 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 			return new StingleDbFile(result);
 		}
 		return null;
+	}
+
+	public Cursor getAvailableDates(){
+		return openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
+						"FROM files " +
+						"GROUP BY cdate " +
+						"ORDER BY cdate DESC"
+				, null);
+
 	}
 
 	public long getTotalFilesCount(){

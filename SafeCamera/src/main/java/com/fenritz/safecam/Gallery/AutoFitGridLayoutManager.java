@@ -9,6 +9,7 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 
 	private int columnWidth;
 	private boolean columnWidthChanged = true;
+	protected int currentCalcSpanCount = 1;
 
 	public AutoFitGridLayoutManager(Context context, int columnWidth) {
 		super(context, 1);
@@ -23,6 +24,10 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 		}
 	}
 
+	public int getCurrentCalcSpanCount(){
+		return currentCalcSpanCount;
+	}
+
 	@Override
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		if (columnWidthChanged && columnWidth > 0) {
@@ -34,6 +39,7 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 			}
 			int spanCount = Math.max(1, totalSpace / columnWidth);
 			setSpanCount(spanCount);
+			currentCalcSpanCount = spanCount;
 			columnWidthChanged = false;
 		}
 		super.onLayoutChildren(recycler, state);

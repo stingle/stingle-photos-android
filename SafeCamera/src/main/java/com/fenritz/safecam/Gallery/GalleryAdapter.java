@@ -96,6 +96,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 		this.db = new StingleDbHelper(context);
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
+
+
 	}
 
 	// Create new views (invoked by the layout manager)

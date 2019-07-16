@@ -1,6 +1,7 @@
 package com.fenritz.safecam.Gallery;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,9 +30,10 @@ import com.squareup.picasso3.RequestHandler;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class GalleryAdapterPisasso extends RecyclerView.Adapter<GalleryAdapterPisasso.GalleryVH> implements IDragSelectAdapter {
+public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
 	private Context context;
 	private StingleDbHelper db;
 	private final MemoryCache memCache = SafeCameraApplication.getCache();
@@ -41,6 +44,11 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<GalleryAdapterPi
 	private AutoFitGridLayoutManager lm;
 	private Picasso picasso;
 	private LruCache<Integer, Integer> typesCache = new LruCache<Integer, Integer>(512);
+	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
+	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
+
+	public static final int TYPE_ITEM = 0;
+	public static final int TYPE_DATE = 1;
 
 	// Provide a reference to the views for each data item
 	// Complex data items may need more than one view per item, and
@@ -68,6 +76,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<GalleryAdapterPi
 			if (callback != null) {
 				callback.onClick(getAdapterPosition());
 			}
+			Log.d("calcPos", String.valueOf(translatePos(getAdapterPosition()).dbPosition));
 		}
 
 		@Override
@@ -77,6 +86,19 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<GalleryAdapterPi
 			}
 			return true;
 		}
+	}
+	public class GalleryDate extends RecyclerView.ViewHolder {
+		// each data item is just a string in this case
+		public RelativeLayout layout;
+		public TextView text;
+		public int currentPos = -1;
+
+		public GalleryDate(RelativeLayout v) {
+			super(v);
+			layout = v;
+			text = v.findViewById(R.id.text);
+		}
+
 	}
 
 	public interface Listener {
@@ -96,89 +118,192 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<GalleryAdapterPi
 		this.lm = lm;
 
 		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
+
+		getAvailableDates();
+		calculateDatePositions();
+	}
+
+	protected class DateGroup{
+		public String date;
+		public int itemCount;
+
+		public DateGroup(String date, int itemCount){
+			this.date = date;
+			this.itemCount = itemCount;
+		}
+	}
+	protected class DatePosition{
+		public int position;
+		public String date;
+
+		public DatePosition(int position, String date){
+			this.position = position;
+			this.date = date;
+		}
+	}
+
+	protected class PosTranslate{
+		public int type;
+		public int dbPosition;
+		public String date = null;
+	}
+
+	protected void getAvailableDates(){
+		Cursor result = db.getAvailableDates();
+		while(result.moveToNext()) {
+			DateGroup group = new DateGroup(result.getString(0),result.getInt(1));
+			dates.add(group);
+			Log.d("dates", group.date + " - " + group.itemCount);
+		}
+	}
+
+	protected void calculateDatePositions(){
+		int totalItems = 0;
+		for(DateGroup group : dates){
+			datePositions.add(new DatePosition(totalItems, group.date));
+			Log.d("datepos", String.valueOf(totalItems) + " - " + group.date);
+
+			totalItems += group.itemCount + 1;
+		}
+	}
+
+	protected PosTranslate translatePos(int pos){
+		int datesCount = 1;
+		for(int i=0;i<datePositions.size();i++){
+			DatePosition datePos = datePositions.get(i);
+			DatePosition nextDatePos = null;
+			if(i+1 < datePositions.size()){
+				nextDatePos = datePositions.get(i+1);
+			}
+
+			if(pos > datePos.position && (nextDatePos == null || pos < nextDatePos.position)){
+				PosTranslate posObj = new PosTranslate();
+				posObj.type = TYPE_ITEM;
+				posObj.dbPosition = pos - datesCount;
+
+				return posObj;
+			}
+			else if(pos == datePos.position){
+				PosTranslate posObj = new PosTranslate();
+				posObj.type = TYPE_DATE;
+				posObj.date = datePos.date;
+
+				return posObj;
+			}
+
+			datesCount++;
+		}
+		return null;
 	}
 
 	// Create new views (invoked by the layout manager)
 	@Override
-	public GalleryAdapterPisasso.GalleryVH onCreateViewHolder(ViewGroup parent, int viewType) {
-		// create a new view
-		RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-				.inflate(R.layout.gallery_item, parent, false);
+	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+		if(viewType == TYPE_ITEM) {
+			// create a new view
+			RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
+					.inflate(R.layout.gallery_item, parent, false);
 
-		GalleryVH vh = new GalleryVH(v);
+			GalleryVH vh = new GalleryVH(v);
 
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(thumbSize, thumbSize);
-		vh.image.setLayoutParams(params);
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(thumbSize, thumbSize);
+			vh.image.setLayoutParams(params);
 
-		return vh;
+			return vh;
+		}
+		else if(viewType == TYPE_DATE){
+			RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
+					.inflate(R.layout.gallery_item_date, parent, false);
+
+			GalleryDate vh = new GalleryDate(v);
+
+			return vh;
+		}
+
+		return null;
 	}
 
 	// Replace the contents of a view (invoked by the layout manager)
 	@Override
-	public void onBindViewHolder(GalleryVH holder, final int position) {
+	public void onBindViewHolder(RecyclerView.ViewHolder holderObj, final int rawPosition) {
 		// - get element from your dataset at this position
 		// - replace the contents of the view with that element
 		//image.setImageDrawable(null);
-		if(isSelectModeActive){
-			int size = Helpers.convertDpToPixels(context, 20);
-			holder.image.setPadding(size,size, size, size);
-			holder.checkbox.setVisibility(View.VISIBLE);
+		PosTranslate transPos = translatePos(rawPosition);
 
-			if (selectedIndices.contains(position)) {
-				holder.checkbox.setChecked(true);
-			}
-			else{
-				holder.checkbox.setChecked(false);
-			}
-		}
-		else{
-			int size = Helpers.convertDpToPixels(context, 5);
-			holder.image.setPadding(size,size, size, size);
-			holder.checkbox.setVisibility(View.GONE);
-		}
+		if(holderObj instanceof GalleryVH) {
+			final int position = transPos.dbPosition;
+			GalleryVH holder = (GalleryVH)holderObj;
+			if (isSelectModeActive) {
+				int size = Helpers.convertDpToPixels(context, 20);
+				holder.image.setPadding(size, size, size, size);
+				holder.checkbox.setVisibility(View.VISIBLE);
 
-		holder.image.setImageBitmap(null);
-		holder.videoIcon.setVisibility(View.GONE);
-		holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
-
-
-
-		final RequestCreator req = picasso.load("p" + String.valueOf(position));
-		req.networkPolicy(NetworkPolicy.NO_CACHE);
-		req.tag(holder);
-		req.addProp("pos", String.valueOf(position));
-		req.into(holder.image, new Callback() {
-			@Override
-			public void onSuccess(RequestHandler.Result result, Request request) {
-				Integer fileType;
-				Integer pos = Integer.valueOf(request.getProp("pos"));
-				if(pos == null){
-					return;
+				if (selectedIndices.contains(position)) {
+					holder.checkbox.setChecked(true);
+				} else {
+					holder.checkbox.setChecked(false);
 				}
-				GalleryVH holder = (GalleryVH)request.tag;
-				Integer cachedFileType = typesCache.get(pos);
-				if(cachedFileType != null){
-					fileType = cachedFileType;
-				}
-				else{
-					fileType = (Integer) result.getProperty("fileType");
-					if(fileType != null) {
-						typesCache.put(pos, fileType);
+			} else {
+				int size = Helpers.convertDpToPixels(context, 5);
+				holder.image.setPadding(size, size, size, size);
+				holder.checkbox.setVisibility(View.GONE);
+			}
+
+			holder.image.setImageBitmap(null);
+			holder.videoIcon.setVisibility(View.GONE);
+			holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
+
+
+			final RequestCreator req = picasso.load("p" + String.valueOf(position));
+			req.networkPolicy(NetworkPolicy.NO_CACHE);
+			req.tag(holder);
+			req.addProp("pos", String.valueOf(position));
+			req.into(holder.image, new Callback() {
+				@Override
+				public void onSuccess(RequestHandler.Result result, Request request) {
+					Integer fileType;
+					Integer pos = Integer.valueOf(request.getProp("pos"));
+					if (pos == null) {
+						return;
+					}
+					GalleryVH holder = (GalleryVH) request.tag;
+					Integer cachedFileType = typesCache.get(pos);
+					if (cachedFileType != null) {
+						fileType = cachedFileType;
+					} else {
+						fileType = (Integer) result.getProperty("fileType");
+						if (fileType != null) {
+							typesCache.put(pos, fileType);
+						}
+					}
+					if (fileType != null && fileType == Crypto.FILE_TYPE_VIDEO) {
+						holder.videoIcon.setVisibility(View.VISIBLE);
+					} else {
+						holder.videoIcon.setVisibility(View.GONE);
 					}
 				}
-				if(fileType != null && fileType == Crypto.FILE_TYPE_VIDEO){
-					holder.videoIcon.setVisibility(View.VISIBLE);
-				}
-				else{
-					holder.videoIcon.setVisibility(View.GONE);
-				}
-			}
 
-			@Override
-			public void onError(@NonNull Throwable t) {
+				@Override
+				public void onError(@NonNull Throwable t) {
 
+				}
+			});
+		}
+		else if(holderObj instanceof GalleryDate) {
+			GalleryDate holder = (GalleryDate)holderObj;
+			holder.text.setText(transPos.date);
+		}
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		for(DatePosition dp : datePositions){
+			if(dp.position == position){
+				return TYPE_DATE;
 			}
-		});
+		}
+		return TYPE_ITEM;
 	}
 
 
@@ -244,7 +369,14 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<GalleryAdapterPi
 	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
-		return (int)db.getTotalFilesCount();
+		/*int totalItems = 0;
+		for(DateGroup group : dates){
+			totalItems += group.itemCount + 1;
+		}
+
+		return totalItems;*/
+		Log.d("totalCount", String.valueOf(db.getTotalFilesCount()));
+		return (int)db.getTotalFilesCount() + dates.size();
 	}
 
 

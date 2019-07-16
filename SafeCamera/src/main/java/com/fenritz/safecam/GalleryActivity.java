@@ -77,8 +77,20 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserLoginSuccess() {
-				AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
+				final AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
 				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager);
+				layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
+					@Override
+					public int getSpanSize(int position) {
+						switch(adapter.getItemViewType(position)){
+							case GalleryAdapterPisasso.TYPE_DATE:
+								return layoutManager.getCurrentCalcSpanCount();
+							default:
+								return 1;
+						}
+					}
+				});
+
 				recyclerView.setAdapter(adapter);
 				recyclerView.setLayoutManager(layoutManager);
 				recyclerView.setHasFixedSize(true);
