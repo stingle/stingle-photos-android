@@ -1,5 +1,6 @@
 package com.fenritz.safecam;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import com.fenritz.safecam.Auth.LoginManager;
@@ -33,7 +34,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	private DragSelectRecyclerView recyclerView;
 	private GalleryAdapterPisasso adapter;
-	private RecyclerView.LayoutManager layoutManager;
+	AutoFitGridLayoutManager layoutManager;
 
 
 	@Override
@@ -58,6 +59,18 @@ public class GalleryActivity extends AppCompatActivity
 		navigationView.setNavigationItemSelectedListener(this);
 
 		recyclerView = (DragSelectRecyclerView) findViewById(R.id.gallery_recycler_view);
+		layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
+		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
+			@Override
+			public int getSpanSize(int position) {
+				switch(adapter.getItemViewType(position)){
+					case GalleryAdapterPisasso.TYPE_DATE:
+						return layoutManager.getCurrentCalcSpanCount();
+					default:
+						return 1;
+				}
+			}
+		});
 
 		// use this setting to improve performance if you know that changes
 		// in content do not change the layout size of the RecyclerView
@@ -77,20 +90,7 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserLoginSuccess() {
-				final AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
 				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager);
-				layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
-					@Override
-					public int getSpanSize(int position) {
-						switch(adapter.getItemViewType(position)){
-							case GalleryAdapterPisasso.TYPE_DATE:
-								return layoutManager.getCurrentCalcSpanCount();
-							default:
-								return 1;
-						}
-					}
-				});
-
 				recyclerView.setAdapter(adapter);
 				recyclerView.setLayoutManager(layoutManager);
 				recyclerView.setHasFixedSize(true);
@@ -102,6 +102,12 @@ public class GalleryActivity extends AppCompatActivity
 			}
 		});
 		LoginManager.disableLockTimer(this);
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		layoutManager.updateAutoFit();
 	}
 
 	@Override

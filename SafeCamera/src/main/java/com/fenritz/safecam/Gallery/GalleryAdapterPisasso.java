@@ -167,6 +167,15 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 	}
 
+	protected boolean isPositionIsDate(int position){
+		for(DatePosition dp : datePositions){
+			if(dp.position == position){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	protected PosTranslate translatePos(int pos){
 		int datesCount = 1;
 		for(int i=0;i<datePositions.size();i++){
@@ -239,7 +248,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				holder.image.setPadding(size, size, size, size);
 				holder.checkbox.setVisibility(View.VISIBLE);
 
-				if (selectedIndices.contains(position)) {
+				if (selectedIndices.contains(rawPosition)) {
 					holder.checkbox.setChecked(true);
 				} else {
 					holder.checkbox.setChecked(false);
@@ -298,12 +307,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	@Override
 	public int getItemViewType(int position) {
-		for(DatePosition dp : datePositions){
-			if(dp.position == position){
-				return TYPE_DATE;
-			}
-		}
-		return TYPE_ITEM;
+		return (isPositionIsDate(position) ? TYPE_DATE : TYPE_ITEM);
 	}
 
 
@@ -311,6 +315,9 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	@Override
 	public void setSelected(int index, boolean selected) {
 		Log.d("MainAdapter", "setSelected(" + index + ", " + selected + ")");
+		if(isPositionIsDate(index)){
+			return;
+		}
 		if (!selected) {
 			selectedIndices.remove((Integer) index);
 		} else if (!selectedIndices.contains(index)) {
@@ -343,6 +350,9 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	public void toggleSelected(int index) {
+		if(isPositionIsDate(index)){
+			return;
+		}
 		if (selectedIndices.contains(index)) {
 			selectedIndices.remove((Integer) index);
 		} else {
@@ -369,14 +379,14 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
-		/*int totalItems = 0;
+		int totalItems = 0;
 		for(DateGroup group : dates){
 			totalItems += group.itemCount + 1;
 		}
 
-		return totalItems;*/
-		Log.d("totalCount", String.valueOf(db.getTotalFilesCount()));
-		return (int)db.getTotalFilesCount() + dates.size();
+		return totalItems;
+		//Log.d("totalCount", String.valueOf(db.getTotalFilesCount()));
+		//return (int)db.getTotalFilesCount() + dates.size();
 	}
 
 

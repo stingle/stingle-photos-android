@@ -11,12 +11,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
@@ -243,15 +245,18 @@ public class Helpers {
 	}
 
 	public static int getThumbSize(Context context){
+		return getThumbSize(context, 3);
+	}
+	public static int getThumbSize(Context context, int colls){
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
 		wm.getDefaultDisplay().getMetrics(metrics);
-		
+
 		if(metrics.widthPixels <= metrics.heightPixels){
-			return (int) Math.floor(metrics.widthPixels / 3);
+			return (int) Math.floor(metrics.widthPixels / colls);
 		}
 		else{
-			return (int) Math.floor(metrics.heightPixels / 3);
+			return (int) Math.floor(metrics.heightPixels / colls);
 		}
 	}
 

@@ -12,9 +12,9 @@
     <color name="dark_bg">#1e2535</color>
     <color name="galery_item_bg">#66B6B6B6</color>
 
-    <color name="primaryColor">#0277bd</color>
-    <color name="primaryLightColor">#58a5f0</color>
-    <color name="primaryDarkColor">#004c8c</color>
+    <color name="primaryColor">#b71c1c</color>
+    <color name="primaryLightColor">#f05545</color>
+    <color name="primaryDarkColor">#7f0000</color>
     <color name="primaryTextColor">#ffffff</color>
-    <color name="colorAccent">#0277bd</color>
+    <color name="colorAccent">#b71c1c</color>
 </resources>

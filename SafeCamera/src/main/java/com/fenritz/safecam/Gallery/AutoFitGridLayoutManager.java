@@ -28,6 +28,10 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 		return currentCalcSpanCount;
 	}
 
+	public void updateAutoFit(){
+		columnWidthChanged = true;
+	}
+
 	@Override
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		if (columnWidthChanged && columnWidth > 0) {
