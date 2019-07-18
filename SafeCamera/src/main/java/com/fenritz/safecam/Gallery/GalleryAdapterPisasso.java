@@ -365,11 +365,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	public void clearSelected() {
-		if (selectedIndices.isEmpty()) {
-			return;
-		}
 		selectedIndices.clear();
-		notifyDataSetChanged();
 		if (callback != null) {
 			callback.onSelectionChanged(0);
 		}

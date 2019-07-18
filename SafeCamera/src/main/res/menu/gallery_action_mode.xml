@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_action_share"
+        android:title="@string/share"
+        app:showAsAction="always|withText" />
+    <item
+        android:id="@+id/decrypt"
+        android:icon="@drawable/ic_action_unlock"
+        android:title="@string/save_to_gallery"
+        app:showAsAction="always|withText" />
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_action_delete"
+        android:title="@string/delete"
+        app:showAsAction="always|withText" />
+</menu>

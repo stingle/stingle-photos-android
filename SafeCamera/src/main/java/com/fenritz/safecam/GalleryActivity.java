@@ -12,8 +12,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.util.Log;
+import android.view.MenuInflater;
 import android.view.View;
 
+import androidx.appcompat.view.ActionMode;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -26,15 +28,17 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import android.view.Menu;
 
 public class GalleryActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapterPisasso.Listener {
 
-	private DragSelectRecyclerView recyclerView;
-	private GalleryAdapterPisasso adapter;
-	AutoFitGridLayoutManager layoutManager;
+	protected DragSelectRecyclerView recyclerView;
+	protected GalleryAdapterPisasso adapter;
+	protected AutoFitGridLayoutManager layoutManager;
+	protected ActionMode actionMode;
 
 
 	@Override
@@ -94,6 +98,7 @@ public class GalleryActivity extends AppCompatActivity
 				recyclerView.setAdapter(adapter);
 				recyclerView.setLayoutManager(layoutManager);
 				recyclerView.setHasFixedSize(true);
+				((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 			}
 
 			@Override
@@ -102,6 +107,13 @@ public class GalleryActivity extends AppCompatActivity
 			}
 		});
 		LoginManager.disableLockTimer(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		LoginManager.setLockedTime(this);
 	}
 
 	@Override
@@ -116,13 +128,15 @@ public class GalleryActivity extends AppCompatActivity
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
 			drawer.closeDrawer(GravityCompat.START);
 		}
-		else if (!adapter.getSelectedIndices().isEmpty()) {
-				adapter.clearSelected();
+		else if (adapter.isSelectionModeActive()) {
+			exitActionMode();
 		}
 		else {
 			super.onBackPressed();
 		}
 	}
+
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -183,12 +197,52 @@ public class GalleryActivity extends AppCompatActivity
 	public void onLongClick(int index) {
 		Log.d("longclick", "longclick");
 		recyclerView.setDragSelectActive(true, index);
+		if(!adapter.isSelectionModeActive()){
+			actionMode = startSupportActionMode(getActionModeCallback());
+		}
 		adapter.setSelectionModeActive(true);
 	}
+
 
 	@Override
 	public void onSelectionChanged(int count) {
 
 	}
+
+
+	protected ActionMode.Callback getActionModeCallback(){
+		return new ActionMode.Callback() {
+			@Override
+			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+				mode.getMenuInflater().inflate(R.menu.gallery_action_mode, menu);
+				return true;
+			}
+
+			@Override
+			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+				return true;
+			}
+
+			@Override
+			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+				return true;
+			}
+
+			@Override
+			public void onDestroyActionMode(ActionMode mode) {
+				exitActionMode();
+			}
+		};
+	}
+
+
+	protected void exitActionMode(){
+		adapter.clearSelected();
+		recyclerView.setDragSelectActive(false, 0);
+		if(actionMode != null){
+			actionMode.finish();
+		}
+	}
+
 
 }
