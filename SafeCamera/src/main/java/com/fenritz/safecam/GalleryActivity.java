@@ -1,11 +1,14 @@
 package com.fenritz.safecam;
 
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
 import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
 import com.fenritz.safecam.Gallery.GalleryAdapterPisasso;
+import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Gallery.DragSelectRecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -32,6 +35,9 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import android.view.Menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GalleryActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapterPisasso.Listener {
 
@@ -39,13 +45,15 @@ public class GalleryActivity extends AppCompatActivity
 	protected GalleryAdapterPisasso adapter;
 	protected AutoFitGridLayoutManager layoutManager;
 	protected ActionMode actionMode;
+	protected Toolbar toolbar;
 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery);
-		Toolbar toolbar = findViewById(R.id.toolbar);
+		toolbar = findViewById(R.id.toolbar);
+		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener() {
@@ -94,7 +102,7 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserLoginSuccess() {
-				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager);
+				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, GalleryAdapterPisasso.FOLDER_MAIN);
 				recyclerView.setAdapter(adapter);
 				recyclerView.setLayoutManager(layoutManager);
 				recyclerView.setHasFixedSize(true);
@@ -187,7 +195,6 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public void onClick(int index) {
-		Log.d("click", String.valueOf(index));
 		if (adapter.isSelectionModeActive()){
 			adapter.toggleSelected(index);
 		}
@@ -195,10 +202,10 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public void onLongClick(int index) {
-		Log.d("longclick", "longclick");
 		recyclerView.setDragSelectActive(true, index);
 		if(!adapter.isSelectionModeActive()){
 			actionMode = startSupportActionMode(getActionModeCallback());
+			onSelectionChanged(1);
 		}
 		adapter.setSelectionModeActive(true);
 	}
@@ -206,7 +213,14 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public void onSelectionChanged(int count) {
-
+		if(actionMode != null) {
+			if(count == 0){
+				actionMode.setTitle("");
+			}
+			else {
+				actionMode.setTitle(String.valueOf(count));
+			}
+		}
 	}
 
 
@@ -225,12 +239,41 @@ public class GalleryActivity extends AppCompatActivity
 
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+				switch(item.getItemId()){
+					case R.id.delete :
+						final List<Integer> indeces = adapter.getSelectedIndices();
+						Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(indeces.size())), new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										ArrayList<String> filenames = new ArrayList<String>();
+										for(Integer index : indeces){
+											StingleDbFile file = adapter.getStingleFileAtPosition(index);
+											filenames.add(file.filename);
+										}
+
+										new SyncManager.MoveToTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
+											@Override
+											public void onFinish() {
+												for(Integer index : indeces) {
+													adapter.updateDataSet();
+												}
+												exitActionMode();
+											}
+										}).execute();
+									}
+								},
+								null);
+
+						break;
+				}
+
 				return true;
 			}
 
 			@Override
 			public void onDestroyActionMode(ActionMode mode) {
 				exitActionMode();
+				actionMode = null;
 			}
 		};
 	}

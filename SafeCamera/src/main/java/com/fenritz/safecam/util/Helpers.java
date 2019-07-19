@@ -40,6 +40,7 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fenritz.safecam.Camera.CameraImageSize;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.GalleryActivityOld;
 import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -136,6 +137,15 @@ public class Helpers {
 		dialog.show();
 	}
 
+	public static void showConfirmDialog(Context context, String message, DialogInterface.OnClickListener yes, DialogInterface.OnClickListener no) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(message);
+		builder.setPositiveButton(context.getString(R.string.yes), yes);
+		builder.setNegativeButton(context.getString(R.string.no), no);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
 	public static String getDefaultHomeDir(){
 		List<StorageInfo> storageList = StorageUtils.getStorageList();
 		if(storageList.size() > 0){
@@ -158,14 +168,18 @@ public class Helpers {
 		
 		return ensureLastSlash(currentHomeDir);
 	}
-	
+
 	public static String getHomeDir(Context context) {
+		return getHomeDir(context, true);
+	}
+
+	public static String getHomeDir(Context context, boolean autoCreateDirs) {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		
 		String homeDirPath = getHomeDirParentPath(context) + sharedPrefs.getString("home_folder_name", context.getString(R.string.default_home_folder_name));
 		
-		if(!new File(homeDirPath).exists()){
-			Helpers.createFolders(context, homeDirPath);
+		if(autoCreateDirs && !new File(homeDirPath).exists()){
+			Helpers.createFolders(context);
 		}
 		
 		return homeDirPath;
@@ -179,37 +193,15 @@ public class Helpers {
 	}
 
 	public static String getThumbsDir(Context context) {
-		return getThumbsDir(context, null);
-	}
-	
-	public static String getThumbsDir(Context context, String homeDir) {
-		if(homeDir != null){
-			return homeDir + "/" + context.getString(R.string.default_thumb_folder_name);
-		}
-		else{
-			return getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
-		}
+		return getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
 	}
 
 	public static void createFolders(Context context) {
-		createFolders(context, null);
-	}
-	
-	public static void createFolders(Context context, String homeDir) {
-		File dir = new File(getThumbsDir(context, homeDir));
+		String homeDirPath = getHomeDir(context, false);
+
+		File dir = new File(homeDirPath + "/" + context.getString(R.string.default_thumb_folder_name));
 		if (!dir.exists() || !dir.isDirectory()) {
 			dir.mkdirs();
-		}
-		
-		File tmpFile;
-		if(homeDir != null){
-			tmpFile = new File(homeDir + "/.tmp/");
-		}
-		else{
-			tmpFile = new File(Helpers.getHomeDir(context) + "/.tmp/");
-		}
-		if (!tmpFile.exists() || !tmpFile.isDirectory()) {
-			tmpFile.mkdirs();
 		}
 	}
 

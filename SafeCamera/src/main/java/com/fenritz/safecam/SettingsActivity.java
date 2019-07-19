@@ -347,7 +347,7 @@ public class SettingsActivity extends PreferenceActivity {
             });
         }
         protected void initFolders(String homePath){
-            Helpers.createFolders(GeneralPreferenceFragment.this.getContext(), homePath);
+            //Helpers.createFolders(GeneralPreferenceFragment.this.getContext(), homePath);
         }
     }
 

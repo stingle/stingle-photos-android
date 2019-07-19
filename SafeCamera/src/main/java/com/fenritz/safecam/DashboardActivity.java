@@ -23,6 +23,8 @@ import android.view.WindowManager;
 import androidx.core.content.FileProvider;
 
 import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Db.StingleDbContract;
+import com.fenritz.safecam.Db.StingleDbHelper;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.LoginManager;
@@ -175,7 +177,7 @@ public class DashboardActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 
-		LoginManager.disableLockTimer(this);
+		//LoginManager.disableLockTimer(this);
 
 		Helpers.checkIsMainFolderWritable(this);
 	}
@@ -184,7 +186,7 @@ public class DashboardActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 
-		LoginManager.setLockedTime(this);
+		//LoginManager.setLockedTime(this);
 	}
 
 	@Override
@@ -317,10 +319,18 @@ public class DashboardActivity extends Activity {
 				openerIntent.putExtra("android.content.extra.SHOW_ADVANCED", true);
 				startActivityForResult(openerIntent, 20);
 				return true;
+			case R.id.resetCloudSync:
+				Helpers.storePreference(this, SyncManager.PREF_LAST_SEEN_TIME, 0L);
+				return true;
+			case R.id.emptyDb:
+				Helpers.storePreference(this, SyncManager.PREF_LAST_SEEN_TIME, 0L);
+				StingleDbHelper db = new StingleDbHelper(this, StingleDbContract.Files.TABLE_NAME_FILES);
+				db.onUpgrade(db.getWritableDatabase(), 1,1);
+				return true;
 			case R.id.upload:
 				SyncManager.syncFSToDB(this);
-				SyncManager.uploadToCloud(this);
 				SyncManager.syncCloudToLocalDb(this);
+				SyncManager.uploadToCloud(this);
 
 				/*HashMap<String, String> postParams = new HashMap<String, String>();
 

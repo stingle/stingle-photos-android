@@ -312,6 +312,7 @@ public class HttpsClient {
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
+			connection.setChunkedStreamingMode(0);
 
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Connection", "Keep-Alive");

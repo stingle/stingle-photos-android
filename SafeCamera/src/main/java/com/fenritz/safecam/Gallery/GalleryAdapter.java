@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fenritz.safecam.Auth.KeyManagement;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Db.StingleDbHelper;
 import com.fenritz.safecam.Net.HttpsClient;
@@ -93,7 +94,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 	public GalleryAdapter(Context context, Listener callback, AutoFitGridLayoutManager lm) {
 		this.context = context;
 		this.callback = callback;
-		this.db = new StingleDbHelper(context);
+		this.db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
 

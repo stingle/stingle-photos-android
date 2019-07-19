@@ -16,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fenritz.safecam.Crypto.Crypto;
+import com.fenritz.safecam.Db.StingleDbContract;
+import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Db.StingleDbHelper;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -50,6 +52,31 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
 
+	public static final int FOLDER_MAIN = 0;
+	public static final int FOLDER_TRASH = 1;
+
+
+	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType) {
+		this.context = context;
+		this.callback = callback;
+		this.db = new StingleDbHelper(context, (folderType == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		this.thumbSize = Helpers.getThumbSize(context);
+		this.lm = lm;
+
+		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
+
+		getAvailableDates();
+		calculateDatePositions();
+	}
+
+	public void updateDataSet(){
+		typesCache.evictAll();
+		picasso.evictAll();
+		getAvailableDates();
+		calculateDatePositions();
+		notifyDataSetChanged();
+	}
+
 	// Provide a reference to the views for each data item
 	// Complex data items may need more than one view per item, and
 	// you provide access to all the views for a data item in a view holder
@@ -67,6 +94,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			image = v.findViewById(R.id.thumbImage);
 			checkbox = v.findViewById(R.id.checkBox);
 			videoIcon = v.findViewById(R.id.videoIcon);
+			checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
 		}
@@ -109,20 +137,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		void onSelectionChanged(int count);
 	}
 
-	// Provide a suitable constructor (depends on the kind of dataset)
-	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm) {
-		this.context = context;
-		this.callback = callback;
-		this.db = new StingleDbHelper(context);
-		this.thumbSize = Helpers.getThumbSize(context);
-		this.lm = lm;
-
-		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
-
-		getAvailableDates();
-		calculateDatePositions();
-	}
-
 	protected class DateGroup{
 		public String date;
 		public int itemCount;
@@ -149,6 +163,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	protected void getAvailableDates(){
+		dates.clear();
 		Cursor result = db.getAvailableDates();
 		while(result.moveToNext()) {
 			DateGroup group = new DateGroup(result.getString(0),result.getInt(1));
@@ -158,6 +173,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	protected void calculateDatePositions(){
+		datePositions.clear();
 		int totalItems = 0;
 		for(DateGroup group : dates){
 			datePositions.add(new DatePosition(totalItems, group.date));
@@ -305,16 +321,19 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 	}
 
+
+
 	@Override
 	public int getItemViewType(int position) {
 		return (isPositionIsDate(position) ? TYPE_DATE : TYPE_ITEM);
 	}
 
-
+	public StingleDbFile getStingleFileAtPosition(int position){
+		return db.getFileAtPosition(translatePos(position).dbPosition);
+	}
 
 	@Override
 	public void setSelected(int index, boolean selected) {
-		Log.d("MainAdapter", "setSelected(" + index + ", " + selected + ")");
 		if(isPositionIsDate(index)){
 			return;
 		}
@@ -375,14 +394,14 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
-		int totalItems = 0;
+		/*int totalItems = 0;
 		for(DateGroup group : dates){
 			totalItems += group.itemCount + 1;
 		}
 
-		return totalItems;
+		return totalItems;*/
 		//Log.d("totalCount", String.valueOf(db.getTotalFilesCount()));
-		//return (int)db.getTotalFilesCount() + dates.size();
+		return (int)db.getTotalFilesCount() + dates.size();
 	}
 
 

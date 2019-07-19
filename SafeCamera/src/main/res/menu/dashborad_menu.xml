@@ -38,6 +38,14 @@
         android:icon="@android:drawable/ic_menu_save"
         android:title="Upload" />
     <item
+        android:id="@+id/resetCloudSync"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Reset Cloud Sync" />
+    <item
+        android:id="@+id/emptyDb"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Empty Local DB" />
+    <item
         android:id="@+id/read_security"
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="@string/read_security" />

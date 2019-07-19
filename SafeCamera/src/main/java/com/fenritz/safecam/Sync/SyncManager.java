@@ -1,12 +1,15 @@
 package com.fenritz.safecam.Sync;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.fenritz.safecam.Auth.KeyManagement;
+import com.fenritz.safecam.Crypto.CryptoException;
+import com.fenritz.safecam.DashboardActivity;
 import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Net.HttpsClient;
@@ -14,6 +17,7 @@ import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.Db.StingleDbHelper;
+import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.Util.Helpers;
 import com.google.gson.JsonObject;
 
@@ -35,7 +39,7 @@ public class SyncManager {
 	public SyncManager(Context context){
 		this.context = context;
 
-		StingleDbHelper dbHelper = new StingleDbHelper(context);
+		StingleDbHelper dbHelper = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 
 	}
@@ -60,7 +64,7 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			StingleDbHelper db = new StingleDbHelper(context);
+			StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 			File dir = new File(Helpers.getHomeDir(this.context));
 
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_LOCAL);
@@ -107,7 +111,8 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			final StingleDbHelper db = new StingleDbHelper(context);
+			Log.d("uploadtocloud", "1");
+			final StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 
 			HashMap<String, String> postParams = new HashMap<String, String>();
 
@@ -126,6 +131,7 @@ public class SyncManager {
 			result.close();
 
 			for(String file : files) {
+				Log.d("fileToUpload", file);
 				HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + file, SP_FILE_MIME_TYPE);
 				HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumbDir.getPath() + "/" + file, SP_FILE_MIME_TYPE);
 
@@ -163,7 +169,7 @@ public class SyncManager {
 
 		public SyncCloudToLocalDbAsyncTask(Context context){
 			this.context = context;
-			db = new StingleDbHelper(context);
+			db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 		}
 
 		@Override
@@ -211,8 +217,9 @@ public class SyncManager {
 			else {
 				if (file.dateModified != remoteFile.dateModified) {
 					file.dateModified = remoteFile.dateModified;
-					db.updateFile(file);
 				}
+				file.isRemote = true;
+				db.updateFile(file);
 			}
 
 			if(remoteFile.dateCreated > lastSeenTime) {
@@ -225,5 +232,74 @@ public class SyncManager {
 			super.onPostExecute(result);
 			db.close();
 		}
+	}
+
+	public static class MoveToTrashAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		protected Context context;
+		protected ArrayList<String> filenames;
+		protected OnFinish onFinish;
+
+		public MoveToTrashAsyncTask(Context context, ArrayList<String> filenames, OnFinish onFinish){
+			this.context = context;
+			this.filenames = filenames;
+			this.onFinish = onFinish;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			File dir = new File(Helpers.getHomeDir(this.context));
+
+			for(String filename : filenames) {
+				StingleDbFile file = db.getFileIfExists(filename);
+				if (file != null) {
+					if (file.isRemote) {
+						if (!notifyCloudAboutTrash(file.filename)) {
+							db.close();
+							trashDb.close();
+							return null;
+						}
+					}
+
+					db.deleteFile(file.filename);
+					trashDb.insertFile(file);
+				}
+			}
+
+
+			db.close();
+			trashDb.close();
+			return null;
+		}
+
+		protected boolean notifyCloudAboutTrash(String filename){
+			HashMap<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("filename", filename);
+
+			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.trash_file_path), postParams);
+			StingleResponse response = new StingleResponse(this.context, json, false);
+
+			if(response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
+		}
+	}
+
+	public static abstract class OnFinish{
+		public abstract void onFinish();
 	}
 }

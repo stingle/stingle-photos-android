@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class StingleDbHelper extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = 2;
 	public static final String DATABASE_NAME = "stingleFiles.db";
 
 	public static final int GET_MODE_ALL = 0;
@@ -26,15 +26,21 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	protected SQLiteDatabase dbWrite;
 	protected SQLiteDatabase dbRead;
 
-	public StingleDbHelper(Context context) {
+	protected String tableName;
+
+	public StingleDbHelper(Context context, String tableName) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+		this.tableName = tableName;
 	}
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(StingleDbContract.SQL_CREATE_ENTRIES);
+		db.execSQL(StingleDbContract.SQL_CREATE_FILES);
+		db.execSQL(StingleDbContract.SQL_CREATE_TRASH);
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL(StingleDbContract.SQL_DELETE_ENTRIES);
+		db.execSQL(StingleDbContract.SQL_DELETE_FILES);
+		db.execSQL(StingleDbContract.SQL_DELETE_TRASH);
 		onCreate(db);
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -54,6 +60,10 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		return this.dbRead;
 	}
 
+	public long insertFile(StingleDbFile file){
+		return insertFile(file.filename, file.isLocal, file.isRemote, file.dateCreated, file.dateModified);
+	}
+
 	public long insertFile(String filename, boolean isLocal, boolean isRemote, long dateCreated, long dateModified){
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, filename);
@@ -63,7 +73,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
 
-		return openWriteDb().insertWithOnConflict(StingleDbContract.Files.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		return openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
 	}
 
@@ -79,7 +89,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String[] selectionArgs = { file.filename };
 
 		return openWriteDb().update(
-				StingleDbContract.Files.TABLE_NAME,
+				tableName,
 				values,
 				selection,
 				selectionArgs);
@@ -93,7 +103,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String[] selectionArgs = { filename };
 
 		return openWriteDb().update(
-				StingleDbContract.Files.TABLE_NAME,
+				tableName,
 				values,
 				selection,
 				selectionArgs);
@@ -103,7 +113,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return openWriteDb().delete(StingleDbContract.Files.TABLE_NAME, selection, selectionArgs);
+		return openWriteDb().delete(tableName, selection, selectionArgs);
 	}
 
 	public StingleDbFile getFileIfExists(String filename){
@@ -119,7 +129,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String[] selectionArgs = {filename};
 
 		Cursor result = openReadDb().query(
-				StingleDbContract.Files.TABLE_NAME,   // The table to query
+				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
 				selectionArgs,          // The values for the WHERE clause
@@ -182,7 +192,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + " DESC";
 
 		return openReadDb().query(
-				StingleDbContract.Files.TABLE_NAME,   // The table to query
+				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
 				selectionArgs,          // The values for the WHERE clause
@@ -205,7 +215,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 		Cursor result = openReadDb().query(
 				false,
-				StingleDbContract.Files.TABLE_NAME,
+				tableName,
 				projection,
 				null,
 				null,
@@ -232,7 +242,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	}
 
 	public long getTotalFilesCount(){
-		return DatabaseUtils.queryNumEntries(openReadDb(), StingleDbContract.Files.TABLE_NAME);
+		return DatabaseUtils.queryNumEntries(openReadDb(), tableName);
 	}
 
 	public void close(){

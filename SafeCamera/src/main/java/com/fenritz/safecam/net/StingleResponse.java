@@ -18,6 +18,10 @@ public class StingleResponse{
 	JSONArray errors = null;
 
 	public StingleResponse(Context context, JSONObject result){
+		this(context, result, true);
+	}
+
+	public StingleResponse(Context context, JSONObject result, boolean showErrorInfos){
 		this.context = context;
 		this.result = result;
 
@@ -43,7 +47,9 @@ public class StingleResponse{
 				this.errors = result.optJSONArray("errors");
 			}
 
-			this.showErrorsInfos();
+			if(showErrorInfos) {
+				this.showErrorsInfos();
+			}
 		}
 		catch (JSONException e) {
 			this.status = "nok";
