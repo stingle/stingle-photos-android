@@ -3,6 +3,7 @@ package com.fenritz.safecam.Util;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -11,14 +12,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.drawable.GradientDrawable;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
@@ -40,7 +39,6 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fenritz.safecam.Camera.CameraImageSize;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
-import com.fenritz.safecam.GalleryActivityOld;
 import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -144,6 +142,19 @@ public class Helpers {
 		builder.setNegativeButton(context.getString(R.string.no), no);
 		AlertDialog dialog = builder.create();
 		dialog.show();
+	}
+
+	public static ProgressDialog showProgressDialog(Context context, String message, DialogInterface.OnCancelListener onCancel){
+		ProgressDialog progressDialog = new ProgressDialog(context);
+		if(onCancel != null) {
+			progressDialog.setCancelable(true);
+			progressDialog.setOnCancelListener(onCancel);
+		}
+		progressDialog.setMessage(message);
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progressDialog.show();
+
+		return progressDialog;
 	}
 
 	public static String getDefaultHomeDir(){

@@ -29,6 +29,8 @@
     <string name="get_server_files_path">sync/getFilesList</string>
     <string name="download_file_path">sync/download</string>
     <string name="trash_file_path">sync/trash</string>
+    <string name="restore_file_path">sync/restore</string>
+    <string name="delete_file_path">sync/delete</string>
 
     <string name="security_page_link">http://www.safecamera.org/security</string>
     

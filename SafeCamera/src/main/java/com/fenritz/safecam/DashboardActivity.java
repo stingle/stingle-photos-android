@@ -55,7 +55,7 @@ public class DashboardActivity extends Activity {
 
 		initViews();
 
-		IntentFilter intentFilter = new IntentFilter();
+		/*IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
 			@Override
@@ -63,7 +63,7 @@ public class DashboardActivity extends Activity {
 				finish();
 			}
 		};
-		registerReceiver(receiver, intentFilter);
+		registerReceiver(receiver, intentFilter);*/
 
 		boolean showPopup = getIntent().getBooleanExtra("showPopup", false);
 		if (showPopup) {
@@ -191,9 +191,9 @@ public class DashboardActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if (receiver != null) {
+		/*if (receiver != null) {
 			unregisterReceiver(receiver);
-		}
+		}*/
 		super.onDestroy();
 	}
 
@@ -321,9 +321,11 @@ public class DashboardActivity extends Activity {
 				return true;
 			case R.id.resetCloudSync:
 				Helpers.storePreference(this, SyncManager.PREF_LAST_SEEN_TIME, 0L);
+				Helpers.storePreference(this, SyncManager.PREF_LAST_DEL_SEEN_TIME, 0L);
 				return true;
 			case R.id.emptyDb:
 				Helpers.storePreference(this, SyncManager.PREF_LAST_SEEN_TIME, 0L);
+				Helpers.storePreference(this, SyncManager.PREF_LAST_DEL_SEEN_TIME, 0L);
 				StingleDbHelper db = new StingleDbHelper(this, StingleDbContract.Files.TABLE_NAME_FILES);
 				db.onUpgrade(db.getWritableDatabase(), 1,1);
 				return true;

@@ -234,7 +234,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 	public Cursor getAvailableDates(){
 		return openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
-						"FROM files " +
+						"FROM " + tableName + " " +
 						"GROUP BY cdate " +
 						"ORDER BY cdate DESC"
 				, null);

@@ -34,7 +34,15 @@ public class SyncManager {
 	protected Context context;
 	protected SQLiteDatabase db;
 	public static final String PREF_LAST_SEEN_TIME = "file_last_seen_time";
+	public static final String PREF_LAST_DEL_SEEN_TIME = "file_last_del_seen_time";
 	public static final String SP_FILE_MIME_TYPE = "application/stinglephoto";
+
+	public static final int FOLDER_MAIN = 0;
+	public static final int FOLDER_TRASH = 1;
+
+	public static final int DELETE_EVENT_TRASH = 1;
+	public static final int DELETE_EVENT_RESTORE = 2;
+	public static final int DELETE_EVENT_DELETE = 3;
 
 	public SyncManager(Context context){
 		this.context = context;
@@ -111,47 +119,54 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			Log.d("uploadtocloud", "1");
-			final StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			uploadFolder(FOLDER_MAIN);
+			uploadFolder(FOLDER_TRASH);
 
-			HashMap<String, String> postParams = new HashMap<String, String>();
 
-			postParams.put("token", KeyManagement.getApiToken(context));
+			return null;
+		}
+
+		protected void uploadFolder(int folder){
+			final StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
 			File dir = new File(Helpers.getHomeDir(context));
 			File thumbDir = new File(Helpers.getThumbsDir(context));
-			final ArrayList<String> files = new ArrayList<String>();
 
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
 
 			while(result.moveToNext()) {
 				String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_FILENAME));
-				files.add(filename);
-			}
-			result.close();
+				String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED));
+				String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED));
 
-			for(String file : files) {
-				Log.d("fileToUpload", file);
-				HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + file, SP_FILE_MIME_TYPE);
-				HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumbDir.getPath() + "/" + file, SP_FILE_MIME_TYPE);
+				Log.d("uploadingFile", filename);
+				HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
+				HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumbDir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
 
 				ArrayList<HttpsClient.FileToUpload> filesToUpload = new ArrayList<HttpsClient.FileToUpload>();
 				filesToUpload.add(fileToUpload);
 				filesToUpload.add(thumbToUpload);
+
+				HashMap<String, String> postParams = new HashMap<String, String>();
+
+				postParams.put("token", KeyManagement.getApiToken(context));
+				postParams.put("folder", String.valueOf(folder));
+				postParams.put("dateCreated", dateCreated);
+				postParams.put("dateModified", dateModified);
 
 				JSONObject resp = HttpsClient.multipartUpload(
 						context.getString(R.string.api_server_url) + context.getString(R.string.upload_file_path),
 						postParams,
 						filesToUpload
 				);
-				StingleResponse response = new StingleResponse(this.context, resp);
+				StingleResponse response = new StingleResponse(this.context, resp, false);
 				if(response.isStatusOk()){
-					db.markFileAsRemote(file);
+					db.markFileAsRemote(filename);
 				}
 			}
+			result.close();
 
 			db.close();
-			return null;
 		}
 
 		@Override
@@ -165,29 +180,58 @@ public class SyncManager {
 
 		protected Context context;
 		protected StingleDbHelper db;
+		protected StingleDbHelper trashDb;
 		protected long lastSeenTime = 0;
+		protected long lastDelSeenTime = 0;
 
 		public SyncCloudToLocalDbAsyncTask(Context context){
 			this.context = context;
 			db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
 			lastSeenTime = Helpers.getPreference(context, PREF_LAST_SEEN_TIME, (long)0);
+			lastDelSeenTime = Helpers.getPreference(context, PREF_LAST_DEL_SEEN_TIME, (long)0);
 
+			getFileList();
+
+			Helpers.storePreference(context, PREF_LAST_SEEN_TIME, lastSeenTime);
+			Helpers.storePreference(context, PREF_LAST_DEL_SEEN_TIME, lastDelSeenTime);
+
+			return null;
+		}
+
+		protected void getFileList(){
 			HashMap<String, String> postParams = new HashMap<String, String>();
 
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("lastSeenTime", String.valueOf(lastSeenTime));
+			postParams.put("lastDelSeenTime", String.valueOf(lastDelSeenTime));
 
 
 			JSONObject resp = HttpsClient.postFunc(
 					context.getString(R.string.api_server_url) + context.getString(R.string.get_server_files_path),
 					postParams
 			);
-			StingleResponse response = new StingleResponse(this.context, resp);
+			StingleResponse response = new StingleResponse(this.context, resp, false);
 			if(response.isStatusOk()){
+				String delsStr = response.get("deletes");
+				if(delsStr != null){
+					try {
+						JSONArray deletes = new JSONArray(delsStr);
+						for(int i=0; i<deletes.length(); i++){
+							JSONObject deleteEvent = deletes.optJSONObject(i);
+							if(deleteEvent != null){
+								processDeleteEvent(deleteEvent);
+							}
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+
 				String filesStr = response.get("files");
 				if(filesStr != null){
 					try {
@@ -195,35 +239,114 @@ public class SyncManager {
 						for(int i=0; i<files.length(); i++){
 							JSONObject file = files.optJSONObject(i);
 							if(file != null){
-								processFile(new StingleDbFile(file));
+								processFile(new StingleDbFile(file), FOLDER_MAIN);
 							}
 						}
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
 				}
-			}
-			Helpers.storePreference(context, PREF_LAST_SEEN_TIME, lastSeenTime);
 
-			return null;
+				String trashStr = response.get("trash");
+				if(trashStr != null){
+					try {
+						JSONArray files = new JSONArray(trashStr);
+						for(int i=0; i<files.length(); i++){
+							JSONObject file = files.optJSONObject(i);
+							if(file != null){
+								processFile(new StingleDbFile(file), FOLDER_TRASH);
+							}
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+
+
+			}
 		}
 
-		protected void processFile(StingleDbFile remoteFile){
-			StingleDbFile file = db.getFileIfExists(remoteFile.filename);
+		protected void processFile(StingleDbFile remoteFile, int folder){
+			StingleDbHelper myDb = db;
+			if (folder == FOLDER_TRASH){
+				myDb = trashDb;
+			}
+
+			StingleDbFile file = myDb.getFileIfExists(remoteFile.filename);
 
 			if(file == null){
-				db.insertFile(remoteFile.filename, false, true, remoteFile.dateCreated, remoteFile.dateModified);
+				myDb.insertFile(remoteFile.filename, false, true, remoteFile.dateCreated, remoteFile.dateModified);
 			}
 			else {
+				boolean needUpdate = false;
 				if (file.dateModified != remoteFile.dateModified) {
 					file.dateModified = remoteFile.dateModified;
+					needUpdate = true;
 				}
-				file.isRemote = true;
-				db.updateFile(file);
+				if(file.isRemote != true) {
+					file.isRemote = true;
+					needUpdate = true;
+				}
+				if(needUpdate) {
+					myDb.updateFile(file);
+				}
 			}
 
-			if(remoteFile.dateCreated > lastSeenTime) {
-				lastSeenTime = remoteFile.dateCreated;
+			if(remoteFile.dateModified > lastSeenTime) {
+				lastSeenTime = remoteFile.dateModified;
+			}
+		}
+
+		protected void processDeleteEvent(JSONObject event){
+
+			try {
+				String filename = event.getString("file");
+				Integer type = event.getInt("type");
+				Long date = event.getLong("date");
+
+				if(type == DELETE_EVENT_TRASH) {
+					StingleDbFile file = db.getFileIfExists(filename);
+					if(file != null) {
+						db.deleteFile(file.filename);
+						trashDb.insertFile(file);
+					}
+				}
+				else if(type == DELETE_EVENT_RESTORE) {
+					StingleDbFile file = trashDb.getFileIfExists(filename);
+					if(file != null) {
+						trashDb.deleteFile(file.filename);
+						db.insertFile(file);
+					}
+				}
+				else if(type == DELETE_EVENT_DELETE) {
+					StingleDbFile file = db.getFileIfExists(filename);
+					if(file != null) {
+						db.deleteFile(file.filename);
+					}
+					file = trashDb.getFileIfExists(filename);
+					if(file != null) {
+						trashDb.deleteFile(file.filename);
+					}
+
+					String homeDir = Helpers.getHomeDir(context);
+					String thumbDir = Helpers.getThumbsDir(context);
+					File mainFile = new File(homeDir + "/" + filename);
+					File thumbFile = new File(thumbDir + "/" + filename);
+
+					if(mainFile.exists()){
+						mainFile.delete();
+					}
+					if(thumbFile.exists()){
+						thumbFile.delete();
+					}
+				}
+
+				if(date > lastDelSeenTime) {
+					lastDelSeenTime = date;
+				}
+
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
 		}
 
@@ -250,20 +373,29 @@ public class SyncManager {
 		protected Void doInBackground(Void... params) {
 			StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
-			File dir = new File(Helpers.getHomeDir(this.context));
+
+			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
 			for(String filename : filenames) {
 				StingleDbFile file = db.getFileIfExists(filename);
 				if (file != null) {
 					if (file.isRemote) {
-						if (!notifyCloudAboutTrash(file.filename)) {
-							db.close();
-							trashDb.close();
-							return null;
-						}
+						filenamesToNotify.add(file.filename);
 					}
+				}
+			}
 
+			if (filenamesToNotify.size() > 0 && !notifyCloudAboutTrash(filenamesToNotify)) {
+				db.close();
+				trashDb.close();
+				return null;
+			}
+
+			for(String filename : filenames) {
+				StingleDbFile file = db.getFileIfExists(filename);
+				if(file != null) {
 					db.deleteFile(file.filename);
+					file.dateModified = System.currentTimeMillis();
 					trashDb.insertFile(file);
 				}
 			}
@@ -274,16 +406,181 @@ public class SyncManager {
 			return null;
 		}
 
-		protected boolean notifyCloudAboutTrash(String filename){
+		protected boolean notifyCloudAboutTrash(ArrayList<String> filenamesToNotify){
 			HashMap<String, String> postParams = new HashMap<String, String>();
 
 			postParams.put("token", KeyManagement.getApiToken(context));
-			postParams.put("filename", filename);
+			postParams.put("count", String.valueOf(filenamesToNotify.size()));
+			for(int i=0; i < filenamesToNotify.size(); i++) {
+				postParams.put("filename" + String.valueOf(i), filenamesToNotify.get(i));
+			}
 
 			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.trash_file_path), postParams);
 			StingleResponse response = new StingleResponse(this.context, json, false);
 
 			if(response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
+		}
+	}
+
+
+	public static class RestoreFromTrashAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		protected Context context;
+		protected ArrayList<String> filenames;
+		protected OnFinish onFinish;
+
+		public RestoreFromTrashAsyncTask(Context context, ArrayList<String> filenames, OnFinish onFinish){
+			this.context = context;
+			this.filenames = filenames;
+			this.onFinish = onFinish;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+
+			ArrayList<String> filenamesToNotify = new ArrayList<String>();
+
+			for(String filename : filenames) {
+				StingleDbFile file = trashDb.getFileIfExists(filename);
+				if (file != null) {
+					if (file.isRemote) {
+						filenamesToNotify.add(filename);
+					}
+				}
+			}
+
+			if (filenamesToNotify.size() > 0 && !notifyCloudAboutRestore(filenamesToNotify)) {
+				db.close();
+				trashDb.close();
+				return null;
+			}
+
+			for(String filename : filenames) {
+				StingleDbFile file = trashDb.getFileIfExists(filename);
+				if(file != null) {
+					trashDb.deleteFile(file.filename);
+					file.dateModified = System.currentTimeMillis();
+					db.insertFile(file);
+				}
+			}
+
+
+			db.close();
+			trashDb.close();
+			return null;
+		}
+
+		protected boolean notifyCloudAboutRestore(ArrayList<String> filenamesToNotify){
+			HashMap<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("count", String.valueOf(filenamesToNotify.size()));
+			for(int i=0; i < filenamesToNotify.size(); i++) {
+				postParams.put("filename" + String.valueOf(i), filenamesToNotify.get(i));
+			}
+
+			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.restore_file_path), postParams);
+			StingleResponse response = new StingleResponse(this.context, json, false);
+
+			if(response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
+		}
+	}
+
+	public static class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		protected Context context;
+		protected ArrayList<String> filenames;
+		protected OnFinish onFinish;
+
+		public DeleteFilesAsyncTask(Context context, ArrayList<String> filenames, OnFinish onFinish){
+			this.context = context;
+			this.filenames = filenames;
+			this.onFinish = onFinish;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			String homeDir = Helpers.getHomeDir(context);
+			String thumbDir = Helpers.getThumbsDir(context);
+
+			ArrayList<String> filenamesToNotify = new ArrayList<String>();
+
+			for(String filename : filenames) {
+				StingleDbFile file = trashDb.getFileIfExists(filename);
+				if (file != null) {
+					if (file.isRemote) {
+						filenamesToNotify.add(file.filename);
+					}
+				}
+			}
+
+			if (filenamesToNotify.size() > 0 && !notifyCloudAboutDelete(filenamesToNotify)) {
+				trashDb.close();
+				return null;
+			}
+
+			for(String filename : filenames) {
+				StingleDbFile file = trashDb.getFileIfExists(filename);
+				File mainFile = new File(homeDir + "/" + filename);
+				File thumbFile = new File(thumbDir + "/" + filename);
+
+				if(mainFile.exists()){
+					mainFile.delete();
+				}
+				if(thumbFile.exists()){
+					thumbFile.delete();
+				}
+
+				if(file != null) {
+					trashDb.deleteFile(file.filename);
+				}
+			}
+
+
+			trashDb.close();
+			return null;
+		}
+
+		protected boolean notifyCloudAboutDelete(ArrayList<String> filenamesToNotify){
+			HashMap<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("count", String.valueOf(filenamesToNotify.size()));
+			for(int i=0; i < filenamesToNotify.size(); i++) {
+				postParams.put("filename" + String.valueOf(i), filenamesToNotify.get(i));
+			}
+
+			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.delete_file_path), postParams);
+			StingleResponse response = new StingleResponse(this.context, json, false);
+
+			if (response.isStatusOk()) {
 				return true;
 			}
 			return false;

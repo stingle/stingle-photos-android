@@ -21,6 +21,7 @@ import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Db.StingleDbHelper;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
+import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Util.MemoryCache;
 import com.squareup.picasso3.Callback;
@@ -52,14 +53,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
 
-	public static final int FOLDER_MAIN = 0;
-	public static final int FOLDER_TRASH = 1;
-
-
 	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType) {
 		this.context = context;
 		this.callback = callback;
-		this.db = new StingleDbHelper(context, (folderType == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		this.db = new StingleDbHelper(context, (folderType == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
 
@@ -67,6 +64,12 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 		getAvailableDates();
 		calculateDatePositions();
+	}
+
+	@Override
+	public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+		super.onDetachedFromRecyclerView(recyclerView);
+		db.close();
 	}
 
 	public void updateDataSet(){
@@ -394,14 +397,14 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
-		/*int totalItems = 0;
+		int totalItems = 0;
 		for(DateGroup group : dates){
 			totalItems += group.itemCount + 1;
 		}
 
-		return totalItems;*/
+		return totalItems;
 		//Log.d("totalCount", String.valueOf(db.getTotalFilesCount()));
-		return (int)db.getTotalFilesCount() + dates.size();
+		//return (int)db.getTotalFilesCount() + dates.size();
 	}
 
 

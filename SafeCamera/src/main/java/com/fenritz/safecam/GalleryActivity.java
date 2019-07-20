@@ -1,5 +1,6 @@
 package com.fenritz.safecam;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected AutoFitGridLayoutManager layoutManager;
 	protected ActionMode actionMode;
 	protected Toolbar toolbar;
+	protected int currentFolder = SyncManager.FOLDER_MAIN;
 
 
 	@Override
@@ -71,6 +73,8 @@ public class GalleryActivity extends AppCompatActivity
 		navigationView.setNavigationItemSelectedListener(this);
 
 		recyclerView = (DragSelectRecyclerView) findViewById(R.id.gallery_recycler_view);
+		((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+		recyclerView.setHasFixedSize(true);
 		layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
 		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
 			@Override
@@ -83,6 +87,7 @@ public class GalleryActivity extends AppCompatActivity
 				}
 			}
 		});
+		recyclerView.setLayoutManager(layoutManager);
 
 		// use this setting to improve performance if you know that changes
 		// in content do not change the layout size of the RecyclerView
@@ -102,11 +107,11 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserLoginSuccess() {
-				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, GalleryAdapterPisasso.FOLDER_MAIN);
+				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
 				recyclerView.setAdapter(adapter);
-				recyclerView.setLayoutManager(layoutManager);
-				recyclerView.setHasFixedSize(true);
-				((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
+
+
 			}
 
 			@Override
@@ -174,17 +179,25 @@ public class GalleryActivity extends AppCompatActivity
 		// Handle navigation view item clicks here.
 		int id = item.getItemId();
 
-		if (id == R.id.nav_home) {
-			// Handle the camera action
-		} else if (id == R.id.nav_gallery) {
+		if (id == R.id.nav_gallery) {
+			adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
+			recyclerView.setAdapter(adapter);
+			currentFolder = SyncManager.FOLDER_MAIN;
+			toolbar.setTitle(getString(R.string.title_gallery_for_app));
+		}
+		else if (id == R.id.nav_trash) {
+			adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_TRASH);
+			recyclerView.setAdapter(adapter);
+			currentFolder = SyncManager.FOLDER_TRASH;
+			toolbar.setTitle(getString(R.string.title_trash));
+		}
+		else if (id == R.id.nav_tools) {
 
-		} else if (id == R.id.nav_slideshow) {
+		}
+		else if (id == R.id.nav_share) {
 
-		} else if (id == R.id.nav_tools) {
-
-		} else if (id == R.id.nav_share) {
-
-		} else if (id == R.id.nav_send) {
+		}
+		else if (id == R.id.nav_send) {
 
 		}
 
@@ -198,6 +211,8 @@ public class GalleryActivity extends AppCompatActivity
 		if (adapter.isSelectionModeActive()){
 			adapter.toggleSelected(index);
 		}
+		StingleDbFile file = adapter.getStingleFileAtPosition(index);
+		Log.d("file", file.filename);
 	}
 
 	@Override
@@ -228,7 +243,15 @@ public class GalleryActivity extends AppCompatActivity
 		return new ActionMode.Callback() {
 			@Override
 			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-				mode.getMenuInflater().inflate(R.menu.gallery_action_mode, menu);
+				switch(currentFolder){
+					case SyncManager.FOLDER_MAIN:
+						mode.getMenuInflater().inflate(R.menu.gallery_action_mode, menu);
+						break;
+					case SyncManager.FOLDER_TRASH:
+						mode.getMenuInflater().inflate(R.menu.gallery_trash_action_mode, menu);
+						break;
+				}
+
 				return true;
 			}
 
@@ -240,33 +263,16 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch(item.getItemId()){
+					case R.id.trash :
+						trashSelected();
+						break;
+					case R.id.restore :
+						restoreSelected();
+						break;
 					case R.id.delete :
-						final List<Integer> indeces = adapter.getSelectedIndices();
-						Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(indeces.size())), new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-										ArrayList<String> filenames = new ArrayList<String>();
-										for(Integer index : indeces){
-											StingleDbFile file = adapter.getStingleFileAtPosition(index);
-											filenames.add(file.filename);
-										}
-
-										new SyncManager.MoveToTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
-											@Override
-											public void onFinish() {
-												for(Integer index : indeces) {
-													adapter.updateDataSet();
-												}
-												exitActionMode();
-											}
-										}).execute();
-									}
-								},
-								null);
-
+						deleteSelected();
 						break;
 				}
-
 				return true;
 			}
 
@@ -287,5 +293,81 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	}
 
+	protected void trashSelected(){
+		final List<Integer> indeces = adapter.getSelectedIndices();
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_trash_files), String.valueOf(indeces.size())), new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.trashing_files), null);
+				ArrayList<String> filenames = new ArrayList<String>();
+				for(Integer index : indeces){
+					StingleDbFile file = adapter.getStingleFileAtPosition(index);
+					filenames.add(file.filename);
+				}
+
+				new SyncManager.MoveToTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
+					@Override
+					public void onFinish() {
+						for(Integer index : indeces) {
+							adapter.updateDataSet();
+						}
+						exitActionMode();
+						spinner.dismiss();
+					}
+				}).execute();
+			}
+		},
+		null);
+	}
+
+	protected void restoreSelected(){
+		final List<Integer> indeces = adapter.getSelectedIndices();
+
+		final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.restoring_files), null);
+		ArrayList<String> filenames = new ArrayList<String>();
+		for(Integer index : indeces){
+			StingleDbFile file = adapter.getStingleFileAtPosition(index);
+			filenames.add(file.filename);
+		}
+
+		new SyncManager.RestoreFromTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
+			@Override
+			public void onFinish() {
+				for(Integer index : indeces) {
+					adapter.updateDataSet();
+				}
+				exitActionMode();
+				spinner.dismiss();
+			}
+		}).execute();
+
+	}
+
+	protected void deleteSelected(){
+		final List<Integer> indeces = adapter.getSelectedIndices();
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(indeces.size())), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.deleting_files), null);
+						ArrayList<String> filenames = new ArrayList<String>();
+						for(Integer index : indeces){
+							StingleDbFile file = adapter.getStingleFileAtPosition(index);
+							filenames.add(file.filename);
+						}
+
+						new SyncManager.DeleteFilesAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
+							@Override
+							public void onFinish() {
+								for(Integer index : indeces) {
+									adapter.updateDataSet();
+								}
+								exitActionMode();
+								spinner.dismiss();
+							}
+						}).execute();
+					}
+				},
+				null);
+	}
 
 }

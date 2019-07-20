@@ -19,11 +19,13 @@
     <string name="home_folder_desc">The folder on SD card to store your encrypted files</string>
     <string name="generating_key">Loging in. Please wait…</string>
     <string name="deleting_files">Deleting file(s)…</string>
+    <string name="trashing_files">Moving file(s) to trash…</string>
     <string name="decrypting_files">Decrypting file(s)…</string>
     <string name="encrypting_files">Encrypting file(s)…</string>
     <string name="encrypting_photo">Encrypting photo…</string>
     <string name="encrypting_video">Encrypting video…</string>
     <string name="confirm_delete_files">Do you really want to delete %s files?</string>
+    <string name="confirm_trash_files">Do you really want to move %s files to trash?</string>
     <string name="confirm_decrypt_files">You\'re about to decrypt %s files. They will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
     <string name="confirm_decrypt_files_s">You\'re about to decrypt a file. It will be decrypted to your SD card and will be available to other apps. Are you sure you want to do it?</string>
     <string name="confirm_delete_photo">Do you really want to delete this photo?</string>
@@ -285,6 +287,12 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
     <string name="save_to_gallery">Save to gallery</string>
+    <string name="menu_trash">Trash</string>
+    <string name="title_trash">Trash</string>
+    <string name="restore">Restore</string>
+    <string name="restoring_files">Restoring file(s)</string>
+    <string name="delete_permanent">Delete permanently</string>
+    <string name="move_to_trash">Move to Trash</string>
 
 
 </resources>
