@@ -14,6 +14,8 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_FILENAME = "filename";
 		public static final String COLUMN_NAME_IS_LOCAL = "is_local";
 		public static final String COLUMN_NAME_IS_REMOTE = "is_remote";
+		public static final String COLUMN_NAME_VERSION = "version";
+		public static final String COLUMN_NAME_REUPLOAD = "reupload";
 		public static final String COLUMN_NAME_DATE_CREATED = "date_created";
 		public static final String COLUMN_NAME_DATE_MODIFIED = "date_modified";
 	}
@@ -24,6 +26,8 @@ public class StingleDbContract {
 					Files.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
 					Files.COLUMN_NAME_IS_LOCAL + " INTEGER," +
 					Files.COLUMN_NAME_IS_REMOTE + " INTEGER," +
+					Files.COLUMN_NAME_VERSION + " INTEGER," +
+					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
 					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
 					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
@@ -38,6 +42,8 @@ public class StingleDbContract {
 					Files.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
 					Files.COLUMN_NAME_IS_LOCAL + " INTEGER," +
 					Files.COLUMN_NAME_IS_REMOTE + " INTEGER," +
+					Files.COLUMN_NAME_VERSION + " INTEGER," +
+					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
 					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
 					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";

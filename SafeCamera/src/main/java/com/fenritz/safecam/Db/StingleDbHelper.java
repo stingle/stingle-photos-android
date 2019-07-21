@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class StingleDbHelper extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 1;
 	public static final String DATABASE_NAME = "stingleFiles.db";
 
 	public static final int GET_MODE_ALL = 0;
@@ -22,6 +22,11 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	public static final int GET_MODE_ONLY_REMOTE = 2;
 	public static final int GET_MODE_LOCAL = 3;
 	public static final int GET_MODE_REMOTE = 4;
+
+	public static final int INITIAL_VERSION = 1;
+
+	public static final int REUPLOAD_NO = 0;
+	public static final int REUPLOAD_YES = 1;
 
 	protected SQLiteDatabase dbWrite;
 	protected SQLiteDatabase dbRead;
@@ -61,14 +66,16 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	}
 
 	public long insertFile(StingleDbFile file){
-		return insertFile(file.filename, file.isLocal, file.isRemote, file.dateCreated, file.dateModified);
+		return insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, file.dateModified);
 	}
 
-	public long insertFile(String filename, boolean isLocal, boolean isRemote, long dateCreated, long dateModified){
+	public long insertFile(String filename, boolean isLocal, boolean isRemote, int version, long dateCreated, long dateModified){
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, filename);
 		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
 		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
+		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, version);
+		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, REUPLOAD_NO);
 
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
@@ -81,6 +88,9 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (file.isLocal ? 1 : 0));
 		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (file.isRemote ? 1 : 0));
+
+		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, file.version);
+		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, file.reupload);
 
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, file.dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, file.dateModified);
@@ -109,6 +119,49 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				selectionArgs);
 	}
 
+	public int incrementVersion(String filename){
+
+		StingleDbFile file = getFileIfExists(filename);
+
+		if(file == null || !file.isLocal){
+			return 0;
+		}
+
+		ContentValues values = new ContentValues();
+		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, file.version +1);
+		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, REUPLOAD_YES);
+
+		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String[] selectionArgs = { filename };
+
+		return openWriteDb().update(
+				tableName,
+				values,
+				selection,
+				selectionArgs);
+	}
+
+	public int markFileAsReuploaded(String filename){
+
+		StingleDbFile file = getFileIfExists(filename);
+
+		if(file == null || !file.isLocal){
+			return 0;
+		}
+
+		ContentValues values = new ContentValues();
+		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, REUPLOAD_NO);
+
+		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String[] selectionArgs = { filename };
+
+		return openWriteDb().update(
+				tableName,
+				values,
+				selection,
+				selectionArgs);
+	}
+
 	public int deleteFile(String filename){
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
@@ -121,6 +174,8 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,
 				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_VERSION,
+				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
 		};
@@ -152,6 +207,8 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,
 				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_VERSION,
+				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
 		};
@@ -203,11 +260,42 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 	}
 
+	public Cursor getReuploadFilesList(){
+
+		String[] projection = {
+				BaseColumns._ID,
+				StingleDbContract.Files.COLUMN_NAME_FILENAME,
+				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_VERSION,
+				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+		};
+
+		String selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_REUPLOAD + " = ?";
+
+		String[] selectionArgs = {"1", "1"};
+
+		return openReadDb().query(
+				tableName,   // The table to query
+				projection,             // The array of columns to return (pass null to get all)
+				selection,              // The columns for the WHERE clause
+				selectionArgs,          // The values for the WHERE clause
+				null,                   // don't group the rows
+				null,                   // don't filter by row groups
+				null               // The sort order
+		);
+
+	}
+
 	public StingleDbFile getFileAtPosition(int pos){
 		String[] projection = {
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,
 				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE
+				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_VERSION,
+				StingleDbContract.Files.COLUMN_NAME_REUPLOAD
 		};
 
 		String sortOrder =

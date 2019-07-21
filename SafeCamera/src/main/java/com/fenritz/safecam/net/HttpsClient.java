@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -114,164 +115,145 @@ public class HttpsClient {
 		return json;
 	}
 
-	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath) {
-		try {
-			Log.e("url", urlStr);
-			URL url = new URL(urlStr);
-			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+		Log.e("url", urlStr);
+		URL url = new URL(urlStr);
+		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
-			// Create the SSL connection
-			SSLContext sc;
-			sc = SSLContext.getInstance("TLS");
-			sc.init(null, null, new java.security.SecureRandom());
-			conn.setSSLSocketFactory(sc.getSocketFactory());
+		// Create the SSL connection
+		SSLContext sc;
+		sc = SSLContext.getInstance("TLS");
+		sc.init(null, null, new java.security.SecureRandom());
+		conn.setSSLSocketFactory(sc.getSocketFactory());
 
-			// Use this if you need SSL authentication
-			//String userpass = user + ":" + password;
-			//String basicAuth = "Basic " + Base64.encodeToString(userpass.getBytes(), Base64.DEFAULT);
-			//conn.setRequestProperty("Authorization", basicAuth);
+		// Use this if you need SSL authentication
+		//String userpass = user + ":" + password;
+		//String basicAuth = "Basic " + Base64.encodeToString(userpass.getBytes(), Base64.DEFAULT);
+		//conn.setRequestProperty("Authorization", basicAuth);
 
-			// set Timeout and method
-			conn.setReadTimeout(7000);
-			conn.setConnectTimeout(7000);
-			conn.setRequestMethod("POST");
-			conn.setDoInput(true);
-			conn.setDoOutput(true);
+		// set Timeout and method
+		conn.setReadTimeout(7000);
+		conn.setConnectTimeout(7000);
+		conn.setRequestMethod("POST");
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
 
-			// Add any data you wish to post here
-			String data = "";
-			if(params != null) {
-				for (String key : params.keySet()) {
-					data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
-				}
+		// Add any data you wish to post here
+		String data = "";
+		if(params != null) {
+			for (String key : params.keySet()) {
+				data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 			}
-
-			if (data.length() > 0) {
-				data = data.substring(0, data.length() - 1);
-
-				OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-
-				wr.write(data);
-				wr.flush();
-			}
-
-			int lenghtOfFile = conn.getContentLength();
-
-			// download the file
-			InputStream input = new BufferedInputStream(conn.getInputStream(),8192);
-
-			// Output stream
-			FileOutputStream output = new FileOutputStream(outputPath);
-
-			byte buf[] = new byte[1024];
-
-			long total = 0;
-			int count;
-
-			while ((count = input.read(buf)) != -1) {
-				total += count;
-				// publishing the progress....
-				// After this onProgressUpdate will be called
-				//publishProgress("" + (int) ((total * 100) / lenghtOfFile));
-
-				// writing data to file
-				output.write(buf, 0, count);
-			}
-
-			// flushing output
-			output.flush();
-
-			// closing streams
-			output.close();
-			input.close();
 		}
-		catch (IOException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (KeyManagementException e) {
-			e.printStackTrace();
+
+		if (data.length() > 0) {
+			data = data.substring(0, data.length() - 1);
+
+			OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+			wr.write(data);
+			wr.flush();
 		}
+
+		int lenghtOfFile = conn.getContentLength();
+
+		// download the file
+		InputStream input = new BufferedInputStream(conn.getInputStream(),8192);
+
+		// Output stream
+		FileOutputStream output = new FileOutputStream(outputPath);
+
+		byte buf[] = new byte[1024];
+
+		long total = 0;
+		int count;
+
+		while ((count = input.read(buf)) != -1) {
+			total += count;
+			// publishing the progress....
+			// After this onProgressUpdate will be called
+			//publishProgress("" + (int) ((total * 100) / lenghtOfFile));
+
+			// writing data to file
+			output.write(buf, 0, count);
+		}
+
+		// flushing output
+		output.flush();
+
+		// closing streams
+		output.close();
+		input.close();
+
 	}
 
-	public static byte[] getFileAsByteArray(String urlStr, HashMap<String, String> params) {
-		try {
-			Log.e("url", urlStr);
-			URL url = new URL(urlStr);
-			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+	public static byte[] getFileAsByteArray(String urlStr, HashMap<String, String> params) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+		Log.e("url", urlStr);
+		URL url = new URL(urlStr);
+		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
-			// Create the SSL connection
-			SSLContext sc;
-			sc = SSLContext.getInstance("TLS");
-			sc.init(null, null, new java.security.SecureRandom());
-			conn.setSSLSocketFactory(sc.getSocketFactory());
+		// Create the SSL connection
+		SSLContext sc;
+		sc = SSLContext.getInstance("TLS");
+		sc.init(null, null, new java.security.SecureRandom());
+		conn.setSSLSocketFactory(sc.getSocketFactory());
 
-			// Use this if you need SSL authentication
-			//String userpass = user + ":" + password;
-			//String basicAuth = "Basic " + Base64.encodeToString(userpass.getBytes(), Base64.DEFAULT);
-			//conn.setRequestProperty("Authorization", basicAuth);
+		// Use this if you need SSL authentication
+		//String userpass = user + ":" + password;
+		//String basicAuth = "Basic " + Base64.encodeToString(userpass.getBytes(), Base64.DEFAULT);
+		//conn.setRequestProperty("Authorization", basicAuth);
 
-			// set Timeout and method
-			conn.setReadTimeout(7000);
-			conn.setConnectTimeout(7000);
-			conn.setRequestMethod("POST");
-			conn.setDoInput(true);
-			conn.setDoOutput(true);
+		// set Timeout and method
+		conn.setReadTimeout(7000);
+		conn.setConnectTimeout(7000);
+		conn.setRequestMethod("POST");
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
 
-			// Add any data you wish to post here
-			String data = "";
-			if(params != null) {
-				for (String key : params.keySet()) {
-					data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
-				}
+		// Add any data you wish to post here
+		String data = "";
+		if(params != null) {
+			for (String key : params.keySet()) {
+				data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 			}
-
-			if (data.length() > 0) {
-				data = data.substring(0, data.length() - 1);
-
-				OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-
-				wr.write(data);
-				wr.flush();
-			}
-
-			int lenghtOfFile = conn.getContentLength();
-
-			// download the file
-			InputStream input = new BufferedInputStream(conn.getInputStream(),8192);
-
-			// Output stream
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-			byte buf[] = new byte[1024];
-
-			long total = 0;
-			int count;
-
-			while ((count = input.read(buf)) != -1) {
-				total += count;
-				// publishing the progress....
-				// After this onProgressUpdate will be called
-				//publishProgress("" + (int) ((total * 100) / lenghtOfFile));
-
-				// writing data to file
-				output.write(buf, 0, count);
-			}
-
-			// closing streams
-			input.close();
-
-			return output.toByteArray();
-		}
-		catch (IOException e) {
-			//e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (KeyManagementException e) {
-			e.printStackTrace();
 		}
 
-		return null;
+		if (data.length() > 0) {
+			data = data.substring(0, data.length() - 1);
+
+			OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+			wr.write(data);
+			wr.flush();
+		}
+
+		int lenghtOfFile = conn.getContentLength();
+
+		// download the file
+		InputStream input = new BufferedInputStream(conn.getInputStream(),8192);
+
+		// Output stream
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+		byte buf[] = new byte[1024];
+
+		long total = 0;
+		int count;
+
+		while ((count = input.read(buf)) != -1) {
+			total += count;
+			// publishing the progress....
+			// After this onProgressUpdate will be called
+			//publishProgress("" + (int) ((total * 100) / lenghtOfFile));
+
+			// writing data to file
+			output.write(buf, 0, count);
+		}
+
+		// closing streams
+		input.close();
+
+		return output.toByteArray();
 	}
 
 	public static JSONObject multipartUpload(String urlTo, HashMap<String, String> params, FileToUpload file)  {

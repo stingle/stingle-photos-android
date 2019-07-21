@@ -330,8 +330,8 @@ public class DashboardActivity extends Activity {
 				db.onUpgrade(db.getWritableDatabase(), 1,1);
 				return true;
 			case R.id.upload:
-				SyncManager.syncFSToDB(this);
 				SyncManager.syncCloudToLocalDb(this);
+				SyncManager.syncFSToDB(this);
 				SyncManager.uploadToCloud(this);
 
 				/*HashMap<String, String> postParams = new HashMap<String, String>();

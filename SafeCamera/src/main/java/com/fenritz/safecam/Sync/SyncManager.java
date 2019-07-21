@@ -20,12 +20,21 @@ import com.fenritz.safecam.Db.StingleDbHelper;
 import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.Util.Helpers;
 import com.google.gson.JsonObject;
+import com.goterl.lazycode.lazysodium.interfaces.AEAD;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -72,18 +81,31 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			fsSyncFolder(FOLDER_MAIN);
+			fsSyncFolder(FOLDER_TRASH);
+
+			return null;
+		}
+
+		protected void fsSyncFolder(int folder){
+			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 			File dir = new File(Helpers.getHomeDir(this.context));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_LOCAL);
+			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ALL);
 
 			while(result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
 				File file = new File(dir.getPath() + "/" + dbFile.filename);
-				if(!file.exists()){
+				if(file.exists()) {
+					dbFile.isLocal = true;
+					db.updateFile(dbFile);
+				}
+				else{
 					if(dbFile.isRemote){
-						dbFile.isLocal = false;
-						db.updateFile(dbFile);
+						if(dbFile.isLocal) {
+							dbFile.isLocal = false;
+							db.updateFile(dbFile);
+						}
 					}
 					else {
 						db.deleteFile(dbFile.filename);
@@ -91,15 +113,18 @@ public class SyncManager {
 				}
 			}
 
-			File[] currentFolderFiles = dir.listFiles();
+			if(folder == FOLDER_MAIN) {
+				File[] currentFolderFiles = dir.listFiles();
 
-			for (File file : currentFolderFiles) {
-				if (file.isFile() && file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION)) {
-					db.insertFile(file.getName(), true, false, file.lastModified(), file.lastModified());
+				StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+
+				for (File file : currentFolderFiles) {
+					if (file.isFile() && file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION) && db.getFileIfExists(file.getName()) == null && trashDb.getFileIfExists(file.getName()) == null) {
+						db.insertFile(file.getName(), true, false, StingleDbHelper.INITIAL_VERSION, file.lastModified(), file.lastModified());
+					}
 				}
 			}
 			db.close();
-			return null;
 		}
 
 		@Override
@@ -112,9 +137,13 @@ public class SyncManager {
 	public static class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
+		protected File dir;
+		protected File thumbDir;
 
 		public UploadToCloudAsyncTask(Context context){
 			this.context = context;
+			dir = new File(Helpers.getHomeDir(context));
+			thumbDir = new File(Helpers.getThumbsDir(context));
 		}
 
 		@Override
@@ -122,51 +151,62 @@ public class SyncManager {
 			uploadFolder(FOLDER_MAIN);
 			uploadFolder(FOLDER_TRASH);
 
-
 			return null;
 		}
 
 		protected void uploadFolder(int folder){
-			final StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
-
-			File dir = new File(Helpers.getHomeDir(context));
-			File thumbDir = new File(Helpers.getThumbsDir(context));
+			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
-
 			while(result.moveToNext()) {
-				String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_FILENAME));
-				String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED));
-				String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED));
-
-				Log.d("uploadingFile", filename);
-				HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
-				HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumbDir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
-
-				ArrayList<HttpsClient.FileToUpload> filesToUpload = new ArrayList<HttpsClient.FileToUpload>();
-				filesToUpload.add(fileToUpload);
-				filesToUpload.add(thumbToUpload);
-
-				HashMap<String, String> postParams = new HashMap<String, String>();
-
-				postParams.put("token", KeyManagement.getApiToken(context));
-				postParams.put("folder", String.valueOf(folder));
-				postParams.put("dateCreated", dateCreated);
-				postParams.put("dateModified", dateModified);
-
-				JSONObject resp = HttpsClient.multipartUpload(
-						context.getString(R.string.api_server_url) + context.getString(R.string.upload_file_path),
-						postParams,
-						filesToUpload
-				);
-				StingleResponse response = new StingleResponse(this.context, resp, false);
-				if(response.isStatusOk()){
-					db.markFileAsRemote(filename);
-				}
+				uploadFile(folder, db, result, false);
 			}
 			result.close();
 
+			Cursor reuploadResult = db.getReuploadFilesList();
+			while(reuploadResult.moveToNext()) {
+				uploadFile(folder, db, reuploadResult, true);
+			}
+			reuploadResult.close();
+
 			db.close();
+		}
+
+		protected void uploadFile(int folder, StingleDbHelper db, Cursor result, boolean isReupload){
+			String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_FILENAME));
+			String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_VERSION));
+			String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED));
+			String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED));
+
+			Log.d("uploadingFile", filename);
+			HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
+			HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumbDir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
+
+			ArrayList<HttpsClient.FileToUpload> filesToUpload = new ArrayList<HttpsClient.FileToUpload>();
+			filesToUpload.add(fileToUpload);
+			filesToUpload.add(thumbToUpload);
+
+			HashMap<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("folder", String.valueOf(folder));
+			postParams.put("version", version);
+			postParams.put("dateCreated", dateCreated);
+			postParams.put("dateModified", dateModified);
+
+			JSONObject resp = HttpsClient.multipartUpload(
+					context.getString(R.string.api_server_url) + context.getString(R.string.upload_file_path),
+					postParams,
+					filesToUpload
+			);
+			StingleResponse response = new StingleResponse(this.context, resp, false);
+			if(response.isStatusOk()){
+				db.markFileAsRemote(filename);
+			}
+
+			if(isReupload){
+				db.markFileAsReuploaded(filename);
+			}
 		}
 
 		@Override
@@ -206,6 +246,8 @@ public class SyncManager {
 		protected void getFileList(){
 			HashMap<String, String> postParams = new HashMap<String, String>();
 
+			Log.d("lastSeenTime", String.valueOf(lastSeenTime));
+
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("lastSeenTime", String.valueOf(lastSeenTime));
 			postParams.put("lastDelSeenTime", String.valueOf(lastDelSeenTime));
@@ -239,7 +281,9 @@ public class SyncManager {
 						for(int i=0; i<files.length(); i++){
 							JSONObject file = files.optJSONObject(i);
 							if(file != null){
-								processFile(new StingleDbFile(file), FOLDER_MAIN);
+								StingleDbFile dbFile = new StingleDbFile(file);
+								Log.d("receivedFile", dbFile.filename);
+								processFile(dbFile, FOLDER_MAIN);
 							}
 						}
 					} catch (JSONException e) {
@@ -275,10 +319,11 @@ public class SyncManager {
 			StingleDbFile file = myDb.getFileIfExists(remoteFile.filename);
 
 			if(file == null){
-				myDb.insertFile(remoteFile.filename, false, true, remoteFile.dateCreated, remoteFile.dateModified);
+				myDb.insertFile(remoteFile.filename, false, true, remoteFile.version, remoteFile.dateCreated, remoteFile.dateModified);
 			}
 			else {
 				boolean needUpdate = false;
+				boolean needDownload = false;
 				if (file.dateModified != remoteFile.dateModified) {
 					file.dateModified = remoteFile.dateModified;
 					needUpdate = true;
@@ -287,8 +332,22 @@ public class SyncManager {
 					file.isRemote = true;
 					needUpdate = true;
 				}
+				if (file.version < remoteFile.version) {
+					file.version = remoteFile.version;
+					needUpdate = true;
+					needDownload = true;
+				}
 				if(needUpdate) {
 					myDb.updateFile(file);
+				}
+				if(needDownload){
+					String homeDir = Helpers.getHomeDir(context);
+					String thumbDir = Helpers.getThumbsDir(context);
+					String mainFilePath = homeDir + "/" + file.filename;
+					String thumbPath = thumbDir + "/" + file.filename;
+
+					downloadFile(context, file.filename, mainFilePath, false);
+					downloadFile(context, file.filename, thumbPath, true);
 				}
 			}
 
@@ -594,6 +653,76 @@ public class SyncManager {
 				onFinish.onFinish();
 			}
 		}
+	}
+
+	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb){
+		HashMap<String, String> postParams = new HashMap<String, String>();
+
+		postParams.put("token", KeyManagement.getApiToken(context));
+		postParams.put("file", filename);
+		if(isThumb) {
+			postParams.put("thumb", "1");
+		}
+
+		try {
+			HttpsClient.downloadFile(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams, outputPath);
+			return true;
+		}
+		catch (IOException | NoSuchAlgorithmException | KeyManagementException e) {
+
+		}
+		return false;
+	}
+
+	public static byte[] getAndCacheThumb(Context context, String filename) throws IOException {
+
+		File cacheDir = new File(context.getCacheDir().getPath() + "/thumbCache");
+		File cachedFile = new File(context.getCacheDir().getPath() + "/thumbCache/" + filename);
+
+		if(cachedFile.exists()){
+			FileInputStream in = new FileInputStream(cachedFile);
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			byte[] buf = new byte[4096];
+
+			int numRead;
+			while ((numRead = in.read(buf)) >= 0) {
+				out.write(buf, 0, numRead);
+			}
+			in.close();
+			return out.toByteArray();
+		}
+
+
+		HashMap<String, String> postParams = new HashMap<String, String>();
+
+		postParams.put("token", KeyManagement.getApiToken(context));
+		postParams.put("file", filename);
+		postParams.put("thumb", "1");
+
+		byte[] encFile = new byte[0];
+
+		try {
+			encFile = HttpsClient.getFileAsByteArray(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams);
+		}
+		catch (NoSuchAlgorithmException | KeyManagementException e) {
+
+		}
+
+		if(encFile == null || encFile.length == 0){
+			return null;
+		}
+
+
+		if(!cacheDir.exists()){
+			cacheDir.mkdirs();
+		}
+
+
+		FileOutputStream out = new FileOutputStream(cachedFile);
+		out.write(encFile);
+		out.close();
+
+		return encFile;
 	}
 
 	public static abstract class OnFinish{
