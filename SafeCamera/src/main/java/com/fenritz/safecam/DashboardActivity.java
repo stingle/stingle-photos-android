@@ -314,7 +314,7 @@ public class DashboardActivity extends Activity {
 			case R.id.import_keys:
 				Intent openerIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
 				openerIntent.addCategory(Intent.CATEGORY_OPENABLE);
-				openerIntent.setType("*/*");
+				openerIntent.setType("image/*");
 				// Note: This is not documented, but works: Show the Internal Storage menu item in the drawer!
 				openerIntent.putExtra("android.content.extra.SHOW_ADVANCED", true);
 				startActivityForResult(openerIntent, 20);

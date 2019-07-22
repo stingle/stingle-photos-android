@@ -260,7 +260,7 @@ public class SyncManager {
 			StingleResponse response = new StingleResponse(this.context, resp, false);
 			if(response.isStatusOk()){
 				String delsStr = response.get("deletes");
-				if(delsStr != null){
+				if(delsStr != null && delsStr.length() > 0){
 					try {
 						JSONArray deletes = new JSONArray(delsStr);
 						for(int i=0; i<deletes.length(); i++){
@@ -275,7 +275,7 @@ public class SyncManager {
 				}
 
 				String filesStr = response.get("files");
-				if(filesStr != null){
+				if(filesStr != null && filesStr.length() > 0){
 					try {
 						JSONArray files = new JSONArray(filesStr);
 						for(int i=0; i<files.length(); i++){
@@ -292,13 +292,15 @@ public class SyncManager {
 				}
 
 				String trashStr = response.get("trash");
-				if(trashStr != null){
+				if(trashStr != null && trashStr.length() > 0){
 					try {
 						JSONArray files = new JSONArray(trashStr);
 						for(int i=0; i<files.length(); i++){
 							JSONObject file = files.optJSONObject(i);
 							if(file != null){
-								processFile(new StingleDbFile(file), FOLDER_TRASH);
+								StingleDbFile dbFile = new StingleDbFile(file);
+								Log.d("receivedTrash", dbFile.filename);
+								processFile(dbFile, FOLDER_TRASH);
 							}
 						}
 					} catch (JSONException e) {

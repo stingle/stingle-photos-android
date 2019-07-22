@@ -80,6 +80,14 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		notifyDataSetChanged();
 	}
 
+	public void setFolder(int folder){
+		synchronized (this){
+			this.db = new StingleDbHelper(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
+			updateDataSet();
+		}
+	}
+
 	// Provide a reference to the views for each data item
 	// Complex data items may need more than one view per item, and
 	// you provide access to all the views for a data item in a view holder
@@ -107,7 +115,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			if (callback != null) {
 				callback.onClick(getAdapterPosition());
 			}
-			Log.d("calcPos", String.valueOf(translatePos(getAdapterPosition()).dbPosition));
+			//Log.d("calcPos", String.valueOf(translatePos(getAdapterPosition()).dbPosition));
 		}
 
 		@Override
@@ -171,7 +179,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		while(result.moveToNext()) {
 			DateGroup group = new DateGroup(result.getString(0),result.getInt(1));
 			dates.add(group);
-			Log.d("dates", group.date + " - " + group.itemCount);
+			//Log.d("dates", group.date + " - " + group.itemCount);
 		}
 	}
 
@@ -180,7 +188,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		int totalItems = 0;
 		for(DateGroup group : dates){
 			datePositions.add(new DatePosition(totalItems, group.date));
-			Log.d("datepos", String.valueOf(totalItems) + " - " + group.date);
+			//Log.d("datepos", String.valueOf(totalItems) + " - " + group.date);
 
 			totalItems += group.itemCount + 1;
 		}

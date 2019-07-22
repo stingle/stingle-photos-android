@@ -1,11 +1,18 @@
 package com.fenritz.safecam;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
 import com.fenritz.safecam.Gallery.GalleryAdapterPisasso;
@@ -15,6 +22,8 @@ import com.fenritz.safecam.Gallery.DragSelectRecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuInflater;
 import android.view.View;
@@ -36,6 +45,12 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import android.view.Menu;
 
+import org.apache.sanselan.util.IOUtils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +64,8 @@ public class GalleryActivity extends AppCompatActivity
 	protected Toolbar toolbar;
 	protected int currentFolder = SyncManager.FOLDER_MAIN;
 
+	protected int INTENT_IMPORT = 1;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +74,8 @@ public class GalleryActivity extends AppCompatActivity
 		toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		setSupportActionBar(toolbar);
-		FloatingActionButton fab = findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-						.setAction("Action", null).show();
-			}
-		});
+		FloatingActionButton fab = findViewById(R.id.import_fab);
+		fab.setOnClickListener(getImportOnClickListener());
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -88,6 +99,8 @@ public class GalleryActivity extends AppCompatActivity
 			}
 		});
 		recyclerView.setLayoutManager(layoutManager);
+		adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
+
 
 		// use this setting to improve performance if you know that changes
 		// in content do not change the layout size of the RecyclerView
@@ -107,11 +120,7 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserLoginSuccess() {
-				adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
 				recyclerView.setAdapter(adapter);
-
-
-
 			}
 
 			@Override
@@ -180,14 +189,12 @@ public class GalleryActivity extends AppCompatActivity
 		int id = item.getItemId();
 
 		if (id == R.id.nav_gallery) {
-			adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
-			recyclerView.setAdapter(adapter);
+			adapter.setFolder(SyncManager.FOLDER_MAIN);
 			currentFolder = SyncManager.FOLDER_MAIN;
 			toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		}
 		else if (id == R.id.nav_trash) {
-			adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_TRASH);
-			recyclerView.setAdapter(adapter);
+			adapter.setFolder(SyncManager.FOLDER_TRASH);
 			currentFolder = SyncManager.FOLDER_TRASH;
 			toolbar.setTitle(getString(R.string.title_trash));
 		}
@@ -368,6 +375,70 @@ public class GalleryActivity extends AppCompatActivity
 					}
 				},
 				null);
+	}
+
+	protected View.OnClickListener getImportOnClickListener(){
+		return new View.OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+				intent.setType("*/*");
+				String[] mimetypes = {"image/*", "video/*"};
+				intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+				//intent.addCategory(Intent.CATEGORY_DEFAULT);
+				intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+				// Note: This is not documented, but works: Show the Internal Storage menu item in the drawer!
+				//intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
+				startActivityForResult(Intent.createChooser(intent, "Select photos and videos"), INTENT_IMPORT);
+			}
+		};
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode != Activity.RESULT_OK || data == null) {
+			return;
+		}
+		if(requestCode == INTENT_IMPORT){
+			Uri uri = data.getData();
+			String[] all_path = data.getStringArrayExtra("all_path");
+
+			if(uri != null){
+
+				Log.d("uri", uri.toString());
+			}
+			ClipData clipData = data.getClipData();
+			if (clipData != null) {
+				for (int i = 0; i < clipData.getItemCount(); i++) {
+					ClipData.Item item = clipData.getItemAt(i);
+					Uri curi = item.getUri();
+					Log.d("curi", curi.toString());
+				}
+			}
+			/*Uri inputUri = data.getData();
+			Log.e("uri", inputUri.getPath());
+			ContentResolver resolver = getContentResolver();
+			try {
+
+				InputStream is = getContentResolver().openInputStream(inputUri);
+				if( is != null ) {
+					SafeCameraApplication.getCrypto().importKeyBundle(IOUtils.getInputStreamBytes(is));
+					is.close();
+					SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+					defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();
+					LoginManager.logout(this);
+					Helpers.showInfoDialog(this, "Import successful");
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (CryptoException e) {
+				Helpers.showAlertDialog(this, e.getMessage());
+				e.printStackTrace();
+			}*/
+		}
 	}
 
 }

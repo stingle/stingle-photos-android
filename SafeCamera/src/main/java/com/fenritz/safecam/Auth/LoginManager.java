@@ -182,16 +182,16 @@ public class LoginManager {
         logout(activity, true);
     }
     public static void logout(Activity activity, boolean redirect){
-        Intent broadcastIntent = new Intent();
+        /*Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("com.fenritz.safecam.ACTION_LOGOUT");
-        activity.sendBroadcast(broadcastIntent);
+        activity.sendBroadcast(broadcastIntent);*/
 
         SafeCameraApplication.setKey(null);
 
         Helpers.deleteTmpDir(activity);
 
         if(redirect) {
-            redirectToDashboard(activity);
+            //redirectToDashboard(activity);
         }
     }
 
