@@ -157,6 +157,22 @@ public class Helpers {
 		return progressDialog;
 	}
 
+
+	public static ProgressDialog showProgressDialogWithBar(Context context, String message, int max, DialogInterface.OnCancelListener onCancel){
+		ProgressDialog progressDialog = new ProgressDialog(context);
+		if(onCancel != null) {
+			progressDialog.setCancelable(true);
+			progressDialog.setOnCancelListener(onCancel);
+		}
+		progressDialog.setMessage(message);
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		progressDialog.setMax(max);
+		progressDialog.show();
+
+		return progressDialog;
+	}
+
+
 	public static String getDefaultHomeDir(){
 		List<StorageInfo> storageList = StorageUtils.getStorageList();
 		if(storageList.size() > 0){
@@ -736,6 +752,20 @@ public class Helpers {
 			fileType = Crypto.FILE_TYPE_PHOTO;
 		}
 		else if(Helpers.isVideoFile(path)){
+			fileType = Crypto.FILE_TYPE_VIDEO;
+		}
+
+		return fileType;
+	}
+
+	public static int getFileType(Context context, Uri uri){
+		String mimeType = context.getContentResolver().getType(uri);
+
+		int fileType = Crypto.FILE_TYPE_GENERAL;
+		if(mimeType.startsWith("image")){
+			fileType = Crypto.FILE_TYPE_PHOTO;
+		}
+		else if(mimeType.startsWith("video")){
 			fileType = Crypto.FILE_TYPE_VIDEO;
 		}
 

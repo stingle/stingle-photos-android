@@ -42,6 +42,19 @@ public class LoginManager {
 
     public static void checkLogin(Activity activity, final UserLogedinCallback loginCallback, boolean redirect) {
 
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        int lockTimeout = Integer.valueOf(sharedPrefs.getString(LAST_LOCK_TIME, "60")) * 1000;
+
+        long currentTimestamp = System.currentTimeMillis();
+        long lockedTime = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(LAST_LOCK_TIME, 0);
+
+        if (lockedTime != 0) {
+            if (currentTimestamp - lockedTime > lockTimeout) {
+                logout(activity, redirect);
+            }
+        }
+
         if (SafeCameraApplication.getKey() == null) {
 
             final Activity activityFinal = activity;
@@ -66,18 +79,6 @@ public class LoginManager {
         else {
             if(loginCallback != null) {
                 loginCallback.onUserLoginSuccess();
-            }
-            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-            int lockTimeout = Integer.valueOf(sharedPrefs.getString(LAST_LOCK_TIME, "60")) * 1000;
-
-            long currentTimestamp = System.currentTimeMillis();
-            long lockedTime = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(LAST_LOCK_TIME, 0);
-            ;
-
-            if (lockedTime != 0) {
-                if (currentTimestamp - lockedTime > lockTimeout) {
-                    logout(activity, redirect);
-                }
             }
         }
     }

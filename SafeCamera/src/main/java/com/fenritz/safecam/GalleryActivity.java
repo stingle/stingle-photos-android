@@ -16,6 +16,7 @@ import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
 import com.fenritz.safecam.Gallery.GalleryAdapterPisasso;
+import com.fenritz.safecam.Sync.FileManager;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Gallery.DragSelectRecyclerView;
@@ -102,6 +103,7 @@ public class GalleryActivity extends AppCompatActivity
 		adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
 
 
+
 		// use this setting to improve performance if you know that changes
 		// in content do not change the layout size of the RecyclerView
 		//recyclerView.setHasFixedSize(true);
@@ -134,7 +136,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onPause() {
 		super.onPause();
-
+		recyclerView.setAdapter(null);
 		LoginManager.setLockedTime(this);
 	}
 
@@ -401,21 +403,28 @@ public class GalleryActivity extends AppCompatActivity
 			return;
 		}
 		if(requestCode == INTENT_IMPORT){
-			Uri uri = data.getData();
-			String[] all_path = data.getStringArrayExtra("all_path");
 
-			if(uri != null){
-
-				Log.d("uri", uri.toString());
-			}
+			ArrayList<Uri> urisToImport = new ArrayList<Uri>();
 			ClipData clipData = data.getClipData();
-			if (clipData != null) {
+			if (clipData != null && clipData.getItemCount() > 0) {
 				for (int i = 0; i < clipData.getItemCount(); i++) {
-					ClipData.Item item = clipData.getItemAt(i);
-					Uri curi = item.getUri();
-					Log.d("curi", curi.toString());
+					urisToImport.add(clipData.getItemAt(i).getUri());
 				}
 			}
+			else {
+
+				Uri uri = data.getData();
+				if (uri != null) {
+					urisToImport.add(uri);
+				}
+			}
+
+			(new FileManager.ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
+				@Override
+				public void onFinish() {
+					adapter.updateDataSet();
+				}
+			})).execute();
 			/*Uri inputUri = data.getData();
 			Log.e("uri", inputUri.getPath());
 			ContentResolver resolver = getContentResolver();

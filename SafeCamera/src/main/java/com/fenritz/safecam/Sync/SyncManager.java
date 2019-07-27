@@ -676,57 +676,6 @@ public class SyncManager {
 		return false;
 	}
 
-	public static byte[] getAndCacheThumb(Context context, String filename) throws IOException {
-
-		File cacheDir = new File(context.getCacheDir().getPath() + "/thumbCache");
-		File cachedFile = new File(context.getCacheDir().getPath() + "/thumbCache/" + filename);
-
-		if(cachedFile.exists()){
-			FileInputStream in = new FileInputStream(cachedFile);
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			byte[] buf = new byte[4096];
-
-			int numRead;
-			while ((numRead = in.read(buf)) >= 0) {
-				out.write(buf, 0, numRead);
-			}
-			in.close();
-			return out.toByteArray();
-		}
-
-
-		HashMap<String, String> postParams = new HashMap<String, String>();
-
-		postParams.put("token", KeyManagement.getApiToken(context));
-		postParams.put("file", filename);
-		postParams.put("thumb", "1");
-
-		byte[] encFile = new byte[0];
-
-		try {
-			encFile = HttpsClient.getFileAsByteArray(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams);
-		}
-		catch (NoSuchAlgorithmException | KeyManagementException e) {
-
-		}
-
-		if(encFile == null || encFile.length == 0){
-			return null;
-		}
-
-
-		if(!cacheDir.exists()){
-			cacheDir.mkdirs();
-		}
-
-
-		FileOutputStream out = new FileOutputStream(cachedFile);
-		out.write(encFile);
-		out.close();
-
-		return encFile;
-	}
-
 	public static abstract class OnFinish{
 		public abstract void onFinish();
 	}

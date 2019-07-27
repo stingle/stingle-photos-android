@@ -160,10 +160,12 @@ public class DragSelectRecyclerView extends RecyclerView {
 
 	@Override
 	public void setAdapter(Adapter adapter) {
-		if (!(adapter instanceof IDragSelectAdapter)) {
-			throw new IllegalArgumentException("Adapter must be implement IDragSelectAdapter.");
+		if(adapter != null) {
+			if (!(adapter instanceof IDragSelectAdapter)) {
+				throw new IllegalArgumentException("Adapter must be implement IDragSelectAdapter.");
+			}
+			this.adapter = (IDragSelectAdapter) adapter;
 		}
-		this.adapter = (IDragSelectAdapter) adapter;
 		super.setAdapter(adapter);
 	}
 

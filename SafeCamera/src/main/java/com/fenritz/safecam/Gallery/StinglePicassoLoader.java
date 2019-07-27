@@ -14,6 +14,7 @@ import com.fenritz.safecam.Db.StingleDbHelper;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
+import com.fenritz.safecam.Sync.FileManager;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.squareup.picasso3.Picasso;
@@ -96,7 +97,7 @@ public class StinglePicassoLoader extends RequestHandler {
 
 			try {
 				//byte[] encFile = HttpsClient.getFileAsByteArray(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams);
-				byte[] encFile = SyncManager.getAndCacheThumb(context, file.filename);
+				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename);
 
 				if(encFile == null || encFile.length == 0){
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));
