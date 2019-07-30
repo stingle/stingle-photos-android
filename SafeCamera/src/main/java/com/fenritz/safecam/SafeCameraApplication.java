@@ -23,6 +23,8 @@ public class SafeCameraApplication extends Application{
     public static final String PASSWORD_FINGERPRINT = "password_finger";
     public static final String PASSWORD_FINGERPRINT_IV = "password_finger_iv";
 
+    public static final String USER_EMAIL = "user_email";
+
     @Override
 	public void onCreate(){
         super.onCreate();

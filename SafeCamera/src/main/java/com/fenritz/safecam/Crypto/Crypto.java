@@ -11,6 +11,7 @@ import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.interfaces.KeyDerivation;
 import com.goterl.lazycode.lazysodium.interfaces.PwHash;
 import com.goterl.lazycode.lazysodium.interfaces.SecretBox;
+import com.sun.jna.NativeLong;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,6 +67,10 @@ public class Crypto {
     public static final int KEY_FILE_TYPE_BUNDLE_PLAIN = 1;
     public static final int KEY_FILE_TYPE_PUBLIC_PLAIN = 2;
 
+    public static final int KDF_DIFFICULTY_NORMAL = 1;
+    public static final int KDF_DIFFICULTY_HARD = 2;
+    public static final int KDF_DIFFICULTY_ULTRA = 3;
+
     protected int bufSize = 1024 * 1024;
 
 
@@ -87,7 +92,7 @@ public class Crypto {
         so.crypto_box_keypair(publicKey, privateKey);
 
         // Derive symmetric encryption key from password
-        byte[] pwdKey = getKeyFromPassword(password);
+        byte[] pwdKey = getKeyFromPassword(password, KDF_DIFFICULTY_NORMAL);
 
         // Generate random nonce, save it and encrypt private key
         byte[] pwdEncNonce = new byte[SecretBox.NONCEBYTES];
@@ -101,20 +106,36 @@ public class Crypto {
     }
 
     public byte[] getPrivateKey(String password) throws CryptoException{
-        byte[] encKey = getKeyFromPassword(password);
+        byte[] encKey = getKeyFromPassword(password, KDF_DIFFICULTY_NORMAL);
 
         byte[] encPrivKey = readPrivateFile(PRIVATE_KEY_FILENAME);
 
         return decryptSymmetric(encKey, readPrivateFile(SK_NONCE_FILENAME), encPrivKey);
     }
 
-    public byte[] exportKeyBundle() throws IOException {
+    public byte[] getPrivateKeyForExport(String password) throws CryptoException{
+        byte[] encPrivKey = readPrivateFile(PRIVATE_KEY_FILENAME);
+
+        byte[] nonce = readPrivateFile(SK_NONCE_FILENAME);
+        byte[] decPrivKey = decryptSymmetric(getKeyFromPassword(password, KDF_DIFFICULTY_NORMAL), nonce, encPrivKey);
+
+       return encryptSymmetric(getKeyFromPassword(password, KDF_DIFFICULTY_HARD), nonce, decPrivKey);
+    }
+
+    public byte[] getPrivateKeyFromExportedKey(String password, byte[] encPrivKey) throws CryptoException{
+        byte[] nonce = readPrivateFile(SK_NONCE_FILENAME);
+        byte[] decPrivKey = decryptSymmetric(getKeyFromPassword(password, KDF_DIFFICULTY_HARD), nonce, encPrivKey);
+
+        return encryptSymmetric(getKeyFromPassword(password, KDF_DIFFICULTY_NORMAL), nonce, decPrivKey);
+    }
+
+    public byte[] exportKeyBundle(String password) throws IOException, CryptoException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(KEY_FILE_BEGGINING.getBytes());
         out.write(CURRENT_KEY_FILE_VERSION);
         out.write(KEY_FILE_TYPE_BUNDLE_ENCRYPTED);
         out.write(readPrivateFile(PUBLIC_KEY_FILENAME));
-        out.write(readPrivateFile(PRIVATE_KEY_FILENAME));
+        out.write(getPrivateKeyForExport(password));
         out.write(readPrivateFile(PWD_SALT_FILENAME));
         out.write(readPrivateFile(SK_NONCE_FILENAME));
         return out.toByteArray();
@@ -129,7 +150,7 @@ public class Crypto {
         return out.toByteArray();
     }
 
-    public void importKeyBundle(byte[] keys) throws IOException, CryptoException {
+    public void importKeyBundle(byte[] keys, String password) throws IOException, CryptoException {
         ByteArrayInputStream in = new ByteArrayInputStream(keys);
 
         byte[] fileBeginning = new byte[KEY_FILE_BEGGINIG_LEN];
@@ -160,12 +181,12 @@ public class Crypto {
         in.read(skNonce);
 
         savePrivateFile(PUBLIC_KEY_FILENAME, publicKey);
-        savePrivateFile(PRIVATE_KEY_FILENAME, encryptedPrivateKey);
+        savePrivateFile(PRIVATE_KEY_FILENAME, getPrivateKeyFromExportedKey(password, encryptedPrivateKey));
         savePrivateFile(PWD_SALT_FILENAME, pwdSalt);
         savePrivateFile(SK_NONCE_FILENAME, skNonce);
     }
 
-    public byte[] getKeyFromPassword(String password) throws CryptoException{
+    public byte[] getKeyFromPassword(String password, int difficulty) throws CryptoException{
         byte[] salt = readPrivateFile(PWD_SALT_FILENAME);
         if(salt.length != PwHash.ARGON2ID_SALTBYTES){
             throw new CryptoException("Invalid salt for password derivation");
@@ -174,7 +195,21 @@ public class Crypto {
         byte[] key = new byte[SecretBox.KEYBYTES];
         byte[] passwordBytes = password.getBytes();
 
-        so.crypto_pwhash(key, key.length, passwordBytes, passwordBytes.length, salt, PwHash.OPSLIMIT_INTERACTIVE, PwHash.MEMLIMIT_INTERACTIVE, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue());
+        long opsLimit = PwHash.OPSLIMIT_INTERACTIVE;
+        NativeLong memlimit = PwHash.MEMLIMIT_INTERACTIVE;
+
+        switch (difficulty){
+            case KDF_DIFFICULTY_HARD:
+                opsLimit = PwHash.OPSLIMIT_MODERATE;
+                memlimit = PwHash.MEMLIMIT_MODERATE;
+                break;
+            case KDF_DIFFICULTY_ULTRA:
+                opsLimit = PwHash.OPSLIMIT_SENSITIVE;
+                memlimit = PwHash.MEMLIMIT_SENSITIVE;
+                break;
+        }
+
+        so.crypto_pwhash(key, key.length, passwordBytes, passwordBytes.length, salt, opsLimit, memlimit, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue());
 
         return key;
     }

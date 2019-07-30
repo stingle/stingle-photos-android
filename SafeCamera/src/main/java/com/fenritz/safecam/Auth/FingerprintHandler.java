@@ -36,6 +36,10 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
 
     public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject, final LoginManager.UserLogedinCallback loginCallback, boolean showPasswordOption) {
 
+        if(dialog != null){
+            dialog.dismiss();
+        }
+
         this.cipher = cryptoObject.getCipher();
 
         cancellationSignal = new CancellationSignal();

@@ -38,6 +38,10 @@
         android:icon="@android:drawable/ic_menu_save"
         android:title="Upload" />
     <item
+        android:id="@+id/uploadkeys"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Upload Keys" />
+    <item
         android:id="@+id/resetCloudSync"
         android:icon="@android:drawable/ic_menu_save"
         android:title="Reset Cloud Sync" />

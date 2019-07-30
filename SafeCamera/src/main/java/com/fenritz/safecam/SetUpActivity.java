@@ -243,7 +243,7 @@ public class SetUpActivity  extends Activity{
 	private OnClickListener signup() {
 		return new OnClickListener() {
 			public void onClick(View v) {
-				String email = ((EditText)findViewById(R.id.email)).getText().toString();
+				final String email = ((EditText)findViewById(R.id.email)).getText().toString();
 				final String password1 = ((EditText)findViewById(R.id.password1)).getText().toString();
 				String password2 = ((EditText)findViewById(R.id.password2)).getText().toString();
 
@@ -295,14 +295,16 @@ public class SetUpActivity  extends Activity{
 										SafeCameraApplication.getCrypto().generateMainKeypair(password1);
 										((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password1));
 
-										KeyManagement.uploadKeyBundle(SetUpActivity.this, new HttpsClient.OnNetworkFinish() {
+										KeyManagement.uploadKeyBundle(SetUpActivity.this, password1, new HttpsClient.OnNetworkFinish() {
 											@Override
 											public void onFinish(StingleResponse response) {
 												progressDialog.dismiss();
 
 												if(response.isStatusOk()) {
+													Helpers.storePreference(SetUpActivity.this, SafeCameraApplication.USER_EMAIL, email);
+
 													Intent intent = new Intent();
-													intent.setClass(SetUpActivity.this, DashboardActivity.class);
+													intent.setClass(SetUpActivity.this, GalleryActivity.class);
 													intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 													intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 													SetUpActivity.this.startActivity(intent);

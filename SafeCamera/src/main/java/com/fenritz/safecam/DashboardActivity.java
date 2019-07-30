@@ -19,12 +19,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
+import com.fenritz.safecam.Auth.KeyManagement;
+import com.fenritz.safecam.Auth.PasswordReturnListener;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbHelper;
+import com.fenritz.safecam.Net.HttpsClient;
+import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.LoginManager;
@@ -217,7 +222,7 @@ public class DashboardActivity extends Activity {
 
 				OutputStream os = getContentResolver().openOutputStream(outputUri);
 				if( os != null ) {
-					os.write(SafeCameraApplication.getCrypto().exportKeyBundle());
+					//os.write(SafeCameraApplication.getCrypto().exportKeyBundle());
 					os.close();
 				}
 			} catch (FileNotFoundException e) {
@@ -234,7 +239,7 @@ public class DashboardActivity extends Activity {
 
 				InputStream is = getContentResolver().openInputStream(inputUri);
 				if( is != null ) {
-					SafeCameraApplication.getCrypto().importKeyBundle(IOUtils.getInputStreamBytes(is));
+					//SafeCameraApplication.getCrypto().importKeyBundle(IOUtils.getInputStreamBytes(is));
 					is.close();
 					SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 					defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();
@@ -245,10 +250,11 @@ public class DashboardActivity extends Activity {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			} catch (CryptoException e) {
+			}
+			/*catch (CryptoException e) {
 				Helpers.showAlertDialog(this, e.getMessage());
 				e.printStackTrace();
-			}
+			}*/
 		}
 	}
 
@@ -297,7 +303,7 @@ public class DashboardActivity extends Activity {
 					File destinationFile = new File(filePath);
 
 					FileOutputStream outputStream = new FileOutputStream(destinationFile);
-					outputStream.write(SafeCameraApplication.getCrypto().exportKeyBundle());
+					//outputStream.write(SafeCameraApplication.getCrypto().exportKeyBundle());
 					outputStream.close();
 
 					Intent share = new Intent(Intent.ACTION_SEND);
@@ -310,6 +316,24 @@ public class DashboardActivity extends Activity {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				return true;
+			case R.id.uploadkeys:
+				LoginManager.getPasswordFromUser(this, new PasswordReturnListener() {
+					@Override
+					public void passwordReceived(String enteredPassword) {
+						KeyManagement.uploadKeyBundle(DashboardActivity.this, enteredPassword, new HttpsClient.OnNetworkFinish() {
+							@Override
+							public void onFinish(StingleResponse response) {
+								Toast.makeText(DashboardActivity.this, "OK", Toast.LENGTH_SHORT);
+							}
+						});
+					}
+
+					@Override
+					public void passwordCanceled() {
+
+					}
+				});
 				return true;
 			case R.id.import_keys:
 				Intent openerIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
