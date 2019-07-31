@@ -25,7 +25,7 @@ import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Base64;
+import android.util.Base64;
 import java.util.HashMap;
 
 public class Crypto {
@@ -191,7 +191,7 @@ public class Crypto {
 
     public byte[] getKeyFromPassword(String password, int difficulty) throws CryptoException{
         byte[] salt = readPrivateFile(PWD_SALT_FILENAME);
-        if(salt.length != PwHash.ARGON2ID_SALTBYTES){
+        if(salt == null || salt.length != PwHash.ARGON2ID_SALTBYTES){
             throw new CryptoException("Invalid salt for password derivation");
         }
 
@@ -762,10 +762,10 @@ public class Crypto {
     }
 
     public static String byteArrayToBase64(byte[] bytes) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); //base64 encoding
+        return Base64.encodeToString(bytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 encoding
     }
     public static byte[] base64ToByteArray(String base64str) {
-        return Base64.getUrlDecoder().decode(base64str); //base64 decoding
+        return Base64.decode(base64str, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 decoding
     }
 
     public class Header{

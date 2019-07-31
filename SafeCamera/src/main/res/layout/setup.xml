@@ -1,73 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:id="@+id/parentLayout">
+	android:orientation="vertical">
 	
-	<LinearLayout
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:orientation="vertical"
-	    android:padding="10dp">
+	<ImageView
+		android:id="@+id/imageView1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="15dp"
+		android:src="@mipmap/ic_stingle_photos_round"
+		android:layout_gravity="center"
+		android:contentDescription="@string/app_name" />
 
-	    <ImageView
-			android:id="@+id/imageView1"
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="30dp"
+		android:layout_gravity="center"
+		android:textSize="30sp"
+		android:text="@string/sign_up" />
+
+	<TextView
+		android:id="@+id/textView1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:layout_margin="10dp"
+		android:text="@string/setup_info" />
+
+	<EditText
+		android:id="@+id/email"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="10dp"
+		android:hint="@string/email" >
+
+		<requestFocus />
+	</EditText>
+
+	<EditText
+		android:id="@+id/password1"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:hint="@string/password"
+		android:layout_margin="10dp"
+		android:inputType="textPassword" >
+
+	</EditText>
+
+	<EditText
+		android:id="@+id/password2"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:hint="@string/confirm_password"
+		android:layout_margin="10dp"
+		android:inputType="textPassword" />
+
+	<Button
+		android:id="@+id/signup"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:layout_marginTop="10dp"
+		android:text="@string/sign_up" />
+
+	<TextView
+		android:id="@+id/loginBtn"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:textColor="@color/design_default_color_primary"
+		android:layout_marginTop="30dp"
+		android:textSize="16sp"
+		android:text="@string/login_intead" />
+
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:gravity="bottom"
+		android:orientation="vertical">
+
+		<TextView
+			android:id="@+id/versionText"
 			android:layout_width="wrap_content"
-			android:layout_height="150dp"
-			android:layout_margin="15dp"
-			android:src="@drawable/safe_camera_logo"
-			android:scaleType="centerInside"
-			android:layout_gravity="center"
-			android:contentDescription="@string/app_name" />
-	    
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center"
-	        android:text="@string/sign_up"
-	        android:textSize="30sp"
-	        android:paddingBottom="10dp" />
-	    
-	    <TextView
-	        android:id="@+id/textView1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center"
-	        android:text="@string/setup_info" />
-
-		<EditText
-			android:id="@+id/email"
-			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="10dp"
-			android:hint="@string/email" >
+			android:layout_gravity="center_horizontal|bottom"
+			android:gravity="center"
+			android:textColor="@color/sec_color_light" />
 
-			<requestFocus />
-		</EditText>
-
-	    <EditText
-	        android:id="@+id/password1"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:hint="@string/password"
-	        android:inputType="textPassword" >
-	
-	    </EditText>
-	
-	    <EditText
-	        android:id="@+id/password2"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:hint="@string/confirm_password"
-	        android:inputType="textPassword" />
-	
-	    <Button
-	        android:id="@+id/signup"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:layout_marginTop="10dp"
-	        android:text="@string/sign_up" />
-
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal|bottom"
+			android:autoLink="web"
+			android:gravity="center"
+			android:paddingBottom="15dp"
+			android:text="@string/bottom_text" />
 	</LinearLayout>
-</ScrollView>
+
+</LinearLayout>

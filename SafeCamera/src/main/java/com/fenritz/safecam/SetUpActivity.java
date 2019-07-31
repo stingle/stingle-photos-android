@@ -4,18 +4,23 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.KeyManagement;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 
@@ -53,7 +58,7 @@ public class SetUpActivity  extends Activity{
 		}*/
 		
 		((Button) findViewById(R.id.signup)).setOnClickListener(signup());
-
+		((TextView) findViewById(R.id.loginBtn)).setOnClickListener(gotoLogin());
 
 
 		/*LazySodiumAndroid ls = new LazySodiumAndroid(new SodiumAndroid());
@@ -240,6 +245,17 @@ public class SetUpActivity  extends Activity{
 		}
 	}
 
+	private OnClickListener gotoLogin() {
+		return new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(SetUpActivity.this, LoginActivity.class);
+				startActivity(intent);
+				finish();
+			}
+		};
+	}
+
 	private OnClickListener signup() {
 		return new OnClickListener() {
 			public void onClick(View v) {
@@ -268,94 +284,102 @@ public class SetUpActivity  extends Activity{
 				}
 
 
-				final ProgressDialog progressDialog = new ProgressDialog(SetUpActivity.this);
-				progressDialog.setMessage(getString(R.string.creating_account));
-				progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-				progressDialog.show();
-
-				HashMap<String, String> loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
-
-				HashMap<String, String> postParams = new HashMap<String, String>();
-
-				postParams.put("email", email);
-				postParams.put("password", loginHash.get("hash"));
-				postParams.put("salt", loginHash.get("salt"));
-
-				HttpsClient.post(SetUpActivity.this, getString(R.string.api_server_url) + getString(R.string.registration_path), postParams, new HttpsClient.OnNetworkFinish() {
-					@Override
-					public void onFinish(StingleResponse response) {
-
-						boolean result = false;
-						if(response.isStatusOk()) {
-							String token = response.get("token");
-							if(token != null) {
-								KeyManagement.setApiToken(SetUpActivity.this, token);
-
-								try {
-									SafeCameraApplication.getCrypto().generateMainKeypair(password1);
-									((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password1));
-
-									KeyManagement.uploadKeyBundle(SetUpActivity.this, password1, new HttpsClient.OnNetworkFinish() {
-										@Override
-										public void onFinish(StingleResponse response) {
-											progressDialog.dismiss();
-
-											if(response.isStatusOk()) {
-												Helpers.storePreference(SetUpActivity.this, SafeCameraApplication.USER_EMAIL, email);
-
-												Intent intent = new Intent();
-												intent.setClass(SetUpActivity.this, GalleryActivity.class);
-												intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-												intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-												SetUpActivity.this.startActivity(intent);
-												SetUpActivity.this.finish();
-											}
-											else{
-												Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
-											}
-
-										}
-									});
-
-									result = true;
-								}
-								catch (CryptoException e) {
-									e.printStackTrace();
-								}
-							}
-						}
-
-						if(!result) {
-							Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
-							progressDialog.dismiss();
-						}
-
-					}
-				});
-
-				/*
-				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);
-				try {
-
-					preferences.edit().putString(SafeCameraApplication.PASSWORD, loginHash).commit();
-
-					SafeCameraApplication.getCrypto().generateMainKeypair(password1);
-
-					((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password1));
-				}
-				catch (CryptoException e) {
-					e.printStackTrace();
-					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.unexpected_error));
-					return;
-				}
-				
-				Intent intent = new Intent();
-				intent.setClass(SetUpActivity.this, DashboardActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
-				finish();*/
+				(new SignUpAsyncTask(SetUpActivity.this, email, password1)).execute();
 			}
 		};
+	}
+
+	public static class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
+
+		protected Activity context;
+		protected String email;
+		protected String password;
+		protected ProgressDialog progressDialog;
+		protected StingleResponse response;
+
+
+		public SignUpAsyncTask(Activity context, String email, String password){
+			this.context = context;
+			this.email = email;
+			this.password = password;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progressDialog = new ProgressDialog(context);
+			progressDialog.setMessage(context.getString(R.string.creating_account));
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.show();
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+
+			HashMap<String, String> loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password);
+
+			HashMap<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("email", email);
+			postParams.put("password", loginHash.get("hash"));
+			postParams.put("salt", loginHash.get("salt"));
+
+			JSONObject resultJson = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.registration_path), postParams);
+			response = new StingleResponse(this.context, resultJson, false);
+
+
+
+			if(response.isStatusOk()) {
+				String token = response.get("token");
+				if(token != null) {
+
+					KeyManagement.setApiToken(context, token);
+
+					try {
+						SafeCameraApplication.getCrypto().generateMainKeypair(password);
+
+						boolean uploadResult = KeyManagement.uploadKeyBundle(context, password);
+						if(uploadResult) {
+							((SafeCameraApplication) context.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
+							Helpers.storePreference(context, SafeCameraApplication.USER_EMAIL, email);
+
+							return true;
+						}
+					}
+					catch (CryptoException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			return false;
+
+		}
+
+
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			super.onPostExecute(result);
+
+			progressDialog.dismiss();
+			if(result) {
+				Intent intent = new Intent();
+				intent.setClass(context, GalleryActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(intent);
+				context.finish();
+			}
+			else{
+				if(response.areThereErrorInfos()) {
+					response.showErrorsInfos();
+				}
+				else {
+					Helpers.showAlertDialog(context, context.getString(R.string.fail_reg));
+				}
+			}
+
+		}
 	}
 }

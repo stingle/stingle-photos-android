@@ -63,6 +63,16 @@
         android:text="@string/sign_in" />
 
 
+	<TextView
+		android:id="@+id/register"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:textColor="@color/design_default_color_primary"
+		android:layout_marginTop="30dp"
+		android:textSize="16sp"
+		android:text="@string/create_account" />
+
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"

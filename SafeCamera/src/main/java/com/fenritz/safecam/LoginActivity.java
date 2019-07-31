@@ -52,6 +52,7 @@ public class LoginActivity extends Activity {
 
 		((Button) findViewById(R.id.login)).setOnClickListener(login());
 		((TextView) findViewById(R.id.forgot_password)).setOnClickListener(forgotPassword());
+		((TextView) findViewById(R.id.register)).setOnClickListener(gotoSignUp());
 		((EditText) findViewById(R.id.password)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_GO) {
@@ -71,6 +72,17 @@ public class LoginActivity extends Activity {
 		return new OnClickListener() {
 			public void onClick(View v) {
 				doLogin();
+			}
+		};
+	}
+
+	private OnClickListener gotoSignUp() {
+		return new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(LoginActivity.this, SetUpActivity.class);
+				startActivity(intent);
+				finish();
 			}
 		};
 	}

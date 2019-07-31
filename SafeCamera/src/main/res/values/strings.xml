@@ -296,6 +296,8 @@
     <string name="sign_in">Sign In</string>
     <string name="signing_in">Signing in...</string>
     <string name="fail_login">Something went wrong during login, please try again.</string>
+    <string name="create_account">Create an account</string>
+    <string name="login_intead">Already have an account? Go to Login</string>
 
 
 </resources>

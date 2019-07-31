@@ -322,7 +322,7 @@ public class DashboardActivity extends Activity {
 				LoginManager.getPasswordFromUser(this, new PasswordReturnListener() {
 					@Override
 					public void passwordReceived(String enteredPassword) {
-						KeyManagement.uploadKeyBundle(DashboardActivity.this, enteredPassword, new HttpsClient.OnNetworkFinish() {
+						KeyManagement.uploadKeyBundleAsync(DashboardActivity.this, enteredPassword, new HttpsClient.OnNetworkFinish() {
 							@Override
 							public void onFinish(StingleResponse response) {
 								Toast.makeText(DashboardActivity.this, "OK", Toast.LENGTH_SHORT);
