@@ -42,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 public class DashboardActivity extends Activity {
 
@@ -352,6 +353,23 @@ public class DashboardActivity extends Activity {
 				Helpers.storePreference(this, SyncManager.PREF_LAST_DEL_SEEN_TIME, 0L);
 				StingleDbHelper db = new StingleDbHelper(this, StingleDbContract.Files.TABLE_NAME_FILES);
 				db.onUpgrade(db.getWritableDatabase(), 1,1);
+				return true;
+			case R.id.tmpshit:
+				HashMap<String, String> postParams = new HashMap<String, String>();
+				HashMap<String, String> loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage("govnoaloblo");
+				Log.d("loginhash", loginHash.get("hash"));
+				Log.d("salt", loginHash.get("salt"));
+				postParams.put("hash", loginHash.get("hash"));
+				postParams.put("salt", loginHash.get("salt"));
+
+				HttpsClient.post(this, getString(R.string.api_server_url) + "tmp", postParams, new HttpsClient.OnNetworkFinish() {
+					@Override
+					public void onFinish(StingleResponse response) {
+
+					}
+				});
+
+
 				return true;
 			case R.id.upload:
 				SyncManager.syncCloudToLocalDb(this);

@@ -175,7 +175,7 @@ public class GalleryActivityOld extends Activity {
 
 			@Override
 			public void onUserLoginFail() {
-				LoginManager.redirectToDashboard(GalleryActivityOld.this);
+				LoginManager.redirectToLogin(GalleryActivityOld.this);
 			}
 		});
 		LoginManager.disableLockTimer(this);

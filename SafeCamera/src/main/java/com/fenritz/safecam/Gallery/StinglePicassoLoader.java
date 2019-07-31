@@ -3,6 +3,7 @@ package com.fenritz.safecam.Gallery;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -11,6 +12,7 @@ import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Db.StingleDbHelper;
+import com.fenritz.safecam.GalleryActivity;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -58,7 +60,9 @@ public class StinglePicassoLoader extends RequestHandler {
 		} catch (InterruptedException e) {
 			//Log.e("interrupted", String.valueOf(position));
 		}*/
-		String position = request.uri.toString().substring(1);
+		String uri = request.uri.toString();
+		String folderStr = uri.substring(1, 2);
+		String position = uri.substring(2);
 
 		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position));
 		if(file.isLocal) {
@@ -89,15 +93,15 @@ public class StinglePicassoLoader extends RequestHandler {
 		}
 		else if(!file.isLocal && file.isRemote){
 
-			HashMap<String, String> postParams = new HashMap<String, String>();
 
-			postParams.put("token", KeyManagement.getApiToken(context));
-			postParams.put("file", file.filename);
-			postParams.put("thumb", "1");
+			int folder = SyncManager.FOLDER_MAIN;
+			if(folderStr.equals("t")){
+				folder = SyncManager.FOLDER_TRASH;
+			}
 
 			try {
 				//byte[] encFile = HttpsClient.getFileAsByteArray(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams);
-				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename);
+				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename, folder);
 
 				if(encFile == null || encFile.length == 0){
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));

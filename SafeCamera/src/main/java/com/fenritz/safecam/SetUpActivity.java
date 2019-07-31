@@ -228,7 +228,7 @@ public class SetUpActivity  extends Activity{
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 		switch (requestCode) {
-			case LoginActivity.REQUEST_SD_CARD_PERMISSION: {
+			case SafeCameraApplication.REQUEST_SD_CARD_PERMISSION: {
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					Helpers.createFolders(this);
 
@@ -273,72 +273,65 @@ public class SetUpActivity  extends Activity{
 				progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 				progressDialog.show();
 
-				try {
-					final String loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
+				HashMap<String, String> loginHash = SafeCameraApplication.getCrypto().getPasswordHashForStorage(password1);
 
-					HashMap<String, String> postParams = new HashMap<String, String>();
+				HashMap<String, String> postParams = new HashMap<String, String>();
 
-					postParams.put("email", email);
-					postParams.put("password", loginHash);
+				postParams.put("email", email);
+				postParams.put("password", loginHash.get("hash"));
+				postParams.put("salt", loginHash.get("salt"));
 
-					HttpsClient.post(SetUpActivity.this, getString(R.string.api_server_url) + getString(R.string.registration_path), postParams, new HttpsClient.OnNetworkFinish() {
-						@Override
-						public void onFinish(StingleResponse response) {
+				HttpsClient.post(SetUpActivity.this, getString(R.string.api_server_url) + getString(R.string.registration_path), postParams, new HttpsClient.OnNetworkFinish() {
+					@Override
+					public void onFinish(StingleResponse response) {
 
-							boolean result = false;
-							if(response.isStatusOk()) {
-								String token = response.get("token");
-								if(token != null) {
-									KeyManagement.setApiToken(SetUpActivity.this, token);
+						boolean result = false;
+						if(response.isStatusOk()) {
+							String token = response.get("token");
+							if(token != null) {
+								KeyManagement.setApiToken(SetUpActivity.this, token);
 
-									try {
-										SafeCameraApplication.getCrypto().generateMainKeypair(password1);
-										((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password1));
+								try {
+									SafeCameraApplication.getCrypto().generateMainKeypair(password1);
+									((SafeCameraApplication) SetUpActivity.this.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password1));
 
-										KeyManagement.uploadKeyBundle(SetUpActivity.this, password1, new HttpsClient.OnNetworkFinish() {
-											@Override
-											public void onFinish(StingleResponse response) {
-												progressDialog.dismiss();
+									KeyManagement.uploadKeyBundle(SetUpActivity.this, password1, new HttpsClient.OnNetworkFinish() {
+										@Override
+										public void onFinish(StingleResponse response) {
+											progressDialog.dismiss();
 
-												if(response.isStatusOk()) {
-													Helpers.storePreference(SetUpActivity.this, SafeCameraApplication.USER_EMAIL, email);
+											if(response.isStatusOk()) {
+												Helpers.storePreference(SetUpActivity.this, SafeCameraApplication.USER_EMAIL, email);
 
-													Intent intent = new Intent();
-													intent.setClass(SetUpActivity.this, GalleryActivity.class);
-													intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-													intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-													SetUpActivity.this.startActivity(intent);
-													SetUpActivity.this.finish();
-												}
-												else{
-													Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
-												}
-
+												Intent intent = new Intent();
+												intent.setClass(SetUpActivity.this, GalleryActivity.class);
+												intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+												intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+												SetUpActivity.this.startActivity(intent);
+												SetUpActivity.this.finish();
 											}
-										});
+											else{
+												Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
+											}
 
-										result = true;
-									}
-									catch (CryptoException e) {
-										e.printStackTrace();
-									}
+										}
+									});
+
+									result = true;
+								}
+								catch (CryptoException e) {
+									e.printStackTrace();
 								}
 							}
-
-							if(!result) {
-								Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
-								progressDialog.dismiss();
-							}
-
 						}
-					});
-				}
-				catch (CryptoException e) {
-					e.printStackTrace();
-					Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.unexpected_error));
-					progressDialog.dismiss();
-					return;
-				}
+
+						if(!result) {
+							Helpers.showAlertDialog(SetUpActivity.this, getString(R.string.fail_reg));
+							progressDialog.dismiss();
+						}
+
+					}
+				});
 
 				/*
 				SharedPreferences preferences = getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, MODE_PRIVATE);

@@ -190,7 +190,7 @@ public class Picasso implements LifecycleObserver {
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-  void cancelAll() {
+  public void cancelAll() {
     checkMain();
 
     List<Action> actions = new ArrayList<>(targetToAction.values());

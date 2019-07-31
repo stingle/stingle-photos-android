@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.fenritz.safecam.DashboardActivity;
+import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.SetUpActivity;
@@ -42,6 +43,9 @@ public class LoginManager {
 
     public static void checkLogin(Activity activity, final UserLogedinCallback loginCallback, boolean redirect) {
 
+        if(!checkIfLoggedIn(activity)){
+            return;
+        }
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
         int lockTimeout = Integer.valueOf(sharedPrefs.getString(LAST_LOCK_TIME, "60")) * 1000;
@@ -171,6 +175,18 @@ public class LoginManager {
         });
     }
 
+    public static boolean checkIfLoggedIn(Activity activity){
+        String email = Helpers.getPreference(activity, SafeCameraApplication.USER_EMAIL, null);
+        String token = KeyManagement.getApiToken(activity);
+
+        if(email == null || token == null){
+            redirectToLogin(activity);
+            return false;
+        }
+
+        return true;
+    }
+
     public static void setLockedTime(Context context) {
         context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LAST_LOCK_TIME, System.currentTimeMillis()).commit();
     }
@@ -196,18 +212,13 @@ public class LoginManager {
         }
     }
 
-    public static void redirectToDashboard(Activity activity) {
+    public static void redirectToLogin(Activity activity) {
         Intent intent = new Intent();
-        intent.setClass(activity, DashboardActivity.class);
+        intent.setClass(activity, LoginActivity.class);
         activity.startActivity(intent);
         activity.finish();
     }
-    public static void redirectToSetup(Activity activity) {
-        Intent intent = new Intent();
-        intent.setClass(activity, SetUpActivity.class);
-        activity.startActivity(intent);
-        activity.finish();
-    }
+
 
     public static abstract class UserLogedinCallback{
         public abstract void onUserLoginSuccess();

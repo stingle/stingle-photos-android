@@ -74,19 +74,46 @@ public class StingleResponse{
 		return "";
 	}
 
-	protected void showErrorsInfos(){
+	public void showErrorsInfos(){
+		showErrors();
+		showInfos();
+	}
+
+	public void showErrors(){
 		for (int i = 0; i < this.errors.length(); i++) {
 			String error = this.errors.optString(i);
 			if(error != null){
 				Helpers.showAlertDialog(this.context, error);
 			}
 		}
+	}
 
+	public void showInfos(){
 		for (int i = 0; i < this.infos.length(); i++) {
 			String info = this.infos.optString(i);
 			if(info != null){
 				Helpers.showInfoDialog(this.context, info);
 			}
 		}
+	}
+
+	public int getErrorCount(){
+		if(this.errors != null) {
+			return this.errors.length();
+		}
+		return 0;
+	}
+	public int getInfoCount(){
+		if(this.infos != null) {
+			return this.infos.length();
+		}
+		return 0;
+	}
+
+	public boolean areThereErrorInfos(){
+		if(getErrorCount() + getInfoCount() > 0){
+			return true;
+		}
+		return false;
 	}
 }

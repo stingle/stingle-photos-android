@@ -26,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 
 public class Crypto {
 
@@ -36,7 +37,7 @@ public class Crypto {
     public static final int FILE_TYPE_PHOTO = 2;
     public static final int FILE_TYPE_VIDEO = 3;
 
-    protected static final String FILE_BEGGINING = "SP";
+    public static final String FILE_BEGGINING = "SP";
     protected static final String KEY_FILE_BEGGINING = "SPK";
     protected static final int CURRENT_FILE_VERSION = 1;
     protected static final int CURRENT_HEADER_VERSION = 1;
@@ -70,6 +71,8 @@ public class Crypto {
     public static final int KDF_DIFFICULTY_NORMAL = 1;
     public static final int KDF_DIFFICULTY_HARD = 2;
     public static final int KDF_DIFFICULTY_ULTRA = 3;
+
+    public static final int PWHASH_LEN = 64;
 
     protected int bufSize = 1024 * 1024;
 
@@ -181,9 +184,9 @@ public class Crypto {
         in.read(skNonce);
 
         savePrivateFile(PUBLIC_KEY_FILENAME, publicKey);
-        savePrivateFile(PRIVATE_KEY_FILENAME, getPrivateKeyFromExportedKey(password, encryptedPrivateKey));
         savePrivateFile(PWD_SALT_FILENAME, pwdSalt);
         savePrivateFile(SK_NONCE_FILENAME, skNonce);
+        savePrivateFile(PRIVATE_KEY_FILENAME, getPrivateKeyFromExportedKey(password, encryptedPrivateKey));
     }
 
     public byte[] getKeyFromPassword(String password, int difficulty) throws CryptoException{
@@ -214,13 +217,29 @@ public class Crypto {
         return key;
     }
 
-    public String getPasswordHashForStorage(String password) throws CryptoException{
-        byte[] hashedPassword = new byte[PwHash.ARGON2ID_STR_BYTES];
-        byte[] passwordBytes = password.getBytes();
+    public HashMap<String, String> getPasswordHashForStorage(String password){
+        byte[] salt = new byte[PwHash.ARGON2ID_SALTBYTES];
+        so.randombytes_buf(salt, salt.length);
 
-        if(so.crypto_pwhash_str(hashedPassword, passwordBytes, passwordBytes.length, PwHash.OPSLIMIT_INTERACTIVE, PwHash.MEMLIMIT_INTERACTIVE) != 0 ){
-            throw new CryptoException("Unable to derive storage key");
-        }
+        String hashedPassword = getPasswordHashForStorage(password, salt);
+
+
+        HashMap<String, String> result = new HashMap<String, String>();
+        result.put("hash", hashedPassword);
+        result.put("salt", byte2hex(salt));
+
+        return result;
+    }
+
+    public String getPasswordHashForStorage(String password, String salt){
+        return getPasswordHashForStorage(password, hex2byte(salt));
+    }
+
+    public String getPasswordHashForStorage(String password, byte[] salt){
+        byte[] passwordBytes = password.getBytes();
+        byte[] hashedPassword = new byte[PWHASH_LEN];
+
+        so.crypto_pwhash(hashedPassword, hashedPassword.length, passwordBytes, passwordBytes.length, salt, PwHash.OPSLIMIT_MODERATE, PwHash.MEMLIMIT_MODERATE, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue());
 
         return byte2hex(hashedPassword);
     }

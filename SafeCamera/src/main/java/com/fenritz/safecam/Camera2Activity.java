@@ -1133,7 +1133,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         .setMessage(getString(R.string.camera_perm_explain))
                         .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(new String[]{Manifest.permission.CAMERA}, LoginActivity.REQUEST_CAMERA_PERMISSION);
+                                requestPermissions(new String[]{Manifest.permission.CAMERA}, SafeCameraApplication.REQUEST_CAMERA_PERMISSION);
                             }
                         })
                         .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -1146,7 +1146,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         .show();
 
             } else {
-                requestPermissions(new String[]{Manifest.permission.CAMERA}, LoginActivity.REQUEST_CAMERA_PERMISSION);
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, SafeCameraApplication.REQUEST_CAMERA_PERMISSION);
             }
             return false;
         }
@@ -1161,7 +1161,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         .setMessage(getString(R.string.camera_perm_explain))
                         .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, LoginActivity.REQUEST_AUDIO_PERMISSION);
+                                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, SafeCameraApplication.REQUEST_AUDIO_PERMISSION);
                             }
                         })
                         .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -1174,7 +1174,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                         .show();
 
             } else {
-                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, LoginActivity.REQUEST_AUDIO_PERMISSION);
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, SafeCameraApplication.REQUEST_AUDIO_PERMISSION);
             }
             return false;
         }
@@ -1184,8 +1184,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case LoginActivity.REQUEST_CAMERA_PERMISSION:
-            case LoginActivity.REQUEST_AUDIO_PERMISSION:{
+            case SafeCameraApplication.REQUEST_CAMERA_PERMISSION:
+            case SafeCameraApplication.REQUEST_AUDIO_PERMISSION:{
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     closeCamera();
                     openCamera();

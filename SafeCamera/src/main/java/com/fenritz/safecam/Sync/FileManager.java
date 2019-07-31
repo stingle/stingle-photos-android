@@ -39,11 +39,12 @@ import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class FileManager {
 
-	public static byte[] getAndCacheThumb(Context context, String filename) throws IOException {
+	public static byte[] getAndCacheThumb(Context context, String filename, int folder) throws IOException {
 
 		File cacheDir = new File(context.getCacheDir().getPath() + "/thumbCache");
 		File cachedFile = new File(context.getCacheDir().getPath() + "/thumbCache/" + filename);
@@ -67,7 +68,7 @@ public class FileManager {
 		postParams.put("token", KeyManagement.getApiToken(context));
 		postParams.put("file", filename);
 		postParams.put("thumb", "1");
-
+		postParams.put("folder", String.valueOf(folder));
 		byte[] encFile = new byte[0];
 
 		try {
@@ -81,6 +82,11 @@ public class FileManager {
 			return null;
 		}
 
+		byte[] fileBeginning = Arrays.copyOfRange(encFile, 0, Crypto.FILE_BEGGINIG_LEN);
+		Log.d("beg", new String(fileBeginning, "UTF-8"));
+		if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
+			return null;
+		}
 
 		if(!cacheDir.exists()){
 			cacheDir.mkdirs();

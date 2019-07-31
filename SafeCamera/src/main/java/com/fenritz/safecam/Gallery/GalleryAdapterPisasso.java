@@ -49,6 +49,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private LruCache<Integer, Integer> typesCache = new LruCache<Integer, Integer>(512);
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
+	private int folderType;
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
@@ -56,6 +57,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType) {
 		this.context = context;
 		this.callback = callback;
+		this.folderType = folderType;
 		this.db = new StingleDbHelper(context, (folderType == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
@@ -83,6 +85,8 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	public void setFolder(int folder){
 		synchronized (this){
 			this.db = new StingleDbHelper(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			folderType = folder;
+			picasso.cancelAll();
 			this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
 			updateDataSet();
 		}
@@ -290,8 +294,12 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			holder.videoIcon.setVisibility(View.GONE);
 			holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
 
+			String folder = "m";
+			if(folderType == SyncManager.FOLDER_TRASH){
+				folder = "t";
+			}
 
-			final RequestCreator req = picasso.load("p" + String.valueOf(position));
+			final RequestCreator req = picasso.load("p" + folder + String.valueOf(position));
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
 			req.tag(holder);
 			req.addProp("pos", String.valueOf(position));

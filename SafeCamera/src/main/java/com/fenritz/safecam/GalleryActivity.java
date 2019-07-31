@@ -127,7 +127,7 @@ public class GalleryActivity extends AppCompatActivity
 
 			@Override
 			public void onUserLoginFail() {
-				LoginManager.redirectToDashboard(GalleryActivity.this);
+				LoginManager.redirectToLogin(GalleryActivity.this);
 			}
 		});
 		LoginManager.disableLockTimer(this);
@@ -178,6 +178,12 @@ public class GalleryActivity extends AppCompatActivity
 
 		//noinspection SimplifiableIfStatement
 		if (id == R.id.action_settings) {
+			return true;
+		}
+		if (id == R.id.action_dashboard) {
+			Intent intent = new Intent();
+			intent.setClass(this, DashboardActivity.class);
+			startActivity(intent);
 			return true;
 		}
 

@@ -693,7 +693,7 @@ public class Helpers {
 						.setMessage(activity.getString(R.string.sdcard_perm_explain))
 						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
-								activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
+								activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
 							}
 						})
 						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -706,7 +706,7 @@ public class Helpers {
 						.show();
 
 			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
+				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
 			}
 			return false;
 		}
@@ -717,7 +717,7 @@ public class Helpers {
 						.setMessage(activity.getString(R.string.sdcard_perm_explain))
 						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
-								activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
+								activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
 							}
 						})
 						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -730,7 +730,7 @@ public class Helpers {
 						.show();
 
 			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, LoginActivity.REQUEST_SD_CARD_PERMISSION);
+				activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
 			}
 			return false;
 		}

@@ -48,4 +48,17 @@ public class KeyManagement {
 
 		return true;
 	}
+
+	public static boolean importKeyBundle(Context context, String keyBundle, String password){
+		try {
+			byte[] keyBundleBytes = Base64.decode(keyBundle, Base64.NO_WRAP);
+
+			SafeCameraApplication.getCrypto().importKeyBundle(keyBundleBytes, password);
+		} catch (IOException | CryptoException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
 }

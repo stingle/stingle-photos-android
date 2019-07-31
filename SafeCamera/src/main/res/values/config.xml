@@ -23,7 +23,10 @@
     <string name="popup_laters_limit">3</string>
 
     <string name="api_server_url">https://api.stingle.org/</string>
+
     <string name="registration_path">register/createAccount</string>
+    <string name="login_path">login/login</string>
+    <string name="pre_login_path">login/preLogin</string>
     <string name="upload_key_bundle_path">keys/uploadKeyBundle</string>
     <string name="upload_file_path">sync/upload</string>
     <string name="get_server_files_path">sync/getFilesList</string>
