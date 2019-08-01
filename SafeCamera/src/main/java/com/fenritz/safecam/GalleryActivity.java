@@ -16,6 +16,7 @@ import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
 import com.fenritz.safecam.Gallery.GalleryAdapterPisasso;
+import com.fenritz.safecam.Gallery.HidingScrollListener;
 import com.fenritz.safecam.Sync.FileManager;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
@@ -30,6 +31,7 @@ import android.view.MenuInflater;
 import android.view.View;
 
 import androidx.appcompat.view.ActionMode;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -45,6 +47,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import android.view.Menu;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import org.apache.sanselan.util.IOUtils;
 
@@ -64,6 +71,8 @@ public class GalleryActivity extends AppCompatActivity
 	protected ActionMode actionMode;
 	protected Toolbar toolbar;
 	protected int currentFolder = SyncManager.FOLDER_MAIN;
+	protected ViewGroup syncBar;
+	protected ProgressBar syncProgress;
 
 	protected int INTENT_IMPORT = 1;
 
@@ -85,6 +94,8 @@ public class GalleryActivity extends AppCompatActivity
 		navigationView.setNavigationItemSelectedListener(this);
 
 		recyclerView = (DragSelectRecyclerView) findViewById(R.id.gallery_recycler_view);
+		syncBar = (ViewGroup) findViewById(R.id.syncBar);
+		syncProgress = (ProgressBar) findViewById(R.id.syncProgress);
 		((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
 		layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
@@ -101,7 +112,21 @@ public class GalleryActivity extends AppCompatActivity
 		});
 		recyclerView.setLayoutManager(layoutManager);
 		adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
+		recyclerView.addOnScrollListener(new HidingScrollListener() {
+			@Override
+			public void onHide() {
+				syncBar.animate().translationY(-syncBar.getHeight()-Helpers.convertDpToPixels(GalleryActivity.this, 20)).setInterpolator(new AccelerateInterpolator(4));
+			}
 
+
+			@Override
+			public void onShow() {
+				syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
+			}
+		});
+
+		syncProgress.setMax(100);
+		syncProgress.setProgress(50);
 
 
 		// use this setting to improve performance if you know that changes
