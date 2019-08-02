@@ -298,6 +298,7 @@
     <string name="fail_login">Something went wrong during login, please try again.</string>
     <string name="create_account">Create an account</string>
     <string name="login_intead">Already have an account? Go to Login</string>
-
+    <string name="uploading_file">"Uploading file %s out of %s"</string>
+    <string name="refreshing">Refreshing...</string>
 
 </resources>

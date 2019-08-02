@@ -61,22 +61,24 @@ public class SyncManager {
 
 	}
 
-	public static void syncFSToDB(Context context){
-		(new FsSyncAsyncTask(context)).execute();
+	public static void syncFSToDB(Context context, OnFinish onFinish){
+		(new FsSyncAsyncTask(context, onFinish)).execute();
 	}
-	public static void uploadToCloud(Context context){
-		(new UploadToCloudAsyncTask(context)).execute();
+	public static void uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish){
+		(new UploadToCloudAsyncTask(context, progress, onFinish)).execute();
 	}
-	public static void syncCloudToLocalDb(Context context){
-		(new SyncCloudToLocalDbAsyncTask(context)).execute();
+	public static void syncCloudToLocalDb(Context context, OnFinish onFinish){
+		(new SyncCloudToLocalDbAsyncTask(context, onFinish)).execute();
 	}
 
 	public static class FsSyncAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
+		protected OnFinish onFinish;
 
-		public FsSyncAsyncTask(Context context){
+		public FsSyncAsyncTask(Context context, OnFinish onFinish){
 			this.context = context;
+			this.onFinish = onFinish;
 		}
 
 		@Override
@@ -131,6 +133,9 @@ public class SyncManager {
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
 		}
 	}
 
@@ -139,19 +144,45 @@ public class SyncManager {
 		protected Context context;
 		protected File dir;
 		protected File thumbDir;
+		protected OnFinish onFinish = null;
+		protected UploadProgress progress = null;
+		protected int uploadedFilesCount = 0;
 
-		public UploadToCloudAsyncTask(Context context){
+
+		public UploadToCloudAsyncTask(Context context, UploadProgress progress, OnFinish onFinish){
 			this.context = context;
+			this.progress = progress;
+			this.onFinish = onFinish;
 			dir = new File(Helpers.getHomeDir(context));
 			thumbDir = new File(Helpers.getThumbsDir(context));
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			if(progress != null){
+				progress.setTotalItemsNumber(getFilesCountToUpload(FOLDER_MAIN) + getFilesCountToUpload(FOLDER_TRASH));
+			}
+
 			uploadFolder(FOLDER_MAIN);
 			uploadFolder(FOLDER_TRASH);
 
 			return null;
+		}
+
+		protected int getFilesCountToUpload(int folder){
+			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+
+			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
+			int uploadCount = result.getCount();
+			result.close();
+
+			Cursor reuploadResult = db.getReuploadFilesList();
+			int reuploadCount = reuploadResult.getCount();
+			reuploadResult.close();
+
+			db.close();
+
+			return uploadCount + reuploadCount;
 		}
 
 		protected void uploadFolder(int folder){
@@ -159,12 +190,20 @@ public class SyncManager {
 
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
 			while(result.moveToNext()) {
+				uploadedFilesCount++;
+				if(progress != null){
+					progress.uploadProgress(uploadedFilesCount);
+				}
 				uploadFile(folder, db, result, false);
 			}
 			result.close();
 
 			Cursor reuploadResult = db.getReuploadFilesList();
 			while(reuploadResult.moveToNext()) {
+				uploadedFilesCount++;
+				if(progress != null){
+					progress.uploadProgress(uploadedFilesCount);
+				}
 				uploadFile(folder, db, reuploadResult, true);
 			}
 			reuploadResult.close();
@@ -177,6 +216,10 @@ public class SyncManager {
 			String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_VERSION));
 			String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED));
 			String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED));
+
+			if(progress != null){
+				progress.currentFile(filename);
+			}
 
 			Log.d("uploadingFile", filename);
 			HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
@@ -213,19 +256,41 @@ public class SyncManager {
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
+		}
+
+		public abstract static class UploadProgress{
+			public int totalItemsNumber = 0;
+			public String currentFile;
+			public int uploadedFilesCount;
+
+			public void setTotalItemsNumber(int number){
+				totalItemsNumber = number;
+			}
+
+			public void currentFile(String filename){
+				this.currentFile = filename;
+			}
+			public void uploadProgress(int uploadedFilesCount){
+				this.uploadedFilesCount = uploadedFilesCount;
+			}
 		}
 	}
 
 	public static class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
+		protected OnFinish onFinish = null;
 		protected StingleDbHelper db;
 		protected StingleDbHelper trashDb;
 		protected long lastSeenTime = 0;
 		protected long lastDelSeenTime = 0;
 
-		public SyncCloudToLocalDbAsyncTask(Context context){
+		public SyncCloudToLocalDbAsyncTask(Context context, OnFinish onFinish){
 			this.context = context;
+			this.onFinish = onFinish;
 			db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 			trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 		}
@@ -245,8 +310,6 @@ public class SyncManager {
 
 		protected void getFileList(){
 			HashMap<String, String> postParams = new HashMap<String, String>();
-
-			Log.d("lastSeenTime", String.valueOf(lastSeenTime));
 
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("lastSeenTime", String.valueOf(lastSeenTime));
@@ -415,6 +478,10 @@ public class SyncManager {
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 			db.close();
+
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
 		}
 	}
 

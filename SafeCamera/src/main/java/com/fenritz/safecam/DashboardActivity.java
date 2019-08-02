@@ -372,9 +372,9 @@ public class DashboardActivity extends Activity {
 
 				return true;
 			case R.id.upload:
-				SyncManager.syncCloudToLocalDb(this);
+				/*SyncManager.syncCloudToLocalDb(this);
 				SyncManager.syncFSToDB(this);
-				SyncManager.uploadToCloud(this);
+				SyncManager.uploadToCloud(this);*/
 
 				/*HashMap<String, String> postParams = new HashMap<String, String>();
 

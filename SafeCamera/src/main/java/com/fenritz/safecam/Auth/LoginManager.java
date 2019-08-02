@@ -129,6 +129,10 @@ public class LoginManager {
         }
     }
 
+    public static boolean isKeyInMemory(){
+        return (SafeCameraApplication.getKey() == null ? false : true);
+    }
+
     public static void getPasswordFromUser(Context context, final PasswordReturnListener listener){
         final Context myContext = context;
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
