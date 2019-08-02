@@ -93,7 +93,7 @@ public class SyncManager {
 			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 			File dir = new File(Helpers.getHomeDir(this.context));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ALL);
+			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ALL, StingleDbHelper.SORT_ASC);
 
 			while(result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
@@ -172,7 +172,7 @@ public class SyncManager {
 		protected int getFilesCountToUpload(int folder){
 			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
+			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL, StingleDbHelper.SORT_ASC);
 			int uploadCount = result.getCount();
 			result.close();
 
@@ -188,7 +188,7 @@ public class SyncManager {
 		protected void uploadFolder(int folder){
 			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL);
+			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL, StingleDbHelper.SORT_ASC);
 			while(result.moveToNext()) {
 				uploadedFilesCount++;
 				if(progress != null){

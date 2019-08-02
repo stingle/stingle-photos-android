@@ -23,6 +23,9 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	public static final int GET_MODE_LOCAL = 3;
 	public static final int GET_MODE_REMOTE = 4;
 
+	public static final int SORT_ASC = 0;
+	public static final int SORT_DESC = 1;
+
 	public static final int INITIAL_VERSION = 1;
 
 	public static final int REUPLOAD_NO = 0;
@@ -200,7 +203,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		return null;
 	}
 
-	public Cursor getFilesList(int mode){
+	public Cursor getFilesList(int mode, int sort){
 
 		String[] projection = {
 				BaseColumns._ID,
@@ -246,7 +249,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 
 		String sortOrder =
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + " DESC";
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == SORT_DESC ? " DESC" : " ASC");
 
 		return openReadDb().query(
 				tableName,   // The table to query
