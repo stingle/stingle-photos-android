@@ -42,7 +42,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:background="@drawable/layout_border"
                 android:elevation="2dp"
-                android:visibility="gone"
                 android:layout_margin="10dp">
 
                 <TextView
@@ -68,14 +67,14 @@
                     android:layout_height="50dp"
                     android:layout_alignParentRight="true"
                     android:layout_margin="5dp"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     />
                 <ProgressBar
                     android:id="@+id/syncProgress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:visibility="invisible"
+                    android:visibility="gone"
                     style="@android:style/Widget.Material.ProgressBar.Horizontal"
                     />
             </RelativeLayout>

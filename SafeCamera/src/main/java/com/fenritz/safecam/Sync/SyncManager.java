@@ -71,7 +71,7 @@ public class SyncManager {
 		(new SyncCloudToLocalDbAsyncTask(context, onFinish)).execute();
 	}
 
-	public static class FsSyncAsyncTask extends AsyncTask<Void, Void, Void> {
+	public static class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		protected Context context;
 		protected OnFinish onFinish;
@@ -82,14 +82,15 @@ public class SyncManager {
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
-			fsSyncFolder(FOLDER_MAIN);
-			fsSyncFolder(FOLDER_TRASH);
+		protected Boolean doInBackground(Void... params) {
+			boolean result1 = fsSyncFolder(FOLDER_MAIN);
+			boolean result2 = fsSyncFolder(FOLDER_TRASH);
 
-			return null;
+			return result1 || result2;
 		}
 
-		protected void fsSyncFolder(int folder){
+		protected boolean fsSyncFolder(int folder){
+			boolean needToUpdateUI = false;
 			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 			File dir = new File(Helpers.getHomeDir(this.context));
 
@@ -123,18 +124,21 @@ public class SyncManager {
 				for (File file : currentFolderFiles) {
 					if (file.isFile() && file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION) && db.getFileIfExists(file.getName()) == null && trashDb.getFileIfExists(file.getName()) == null) {
 						db.insertFile(file.getName(), true, false, StingleDbHelper.INITIAL_VERSION, file.lastModified(), file.lastModified());
+						needToUpdateUI = true;
 					}
 				}
 			}
 			db.close();
+
+			return needToUpdateUI;
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
+		protected void onPostExecute(Boolean needToUpdateUI) {
+			super.onPostExecute(needToUpdateUI);
 
 			if(onFinish != null){
-				onFinish.onFinish();
+				onFinish.onFinish(needToUpdateUI);
 			}
 		}
 	}
@@ -257,7 +261,7 @@ public class SyncManager {
 			super.onPostExecute(result);
 
 			if(onFinish != null){
-				onFinish.onFinish();
+				onFinish.onFinish(false);
 			}
 		}
 
@@ -279,7 +283,7 @@ public class SyncManager {
 		}
 	}
 
-	public static class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Void> {
+	public static class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		protected Context context;
 		protected OnFinish onFinish = null;
@@ -296,19 +300,20 @@ public class SyncManager {
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected Boolean doInBackground(Void... params) {
 			lastSeenTime = Helpers.getPreference(context, PREF_LAST_SEEN_TIME, (long)0);
 			lastDelSeenTime = Helpers.getPreference(context, PREF_LAST_DEL_SEEN_TIME, (long)0);
 
-			getFileList();
+			boolean needToUpdateUI = getFileList();
 
 			Helpers.storePreference(context, PREF_LAST_SEEN_TIME, lastSeenTime);
 			Helpers.storePreference(context, PREF_LAST_DEL_SEEN_TIME, lastDelSeenTime);
 
-			return null;
+			return needToUpdateUI;
 		}
 
-		protected void getFileList(){
+		protected boolean getFileList(){
+			boolean needToUpdateUI = false;
 			HashMap<String, String> postParams = new HashMap<String, String>();
 
 			postParams.put("token", KeyManagement.getApiToken(context));
@@ -330,6 +335,7 @@ public class SyncManager {
 							JSONObject deleteEvent = deletes.optJSONObject(i);
 							if(deleteEvent != null){
 								processDeleteEvent(deleteEvent);
+								needToUpdateUI = true;
 							}
 						}
 					} catch (JSONException e) {
@@ -347,6 +353,7 @@ public class SyncManager {
 								StingleDbFile dbFile = new StingleDbFile(file);
 								Log.d("receivedFile", dbFile.filename);
 								processFile(dbFile, FOLDER_MAIN);
+								needToUpdateUI = true;
 							}
 						}
 					} catch (JSONException e) {
@@ -364,6 +371,7 @@ public class SyncManager {
 								StingleDbFile dbFile = new StingleDbFile(file);
 								Log.d("receivedTrash", dbFile.filename);
 								processFile(dbFile, FOLDER_TRASH);
+								needToUpdateUI = true;
 							}
 						}
 					} catch (JSONException e) {
@@ -373,6 +381,8 @@ public class SyncManager {
 
 
 			}
+
+			return needToUpdateUI;
 		}
 
 		protected void processFile(StingleDbFile remoteFile, int folder){
@@ -475,12 +485,12 @@ public class SyncManager {
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
+		protected void onPostExecute(Boolean needToUpdateUI) {
+			super.onPostExecute(needToUpdateUI);
 			db.close();
 
 			if(onFinish != null){
-				onFinish.onFinish();
+				onFinish.onFinish(needToUpdateUI);
 			}
 		}
 	}
@@ -557,7 +567,7 @@ public class SyncManager {
 			super.onPostExecute(result);
 
 			if(onFinish != null){
-				onFinish.onFinish();
+				onFinish.onFinish(true);
 			}
 		}
 	}
@@ -635,7 +645,7 @@ public class SyncManager {
 			super.onPostExecute(result);
 
 			if(onFinish != null){
-				onFinish.onFinish();
+				onFinish.onFinish(true);
 			}
 		}
 	}
@@ -719,7 +729,7 @@ public class SyncManager {
 			super.onPostExecute(result);
 
 			if(onFinish != null){
-				onFinish.onFinish();
+				onFinish.onFinish(true);
 			}
 		}
 	}
@@ -744,6 +754,6 @@ public class SyncManager {
 	}
 
 	public static abstract class OnFinish{
-		public abstract void onFinish();
+		public abstract void onFinish(Boolean needToUpdateUI);
 	}
 }

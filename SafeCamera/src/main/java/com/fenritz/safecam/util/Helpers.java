@@ -150,6 +150,9 @@ public class Helpers {
 			progressDialog.setCancelable(true);
 			progressDialog.setOnCancelListener(onCancel);
 		}
+		else{
+			progressDialog.setCancelable(false);
+		}
 		progressDialog.setMessage(message);
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		progressDialog.show();

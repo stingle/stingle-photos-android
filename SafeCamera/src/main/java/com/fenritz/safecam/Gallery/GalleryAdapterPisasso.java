@@ -89,6 +89,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			picasso.cancelAll();
 			this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
 			updateDataSet();
+
 		}
 	}
 

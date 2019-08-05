@@ -191,7 +191,7 @@ public class GalleryActivity extends AppCompatActivity
 
 			@Override
 			public void onUserLoginFail() {
-				LoginManager.redirectToLogin(GalleryActivity.this);
+
 			}
 		});
 		LoginManager.disableLockTimer(this);
@@ -243,18 +243,15 @@ public class GalleryActivity extends AppCompatActivity
 
 				Log.d("message", "syncStatus - " + String.valueOf(syncStatus) + " - " + String.valueOf(totalItemsNumber) + " - " + String.valueOf(uploadedFilesCount) + " - " + currentFile);
 				if (syncStatus == SyncService.STATUS_UPLOADING) {
-					showSyncBar();
-					syncProgress.setVisibility(View.VISIBLE);
 					syncProgress.setMax(totalItemsNumber);
 					syncProgress.setProgress(uploadedFilesCount);
 					syncText.setText(getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
 					(new ShowThumbInImageView(GalleryActivity.this, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					setSyncStatus(SyncService.STATUS_UPLOADING);
 				} else if (syncStatus == SyncService.STATUS_REFRESHING) {
-					showSyncBar();
-					syncProgress.setVisibility(View.INVISIBLE);
-					syncText.setText(getString(R.string.refreshing));
+					setSyncStatus(SyncService.STATUS_REFRESHING);
 				} else if (syncStatus == SyncService.STATUS_IDLE) {
-					hideSyncBar();
+					setSyncStatus(SyncService.STATUS_IDLE);
 				}
 
 			}
@@ -263,6 +260,8 @@ public class GalleryActivity extends AppCompatActivity
 				Bundle bundle = msg.getData();
 				String currentFile = bundle.getString("currentFile");
 				(new ShowThumbInImageView(GalleryActivity.this, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+				setSyncStatus(SyncService.STATUS_UPLOADING);
 			}
 			else if(msg.what == SyncService.MSG_SYNC_UPLOAD_PROGRESS) {
 				Log.d("message", "uploadProgress");
@@ -273,6 +272,8 @@ public class GalleryActivity extends AppCompatActivity
 				syncProgress.setMax(totalItemsNumber);
 				syncProgress.setProgress(uploadedFilesCount);
 				syncText.setText(getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
+
+				setSyncStatus(SyncService.STATUS_UPLOADING);
 			}
 			else if(msg.what == SyncService.MSG_SYNC_STATUS_CHANGE) {
 				Log.d("message", "syncStatusChange");
@@ -281,7 +282,9 @@ public class GalleryActivity extends AppCompatActivity
 				setSyncStatus(newStatus);
 			}
 			else if(msg.what == SyncService.MSG_REFRESH_GALLERY) {
+				int lastScrollPos = recyclerView.getScrollY();
 				adapter.updateDataSet();
+				recyclerView.setScrollY(lastScrollPos);
 			}
 			else{
 				super.handleMessage(msg);
@@ -289,30 +292,21 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	}
 
-	private void showSyncBar(){
-		syncBar.setVisibility(View.VISIBLE);
-		recyclerView.setPadding(0,Helpers.convertDpToPixels(this, 60),0,0);
-		recyclerView.scrollTo(0, 0);
-	}
-	private void hideSyncBar(){
-		syncBar.setVisibility(View.GONE);
-		recyclerView.setPadding(0,0,0,0);
-	}
-
 	private void setSyncStatus(int syncStatus){
 		if (syncStatus == SyncService.STATUS_UPLOADING) {
-			showSyncBar();
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.VISIBLE);
 			syncProgress.setVisibility(View.VISIBLE);
 		} else if (syncStatus == SyncService.STATUS_REFRESHING) {
-			showSyncBar();
 			refreshCProgress.setVisibility(View.VISIBLE);
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.refreshing));
 		} else if (syncStatus == SyncService.STATUS_IDLE) {
-			hideSyncBar();
+			syncText.setText(getString(R.string.backup_complete));
+			syncPhoto.setVisibility(View.GONE);
+			syncProgress.setVisibility(View.INVISIBLE);
+			refreshCProgress.setVisibility(View.GONE);
 		}
 	}
 
@@ -322,6 +316,7 @@ public class GalleryActivity extends AppCompatActivity
 			mService = new Messenger(service);
 			sendMessageToSyncService(SyncService.MSG_REGISTER_CLIENT);
 			sendMessageToSyncService(SyncService.MSG_GET_SYNC_STATUS);
+			sendMessageToSyncService(SyncService.MSG_START_SYNC);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -371,7 +366,16 @@ public class GalleryActivity extends AppCompatActivity
 		if (id == R.id.action_settings) {
 			return true;
 		}
-		if (id == R.id.action_dashboard) {
+		else if (id == R.id.action_lock) {
+			LoginManager.lock(this);
+			Intent intent = new Intent();
+			intent.setClass(this, GalleryActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+			finish();
+		}
+		else if (id == R.id.action_dashboard) {
 			Intent intent = new Intent();
 			intent.setClass(this, DashboardActivity.class);
 			startActivity(intent);
@@ -390,22 +394,22 @@ public class GalleryActivity extends AppCompatActivity
 		if (id == R.id.nav_gallery) {
 			adapter.setFolder(SyncManager.FOLDER_MAIN);
 			currentFolder = SyncManager.FOLDER_MAIN;
+			recyclerView.scrollToPosition(0);
 			toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		}
 		else if (id == R.id.nav_trash) {
 			adapter.setFolder(SyncManager.FOLDER_TRASH);
 			currentFolder = SyncManager.FOLDER_TRASH;
+			recyclerView.scrollToPosition(0);
 			toolbar.setTitle(getString(R.string.title_trash));
 		}
 		else if (id == R.id.nav_tools) {
 
 		}
-		else if (id == R.id.nav_share) {
-
+		else if (id == R.id.nav_logout) {
+			LoginManager.logout(this);
 		}
-		else if (id == R.id.nav_send) {
 
-		}
 
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
 		drawer.closeDrawer(GravityCompat.START);
@@ -513,10 +517,8 @@ public class GalleryActivity extends AppCompatActivity
 
 				new SyncManager.MoveToTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
 					@Override
-					public void onFinish() {
-						for(Integer index : indeces) {
-							adapter.updateDataSet();
-						}
+					public void onFinish(Boolean needToUpdateUI) {
+						adapter.updateDataSet();
 						exitActionMode();
 						spinner.dismiss();
 					}
@@ -538,10 +540,8 @@ public class GalleryActivity extends AppCompatActivity
 
 		new SyncManager.RestoreFromTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
 			@Override
-			public void onFinish() {
-				for(Integer index : indeces) {
-					adapter.updateDataSet();
-				}
+			public void onFinish(Boolean needToUpdateUI) {
+				adapter.updateDataSet();
 				exitActionMode();
 				spinner.dismiss();
 			}
@@ -563,10 +563,8 @@ public class GalleryActivity extends AppCompatActivity
 
 						new SyncManager.DeleteFilesAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
 							@Override
-							public void onFinish() {
-								for(Integer index : indeces) {
-									adapter.updateDataSet();
-								}
+							public void onFinish(Boolean needToUpdateUI) {
+								adapter.updateDataSet();
 								exitActionMode();
 								spinner.dismiss();
 							}

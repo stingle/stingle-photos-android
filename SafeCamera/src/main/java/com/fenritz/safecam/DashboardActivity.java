@@ -330,10 +330,6 @@ public class DashboardActivity extends Activity {
 						});
 					}
 
-					@Override
-					public void passwordCanceled() {
-
-					}
 				});
 				return true;
 			case R.id.import_keys:

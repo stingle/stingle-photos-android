@@ -79,16 +79,19 @@ public class SyncService extends Service {
 
 		SyncManager.syncCloudToLocalDb(this, new SyncManager.OnFinish() {
 			@Override
-			public void onFinish() {
+			public void onFinish(Boolean needToUpdateUI) {
+				final boolean needUpdateFSSync = needToUpdateUI;
 				SyncManager.syncFSToDB(SyncService.this, new SyncManager.OnFinish() {
 					@Override
-					public void onFinish() {
-						sendMessageToUI(MSG_REFRESH_GALLERY);
+					public void onFinish(Boolean needUpdateFSToDB) {
+						if (needUpdateFSToDB || needUpdateFSSync){
+							sendMessageToUI(MSG_REFRESH_GALLERY);
+						}
 						currentStatus = STATUS_UPLOADING;
 						sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 						SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
 							@Override
-							public void onFinish() {
+							public void onFinish(Boolean needUpdateUI) {
 								currentStatus = STATUS_IDLE;
 								sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 								sendMessageToUI(MSG_SYNC_FINISHED);

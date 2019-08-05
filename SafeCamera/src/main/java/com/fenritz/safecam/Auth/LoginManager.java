@@ -2,7 +2,9 @@ package com.fenritz.safecam.Auth;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -15,12 +17,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.fenritz.safecam.DashboardActivity;
+import com.fenritz.safecam.GalleryActivity;
 import com.fenritz.safecam.LoginActivity;
+import com.fenritz.safecam.Net.HttpsClient;
+import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Util.Helpers;
+
+import java.util.HashMap;
 
 public class LoginManager {
 
@@ -30,18 +37,17 @@ public class LoginManager {
     public static final String DONT_SHOW_POPUP = "dont_show_popup";
     public static final String POPUP_LATERS_COUNT = "laters_count";
 
+    private static AlertDialog dialog = null;
+
     public LoginManager(){
 
     }
 
     public static void checkLogin(Activity activity) {
-        checkLogin(activity, null, true);
-    }
-    public static void checkLogin(Activity activity, final UserLogedinCallback loginCallback) {
-        checkLogin(activity, loginCallback, true);
+        checkLogin(activity, null);
     }
 
-    public static void checkLogin(Activity activity, final UserLogedinCallback loginCallback, boolean redirect) {
+    public static void checkLogin(final Activity activity, final UserLogedinCallback loginCallback) {
 
         if(!checkIfLoggedIn(activity)){
             return;
@@ -55,13 +61,12 @@ public class LoginManager {
 
         if (lockedTime != 0) {
             if (currentTimestamp - lockedTime > lockTimeout) {
-                logout(activity, redirect);
+                lock(activity);
             }
         }
 
         if (SafeCameraApplication.getKey() == null) {
 
-            final Activity activityFinal = activity;
 
             SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
             boolean isFingerprintSetup = defaultSharedPrefs.getBoolean(FINGERPRINT_PREFERENCE, false);
@@ -72,7 +77,7 @@ public class LoginManager {
                 fingerprintManager.unlock(new FingerprintManagerWrapper.PasswordReceivedHandler() {
                     @Override
                     public void onPasswordReceived(String password) {
-                        unlockWithPassword(activityFinal, password, loginCallback);
+                        unlockWithPassword(activity, password, loginCallback);
                     }
                 }, loginCallback);
             }
@@ -94,30 +99,19 @@ public class LoginManager {
             public void passwordReceived(String enteredPassword) {
                 unlockWithPassword(activityFinal, enteredPassword, loginCallback);
             }
-
-            @Override
-            public void passwordCanceled() {
-
-            }
         });
     }
 
     public static void unlockWithPassword(Activity activity, String password, UserLogedinCallback loginCallback){
 
-        /*SharedPreferences preferences = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-        if (!preferences.contains(SafeCameraApplication.PASSWORD)) {
-            redirectToSetup(activity);
-            return;
-        }
-        String savedHash = preferences.getString(SafeCameraApplication.PASSWORD, "");*/
-        try{
-           /* if(!SafeCameraApplication.getCrypto().verifyStoredPassword(savedHash, password)){
 
-                return;
-            }
-            */
+        try{
             SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
             if(loginCallback != null) {
+                if(dialog!=null) {
+                    dialog.dismiss();
+                    dialog = null;
+                }
                 loginCallback.onUserLoginSuccess();
             }
         }
@@ -133,16 +127,35 @@ public class LoginManager {
         return (SafeCameraApplication.getKey() == null ? false : true);
     }
 
-    public static void getPasswordFromUser(Context context, final PasswordReturnListener listener){
-        final Context myContext = context;
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    public static void getPasswordFromUser(final Activity activity, final PasswordReturnListener listener){
+        final Context myContext = activity;
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(R.layout.password);
-        final AlertDialog dialog = builder.create();
+        builder.setCancelable(false);
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface mDialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK){
+                    if(dialog != null){
+                        dialog.dismiss();
+                        dialog = null;
+                    }
+                    activity.finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+        if(dialog != null){
+            dialog.dismiss();
+            dialog = null;
+        }
+        dialog = builder.create();
         dialog.show();
 
         Button okButton = (Button)dialog.findViewById(R.id.okButton);
         final EditText passwordField = (EditText)dialog.findViewById(R.id.password);
-        Button cancelButton = (Button)dialog.findViewById(R.id.cancelButton);
+        Button logoutButton = (Button)dialog.findViewById(R.id.logoutButton);
 
         final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
@@ -152,7 +165,6 @@ public class LoginManager {
             public void onClick(View v) {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 listener.passwordReceived(passwordField.getText().toString());
-                dialog.dismiss();
             }
         });
 
@@ -161,7 +173,6 @@ public class LoginManager {
                 if (actionId == EditorInfo.IME_ACTION_GO) {
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     listener.passwordReceived(passwordField.getText().toString());
-                    dialog.dismiss();
                     return true;
                 }
                 return false;
@@ -169,12 +180,11 @@ public class LoginManager {
         });
 
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                listener.passwordCanceled();
-                dialog.cancel();
+               imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+               LoginManager.logout(activity);
             }
         });
     }
@@ -199,26 +209,49 @@ public class LoginManager {
         context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LAST_LOCK_TIME, 0).commit();
     }
 
-    public static void logout(Activity activity){
-        logout(activity, true);
-    }
-    public static void logout(Activity activity, boolean redirect){
-        /*Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction("com.fenritz.safecam.ACTION_LOGOUT");
-        activity.sendBroadcast(broadcastIntent);*/
 
+    public static void lock(final Activity activity){
         SafeCameraApplication.setKey(null);
-
         Helpers.deleteTmpDir(activity);
+    }
 
-        if(redirect) {
-            //redirectToDashboard(activity);
-        }
+    public static void logout(final Activity activity){
+        Helpers.showConfirmDialog(activity, activity.getString(R.string.confirm_logout), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface mDialog, int which) {
+                final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.logging_out), null);
+                HashMap<String, String> postParams = new HashMap<String, String>();
+                postParams.put("token", KeyManagement.getApiToken(activity));
+                HttpsClient.post(activity, activity.getString(R.string.api_server_url) + activity.getString(R.string.logout_path), postParams, new HttpsClient.OnNetworkFinish() {
+                    @Override
+                    public void onFinish(StingleResponse response) {
+                        if (response.isStatusOk()) {
+                            SafeCameraApplication.setKey(null);
+                            KeyManagement.deleteLocalKeys();
+                            Helpers.storePreference(activity, SafeCameraApplication.USER_EMAIL, null);
+                            Helpers.deleteTmpDir(activity);
+                            spinner.dismiss();
+                            if(dialog != null){
+                                dialog.dismiss();
+                                dialog = null;
+                            }
+                            if(FingerprintHandler.dialog != null){
+                                FingerprintHandler.dialog.dismiss();
+                                FingerprintHandler.dialog = null;
+                            }
+                            redirectToLogin(activity);
+                        }
+                    }
+                });
+            }
+        }, null);
     }
 
     public static void redirectToLogin(Activity activity) {
         Intent intent = new Intent();
         intent.setClass(activity, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activity.startActivity(intent);
         activity.finish();
     }

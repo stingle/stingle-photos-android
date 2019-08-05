@@ -310,6 +310,7 @@ public class SetUpActivity  extends Activity{
 			progressDialog = new ProgressDialog(context);
 			progressDialog.setMessage(context.getString(R.string.creating_account));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.setCancelable(false);
 			progressDialog.show();
 		}
 

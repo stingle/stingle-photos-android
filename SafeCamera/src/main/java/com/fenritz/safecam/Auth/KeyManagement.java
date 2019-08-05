@@ -76,4 +76,9 @@ public class KeyManagement {
 
 		return true;
 	}
+
+	public static void deleteLocalKeys(){
+		SafeCameraApplication.getCrypto().deleteKeys();
+	}
+
 }

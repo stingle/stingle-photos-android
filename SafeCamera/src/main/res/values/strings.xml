@@ -300,5 +300,9 @@
     <string name="login_intead">Already have an account? Go to Login</string>
     <string name="uploading_file">"Uploading file %s out of %s"</string>
     <string name="refreshing">Refreshing...</string>
+    <string name="backup_complete">Backup/Sync complete</string>
+    <string name="logging_out">Logging out...</string>
+    <string name="confirm_logout">Are you sure you want to log out?</string>
+    <string name="lock">Lock</string>
 
 </resources>

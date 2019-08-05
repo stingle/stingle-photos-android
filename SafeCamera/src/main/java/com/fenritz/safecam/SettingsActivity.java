@@ -363,7 +363,7 @@ public class SettingsActivity extends PreferenceActivity {
             setHasOptionsMenu(true);
 
             SwitchPreference fingerprintSetting = (SwitchPreference)findPreference("fingerprint");
-            final FingerprintManagerWrapper fingerprintManager = new FingerprintManagerWrapper(this.getContext());
+            final FingerprintManagerWrapper fingerprintManager = new FingerprintManagerWrapper(getActivity());
 
             if(!fingerprintManager.isFingerprintAvailable()){
                 fingerprintSetting.setEnabled(false);

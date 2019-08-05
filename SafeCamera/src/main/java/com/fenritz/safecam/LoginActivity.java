@@ -133,6 +133,7 @@ public class LoginActivity extends Activity {
 			progressDialog = new ProgressDialog(context);
 			progressDialog.setMessage(context.getString(R.string.signing_in));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.setCancelable(false);
 			progressDialog.show();
 		}
 

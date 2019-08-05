@@ -48,21 +48,21 @@
         android:layout_gravity="right"
         android:orientation="horizontal">
         <Button
+            android:id="@+id/logoutButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="10dp"
+            android:text="@string/log_out" />
+
+        <Button
             android:id="@+id/usePasswordButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:text="@string/use_password" />
-
-        <Button
-            android:id="@+id/cancelButton"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginRight="10dp"
-            android:text="@string/cancel" />
     </LinearLayout>
 
 

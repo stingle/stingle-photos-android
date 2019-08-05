@@ -189,6 +189,13 @@ public class Crypto {
         savePrivateFile(PRIVATE_KEY_FILENAME, getPrivateKeyFromExportedKey(password, encryptedPrivateKey));
     }
 
+    public void deleteKeys(){
+        deletePrivateFile(PUBLIC_KEY_FILENAME);
+        deletePrivateFile(PWD_SALT_FILENAME);
+        deletePrivateFile(SK_NONCE_FILENAME);
+        deletePrivateFile(PRIVATE_KEY_FILENAME);
+    }
+
     public byte[] getKeyFromPassword(String password, int difficulty) throws CryptoException{
         byte[] salt = readPrivateFile(PWD_SALT_FILENAME);
         if(salt == null || salt.length != PwHash.ARGON2ID_SALTBYTES){
@@ -701,6 +708,10 @@ public class Crypto {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    protected boolean deletePrivateFile(String filename){
+        return context.deleteFile(filename);
     }
 
     public static byte[] sha256(byte[] data){

@@ -1,6 +1,7 @@
 package com.fenritz.safecam.Auth;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -46,7 +47,7 @@ public class FingerprintManagerWrapper {
     public static final int IV_LENGTH = 16;
     private byte[] iv;
 
-    protected Context context;
+    protected Activity context;
     protected KeyguardManager keyguardManager;
     protected KeyStore keyStore;
     protected KeyGenerator keyGenerator;
@@ -54,7 +55,7 @@ public class FingerprintManagerWrapper {
     private FingerprintManager.CryptoObject cryptoObject;
     private FingerprintManager fingerprintManager;
 
-    public FingerprintManagerWrapper(Context context){
+    public FingerprintManagerWrapper(Activity context){
         this.context = context;
 
         keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
@@ -158,11 +159,6 @@ public class FingerprintManagerWrapper {
                             } catch (IllegalBlockSizeException e) {
                                 e.printStackTrace();
                             }
-                        }
-
-                        @Override
-                        public void passwordCanceled() {
-
                         }
                     });
                 }

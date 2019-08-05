@@ -4,9 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -22,12 +24,12 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     // into the background. If you don’t use this method, then other apps will be unable to access the touch sensor, including the lockscreen!//
 
     private CancellationSignal cancellationSignal;
-    private Context context;
-    private AlertDialog dialog = null;
+    private Activity context;
+    public static AlertDialog dialog = null;
     private Cipher cipher;
     private OnFingerprintSuccess successHandler;
 
-    public FingerprintHandler(Context mContext, OnFingerprintSuccess successHandler) {
+    public FingerprintHandler(Activity mContext, OnFingerprintSuccess successHandler) {
         context = mContext;
         this.successHandler = successHandler;
     }
@@ -38,6 +40,7 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
 
         if(dialog != null){
             dialog.dismiss();
+            dialog = null;
         }
 
         this.cipher = cryptoObject.getCipher();
@@ -48,8 +51,27 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
         }
         manager.authenticate(cryptoObject, cancellationSignal, 0, this, null);
 
+        if(dialog != null){
+            dialog.dismiss();
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setView(R.layout.fingerprint);
+        builder.setCancelable(false);
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface mDialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK){
+                    if(dialog != null){
+                        dialog.dismiss();
+                        dialog = null;
+                    }
+                    context.finish();
+                    return true;
+                }
+                return false;
+            }
+        });
         dialog = builder.create();
         dialog.show();
 
@@ -66,16 +88,13 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
             });
         }
 
-        Button cancelButton = (Button)dialog.findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        Button logoutButton = (Button)dialog.findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialog.cancel();
-                dialog = null;
+                LoginManager.logout(context);
             }
         });
-
-
     }
 
     @Override
