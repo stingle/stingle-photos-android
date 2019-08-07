@@ -542,6 +542,11 @@ public class Crypto {
         return decryptFile(in, null, null);
     }
 
+    public byte[] decryptFile(byte[] bytes, AsyncTask<?,?,?> task) throws IOException, CryptoException{
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        return decryptFile(in, null, task);
+    }
+
     public byte[] decryptFile(InputStream in) throws IOException, CryptoException{
         return decryptFile(in, null, null);
     }

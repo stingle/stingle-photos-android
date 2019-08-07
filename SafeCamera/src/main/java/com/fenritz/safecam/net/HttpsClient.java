@@ -214,6 +214,7 @@ public class HttpsClient {
 		String data = "";
 		if(params != null) {
 			for (String key : params.keySet()) {
+				Log.d("param" , key + " - " + params.get(key));
 				data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 			}
 		}

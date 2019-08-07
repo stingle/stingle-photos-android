@@ -73,6 +73,7 @@ public class StinglePicassoLoader extends RequestHandler {
 
 				if (decryptedData != null) {
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
+					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
 
 					FileInputStream streamForHeader = new FileInputStream(fileToDec);
 					Crypto.Header header = SafeCameraApplication.getCrypto().getFileHeader(streamForHeader);
@@ -118,6 +119,7 @@ public class StinglePicassoLoader extends RequestHandler {
 				if (decryptedData != null) {
 
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
+					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
 					Crypto.Header header = SafeCameraApplication.getCrypto().getFileHeader(encFile);
 
 					if(bitmap == null) {

@@ -2,6 +2,7 @@ package com.fenritz.safecam.Video;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;

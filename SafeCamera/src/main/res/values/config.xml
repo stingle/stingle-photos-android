@@ -35,6 +35,7 @@
     <string name="trash_file_path">sync/trash</string>
     <string name="restore_file_path">sync/restore</string>
     <string name="delete_file_path">sync/delete</string>
+    <string name="get_url_path">sync/getUrl</string>
 
     <string name="security_page_link">http://www.safecamera.org/security</string>
     

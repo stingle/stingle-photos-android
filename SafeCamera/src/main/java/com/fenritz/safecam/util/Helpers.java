@@ -239,12 +239,12 @@ public class Helpers {
 	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName, byte[] fileId, int type) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
-		Bitmap thumbBitmap = null;
+		//Bitmap thumbBitmap = null;
 		if (bitmap != null) {
-			thumbBitmap = Helpers.getThumbFromBitmap(bitmap, getThumbSize(context));
+			//thumbBitmap = Helpers.getThumbFromBitmap(bitmap, getThumbSize(context));
 
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-			thumbBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
 			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
 			try {
@@ -258,7 +258,7 @@ public class Helpers {
 
 			//Helpers.getAESCrypt(context).encrypt(stream.toByteArray(), out);
 		}
-		return thumbBitmap;
+		return bitmap;
 	}
 
 	public static int convertDpToPixels(Context context, int dp){
