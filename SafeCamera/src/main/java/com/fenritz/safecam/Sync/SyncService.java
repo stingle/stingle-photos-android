@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,7 +108,6 @@ public class SyncService extends Service {
 	}
 
 	private void sendStringToUi(int type, String key, String value) {
-		Log.e("clientsSize", String.valueOf(mClients.size()));
 		for (int i=mClients.size()-1; i>=0; i--) {
 			try {
 				Bundle b = new Bundle();
@@ -117,17 +115,14 @@ public class SyncService extends Service {
 				Message msg = Message.obtain(null, type);
 				msg.setData(b);
 				mClients.get(i).send(msg);
-				Log.e("sentToClient", String.valueOf(mClients.get(i).toString()));
 			}
 			catch (RemoteException e) {
 				mClients.remove(i);
-				Log.e("removeClient", String.valueOf(mClients.get(i).toString()));
 			}
 		}
 	}
 
 	private void sendIntToUi(int type, String key, int value) {
-		Log.e("clientsSize", String.valueOf(mClients.size()));
 		for (int i=mClients.size()-1; i>=0; i--) {
 			try {
 				Bundle b = new Bundle();
@@ -135,17 +130,14 @@ public class SyncService extends Service {
 				Message msg = Message.obtain(null, type);
 				msg.setData(b);
 				mClients.get(i).send(msg);
-				Log.e("sentToClient", String.valueOf(mClients.get(i).toString()));
 			}
 			catch (RemoteException e) {
 				mClients.remove(i);
-				Log.e("removeClient", String.valueOf(mClients.get(i).toString()));
 			}
 		}
 	}
 
 	private void sendIntToUi(int type, HashMap<String, Integer> values) {
-		Log.e("clientsSize", String.valueOf(mClients.size()));
 		for (int i=mClients.size()-1; i>=0; i--) {
 			try {
 				Bundle b = new Bundle();
@@ -155,25 +147,20 @@ public class SyncService extends Service {
 				Message msg = Message.obtain(null, type);
 				msg.setData(b);
 				mClients.get(i).send(msg);
-				Log.e("sentToClient", String.valueOf(mClients.get(i).toString()));
 			}
 			catch (RemoteException e) {
 				mClients.remove(i);
-				Log.e("removeClient", String.valueOf(mClients.get(i).toString()));
 			}
 		}
 	}
 
 	private void sendMessageToUI(int type) {
-		Log.e("clientsSize", String.valueOf(mClients.size()));
 		for (int i=mClients.size()-1; i>=0; i--) {
 			try {
 				mClients.get(i).send(Message.obtain(null, type));
-				Log.e("sentToClient", String.valueOf(mClients.get(i).toString()));
 			}
 			catch (RemoteException e) {
 				mClients.remove(i);
-				Log.e("removeClient", String.valueOf(mClients.get(i).toString()));
 			}
 		}
 	}
@@ -183,11 +170,9 @@ public class SyncService extends Service {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case MSG_REGISTER_CLIENT:
-					Log.e("registerClient", String.valueOf(msg.replyTo));
 					mClients.add(msg.replyTo);
 					break;
 				case MSG_UNREGISTER_CLIENT:
-					Log.e("UNregisterClient", String.valueOf(msg.replyTo));
 					mClients.remove(msg.replyTo);
 					break;
 				case MSG_START_SYNC:

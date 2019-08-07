@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -99,6 +100,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected Messenger mService = null;
 	protected boolean isBound = false;
 	final Messenger mMessenger = new Messenger(new IncomingHandler());
+	protected int lastScrollPosition = 0;
 
 	protected int INTENT_IMPORT = 1;
 
@@ -164,6 +166,10 @@ public class GalleryActivity extends AppCompatActivity
 				syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
 			}
 		});
+
+		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){
+			lastScrollPosition = savedInstanceState.getInt("scroll");
+		}
 	}
 
 	@Override
@@ -186,7 +192,6 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public void onUserLoginSuccess() {
 				recyclerView.setAdapter(adapter);
-
 			}
 
 			@Override
@@ -202,12 +207,14 @@ public class GalleryActivity extends AppCompatActivity
 			bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
 		}
 		catch (IllegalStateException e){}
-
+		layoutManager.scrollToPosition(lastScrollPosition);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		lastScrollPosition = layoutManager.findFirstVisibleItemPosition();
+
 		recyclerView.setAdapter(null);
 		LoginManager.setLockedTime(this);
 
@@ -215,6 +222,14 @@ public class GalleryActivity extends AppCompatActivity
 			unbindService(mConnection);
 			isBound = false;
 		}
+
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+		super.onSaveInstanceState(outState, outPersistentState);
+
+		outState.putInt("scroll", layoutManager.findFirstVisibleItemPosition());
 	}
 
 	private void sendMessageToSyncService(int type) {
@@ -241,7 +256,6 @@ public class GalleryActivity extends AppCompatActivity
 				int uploadedFilesCount = bundle.getInt("uploadedFilesCount");
 				String currentFile = bundle.getString("currentFile");
 
-				Log.d("message", "syncStatus - " + String.valueOf(syncStatus) + " - " + String.valueOf(totalItemsNumber) + " - " + String.valueOf(uploadedFilesCount) + " - " + currentFile);
 				if (syncStatus == SyncService.STATUS_UPLOADING) {
 					syncProgress.setMax(totalItemsNumber);
 					syncProgress.setProgress(uploadedFilesCount);
@@ -256,7 +270,6 @@ public class GalleryActivity extends AppCompatActivity
 
 			}
 			else if(msg.what == SyncService.MSG_SYNC_CURRENT_FILE) {
-				Log.d("message", "currentFile");
 				Bundle bundle = msg.getData();
 				String currentFile = bundle.getString("currentFile");
 				(new ShowThumbInImageView(GalleryActivity.this, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -264,7 +277,6 @@ public class GalleryActivity extends AppCompatActivity
 				setSyncStatus(SyncService.STATUS_UPLOADING);
 			}
 			else if(msg.what == SyncService.MSG_SYNC_UPLOAD_PROGRESS) {
-				Log.d("message", "uploadProgress");
 				Bundle bundle = msg.getData();
 				int totalItemsNumber = bundle.getInt("totalItemsNumber");
 				int uploadedFilesCount = bundle.getInt("uploadedFilesCount");
@@ -276,7 +288,6 @@ public class GalleryActivity extends AppCompatActivity
 				setSyncStatus(SyncService.STATUS_UPLOADING);
 			}
 			else if(msg.what == SyncService.MSG_SYNC_STATUS_CHANGE) {
-				Log.d("message", "syncStatusChange");
 				Bundle bundle = msg.getData();
 				int newStatus = bundle.getInt("newStatus");
 				setSyncStatus(newStatus);
@@ -421,8 +432,14 @@ public class GalleryActivity extends AppCompatActivity
 		if (adapter.isSelectionModeActive()){
 			adapter.toggleSelected(index);
 		}
-		StingleDbFile file = adapter.getStingleFileAtPosition(index);
-		Log.d("file", file.filename);
+		else {
+			StingleDbFile file = adapter.getStingleFileAtPosition(index);
+			Intent intent = new Intent();
+			intent.setClass(this, ViewItemActivity.class);
+			intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
+			intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
+			startActivity(intent);
+		}
 	}
 
 	@Override
@@ -599,6 +616,8 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		if(requestCode == INTENT_IMPORT){
 
+			lastScrollPosition = 0;
+			layoutManager.scrollToPosition(lastScrollPosition);
 			ArrayList<Uri> urisToImport = new ArrayList<Uri>();
 			ClipData clipData = data.getClipData();
 			if (clipData != null && clipData.getItemCount() > 0) {
@@ -622,7 +641,6 @@ public class GalleryActivity extends AppCompatActivity
 				}
 			})).execute();
 			/*Uri inputUri = data.getData();
-			Log.e("uri", inputUri.getPath());
 			ContentResolver resolver = getContentResolver();
 			try {
 

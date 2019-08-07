@@ -6,10 +6,13 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
 
+import com.fenritz.safecam.Crypto.Crypto;
+
 public class ImageHolderLayout extends LinearLayout {
 
 	private boolean inteceptAllowed = true;
 	private OnTouchListener listener = null;
+	private int fileType = Crypto.FILE_TYPE_PHOTO;
 	
 	public ImageHolderLayout(Context context) {
 		super(context);
@@ -55,5 +58,13 @@ public class ImageHolderLayout extends LinearLayout {
 		}
 		return super.onInterceptTouchEvent(ev);
 	}
-	
+
+
+	public void setFileType(int type){
+		fileType = type;
+	}
+
+	public int getFileType(){
+		return fileType;
+	}
 }

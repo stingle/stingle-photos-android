@@ -52,7 +52,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class ViewImageActivity extends Activity {
+public class ViewImageActivityOld extends Activity {
 
 	private final ArrayList<File> files = new ArrayList<File>();
 	
@@ -206,7 +206,7 @@ public class ViewImageActivity extends Activity {
 		getActionBar().hide();
 		for(View view : viewsHideShow){
 			if(view.getVisibility() == View.VISIBLE) {
-				view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_out));
+				view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivityOld.this, android.R.anim.fade_out));
 				view.setVisibility(View.INVISIBLE);
 			}
 		}
@@ -229,7 +229,7 @@ public class ViewImageActivity extends Activity {
 		}
 		for(View view : viewsHideShow){
 		    if(view.getVisibility() != View.VISIBLE) {
-		    	view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivity.this, android.R.anim.fade_in));
+		    	view.startAnimation(AnimationUtils.loadAnimation(ViewImageActivityOld.this, android.R.anim.fade_in));
 		    	view.setVisibility(View.VISIBLE);
 		    }
 		}
@@ -349,7 +349,7 @@ public class ViewImageActivity extends Activity {
 		Intent intent = new Intent();
 		final ArrayList<File> selectedFiles = new ArrayList<File>();
 		AlertDialog dialog;
-		AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivity.this);
+		AlertDialog.Builder builder = new AlertDialog.Builder(ViewImageActivityOld.this);
 		selectedFiles.add(files.get(currentPosition));
 		switch (item.getItemId()) {
 			case android.R.id.home:
@@ -361,14 +361,14 @@ public class ViewImageActivity extends Activity {
 					public void onFinish() {
 						super.onFinish();
 						
-						Toast.makeText(ViewImageActivity.this, getString(R.string.success_decrypt), Toast.LENGTH_LONG).show();
+						Toast.makeText(ViewImageActivityOld.this, getString(R.string.success_decrypt), Toast.LENGTH_LONG).show();
 					}
 				};
 				
 				builder.setMessage(getString(R.string.confirm_decrypt_files_s));
 				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						Helpers.decryptSelected(ViewImageActivity.this, selectedFiles, finishTask);
+						Helpers.decryptSelected(ViewImageActivityOld.this, selectedFiles, finishTask);
 					}
 				});
 				builder.setNegativeButton(getString(R.string.no), null);
@@ -377,7 +377,7 @@ public class ViewImageActivity extends Activity {
 				
 				return true;
 			case R.id.share:
-				Helpers.share(ViewImageActivity.this, selectedFiles, null);
+				Helpers.share(ViewImageActivityOld.this, selectedFiles, null);
 				return true;
 			case R.id.delete:
 				cancelPendingTasks();
@@ -386,7 +386,7 @@ public class ViewImageActivity extends Activity {
 				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 					@SuppressWarnings("unchecked")
 					public void onClick(DialogInterface dialog, int whichButton) {
-						new DeleteFiles(ViewImageActivity.this, new OnAsyncTaskFinish() {
+						new DeleteFiles(ViewImageActivityOld.this, new OnAsyncTaskFinish() {
 							@Override
 							public void onFinish() {
 								super.onFinish();
@@ -405,7 +405,7 @@ public class ViewImageActivity extends Activity {
 									showViews();
 								}
 								else{
-									ViewImageActivity.this.finish();
+									ViewImageActivityOld.this.finish();
 								}
 							}
 						}).execute(selectedFiles);
@@ -421,7 +421,7 @@ public class ViewImageActivity extends Activity {
 					public void onFinish(Integer result) {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
-							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + files.get(currentPosition).getName();
+							String key = Helpers.getThumbsDir(ViewImageActivityOld.this) + "/" + files.get(currentPosition).getName();
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();
@@ -437,7 +437,7 @@ public class ViewImageActivity extends Activity {
 					public void onFinish(Integer result) {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
-							String key = Helpers.getThumbsDir(ViewImageActivity.this) + "/" + files.get(currentPosition).getName();
+							String key = Helpers.getThumbsDir(ViewImageActivityOld.this) + "/" + files.get(currentPosition).getName();
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();
@@ -448,7 +448,7 @@ public class ViewImageActivity extends Activity {
 				}).execute();
 				return true;
 			case R.id.gotoGallery:
-				intent.setClass(ViewImageActivity.this, GalleryActivityOld.class);
+				intent.setClass(ViewImageActivityOld.this, GalleryActivityOld.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
 				startActivity(intent);
 				finish();

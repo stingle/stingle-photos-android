@@ -740,7 +740,7 @@ public class AsyncTasks {
 
 				//Helpers.generateThumbnail(activity, data, Helpers.getThumbFileName(filePath));
 				
-				//new File(Helpers.getThumbsDir(ViewImageActivity.this) + "/" + files.get(currentPosition).getName()).delete();
+				//new File(Helpers.getThumbsDir(ViewImageActivityOld.this) + "/" + files.get(currentPosition).getName()).delete();
 				/*
 				
 				try {

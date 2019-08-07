@@ -2589,7 +2589,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 						public void onUserLoginSuccess() {
 							Log.d("FILE", lastFile.getPath());
 							Intent intent = new Intent();
-							intent.setClass(Camera2Activity.this, ViewImageActivity.class);
+							intent.setClass(Camera2Activity.this, ViewImageActivityOld.class);
 							intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
 							intent.putExtra("EXTRA_CURRENT_PATH", Helpers.getHomeDir(Camera2Activity.this));
 							startActivityForResult(intent, GalleryActivityOld.REQUEST_VIEW_PHOTO);

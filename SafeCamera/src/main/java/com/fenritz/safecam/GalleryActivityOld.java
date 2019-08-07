@@ -690,7 +690,7 @@ public class GalleryActivityOld extends Activity {
 					}
 					else {
 						Intent intent = new Intent();
-						intent.setClass(GalleryActivityOld.this, ViewImageActivity.class);
+						intent.setClass(GalleryActivityOld.this, ViewImageActivityOld.class);
 						intent.putExtra("EXTRA_IMAGE_PATH", file.getPath());
 						startActivityForResult(intent, REQUEST_VIEW_PHOTO);
 					}

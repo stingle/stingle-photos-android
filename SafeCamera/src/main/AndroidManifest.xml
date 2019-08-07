@@ -35,10 +35,16 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@android:style/Theme.Material.Light">
+        <activity
+            android:name=".ViewItemActivity"
+            android:label="@string/title_activity_view_item"
+            android:theme="@style/AppThemeDark"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+
         <service
             android:name=".Sync.SyncService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false" />
 
         <activity
             android:name=".GalleryActivity"
@@ -55,7 +61,7 @@
         <activity
             android:name=".DashboardActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/app_name"></activity>
+            android:label="@string/app_name" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/login"
@@ -146,9 +152,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ViewImageActivity"
+            android:name=".ViewImageActivityOld"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:hardwareAccelerated="false"
             android:label="@string/title_view_photo" />
         <activity
             android:name=".SetUpActivity"

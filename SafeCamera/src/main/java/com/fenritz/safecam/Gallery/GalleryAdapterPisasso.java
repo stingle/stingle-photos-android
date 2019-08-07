@@ -237,6 +237,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return null;
 	}
 
+	public int getDbPositionFromRaw(int pos){
+		return ((PosTranslate)translatePos(pos)).dbPosition;
+	}
+
 	// Create new views (invoked by the layout manager)
 	@Override
 	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

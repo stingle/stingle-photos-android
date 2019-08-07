@@ -304,5 +304,6 @@
     <string name="logging_out">Logging out...</string>
     <string name="confirm_logout">Are you sure you want to log out?</string>
     <string name="lock">Lock</string>
+    <string name="title_activity_view_item">ViewItemActivity</string>
 
 </resources>
