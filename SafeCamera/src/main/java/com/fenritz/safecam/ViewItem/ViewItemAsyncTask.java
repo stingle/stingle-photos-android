@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import androidx.core.widget.ContentLoadingProgressBar;
 
@@ -68,6 +69,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 	private int position = 0;
 	private final ImageHolderLayout parent;
+	private final ContentLoadingProgressBar loading;
 	private final ViewPagerAdapter adapter;
 	private final StingleDbHelper db;
 	private int folder = SyncManager.FOLDER_MAIN;
@@ -81,12 +83,13 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private int fileType;
 
 
-	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, StingleDbHelper db, int folder, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
+	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, StingleDbHelper db, int folder, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
 		this.context = context;
 		this.adapter = adapter;
 		this.position = position;
 		this.parent = parent;
+		this.loading = loading;
 		this.db = db;
 		this.folder = folder;
 		this.onClickListener = onClickListener;
@@ -137,26 +140,29 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				result.fileType = fileType;
 				result.isRemote = true;
 
-				HashMap<String, String> postParams = new HashMap<String, String>();
+				if(fileType == Crypto.FILE_TYPE_PHOTO) {
+					byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(encThumb, this);
 
-				postParams.put("token", KeyManagement.getApiToken(context));
-				postParams.put("file", dbFile.filename);
-				postParams.put("folder", String.valueOf(folder));
+					if (decryptedData != null) {
+						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
+					}
+				}
+				else if(fileType == Crypto.FILE_TYPE_VIDEO) {
 
-				JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.get_url_path), postParams);
-				StingleResponse response = new StingleResponse(this.context, json, false);
+					HashMap<String, String> postParams = new HashMap<String, String>();
 
-				if (response.isStatusOk()) {
-					String url = response.get("url");
+					postParams.put("token", KeyManagement.getApiToken(context));
+					postParams.put("file", dbFile.filename);
+					postParams.put("folder", String.valueOf(folder));
 
-					if(url != null){
-						result.url = url;
-						if(fileType == Crypto.FILE_TYPE_PHOTO) {
-							byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(encThumb, this);
+					JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.get_url_path), postParams);
+					StingleResponse response = new StingleResponse(this.context, json, false);
 
-							if (decryptedData != null) {
-								result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
-							}
+					if (response.isStatusOk()) {
+						String url = response.get("url");
+
+						if (url != null) {
+							result.url = url;
 						}
 					}
 				}
@@ -217,21 +223,15 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			if(result.isRemote){
 				(new GetOriginalRemotePhotoTask(context, result, image, attacher)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
-
+			loading.setVisibility(View.INVISIBLE);
 			parent.addView(image);
 		}
 		else if (result.fileType == Crypto.FILE_TYPE_VIDEO){
 			PlayerView playerView = new PlayerView(context);
 			playerView.setLayoutParams(params);
 
-			LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(Helpers.convertDpToPixels(context,100), Helpers.convertDpToPixels(context,100));
-			final ContentLoadingProgressBar loading = new ContentLoadingProgressBar(context);
-
-			loading.setLayoutParams(params);
-
 			parent.removeAllViews();
 			parent.addView(playerView);
-			parent.addView(loading);
 
 			if(touchListener != null){
 				parent.setOnTouchListener(touchListener);
@@ -247,63 +247,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 
 			playerView.setPlayer(player);
-			player.addListener(new Player.EventListener() {
-				@Override
-				public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-
-				}
-
-				@Override
-				public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-				}
-
-				@Override
-				public void onLoadingChanged(boolean isLoading) {
-
-				}
-
-				@Override
-				public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-					if (playbackState == ExoPlayer.STATE_BUFFERING){
-						loading.setVisibility(View.VISIBLE);
-						Log.d("buffering", "yes");
-					} else {
-						loading.setVisibility(View.INVISIBLE);
-						Log.d("buffering", "no");
-					}
-				}
-
-				@Override
-				public void onRepeatModeChanged(int repeatMode) {
-
-				}
-
-				@Override
-				public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
-				}
-
-				@Override
-				public void onPlayerError(ExoPlaybackException error) {
-
-				}
-
-				@Override
-				public void onPositionDiscontinuity(int reason) {
-
-				}
-
-				@Override
-				public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-				}
-
-				@Override
-				public void onSeekProcessed() {
-
-				}
-			});
+			player.addListener(getPlayerEventListener());
 
 			MediaSource mediaSource;
 			if(result.isRemote){
@@ -331,8 +275,68 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			}*/
 			playerView.setShowShuffleButton(false);
 			player.prepare(mediaSource, true, false);
-
+			loading.setVisibility(View.INVISIBLE);
 		}
+	}
+
+	private Player.EventListener getPlayerEventListener(){
+		return new Player.EventListener() {
+			@Override
+			public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+
+			}
+
+			@Override
+			public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+			}
+
+			@Override
+			public void onLoadingChanged(boolean isLoading) {
+
+			}
+
+			@Override
+			public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+				if (playbackState == ExoPlayer.STATE_BUFFERING){
+					loading.setVisibility(View.VISIBLE);
+					Log.d("buffering", "yes");
+				} else {
+					loading.setVisibility(View.INVISIBLE);
+					Log.d("buffering", "no");
+				}
+			}
+
+			@Override
+			public void onRepeatModeChanged(int repeatMode) {
+
+			}
+
+			@Override
+			public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+			}
+
+			@Override
+			public void onPlayerError(ExoPlaybackException error) {
+
+			}
+
+			@Override
+			public void onPositionDiscontinuity(int reason) {
+
+			}
+
+			@Override
+			public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+			}
+
+			@Override
+			public void onSeekProcessed() {
+
+			}
+		};
 	}
 
 	public class ViewItemTaskResult{

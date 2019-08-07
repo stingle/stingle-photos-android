@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.fenritz.safecam.Db.StingleDbContract;
@@ -53,8 +54,9 @@ public class ViewPagerAdapter extends PagerAdapter {
 	public Object instantiateItem(@NonNull ViewGroup container, int position) {
 		ViewGroup layout = (ViewGroup) layoutInflater.inflate(R.layout.view_item_item, container, false);
 		ImageHolderLayout parent = (ImageHolderLayout)layout.findViewById(R.id.parent_layout);
+		ContentLoadingProgressBar loading = (ContentLoadingProgressBar)layout.findViewById(R.id.loading_spinner);
 
-		(new ViewItemAsyncTask(context, this, position, parent, db, folder, null, null, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		(new ViewItemAsyncTask(context, this, position, parent, loading, db, folder, null, null, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		container.addView(layout);
 		return layout;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,11 +9,13 @@
         android:orientation="vertical"
         android:id="@+id/parent_layout"
         android:gravity="center" >
-        <androidx.core.widget.ContentLoadingProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="?android:attr/progressBarStyleLarge"
-            android:theme="@style/WhiteLoading"/>
-    </com.fenritz.safecam.Widget.ImageHolderLayout>
 
-</LinearLayout>
+    </com.fenritz.safecam.Widget.ImageHolderLayout>
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/loading_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:theme="@style/WhiteLoading"
+        android:layout_centerInParent="true"/>
+</RelativeLayout>
