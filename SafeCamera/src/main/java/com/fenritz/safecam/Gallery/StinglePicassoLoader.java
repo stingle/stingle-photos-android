@@ -3,34 +3,25 @@ package com.fenritz.safecam.Gallery;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.fenritz.safecam.Auth.KeyManagement;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Db.StingleDbHelper;
-import com.fenritz.safecam.GalleryActivity;
-import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.Sync.FileManager;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.squareup.picasso3.Picasso;
 import com.squareup.picasso3.RequestHandler;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-
-import okhttp3.Request;
-import okhttp3.Response;
 
 
 public class StinglePicassoLoader extends RequestHandler {
@@ -67,7 +58,7 @@ public class StinglePicassoLoader extends RequestHandler {
 		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position));
 		if(file.isLocal) {
 			try {
-				File fileToDec = new File(Helpers.getThumbsDir(context) +"/"+ file.filename);
+				File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 				FileInputStream input = new FileInputStream(fileToDec);
 				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
 

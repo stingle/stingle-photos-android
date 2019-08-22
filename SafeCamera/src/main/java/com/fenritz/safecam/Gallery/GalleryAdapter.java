@@ -20,6 +20,7 @@ import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Db.StingleDbHelper;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
@@ -274,7 +275,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 			StingleDbFile file = db.getFileAtPosition(position);
 			if(file.isLocal) {
 				try {
-					File fileToDec = new File(Helpers.getThumbsDir(context) +"/"+ file.filename);
+					File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 					FileInputStream input = new FileInputStream(fileToDec);
 					byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
 

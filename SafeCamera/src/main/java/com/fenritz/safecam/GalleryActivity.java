@@ -4,34 +4,31 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import com.fenritz.safecam.AsyncTasks.DecryptFiles;
+import com.fenritz.safecam.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.Auth.LoginManager;
 import com.fenritz.safecam.Crypto.CryptoException;
-import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbFile;
-import com.fenritz.safecam.Db.StingleDbHelper;
+import com.fenritz.safecam.Files.ShareManager;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
 import com.fenritz.safecam.Gallery.GalleryAdapterPisasso;
 import com.fenritz.safecam.Gallery.HidingScrollListener;
-import com.fenritz.safecam.Sync.FileManager;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Sync.SyncService;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Gallery.DragSelectRecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,14 +36,9 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.MenuInflater;
 import android.view.View;
 
 import androidx.appcompat.view.ActionMode;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -58,8 +50,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -68,18 +58,12 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.apache.sanselan.util.IOUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -182,6 +166,12 @@ public class GalleryActivity extends AppCompatActivity
 	protected void onStop() {
 		super.onStop();
 
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		FileManager.deleteTempFiles(this);
 	}
 
 	@Override
@@ -375,7 +365,9 @@ public class GalleryActivity extends AppCompatActivity
 
 		//noinspection SimplifiableIfStatement
 		if (id == R.id.action_settings) {
-			return true;
+			Intent intent = new Intent();
+			intent.setClass(this, SettingsActivity.class);
+			startActivity(intent);
 		}
 		else if (id == R.id.action_lock) {
 			LoginManager.lock(this);
@@ -490,6 +482,9 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch(item.getItemId()){
+					case R.id.share:
+						shareSelected();
+						break;
 					case R.id.trash :
 						trashSelected();
 						break;
@@ -511,6 +506,21 @@ public class GalleryActivity extends AppCompatActivity
 		};
 	}
 
+	private void shareSelected() {
+		List<Integer> indices = adapter.getSelectedIndices();
+		ArrayList<StingleDbFile> files = new ArrayList<StingleDbFile>();
+		for(Integer index : indices){
+			files.add(adapter.getStingleFileAtPosition(index));
+		}
+
+		ShareManager.shareDbFiles(this, files, currentFolder);
+
+		//Intent share = new Intent(Intent.ACTION_SEND);
+		//share.setType("*/*");
+		//share.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getApplicationContext(), "com.fenritz.safecam.shareprovider", destinationFile));
+		//startActivity(Intent.createChooser(share, getString(R.string.export_keys)));*/
+	}
+
 
 	protected void exitActionMode(){
 		adapter.clearSelected();
@@ -521,13 +531,13 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void trashSelected(){
-		final List<Integer> indeces = adapter.getSelectedIndices();
-		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_trash_files), String.valueOf(indeces.size())), new DialogInterface.OnClickListener() {
+		final List<Integer> indices = adapter.getSelectedIndices();
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_trash_files), String.valueOf(indices.size())), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.trashing_files), null);
 				ArrayList<String> filenames = new ArrayList<String>();
-				for(Integer index : indeces){
+				for(Integer index : indices){
 					StingleDbFile file = adapter.getStingleFileAtPosition(index);
 					filenames.add(file.filename);
 				}
@@ -546,11 +556,11 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void restoreSelected(){
-		final List<Integer> indeces = adapter.getSelectedIndices();
+		final List<Integer> indices = adapter.getSelectedIndices();
 
 		final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.restoring_files), null);
 		ArrayList<String> filenames = new ArrayList<String>();
-		for(Integer index : indeces){
+		for(Integer index : indices){
 			StingleDbFile file = adapter.getStingleFileAtPosition(index);
 			filenames.add(file.filename);
 		}
@@ -567,13 +577,13 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void deleteSelected(){
-		final List<Integer> indeces = adapter.getSelectedIndices();
-		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(indeces.size())), new DialogInterface.OnClickListener() {
+		final List<Integer> indices = adapter.getSelectedIndices();
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(indices.size())), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.deleting_files), null);
 						ArrayList<String> filenames = new ArrayList<String>();
-						for(Integer index : indeces){
+						for(Integer index : indices){
 							StingleDbFile file = adapter.getStingleFileAtPosition(index);
 							filenames.add(file.filename);
 						}
@@ -682,7 +692,7 @@ public class GalleryActivity extends AppCompatActivity
 				return null;
 			}
 			try {
-				File fileToDec = new File(Helpers.getThumbsDir(context) + "/" + filename);
+				File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + filename);
 				FileInputStream input = new FileInputStream(fileToDec);
 				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
 

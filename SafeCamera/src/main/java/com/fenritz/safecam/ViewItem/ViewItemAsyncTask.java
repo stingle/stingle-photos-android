@@ -1,21 +1,16 @@
 package com.fenritz.safecam.ViewItem;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import androidx.core.widget.ContentLoadingProgressBar;
 
@@ -28,13 +23,12 @@ import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.Sync.FileManager;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Util.MemoryCache;
 import com.fenritz.safecam.Video.StingleDataSourceFactory;
 import com.fenritz.safecam.Video.StingleHttpDataSource;
-import com.fenritz.safecam.Widget.AnimatedGifImageView;
 import com.fenritz.safecam.Widget.ImageHolderLayout;
 import com.fenritz.safecam.Widget.photoview.PhotoViewAttacher;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -59,7 +53,6 @@ import org.json.JSONObject;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -93,8 +86,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		this.db = db;
 		this.folder = folder;
 		this.onClickListener = onClickListener;
-		this.memCache = memCache;
 		this.touchListener = touchListener;
+		this.memCache = memCache;
 	}
 
 	@Override
@@ -111,7 +104,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		StingleDbFile dbFile = db.getFileAtPosition(position);
 		result.filename = dbFile.filename;
 		if(dbFile.isLocal){
-			File file = new File(Helpers.getHomeDir(context) + "/" + dbFile.filename);
+			File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
 			try {
 				Crypto.Header fileHeader = SafeCameraApplication.getCrypto().getFileHeader(new FileInputStream(file));
 				fileType = fileHeader.fileType;
@@ -260,7 +253,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
 			}
 			else{
-				Uri uri = Uri.fromFile(new File(Helpers.getHomeDir(context) + "/" + result.filename));
+				Uri uri = Uri.fromFile(new File(FileManager.getHomeDir(context) + "/" + result.filename));
 				FileDataSource file = new FileDataSource();
 				StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, file);
 				mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);

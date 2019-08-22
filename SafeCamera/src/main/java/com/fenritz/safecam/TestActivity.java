@@ -5,7 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
-import com.fenritz.safecam.Util.Helpers;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Video.StingleDataSourceFactory;
 import com.fenritz.safecam.Video.StingleHttpDataSource;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -188,7 +188,7 @@ public class TestActivity extends Activity {
 
 		playerView.setPlayer(player);
 		//AesCipherDataSource
-		String path = Helpers.getHomeDir(this) + "/vid1.sc";
+		String path = FileManager.getHomeDir(this) + "/vid1.sc";
 		//path = "/storage/emulated/0/vid.mp4";
 		//Uri uri = Uri.fromFile(new File(path));
 		Uri uri = Uri.parse("https://www.safecamera.org/vid1.sc");

@@ -1,38 +1,28 @@
 package com.fenritz.safecam.Sync;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.fenritz.safecam.Auth.KeyManagement;
-import com.fenritz.safecam.Crypto.CryptoException;
-import com.fenritz.safecam.DashboardActivity;
 import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbFile;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
 import com.fenritz.safecam.Db.StingleDbHelper;
-import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.Util.Helpers;
-import com.google.gson.JsonObject;
-import com.goterl.lazycode.lazysodium.interfaces.AEAD;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -92,7 +82,7 @@ public class SyncManager {
 		protected boolean fsSyncFolder(int folder){
 			boolean needToUpdateUI = false;
 			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
-			File dir = new File(Helpers.getHomeDir(this.context));
+			File dir = new File(FileManager.getHomeDir(this.context));
 
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ALL, StingleDbHelper.SORT_ASC);
 
@@ -157,8 +147,8 @@ public class SyncManager {
 			this.context = context;
 			this.progress = progress;
 			this.onFinish = onFinish;
-			dir = new File(Helpers.getHomeDir(context));
-			thumbDir = new File(Helpers.getThumbsDir(context));
+			dir = new File(FileManager.getHomeDir(context));
+			thumbDir = new File(FileManager.getThumbsDir(context));
 		}
 
 		@Override
@@ -416,8 +406,8 @@ public class SyncManager {
 					myDb.updateFile(file);
 				}
 				if(needDownload){
-					String homeDir = Helpers.getHomeDir(context);
-					String thumbDir = Helpers.getThumbsDir(context);
+					String homeDir = FileManager.getHomeDir(context);
+					String thumbDir = FileManager.getThumbsDir(context);
 					String mainFilePath = homeDir + "/" + file.filename;
 					String thumbPath = thumbDir + "/" + file.filename;
 
@@ -462,8 +452,8 @@ public class SyncManager {
 						trashDb.deleteFile(file.filename);
 					}
 
-					String homeDir = Helpers.getHomeDir(context);
-					String thumbDir = Helpers.getThumbsDir(context);
+					String homeDir = FileManager.getHomeDir(context);
+					String thumbDir = FileManager.getThumbsDir(context);
 					File mainFile = new File(homeDir + "/" + filename);
 					File thumbFile = new File(thumbDir + "/" + filename);
 
@@ -665,8 +655,8 @@ public class SyncManager {
 		@Override
 		protected Void doInBackground(Void... params) {
 			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
-			String homeDir = Helpers.getHomeDir(context);
-			String thumbDir = Helpers.getThumbsDir(context);
+			String homeDir = FileManager.getHomeDir(context);
+			String thumbDir = FileManager.getThumbsDir(context);
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 

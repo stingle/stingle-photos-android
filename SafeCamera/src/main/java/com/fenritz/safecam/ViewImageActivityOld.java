@@ -26,9 +26,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Util.AsyncTasks;
 import com.fenritz.safecam.Util.AsyncTasks.DeleteFiles;
-import com.fenritz.safecam.Util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Util.DecryptAndShowImage;
@@ -318,7 +319,7 @@ public class ViewImageActivityOld extends Activity {
 	
 	@SuppressWarnings("unchecked")
 	private void fillFilesList() {
-		File dir = new File(Helpers.getHomeDir(this));
+		File dir = new File(FileManager.getHomeDir(this));
 		File[] folderFiles = dir.listFiles();
 
 		Arrays.sort(folderFiles, new Comparator<File>() {
@@ -356,7 +357,7 @@ public class ViewImageActivityOld extends Activity {
 				finish();
 				return true;
 			case R.id.decrypt:
-				final AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
+				final OnAsyncTaskFinish finishTask = new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
@@ -368,7 +369,7 @@ public class ViewImageActivityOld extends Activity {
 				builder.setMessage(getString(R.string.confirm_decrypt_files_s));
 				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						Helpers.decryptSelected(ViewImageActivityOld.this, selectedFiles, finishTask);
+						//Helpers.decryptSelected(ViewImageActivityOld.this, selectedFiles, finishTask);
 					}
 				});
 				builder.setNegativeButton(getString(R.string.no), null);
@@ -377,7 +378,7 @@ public class ViewImageActivityOld extends Activity {
 				
 				return true;
 			case R.id.share:
-				Helpers.share(ViewImageActivityOld.this, selectedFiles, null);
+				//Helpers.share(ViewImageActivityOld.this, selectedFiles, null);
 				return true;
 			case R.id.delete:
 				cancelPendingTasks();
@@ -421,7 +422,7 @@ public class ViewImageActivityOld extends Activity {
 					public void onFinish(Integer result) {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
-							String key = Helpers.getThumbsDir(ViewImageActivityOld.this) + "/" + files.get(currentPosition).getName();
+							String key = FileManager.getThumbsDir(ViewImageActivityOld.this) + "/" + files.get(currentPosition).getName();
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();
@@ -437,7 +438,7 @@ public class ViewImageActivityOld extends Activity {
 					public void onFinish(Integer result) {
 						super.onFinish(result);
 						if(result == AsyncTasks.RotatePhoto.STATUS_OK){
-							String key = Helpers.getThumbsDir(ViewImageActivityOld.this) + "/" + files.get(currentPosition).getName();
+							String key = FileManager.getThumbsDir(ViewImageActivityOld.this) + "/" + files.get(currentPosition).getName();
 							SafeCameraApplication.getCache().remove(key);
 							showImage(files.get(currentPosition));
 							Intent resultIntent = new Intent();

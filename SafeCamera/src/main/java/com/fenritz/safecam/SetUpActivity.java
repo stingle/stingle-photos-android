@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -14,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.Crypto.CryptoException;
@@ -226,8 +226,8 @@ public class SetUpActivity  extends Activity{
 	protected void onResume() {
 		super.onResume();
 
-		if(Helpers.requestSDCardPermission(this)){
-			Helpers.createFolders(this);
+		if(FileManager.requestSDCardPermission(this)){
+			FileManager.createFolders(this);
 		}
 	}
 	@Override
@@ -235,7 +235,7 @@ public class SetUpActivity  extends Activity{
 		switch (requestCode) {
 			case SafeCameraApplication.REQUEST_SD_CARD_PERMISSION: {
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					Helpers.createFolders(this);
+					FileManager.createFolders(this);
 
 				} else {
 					finish();

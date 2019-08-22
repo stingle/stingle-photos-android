@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -25,16 +23,14 @@ import androidx.core.content.FileProvider;
 
 import com.fenritz.safecam.Auth.KeyManagement;
 import com.fenritz.safecam.Auth.PasswordReturnListener;
-import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbContract;
 import com.fenritz.safecam.Db.StingleDbHelper;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.LoginManager;
-
-import org.apache.sanselan.util.IOUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -76,7 +72,7 @@ public class DashboardActivity extends Activity {
 			showPopup();
 		}
 
-		if (Helpers.requestSDCardPermission(this)) {
+		if (FileManager.requestSDCardPermission(this)) {
 			filesystemInit();
 		}
 
@@ -97,7 +93,7 @@ public class DashboardActivity extends Activity {
 	}
 
 	public void filesystemInit() {
-		Helpers.createFolders(this);
+		FileManager.createFolders(this);
 
 		Helpers.deleteTmpDir(this);
 	}
@@ -185,7 +181,7 @@ public class DashboardActivity extends Activity {
 
 		//LoginManager.disableLockTimer(this);
 
-		Helpers.checkIsMainFolderWritable(this);
+		FileManager.checkIsMainFolderWritable(this);
 	}
 
 	@Override
@@ -300,7 +296,7 @@ public class DashboardActivity extends Activity {
 				return true;
 			case R.id.share_keys:
 				try {
-					String filePath = Helpers.getHomeDir(this) + "/.tmp/stingle_keys.skey";
+					String filePath = FileManager.getHomeDir(this) + "/.tmp/stingle_keys.skey";
 					File destinationFile = new File(filePath);
 
 					FileOutputStream outputStream = new FileOutputStream(destinationFile);

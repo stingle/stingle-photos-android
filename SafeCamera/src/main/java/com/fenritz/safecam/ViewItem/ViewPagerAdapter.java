@@ -31,10 +31,12 @@ public class ViewPagerAdapter extends PagerAdapter {
 	private int currentPosition = 0;
 	private int folder = SyncManager.FOLDER_MAIN;
 	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
+	private View.OnTouchListener gestureTouchListener;
 
-	public ViewPagerAdapter(Context context, int folder){
+	public ViewPagerAdapter(Context context, int folder, View.OnTouchListener gestureTouchListener){
 		this.context = context;
 		this.folder = folder;
+		this.gestureTouchListener = gestureTouchListener;
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		db = new StingleDbHelper(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 	}
@@ -56,7 +58,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		ImageHolderLayout parent = (ImageHolderLayout)layout.findViewById(R.id.parent_layout);
 		ContentLoadingProgressBar loading = (ContentLoadingProgressBar)layout.findViewById(R.id.loading_spinner);
 
-		(new ViewItemAsyncTask(context, this, position, parent, loading, db, folder, null, null, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		(new ViewItemAsyncTask(context, this, position, parent, loading, db, folder, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		container.addView(layout);
 		return layout;

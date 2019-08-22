@@ -174,7 +174,8 @@ public class HttpsClient {
 			// After this onProgressUpdate will be called
 			//publishProgress("" + (int) ((total * 100) / lenghtOfFile));
 
-			// writing data to file
+			// writing data to
+			//Log.d("file", new String(buf));
 			output.write(buf, 0, count);
 		}
 

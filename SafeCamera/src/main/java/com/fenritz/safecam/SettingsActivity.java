@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 import com.fenritz.safecam.Camera.CameraImageSize;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Util.AsyncTasks;
 import com.fenritz.safecam.Auth.FingerprintManagerWrapper;
 import com.fenritz.safecam.Util.Helpers;
@@ -219,7 +220,7 @@ public class SettingsActivity extends PreferenceActivity {
                         @SuppressWarnings("unchecked")
                         public void onClick(DialogInterface dialog, int whichButton) {
                             ArrayList<File> selectedFiles = new ArrayList<File>();
-                            File thumbsDir = new File(Helpers.getThumbsDir(GeneralPreferenceFragment.this.getContext()));
+                            File thumbsDir = new File(FileManager.getThumbsDir(GeneralPreferenceFragment.this.getContext()));
                             File[] folderFiles = thumbsDir.listFiles();
                             for(File file : folderFiles){
                                 selectedFiles.add(file);
@@ -275,7 +276,7 @@ public class SettingsActivity extends PreferenceActivity {
                 homeFolderCurrentValue = String.valueOf(storageEntriesValues[storageEntriesValues.length-1]);
             }
             else if(homeDirPath == null){
-                homeFolderCurrentValue = Helpers.getDefaultHomeDir();
+                homeFolderCurrentValue = FileManager.getDefaultHomeDir();
             }
             else{
                 homeFolderCurrentValue = homeFolderLocPref.getValue();
@@ -297,7 +298,7 @@ public class SettingsActivity extends PreferenceActivity {
                             locationText.setText(homeDirCustomPath);
                         }
                         else{
-                            locationText.setText(Helpers.getDefaultHomeDir());
+                            locationText.setText(FileManager.getDefaultHomeDir());
                         }
                         builder.setView(locationText);
 
@@ -315,7 +316,7 @@ public class SettingsActivity extends PreferenceActivity {
 
                                     new AlertDialog.Builder(GeneralPreferenceFragment.this.getContext()).setMessage(message).setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener(){
                                         public void onClick(DialogInterface dialog, int which) {
-                                            if(Helpers.getDefaultHomeDir().equals(locationText.getText().toString())){
+                                            if(FileManager.getDefaultHomeDir().equals(locationText.getText().toString())){
                                                 sharedPrefs.edit().putString("home_folder_location", null).commit();
                                             }
                                             homeFolderLocPref.setValue(storageEntriesValues[0].toString());
@@ -328,7 +329,7 @@ public class SettingsActivity extends PreferenceActivity {
                         });
                         builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                if(Helpers.getDefaultHomeDir().equals(locationText.getText().toString())){
+                                if(FileManager.getDefaultHomeDir().equals(locationText.getText().toString())){
                                     sharedPrefs.edit().putString("home_folder_location", null).commit();
                                 }
                                 homeFolderLocPref.setValue(storageEntriesValues[0].toString());

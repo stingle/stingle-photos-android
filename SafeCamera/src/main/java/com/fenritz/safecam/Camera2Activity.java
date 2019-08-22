@@ -81,7 +81,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.fenritz.safecam.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.Camera.CameraImageSize;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Util.AsyncTasks;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
@@ -868,7 +870,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
             String filenameEnc = Helpers.getNewEncFilename();
 
-            String path = Helpers.getHomeDir(Camera2Activity.this);
+            String path = FileManager.getHomeDir(Camera2Activity.this);
             String finalPath = path + "/" + filenameEnc;
 
             // Look up the ImageSaverBuilder for this request and update it with the file name
@@ -883,7 +885,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 				if (jpegBuilder != null) {
 					jpegBuilder.setFile(new File(finalPath));
 					jpegBuilder.setFileName(filename);
-					jpegBuilder.setOnFinish(new AsyncTasks.OnAsyncTaskFinish() {
+					jpegBuilder.setOnFinish(new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
 							super.onFinish();
@@ -1698,7 +1700,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
                 File tmpFile = new File(cacheDir.getAbsolutePath() + "/" + fileName);
                 FileInputStream in = new FileInputStream(tmpFile);
-                String encFilePath = Helpers.getHomeDir(Camera2Activity.this) + "/" + encFileName;
+                String encFilePath = FileManager.getHomeDir(Camera2Activity.this) + "/" + encFileName;
                 FileOutputStream out = new FileOutputStream(encFilePath);
 
                 byte[] fileId = SafeCameraApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size());
@@ -1997,14 +1999,14 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
          */
         private final Context mContext;
 
-		private AsyncTasks.OnAsyncTaskFinish mOnFinish;
+		private OnAsyncTaskFinish mOnFinish;
 
         /**
          * A reference counted wrapper for the ImageReader that owns the given image.
          */
         private final RefCountedAutoCloseable<ImageReader> mReader;
 
-        private ImageSaver(Image image, File file, String fileName, CaptureResult result, CameraCharacteristics characteristics, Context context, RefCountedAutoCloseable<ImageReader> reader, AsyncTasks.OnAsyncTaskFinish onFinish) {
+        private ImageSaver(Image image, File file, String fileName, CaptureResult result, CameraCharacteristics characteristics, Context context, RefCountedAutoCloseable<ImageReader> reader, OnAsyncTaskFinish onFinish) {
             mImage = image;
             mFile = file;
             mFileName = fileName;
@@ -2097,7 +2099,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             private CaptureResult mCaptureResult;
             private CameraCharacteristics mCharacteristics;
             private Context mContext;
-            private AsyncTasks.OnAsyncTaskFinish mOnFinish;
+            private OnAsyncTaskFinish mOnFinish;
             private RefCountedAutoCloseable<ImageReader> mReader;
 
             /**
@@ -2141,7 +2143,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 mCaptureResult = result;
                 return this;
             }
-            public synchronized ImageSaverBuilder setOnFinish(final AsyncTasks.OnAsyncTaskFinish onFinish) {
+            public synchronized ImageSaverBuilder setOnFinish(final OnAsyncTaskFinish onFinish) {
                 if (onFinish == null) throw new NullPointerException();
 				mOnFinish = onFinish;
                 return this;
@@ -2519,7 +2521,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 		@Override
 		protected File doInBackground(Void... params) {
 
-			File dir = new File(Helpers.getHomeDir(Camera2Activity.this));
+			File dir = new File(FileManager.getHomeDir(Camera2Activity.this));
 
 			File[] folderFiles = dir.listFiles();
 
@@ -2531,7 +2533,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 				});
 
 				for (File file : folderFiles) {
-					File thumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + file.getName());
+					File thumb = new File(FileManager.getThumbsDir(Camera2Activity.this) + "/" + file.getName());
 					if (file.getName().endsWith(SafeCameraApplication.FILE_EXTENSION) && thumb.exists() && thumb.isFile()) {
 						return file;
 					}
@@ -2547,13 +2549,13 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 			lastFile = file;
 
 			if (lastFile != null) {
-				final File lastFileThumb = new File(Helpers.getThumbsDir(Camera2Activity.this) + "/" + lastFile.getName());
+				final File lastFileThumb = new File(FileManager.getThumbsDir(Camera2Activity.this) + "/" + lastFile.getName());
 				final int thumbSize = (int) Math.round(Helpers.getThumbSize(Camera2Activity.this) / 1.4);
 
 				if (SafeCameraApplication.getKey() != null) {
 					AsyncTasks.DecryptPopulateImage task = new AsyncTasks.DecryptPopulateImage(Camera2Activity.this, lastFileThumb.getPath(), galleryButton);
 					task.setSize(thumbSize);
-					task.setOnFinish(new AsyncTasks.OnAsyncTaskFinish() {
+					task.setOnFinish(new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
 							super.onFinish();
@@ -2591,7 +2593,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 							Intent intent = new Intent();
 							intent.setClass(Camera2Activity.this, ViewImageActivityOld.class);
 							intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
-							intent.putExtra("EXTRA_CURRENT_PATH", Helpers.getHomeDir(Camera2Activity.this));
+							intent.putExtra("EXTRA_CURRENT_PATH", FileManager.getHomeDir(Camera2Activity.this));
 							startActivityForResult(intent, GalleryActivityOld.REQUEST_VIEW_PHOTO);
 
 						}

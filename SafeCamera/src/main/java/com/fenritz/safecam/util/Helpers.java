@@ -1,18 +1,14 @@
 package com.fenritz.safecam.Util;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,9 +17,8 @@ import android.graphics.Matrix;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.preference.PreferenceManager;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -39,12 +34,9 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fenritz.safecam.Camera.CameraImageSize;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
-import com.fenritz.safecam.LoginActivity;
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.SettingsActivity;
-import com.fenritz.safecam.Util.AsyncTasks.OnAsyncTaskFinish;
-import com.fenritz.safecam.Util.StorageUtils.StorageInfo;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -62,24 +54,35 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Helpers {
 	public static final String GENERAL_FILE_PREFIX = "FILE_";
 	public static final String IMAGE_FILE_PREFIX = "IMG_";
 	public static final String VIDEO_FILE_PREFIX = "VID_";
 	protected static final int SHARE_DECRYPT = 0;
-	
+	private static PowerManager.WakeLock wakelock;
+
+
+	public static void acquireWakeLock(Context context){
+		PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+		wakelock = pm.newWakeLock(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, context.getString(R.string.app_name) + "decrypt");
+		wakelock.acquire();
+	}
+
+	public static void releaseWakeLock(){
+		if(wakelock != null){
+			wakelock.release();
+			wakelock = null;
+		}
+	}
+
 	public static void deleteTmpDir(Context context) {
-		File dir = new File(Helpers.getHomeDir(context) + "/" + ".tmp");
+		File dir = new File(FileManager.getHomeDir(context) + "/" + ".tmp");
 		if (dir.isDirectory()) {
 			String[] children = dir.list();
 			if(children != null) {
@@ -176,66 +179,6 @@ public class Helpers {
 	}
 
 
-	public static String getDefaultHomeDir(){
-		List<StorageInfo> storageList = StorageUtils.getStorageList();
-		if(storageList.size() > 0){
-			return storageList.get(0).path;
-		}
-		
-		return null;
-	}
-	
-	public static String getHomeDirParentPath(Context context){
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-		String defaultHomeDir = Helpers.getDefaultHomeDir();
-		
-		String currentHomeDir = sharedPrefs.getString("home_folder", defaultHomeDir);
-		String customHomeDir = sharedPrefs.getString("home_folder_location", null);
-		
-		if(currentHomeDir != null && currentHomeDir.equals(SettingsActivity.CUSTOM_HOME_VALUE)){
-			currentHomeDir = customHomeDir;
-		}
-		
-		return ensureLastSlash(currentHomeDir);
-	}
-
-	public static String getHomeDir(Context context) {
-		return getHomeDir(context, true);
-	}
-
-	public static String getHomeDir(Context context, boolean autoCreateDirs) {
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-		
-		String homeDirPath = getHomeDirParentPath(context) + sharedPrefs.getString("home_folder_name", context.getString(R.string.default_home_folder_name));
-		
-		if(autoCreateDirs && !new File(homeDirPath).exists()){
-			Helpers.createFolders(context);
-		}
-		
-		return homeDirPath;
-	}
-	
-	public static String ensureLastSlash(String path){
-		if(path != null && !path.endsWith("/")){
-			return path + "/";
-		}
-		return path;
-	}
-
-	public static String getThumbsDir(Context context) {
-		return getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
-	}
-
-	public static void createFolders(Context context) {
-		String homeDirPath = getHomeDir(context, false);
-
-		File dir = new File(homeDirPath + "/" + context.getString(R.string.default_thumb_folder_name));
-		if (!dir.exists() || !dir.isDirectory()) {
-			dir.mkdirs();
-		}
-	}
-
-
 	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName, byte[] fileId, int type) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
@@ -246,7 +189,7 @@ public class Helpers {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
-			FileOutputStream out = new FileOutputStream(Helpers.getThumbsDir(context) + "/" + fileName);
+			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + fileName);
 			try {
 				SafeCameraApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName, type, fileId);
 				out.close();
@@ -507,273 +450,7 @@ public class Helpers {
 			return "";
 		}
 	}
-	
-	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
-		return findNewFileNameIfNeeded(context, filePath, fileName, null);
-	}
-	
-	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName, Integer number) {
-		if (number == null) {
-			number = 1;
-		}
 
-		File file = new File(Helpers.ensureLastSlash(filePath) + fileName);
-		if (file.exists()) {
-			int lastDotIndex = fileName.lastIndexOf(".");
-			String fileNameWithoutExt;
-			String originalExtension = ""; 
-			if (lastDotIndex > 0) {
-				fileNameWithoutExt = fileName.substring(0, lastDotIndex);
-				originalExtension = fileName.substring(lastDotIndex);
-			}
-			else {
-				fileNameWithoutExt = fileName;
-			}
-
-			Pattern p = Pattern.compile(".+_\\d{1,3}$");
-			Matcher m = p.matcher(fileNameWithoutExt);
-			if (m.find()) {
-				fileNameWithoutExt = fileNameWithoutExt.substring(0, fileName.lastIndexOf("_"));
-			}
-			
-			String finalFilaname = fileNameWithoutExt + "_" + String.valueOf(number) + originalExtension;
-			
-			return findNewFileNameIfNeeded(context, filePath, finalFilaname, ++number);
-		}
-		return Helpers.ensureLastSlash(filePath) + fileName;
-	}
-	
-	public static void share(final Activity activity, final ArrayList<File> files, final OnAsyncTaskFinish onDecrypt) {
-		CharSequence[] listEntries = activity.getResources().getStringArray(R.array.beforeShareActions);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle(activity.getString(R.string.before_sharing));
-		builder.setItems(listEntries, new DialogInterface.OnClickListener() {
-			@SuppressWarnings("unchecked")
-			public void onClick(DialogInterface dialog, int item) {
-				switch (item) {
-					case SHARE_DECRYPT:
-						String filePath = Helpers.getHomeDir(activity) + "/" + ".tmp";
-						File destinationFolder = new File(filePath);
-						destinationFolder.mkdirs();
-
-						AsyncTasks.OnAsyncTaskFinish finalOnDecrypt = new AsyncTasks.OnAsyncTaskFinish() {
-							@Override
-							public void onFinish(java.util.ArrayList<File> processedFiles) {
-								if (processedFiles != null && processedFiles.size() > 0) {
-									shareFiles(activity, processedFiles);
-								}
-								if(onDecrypt != null){
-									onDecrypt.onFinish();
-								}
-							};
-						};
-						
-						new AsyncTasks.DecryptFiles(activity, filePath, finalOnDecrypt).execute(files);
-
-						break;
-				}
-
-				dialog.dismiss();
-			}
-		}).show();
-	}
-	
-	public static void shareFiles(Activity activity, ArrayList<File> fileToShare) {
-		if (fileToShare.size() == 1) {
-			Intent share = new Intent(Intent.ACTION_SEND);
-			share.setType("*/*");
-
-			share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + fileToShare.get(0).getPath()));
-			activity.startActivity(Intent.createChooser(share, "Share Image"));
-		}
-		else if (fileToShare.size() > 1) {
-			Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
-			share.setType("*/*");
-
-			ArrayList<Uri> uris = new ArrayList<Uri>();
-			for (int i = 0; i < fileToShare.size(); i++) {
-				uris.add(Uri.parse("file://" + fileToShare.get(i).getPath()));
-			}
-
-			share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-			activity.startActivity(Intent.createChooser(share, activity.getString(R.string.share)));
-		}
-	}
-	
-	public static void scanFile(final Context context, File file) {
-	    try {
-	    	if( file.isFile() ) {
-		        MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null, null);
-	    	}
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-
-	}
-	
-	public static void rescanDeletedFile(Context context, File file){
-		// Set up the projection (we only need the ID)
-		String[] projection = { MediaStore.Images.Media._ID };
-
-		// Match on the file path
-		String selection = MediaStore.Images.Media.DATA + " = ?";
-		String[] selectionArgs = new String[] { file.getAbsolutePath() };
-
-		// Query for the ID of the media matching the file path
-		Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-		ContentResolver contentResolver = context.getContentResolver();
-		Cursor c = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
-		if (c.moveToFirst()) {
-		    // We found the ID. Deleting the item via the content provider will also remove the file
-		    long id = c.getLong(c.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
-		    Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-		    contentResolver.delete(deleteUri, null, null);
-		} else {
-		    // File not found in media store DB
-		}
-		c.close();
-	}
-	
-	public static void decryptSelected(final Activity activity, ArrayList<File> selectedFiles) {
-		decryptSelected(activity, selectedFiles, null);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static void decryptSelected(final Activity activity, ArrayList<File> selectedFiles, final AsyncTasks.OnAsyncTaskFinish finishTask) {
-		SharedPreferences preferences = activity.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Activity.MODE_PRIVATE);
-		
-		String filePath = Helpers.getHomeDirParentPath(activity) + preferences.getString("dec_folder", activity.getString(R.string.dec_folder_def));
-		File destinationFolder = new File(filePath);
-		destinationFolder.mkdirs();
-		new AsyncTasks.DecryptFiles(activity, filePath, new OnAsyncTaskFinish() {
-			@Override
-			public void onFinish(java.util.ArrayList<File> decryptedFiles) {
-				if(decryptedFiles != null){
-					for(File file : decryptedFiles){
-						activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
-					}
-				}
-				finishTask.onFinish();
-			}
-		}).execute(selectedFiles);
-	}
-
-    public static void checkIsMainFolderWritable(final Activity activity){
-        String homeDir = getHomeDir(activity);
-
-        File homeDirFile = new File(homeDir);
-
-        if(!homeDirFile.exists() || !homeDirFile.canWrite()){
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setTitle(activity.getString(R.string.home_folder_problem_title));
-
-            builder.setMessage(activity.getString(R.string.home_folder_problem));
-            builder.setPositiveButton(activity.getString(R.string.yes), new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface dialog, int whichButton) {
-
-                    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-                    String defaultHomeDir = Helpers.getDefaultHomeDir();
-
-                    sharedPrefs.edit().putString("home_folder", defaultHomeDir).putString("home_folder_location", null).commit();
-
-                    Helpers.createFolders(activity);
-                }
-            });
-            builder.setNegativeButton(activity.getString(R.string.no), null);
-            builder.setCancelable(false);
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }
-    }
-
-	public static boolean requestSDCardPermission(final Activity activity){
-		if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-				new AlertDialog.Builder(activity)
-						.setMessage(activity.getString(R.string.sdcard_perm_explain))
-						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
-							}
-						})
-						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int which) {
-										activity.finish();
-									}
-								}
-						)
-						.create()
-						.show();
-
-			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
-			}
-			return false;
-		}
-		if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-				new AlertDialog.Builder(activity)
-						.setMessage(activity.getString(R.string.sdcard_perm_explain))
-						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
-							}
-						})
-						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int which) {
-										activity.finish();
-									}
-								}
-						)
-						.create()
-						.show();
-
-			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SafeCameraApplication.REQUEST_SD_CARD_PERMISSION);
-			}
-			return false;
-		}
-		return true;
-	}
-
-	public static boolean isImageFile(String path) {
-		String mimeType = URLConnection.guessContentTypeFromName(path);
-		return mimeType != null && mimeType.startsWith("image");
-	}
-	public static boolean isVideoFile(String path) {
-		String mimeType = URLConnection.guessContentTypeFromName(path);
-		return mimeType != null && mimeType.startsWith("video");
-	}
-
-	public static int getFileType(String path){
-		int fileType = Crypto.FILE_TYPE_GENERAL;
-		if(Helpers.isImageFile(path)){
-			fileType = Crypto.FILE_TYPE_PHOTO;
-		}
-		else if(Helpers.isVideoFile(path)){
-			fileType = Crypto.FILE_TYPE_VIDEO;
-		}
-
-		return fileType;
-	}
-
-	public static int getFileType(Context context, Uri uri){
-		String mimeType = context.getContentResolver().getType(uri);
-
-		int fileType = Crypto.FILE_TYPE_GENERAL;
-		if(mimeType.startsWith("image")){
-			fileType = Crypto.FILE_TYPE_PHOTO;
-		}
-		else if(mimeType.startsWith("video")){
-			fileType = Crypto.FILE_TYPE_VIDEO;
-		}
-
-		return fileType;
-	}
 
 	public static ArrayList<CameraImageSize> parseVideoOutputs(Context context, StreamConfigurationMap map, CameraCharacteristics characteristics){
 		ArrayList<CameraImageSize> videoSizes = new ArrayList<>();

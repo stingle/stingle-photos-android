@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.fenritz.safecam.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.Util.AsyncTasks;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.LoginManager;
@@ -200,7 +201,7 @@ public class ImportPhotosActivity extends Activity {
 			catch (IndexOutOfBoundsException e) {}
 
 			final AsyncTasks.ShowSystemImageThumb task = new AsyncTasks.ShowSystemImageThumb(imageview, imgIds.get(position), rotation, cache);
-			AsyncTasks.OnAsyncTaskFinish onFinish = new AsyncTasks.OnAsyncTaskFinish() {
+			OnAsyncTaskFinish onFinish = new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					tasks.remove(task);

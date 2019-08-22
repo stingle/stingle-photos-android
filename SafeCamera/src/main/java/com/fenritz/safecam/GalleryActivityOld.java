@@ -39,9 +39,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Util.AsyncTasks;
 import com.fenritz.safecam.Util.AsyncTasks.EncryptFiles;
-import com.fenritz.safecam.Util.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.AsyncTasks.OnAsyncTaskFinish;
 import com.fenritz.safecam.Crypto.Crypto;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Util.Helpers;
@@ -123,7 +124,7 @@ public class GalleryActivityOld extends Activity {
 		
 		setTitle(getString(R.string.title_gallery_for_app));
 
-		this.thumbsDir = Helpers.getThumbsDir(this);
+		this.thumbsDir = FileManager.getThumbsDir(this);
 	}
 	
 	protected void startupActions(){
@@ -244,7 +245,7 @@ public class GalleryActivityOld extends Activity {
 			}
 			
 			final String[] filePaths = {filePath};
-			new EncryptFiles(GalleryActivityOld.this, Helpers.getHomeDir(this), new OnAsyncTaskFinish() {
+			new EncryptFiles(GalleryActivityOld.this, FileManager.getHomeDir(this), new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
@@ -258,7 +259,7 @@ public class GalleryActivityOld extends Activity {
 	}
 	
 	private void decryptSelected(){
-		final AsyncTasks.OnAsyncTaskFinish finishTask = new AsyncTasks.OnAsyncTaskFinish() {
+		final OnAsyncTaskFinish finishTask = new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {
 				super.onFinish();
@@ -273,7 +274,7 @@ public class GalleryActivityOld extends Activity {
 		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 			@SuppressWarnings("unchecked")
 			public void onClick(DialogInterface dialog, int whichButton) {
-				Helpers.decryptSelected(GalleryActivityOld.this, selectedFiles, finishTask);
+				//Helpers.decryptSelected(GalleryActivityOld.this, selectedFiles, finishTask);
 			}
 		});
 		builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
@@ -307,7 +308,7 @@ public class GalleryActivityOld extends Activity {
 			
 			final String[] finalFilePaths = filePaths;
 			
-			new EncryptFiles(GalleryActivityOld.this, Helpers.getHomeDir(this), new OnAsyncTaskFinish() {
+			new EncryptFiles(GalleryActivityOld.this, FileManager.getHomeDir(this), new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
@@ -335,7 +336,7 @@ public class GalleryActivityOld extends Activity {
 			if(galleryItems.size() == 0){
 
 				int maxFileSize = Integer.valueOf(getString(R.string.max_file_size)) * 1024 * 1024;
-				File dir = new File(Helpers.getHomeDir(GalleryActivityOld.this));
+				File dir = new File(FileManager.getHomeDir(GalleryActivityOld.this));
 
 				File[] currentFolderFiles = dir.listFiles();
 
@@ -485,7 +486,7 @@ public class GalleryActivityOld extends Activity {
 		builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 			@SuppressWarnings("unchecked")
 			public void onClick(DialogInterface dialog, int whichButton) {
-				new AsyncTasks.DeleteFiles(GalleryActivityOld.this, new AsyncTasks.OnAsyncTaskFinish() {
+				new AsyncTasks.DeleteFiles(GalleryActivityOld.this, new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						refreshList();
@@ -521,7 +522,7 @@ public class GalleryActivityOld extends Activity {
 				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
 				File destinationFolder = new File(filePath);
 				destinationFolder.mkdirs();
-				new AsyncTasks.DecryptFiles(GalleryActivityOld.this, filePath, new OnAsyncTaskFinish() {
+				/*new DecryptFiles(GalleryActivityOld.this, filePath, new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish(java.util.ArrayList<File> decryptedFiles) {
 						if(decryptedFiles != null){
@@ -531,7 +532,7 @@ public class GalleryActivityOld extends Activity {
 						}
 						exitMultiSelect();
 					}
-				}).execute(selectedFiles);
+				}).execute(selectedFiles);*/
 			}
 			else if (requestCode == REQUEST_ENCRYPT) {
 				final String[] filePaths = data.getStringArrayExtra(FileDialog.RESULT_PATH);
@@ -550,7 +551,7 @@ public class GalleryActivityOld extends Activity {
 					}
 				});
 				
-				new EncryptFiles(GalleryActivityOld.this, Helpers.getHomeDir(this), new OnAsyncTaskFinish() {
+				new EncryptFiles(GalleryActivityOld.this, FileManager.getHomeDir(this), new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
@@ -593,7 +594,7 @@ public class GalleryActivityOld extends Activity {
 				
 				boolean isSecure = checkBox.isChecked();
 				
-				AsyncTasks.DeleteFiles deleteOrigFiles = new AsyncTasks.DeleteFiles(GalleryActivityOld.this, new AsyncTasks.OnAsyncTaskFinish() {
+				AsyncTasks.DeleteFiles deleteOrigFiles = new AsyncTasks.DeleteFiles(GalleryActivityOld.this, new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish(ArrayList<File> deletedFiles) {
 						if(deletedFiles != null){
@@ -647,11 +648,11 @@ public class GalleryActivityOld extends Activity {
 				@SuppressWarnings("unchecked")
 				public void onClick(View v) {
 					if(sendBackDecryptedFile){
-						String filePath = Helpers.getHomeDir(GalleryActivityOld.this) + "/" + ".tmp";
+						String filePath = FileManager.getHomeDir(GalleryActivityOld.this) + "/" + ".tmp";
 						File destinationFolder = new File(filePath);
 						destinationFolder.mkdirs();
 
-						AsyncTasks.OnAsyncTaskFinish finalOnDecrypt = new AsyncTasks.OnAsyncTaskFinish() {
+						OnAsyncTaskFinish finalOnDecrypt = new OnAsyncTaskFinish() {
 							@Override
 							public void onFinish(java.util.ArrayList<File> processedFiles) {
 								if (processedFiles != null && processedFiles.size() == 1) {
@@ -677,7 +678,7 @@ public class GalleryActivityOld extends Activity {
 						};
 						ArrayList<File> filesToDec = new ArrayList<File>();
 						filesToDec.add(file);
-						new AsyncTasks.DecryptFiles(GalleryActivityOld.this, filePath, finalOnDecrypt).execute(filesToDec);
+						//new DecryptFiles(GalleryActivityOld.this, filePath, finalOnDecrypt).execute(filesToDec);
 					}
 					else if (multiSelectModeActive) {
 						layout.toggle();
@@ -742,13 +743,13 @@ public class GalleryActivityOld extends Activity {
 							decryptSelected();
 							break;
 						case ACTION_SHARE:
-							Helpers.share(GalleryActivityOld.this, selectedFiles, new OnAsyncTaskFinish() {
+							/*Helpers.share(GalleryActivityOld.this, selectedFiles, new OnAsyncTaskFinish() {
 								@Override
 								public void onFinish() {
 									super.onFinish();
 									refreshList();
 								}
-							});
+							});*/
 							break;
 						case ACTION_DELETE:
 							deleteSelected();
@@ -1146,13 +1147,13 @@ public class GalleryActivityOld extends Activity {
                 decryptSelected();
                 break;
             case R.id.share:
-                Helpers.share(GalleryActivityOld.this, selectedFiles, new OnAsyncTaskFinish() {
+                /*Helpers.share(GalleryActivityOld.this, selectedFiles, new OnAsyncTaskFinish() {
                     @Override
                     public void onFinish() {
                         super.onFinish();
                         refreshList();
                     }
-                });
+                });*/
                 break;
             case R.id.delete:
                 deleteSelected();
