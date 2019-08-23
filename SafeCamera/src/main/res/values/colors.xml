@@ -17,4 +17,5 @@
     <color name="primaryDarkColor">#7f0000</color>
     <color name="primaryTextColor">#ffffff</color>
     <color name="colorAccent">#b71c1c</color>
+    <color name="lightAccent">#D5D5D5</color>
 </resources>

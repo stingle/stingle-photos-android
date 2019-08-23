@@ -1,11 +1,17 @@
 package com.fenritz.safecam;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.fenritz.safecam.Auth.LoginManager;
+import com.fenritz.safecam.Db.StingleDbContract;
+import com.fenritz.safecam.Db.StingleDbFile;
+import com.fenritz.safecam.Db.StingleDbHelper;
+import com.fenritz.safecam.Files.ShareManager;
 import com.fenritz.safecam.Sync.SyncManager;
 import com.fenritz.safecam.Sync.SyncService;
+import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.ViewItem.ViewPagerAdapter;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -18,11 +24,16 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.fenritz.safecam.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ViewItemActivity extends AppCompatActivity {
 
@@ -60,8 +71,6 @@ public class ViewItemActivity extends AppCompatActivity {
 			}
 		});
 
-
-
 		Intent intent = getIntent();
 		itemPosition = intent.getIntExtra("EXTRA_ITEM_POSITION", 0);
 		folder = intent.getIntExtra("EXTRA_ITEM_FOLDER", 0);
@@ -75,7 +84,6 @@ public class ViewItemActivity extends AppCompatActivity {
 				return gestureDetector.onTouchEvent(event);
 			}
 		};
-
 	}
 
 	@Override
@@ -91,7 +99,6 @@ public class ViewItemActivity extends AppCompatActivity {
 				adapter = new ViewPagerAdapter(ViewItemActivity.this, folder, gestureTouchListener);
 				viewPager.setAdapter(adapter);
 				viewPager.setCurrentItem(itemPosition);
-				Log.d("initialPos", String.valueOf(itemPosition));
 			}
 
 			@Override
@@ -156,5 +163,47 @@ public class ViewItemActivity extends AppCompatActivity {
 			return false;
 		}
 
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.view_item_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		int id = item.getItemId();
+		StingleDbHelper db = new StingleDbHelper(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+
+		if (id == R.id.share) {
+			ArrayList<StingleDbFile> files = new ArrayList<StingleDbFile>();
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition()));
+
+			ShareManager.shareDbFiles(this, files, folder);
+
+		}
+		else if (id == R.id.trash) {
+			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
+			ArrayList<String> filenames = new ArrayList<String>();
+			filenames.add(db.getFileAtPosition(adapter.getCurrentPosition()).filename);
+
+
+			new SyncManager.MoveToTrashAsyncTask(this, filenames, new SyncManager.OnFinish(){
+				@Override
+				public void onFinish(Boolean needToUpdateUI) {
+					if(adapter != null) {
+						adapter.notifyDataSetChanged();
+					}
+					spinner.dismiss();
+					Snackbar mySnackbar = Snackbar.make(findViewById(R.id.view_item_layout), getString(R.string.moved_to_trash), Snackbar.LENGTH_SHORT);
+					mySnackbar.show();
+				}
+			}).execute();
+		}
+
+
+		return super.onOptionsItemSelected(item);
 	}
 }

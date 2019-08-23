@@ -13,9 +13,9 @@
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/lightAccent</item>
+        <item name="colorPrimaryDark">@color/lightAccent</item>
+        <item name="colorAccent">@color/lightAccent</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
@@ -36,6 +36,6 @@
     </style>
 
     <style name="WhiteLoading">
-        <item name="colorAccent">#D5D5D5</item> <!-- Whatever color you want-->
+        <item name="colorAccent">@color/lightAccent</item>
     </style>
 </resources>

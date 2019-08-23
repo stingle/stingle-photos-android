@@ -176,7 +176,6 @@
     <string name="change">Change</string>
     <string name="current_password">Current Password</string>
     <string name="new_password">New Password</string>
-    <string name="change_password_warning">Warning! Changing the master password will cause all your files to be decrypted and then encrypted again with the new password. Any encrypted files not currently on this device will remain encrypted with the previous password. To change their password automatically please move them to device before changing the master password. Alternatively, you can import them later (the old password will have to be entered at that time).</string>
     <string name="sdcard_perm_explain">SafeCamera requires access to SD card in order to show and create photos. Please allow access to continue.</string>
     <string name="camera_perm_explain">SafeCamera requires access to camera in order to take photos. Please allow access to continue.</string>
     <string name="shutter_sound">Camera shutter sound</string>
@@ -305,5 +304,7 @@
     <string name="confirm_logout">Are you sure you want to log out?</string>
     <string name="lock">Lock</string>
     <string name="title_activity_view_item">ViewItemActivity</string>
+    <string name="moved_to_trash">Moved to trash</string>
+    <string name="menu_change_password">Change password</string>
 
 </resources>

@@ -198,6 +198,10 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		catch (IllegalStateException e){}
 		layoutManager.scrollToPosition(lastScrollPosition);
+
+		if(adapter != null){
+			adapter.updateDataSet();
+		}
 	}
 
 	@Override
@@ -364,12 +368,7 @@ public class GalleryActivity extends AppCompatActivity
 		int id = item.getItemId();
 
 		//noinspection SimplifiableIfStatement
-		if (id == R.id.action_settings) {
-			Intent intent = new Intent();
-			intent.setClass(this, SettingsActivity.class);
-			startActivity(intent);
-		}
-		else if (id == R.id.action_lock) {
+		if (id == R.id.action_lock) {
 			LoginManager.lock(this);
 			Intent intent = new Intent();
 			intent.setClass(this, GalleryActivity.class);
@@ -406,8 +405,15 @@ public class GalleryActivity extends AppCompatActivity
 			recyclerView.scrollToPosition(0);
 			toolbar.setTitle(getString(R.string.title_trash));
 		}
-		else if (id == R.id.nav_tools) {
-
+		else if (id == R.id.nav_change_pass) {
+			Intent intent = new Intent();
+			intent.setClass(this, ChangePasswordActivity.class);
+			startActivity(intent);
+		}
+		else if (id == R.id.nav_settings) {
+			Intent intent = new Intent();
+			intent.setClass(this, SettingsActivity.class);
+			startActivity(intent);
 		}
 		else if (id == R.id.nav_logout) {
 			LoginManager.logout(this);

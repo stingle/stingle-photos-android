@@ -77,6 +77,11 @@ public class ViewPagerAdapter extends PagerAdapter {
 		}
 	}
 
+	@Override
+	public int getItemPosition(Object object) {
+		return POSITION_NONE;
+	}
+
 	public void addPlayer(int position, SimpleExoPlayer player){
 		synchronized (this) {
 			players.put(position, player);

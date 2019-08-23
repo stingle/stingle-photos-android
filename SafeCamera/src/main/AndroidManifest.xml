@@ -173,7 +173,8 @@
         <activity
             android:name=".ChangePasswordActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_change_password" />
+            android:label="@string/title_change_password"
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".ImportPhotosActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
