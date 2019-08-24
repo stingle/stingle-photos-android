@@ -2,11 +2,13 @@ package com.fenritz.safecam;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -70,6 +72,7 @@ import java.util.List;
 public class GalleryActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapterPisasso.Listener {
 
+	protected BroadcastReceiver receiver;
 	protected DragSelectRecyclerView recyclerView;
 	protected GalleryAdapterPisasso adapter;
 	protected AutoFitGridLayoutManager layoutManager;
@@ -154,6 +157,16 @@ public class GalleryActivity extends AppCompatActivity
 		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){
 			lastScrollPosition = savedInstanceState.getInt("scroll");
 		}
+
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
+		receiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				LoginManager.redirectToLogin(GalleryActivity.this);
+			}
+		};
+		registerReceiver(receiver, intentFilter);
 	}
 
 	@Override
@@ -172,6 +185,9 @@ public class GalleryActivity extends AppCompatActivity
 	protected void onDestroy() {
 		super.onDestroy();
 		FileManager.deleteTempFiles(this);
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 	}
 
 	@Override
@@ -180,28 +196,36 @@ public class GalleryActivity extends AppCompatActivity
 
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
-			public void onUserLoginSuccess() {
+			public void onUserAuthSuccess() {
 				recyclerView.setAdapter(adapter);
 			}
 
 			@Override
-			public void onUserLoginFail() {
+			public void onUserAuthFail() {
 
+			}
+
+			@Override
+			public void onNotLoggedIn() {
+
+			}
+
+			@Override
+			public void onLoggedIn() {
+				Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
+				try {
+					startService(serviceIntent);
+					bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+				}
+				catch (IllegalStateException e){}
+				layoutManager.scrollToPosition(lastScrollPosition);
+
+				if(adapter != null){
+					adapter.updateDataSet();
+				}
 			}
 		});
 		LoginManager.disableLockTimer(this);
-
-		Intent serviceIntent = new Intent(this, SyncService.class);
-		try {
-			startService(serviceIntent);
-			bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
-		}
-		catch (IllegalStateException e){}
-		layoutManager.scrollToPosition(lastScrollPosition);
-
-		if(adapter != null){
-			adapter.updateDataSet();
-		}
 	}
 
 	@Override

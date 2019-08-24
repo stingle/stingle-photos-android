@@ -73,11 +73,7 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 					boolean uploadResult = KeyManagement.uploadKeyBundle(activity, newPassword);
 					if (uploadResult) {
 						((SafeCameraApplication) activity.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(newPassword));
-						FingerprintManagerWrapper fingerprintManager = new FingerprintManagerWrapper(activity);
-
-						if(!fingerprintManager.isFingerprintAvailable()){
-							fingerprintManager.turnOffFingerprint();
-						}
+						FingerprintManagerWrapper.turnOffFingerprint(activity);
 						return true;
 					}
 

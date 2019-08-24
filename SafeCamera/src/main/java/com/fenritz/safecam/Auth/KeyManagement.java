@@ -27,6 +27,11 @@ public class KeyManagement {
 		preferences.edit().putString(SafeCameraApplication.API_TOKEN, token).commit();
 	}
 
+	public static void removeApiToken(Context context){
+		SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS,context. MODE_PRIVATE);
+		preferences.edit().remove(SafeCameraApplication.API_TOKEN).commit();
+	}
+
 	public static boolean uploadKeyBundleAsync(Context context, String password, HttpsClient.OnNetworkFinish onFinish){
 		HttpsClient.post(context, context.getString(R.string.api_server_url) + context.getString(R.string.upload_key_bundle_path), getUploadKeyBundlePostParams(context, password), onFinish);
 		return true;

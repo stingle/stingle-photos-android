@@ -16,14 +16,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.fenritz.safecam.DashboardActivity;
-import com.fenritz.safecam.GalleryActivity;
 import com.fenritz.safecam.LoginActivity;
 import com.fenritz.safecam.Net.HttpsClient;
 import com.fenritz.safecam.Net.StingleResponse;
 import com.fenritz.safecam.R;
 import com.fenritz.safecam.SafeCameraApplication;
-import com.fenritz.safecam.SetUpActivity;
 import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Util.Helpers;
 
@@ -50,7 +47,14 @@ public class LoginManager {
     public static void checkLogin(final Activity activity, final UserLogedinCallback loginCallback) {
 
         if(!checkIfLoggedIn(activity)){
+            if(loginCallback != null) {
+                loginCallback.onNotLoggedIn();
+            }
             return;
+        }
+
+        if(loginCallback != null) {
+            loginCallback.onLoggedIn();
         }
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -87,7 +91,7 @@ public class LoginManager {
         }
         else {
             if(loginCallback != null) {
-                loginCallback.onUserLoginSuccess();
+                loginCallback.onUserAuthSuccess();
             }
         }
     }
@@ -112,12 +116,12 @@ public class LoginManager {
                     dialog.dismiss();
                     dialog = null;
                 }
-                loginCallback.onUserLoginSuccess();
+                loginCallback.onUserAuthSuccess();
             }
         }
         catch (CryptoException e) {
             if(loginCallback != null) {
-                loginCallback.onUserLoginFail();
+                loginCallback.onUserAuthFail();
             }
             Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
         }
@@ -200,11 +204,19 @@ public class LoginManager {
         }
     }
 
-    public static boolean checkIfLoggedIn(Activity activity){
-        String email = Helpers.getPreference(activity, SafeCameraApplication.USER_EMAIL, null);
-        String token = KeyManagement.getApiToken(activity);
+    public static boolean isLoggedIn(Context context){
+        String email = Helpers.getPreference(context, SafeCameraApplication.USER_EMAIL, null);
+        String token = KeyManagement.getApiToken(context);
 
         if(email == null || token == null){
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean checkIfLoggedIn(Activity activity){
+        if(!isLoggedIn(activity)){
             redirectToLogin(activity);
             return false;
         }
@@ -237,25 +249,42 @@ public class LoginManager {
                     @Override
                     public void onFinish(StingleResponse response) {
                         if (response.isStatusOk()) {
-                            SafeCameraApplication.setKey(null);
-                            KeyManagement.deleteLocalKeys();
-                            Helpers.storePreference(activity, SafeCameraApplication.USER_EMAIL, null);
-                            Helpers.deleteTmpDir(activity);
                             spinner.dismiss();
-                            if(dialog != null){
-                                dialog.dismiss();
-                                dialog = null;
-                            }
-                            if(FingerprintHandler.dialog != null){
-                                FingerprintHandler.dialog.dismiss();
-                                FingerprintHandler.dialog = null;
-                            }
-                            redirectToLogin(activity);
+                            logoutLocally(activity);
                         }
                     }
                 });
             }
         }, null);
+    }
+
+    public static void logoutLocally(Context context){
+        if(!isLoggedIn(context)){
+            return;
+        }
+        SafeCameraApplication.setKey(null);
+        KeyManagement.deleteLocalKeys();
+        KeyManagement.removeApiToken(context);
+        FingerprintManagerWrapper.turnOffFingerprint(context);
+        Helpers.storePreference(context, SafeCameraApplication.USER_EMAIL, null);
+        Helpers.deleteTmpDir(context);
+
+        if(dialog != null){
+            dialog.dismiss();
+            dialog = null;
+        }
+        if(FingerprintHandler.dialog != null){
+            FingerprintHandler.dialog.dismiss();
+            FingerprintHandler.dialog = null;
+        }
+
+        if(context instanceof Activity){
+            redirectToLogin((Activity)context);
+        }
+
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction("com.fenritz.safecam.ACTION_LOGOUT");
+        context.sendBroadcast(broadcastIntent);
     }
 
     public static void redirectToLogin(Activity activity) {
@@ -269,7 +298,9 @@ public class LoginManager {
 
 
     public static abstract class UserLogedinCallback{
-        public abstract void onUserLoginSuccess();
-        public abstract void onUserLoginFail();
+        public abstract void onUserAuthSuccess();
+        public abstract void onUserAuthFail();
+        public abstract void onNotLoggedIn();
+        public abstract void onLoggedIn();
     }
 }

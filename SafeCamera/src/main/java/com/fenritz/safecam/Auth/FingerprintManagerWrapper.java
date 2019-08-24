@@ -168,7 +168,7 @@ public class FingerprintManagerWrapper {
         return false;
     }
 
-    public void turnOffFingerprint(){
+    public static void turnOffFingerprint(Context context){
         SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
         preferences.edit().remove(SafeCameraApplication.PASSWORD_FINGERPRINT).commit();
         preferences.edit().remove(SafeCameraApplication.PASSWORD_FINGERPRINT_IV).commit();

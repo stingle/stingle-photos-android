@@ -74,7 +74,10 @@ public class HttpsClient {
 			String data = "";
 			if(params != null) {
 				for (String key : params.keySet()) {
-					data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
+					String value = params.get(key);
+					if(value != null) {
+						data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8") + "&";
+					}
 				}
 			}
 

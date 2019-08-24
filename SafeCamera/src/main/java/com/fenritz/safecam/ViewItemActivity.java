@@ -1,7 +1,10 @@
 package com.fenritz.safecam;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import com.fenritz.safecam.Auth.LoginManager;
@@ -44,6 +47,7 @@ public class ViewItemActivity extends AppCompatActivity {
 	protected ViewPagerAdapter adapter;
 	protected GestureDetector gestureDetector;
 	protected View.OnTouchListener gestureTouchListener;
+	private BroadcastReceiver receiver;
 
 	private static final int SWIPE_MIN_DISTANCE = 100;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -84,6 +88,16 @@ public class ViewItemActivity extends AppCompatActivity {
 				return gestureDetector.onTouchEvent(event);
 			}
 		};
+
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
+		receiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				finish();
+			}
+		};
+		registerReceiver(receiver, intentFilter);
 	}
 
 	@Override
@@ -92,7 +106,7 @@ public class ViewItemActivity extends AppCompatActivity {
 
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
-			public void onUserLoginSuccess() {
+			public void onUserAuthSuccess() {
 				if(adapter != null){
 					adapter.releasePlayers();
 				}
@@ -102,7 +116,17 @@ public class ViewItemActivity extends AppCompatActivity {
 			}
 
 			@Override
-			public void onUserLoginFail() {
+			public void onUserAuthFail() {
+
+			}
+
+			@Override
+			public void onNotLoggedIn() {
+
+			}
+
+			@Override
+			public void onLoggedIn() {
 
 			}
 		});
@@ -118,6 +142,14 @@ public class ViewItemActivity extends AppCompatActivity {
 			adapter = null;
 		}
 		LoginManager.setLockedTime(this);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if(receiver != null){
+			unregisterReceiver(receiver);
+		}
 	}
 
 	protected ViewPager.OnPageChangeListener getOnPageChangeListener(){

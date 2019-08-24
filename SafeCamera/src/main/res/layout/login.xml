@@ -60,6 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_gravity="center"
+		style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:text="@string/sign_in" />
 
 

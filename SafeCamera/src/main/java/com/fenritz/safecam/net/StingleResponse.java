@@ -2,6 +2,7 @@ package com.fenritz.safecam.Net;
 
 import android.content.Context;
 
+import com.fenritz.safecam.Auth.LoginManager;
 import com.fenritz.safecam.Util.Helpers;
 
 import org.json.JSONArray;
@@ -49,6 +50,12 @@ public class StingleResponse{
 
 			if(showErrorInfos) {
 				this.showErrorsInfos();
+			}
+
+			String logout = get("logout");
+			if(logout != null && logout.length() > 0){
+				LoginManager.logoutLocally(context);
+				this.status = "nok";
 			}
 		}
 		catch (JSONException e) {

@@ -2588,7 +2588,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 				if (lastFile != null && lastFile.isFile()) {
 					LoginManager.checkLogin(Camera2Activity.this, new LoginManager.UserLogedinCallback() {
 						@Override
-						public void onUserLoginSuccess() {
+						public void onUserAuthSuccess() {
 							Log.d("FILE", lastFile.getPath());
 							Intent intent = new Intent();
 							intent.setClass(Camera2Activity.this, ViewImageActivityOld.class);
@@ -2599,10 +2599,20 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 						}
 
 						@Override
-						public void onUserLoginFail() {
+						public void onUserAuthFail() {
 
 						}
-					});
+
+                        @Override
+                        public void onNotLoggedIn() {
+
+                        }
+
+                        @Override
+                        public void onLoggedIn() {
+
+                        }
+                    });
 				}
 			}
 		};

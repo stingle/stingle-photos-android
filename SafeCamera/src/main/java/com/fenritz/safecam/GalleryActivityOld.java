@@ -158,7 +158,7 @@ public class GalleryActivityOld extends Activity {
 
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
-			public void onUserLoginSuccess() {
+			public void onUserAuthSuccess() {
 				Handler mainHandler = new Handler(Looper.getMainLooper());
 				Runnable myRunnable = new Runnable() {
 					@Override
@@ -175,8 +175,18 @@ public class GalleryActivityOld extends Activity {
 			}
 
 			@Override
-			public void onUserLoginFail() {
+			public void onUserAuthFail() {
 				LoginManager.redirectToLogin(GalleryActivityOld.this);
+			}
+
+			@Override
+			public void onNotLoggedIn() {
+
+			}
+
+			@Override
+			public void onLoggedIn() {
+
 			}
 		});
 		LoginManager.disableLockTimer(this);
