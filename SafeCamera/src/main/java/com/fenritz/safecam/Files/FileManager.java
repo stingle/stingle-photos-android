@@ -411,7 +411,7 @@ public class FileManager {
 					else if(fileType == Crypto.FILE_TYPE_VIDEO){
 
 						/*String[] filePathColumn = {MediaStore.Images.Media.DATA};
-						Cursor cursor = context.getContentResolver().query(uri, filePathColumn, null, null, null);
+						Cursor cursor = activity.getContentResolver().query(uri, filePathColumn, null, null, null);
 						cursor.moveToFirst();
 						int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 						String picturePath = cursor.getString(columnIndex);

@@ -78,7 +78,7 @@ public class AsyncTasks {
 			if (file.exists() && file.isFile()) {
 				try {
 					FileInputStream input = new FileInputStream(file);
-					//byte[] decryptedData = Helpers.getAESCrypt(context).decrypt(input, null, this);
+					//byte[] decryptedData = Helpers.getAESCrypt(activity).decrypt(input, null, this);
 					byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
 
 					if (decryptedData != null) {

@@ -319,7 +319,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
 					//Log.d("encFile", new String(encFile, "UTF-8"));
 
-					/*FileOutputStream tmp = new FileOutputStream(Helpers.getHomeDir(context) + "/qaq.sp");
+					/*FileOutputStream tmp = new FileOutputStream(Helpers.getHomeDir(activity) + "/qaq.sp");
 					tmp.write(encFile);
 					tmp.close();*/
 

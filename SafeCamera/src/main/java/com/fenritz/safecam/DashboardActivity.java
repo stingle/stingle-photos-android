@@ -61,7 +61,7 @@ public class DashboardActivity extends Activity {
 		intentFilter.addAction("com.fenritz.safecam.ACTION_LOGOUT");
 		receiver = new BroadcastReceiver() {
 			@Override
-			public void onReceive(Context context, Intent intent) {
+			public void onReceive(Context activity, Intent intent) {
 				finish();
 			}
 		};
@@ -315,7 +315,7 @@ public class DashboardActivity extends Activity {
 				}
 				return true;
 			case R.id.uploadkeys:
-				LoginManager.getPasswordFromUser(this, new PasswordReturnListener() {
+				LoginManager.getPasswordFromUser(this, false, new PasswordReturnListener() {
 					@Override
 					public void passwordReceived(String enteredPassword) {
 						KeyManagement.uploadKeyBundleAsync(DashboardActivity.this, enteredPassword, new HttpsClient.OnNetworkFinish() {

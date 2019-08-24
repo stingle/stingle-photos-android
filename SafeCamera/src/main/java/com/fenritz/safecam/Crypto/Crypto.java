@@ -116,6 +116,25 @@ public class Crypto {
         return decryptSymmetric(encKey, readPrivateFile(SK_NONCE_FILENAME), encPrivKey);
     }
 
+    public void reencryptPrivateKey(String oldPassword, String newPassword) throws CryptoException{
+        byte[] privateKey = getPrivateKey(oldPassword);
+
+        byte[] pwdKey = getKeyFromPassword(newPassword, KDF_DIFFICULTY_NORMAL);
+        byte[] pwdEncNonce = readPrivateFile(SK_NONCE_FILENAME);
+
+        byte[] encryptedPrivateKey = encryptSymmetric(pwdKey, pwdEncNonce, privateKey);
+
+        savePrivateFile(PRIVATE_KEY_FILENAME, encryptedPrivateKey);
+    }
+
+    public byte[] getEncryptedPrivateKey(){
+        return readPrivateFile(PRIVATE_KEY_FILENAME);
+    }
+
+    public void saveEncryptedPrivateKey(byte[] encryptedPrivateKey){
+        savePrivateFile(PRIVATE_KEY_FILENAME, encryptedPrivateKey);
+    }
+
     public byte[] getPrivateKeyForExport(String password) throws CryptoException{
         byte[] encPrivKey = readPrivateFile(PRIVATE_KEY_FILENAME);
 

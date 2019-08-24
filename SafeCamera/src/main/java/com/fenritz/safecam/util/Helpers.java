@@ -129,10 +129,20 @@ public class Helpers {
 		dialog.show();
 	}
 
+
 	public static void showInfoDialog(Context context, String message) {
+		showInfoDialog(context, message, null);
+	}
+
+	public static void showInfoDialog(Context context, String message, DialogInterface.OnClickListener onClick) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(message);
-		builder.setNegativeButton(context.getString(R.string.ok), null);
+		if(onClick != null){
+			builder.setNegativeButton(context.getString(R.string.ok), onClick);
+		}
+		else {
+			builder.setNegativeButton(context.getString(R.string.ok), null);
+		}
 		builder.setIcon(android.R.drawable.ic_dialog_info);
 		AlertDialog dialog = builder.create();
 		dialog.show();
@@ -184,7 +194,7 @@ public class Helpers {
 		
 		//Bitmap thumbBitmap = null;
 		if (bitmap != null) {
-			//thumbBitmap = Helpers.getThumbFromBitmap(bitmap, getThumbSize(context));
+			//thumbBitmap = Helpers.getThumbFromBitmap(bitmap, getThumbSize(activity));
 
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -199,7 +209,7 @@ public class Helpers {
 				e.printStackTrace();
 			}
 
-			//Helpers.getAESCrypt(context).encrypt(stream.toByteArray(), out);
+			//Helpers.getAESCrypt(activity).encrypt(stream.toByteArray(), out);
 		}
 		return bitmap;
 	}

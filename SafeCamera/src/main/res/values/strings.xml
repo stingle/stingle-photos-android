@@ -38,7 +38,7 @@
     <string name="photo_size_descr">Size of photos to take</string>
     <string name="photo_size_choose">Please choose desired photo size</string>
     <string name="change_password">Change Password</string>
-    <string name="changing_password">Changing password on files…</string>
+    <string name="changing_password">Changing account password…</string>
     <string name="success_change_pass">Password has been successfully changed</string>
     <string name="success_decrypt">Successfully decrypted</string>
     <string name="import_desc">Import</string>
@@ -306,5 +306,6 @@
     <string name="title_activity_view_item">ViewItemActivity</string>
     <string name="moved_to_trash">Moved to trash</string>
     <string name="menu_change_password">Change password</string>
+    <string name="warning_chpass">Warning! Changing password will logout all other devices currently connected to this account and you will need to login them again with new credentials.</string>
 
 </resources>

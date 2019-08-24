@@ -92,7 +92,7 @@ public class StinglePicassoLoader extends RequestHandler {
 			}
 
 			try {
-				//byte[] encFile = HttpsClient.getFileAsByteArray(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams);
+				//byte[] encFile = HttpsClient.getFileAsByteArray(activity.getString(R.string.api_server_url) + activity.getString(R.string.download_file_path), postParams);
 				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename, folder);
 
 				if(encFile == null || encFile.length == 0){
@@ -101,7 +101,7 @@ public class StinglePicassoLoader extends RequestHandler {
 
 				//Log.d("encFile", new String(encFile, "UTF-8"));
 
-					/*FileOutputStream tmp = new FileOutputStream(Helpers.getHomeDir(context) + "/qaq.sp");
+					/*FileOutputStream tmp = new FileOutputStream(Helpers.getHomeDir(activity) + "/qaq.sp");
 					tmp.write(encFile);
 					tmp.close();*/
 

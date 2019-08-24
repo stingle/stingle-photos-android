@@ -130,21 +130,20 @@ public class FingerprintManagerWrapper {
             FingerprintHandler helper = new FingerprintHandler(context, new FingerprintHandler.OnFingerprintSuccess() {
                 @Override
                 public void onSuccess(final Cipher cipher) {
-                    LoginManager.getPasswordFromUser(context, new PasswordReturnListener() {
+                    LoginManager.getPasswordFromUser(context, false, new PasswordReturnListener() {
                         @Override
                         public void passwordReceived(String password) {
                             try {
-                                byte[] encPassword = cipher.doFinal(password.getBytes());
-                                SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-
                                 try{
-                                    SafeCameraApplication.setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
+                                    SafeCameraApplication.getCrypto().getPrivateKey(password);
                                 }
                                 catch (CryptoException e) {
                                     Helpers.showAlertDialog(context, context.getString(R.string.incorrect_password));
                                     return;
                                 }
 
+                                SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+                                byte[] encPassword = cipher.doFinal(password.getBytes());
 
                                 preferences.edit().putString(SafeCameraApplication.PASSWORD_FINGERPRINT, SafeCameraApplication.getCrypto().byte2hex(encPassword)).commit();
                                 preferences.edit().putString(SafeCameraApplication.PASSWORD_FINGERPRINT_IV, SafeCameraApplication.getCrypto().byte2hex(iv)).commit();
@@ -153,7 +152,7 @@ public class FingerprintManagerWrapper {
                                 defaultSharedPrefs.edit().putBoolean("fingerprint", true).commit();
                                 ((SwitchPreference) preferenceFinal).setChecked(true);
 
-
+                                LoginManager.dismissLoginDialog();
                             } catch (BadPaddingException e) {
                                 e.printStackTrace();
                             } catch (IllegalBlockSizeException e) {
@@ -167,6 +166,15 @@ public class FingerprintManagerWrapper {
         }
 
         return false;
+    }
+
+    public void turnOffFingerprint(){
+        SharedPreferences preferences = context.getSharedPreferences(SafeCameraApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+        preferences.edit().remove(SafeCameraApplication.PASSWORD_FINGERPRINT).commit();
+        preferences.edit().remove(SafeCameraApplication.PASSWORD_FINGERPRINT_IV).commit();
+
+        SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();
     }
 
     public boolean unlock(final PasswordReceivedHandler passwordHandler, final LoginManager.UserLogedinCallback loginCallback){

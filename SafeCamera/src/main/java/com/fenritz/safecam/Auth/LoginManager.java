@@ -94,7 +94,7 @@ public class LoginManager {
 
     public static void showEnterPasswordToUnlock(Activity activity, final UserLogedinCallback loginCallback){
         final Activity activityFinal = activity;
-        getPasswordFromUser(activity, new PasswordReturnListener() {
+        getPasswordFromUser(activity, true, new PasswordReturnListener() {
             @Override
             public void passwordReceived(String enteredPassword) {
                 unlockWithPassword(activityFinal, enteredPassword, loginCallback);
@@ -127,7 +127,14 @@ public class LoginManager {
         return (SafeCameraApplication.getKey() == null ? false : true);
     }
 
-    public static void getPasswordFromUser(final Activity activity, final PasswordReturnListener listener){
+    public static void dismissLoginDialog(){
+        if(dialog != null){
+            dialog.dismiss();
+            dialog = null;
+        }
+    }
+
+    public static void getPasswordFromUser(final Activity activity, final boolean showLogout, final PasswordReturnListener listener){
         final Context myContext = activity;
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(R.layout.password);
@@ -140,16 +147,15 @@ public class LoginManager {
                         dialog.dismiss();
                         dialog = null;
                     }
-                    activity.finish();
+                    if(showLogout) {
+                        activity.finish();
+                    }
                     return true;
                 }
                 return false;
             }
         });
-        if(dialog != null){
-            dialog.dismiss();
-            dialog = null;
-        }
+        dismissLoginDialog();
         dialog = builder.create();
         dialog.show();
 
@@ -180,13 +186,18 @@ public class LoginManager {
         });
 
 
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-               LoginManager.logout(activity);
-            }
-        });
+        if(showLogout) {
+            logoutButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    LoginManager.logout(activity);
+                }
+            });
+        }
+        else{
+            logoutButton.setVisibility(View.GONE);
+        }
     }
 
     public static boolean checkIfLoggedIn(Activity activity){

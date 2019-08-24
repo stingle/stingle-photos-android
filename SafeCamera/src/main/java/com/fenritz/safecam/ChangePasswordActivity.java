@@ -15,8 +15,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import com.fenritz.safecam.AsyncTasks.ChangePasswordAsyncTask;
+import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Util.Helpers;
 import com.fenritz.safecam.Auth.LoginManager;
 
@@ -29,7 +35,7 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ChangePasswordActivity extends Activity {
+public class ChangePasswordActivity extends AppCompatActivity {
 
 	private BroadcastReceiver receiver;
 	
@@ -39,16 +45,62 @@ public class ChangePasswordActivity extends Activity {
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
 		//getActionBar().setHomeButtonEnabled(true);
 
+		setContentView(R.layout.change_password);
+
+		Toolbar toolbar = findViewById(R.id.toolbar);
+		toolbar.setTitle(getString(R.string.change_password));
+		setSupportActionBar(toolbar);
+
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+		toolbar.setNavigationOnClickListener(new View.OnClickListener(){
+			@Override
+			public void onClick(View view){
+				finish();
+			}
+		});
+
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
-		setContentView(R.layout.change_password);
-		
-		//findViewById(R.id.change).setOnClickListener(changeClick());
+
+		findViewById(R.id.change).setOnClickListener(changeClick());
 		findViewById(R.id.cancel).setOnClickListener(cancelClick());
 		
 
 	}
-	
+
+	private OnClickListener changeClick() {
+		return new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String currentPassword = ((EditText)findViewById(R.id.current_password)).getText().toString();
+				try {
+					SafeCameraApplication.getCrypto().getPrivateKey(currentPassword);
+				} catch (CryptoException e) {
+					Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.incorrect_password));
+					return;
+				}
+
+
+				String newPassword = ((EditText)findViewById(R.id.new_password)).getText().toString();
+				String confirm_password = ((EditText)findViewById(R.id.confirm_password)).getText().toString();
+
+				if(!newPassword.equals(confirm_password)){
+					Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.password_not_match));
+					return;
+				}
+
+				if(newPassword.length() < Integer.valueOf(getString(R.string.min_pass_length))){
+					Helpers.showAlertDialog(ChangePasswordActivity.this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
+					return;
+				}
+
+				(new ChangePasswordAsyncTask(ChangePasswordActivity.this, currentPassword, newPassword)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			}
+		};
+	}
+
 	@Override
 	protected void onPause() {
 		super.onPause();
