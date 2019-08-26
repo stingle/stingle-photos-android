@@ -14,7 +14,7 @@
   limitations under the License.
   -->
 <resources>
-    <string name="default_home_folder_name">SafeCamera</string>
+    <string name="default_home_folder_name">StinglePhotos</string>
     <string name="default_thumb_folder_name">.thumb</string>
     <string name="file_extension">.sp</string>
     <string name="max_file_size">20</string>

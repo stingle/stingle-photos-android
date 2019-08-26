@@ -142,8 +142,7 @@
     <string name="no_such_folder">"There is no such folder %s"</string>
     <string name="home_folder_name">"Home folder name"</string>
     <string name="home_folder_name_desc">"Name of the SafeCamera folder in selected location"</string>
-    <string name="home_folder_problem_title">"Problem with SafeCamera folder"</string>
-    <string name="home_folder_problem">"Main folder does not exist or is not writable. Do you want to reset main folder location?"</string>
+    <string name="home_folder_problem_title">"Problem with StinglePhotos folder"</string>
     <string name="home_folder_incorrect">"Sorry, home folder is now pointing to non writable destination, please select valid home folder path"</string>
     <string name="multiselect_exit">"Exit Multi Select"</string>
     <string name="please_enter_password">"Please enter password"</string>
@@ -307,5 +306,6 @@
     <string name="moved_to_trash">Moved to trash</string>
     <string name="menu_change_password">Change password</string>
     <string name="warning_chpass">Warning! Changing password will logout all other devices currently connected to this account and you will need to login them again with new credentials.</string>
+    <string name="home_folder_problem">Please check that app has access to external storage</string>
 
 </resources>

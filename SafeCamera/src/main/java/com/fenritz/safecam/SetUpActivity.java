@@ -44,7 +44,7 @@ public class SetUpActivity  extends Activity{
 		super.onResume();
 
 		if(FileManager.requestSDCardPermission(this)){
-			FileManager.createFolders(this);
+			FileManager.getHomeDir(this);
 		}
 	}
 	@Override
@@ -52,7 +52,7 @@ public class SetUpActivity  extends Activity{
 		switch (requestCode) {
 			case SafeCameraApplication.REQUEST_SD_CARD_PERMISSION: {
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					FileManager.createFolders(this);
+					FileManager.getHomeDir(this);
 
 				} else {
 					finish();

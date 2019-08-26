@@ -83,7 +83,7 @@ public class LoginManager {
                     public void onPasswordReceived(String password) {
                         unlockWithPassword(activity, password, loginCallback);
                     }
-                }, loginCallback);
+                }, loginCallback, true);
             }
             else{
                 showEnterPasswordToUnlock(activity, loginCallback);

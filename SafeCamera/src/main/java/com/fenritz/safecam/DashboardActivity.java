@@ -93,8 +93,6 @@ public class DashboardActivity extends Activity {
 	}
 
 	public void filesystemInit() {
-		FileManager.createFolders(this);
-
 		Helpers.deleteTmpDir(this);
 	}
 

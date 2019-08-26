@@ -11,15 +11,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import com.fenritz.safecam.AsyncTasks.DecryptFiles;
-import com.fenritz.safecam.AsyncTasks.OnAsyncTaskFinish;
+import com.fenritz.safecam.AsyncTasks.ShowThumbInImageView;
 import com.fenritz.safecam.Auth.LoginManager;
-import com.fenritz.safecam.Crypto.CryptoException;
 import com.fenritz.safecam.Db.StingleDbFile;
 import com.fenritz.safecam.Files.ShareManager;
 import com.fenritz.safecam.Gallery.AutoFitGridLayoutManager;
@@ -63,9 +60,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -701,49 +695,6 @@ public class GalleryActivity extends AppCompatActivity
 				Helpers.showAlertDialog(this, e.getMessage());
 				e.printStackTrace();
 			}*/
-		}
-	}
-
-	public static class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
-
-		protected Context context;
-		protected String filename;
-		protected ImageView imageView;
-
-		public ShowThumbInImageView(Context context, String filename, ImageView imageView){
-			this.context = context;
-			this.filename = filename;
-			this.imageView = imageView;
-		}
-
-		@Override
-		protected Bitmap doInBackground(Void... params) {
-			if(filename == null || !LoginManager.isKeyInMemory()){
-				return null;
-			}
-			try {
-				File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + filename);
-				FileInputStream input = new FileInputStream(fileToDec);
-				byte[] decryptedData = SafeCameraApplication.getCrypto().decryptFile(input);
-
-				if (decryptedData != null) {
-					return Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(context));
-				}
-			} catch (IOException | CryptoException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-
-
-		@Override
-		protected void onPostExecute(Bitmap bitmap) {
-			super.onPostExecute(bitmap);
-
-			if(bitmap != null){
-				imageView.setImageBitmap(bitmap);
-			}
 		}
 	}
 

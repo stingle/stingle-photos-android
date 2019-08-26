@@ -162,7 +162,7 @@ public class FingerprintManagerWrapper {
                     });
                 }
             });
-            helper.startAuth(fingerprintManager, cryptoObject, null, false);
+            helper.startAuth(fingerprintManager, cryptoObject, null, false, false);
         }
 
         return false;
@@ -177,7 +177,7 @@ public class FingerprintManagerWrapper {
         defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();
     }
 
-    public boolean unlock(final PasswordReceivedHandler passwordHandler, final LoginManager.UserLogedinCallback loginCallback){
+    public boolean unlock(final PasswordReceivedHandler passwordHandler, final LoginManager.UserLogedinCallback loginCallback, boolean showLogout){
 
         // Obtain a reference to the Keystore using the standard Android keystore container identifier (“AndroidKeystore”)//
         try {
@@ -238,7 +238,7 @@ public class FingerprintManagerWrapper {
                     }
                 }
             });
-            helper.startAuth(fingerprintManager, cryptoObject, loginCallback, true);
+            helper.startAuth(fingerprintManager, cryptoObject, loginCallback, true, showLogout);
         }
 
 

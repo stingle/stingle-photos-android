@@ -15,6 +15,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -111,43 +112,17 @@ public class FileManager {
 		return encFile;
 	}
 
-	public static String getDefaultHomeDir(){
-		List<StorageUtils.StorageInfo> storageList = StorageUtils.getStorageList();
-		if(storageList.size() > 0){
-			return storageList.get(0).path;
-		}
-
-		return null;
-	}
-
-	public static String getHomeDirParentPath(Context context){
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-		String defaultHomeDir = getDefaultHomeDir();
-
-		String currentHomeDir = sharedPrefs.getString("home_folder", defaultHomeDir);
-		String customHomeDir = sharedPrefs.getString("home_folder_location", null);
-
-		if(currentHomeDir != null && currentHomeDir.equals(SettingsActivity.CUSTOM_HOME_VALUE)){
-			currentHomeDir = customHomeDir;
-		}
-
-		return ensureLastSlash(currentHomeDir);
-	}
-
 	public static String getHomeDir(Context context) {
-		return getHomeDir(context, true);
-	}
+		String externalStorage = Environment.getExternalStorageDirectory().getPath();
 
-	public static String getHomeDir(Context context, boolean autoCreateDirs) {
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		String homeDirPath = externalStorage + "/" + context.getString(R.string.default_home_folder_name) + "/" + Helpers.getPreference(context, SafeCameraApplication.USER_HOME_FOLDER, "default");
 
-		String homeDirPath = getHomeDirParentPath(context) + sharedPrefs.getString("home_folder_name", context.getString(R.string.default_home_folder_name));
-
-		if(autoCreateDirs && !new File(homeDirPath).exists()){
-			createFolders(context);
+		File homeDir = new File(homeDirPath);
+		if(!homeDir.exists()){
+			homeDir.mkdirs();
 		}
 
-		return homeDirPath;
+		return homeDir.getPath();
 	}
 
 	public static String ensureLastSlash(String path){
@@ -158,16 +133,14 @@ public class FileManager {
 	}
 
 	public static String getThumbsDir(Context context) {
-		return getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
-	}
+		String thumbDirPath = getHomeDir(context) + "/" + context.getString(R.string.default_thumb_folder_name);
 
-	public static void createFolders(Context context) {
-		String homeDirPath = getHomeDir(context, false);
-
-		File dir = new File(homeDirPath + "/" + context.getString(R.string.default_thumb_folder_name));
-		if (!dir.exists() || !dir.isDirectory()) {
-			dir.mkdirs();
+		File thumbDir = new File(thumbDirPath);
+		if(!thumbDir.exists()){
+			thumbDir.mkdirs();
 		}
+
+		return thumbDir.getPath();
 	}
 
 	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
@@ -238,19 +211,7 @@ public class FileManager {
             builder.setTitle(activity.getString(R.string.home_folder_problem_title));
 
             builder.setMessage(activity.getString(R.string.home_folder_problem));
-            builder.setPositiveButton(activity.getString(R.string.yes), new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface dialog, int whichButton) {
-
-                    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-                    String defaultHomeDir = getDefaultHomeDir();
-
-                    sharedPrefs.edit().putString("home_folder", defaultHomeDir).putString("home_folder_location", null).commit();
-
-                    createFolders(activity);
-                }
-            });
-            builder.setNegativeButton(activity.getString(R.string.no), null);
+            builder.setNegativeButton(activity.getString(R.string.ok), null);
             builder.setCancelable(false);
             AlertDialog dialog = builder.create();
             dialog.show();

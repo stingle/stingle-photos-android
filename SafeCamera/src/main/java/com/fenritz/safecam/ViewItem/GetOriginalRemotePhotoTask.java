@@ -2,6 +2,7 @@ package com.fenritz.safecam.ViewItem;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
@@ -82,7 +83,10 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, Bitmap>
 			Log.d("update", " qaq");
 			//image.setImageResource(R.drawable.no);
 			image.setImageBitmap(bitmap);
+
+			float scale = attacher.getScale();
 			attacher.update();
+			attacher.setScale(scale);
 		}
 		else{
 			Log.d("noupdate", "shit qaq");

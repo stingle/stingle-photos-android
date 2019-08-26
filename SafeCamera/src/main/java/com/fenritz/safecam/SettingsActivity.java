@@ -21,6 +21,8 @@ import android.preference.SwitchPreference;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import androidx.core.app.NavUtils;
+
 import com.fenritz.safecam.Camera.CameraImageSize;
 import com.fenritz.safecam.Files.FileManager;
 import com.fenritz.safecam.Util.AsyncTasks;
@@ -62,6 +64,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         LoginManager.disableLockTimer(this);
     }
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -138,14 +141,13 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
+        switch (item.getItemId())
+        {
             case android.R.id.home:
-                finish();
+                onBackPressed();
                 return true;
-            default:
-                return super.onOptionsItemSelected(item);
         }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -191,12 +193,9 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
 
-            initHomeFolderPref();
             initClearCacheButton();
 
             bindPreferenceSummaryToValue(findPreference("lock_time"));
-            bindPreferenceSummaryToValue(findPreference("home_folder_name"));
-            bindPreferenceSummaryToValue(findPreference("dec_folder"));
         }
 
         @Override
@@ -209,7 +208,7 @@ public class SettingsActivity extends PreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
 
-        protected void initClearCacheButton(){
+        protected void initClearCacheButton() {
             Preference clearCachePref = findPreference("clear_cache");
             clearCachePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
@@ -222,7 +221,7 @@ public class SettingsActivity extends PreferenceActivity {
                             ArrayList<File> selectedFiles = new ArrayList<File>();
                             File thumbsDir = new File(FileManager.getThumbsDir(GeneralPreferenceFragment.this.getContext()));
                             File[] folderFiles = thumbsDir.listFiles();
-                            for(File file : folderFiles){
+                            for (File file : folderFiles) {
                                 selectedFiles.add(file);
                             }
                             new AsyncTasks.DeleteFiles(GeneralPreferenceFragment.this.getContext()).execute(selectedFiles);
@@ -235,122 +234,8 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
         }
-
-        protected void initHomeFolderPref(){
-            final ListPreference homeFolderLocPref = (ListPreference)findPreference("home_folder");
-            EditTextPreference decFolderPref = (EditTextPreference)findPreference("dec_folder");
-
-            List<StorageUtils.StorageInfo> storageList = StorageUtils.getStorageList();
-
-            final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(GeneralPreferenceFragment.this.getContext());
-            CharSequence[] storageEntries = new CharSequence[storageList.size()+1];
-            final CharSequence[] storageEntriesValues = new CharSequence[storageList.size()+1];
-
-            final String homeDirCustomPath = sharedPrefs.getString("home_folder_location", null);
-            String homeDirPath = sharedPrefs.getString("home_folder", null);
-
-            if(storageList.size() > 0){
-
-                for(int i=0;i<storageList.size();i++){
-                    StorageUtils.StorageInfo item = storageList.get(i);
-                    storageEntries[i] = item.getDisplayName();
-                    storageEntriesValues[i] = item.path;
-                }
-
-            }
-
-            if(homeDirCustomPath != null){
-                storageEntries[storageEntries.length-1] = getString(R.string.custom_folder) + "("+homeDirCustomPath+")";
-            }
-            else{
-                storageEntries[storageEntries.length-1] = getString(R.string.custom_folder);
-            }
-            storageEntriesValues[storageEntriesValues.length-1] = CUSTOM_HOME_VALUE;
-
-            homeFolderLocPref.setEntries(storageEntries);
-            homeFolderLocPref.setEntryValues(storageEntriesValues);
-
-            final String homeFolderCurrentValue;
-
-            if(homeDirPath != null && homeDirPath.equals(CUSTOM_HOME_VALUE) && homeDirCustomPath != null){
-                homeFolderCurrentValue = String.valueOf(storageEntriesValues[storageEntriesValues.length-1]);
-            }
-            else if(homeDirPath == null){
-                homeFolderCurrentValue = FileManager.getDefaultHomeDir();
-            }
-            else{
-                homeFolderCurrentValue = homeFolderLocPref.getValue();
-            }
-
-            homeFolderLocPref.setValue(homeFolderCurrentValue);
-
-            homeFolderLocPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                public boolean onPreferenceChange(final Preference preference, Object newValue) {
-                    String select = (String)newValue;
-
-                    if(select.equals(CUSTOM_HOME_VALUE)){
-                        AlertDialog.Builder builder = new AlertDialog.Builder(GeneralPreferenceFragment.this.getContext());
-                        builder.setMessage(getString(R.string.choose_folder));
-
-                        final EditText locationText = new EditText(GeneralPreferenceFragment.this.getContext());
-
-                        if(homeDirCustomPath != null){
-                            locationText.setText(homeDirCustomPath);
-                        }
-                        else{
-                            locationText.setText(FileManager.getDefaultHomeDir());
-                        }
-                        builder.setView(locationText);
-
-                        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                File newLoc = new File(locationText.getText().toString());
-
-                                if(newLoc.exists() && newLoc.isDirectory() && newLoc.canWrite()){
-                                    sharedPrefs.edit().putString("home_folder_location", locationText.getText().toString()).commit();
-                                    initFolders(locationText.getText().toString());
-                                    initHomeFolderPref();
-                                }
-                                else{
-                                    String message = String.format(getString(R.string.no_such_folder),locationText.getText().toString());
-
-                                    new AlertDialog.Builder(GeneralPreferenceFragment.this.getContext()).setMessage(message).setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener(){
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            if(FileManager.getDefaultHomeDir().equals(locationText.getText().toString())){
-                                                sharedPrefs.edit().putString("home_folder_location", null).commit();
-                                            }
-                                            homeFolderLocPref.setValue(storageEntriesValues[0].toString());
-                                            initHomeFolderPref();
-                                        };
-                                    }).setCancelable(false)
-                                            .show();
-                                }
-                            }
-                        });
-                        builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                if(FileManager.getDefaultHomeDir().equals(locationText.getText().toString())){
-                                    sharedPrefs.edit().putString("home_folder_location", null).commit();
-                                }
-                                homeFolderLocPref.setValue(storageEntriesValues[0].toString());
-                                initHomeFolderPref();
-                            }
-                        });
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                    }
-                    else{
-                        initFolders(select);
-                    }
-
-                    return true;
-                }
-            });
-        }
-        protected void initFolders(String homePath){
-            //Helpers.createFolders(GeneralPreferenceFragment.this.getContext(), homePath);
-        }
     }
+
 
     /**
      * This fragment shows notification preferences only. It is used when the

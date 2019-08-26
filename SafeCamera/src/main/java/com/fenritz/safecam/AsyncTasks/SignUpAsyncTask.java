@@ -61,7 +61,8 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		if(response.isStatusOk()) {
 			String token = response.get("token");
-			if(token != null) {
+			String homeFolder = response.get("homeFolder");
+			if(token != null && homeFolder != null && token.length() > 0 && homeFolder.length() > 0) {
 
 				KeyManagement.setApiToken(context, token);
 
@@ -72,6 +73,8 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 					if(uploadResult) {
 						((SafeCameraApplication) context.getApplication()).setKey(SafeCameraApplication.getCrypto().getPrivateKey(password));
 						Helpers.storePreference(context, SafeCameraApplication.USER_EMAIL, email);
+
+						Helpers.storePreference(context, SafeCameraApplication.USER_HOME_FOLDER, homeFolder);
 
 						return true;
 					}
