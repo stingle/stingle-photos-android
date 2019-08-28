@@ -111,7 +111,6 @@ public class StinglePicassoLoader extends RequestHandler {
 						bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.file);
 					}
 
-					Log.d("thumbIsOK", file.filename);
 					Result result = new Result(bitmap, Picasso.LoadedFrom.NETWORK);
 					result.addProperty("fileType", header.fileType);
 					callback.onSuccess(result);
