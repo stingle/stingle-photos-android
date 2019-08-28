@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.stingle.photos.Widget.ImageHolderLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:id="@+id/parent_layout"
+        android:gravity="center" >
+
+    </org.stingle.photos.Widget.ImageHolderLayout>
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/loading_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:theme="@style/WhiteLoading"
+        android:layout_centerInParent="true"/>
+</RelativeLayout>

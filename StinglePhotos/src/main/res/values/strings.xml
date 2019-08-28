@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Stingle Photos</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="ok">OK</string>
+    <string name="setup_info">Please choose your master password. While no limit is put on what you can enter here, it is strongly advised that your password has at least 12 characters and contains lowercase and uppercase letters, digits and special symbols (!?/$%#). If your password is not secure enough then your photos/videos may be vulnerable to brute force attacks.</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="password_not_match">Passwords don\'t match. Please enter the same password twice correctly.</string>
+    <string name="password_empty">Password can\'t be empty.</string>
+    <string name="incorrect_password">Incorrect password</string>
+    <string name="settings">Settings</string>
+    <string name="deleting_files">Deleting file(s)…</string>
+    <string name="trashing_files">Moving file(s) to trash…</string>
+    <string name="decrypting_files">Decrypting file(s)…</string>
+    <string name="encrypting_files">Encrypting file(s)…</string>
+    <string name="encrypting_video">Encrypting video…</string>
+    <string name="confirm_delete_files">Do you really want to delete %s files?</string>
+    <string name="confirm_trash_files">Do you really want to move %s files to trash?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete">Delete</string>
+    <string name="change_password">Change Password</string>
+    <string name="changing_password">Changing account password…</string>
+    <string name="success_change_pass">Password has been successfully changed</string>
+    <string name="import_btn">Import</string>
+    <string name="importing_files">Importing files…</string>
+    <string name="lock_time">Lock up the app after</string>
+    <string name="lock_time_desc">Lock app if inactive for specified amount of time</string>
+    <string name="seconds5">5 seconds</string>
+    <string name="seconds10">10 seconds</string>
+    <string name="seconds15">15 seconds</string>
+    <string name="seconds20">20 seconds</string>
+    <string name="seconds30">30 seconds</string>
+    <string name="minute1">1 minute</string>
+    <string name="minutes5">5 minutes</string>
+    <string name="minutes10">10 minutes</string>
+    <string name="minutes30">30 minutes</string>
+    <string name="hour1">1 hour</string>
+    <string name="share">Share</string>
+    <string name="log_out">Log Out</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="volume_take_photo">Volume Up/Down</string>
+    <string name="volume_take_photo_desc">Volume Up/Down takes picture</string>
+    <string name="timer_duration">Timer Duration</string>
+    <string name="timer_duartion_desc">Camera Timer Duration</string>
+    <string name="password_short">Password have to be at least %s characters long</string>
+    <string name="flash">Flash</string>
+    <string name="timer">Timer</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="bottom_text">https://stingle.org</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache_desc">Clear thumbnail cache</string>
+    <string name="confirm_delete_cache">Are you sure you want to delete whole thumbnail cache?</string>
+    <string name="title_gallery_for_app">Gallery</string>
+    <string name="title_setup">Set Up</string>
+    <string name="title_change_password">Change Password</string>
+    <string name="title_import">Import</string>
+    <string name="options">Options</string>
+    <string name="rotating">Rotating…</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="internal_sd_card">"Internal SD card"</string>
+    <string name="external_sd_card">"External SD card"</string>
+    <string name="read_only">"Read Only"</string>
+    <string name="home_folder_problem_title">"Problem with StinglePhotos folder"</string>
+    <string name="please_enter_password">"Please enter password"</string>
+    <string name="use_fingerprint">"Fingerprint authentication"</string>
+    <string name="use_fingerprint_desc">"Use your fingerprint instead of entering password"</string>
+    <string name="error_fingerprint_perm">"Please enable the fingerprint permission"</string>
+    <string name="error_fingerprint_enroll">"No fingerprint configured. Please register at least one fingerprint in your device's Settings"</string>
+    <string name="error_fingerprint_screenguard">"Please enable lockscreen security in your device's Settings"</string>
+    <string name="use_password">"Use password"</string>
+    <string name="fingerprint_auth_error">"Authentication error\n%s"</string>
+    <string name="fingerprint_auth_failed">"Authentication failed"</string>
+    <string name="fingerprint_auth_success">"Success!"</string>
+    <string name="fingerprint_auth_help">"Authentication help\n%s"</string>
+    <string name="enter_password_desc">"Please enter your password to continue"</string>
+    <string name="other">"Other"</string>
+
+
+    <!-- File Dialog -->
+    <string name="cancel">Cancel</string>
+    <string name="change">Change</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="sdcard_perm_explain">SafeCamera requires access to SD card in order to show and create photos. Please allow access to continue.</string>
+    <string name="camera_perm_explain">SafeCamera requires access to camera in order to take photos. Please allow access to continue.</string>
+    <string name="shutter_sound">Camera shutter sound</string>
+    <string name="shutter_sound_desc">Play sound when taking photos</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <!-- Example settings for Data & Sync -->
+
+    <!-- Example settings for Notifications -->
+
+    <string name="pref_header_security">Security</string>
+    <string name="pref_header_camera">Camera</string>
+    <string name="photo">Photo</string>
+    <string name="video">Video</string>
+    <string name="back_camera_photo_res">Back camera photo resolution</string>
+    <string name="back_camera_video_res">Back camera video resolution</string>
+    <string name="front_camera_photo_res">Front camera photo resolution</string>
+    <string name="front_camera_video_res">Front camera video resolution</string>
+    <string name="megapixels">megapixels</string>
+    <string name="fps">fps</string>
+    <string name="email">Email</string>
+    <string name="invalid_email">Invalid email address specified</string>
+    <string name="fail_reg">Something went wrong, please try again.</string>
+    <string name="creating_account">Creating account...</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+    <string name="menu_gallery">Gallery</string>
+    <string name="save_to_gallery">Save to gallery</string>
+    <string name="menu_trash">Trash</string>
+    <string name="title_trash">Trash</string>
+    <string name="restore">Restore</string>
+    <string name="restoring_files">Restoring file(s)</string>
+    <string name="move_to_trash">Move to Trash</string>
+    <string name="sign_in">Sign In</string>
+    <string name="signing_in">Signing in...</string>
+    <string name="fail_login">Something went wrong during login, please try again.</string>
+    <string name="create_account">Create an account</string>
+    <string name="login_intead">Already have an account? Go to Login</string>
+    <string name="uploading_file">"Uploading file %s out of %s"</string>
+    <string name="refreshing">Refreshing...</string>
+    <string name="backup_complete">Backup/Sync complete</string>
+    <string name="logging_out">Logging out...</string>
+    <string name="confirm_logout">Are you sure you want to log out?</string>
+    <string name="lock">Lock</string>
+    <string name="title_activity_view_item">ViewItemActivity</string>
+    <string name="moved_to_trash">Moved to trash</string>
+    <string name="menu_change_password">Change password</string>
+    <string name="warning_chpass">Warning! Changing password will logout all other devices currently connected to this account and you will need to login them again with new credentials.</string>
+    <string name="home_folder_problem">Please check that app has access to external storage</string>
+
+</resources>

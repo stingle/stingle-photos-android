@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        release {
+            storeFile file('/home/alex/Desktop/encfs/encfs/APK Signing Key/alex')
+        }
+    }
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+    defaultConfig {
+        applicationId "org.stingle.photos"
+        minSdkVersion 23
+        targetSdkVersion 28
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles 'proguard.cfg'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    implementation files('libs/Sanselan.jar')
+    implementation files('libs/metadata-extractor-2.6.2.jar')
+    implementation files('libs/xmpcore.jar')
+    //implementation files('libs/Robosodium.aar')
+    //implementation 'com.goterl.lazycode:lazysodium-android:3.5.0@aar'
+    implementation "com.goterl.lazycode:lazysodium-android:3.7.0@aar"
+    implementation 'net.java.dev.jna:jna:5.4.0@aar'
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.7.3'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
+    implementation 'androidx.core:core:1.0.2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
+    implementation project(path: ':picasso')
+    //implementation 'com.squareup.picasso:picasso:2.71828'
+}
