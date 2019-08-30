@@ -59,7 +59,6 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 		container.addView(layout);
 		return layout;
-
 	}
 
 	@Override

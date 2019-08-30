@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Movie;
 import android.graphics.Paint;
@@ -15,19 +16,13 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.appcompat.widget.AppCompatImageView;
+
 public class AnimatedGifImageView extends ImageView {
+
     public static enum TYPE {
-        FIT_CENTER, STREACH_TO_FIT, AS_IS
+        FIT_CENTER, STRETCH_TO_FIT, AS_IS
     };
-
-    public AnimatedGifImageView(Context context, AttributeSet attrs,
-                                int defStyle) {
-        super(context, attrs, defStyle);
-    }
-
-    public AnimatedGifImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
 
     public AnimatedGifImageView(Context context) {
         super(context);
@@ -42,9 +37,7 @@ public class AnimatedGifImageView extends ImageView {
 
     public void setAnimatedGif(int rawResourceId, TYPE streachType) {
         setImageBitmap(null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mType = streachType;
         animatedGifImage = true;
         is = getContext().getResources().openRawResource(rawResourceId);
@@ -60,9 +53,7 @@ public class AnimatedGifImageView extends ImageView {
 
     public void setAnimatedGif(String filePath, TYPE streachType) throws FileNotFoundException {
         setImageBitmap(null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mType = streachType;
         animatedGifImage = true;
         InputStream is;
@@ -79,9 +70,7 @@ public class AnimatedGifImageView extends ImageView {
 
     public void setAnimatedGif(byte[] byteArray, TYPE streachType){
         setImageBitmap(null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mType = streachType;
         animatedGifImage = true;
 
@@ -98,6 +87,12 @@ public class AnimatedGifImageView extends ImageView {
     public void setImageResource(int resId) {
         animatedGifImage = false;
         super.setImageResource(resId);
+    }
+
+    @Override
+    public void setImageBitmap(Bitmap bm) {
+        animatedGifImage = false;
+        super.setImageBitmap(bm);
     }
 
     @Override
@@ -137,9 +132,7 @@ public class AnimatedGifImageView extends ImageView {
         if (mMovie != null) {
             int movieWidth = mMovie.width();
             int movieHeight = mMovie.height();
-			/*
-			 * Calculate horizontal scaling
-			 */
+
             int measureModeWidth = MeasureSpec.getMode(widthMeasureSpec);
             float scaleW = 1f, scaleH = 1f;
             if (measureModeWidth != MeasureSpec.UNSPECIFIED) {
@@ -151,9 +144,6 @@ public class AnimatedGifImageView extends ImageView {
                 }
             }
 
-			/*
-			 * calculate vertical scaling
-			 */
             int measureModeHeight = MeasureSpec.getMode(heightMeasureSpec);
 
             if (measureModeHeight != MeasureSpec.UNSPECIFIED) {
@@ -165,9 +155,6 @@ public class AnimatedGifImageView extends ImageView {
                 }
             }
 
-			/*
-			 * calculate overall scale
-			 */
             switch (mType) {
                 case FIT_CENTER:
                     mScaleH = mScaleW = Math.min(scaleH, scaleW);
@@ -175,7 +162,7 @@ public class AnimatedGifImageView extends ImageView {
                 case AS_IS:
                     mScaleH = mScaleW = 1f;
                     break;
-                case STREACH_TO_FIT:
+                case STRETCH_TO_FIT:
                     mScaleH = scaleH;
                     mScaleW = scaleW;
                     break;

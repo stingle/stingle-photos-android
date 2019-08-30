@@ -110,13 +110,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new FileInputStream(file));
 				fileType = fileHeader.fileType;
 				result.fileType = Crypto.FILE_TYPE_VIDEO;
-				Log.d("file_header", fileHeader.toString());
+
 				if(fileHeader.filename.toLowerCase().endsWith(".gif")){
 					isGif = true;
-					Log.d("isGif", "yes");
-				}
-				else {
-					Log.d("isGif", "no");
 				}
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
@@ -147,7 +143,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				result.fileType = fileType;
 				result.isRemote = true;
 
-				if(fileHeader.filename.endsWith(".gif")){
+				if(fileHeader.filename.toLowerCase().endsWith(".gif")){
 					isGif = true;
 				}
 
@@ -211,20 +207,19 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 		if(result.fileType == Crypto.FILE_TYPE_PHOTO) {
 			if(isGif){
-				//InputStream stream = new ByteArrayInputStream(bitmap);
 				AnimatedGifImageView gifMovie = new AnimatedGifImageView(context);
+				PhotoViewAttacher attacher = new PhotoViewAttacher(gifMovie);
 
-
-				/*if (result.bitmap != null) {
+				if (result.bitmap != null) {
 					gifMovie.setImageBitmap(result.bitmap);
-				}*/
+				}
 
-				if(touchListener != null){
+				if (touchListener != null) {
 					parent.setOnTouchListener(touchListener);
 				}
 
 				if (onClickListener != null) {
-					parent.setOnClickListener(onClickListener);
+					gifMovie.setOnClickListener(onClickListener);
 				}
 
 				gifMovie.setLayoutParams(params);
@@ -235,6 +230,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 
 				gifMovie.setPadding(3, 3, 3, 3);
+				attacher.update();
 
 				if (result.isRemote) {
 					GetOriginalRemotePhotoTask getOriginalTask = new GetOriginalRemotePhotoTask(context, result);
