@@ -1,5 +1,7 @@
 package org.stingle.photos.Files;
 
+import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
@@ -10,9 +12,10 @@ import android.webkit.MimeTypeMap;
 
 import androidx.core.content.FileProvider;
 
-import org.stingle.photos.AsyncTasks.DecryptFiles;
+import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 
 import java.io.File;
@@ -24,7 +27,7 @@ public class ShareManager {
 	public static void shareDbFiles(final Context context, List<StingleDbFile> dbFiles, int folder){
 
 
-		DecryptFiles decFilesJob = new DecryptFiles(context, new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
+		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(context, new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish(ArrayList<File> files) {
 				super.onFinish(files);
@@ -40,7 +43,7 @@ public class ShareManager {
 			Intent share = new Intent(Intent.ACTION_SEND);
 			share.setType(getMimeType(fileToShare.get(0).getPath()));
 
-			share.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context.getApplicationContext(), "org.stingle.photos.shareprovider", fileToShare.get(0)));
+			share.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context.getApplicationContext(), "org.stingle.photos.share", fileToShare.get(0)));
 			context.startActivity(Intent.createChooser(share, "Share Image"));
 		}
 		else if (fileToShare.size() > 1) {
@@ -61,7 +64,7 @@ public class ShareManager {
 				}
 				mimeType = thisMimeType;
 
-				uris.add(FileProvider.getUriForFile(context.getApplicationContext(), "org.stingle.photos.shareprovider", fileToShare.get(i)));
+				uris.add(FileProvider.getUriForFile(context.getApplicationContext(), "org.stingle.photos.share", fileToShare.get(i)));
 			}
 
 			if(sameMimeType) {
@@ -76,6 +79,43 @@ public class ShareManager {
 			share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 			context.startActivity(Intent.createChooser(share, context.getString(R.string.share)));
 		}
+	}
+
+	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleDbFile> selectedFiles, int folder) {
+		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new File(activity.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish(ArrayList<File> files) {
+				super.onFinish(files);
+				if(files != null) {
+					if (originalIntent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)) {
+						Uri fileUri = FileProvider.getUriForFile(activity, "org.stingle.photos.share", files.get(0));
+						originalIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+						ClipData clipData = ClipData.newRawUri(null, fileUri);
+						for(int i=1; i< files.size(); i++) {
+							clipData.addItem(new ClipData.Item(FileProvider.getUriForFile(activity, "org.stingle.photos.share", files.get(i))));
+						}
+						originalIntent.setClipData(clipData);
+						originalIntent.setDataAndType(fileUri, activity.getContentResolver().getType(fileUri));
+						activity.setResult(Activity.RESULT_OK, originalIntent);
+						activity.finish();
+						return;
+					}
+					else{
+						Uri fileUri = FileProvider.getUriForFile(activity, "org.stingle.photos.share", files.get(0));
+						originalIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+						originalIntent.setDataAndType(fileUri, activity.getContentResolver().getType(fileUri));
+						activity.setResult(Activity.RESULT_OK, originalIntent);
+						activity.finish();
+						return;
+					}
+				}
+				originalIntent.setDataAndType(null, "");
+				activity.setResult(Activity.RESULT_CANCELED, originalIntent);
+				activity.finish();
+			}
+		});
+		decFilesJob.setFolder(folder);
+		decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, selectedFiles);
 	}
 
 	public static String getMimeType(String url) {

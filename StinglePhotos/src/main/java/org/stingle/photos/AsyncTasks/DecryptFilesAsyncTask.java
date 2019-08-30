@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DecryptFiles extends AsyncTask<List<StingleDbFile>, Integer, ArrayList<File>> {
+public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Integer, ArrayList<File>> {
 
 	private ProgressDialog progressDialog;
 	private final Context context;
@@ -37,11 +37,11 @@ public class DecryptFiles extends AsyncTask<List<StingleDbFile>, Integer, ArrayL
 
 	private boolean performMediaScan = false;
 
-	public DecryptFiles(Activity context, File destinationFolder) {
+	public DecryptFilesAsyncTask(Activity context, File destinationFolder) {
 		this(context, destinationFolder, null);
 	}
 
-	public DecryptFiles(Context context, File destinationFolder, OnAsyncTaskFinish onFinishListener) {
+	public DecryptFilesAsyncTask(Context context, File destinationFolder, OnAsyncTaskFinish onFinishListener) {
 		this.context = context;
 		this.destinationFolder = destinationFolder;
 		this.onFinishListener = onFinishListener;
@@ -62,7 +62,7 @@ public class DecryptFiles extends AsyncTask<List<StingleDbFile>, Integer, ArrayL
 		progressDialog.setCancelable(true);
 		progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 			public void onCancel(DialogInterface dialog) {
-				DecryptFiles.this.cancel(false);
+				DecryptFilesAsyncTask.this.cancel(false);
 			}
 		});
 		progressDialog.setMessage(context.getString(R.string.decrypting_files));

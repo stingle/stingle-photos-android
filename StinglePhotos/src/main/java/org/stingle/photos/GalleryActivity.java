@@ -13,8 +13,11 @@ import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
+import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.StingleDbFile;
@@ -39,6 +42,7 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.view.ActionMode;
+import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -61,6 +65,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,6 +88,10 @@ public class GalleryActivity extends AppCompatActivity
 	protected Messenger mService = null;
 	protected boolean isBound = false;
 	final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+	private boolean sendBackDecryptedFile = false;
+	private Intent originalIntent = null;
+
 	protected int lastScrollPosition = 0;
 
 	protected int INTENT_IMPORT = 1;
@@ -163,6 +172,8 @@ public class GalleryActivity extends AppCompatActivity
 			}
 		};
 		registerReceiver(receiver, intentFilter);
+
+		handleIncomingIntent(getIntent());
 	}
 
 	@Override
@@ -244,6 +255,42 @@ public class GalleryActivity extends AppCompatActivity
 		super.onSaveInstanceState(outState, outPersistentState);
 
 		outState.putInt("scroll", layoutManager.findFirstVisibleItemPosition());
+	}
+
+	private void handleIncomingIntent(Intent intent) {
+		String action = intent.getAction();
+		String type = intent.getType();
+
+		ArrayList<Uri> urisToImport = new ArrayList<>();
+
+		if (Intent.ACTION_SEND.equals(action) && type != null) {
+			Uri fileUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+			if(fileUri != null){
+				urisToImport.add(fileUri);
+			}
+
+		} else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
+			ArrayList<Uri> fileUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+			if (fileUris != null) {
+				urisToImport.addAll(fileUris);
+			}
+		}
+		else if ((Intent.ACTION_PICK.equals(action) || Intent.ACTION_GET_CONTENT.equals(action)) && type != null) {
+			originalIntent = intent;
+			sendBackDecryptedFile = true;
+			invalidateOptionsMenu();
+		}
+
+		if(urisToImport.size() > 0){
+			(new FileManager.ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
+				@Override
+				public void onFinish() {
+					adapter.updateDataSet();
+					sendMessageToSyncService(SyncService.MSG_START_SYNC);
+				}
+			})).execute();
+		}
+
 	}
 
 	private void sendMessageToSyncService(int type) {
@@ -375,8 +422,9 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.gallery, menu);
+		if(!sendBackDecryptedFile) {
+			getMenuInflater().inflate(R.menu.gallery, menu);
+		}
 		return true;
 	}
 
@@ -445,13 +493,20 @@ public class GalleryActivity extends AppCompatActivity
 			adapter.toggleSelected(index);
 		}
 		else {
-			StingleDbFile file = adapter.getStingleFileAtPosition(index);
-			Log.d("selectedFile", file.filename);
-			Intent intent = new Intent();
-			intent.setClass(this, ViewItemActivity.class);
-			intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
-			intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
-			startActivity(intent);
+			if(sendBackDecryptedFile){
+				ArrayList<StingleDbFile> selectedFiles = new ArrayList<>();
+				selectedFiles.add(adapter.getStingleFileAtPosition(index));
+				ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentFolder);
+			}
+			else {
+				StingleDbFile file = adapter.getStingleFileAtPosition(index);
+				Log.d("selectedFile", file.filename);
+				Intent intent = new Intent();
+				intent.setClass(this, ViewItemActivity.class);
+				intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
+				intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
+				startActivity(intent);
+			}
 		}
 	}
 
@@ -483,13 +538,18 @@ public class GalleryActivity extends AppCompatActivity
 		return new ActionMode.Callback() {
 			@Override
 			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-				switch(currentFolder){
-					case SyncManager.FOLDER_MAIN:
-						mode.getMenuInflater().inflate(R.menu.gallery_action_mode, menu);
-						break;
-					case SyncManager.FOLDER_TRASH:
-						mode.getMenuInflater().inflate(R.menu.gallery_trash_action_mode, menu);
-						break;
+				if(!sendBackDecryptedFile) {
+					switch (currentFolder) {
+						case SyncManager.FOLDER_MAIN:
+							mode.getMenuInflater().inflate(R.menu.gallery_action_mode, menu);
+							break;
+						case SyncManager.FOLDER_TRASH:
+							mode.getMenuInflater().inflate(R.menu.gallery_trash_action_mode, menu);
+							break;
+					}
+				}
+				else{
+					mode.getMenuInflater().inflate(R.menu.gallery_send_back, menu);
 				}
 
 				return true;
@@ -515,6 +575,9 @@ public class GalleryActivity extends AppCompatActivity
 					case R.id.delete :
 						deleteSelected();
 						break;
+					case R.id.send_back :
+						sendBackSelected();
+						break;
 				}
 				return true;
 			}
@@ -535,6 +598,16 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		ShareManager.shareDbFiles(this, files, currentFolder);
+	}
+
+	private void sendBackSelected() {
+		List<Integer> indices = adapter.getSelectedIndices();
+		ArrayList<StingleDbFile> files = new ArrayList<StingleDbFile>();
+		for(Integer index : indices){
+			files.add(adapter.getStingleFileAtPosition(index));
+		}
+
+		ShareManager.sendBackSelection(this, originalIntent, files, currentFolder);
 	}
 
 
