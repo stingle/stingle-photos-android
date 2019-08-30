@@ -285,7 +285,7 @@ public class FileManager {
 		return mimeType != null && mimeType.startsWith("video");
 	}
 
-	public static int getFileType(String path){
+	public static int getFileTypeFromUri(String path){
 		int fileType = Crypto.FILE_TYPE_GENERAL;
 		if(isImageFile(path)){
 			fileType = Crypto.FILE_TYPE_PHOTO;
@@ -297,7 +297,7 @@ public class FileManager {
 		return fileType;
 	}
 
-	public static int getFileType(Context context, Uri uri){
+	public static int getFileTypeFromUri(Context context, Uri uri){
 		String mimeType = context.getContentResolver().getType(uri);
 
 		int fileType = Crypto.FILE_TYPE_GENERAL;
@@ -309,133 +309,6 @@ public class FileManager {
 		}
 
 		return fileType;
-	}
-
-	public static class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
-
-		protected Context context;
-		protected ArrayList<Uri> uris;
-		protected OnFinish onFinish;
-		protected ProgressDialog progress;
-
-		public ImportFilesAsyncTask(Context context, ArrayList<Uri> uris, OnFinish onFinish){
-			this.context = context;
-			this.uris = uris;
-			this.onFinish = onFinish;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-			progress = Helpers.showProgressDialogWithBar(context, context.getString(R.string.importing_files), uris.size(), null);
-		}
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			int index = 0;
-			for (Uri uri : uris) {
-				try {
-					int fileType = getFileType(context, uri);
-					InputStream in = context.getContentResolver().openInputStream(uri);
-
-					Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
-					/*
-					 * Get the column indexes of the data in the Cursor,
-					 * move to the first row in the Cursor, get the data,
-					 * and display it.
-					 */
-					int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-					int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-					returnCursor.moveToFirst();
-					String filename = returnCursor.getString(nameIndex);
-					long fileSize = returnCursor.getLong(sizeIndex);
-
-
-					String encFilename = Helpers.getNewEncFilename();
-					String encFilePath = getHomeDir(context) + "/" + encFilename;
-
-					FileOutputStream outputStream = new FileOutputStream(encFilePath);
-
-					byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize);
-
-					if(fileType == Crypto.FILE_TYPE_PHOTO) {
-
-						InputStream thumbIn = context.getContentResolver().openInputStream(uri);
-						ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-						int numRead = 0;
-						byte[] buf = new byte[1024];
-						while ((numRead = thumbIn.read(buf)) >= 0) {
-							bytes.write(buf, 0, numRead);
-						}
-						thumbIn.close();
-
-						//System.gc();
-
-						Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, fileId, Crypto.FILE_TYPE_PHOTO);
-					}
-					else if(fileType == Crypto.FILE_TYPE_VIDEO){
-
-						/*String[] filePathColumn = {MediaStore.Images.Media.DATA};
-						Cursor cursor = activity.getContentResolver().query(uri, filePathColumn, null, null, null);
-						cursor.moveToFirst();
-						int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-						String picturePath = cursor.getString(columnIndex);
-						cursor.close();
-
-						Bitmap thumb = ThumbnailUtils.createVideoThumbnail(picturePath, MediaStore.Video.Thumbnails.MINI_KIND);
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);*/
-						Bitmap thumb = getVideoThumbnail(context, uri);
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
-
-						Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, fileId, Crypto.FILE_TYPE_VIDEO);
-					}
-
-					long nowDate = System.currentTimeMillis();
-					StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
-					db.insertFile(encFilename, true, false, StingleDbHelper.INITIAL_VERSION, nowDate, nowDate);
-					db.close();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				catch (CryptoException e) {
-					e.printStackTrace();
-				}
-				publishProgress(index+1);
-				index++;
-			}
-
-			return null;
-		}
-
-		private Bitmap getVideoThumbnail(Context context, Uri uri) throws IllegalArgumentException,
-				SecurityException{
-			MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-			retriever.setDataSource(context,uri);
-			return retriever.getFrameAtTime();
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-			progress.setProgress(values[0]);
-
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-
-			progress.dismiss();
-
-			if(onFinish != null){
-				onFinish.onFinish();
-			}
-		}
 	}
 
 	public static void deleteTempFiles(Context context){

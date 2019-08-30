@@ -189,7 +189,7 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, String fileName, byte[] fileId, int type) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String encfileName, String realFileName, byte[] fileId, int type) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		//Bitmap thumbBitmap = null;
@@ -199,9 +199,9 @@ public class Helpers {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
-			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + fileName);
+			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encfileName);
 			try {
-				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), fileName, type, fileId);
+				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();

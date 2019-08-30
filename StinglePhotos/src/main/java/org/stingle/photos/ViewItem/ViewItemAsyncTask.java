@@ -29,6 +29,7 @@ import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
 import org.stingle.photos.Video.StingleDataSourceFactory;
 import org.stingle.photos.Video.StingleHttpDataSource;
+import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.ImageHolderLayout;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -109,6 +110,14 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new FileInputStream(file));
 				fileType = fileHeader.fileType;
 				result.fileType = Crypto.FILE_TYPE_VIDEO;
+				Log.d("file_header", fileHeader.toString());
+				if(fileHeader.filename.toLowerCase().endsWith(".gif")){
+					isGif = true;
+					Log.d("isGif", "yes");
+				}
+				else {
+					Log.d("isGif", "no");
+				}
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 					result.fileType = Crypto.FILE_TYPE_PHOTO;
@@ -117,7 +126,12 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null, this);
 
 					if (decryptedData != null) {
-						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
+						if(isGif){
+							result.bitmapBytes = decryptedData;
+						}
+						else{
+							result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
+						}
 					}
 				}
 			}
@@ -132,6 +146,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				fileType = fileHeader.fileType;
 				result.fileType = fileType;
 				result.isRemote = true;
+
+				if(fileHeader.filename.endsWith(".gif")){
+					isGif = true;
+				}
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encThumb, this);
@@ -192,32 +210,74 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
 		if(result.fileType == Crypto.FILE_TYPE_PHOTO) {
-			ImageView image = new ImageView(context);
-			PhotoViewAttacher attacher = new PhotoViewAttacher(image);
-			if (touchListener != null) {
-				parent.setOnTouchListener(touchListener);
+			if(isGif){
+				//InputStream stream = new ByteArrayInputStream(bitmap);
+				AnimatedGifImageView gifMovie = new AnimatedGifImageView(context);
+
+
+				/*if (result.bitmap != null) {
+					gifMovie.setImageBitmap(result.bitmap);
+				}*/
+
+				if(touchListener != null){
+					parent.setOnTouchListener(touchListener);
+				}
+
+				if (onClickListener != null) {
+					parent.setOnClickListener(onClickListener);
+				}
+
+				gifMovie.setLayoutParams(params);
+
+				if(result.bitmapBytes != null) {
+					gifMovie.setAnimatedGif(result.bitmapBytes, AnimatedGifImageView.TYPE.FIT_CENTER);
+					loading.setVisibility(View.INVISIBLE);
+				}
+
+				gifMovie.setPadding(3, 3, 3, 3);
+
+				if (result.isRemote) {
+					GetOriginalRemotePhotoTask getOriginalTask = new GetOriginalRemotePhotoTask(context, result);
+					getOriginalTask.setGif(true);
+					getOriginalTask.setAnimatedImage(gifMovie);
+					getOriginalTask.setLoading(loading);
+					getOriginalTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
+
+				parent.addView(gifMovie);
 			}
-			if (onClickListener != null) {
-				attacher.setOnClickListener(onClickListener);
+			else {
+				ImageView image = new ImageView(context);
+				PhotoViewAttacher attacher = new PhotoViewAttacher(image);
+				if (touchListener != null) {
+					parent.setOnTouchListener(touchListener);
+				}
+				if (onClickListener != null) {
+					attacher.setOnClickListener(onClickListener);
+				}
+
+				image.setLayoutParams(params);
+
+				if (result.bitmap != null) {
+					image.setImageBitmap(result.bitmap);
+				} else {
+					image.setImageResource(R.drawable.no);
+				}
+
+				image.setPadding(3, 3, 3, 3);
+
+				attacher.update();
+
+				if (result.isRemote) {
+					GetOriginalRemotePhotoTask getOriginalTask = new GetOriginalRemotePhotoTask(context, result);
+					getOriginalTask.setImage(image);
+					getOriginalTask.setAttacher(attacher);
+					getOriginalTask.setGif(false);
+					getOriginalTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
+				loading.setVisibility(View.INVISIBLE);
+				parent.addView(image);
 			}
-
-			image.setLayoutParams(params);
-
-			if (result.bitmap != null) {
-				image.setImageBitmap(result.bitmap);
-			} else {
-				image.setImageResource(R.drawable.no);
-			}
-
-			image.setPadding(3, 3, 3, 3);
-
-			attacher.update();
-
-			if(result.isRemote){
-				(new GetOriginalRemotePhotoTask(context, result, image, attacher)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			}
-			loading.setVisibility(View.INVISIBLE);
-			parent.addView(image);
 		}
 		else if (result.fileType == Crypto.FILE_TYPE_VIDEO){
 			PlayerView playerView = new PlayerView(context);
@@ -336,6 +396,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		public int fileType = Crypto.FILE_TYPE_PHOTO;
 		public String filename = null;
 		public Bitmap bitmap = null;
+		public byte[] bitmapBytes = null;
 		public boolean isRemote = false;
 		public String url = null;
 		public int folder = SyncManager.FOLDER_MAIN;

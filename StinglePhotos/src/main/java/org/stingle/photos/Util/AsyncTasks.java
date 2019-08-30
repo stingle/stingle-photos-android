@@ -383,7 +383,7 @@ public class AsyncTasks {
 						inputStream = new FileInputStream(origFile);
 
 						String prefix = Helpers.GENERAL_FILE_PREFIX;
-						int fileType = FileManager.getFileType(origFile.getAbsolutePath());
+						int fileType = FileManager.getFileTypeFromUri(origFile.getAbsolutePath());
 						switch (fileType){
 							case Crypto.FILE_TYPE_PHOTO:
 								prefix = Helpers.IMAGE_FILE_PREFIX;
@@ -415,7 +415,7 @@ public class AsyncTasks {
 
 							System.gc();
 
-							Helpers.generateThumbnail(activity, bytes.toByteArray(), destFile.getName(), fileId, Crypto.FILE_TYPE_PHOTO);
+							Helpers.generateThumbnail(activity, bytes.toByteArray(), destFile.getName(), origFile.getName(), fileId, Crypto.FILE_TYPE_PHOTO);
 						}
 						else if(FileManager.isVideoFile(origFile.getAbsolutePath())){
 							File destFile = new File(encFilePath);
@@ -424,7 +424,7 @@ public class AsyncTasks {
 							ByteArrayOutputStream bos = new ByteArrayOutputStream();
 							thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-							Helpers.generateThumbnail(activity, bos.toByteArray(), destFile.getName(), fileId, Crypto.FILE_TYPE_VIDEO);
+							Helpers.generateThumbnail(activity, bos.toByteArray(), destFile.getName(), origFile.getName(), fileId, Crypto.FILE_TYPE_VIDEO);
 						}
 						
 						publishProgress(i+1);

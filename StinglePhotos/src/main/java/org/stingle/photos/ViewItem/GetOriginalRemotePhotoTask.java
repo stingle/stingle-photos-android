@@ -4,7 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+
+import androidx.core.widget.ContentLoadingProgressBar;
 
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
@@ -13,6 +16,7 @@ import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 
 import java.io.IOException;
@@ -21,19 +25,41 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, Bitmap> {
+public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]> {
 
 	private Context context;
 	private ViewItemAsyncTask.ViewItemTaskResult result;
 	private ImageView image;
+	private AnimatedGifImageView animatedImage;
 	private PhotoViewAttacher attacher;
 
-	public GetOriginalRemotePhotoTask(Context context, ViewItemAsyncTask.ViewItemTaskResult result, ImageView image, PhotoViewAttacher attacher) {
+	private ContentLoadingProgressBar loading;
+
+	private boolean isGif = false;
+
+	public GetOriginalRemotePhotoTask(Context context, ViewItemAsyncTask.ViewItemTaskResult result) {
 		super();
 		this.context = context;
 		this.result = result;
+	}
+
+	public void setImage(ImageView image) {
 		this.image = image;
+	}
+
+	public void setAnimatedImage(AnimatedGifImageView animatedImage) {
+		this.animatedImage = animatedImage;
+	}
+	public void setGif(boolean gif) {
+		isGif = gif;
+	}
+
+	public void setAttacher(PhotoViewAttacher attacher) {
 		this.attacher = attacher;
+	}
+
+	public void setLoading(ContentLoadingProgressBar loading) {
+		this.loading = loading;
 	}
 
 	@Override
@@ -42,7 +68,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, Bitmap>
 	}
 
 	@Override
-	protected Bitmap doInBackground(Void... params) {
+	protected byte[] doInBackground(Void... params) {
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
@@ -62,9 +88,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, Bitmap>
 				return null;
 			}
 
-			byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encFile, this);
-
-			return Helpers.decodeBitmap(decryptedData, ViewItemAsyncTask.getSize(context));
+			return StinglePhotosApplication.getCrypto().decryptFile(encFile, this);
 		}
 		catch (NoSuchAlgorithmException | KeyManagementException | IOException | CryptoException e) {
 
@@ -75,20 +99,30 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, Bitmap>
 
 
 	@Override
-	protected void onPostExecute(Bitmap bitmap) {
-		super.onPostExecute(bitmap);
+	protected void onPostExecute(byte[] data) {
+		super.onPostExecute(data);
 
-		if(bitmap != null) {
-			Log.d("update", " qaq");
-			//image.setImageResource(R.drawable.no);
-			image.setImageBitmap(bitmap);
+		if(data != null) {
+			if(isGif){
+				if(animatedImage != null) {
+					animatedImage.setAnimatedGif(data, AnimatedGifImageView.TYPE.FIT_CENTER);
+					if(loading != null){
+						loading.setVisibility(View.INVISIBLE);
+					}
+				}
+			}
+			else {
+				Bitmap bitmap = Helpers.decodeBitmap(data, ViewItemAsyncTask.getSize(context));
+				Log.d("update", " qaq");
+				//image.setImageResource(R.drawable.no);
+				image.setImageBitmap(bitmap);
 
-			float scale = attacher.getScale();
-			attacher.update();
-			attacher.setScale(scale);
-		}
-		else{
-			Log.d("noupdate", "shit qaq");
+				//float scale = attacher.getScale();
+				if (attacher != null) {
+					attacher.update();
+				}
+				//attacher.setScale(scale);
+			}
 		}
 	}
 

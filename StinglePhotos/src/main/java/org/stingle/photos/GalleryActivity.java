@@ -13,11 +13,9 @@ import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 
-import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
-import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.StingleDbFile;
@@ -42,7 +40,6 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.view.ActionMode;
-import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -65,7 +62,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -282,7 +278,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		if(urisToImport.size() > 0){
-			(new FileManager.ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
+			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
 					adapter.updateDataSet();
@@ -732,7 +728,7 @@ public class GalleryActivity extends AppCompatActivity
 				}
 			}
 
-			(new FileManager.ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
+			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
 					adapter.updateDataSet();
