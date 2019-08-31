@@ -76,7 +76,12 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 				FileOutputStream outputStream = new FileOutputStream(encFilePath);
 
-				byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize);
+				int videoDuration = 0;
+				if(fileType == Crypto.FILE_TYPE_VIDEO) {
+					videoDuration = FileManager.getVideoDurationFromUri(context, uri);
+				}
+
+				byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, videoDuration);
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 
@@ -91,7 +96,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 					//System.gc();
 
-					Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO);
+					Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
 				}
 				else if(fileType == Crypto.FILE_TYPE_VIDEO){
 
@@ -109,7 +114,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
-					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO);
+					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 				}
 
 				long nowDate = System.currentTimeMillis();

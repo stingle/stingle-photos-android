@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class Helpers {
 	public static final String GENERAL_FILE_PREFIX = "FILE_";
@@ -189,7 +190,7 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, String encfileName, String realFileName, byte[] fileId, int type) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String encfileName, String realFileName, byte[] fileId, int type, int videoDuration) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		//Bitmap thumbBitmap = null;
@@ -201,7 +202,7 @@ public class Helpers {
 
 			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encfileName);
 			try {
-				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId);
+				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -585,5 +586,12 @@ public class Helpers {
 	public static boolean getPreference(Context context, String key, boolean defaultValue){
 		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
 		return preferences.getBoolean(key, defaultValue);
+	}
+
+	public static String formatVideoDuration(int duration){
+		return String.format(Locale.getDefault(), "%2d:%02d",
+				TimeUnit.SECONDS.toMinutes(duration),
+				TimeUnit.SECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(duration))
+		);
 	}
 }

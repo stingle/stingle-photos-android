@@ -43,7 +43,10 @@ public class HttpsClient {
 	public static JSONObject postFunc(String urlStr, HashMap<String, String> params) {
 		JSONObject json = null;
 		try {
-			Log.e("url", urlStr);
+			Log.d("url", urlStr);
+			for(String key : params.keySet()) {
+				Log.d("param", key + " = " + params.get(key));
+			}
 			URL url = new URL(urlStr);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
@@ -59,7 +62,7 @@ public class HttpsClient {
 			//conn.setRequestProperty("Authorization", basicAuth);
 
 			// set Timeout and method
-			conn.setReadTimeout(7000);
+			conn.setReadTimeout(60000);
 			conn.setConnectTimeout(7000);
 			conn.setRequestMethod("POST");
 			conn.setDoInput(true);
@@ -129,7 +132,7 @@ public class HttpsClient {
 		//conn.setRequestProperty("Authorization", basicAuth);
 
 		// set Timeout and method
-		conn.setReadTimeout(7000);
+		conn.setReadTimeout(60000);
 		conn.setConnectTimeout(7000);
 		conn.setRequestMethod("POST");
 		conn.setDoInput(true);
@@ -202,7 +205,7 @@ public class HttpsClient {
 		//conn.setRequestProperty("Authorization", basicAuth);
 
 		// set Timeout and method
-		conn.setReadTimeout(7000);
+		conn.setReadTimeout(60000);
 		conn.setConnectTimeout(7000);
 		conn.setRequestMethod("POST");
 		conn.setDoInput(true);

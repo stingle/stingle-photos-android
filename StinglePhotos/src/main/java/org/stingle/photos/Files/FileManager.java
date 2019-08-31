@@ -311,6 +311,17 @@ public class FileManager {
 		return fileType;
 	}
 
+	public static int getVideoDurationFromUri(Context context, Uri uri){
+		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+		retriever.setDataSource(context, uri);
+		String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+		int duration = (int)(Long.parseLong(time) / 1000);
+
+		retriever.release();
+
+		return duration;
+	}
+
 	public static void deleteTempFiles(Context context){
 		File file = new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR);
 		if (file.isDirectory()) {

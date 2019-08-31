@@ -45,6 +45,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private AutoFitGridLayoutManager lm;
 	private Picasso picasso;
 	private LruCache<Integer, Integer> typesCache = new LruCache<Integer, Integer>(512);
+	private LruCache<Integer, Integer> durationsCache = new LruCache<Integer, Integer>(512);
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
 	private int folderType;
@@ -74,6 +75,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	public void updateDataSet(){
 		typesCache.evictAll();
+		durationsCache.evictAll();
 		picasso.evictAll();
 		getAvailableDates();
 		calculateDatePositions();
@@ -99,6 +101,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		public RelativeLayout layout;
 		public ImageView image;
 		public ImageView videoIcon;
+		public TextView videoDuration;
 		public CheckBox checkbox;
 		public int currentPos = -1;
 
@@ -108,6 +111,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			image = v.findViewById(R.id.thumbImage);
 			checkbox = v.findViewById(R.id.checkBox);
 			videoIcon = v.findViewById(R.id.videoIcon);
+			videoDuration = v.findViewById(R.id.videoDuration);
 			checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
@@ -309,12 +313,13 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			req.into(holder.image, new Callback() {
 				@Override
 				public void onSuccess(RequestHandler.Result result, Request request) {
-					Integer fileType;
+					Integer fileType, videoDuration;
 					Integer pos = Integer.valueOf(request.getProp("pos"));
 					if (pos == null) {
 						return;
 					}
 					GalleryVH holder = (GalleryVH) request.tag;
+
 					Integer cachedFileType = typesCache.get(pos);
 					if (cachedFileType != null) {
 						fileType = cachedFileType;
@@ -324,10 +329,28 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 							typesCache.put(pos, fileType);
 						}
 					}
+
+					Integer cachedVideoDuration = durationsCache.get(pos);
+					if (cachedVideoDuration != null) {
+						videoDuration = cachedVideoDuration;
+					} else {
+						videoDuration = (Integer) result.getProperty("videoDuration");
+						if (videoDuration != null) {
+							durationsCache.put(pos, videoDuration);
+						}
+					}
+
 					if (fileType != null && fileType == Crypto.FILE_TYPE_VIDEO) {
 						holder.videoIcon.setVisibility(View.VISIBLE);
 					} else {
 						holder.videoIcon.setVisibility(View.GONE);
+					}
+
+					if (videoDuration != null && videoDuration > 0) {
+						holder.videoDuration.setText(Helpers.formatVideoDuration(videoDuration));
+						holder.videoDuration.setVisibility(View.VISIBLE);
+					} else {
+						holder.videoDuration.setVisibility(View.GONE);
 					}
 				}
 

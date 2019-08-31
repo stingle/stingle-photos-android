@@ -48,4 +48,15 @@
     <style name="WhiteLoading">
         <item name="colorAccent">@color/lightAccent</item>
     </style>
+
+    <style name="ShadowedText">
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
 </resources>

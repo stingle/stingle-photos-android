@@ -55,6 +55,7 @@ public class Crypto {
     public static final int FILE_FILE_VERSION_LEN = 1;
     public static final int FILE_CHUNK_SIZE_LEN = 4;
     public static final int FILE_DATA_SIZE_LEN = 8;
+    public static final int FILE_VIDEO_DURATION_LEN = 4;
     public static final int FILE_HEADER_SIZE_LEN = 4;
     public static final int FILE_FILE_ID_LEN = 32;
     public static final int FILE_HEADER_BEGINNING_LEN =
@@ -311,7 +312,7 @@ public class Crypto {
     }
 
 
-    protected Header getNewHeader(byte[] symmetricKey, long dataSize, String filename, int fileType, byte[] fileId) throws CryptoException {
+    protected Header getNewHeader(byte[] symmetricKey, long dataSize, String filename, int fileType, byte[] fileId, int videoDuration) throws CryptoException {
         if(symmetricKey.length != KeyDerivation.MASTER_KEY_BYTES){
             throw new CryptoException("Symmetric key length is incorrect");
         }
@@ -326,6 +327,7 @@ public class Crypto {
         header.symmetricKey = symmetricKey;
         header.fileId = fileId;
         header.filename = filename;
+        header.videoDuration = videoDuration;
 
         return header;
     }
@@ -374,6 +376,9 @@ public class Crypto {
             // If filename is empty then write that filename length is 0
             headerByteStream.write(intToByteArray(0));
         }
+
+        // Video duration - 4 bytes
+        headerByteStream.write(intToByteArray(header.videoDuration));
 
         byte[] headerBytes = headerByteStream.toByteArray();
 
@@ -498,6 +503,11 @@ public class Crypto {
             header.filename = "";
         }
 
+        // Read video duration
+        byte[] videoDuration = new byte[FILE_VIDEO_DURATION_LEN];
+        headerStream.read(videoDuration);
+        header.videoDuration = byteArrayToInt(videoDuration);
+
         header.overallHeaderSize = overallHeaderSize;
 
         return header;
@@ -515,23 +525,24 @@ public class Crypto {
         return filename;
     }
 
-    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType) throws IOException, CryptoException {
-        return encryptFile(out, data, filename, fileType, null);
+    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, int videoDuration) throws IOException, CryptoException {
+        return encryptFile(out, data, filename, fileType, null, videoDuration);
     }
 
-    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, byte[] fileId) throws IOException, CryptoException {
+    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, byte[] fileId, int videoDuration) throws IOException, CryptoException {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
-        return encryptFile(in, out, filename, fileType, data.length, fileId);
+        return encryptFile(in, out, filename, fileType, data.length, fileId, videoDuration);
     }
 
-    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength) throws IOException, CryptoException {
-        return encryptFile(in, out, filename, fileType, dataLength, null, null, null);
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, int videoDuration) throws IOException, CryptoException {
+        return encryptFile(in, out, filename, fileType, dataLength, null, videoDuration, null, null);
     }
 
-    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId) throws IOException, CryptoException {
-        return encryptFile(in, out, filename, fileType, dataLength, fileId, null, null);
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration) throws IOException, CryptoException {
+        return encryptFile(in, out, filename, fileType, dataLength, fileId, videoDuration, null, null);
     }
-    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
         long time = System.nanoTime();
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
 
@@ -543,7 +554,7 @@ public class Crypto {
             so.randombytes_buf(fileId, FILE_FILE_ID_LEN);
         }
 
-        Header header = getNewHeader(symmetricKey, dataLength, filename, fileType, fileId);
+        Header header = getNewHeader(symmetricKey, dataLength, filename, fileType, fileId, videoDuration);
         writeHeader(out, header, publicKey);
 
         encryptData(in, out, header, progress, task);
@@ -813,6 +824,7 @@ public class Crypto {
         public byte[] symmetricKey;
         public int fileType;
         public String filename;
+        public int videoDuration;
 
         public int overallHeaderSize = 0;
 
@@ -828,6 +840,7 @@ public class Crypto {
                     "Symmetric Key - " + byteArrayToBase64(symmetricKey) + "\n" +
                     "File Type - " + String.valueOf(fileType) + "\n" +
                     "Filename - " + filename + "\n\n" +
+                    "Video Duration - " + String.valueOf(videoDuration) + "\n\n" +
 
                     "Overall Header Size - " + String.valueOf(overallHeaderSize);
         }

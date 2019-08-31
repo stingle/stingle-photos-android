@@ -1703,7 +1703,9 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 String encFilePath = FileManager.getHomeDir(Camera2Activity.this) + "/" + encFileName;
                 FileOutputStream out = new FileOutputStream(encFilePath);
 
-                byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size());
+                int videoDuration = FileManager.getVideoDurationFromUri(Camera2Activity.this, Uri.fromFile(tmpFile));
+
+                byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size(), videoDuration);
 
                 out.close();
 
@@ -1711,7 +1713,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), encFileName, lastVideoFilename, fileId, Crypto.FILE_TYPE_VIDEO);
+                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), encFileName, lastVideoFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 
                 tmpFile.delete();
 
@@ -2029,8 +2031,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     FileOutputStream output = null;
                     try {
                         output = new FileOutputStream(mFile);
-                        byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO);
-                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, mFile.getName(), mFileName, fileId, Crypto.FILE_TYPE_PHOTO);
+                        byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO, 0);
+                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, mFile.getName(), mFileName, fileId, Crypto.FILE_TYPE_PHOTO, 0);
                         success = true;
                     } catch (IOException e) {
                         e.printStackTrace();

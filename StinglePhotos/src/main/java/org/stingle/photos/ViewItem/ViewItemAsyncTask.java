@@ -109,14 +109,13 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			try {
 				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new FileInputStream(file));
 				fileType = fileHeader.fileType;
-				result.fileType = Crypto.FILE_TYPE_VIDEO;
+				result.fileType = fileType;
 
 				if(fileHeader.filename.toLowerCase().endsWith(".gif")){
 					isGif = true;
 				}
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
-					result.fileType = Crypto.FILE_TYPE_PHOTO;
 					FileInputStream input = new FileInputStream(file);
 
 					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null, this);

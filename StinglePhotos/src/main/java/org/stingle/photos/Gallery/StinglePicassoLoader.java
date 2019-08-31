@@ -79,6 +79,7 @@ public class StinglePicassoLoader extends RequestHandler {
 
 					Result result = new Result(bitmap, Picasso.LoadedFrom.DISK);
 					result.addProperty("fileType", header.fileType);
+					result.addProperty("videoDuration", header.videoDuration);
 					callback.onSuccess(result);
 				}
 			} catch (FileNotFoundException e) {
@@ -113,6 +114,7 @@ public class StinglePicassoLoader extends RequestHandler {
 
 					Result result = new Result(bitmap, Picasso.LoadedFrom.NETWORK);
 					result.addProperty("fileType", header.fileType);
+					result.addProperty("videoDuration", header.videoDuration);
 					callback.onSuccess(result);
 				}
 				else{
