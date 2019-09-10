@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.drew.lang.StringUtil;
+
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
@@ -34,6 +36,10 @@ public class SyncManager {
 	protected SQLiteDatabase db;
 	public static final String PREF_LAST_SEEN_TIME = "file_last_seen_time";
 	public static final String PREF_LAST_DEL_SEEN_TIME = "file_last_del_seen_time";
+	public static final String PREF_LAST_SPACE_USED = "last_space_used";
+	public static final String PREF_LAST_SPACE_QUOTA = "last_space_quota";
+	public static final String PREF_SUSPEND_UPLOAD = "suspend_upload";
+	public static final String PREF_LAST_AVAILABLE_SPACE = "last_available_space";
 	public static final String SP_FILE_MIME_TYPE = "application/stinglephoto";
 
 	public static final int FOLDER_MAIN = 0;
@@ -52,13 +58,13 @@ public class SyncManager {
 	}
 
 	public static void syncFSToDB(Context context, OnFinish onFinish){
-		(new FsSyncAsyncTask(context, onFinish)).execute();
+		(new FsSyncAsyncTask(context, onFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 	public static void uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish){
-		(new UploadToCloudAsyncTask(context, progress, onFinish)).execute();
+		(new UploadToCloudAsyncTask(context, progress, onFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 	public static void syncCloudToLocalDb(Context context, OnFinish onFinish){
-		(new SyncCloudToLocalDbAsyncTask(context, onFinish)).execute();
+		(new SyncCloudToLocalDbAsyncTask(context, onFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	public static class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
@@ -218,8 +224,19 @@ public class SyncManager {
 			}
 
 			Log.d("uploadingFile", filename);
-			HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", dir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
-			HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumbDir.getPath() + "/" + filename, SP_FILE_MIME_TYPE);
+			File file = new File(dir.getPath() + "/" + filename);
+			File thumb = new File(thumbDir.getPath() + "/" + filename);
+
+			int overallSize = Helpers.bytesToMb(file.length() + thumb.length());
+			if(!Helpers.isUploadSpaceAvailable(context, overallSize)){
+				Helpers.storePreference(context, PREF_LAST_AVAILABLE_SPACE, Helpers.getAvailableUploadSpace(context));
+				Helpers.storePreference(context, PREF_SUSPEND_UPLOAD, true);
+				Log.d("not_uploading", "space is over, not uploading file " + file.getName());
+				return;
+			}
+
+			HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", file.getPath(), SP_FILE_MIME_TYPE);
+			HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumb.getPath(), SP_FILE_MIME_TYPE);
 
 			ArrayList<HttpsClient.FileToUpload> filesToUpload = new ArrayList<HttpsClient.FileToUpload>();
 			filesToUpload.add(fileToUpload);
@@ -241,6 +258,23 @@ public class SyncManager {
 			StingleResponse response = new StingleResponse(this.context, resp, false);
 			if(response.isStatusOk()){
 				db.markFileAsRemote(filename);
+
+				String spaceUsedStr = response.get("spaceUsed");
+				String spaceQuotaStr = response.get("spaceQuota");
+
+				if(spaceUsedStr != null && spaceUsedStr.length() > 0){
+					int spaceUsed = Integer.parseInt(spaceUsedStr);
+					if(spaceUsed >= 0){
+						Helpers.storePreference(context, PREF_LAST_SPACE_USED, spaceUsed);
+					}
+				}
+
+				if(spaceQuotaStr != null && spaceQuotaStr.length() > 0){
+					int spaceQuota = Integer.parseInt(spaceQuotaStr);
+					if(spaceQuota >= 0){
+						Helpers.storePreference(context, PREF_LAST_SPACE_QUOTA, spaceQuota);
+					}
+				}
 			}
 
 			if(isReupload){
@@ -314,7 +348,7 @@ public class SyncManager {
 
 
 			JSONObject resp = HttpsClient.postFunc(
-					context.getString(R.string.api_server_url) + context.getString(R.string.get_server_files_path),
+					context.getString(R.string.api_server_url) + context.getString(R.string.get_updates_path),
 					postParams
 			);
 			StingleResponse response = new StingleResponse(this.context, resp, false);
@@ -371,6 +405,23 @@ public class SyncManager {
 					}
 				}
 
+				String spaceUsedStr = response.get("spaceUsed");
+				String spaceQuotaStr = response.get("spaceQuota");
+
+
+				if(spaceUsedStr != null && spaceUsedStr.length() > 0){
+					int spaceUsed = Integer.parseInt(spaceUsedStr);
+					if(spaceUsed >= 0){
+						Helpers.storePreference(context, PREF_LAST_SPACE_USED, spaceUsed);
+					}
+				}
+
+				if(spaceQuotaStr != null && spaceQuotaStr.length() > 0){
+					int spaceQuota = Integer.parseInt(spaceQuotaStr);
+					if(spaceQuota >= 0){
+						Helpers.storePreference(context, PREF_LAST_SPACE_QUOTA, spaceQuota);
+					}
+				}
 
 			}
 

@@ -36,6 +36,16 @@
         android:layout_marginEnd="10dp"
         app:srcCompat="@drawable/ic_video_icon1" />
 
+    <ImageView
+        android:id="@+id/noCloudIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:visibility="visible"
+        app:srcCompat="@drawable/ic_cloud_off" />
+
     <CheckBox
         android:id="@+id/checkBox"
         android:layout_width="wrap_content"

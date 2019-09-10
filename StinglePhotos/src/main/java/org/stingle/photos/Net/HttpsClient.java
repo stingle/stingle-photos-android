@@ -34,10 +34,10 @@ import javax.net.ssl.SSLContext;
 public class HttpsClient {
 
 	public static void post(Context context, String urlStr, HashMap<String, String> params, OnNetworkFinish onFinish) {
-		new PostRequest(context, urlStr, params, onFinish).execute();
+		new PostRequest(context, urlStr, params, onFinish).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 	public static void uploadFiles(Context context, String urlStr, HashMap<String, String> params, ArrayList<FileToUpload> files, OnUploadFinish onFinish) {
-		new UploadRequest(context, urlStr, params, files, onFinish).execute();
+		new UploadRequest(context, urlStr, params, files, onFinish).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	public static JSONObject postFunc(String urlStr, HashMap<String, String> params) {

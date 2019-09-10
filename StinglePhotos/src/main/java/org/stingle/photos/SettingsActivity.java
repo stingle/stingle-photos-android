@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -218,7 +219,7 @@ public class SettingsActivity extends PreferenceActivity {
                             for (File file : folderFiles) {
                                 selectedFiles.add(file);
                             }
-                            new AsyncTasks.DeleteFiles(GeneralPreferenceFragment.this.getContext()).execute(selectedFiles);
+                            new AsyncTasks.DeleteFiles(GeneralPreferenceFragment.this.getContext()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, selectedFiles);
                         }
                     });
                     builder.setNegativeButton(getString(R.string.no), null);

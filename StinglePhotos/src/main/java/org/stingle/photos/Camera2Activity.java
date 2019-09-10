@@ -1670,7 +1670,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         mNextVideoAbsolutePath = null;
         createCameraPreviewSession();
-        (new EncryptAndSaveVideo(this, lastVideoFilename, lastVideoFilenameEnc)).execute();
+        (new EncryptAndSaveVideo(this, lastVideoFilename, lastVideoFilenameEnc)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public class EncryptAndSaveVideo extends AsyncTask<Void, Void, Void> {
@@ -2566,7 +2566,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 							findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
 						}
 					});
-					task.execute();
+					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 				else if(mLastThumbBitmap != null){
 					galleryButton.setImageBitmap(mLastThumbBitmap);

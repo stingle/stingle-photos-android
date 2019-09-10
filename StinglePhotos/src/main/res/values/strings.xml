@@ -143,5 +143,6 @@
     <string name="menu_change_password">Change password</string>
     <string name="warning_chpass">Warning! Changing password will logout all other devices currently connected to this account and you will need to login them again with new credentials.</string>
     <string name="home_folder_problem">Please check that app has access to external storage</string>
+    <string name="no_space_left">Unable to upload file(s), no space left in your account!</string>
 
 </resources>

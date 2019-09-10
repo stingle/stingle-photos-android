@@ -284,7 +284,7 @@ public class GalleryActivity extends AppCompatActivity
 					adapter.updateDataSet();
 					sendMessageToSyncService(SyncService.MSG_START_SYNC);
 				}
-			})).execute();
+			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 
 	}
@@ -370,6 +370,11 @@ public class GalleryActivity extends AppCompatActivity
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.refreshing));
+		} else if (syncStatus == SyncService.STATUS_NO_SPACE_LEFT) {
+			refreshCProgress.setVisibility(View.GONE);
+			syncPhoto.setVisibility(View.GONE);
+			syncProgress.setVisibility(View.INVISIBLE);
+			syncText.setText(getString(R.string.no_space_left));
 		} else if (syncStatus == SyncService.STATUS_IDLE) {
 			syncText.setText(getString(R.string.backup_complete));
 			syncPhoto.setVisibility(View.GONE);
@@ -634,7 +639,7 @@ public class GalleryActivity extends AppCompatActivity
 						exitActionMode();
 						spinner.dismiss();
 					}
-				}).execute();
+				}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		},
 		null);
@@ -657,7 +662,7 @@ public class GalleryActivity extends AppCompatActivity
 				exitActionMode();
 				spinner.dismiss();
 			}
-		}).execute();
+		}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 	}
 
@@ -680,7 +685,7 @@ public class GalleryActivity extends AppCompatActivity
 								exitActionMode();
 								spinner.dismiss();
 							}
-						}).execute();
+						}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					}
 				},
 				null);
@@ -734,7 +739,7 @@ public class GalleryActivity extends AppCompatActivity
 					adapter.updateDataSet();
 					sendMessageToSyncService(SyncService.MSG_START_SYNC);
 				}
-			})).execute();
+			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			/*Uri inputUri = data.getData();
 			ContentResolver resolver = getContentResolver();
 			try {

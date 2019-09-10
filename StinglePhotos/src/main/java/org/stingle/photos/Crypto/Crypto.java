@@ -565,6 +565,13 @@ public class Crypto {
         return fileId;
     }
 
+    public byte[] getNewFileId(){
+        byte[] fileId = new byte[FILE_FILE_ID_LEN];
+        so.randombytes_buf(fileId, FILE_FILE_ID_LEN);
+
+        return fileId;
+    }
+
 
     public byte[] decryptFile(byte[] bytes) throws IOException, CryptoException{
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);

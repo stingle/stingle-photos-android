@@ -38,7 +38,7 @@ public class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 			byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input);
 
 			if (decryptedData != null) {
-				return Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(context));
+				return Helpers.getThumbFromBitmap(Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(context)), Helpers.getThumbSize(context));
 			}
 		} catch (IOException | CryptoException e) {
 			e.printStackTrace();

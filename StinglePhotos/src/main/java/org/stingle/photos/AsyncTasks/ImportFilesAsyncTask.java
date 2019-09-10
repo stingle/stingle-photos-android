@@ -57,8 +57,6 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 				Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
 
-				Log.d("lastseg", uri.getLastPathSegment());
-
 				int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 				int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
 				returnCursor.moveToFirst();
@@ -74,14 +72,12 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 				String encFilename = Helpers.getNewEncFilename();
 				String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;
 
-				FileOutputStream outputStream = new FileOutputStream(encFilePath);
-
 				int videoDuration = 0;
 				if(fileType == Crypto.FILE_TYPE_VIDEO) {
 					videoDuration = FileManager.getVideoDurationFromUri(context, uri);
 				}
 
-				byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, videoDuration);
+				byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 
@@ -115,7 +111,11 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
 					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+					Log.e("thumb", "generatedVideoThumb");
 				}
+
+				FileOutputStream outputStream = new FileOutputStream(encFilePath);
+				StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration);
 
 				long nowDate = System.currentTimeMillis();
 				StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);

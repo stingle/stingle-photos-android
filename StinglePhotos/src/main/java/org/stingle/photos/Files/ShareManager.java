@@ -39,6 +39,9 @@ public class ShareManager {
 	}
 
 	public static void shareFiles(Context context, ArrayList<File> fileToShare) {
+		if(fileToShare == null){
+			return;
+		}
 		if (fileToShare.size() == 1) {
 			Intent share = new Intent(Intent.ACTION_SEND);
 			share.setType(getMimeType(fileToShare.get(0).getPath()));

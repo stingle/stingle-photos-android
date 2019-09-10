@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import org.stingle.photos.Auth.LoginManager;
@@ -228,7 +229,7 @@ public class ViewItemActivity extends AppCompatActivity {
 					Snackbar mySnackbar = Snackbar.make(findViewById(R.id.view_item_layout), getString(R.string.moved_to_trash), Snackbar.LENGTH_SHORT);
 					mySnackbar.show();
 				}
-			}).execute();
+			}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 
 

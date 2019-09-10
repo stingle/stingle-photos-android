@@ -18,6 +18,7 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Db.StingleDbHelper;
+import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
@@ -44,8 +45,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private boolean isSelectModeActive = false;
 	private AutoFitGridLayoutManager lm;
 	private Picasso picasso;
-	private LruCache<Integer, Integer> typesCache = new LruCache<Integer, Integer>(512);
-	private LruCache<Integer, Integer> durationsCache = new LruCache<Integer, Integer>(512);
+	private LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
 	private int folderType;
@@ -74,8 +74,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	public void updateDataSet(){
-		typesCache.evictAll();
-		durationsCache.evictAll();
+		filePropsCache.evictAll();
 		picasso.evictAll();
 		getAvailableDates();
 		calculateDatePositions();
@@ -101,6 +100,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		public RelativeLayout layout;
 		public ImageView image;
 		public ImageView videoIcon;
+		public ImageView noCloudIcon;
 		public TextView videoDuration;
 		public CheckBox checkbox;
 		public int currentPos = -1;
@@ -111,6 +111,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			image = v.findViewById(R.id.thumbImage);
 			checkbox = v.findViewById(R.id.checkBox);
 			videoIcon = v.findViewById(R.id.videoIcon);
+			noCloudIcon = v.findViewById(R.id.noCloudIcon);
 			videoDuration = v.findViewById(R.id.videoDuration);
 			checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
@@ -313,44 +314,40 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			req.into(holder.image, new Callback() {
 				@Override
 				public void onSuccess(RequestHandler.Result result, Request request) {
-					Integer fileType, videoDuration;
 					Integer pos = Integer.valueOf(request.getProp("pos"));
 					if (pos == null) {
 						return;
 					}
 					GalleryVH holder = (GalleryVH) request.tag;
 
-					Integer cachedFileType = typesCache.get(pos);
-					if (cachedFileType != null) {
-						fileType = cachedFileType;
-					} else {
-						fileType = (Integer) result.getProperty("fileType");
-						if (fileType != null) {
-							typesCache.put(pos, fileType);
+					FileProps props = filePropsCache.get(pos);
+					if (props == null) {
+						props = (FileProps) result.getProperty("fileProps");
+						if (props != null) {
+							filePropsCache.put(pos, props);
+						}
+						else{
+							props = new FileProps();
 						}
 					}
 
-					Integer cachedVideoDuration = durationsCache.get(pos);
-					if (cachedVideoDuration != null) {
-						videoDuration = cachedVideoDuration;
-					} else {
-						videoDuration = (Integer) result.getProperty("videoDuration");
-						if (videoDuration != null) {
-							durationsCache.put(pos, videoDuration);
-						}
-					}
-
-					if (fileType != null && fileType == Crypto.FILE_TYPE_VIDEO) {
+					if (props.fileType == Crypto.FILE_TYPE_VIDEO) {
 						holder.videoIcon.setVisibility(View.VISIBLE);
 					} else {
 						holder.videoIcon.setVisibility(View.GONE);
 					}
 
-					if (videoDuration != null && videoDuration > 0) {
-						holder.videoDuration.setText(Helpers.formatVideoDuration(videoDuration));
+					if (props.videoDuration > 0) {
+						holder.videoDuration.setText(Helpers.formatVideoDuration(props.videoDuration));
 						holder.videoDuration.setVisibility(View.VISIBLE);
 					} else {
 						holder.videoDuration.setVisibility(View.GONE);
+					}
+
+					if (!props.isUploaded) {
+						holder.noCloudIcon.setVisibility(View.VISIBLE);
+					} else {
+						holder.noCloudIcon.setVisibility(View.GONE);
 					}
 				}
 
@@ -450,6 +447,11 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 
+	public static class FileProps{
+		public int fileType = Crypto.FILE_TYPE_PHOTO;
+		public int videoDuration = 0;
+		public boolean isUploaded = false;
+	}
 
 }
 

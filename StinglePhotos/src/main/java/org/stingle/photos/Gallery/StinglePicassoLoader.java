@@ -78,8 +78,15 @@ public class StinglePicassoLoader extends RequestHandler {
 					streamForHeader.close();
 
 					Result result = new Result(bitmap, Picasso.LoadedFrom.DISK);
-					result.addProperty("fileType", header.fileType);
-					result.addProperty("videoDuration", header.videoDuration);
+
+					GalleryAdapterPisasso.FileProps props = new GalleryAdapterPisasso.FileProps();
+
+					props.fileType = header.fileType;
+					props.videoDuration = header.videoDuration;
+					props.isUploaded = file.isRemote;
+
+					result.addProperty("fileProps", props);
+
 					callback.onSuccess(result);
 				}
 			} catch (FileNotFoundException e) {

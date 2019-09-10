@@ -8,6 +8,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
+
+import org.stingle.photos.Util.Helpers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +33,7 @@ public class SyncService extends Service {
 	static final public int STATUS_IDLE = 0;
 	static final public int STATUS_REFRESHING = 1;
 	static final public int STATUS_UPLOADING = 2;
+	static final public int STATUS_NO_SPACE_LEFT = 3;
 
 	protected int currentStatus = STATUS_IDLE;
 	protected SyncManager.UploadToCloudAsyncTask.UploadProgress progress;
@@ -87,14 +91,35 @@ public class SyncService extends Service {
 						}
 						currentStatus = STATUS_UPLOADING;
 						sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
-						SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
-							@Override
-							public void onFinish(Boolean needUpdateUI) {
-								currentStatus = STATUS_IDLE;
-								sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
-								sendMessageToUI(MSG_SYNC_FINISHED);
+
+						boolean isUploadSuspended = Helpers.getPreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
+						if(isUploadSuspended){
+							int lastAvailableSpace = Helpers.getPreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
+							int availableSpace = Helpers.getAvailableUploadSpace(SyncService.this);
+							if(availableSpace > lastAvailableSpace){
+								Helpers.storePreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
+								Helpers.deletePreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE);
+								isUploadSuspended = false;
+								Log.d("upload", "resuming upload");
 							}
-						});
+						}
+
+						if(!isUploadSuspended) {
+							SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
+								@Override
+								public void onFinish(Boolean needUpdateUI) {
+									currentStatus = STATUS_IDLE;
+									sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
+									//sendMessageToUI(MSG_SYNC_FINISHED);
+								}
+							});
+						}
+						else{
+							Log.d("upload", "upload is disabled, no space");
+							currentStatus = STATUS_IDLE;
+							sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", STATUS_NO_SPACE_LEFT);
+							//sendMessageToUI(MSG_SYNC_FINISHED);
+						}
 					}
 				});
 			}

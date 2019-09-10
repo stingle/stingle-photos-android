@@ -44,6 +44,7 @@ import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
+import org.stingle.photos.Sync.SyncManager;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -587,11 +588,35 @@ public class Helpers {
 		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
 		return preferences.getBoolean(key, defaultValue);
 	}
+	public static void deletePreference(Context context, String key){
+		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+		preferences.edit().remove(key).commit();
+	}
 
 	public static String formatVideoDuration(int duration){
 		return String.format(Locale.getDefault(), "%2d:%02d",
 				TimeUnit.SECONDS.toMinutes(duration),
 				TimeUnit.SECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(duration))
 		);
+	}
+
+	public static int bytesToMb(long bytes){
+		return Math.round(bytes / (1024 * 1024));
+	}
+
+	public static boolean isUploadSpaceAvailable(Context context, int uploadSize){
+		int availableSpace = getAvailableUploadSpace(context);
+
+		if(availableSpace > uploadSize){
+			return true;
+		}
+		return false;
+	}
+
+	public static int getAvailableUploadSpace(Context context){
+		int spaceUsed = getPreference(context, SyncManager.PREF_LAST_SPACE_USED, 0);
+		int spaceQuota = getPreference(context, SyncManager.PREF_LAST_SPACE_QUOTA, 0);
+
+		return spaceQuota - spaceUsed;
 	}
 }
