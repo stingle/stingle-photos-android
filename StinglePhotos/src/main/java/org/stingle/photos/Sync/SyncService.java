@@ -10,6 +10,9 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Util.Helpers;
 
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ public class SyncService extends Service {
 	static final public int MSG_RESP_SYNC_STATUS = 8;
 	static final public int MSG_SYNC_STATUS_CHANGE = 9;
 	static final public int MSG_REFRESH_GALLERY = 10;
+	static final public int MSG_REFRESH_GALLERY_ITEM = 11;
 
 	static final public int STATUS_IDLE = 0;
 	static final public int STATUS_REFRESHING = 1;
@@ -53,6 +57,20 @@ public class SyncService extends Service {
 			}
 
 			@Override
+			public void fileUploadFinished(String filename, int folder) {
+				StingleDbHelper db = new StingleDbHelper(SyncService.this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+
+				Integer filePos = db.getFilePositionByFilename(filename);
+				db.close();
+
+				if(filePos != null) {
+					HashMap<String, Integer> values = new HashMap<String, Integer>();
+					values.put("position", filePos);
+					sendIntToUi(MSG_REFRESH_GALLERY_ITEM, values);
+				}
+			}
+
+			@Override
 			public void uploadProgress(int uploadedFilesCount) {
 				super.uploadProgress(uploadedFilesCount);
 				HashMap<String, Integer> values = new HashMap<String, Integer>();
@@ -62,7 +80,7 @@ public class SyncService extends Service {
 			}
 		};
 
-		startSync();
+		//startSync();
 	}
 
 	@Override

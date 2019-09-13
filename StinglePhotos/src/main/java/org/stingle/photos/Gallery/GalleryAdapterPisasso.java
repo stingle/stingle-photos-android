@@ -2,6 +2,7 @@ package org.stingle.photos.Gallery;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,8 @@ import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
+
+import com.drew.lang.StringUtil;
 import com.squareup.picasso3.Callback;
 import com.squareup.picasso3.NetworkPolicy;
 import com.squareup.picasso3.Picasso;
@@ -34,6 +37,7 @@ import com.squareup.picasso3.RequestHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
 	private Context context;
@@ -185,13 +189,13 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		dates.clear();
 		Cursor result = db.getAvailableDates();
 		while(result.moveToNext()) {
-			DateGroup group = new DateGroup(result.getString(0),result.getInt(1));
+			DateGroup group = new DateGroup(result.getString(0), result.getInt(1));
 			dates.add(group);
 			//Log.d("dates", group.date + " - " + group.itemCount);
 		}
 	}
 
-	protected void calculateDatePositions(){
+	private void calculateDatePositions(){
 		datePositions.clear();
 		int totalItems = 0;
 		for(DateGroup group : dates){
@@ -202,7 +206,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 	}
 
-	protected boolean isPositionIsDate(int position){
+	private boolean isPositionIsDate(int position){
 		for(DatePosition dp : datePositions){
 			if(dp.position == position){
 				return true;
@@ -211,7 +215,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return false;
 	}
 
-	protected PosTranslate translatePos(int pos){
+	private PosTranslate translatePos(int pos){
 		int datesCount = 1;
 		for(int i=0;i<datePositions.size();i++){
 			DatePosition datePos = datePositions.get(i);
@@ -240,8 +244,35 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return null;
 	}
 
+	private int translateDbPosToGalleryPos(int pos){
+		for(int i=0;i<datePositions.size();i++){
+			DatePosition datePos = datePositions.get(i);
+			if(datePos.position <= pos){
+				pos++;
+			}
+			else{
+				break;
+			}
+		}
+		return pos;
+	}
+
 	public int getDbPositionFromRaw(int pos){
-		return ((PosTranslate)translatePos(pos)).dbPosition;
+		return ((PosTranslate) Objects.requireNonNull(translatePos(pos))).dbPosition;
+	}
+
+	public void updateItem(int dbPosition){
+		int galleryPos = translateDbPosToGalleryPos(dbPosition);
+
+		String folder = "m";
+		if(folderType == SyncManager.FOLDER_TRASH){
+			folder = "t";
+		}
+
+		filePropsCache.remove(dbPosition);
+		picasso.invalidate("p" + folder + String.valueOf(dbPosition));
+		//picasso.evictAll();
+		notifyItemChanged(galleryPos);
 	}
 
 	// Create new views (invoked by the layout manager)

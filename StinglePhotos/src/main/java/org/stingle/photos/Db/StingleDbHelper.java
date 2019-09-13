@@ -319,6 +319,16 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		return null;
 	}
 
+	public Integer getFilePositionByFilename(String filename){
+		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created <= b.date_created) AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"'";
+		Cursor cursor = openReadDb().rawQuery(query, null);
+		if(cursor.getCount() == 1){
+			cursor.moveToNext();
+			return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
+		}
+		return null;
+	}
+
 	public Cursor getAvailableDates(){
 		return openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +

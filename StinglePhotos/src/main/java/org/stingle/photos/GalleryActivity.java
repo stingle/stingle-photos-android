@@ -18,7 +18,9 @@ import android.os.Bundle;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.GalleryAdapterPisasso;
@@ -39,6 +41,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -64,6 +67,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GalleryActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapterPisasso.Listener {
@@ -92,6 +96,8 @@ public class GalleryActivity extends AppCompatActivity
 
 	protected int INTENT_IMPORT = 1;
 
+	private boolean dontStartSyncYet = false;
+
 
 
 	@Override
@@ -110,12 +116,12 @@ public class GalleryActivity extends AppCompatActivity
 		toggle.syncState();
 		navigationView.setNavigationItemSelectedListener(this);
 
-		recyclerView = (DragSelectRecyclerView) findViewById(R.id.gallery_recycler_view);
-		syncBar = (ViewGroup) findViewById(R.id.syncBar);
-		syncProgress = (ProgressBar) findViewById(R.id.syncProgress);
-		refreshCProgress = (ProgressBar) findViewById(R.id.refreshCProgress);
-		syncPhoto = ((ImageView)findViewById(R.id.syncPhoto));
-		syncText = ((TextView)findViewById(R.id.syncText));
+		recyclerView = findViewById(R.id.gallery_recycler_view);
+		syncBar = findViewById(R.id.syncBar);
+		syncProgress = findViewById(R.id.syncProgress);
+		refreshCProgress = findViewById(R.id.refreshCProgress);
+		syncPhoto = findViewById(R.id.syncPhoto);
+		syncText = findViewById(R.id.syncText);
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -126,18 +132,16 @@ public class GalleryActivity extends AppCompatActivity
 			}
 		});
 
-		((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
 		layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
 		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
 			@Override
 			public int getSpanSize(int position) {
-				switch(adapter.getItemViewType(position)){
-					case GalleryAdapterPisasso.TYPE_DATE:
-						return layoutManager.getCurrentCalcSpanCount();
-					default:
-						return 1;
+				if (adapter.getItemViewType(position) == GalleryAdapterPisasso.TYPE_DATE) {
+					return layoutManager.getCurrentCalcSpanCount();
 				}
+				return 1;
 			}
 		});
 		recyclerView.setLayoutManager(layoutManager);
@@ -220,7 +224,7 @@ public class GalleryActivity extends AppCompatActivity
 					startService(serviceIntent);
 					bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
 				}
-				catch (IllegalStateException e){}
+				catch (IllegalStateException ignored){}
 				layoutManager.scrollToPosition(lastScrollPosition);
 
 				if(adapter != null){
@@ -247,7 +251,7 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+	public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
 		super.onSaveInstanceState(outState, outPersistentState);
 
 		outState.putInt("scroll", layoutManager.findFirstVisibleItemPosition());
@@ -260,7 +264,7 @@ public class GalleryActivity extends AppCompatActivity
 		ArrayList<Uri> urisToImport = new ArrayList<>();
 
 		if (Intent.ACTION_SEND.equals(action) && type != null) {
-			Uri fileUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+			Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
 			if(fileUri != null){
 				urisToImport.add(fileUri);
 			}
@@ -297,8 +301,7 @@ public class GalleryActivity extends AppCompatActivity
 					msg.replyTo = mMessenger;
 					mService.send(msg);
 				}
-				catch (RemoteException e) {
-				}
+				catch (RemoteException ignored) { }
 			}
 		}
 	}
@@ -354,6 +357,12 @@ public class GalleryActivity extends AppCompatActivity
 				adapter.updateDataSet();
 				recyclerView.setScrollY(lastScrollPos);
 			}
+			else if(msg.what == SyncService.MSG_REFRESH_GALLERY_ITEM) {
+				Bundle bundle = msg.getData();
+				int position = bundle.getInt("position");
+
+				adapter.updateItem(position);
+			}
 			else{
 				super.handleMessage(msg);
 			}
@@ -389,7 +398,9 @@ public class GalleryActivity extends AppCompatActivity
 			mService = new Messenger(service);
 			sendMessageToSyncService(SyncService.MSG_REGISTER_CLIENT);
 			sendMessageToSyncService(SyncService.MSG_GET_SYNC_STATUS);
-			sendMessageToSyncService(SyncService.MSG_START_SYNC);
+			if(!dontStartSyncYet){
+				sendMessageToSyncService(SyncService.MSG_START_SYNC);
+			}
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -400,7 +411,7 @@ public class GalleryActivity extends AppCompatActivity
 	};
 
 	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
+	public void onConfigurationChanged(@NonNull Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		layoutManager.updateAutoFit();
 	}
@@ -450,7 +461,6 @@ public class GalleryActivity extends AppCompatActivity
 		return super.onOptionsItemSelected(item);
 	}
 
-	@SuppressWarnings("StatementWithEmptyBody")
 	@Override
 	public boolean onNavigationItemSelected(MenuItem item) {
 		// Handle navigation view item clicks here.
@@ -500,8 +510,6 @@ public class GalleryActivity extends AppCompatActivity
 				ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentFolder);
 			}
 			else {
-				StingleDbFile file = adapter.getStingleFileAtPosition(index);
-				Log.d("selectedFile", file.filename);
 				Intent intent = new Intent();
 				intent.setClass(this, ViewItemActivity.class);
 				intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
@@ -593,7 +601,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	private void shareSelected() {
 		List<Integer> indices = adapter.getSelectedIndices();
-		ArrayList<StingleDbFile> files = new ArrayList<StingleDbFile>();
+		ArrayList<StingleDbFile> files = new ArrayList<>();
 		for(Integer index : indices){
 			files.add(adapter.getStingleFileAtPosition(index));
 		}
@@ -603,7 +611,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	private void sendBackSelected() {
 		List<Integer> indices = adapter.getSelectedIndices();
-		ArrayList<StingleDbFile> files = new ArrayList<StingleDbFile>();
+		ArrayList<StingleDbFile> files = new ArrayList<>();
 		for(Integer index : indices){
 			files.add(adapter.getStingleFileAtPosition(index));
 		}
@@ -626,7 +634,7 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.trashing_files), null);
-				ArrayList<String> filenames = new ArrayList<String>();
+				ArrayList<String> filenames = new ArrayList<>();
 				for(Integer index : indices){
 					StingleDbFile file = adapter.getStingleFileAtPosition(index);
 					filenames.add(file.filename);
@@ -649,7 +657,7 @@ public class GalleryActivity extends AppCompatActivity
 		final List<Integer> indices = adapter.getSelectedIndices();
 
 		final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.restoring_files), null);
-		ArrayList<String> filenames = new ArrayList<String>();
+		ArrayList<String> filenames = new ArrayList<>();
 		for(Integer index : indices){
 			StingleDbFile file = adapter.getStingleFileAtPosition(index);
 			filenames.add(file.filename);
@@ -672,7 +680,7 @@ public class GalleryActivity extends AppCompatActivity
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.deleting_files), null);
-						ArrayList<String> filenames = new ArrayList<String>();
+						ArrayList<String> filenames = new ArrayList<>();
 						for(Integer index : indices){
 							StingleDbFile file = adapter.getStingleFileAtPosition(index);
 							filenames.add(file.filename);
@@ -715,10 +723,11 @@ public class GalleryActivity extends AppCompatActivity
 			return;
 		}
 		if(requestCode == INTENT_IMPORT){
+			dontStartSyncYet = true;
 
 			lastScrollPosition = 0;
 			layoutManager.scrollToPosition(lastScrollPosition);
-			ArrayList<Uri> urisToImport = new ArrayList<Uri>();
+			ArrayList<Uri> urisToImport = new ArrayList<>();
 			ClipData clipData = data.getClipData();
 			if (clipData != null && clipData.getItemCount() > 0) {
 				for (int i = 0; i < clipData.getItemCount(); i++) {
@@ -737,30 +746,10 @@ public class GalleryActivity extends AppCompatActivity
 				@Override
 				public void onFinish() {
 					adapter.updateDataSet();
+					dontStartSyncYet = false;
 					sendMessageToSyncService(SyncService.MSG_START_SYNC);
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			/*Uri inputUri = data.getData();
-			ContentResolver resolver = getContentResolver();
-			try {
-
-				InputStream is = getContentResolver().openInputStream(inputUri);
-				if( is != null ) {
-					StinglePhotosApplication.getCrypto().importKeyBundle(IOUtils.getInputStreamBytes(is));
-					is.close();
-					SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-					defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();
-					LoginManager.logout(this);
-					Helpers.showInfoDialog(this, "Import successful");
-				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (CryptoException e) {
-				Helpers.showAlertDialog(this, e.getMessage());
-				e.printStackTrace();
-			}*/
 		}
 	}
 

@@ -259,6 +259,8 @@ public class SyncManager {
 			if(response.isStatusOk()){
 				db.markFileAsRemote(filename);
 
+
+
 				String spaceUsedStr = response.get("spaceUsed");
 				String spaceQuotaStr = response.get("spaceQuota");
 
@@ -274,6 +276,10 @@ public class SyncManager {
 					if(spaceQuota >= 0){
 						Helpers.storePreference(context, PREF_LAST_SPACE_QUOTA, spaceQuota);
 					}
+				}
+
+				if(progress != null){
+					progress.fileUploadFinished(filename, folder);
 				}
 			}
 
@@ -302,6 +308,9 @@ public class SyncManager {
 
 			public void currentFile(String filename){
 				this.currentFile = filename;
+			}
+			public void fileUploadFinished(String filename, int folder){
+
 			}
 			public void uploadProgress(int uploadedFilesCount){
 				this.uploadedFilesCount = uploadedFilesCount;
