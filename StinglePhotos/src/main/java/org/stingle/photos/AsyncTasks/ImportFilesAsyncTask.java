@@ -21,10 +21,12 @@ import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 
 public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
@@ -56,18 +58,29 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 				InputStream in = context.getContentResolver().openInputStream(uri);
 
 				Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
+				String filename = null;
+				long fileSize = 0;
+				if(returnCursor != null) {
+					int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+					int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+					returnCursor.moveToFirst();
+					filename = returnCursor.getString(nameIndex);
+					fileSize = returnCursor.getLong(sizeIndex);
+				}
+				else{
+					File fileToImport = new File(uri.getPath());
+					if (fileToImport.exists()) {
+						filename = fileToImport.getName();
+						fileSize = fileToImport.length();
+					}
+				}
 
-				int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-				int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-				returnCursor.moveToFirst();
-				String filename = returnCursor.getString(nameIndex);
-				long fileSize = returnCursor.getLong(sizeIndex);
-
-				if(filename == null) {
+				if (filename == null) {
 					int column_index = returnCursor.getColumnIndex(MediaStore.Images.Media.DATA);
 					Uri filePathUri = Uri.parse(returnCursor.getString(column_index));
 					filename = filePathUri.getLastPathSegment().toString();
 				}
+
 
 				String encFilename = Helpers.getNewEncFilename();
 				String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;

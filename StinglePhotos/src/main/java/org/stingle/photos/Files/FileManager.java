@@ -18,6 +18,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
@@ -298,17 +299,32 @@ public class FileManager {
 	}
 
 	public static int getFileTypeFromUri(Context context, Uri uri){
-		String mimeType = context.getContentResolver().getType(uri);
+		String mimeType = getMimeType(context, uri);
 
-		int fileType = Crypto.FILE_TYPE_GENERAL;
-		if(mimeType.startsWith("image")){
-			fileType = Crypto.FILE_TYPE_PHOTO;
-		}
-		else if(mimeType.startsWith("video")){
-			fileType = Crypto.FILE_TYPE_VIDEO;
+		int fileType = Crypto.FILE_TYPE_PHOTO;
+		if(mimeType != null) {
+			if (mimeType.startsWith("image")) {
+				fileType = Crypto.FILE_TYPE_PHOTO;
+			} else if (mimeType.startsWith("video")) {
+				fileType = Crypto.FILE_TYPE_VIDEO;
+			}
 		}
 
 		return fileType;
+	}
+
+	public static String getMimeType(Context context, Uri uri) {
+		String mimeType = null;
+		if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+			ContentResolver cr = context.getContentResolver();
+			mimeType = cr.getType(uri);
+		} else {
+			String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+					.toString());
+			mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+					fileExtension.toLowerCase());
+		}
+		return mimeType;
 	}
 
 	public static int getVideoDurationFromUri(Context context, Uri uri){

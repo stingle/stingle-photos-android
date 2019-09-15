@@ -41,6 +41,7 @@ public class SyncService extends Service {
 
 	protected int currentStatus = STATUS_IDLE;
 	protected SyncManager.UploadToCloudAsyncTask.UploadProgress progress;
+	private boolean restartSyncAfterComplete = false;
 
 	public SyncService() {
 	}
@@ -90,6 +91,7 @@ public class SyncService extends Service {
 
 	protected void startSync(){
 		if(currentStatus != STATUS_IDLE){
+			restartSyncAfterComplete = true;
 			return;
 		}
 		currentStatus = STATUS_REFRESHING;
@@ -129,6 +131,10 @@ public class SyncService extends Service {
 									currentStatus = STATUS_IDLE;
 									sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 									//sendMessageToUI(MSG_SYNC_FINISHED);
+									if(restartSyncAfterComplete){
+										restartSyncAfterComplete = false;
+										startSync();
+									}
 								}
 							});
 						}
