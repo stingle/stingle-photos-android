@@ -625,12 +625,12 @@ public class Helpers {
 			return String.valueOf(mb) + " MB";
 		}
 		else if(mb >= 1024 && mb < 1024*1024){
-			double gb = ((mb/1024) * 100.0)/100.0;
-			return Math.round(gb) + " GB";
+			double gb = Math.round((mb/1024.0) * 100.0)/100.0;
+			return gb + " GB";
 		}
 		else if(mb >= 1024*1024){
-			double tb = ((mb/(1024*1024)) * 100.0)/100.0;
-			return Math.round(tb) + " TB";
+			double tb = Math.round((mb/1048576.0) * 100.0)/100.0;
+			return tb + " TB";
 		}
 
 		return String.valueOf(mb);

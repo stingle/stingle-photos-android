@@ -12,27 +12,43 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <!--<ImageView
-        android:id="@+id/navLogo"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:contentDescription="@string/nav_header_desc"
-        android:src="@mipmap/ic_stingle_photos_round" />-->
+    <!---->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="30dp">
+        <ImageView
+            android:id="@+id/navLogo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/nav_header_desc"
+            android:src="@mipmap/ic_stingle_photos_round" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="normal"
+            android:textSize="24sp"
+            android:paddingLeft="10dp"
+            android:text="@string/app_name"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/userEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="40dp"
+        android:paddingTop="20dp"
         android:paddingBottom="20dp"
-        android:textStyle="bold"/>
+        android:textStyle="normal"
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/quotaInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"/>
+        android:layout_marginBottom="5dp"
+        android:textSize="14sp"/>
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/quotaBar"

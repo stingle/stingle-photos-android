@@ -331,6 +331,8 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 			holder.image.setImageBitmap(null);
 			holder.videoIcon.setVisibility(View.GONE);
+			holder.videoDuration.setVisibility(View.GONE);
+			holder.noCloudIcon.setVisibility(View.GONE);
 			holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
 
 			String folder = "m";
@@ -481,7 +483,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	public static class FileProps{
 		public int fileType = Crypto.FILE_TYPE_PHOTO;
 		public int videoDuration = 0;
-		public boolean isUploaded = false;
+		public boolean isUploaded = true;
 	}
 
 }
