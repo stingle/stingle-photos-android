@@ -145,6 +145,11 @@
             android:label="@string/title_change_password"
             android:theme="@style/AppTheme"/>
         <activity
+            android:name="AccountActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_account"
+            android:theme="@style/AppTheme"/>
+        <activity
             android:name="SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppThemeNoCompat" />

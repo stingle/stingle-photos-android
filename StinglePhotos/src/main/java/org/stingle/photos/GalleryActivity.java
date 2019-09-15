@@ -10,7 +10,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,6 +52,7 @@ import android.view.MenuItem;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -97,7 +100,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected int INTENT_IMPORT = 1;
 
 	private boolean dontStartSyncYet = false;
-
+	private View headerView;
 
 
 	@Override
@@ -174,6 +177,9 @@ public class GalleryActivity extends AppCompatActivity
 		registerReceiver(receiver, intentFilter);
 
 		handleIncomingIntent(getIntent());
+
+		headerView = ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0);
+		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
 	}
 
 	@Override
@@ -200,7 +206,6 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
@@ -230,6 +235,7 @@ public class GalleryActivity extends AppCompatActivity
 				if(adapter != null){
 					adapter.updateDataSet();
 				}
+				updateQuotaInfo();
 			}
 		});
 		LoginManager.disableLockTimer(this);
@@ -290,6 +296,21 @@ public class GalleryActivity extends AppCompatActivity
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
+
+	}
+
+	private void updateQuotaInfo(){
+		int spaceUsed = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_USED, 0);
+		int spaceQuota = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_QUOTA, 1);
+		int percent = Math.round(spaceUsed * 100 / spaceQuota);
+
+
+		String quotaText = getString(R.string.quota_text, Helpers.formatSpaceUnits(spaceUsed), Helpers.formatSpaceUnits(spaceQuota), String.valueOf(percent) + "%");
+		((TextView)headerView.findViewById(R.id.quotaInfo)).setText(quotaText);
+		ContentLoadingProgressBar progressBar = headerView.findViewById(R.id.quotaBar);
+
+		progressBar.setMax(100);
+		progressBar.setProgress(percent);
 
 	}
 
@@ -384,11 +405,13 @@ public class GalleryActivity extends AppCompatActivity
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.no_space_left));
+			updateQuotaInfo();
 		} else if (syncStatus == SyncService.STATUS_IDLE) {
 			syncText.setText(getString(R.string.backup_complete));
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			refreshCProgress.setVisibility(View.GONE);
+			updateQuotaInfo();
 		}
 	}
 
@@ -477,6 +500,11 @@ public class GalleryActivity extends AppCompatActivity
 			currentFolder = SyncManager.FOLDER_TRASH;
 			recyclerView.scrollToPosition(0);
 			toolbar.setTitle(getString(R.string.title_trash));
+		}
+		else if (id == R.id.nav_account) {
+			Intent intent = new Intent();
+			intent.setClass(this, AccountActivity.class);
+			startActivity(intent);
 		}
 		else if (id == R.id.nav_change_pass) {
 			Intent intent = new Intent();

@@ -619,4 +619,21 @@ public class Helpers {
 
 		return spaceQuota - spaceUsed;
 	}
+
+	public static String formatSpaceUnits(int mb){
+		if(mb < 1024){
+			return String.valueOf(mb) + " MB";
+		}
+		else if(mb >= 1024 && mb < 1024*1024){
+			double gb = ((mb/1024) * 100.0)/100.0;
+			return Math.round(gb) + " GB";
+		}
+		else if(mb >= 1024*1024){
+			double tb = ((mb/(1024*1024)) * 100.0)/100.0;
+			return Math.round(tb) + " TB";
+		}
+
+		return String.valueOf(mb);
+	}
+
 }
