@@ -58,6 +58,15 @@
                         android:layout_height="5dp"
                         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                         android:progressDrawable="@drawable/account_progress" />
+
+                    <Button
+                        android:id="@+id/pay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_gravity="center"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:text="Pay" />
                 </LinearLayout>
             </ScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
