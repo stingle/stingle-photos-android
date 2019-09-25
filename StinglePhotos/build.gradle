@@ -3,7 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            storeFile file('/home/alex/Desktop/encfs/encfs/APK Signing Key/alex')
+            storeFile file('S:\\APK Signing Key\\MainNew')
+            keyAlias = 'main'
+            storePassword '***REMOVED***'
+            keyPassword '***REMOVED***'
         }
     }
     compileSdkVersion 29
@@ -15,9 +18,10 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles 'proguard.cfg'
+            //minifyEnabled true
+            //proguardFiles 'proguard.cfg'
             signingConfig signingConfigs.release
+            debuggable = true
         }
         debug {
             applicationIdSuffix '.debug'
@@ -46,5 +50,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
+    implementation 'com.android.billingclient:billing:2.0.3'
     implementation project(path: ':picasso')
+
 }
