@@ -27,6 +27,7 @@ public class StinglePhotosApplication extends Application{
     public static final String PASSWORD_FINGERPRINT = "password_finger";
     public static final String PASSWORD_FINGERPRINT_IV = "password_finger_iv";
 
+    public static final String USER_ID = "user_id";
     public static final String USER_EMAIL = "user_email";
     public static final String USER_HOME_FOLDER = "user_home_folder";
 

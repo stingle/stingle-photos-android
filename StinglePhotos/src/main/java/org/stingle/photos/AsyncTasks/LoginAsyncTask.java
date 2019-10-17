@@ -73,8 +73,9 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				if (response.isStatusOk()) {
 					String token = response.get("token");
 					String keyBundle = response.get("keyBundle");
+					String userId = response.get("userId");
 					String homeFolder = response.get("homeFolder");
-					if (token != null && keyBundle != null && homeFolder != null && token.length() > 0 && keyBundle.length() > 0 && homeFolder.length() > 0) {
+					if (token != null && keyBundle != null && homeFolder != null && userId != null && token.length() > 0 && keyBundle.length() > 0 && homeFolder.length() > 0 && userId.length() > 0) {
 						try {
 							boolean importResult = KeyManagement.importKeyBundle(context, keyBundle, password);
 
@@ -83,10 +84,11 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 							}
 
 							KeyManagement.setApiToken(context, token);
+							Helpers.storePreference(context, StinglePhotosApplication.USER_ID, userId);
 							Helpers.storePreference(context, StinglePhotosApplication.USER_EMAIL, email);
 							Helpers.storePreference(context, StinglePhotosApplication.USER_HOME_FOLDER, homeFolder);
 
-							((StinglePhotosApplication) context.getApplication()).setKey(StinglePhotosApplication.getCrypto().getPrivateKey(password));
+							StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(password));
 
 							return true;
 						} catch (CryptoException e) {

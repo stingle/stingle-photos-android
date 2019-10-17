@@ -148,6 +148,13 @@
     <string name="menu_account">Account</string>
     <string name="title_account">Account</string>
     <string name="current_storage">Current storage</string>
-
+    <string name="payment_success">Payment successfully completed!</string>
+    <string name="pending_purchase">Your payment is still in progress.</string>
+    <string name="payment_error">Failed to notify server about the purchase</string>
+    <string name="monthly_plan">%s / month</string>
+    <string name="yearly_plan">%s / year (save %s)</string>
+    <string name="free">Free</string>
+    <string name="upgrade">Upgrade</string>
+    <string name="current_plan">Current plan</string>
 
 </resources>
