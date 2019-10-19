@@ -156,5 +156,6 @@
     <string name="free">Free</string>
     <string name="upgrade">Upgrade</string>
     <string name="current_plan">Current plan</string>
+    <string name="confirming_purchase">Confirming purchase...</string>
 
 </resources>

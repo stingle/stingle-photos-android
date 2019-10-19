@@ -1,5 +1,7 @@
 package org.stingle.photos;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -29,9 +31,11 @@ import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Billing.BillingSecurity;
 import org.stingle.photos.Billing.StingleBilling;
 import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.IOException;
@@ -84,6 +88,20 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 
 		initSkus();
 		getSkuDetails();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		LoginManager.checkLogin(this, null);
+		LoginManager.disableLockTimer(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		LoginManager.setLockedTime(this);
 	}
 
 	private void initSkus() {
@@ -232,9 +250,15 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 
 				if (areSubscriptionsSupported()) {
 					SkuDetails onetb = skuDetailsMap.get(sku);
-					BillingFlowParams flowParams = BillingFlowParams.newBuilder()
-							.setSkuDetails(onetb)
-							.build();
+					BillingFlowParams.Builder flowParamsBuilder = BillingFlowParams.newBuilder();
+					flowParamsBuilder.setSkuDetails(onetb);
+
+					if(purchasedSkus != null && purchasedSkus.size() > 0){
+						flowParamsBuilder.setOldSku(purchasedSkus.get(0).getSku());
+					}
+
+					BillingFlowParams flowParams = flowParamsBuilder.build();
+
 					BillingResult responseCode = billingClient.launchBillingFlow(AccountActivity.this, flowParams);
 					Log.e("responseCode", responseCode.toString());
 				}
@@ -361,16 +385,19 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 	}
 
 	private void notifyServerAboutPurchase(Purchase purchase){
+		final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.confirming_purchase), null);
 		(new StingleBilling.NotifyServerAboutPurchase(AccountActivity.this, purchase.getSku(), purchase.getPurchaseToken(), new StingleBilling.OnFinish() {
 			@Override
 			public void onFinish(boolean isSuccess) {
 				if(isSuccess) {
 					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
 					getSkuDetails();
+					updateQuotaInfo();
 				}
 				else{
 					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_error), Snackbar.LENGTH_LONG).show();
 				}
+				spinner.dismiss();
 			}
 		})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}

@@ -59,6 +59,24 @@ public class StingleBilling {
 			if(response.isStatusOk()) {
 				Helpers.storePreference(context, PREF_BILLING_PLAN, productId);
 				Helpers.storePreference(context, PREF_BILLING_PURCHASE_TOKEN, token);
+
+				String spaceUsedStr = response.get("spaceUsed");
+				String spaceQuotaStr = response.get("spaceQuota");
+
+
+				if(spaceUsedStr != null && spaceUsedStr.length() > 0){
+					int spaceUsed = Integer.parseInt(spaceUsedStr);
+					if(spaceUsed >= 0){
+						Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_USED, spaceUsed);
+					}
+				}
+
+				if(spaceQuotaStr != null && spaceQuotaStr.length() > 0){
+					int spaceQuota = Integer.parseInt(spaceQuotaStr);
+					if(spaceQuota >= 0){
+						Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_QUOTA, spaceQuota);
+					}
+				}
 				return true;
 			}
 
