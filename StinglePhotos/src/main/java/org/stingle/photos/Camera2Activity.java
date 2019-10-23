@@ -28,12 +28,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.Typeface;
 import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -74,12 +76,19 @@ import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Camera.CameraImageSize;
@@ -89,8 +98,10 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.ViewItem.ViewItemAsyncTask;
 import org.stingle.photos.Widget.AutoFitTextureView;
 import org.stingle.photos.Widget.FocusCircleView;
+import org.stingle.photos.Widget.ImageHolderLayout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -266,7 +277,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
-        setContentView(R.layout.camera2);
+        setContentView(R.layout.activity_camera2);
 
         mFocusCircleView = (FocusCircleView)findViewById(R.id.focusCircle);
 
@@ -276,69 +287,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         LinearLayout textureHolder = (LinearLayout)findViewById(R.id.textureHolder);
         mTextureView = new AutoFitTextureView(this);
-		mTextureView.setOnTouchListener(new View.OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-
-				if (scaleGestureDetector != null) {
-					scaleGestureDetector.onTouchEvent(event);
-				}
-				if( event.getPointerCount() > 1 ) {
-					//multitouch_time = System.currentTimeMillis();
-					mIsTouchIsMulti = true;
-					return true;
-				}
-				mIsTouchIsMulti = false;
-
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					mDownEventAtMS = System.currentTimeMillis();
-					mDownEventAtX = event.getX();
-					mDownEventAtY = event.getY();
-				} else if (event.getAction() == MotionEvent.ACTION_UP) {
-					if (mIsFocusSupported && System.currentTimeMillis() - mDownEventAtMS < CLICK_MS &&
-							mCaptureSession != null &&
-							Math.abs(event.getX() - mDownEventAtX) < CLICK_DIST &&
-							Math.abs(event.getY() - mDownEventAtY) < CLICK_DIST) {
-						try {
-							//focusArea(event.getX(), event.getY(), true);
-							isSetFocusPoint = true;
-							focusPointX = event.getX();
-							focusPointY = event.getY();
-							isPassiveFocused = false;
-							focusMovedTime = 0;
-							ArrayList<Area> areas = getAreas(event.getX(), event.getY());
-							setMeteringArea(areas);
-							mFocusCircleView.drawFocusCircle(event.getX(), event.getY());
-
-							/*removeFocusClearCallback();
-
-							clearFocusRunnable = new Runnable() {
-								@Override
-								public void run() {
-									Log.d("focus", "removeFocus");
-									clearFocusRunnable = null;
-									clearMeteringArea();
-								}
-							};
-
-							clearFocusHandler.postDelayed(clearFocusRunnable, 10000);*/
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				}
-
-				if (mIsZoomSupported && event.getPointerCount() > 1 && mCaptureSession != null) {
-					try {
-						//handleZoom(event);
-					} catch (Exception e) {
-
-					}
-				}
-				return true;
-				//return onPreviewTouch(v, event);
-			}
-		});
+		mTextureView.setOnTouchListener(getOnTouchListener());
 		textureHolder.addView(mTextureView);
 
 
@@ -403,6 +352,72 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 break;
             }
         }
+    }
+
+    public View.OnTouchListener getOnTouchListener(){
+        return new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (scaleGestureDetector != null) {
+                    scaleGestureDetector.onTouchEvent(event);
+                }
+                if( event.getPointerCount() > 1 ) {
+                    //multitouch_time = System.currentTimeMillis();
+                    mIsTouchIsMulti = true;
+                    return true;
+                }
+                mIsTouchIsMulti = false;
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mDownEventAtMS = System.currentTimeMillis();
+                    mDownEventAtX = event.getX();
+                    mDownEventAtY = event.getY();
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (mIsFocusSupported && System.currentTimeMillis() - mDownEventAtMS < CLICK_MS &&
+                            mCaptureSession != null &&
+                            Math.abs(event.getX() - mDownEventAtX) < CLICK_DIST &&
+                            Math.abs(event.getY() - mDownEventAtY) < CLICK_DIST) {
+                        try {
+                            //focusArea(event.getX(), event.getY(), true);
+                            isSetFocusPoint = true;
+                            focusPointX = event.getX();
+                            focusPointY = event.getY();
+                            isPassiveFocused = false;
+                            focusMovedTime = 0;
+                            ArrayList<Area> areas = getAreas(event.getX(), event.getY());
+                            setMeteringArea(areas);
+                            mFocusCircleView.drawFocusCircle(event.getX(), event.getY());
+
+							/*removeFocusClearCallback();
+
+							clearFocusRunnable = new Runnable() {
+								@Override
+								public void run() {
+									Log.d("focus", "removeFocus");
+									clearFocusRunnable = null;
+									clearMeteringArea();
+								}
+							};
+
+							clearFocusHandler.postDelayed(clearFocusRunnable, 10000);*/
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                if (mIsZoomSupported && event.getPointerCount() > 1 && mCaptureSession != null) {
+                    try {
+                        //handleZoom(event);
+                    } catch (Exception e) {
+
+                    }
+                }
+                return true;
+                //return onPreviewTouch(v, event);
+            }
+        };
     }
 
 	public void removeFocusClearCallback(){
@@ -822,7 +837,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             mSensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
             int deviceRotation = getCurrentDeviceRotation();
             Log.d("sensorOrientation", String.valueOf(mSensorOrientation));
-            Log.d("getCurrentDeviceRotation", String.valueOf(deviceRotation));
+            Log.d("getCurrentDeviceRotatio", String.valueOf(deviceRotation));
 
             int invert = 0;
             if(!isFrontCamera && (deviceRotation == 90 || deviceRotation == 270)){
@@ -1783,7 +1798,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         mSensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
         int deviceRotation = getCurrentDeviceRotation();
         Log.d("sensorOrientation", String.valueOf(mSensorOrientation));
-        Log.d("getCurrentDeviceRotation", String.valueOf(deviceRotation));
+        Log.d("getCurrentDeviceRotatio", String.valueOf(deviceRotation));
 
         int invert = 0;
         if(!isFrontCamera && (deviceRotation == 90 || deviceRotation == 270)){
@@ -1901,6 +1916,13 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 closeCamera();
                 openCamera();
                 configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
+
+                if(isFrontCamera){
+                    ((ImageButton)findViewById(R.id.switchCamButton)).setImageDrawable(getDrawable(R.drawable.ic_camera_front));
+                }
+                else {
+                    ((ImageButton)findViewById(R.id.switchCamButton)).setImageDrawable(getDrawable(R.drawable.ic_camera_rear));
+                }
             }
         };
     }

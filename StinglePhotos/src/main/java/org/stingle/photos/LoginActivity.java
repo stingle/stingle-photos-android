@@ -30,7 +30,7 @@ public class LoginActivity extends Activity {
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
-		setContentView(R.layout.login);
+		setContentView(R.layout.activity_login);
 
 		((Button) findViewById(R.id.login)).setOnClickListener(login());
 		((TextView) findViewById(R.id.forgot_password)).setOnClickListener(forgotPassword());

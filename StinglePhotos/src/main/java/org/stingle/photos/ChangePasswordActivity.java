@@ -26,7 +26,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
 		//getActionBar().setHomeButtonEnabled(true);
 
-		setContentView(R.layout.change_password);
+		setContentView(R.layout.activity_change_password);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.change_password));

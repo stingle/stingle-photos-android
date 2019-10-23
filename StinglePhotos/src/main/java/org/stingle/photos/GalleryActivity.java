@@ -10,9 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,9 +18,7 @@ import android.os.Bundle;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.GalleryAdapterPisasso;
@@ -40,7 +36,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -106,7 +101,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.gallery);
+		setContentView(R.layout.activity_gallery);
 		toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		setSupportActionBar(toolbar);

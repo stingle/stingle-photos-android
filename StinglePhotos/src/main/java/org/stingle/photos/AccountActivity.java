@@ -81,20 +81,38 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
-		updateQuotaInfo();
-
 		billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build();
 		boxesParent = findViewById(R.id.payment_boxes);
 
 		initSkus();
-		getSkuDetails();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		LoginManager.checkLogin(this, null);
+		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
+			@Override
+			public void onUserAuthSuccess() {
+				updateQuotaInfo();
+				getSkuDetails();
+			}
+
+			@Override
+			public void onUserAuthFail() {
+
+			}
+
+			@Override
+			public void onNotLoggedIn() {
+
+			}
+
+			@Override
+			public void onLoggedIn() {
+
+			}
+		});
 		LoginManager.disableLockTimer(this);
 	}
 
@@ -172,12 +190,22 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 
 		boxesParent.removeAllViews();
 
-		createPaymentBox("1 GB", null, null);
+		if(purchasedSkus == null || purchasedSkus.size() == 0) {
+			createPaymentBox("1 GB", null, null);
+		}
 		createPaymentBox("1 TB", skuDetailsMap.get("1tb_monthly"), skuDetailsMap.get("1tb_yearly"));
 		createPaymentBox("3 TB", skuDetailsMap.get("3tb_monthly"), skuDetailsMap.get("3tb_yearly"));
 		createPaymentBox("5 TB", skuDetailsMap.get("5tb_monthly"), null);
 		createPaymentBox("10 TB", skuDetailsMap.get("10tb_monthly"), null);
 		createPaymentBox("20 TB", skuDetailsMap.get("20tb_monthly"), null);
+
+		if(purchasedSkus != null && purchasedSkus.size() > 0){
+			SkuDetails sku = skuDetailsMap.get(purchasedSkus.get(0).getSku());
+			((TextView) findViewById(R.id.planInfo)).setText(sku.getDescription());
+		}
+		else {
+			((TextView) findViewById(R.id.planInfo)).setText(getString(R.string.free));
+		}
 	}
 
 	private void createPaymentBox(String title, SkuDetails monthly, SkuDetails yearly){
