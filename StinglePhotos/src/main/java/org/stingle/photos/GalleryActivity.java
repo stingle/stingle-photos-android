@@ -15,7 +15,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.StingleDbFile;
@@ -30,6 +32,7 @@ import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Gallery.DragSelectRecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -63,6 +66,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -453,7 +457,14 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if(!sendBackDecryptedFile) {
-			getMenuInflater().inflate(R.menu.gallery, menu);
+			switch (currentFolder) {
+				case SyncManager.FOLDER_MAIN:
+					getMenuInflater().inflate(R.menu.gallery, menu);
+					break;
+				case SyncManager.FOLDER_TRASH:
+					getMenuInflater().inflate(R.menu.gallery_trash, menu);
+					break;
+			}
 		}
 		return true;
 	}
@@ -475,6 +486,9 @@ public class GalleryActivity extends AppCompatActivity
 			startActivity(intent);
 			finish();
 		}
+		else if (id == R.id.action_empty_trash) {
+			emptyTrash();
+		}
 
 		return super.onOptionsItemSelected(item);
 	}
@@ -489,12 +503,14 @@ public class GalleryActivity extends AppCompatActivity
 			currentFolder = SyncManager.FOLDER_MAIN;
 			recyclerView.scrollToPosition(0);
 			toolbar.setTitle(getString(R.string.title_gallery_for_app));
+			invalidateOptionsMenu();
 		}
 		else if (id == R.id.nav_trash) {
 			adapter.setFolder(SyncManager.FOLDER_TRASH);
 			currentFolder = SyncManager.FOLDER_TRASH;
 			recyclerView.scrollToPosition(0);
 			toolbar.setTitle(getString(R.string.title_trash));
+			invalidateOptionsMenu();
 		}
 		else if (id == R.id.nav_account) {
 			Intent intent = new Intent();
@@ -598,6 +614,9 @@ public class GalleryActivity extends AppCompatActivity
 					case R.id.share:
 						shareSelected();
 						break;
+					case R.id.decrypt:
+						decryptSelected();
+						break;
 					case R.id.trash :
 						trashSelected();
 						break;
@@ -630,6 +649,34 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		ShareManager.shareDbFiles(this, files, currentFolder);
+	}
+
+	private void decryptSelected() {
+		final List<Integer> indices = adapter.getSelectedIndices();
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_decrypt_files)), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.decrypting_files), null);
+						ArrayList<StingleDbFile> files = new ArrayList<>();
+						for(Integer index : indices){
+							files.add(adapter.getStingleFileAtPosition(index));
+						}
+
+						File decryptDir = new File(Environment.getExternalStorageDirectory().getPath() + "/" + FileManager.DECRYPT_DIR);
+						DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(GalleryActivity.this, decryptDir, new OnAsyncTaskFinish() {
+							@Override
+							public void onFinish(ArrayList<File> files) {
+								super.onFinish(files);
+								exitActionMode();
+								spinner.dismiss();
+							}
+						});
+						decFilesJob.setFolder(currentFolder);
+						decFilesJob.setPerformMediaScan(true);
+						decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, files);
+					}
+				},
+				null);
 	}
 
 	private void sendBackSelected() {
@@ -714,6 +761,24 @@ public class GalleryActivity extends AppCompatActivity
 							public void onFinish(Boolean needToUpdateUI) {
 								adapter.updateDataSet();
 								exitActionMode();
+								spinner.dismiss();
+							}
+						}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+				},
+				null);
+	}
+
+	protected void emptyTrash(){
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_empty_trash)), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.emptying_trash), null);
+
+						new SyncManager.EmptyTrashAsyncTask(GalleryActivity.this, new SyncManager.OnFinish(){
+							@Override
+							public void onFinish(Boolean needToUpdateUI) {
+								adapter.updateDataSet();
 								spinner.dismiss();
 							}
 						}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

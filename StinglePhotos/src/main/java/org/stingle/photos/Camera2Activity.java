@@ -21,6 +21,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -79,9 +82,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -91,8 +96,13 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
 import org.stingle.photos.Camera.CameraImageSize;
+import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.Sync.SyncService;
+import org.stingle.photos.Sync.VideoEncryptService;
 import org.stingle.photos.Util.AsyncTasks;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -228,7 +238,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
 
     private String lastVideoFilename = "";
-    private String lastVideoFilenameEnc = "";
     private SharedPreferences sharedPrefs;
     private Range<Integer> mPreviewFpsRange = null;
 
@@ -883,7 +892,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             String currentDateTime = generateTimestamp();
 
             String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
-            String filenameEnc = Helpers.getNewEncFilename();
+            final String filenameEnc = Helpers.getNewEncFilename();
 
             String path = FileManager.getHomeDir(Camera2Activity.this);
             String finalPath = path + "/" + filenameEnc;
@@ -904,6 +913,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 						@Override
 						public void onFinish() {
 							super.onFinish();
+                            Helpers.insertFileIntoDB(Camera2Activity.this, filenameEnc);
 							showLastPhotoThumb();
 						}
 					});
@@ -1666,6 +1676,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     Toast.makeText(Camera2Activity.this, "Failed", Toast.LENGTH_SHORT).show();
                 }
             }, mBackgroundHandler);
+            ((RelativeLayout)findViewById(R.id.chronoBar)).setVisibility(View.VISIBLE);
+            ((Chronometer)findViewById(R.id.chrono)).setBase(SystemClock.elapsedRealtime());
+            ((Chronometer)findViewById(R.id.chrono)).start();
+            ((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter_video_active));
+            Helpers.acquireWakeLock(this);
         } catch (CameraAccessException/* | IOException*/ e) {
             e.printStackTrace();
 		} catch (ErrnoException e) {
@@ -1685,73 +1700,20 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         mNextVideoAbsolutePath = null;
         createCameraPreviewSession();
-        (new EncryptAndSaveVideo(this, lastVideoFilename, lastVideoFilenameEnc)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        ((RelativeLayout)findViewById(R.id.chronoBar)).setVisibility(View.INVISIBLE);
+        ((Chronometer)findViewById(R.id.chrono)).stop();
+        ((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter_video));
+
+        Helpers.releaseWakeLock();
+
+        (new ShowLastVideoThumb(lastVideoFilename)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        Intent serviceIntent = new Intent(Camera2Activity.this, VideoEncryptService.class);
+        startForegroundService(serviceIntent);
     }
 
-    public class EncryptAndSaveVideo extends AsyncTask<Void, Void, Void> {
 
-        private final Context context;
-        private final String fileName;
-        private final String encFileName;
-        private ProgressDialog progressDialog;
-
-        public EncryptAndSaveVideo(Context context, String fileName, String encFileName) {
-            super();
-            this.context = context;
-            this.fileName = fileName;
-            this.encFileName = encFileName;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressDialog = ProgressDialog.show(Camera2Activity.this, "", getString(R.string.encrypting_video), false, false);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                File cacheDir = context.getCacheDir();
-
-                File tmpFile = new File(cacheDir.getAbsolutePath() + "/" + fileName);
-                FileInputStream in = new FileInputStream(tmpFile);
-                String encFilePath = FileManager.getHomeDir(Camera2Activity.this) + "/" + encFileName;
-                FileOutputStream out = new FileOutputStream(encFilePath);
-
-                int videoDuration = FileManager.getVideoDurationFromUri(Camera2Activity.this, Uri.fromFile(tmpFile));
-
-                byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, out, lastVideoFilename, Crypto.FILE_TYPE_VIDEO, in.getChannel().size(), videoDuration);
-
-                out.close();
-
-                Bitmap thumb = ThumbnailUtils.createVideoThumbnail(tmpFile.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
-
-                mLastThumbBitmap = Helpers.generateThumbnail(Camera2Activity.this, bos.toByteArray(), encFileName, lastVideoFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
-
-                tmpFile.delete();
-
-                //Helpers.getAESCrypt(CameraActivity.this).encrypt(params[0], out);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (CryptoException e) {
-                e.printStackTrace();
-            }
-            // new EncryptAndWriteThumb(filename).execute(params[0]);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            progressDialog.dismiss();
-            showLastPhotoThumb();
-        }
-
-    }
 
     private void closePreviewSession() {
         if (mCaptureSession != null) {
@@ -1827,10 +1789,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     private String getVideoFilePath(Context context) {
 		lastVideoFilename = Helpers.getTimestampedFilename(Helpers.VIDEO_FILE_PREFIX, ".mp4");
-        lastVideoFilenameEnc = Helpers.getNewEncFilename();
 
         File cacheDir = getCacheDir();
-        return cacheDir.getAbsolutePath() + "/" + lastVideoFilename;
+        File tmpVideoDir = new File(cacheDir.getAbsolutePath() + "/tmpvideo/");
+        tmpVideoDir.mkdirs();
+        return tmpVideoDir.getAbsolutePath() + "/" + lastVideoFilename;
     }
 
     /**
@@ -1933,9 +1896,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
                 if(!isInVideoMode){
                     modeChangerButton.setImageResource(R.drawable.ic_photo);
+                    ((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter));
                 }
                 else{
                     modeChangerButton.setImageResource(R.drawable.ic_video);
+                    ((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter_video));
                 }
                 closeCamera();
                 openCamera();
@@ -2053,8 +2018,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     FileOutputStream output = null;
                     try {
                         output = new FileOutputStream(mFile);
-                        byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO, 0);
-                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, mFile.getName(), mFileName, fileId, Crypto.FILE_TYPE_PHOTO, 0);
+                        Crypto.EncryptResult result = StinglePhotosApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO, 0);
+                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, result.symmetricKey, mFile.getName(), mFileName, result.fileId, Crypto.FILE_TYPE_PHOTO, 0);
                         success = true;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -2552,7 +2517,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 			if (folderFiles != null && folderFiles.length > 0) {
 				Arrays.sort(folderFiles, new Comparator<File>() {
 					public int compare(File f1, File f2) {
-						return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
+					    return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
 					}
 				});
 
@@ -2573,37 +2538,67 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 			lastFile = file;
 
 			if (lastFile != null) {
-				final File lastFileThumb = new File(FileManager.getThumbsDir(Camera2Activity.this) + "/" + lastFile.getName());
 				final int thumbSize = (int) Math.round(Helpers.getThumbSize(Camera2Activity.this) / 1.4);
 
 				if (StinglePhotosApplication.getKey() != null) {
-					AsyncTasks.DecryptPopulateImage task = new AsyncTasks.DecryptPopulateImage(Camera2Activity.this, lastFileThumb.getPath(), galleryButton);
-					task.setSize(thumbSize);
-					task.setOnFinish(new OnAsyncTaskFinish() {
-						@Override
-						public void onFinish() {
-							super.onFinish();
-							//galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
-							//changeRotation(mOrientation);
-							findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
-						}
-					});
-					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    ShowThumbInImageView task = new ShowThumbInImageView(Camera2Activity.this, lastFile.getName(), galleryButton);
+                    task.setThumbSize(thumbSize);
+                    task.setOnFinish(new OnAsyncTaskFinish() {
+                        @Override
+                        public void onFinish() {
+                            super.onFinish();
+                            //galleryButton.setLayoutParams(new LinearLayout.LayoutParams(thumbSize, thumbSize));
+                            //changeRotation(mOrientation);
+                            findViewById(R.id.lastPhoto).setVisibility(View.VISIBLE);
+                        }
+                    });
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 				else if(mLastThumbBitmap != null){
-					galleryButton.setImageBitmap(mLastThumbBitmap);
+                    Bitmap thumb = Helpers.getThumbFromBitmap(mLastThumbBitmap, thumbSize);
+					galleryButton.setImageBitmap(thumb);
 					galleryButton.setVisibility(View.VISIBLE);
 				}
 			} else {
 				findViewById(R.id.lastPhoto).setVisibility(View.INVISIBLE);
 			}
 		}
-
 	}
+
+    private class ShowLastVideoThumb extends AsyncTask<Void, Void, Bitmap> {
+
+	    private String filename;
+
+	    ShowLastVideoThumb(String filename){
+	        this.filename = filename;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            int thumbSize = (int) Math.round(Helpers.getThumbSize(Camera2Activity.this) / 1.4);
+
+            File tmpFile = new File(getCacheDir().getAbsolutePath() + "/tmpvideo/" + filename);
+            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(tmpFile.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
+            return Helpers.getThumbFromBitmap(thumb, thumbSize);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+
+            if (bitmap != null) {
+                galleryButton.setImageBitmap(bitmap);
+                galleryButton.setVisibility(View.VISIBLE);
+            } else {
+                findViewById(R.id.lastPhoto).setVisibility(View.INVISIBLE);
+            }
+        }
+    }
 
 
 	private void showLastPhotoThumb() {
-		(new Camera2Activity.ShowLastPhotoThumb()).execute();
+		(new Camera2Activity.ShowLastPhotoThumb()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	private View.OnClickListener openGallery() {
@@ -2616,10 +2611,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 							Log.d("FILE", lastFile.getPath());
 							Intent intent = new Intent();
 							intent.setClass(Camera2Activity.this, ViewItemActivity.class);
-							intent.putExtra("EXTRA_IMAGE_PATH", lastFile.getPath());
-							intent.putExtra("EXTRA_CURRENT_PATH", FileManager.getHomeDir(Camera2Activity.this));
 							startActivityForResult(intent, GalleryActivity.REQUEST_VIEW_PHOTO);
-
 						}
 
 						@Override

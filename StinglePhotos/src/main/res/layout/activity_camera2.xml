@@ -54,6 +54,27 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/topPanel"/>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/chronoBar"
+        android:background="@drawable/chrono_bg"
+        android:elevation="1dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:layout_marginTop="20dp"
+        android:padding="10dp"
+        android:visibility="invisible">
+        <Chronometer
+            android:id="@+id/chrono"
+            android:textColor="@android:color/holo_red_dark"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+    </RelativeLayout>
     <LinearLayout
         android:id="@+id/timerLabelContainer"
         android:layout_width="50dp"

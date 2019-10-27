@@ -32,6 +32,7 @@
     <string name="trash_file_path">sync/trash</string>
     <string name="restore_file_path">sync/restore</string>
     <string name="delete_file_path">sync/delete</string>
+    <string name="empty_trash_path">sync/emptyTrash</string>
     <string name="get_url_path">sync/getUrl</string>
     <string name="notify_purchase">billing/purchase</string>
 

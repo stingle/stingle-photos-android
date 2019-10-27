@@ -1,6 +1,7 @@
 package org.stingle.photos.ViewItem;
 
 import android.content.Context;
+import android.drm.DrmStore;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -48,6 +49,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.FileDataSource;
+import com.google.android.exoplayer2.video.VideoListener;
 
 import org.json.JSONObject;
 
@@ -277,6 +279,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		else if (result.fileType == Crypto.FILE_TYPE_VIDEO){
 			PlayerView playerView = new PlayerView(context);
 			playerView.setLayoutParams(params);
+			playerView.setKeepScreenOn(true);
 
 			parent.removeAllViews();
 			parent.addView(playerView);
@@ -315,6 +318,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			}
 
 			player.setPlayWhenReady(false);
+
 			/*if(adapter.getCurrentPosition() == position) {
 				player.setPlayWhenReady(true);
 			}

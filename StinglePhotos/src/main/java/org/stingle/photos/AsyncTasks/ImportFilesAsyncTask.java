@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
@@ -92,6 +93,9 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 				byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
 
+				FileOutputStream outputStream = new FileOutputStream(encFilePath);
+				Crypto.EncryptResult result =  StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, null, videoDuration);
+
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 
 					InputStream thumbIn = context.getContentResolver().openInputStream(uri);
@@ -105,7 +109,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 					//System.gc();
 
-					Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
+					Helpers.generateThumbnail(context, bytes.toByteArray(), result.symmetricKey, encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
 				}
 				else if(fileType == Crypto.FILE_TYPE_VIDEO){
 
@@ -123,12 +127,11 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
-					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+					Helpers.generateThumbnail(context, bos.toByteArray(), result.symmetricKey, encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 					Log.e("thumb", "generatedVideoThumb");
 				}
 
-				FileOutputStream outputStream = new FileOutputStream(encFilePath);
-				StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration);
+
 
 				long nowDate = System.currentTimeMillis();
 				StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);

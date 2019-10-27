@@ -17,14 +17,24 @@ import java.io.IOException;
 
 public class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 
-	protected Context context;
-	protected String filename;
-	protected ImageView imageView;
+	private Context context;
+	private String filename;
+	private ImageView imageView;
+	private Integer thumbSize;
+	private OnAsyncTaskFinish onFinish;
 
 	public ShowThumbInImageView(Context context, String filename, ImageView imageView){
 		this.context = context;
 		this.filename = filename;
 		this.imageView = imageView;
+	}
+
+	public void setThumbSize(int size){
+		thumbSize = size;
+	}
+
+	public void setOnFinish(OnAsyncTaskFinish onFinish){
+		this.onFinish = onFinish;
 	}
 
 	@Override
@@ -33,12 +43,15 @@ public class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 			return null;
 		}
 		try {
+			if(thumbSize == null){
+				thumbSize = Helpers.getThumbSize(context);
+			}
 			File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + filename);
 			FileInputStream input = new FileInputStream(fileToDec);
 			byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input);
 
 			if (decryptedData != null) {
-				return Helpers.getThumbFromBitmap(Helpers.decodeBitmap(decryptedData, Helpers.getThumbSize(context)), Helpers.getThumbSize(context));
+				return Helpers.getThumbFromBitmap(Helpers.decodeBitmap(decryptedData, thumbSize), thumbSize);
 			}
 		} catch (IOException | CryptoException e) {
 			e.printStackTrace();
@@ -54,6 +67,9 @@ public class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 
 		if(bitmap != null){
 			imageView.setImageBitmap(bitmap);
+			if(onFinish != null){
+				onFinish.onFinish();
+			}
 		}
 	}
 }

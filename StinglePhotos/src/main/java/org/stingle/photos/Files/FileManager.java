@@ -20,14 +20,18 @@ import android.provider.OpenableColumns;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Net.HttpsClient;
+import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.ByteArrayOutputStream;
@@ -50,6 +54,7 @@ public class FileManager {
 
 
 	static final public String SHARE_CACHE_DIR = "share";
+	static final public String DECRYPT_DIR = "StinglePhotosDecrypted";
 
 	public static byte[] getAndCacheThumb(Context context, String filename, int folder) throws IOException {
 		return getAndCacheThumb(context,filename, folder,null);

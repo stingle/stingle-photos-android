@@ -34,6 +34,8 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import org.stingle.photos.Camera.CameraImageSize;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -191,7 +193,7 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, String encfileName, String realFileName, byte[] fileId, int type, int videoDuration) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, byte[] symmetricKey, String encfileName, String realFileName, byte[] fileId, int type, int videoDuration) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		//Bitmap thumbBitmap = null;
@@ -199,11 +201,11 @@ public class Helpers {
 			//thumbBitmap = Helpers.getThumbFromBitmap(bitmap, getThumbSize(activity));
 
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+			bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream);
 
 			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encfileName);
 			try {
-				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
+				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, symmetricKey, videoDuration);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -634,6 +636,13 @@ public class Helpers {
 		}
 
 		return String.valueOf(mb);
+	}
+
+	public static void insertFileIntoDB(Context context, String filename){
+		long nowDate = System.currentTimeMillis();
+		StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+		db.insertFile(filename, true, false, StingleDbHelper.INITIAL_VERSION, nowDate, nowDate);
+		db.close();
 	}
 
 }

@@ -29,6 +29,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executor;
 
 public class SyncManager {
 
@@ -57,14 +58,23 @@ public class SyncManager {
 
 	}
 
-	public static void syncFSToDB(Context context, OnFinish onFinish){
-		(new FsSyncAsyncTask(context, onFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	public static void syncFSToDB(Context context, OnFinish onFinish, Executor executor){
+		if(executor == null){
+			executor = AsyncTask.THREAD_POOL_EXECUTOR;
+		}
+		(new FsSyncAsyncTask(context, onFinish)).executeOnExecutor(executor);
 	}
-	public static void uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish){
-		(new UploadToCloudAsyncTask(context, progress, onFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	public static void uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish, Executor executor){
+		if(executor == null){
+			executor = AsyncTask.THREAD_POOL_EXECUTOR;
+		}
+		(new UploadToCloudAsyncTask(context, progress, onFinish)).executeOnExecutor(executor);
 	}
-	public static void syncCloudToLocalDb(Context context, OnFinish onFinish){
-		(new SyncCloudToLocalDbAsyncTask(context, onFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	public static void syncCloudToLocalDb(Context context, OnFinish onFinish, Executor executor){
+		if(executor == null){
+			executor = AsyncTask.THREAD_POOL_EXECUTOR;
+		}
+		(new SyncCloudToLocalDbAsyncTask(context, onFinish)).executeOnExecutor(executor);
 	}
 
 	public static class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
@@ -420,15 +430,19 @@ public class SyncManager {
 
 				if(spaceUsedStr != null && spaceUsedStr.length() > 0){
 					int spaceUsed = Integer.parseInt(spaceUsedStr);
-					if(spaceUsed >= 0){
+					int oldSpaceUsed = Helpers.getPreference(context, PREF_LAST_SPACE_USED, 0);
+					if(spaceUsed != oldSpaceUsed){
 						Helpers.storePreference(context, PREF_LAST_SPACE_USED, spaceUsed);
+						needToUpdateUI = true;
 					}
 				}
 
 				if(spaceQuotaStr != null && spaceQuotaStr.length() > 0){
 					int spaceQuota = Integer.parseInt(spaceQuotaStr);
-					if(spaceQuota >= 0){
+					int oldSpaceQuota = Helpers.getPreference(context, PREF_LAST_SPACE_QUOTA, 0);
+					if(spaceQuota != oldSpaceQuota){
 						Helpers.storePreference(context, PREF_LAST_SPACE_QUOTA, spaceQuota);
+						needToUpdateUI = true;
 					}
 				}
 
@@ -768,6 +782,68 @@ public class SyncManager {
 			}
 
 			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.delete_file_path), postParams);
+			StingleResponse response = new StingleResponse(this.context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+
+			if(onFinish != null){
+				onFinish.onFinish(true);
+			}
+		}
+	}
+
+	public static class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		protected Context context;
+		protected OnFinish onFinish;
+
+		public EmptyTrashAsyncTask(Context context, OnFinish onFinish){
+			this.context = context;
+			this.onFinish = onFinish;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			String homeDir = FileManager.getHomeDir(context);
+			String thumbDir = FileManager.getThumbsDir(context);
+
+			Cursor result = trashDb.getFilesList(StingleDbHelper.GET_MODE_ALL, StingleDbHelper.SORT_ASC);
+
+			while(result.moveToNext()) {
+				StingleDbFile dbFile = new StingleDbFile(result);
+				if(dbFile.isLocal){
+					File mainFile = new File(homeDir + "/" + dbFile.filename);
+					if(mainFile.exists()){
+						mainFile.delete();
+					}
+				}
+				File thumbFile = new File(thumbDir + "/" + dbFile.filename);
+				if(thumbFile.exists()){
+					thumbFile.delete();
+				}
+				trashDb.deleteFile(dbFile.filename);
+			}
+			notifyCloudAboutEmptyTrash();
+
+			trashDb.close();
+			return null;
+		}
+
+		protected boolean notifyCloudAboutEmptyTrash(){
+			HashMap<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("token", KeyManagement.getApiToken(context));
+
+			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.empty_trash_path), postParams);
 			StingleResponse response = new StingleResponse(this.context, json, false);
 
 			if (response.isStatusOk()) {
