@@ -163,7 +163,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="org.stingle.photos.share"
+            android:authorities="@string/content_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

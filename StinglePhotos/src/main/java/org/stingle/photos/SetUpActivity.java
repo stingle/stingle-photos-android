@@ -32,25 +32,8 @@ public class SetUpActivity  extends Activity{
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		if(FileManager.requestSDCardPermission(this)){
-			FileManager.getHomeDir(this);
-		}
 	}
-	@Override
-	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-		switch (requestCode) {
-			case StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION: {
-				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					FileManager.getHomeDir(this);
 
-				} else {
-					finish();
-				}
-				return;
-			}
-		}
-	}
 
 	private OnClickListener gotoLogin() {
 		return new OnClickListener() {

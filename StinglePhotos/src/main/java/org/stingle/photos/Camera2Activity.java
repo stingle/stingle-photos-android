@@ -2018,8 +2018,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                     FileOutputStream output = null;
                     try {
                         output = new FileOutputStream(mFile);
-                        Crypto.EncryptResult result = StinglePhotosApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO, 0);
-                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, result.symmetricKey, mFile.getName(), mFileName, result.fileId, Crypto.FILE_TYPE_PHOTO, 0);
+                        byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(output, bytes, mFileName, Crypto.FILE_TYPE_PHOTO, 0);
+                        mLastThumbBitmap = Helpers.generateThumbnail(mContext, bytes, mFile.getName(), mFileName, fileId, Crypto.FILE_TYPE_PHOTO, 0);
                         success = true;
                     } catch (IOException e) {
                         e.printStackTrace();

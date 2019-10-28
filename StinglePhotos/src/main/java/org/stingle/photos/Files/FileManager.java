@@ -229,7 +229,7 @@ public class FileManager {
         }
     }
 
-	public static boolean requestSDCardPermission(final Activity activity){
+	public static boolean requestSDCardPermission(final Activity activity, OnFinish onFinish){
 		if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
 			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -278,6 +278,7 @@ public class FileManager {
 			}
 			return false;
 		}
+		onFinish.onFinish();
 		return true;
 	}
 

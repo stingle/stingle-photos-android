@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -223,21 +224,30 @@ public class GalleryActivity extends AppCompatActivity
 
 			@Override
 			public void onLoggedIn() {
-				Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
-				try {
-					startService(serviceIntent);
-					bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
-				}
-				catch (IllegalStateException ignored){}
-				layoutManager.scrollToPosition(lastScrollPosition);
-
-				if(adapter != null){
-					adapter.updateDataSet();
-				}
-				updateQuotaInfo();
+				FileManager.requestSDCardPermission(GalleryActivity.this, new FileManager.OnFinish() {
+					@Override
+					public void onFinish() {
+						initGallery();
+					}
+				});
 			}
 		});
-		LoginManager.disableLockTimer(this);
+		LoginManager.disableLockTimer(GalleryActivity.this);
+	}
+
+	private void initGallery(){
+		Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
+		try {
+			startService(serviceIntent);
+			bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+		}
+		catch (IllegalStateException ignored){}
+		layoutManager.scrollToPosition(lastScrollPosition);
+
+		if(adapter != null){
+			adapter.updateDataSet();
+		}
+		updateQuotaInfo();
 	}
 
 	@Override
@@ -260,6 +270,20 @@ public class GalleryActivity extends AppCompatActivity
 		super.onSaveInstanceState(outState, outPersistentState);
 
 		outState.putInt("scroll", layoutManager.findFirstVisibleItemPosition());
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION: {
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					initGallery();
+				} else {
+					finish();
+				}
+				return;
+			}
+		}
 	}
 
 	private void handleIncomingIntent(Intent intent) {

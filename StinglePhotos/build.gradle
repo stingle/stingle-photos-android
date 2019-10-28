@@ -21,11 +21,12 @@ android {
             //minifyEnabled true
             //proguardFiles 'proguard.cfg'
             signingConfig signingConfigs.release
-            debuggable = true
+            resValue "string", "content_provider", "org.stingle.photos.share"
         }
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
+            resValue "string", "content_provider", "org.stingle.photos.share.debug"
         }
     }
     productFlavors {

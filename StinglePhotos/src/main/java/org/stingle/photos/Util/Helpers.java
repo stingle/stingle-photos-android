@@ -193,7 +193,7 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, byte[] symmetricKey, String encfileName, String realFileName, byte[] fileId, int type, int videoDuration) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String encFilename, String realFileName, byte[] fileId, int type, int videoDuration) throws FileNotFoundException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		//Bitmap thumbBitmap = null;
@@ -203,9 +203,9 @@ public class Helpers {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream);
 
-			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encfileName);
+			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encFilename);
 			try {
-				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, symmetricKey, videoDuration);
+				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -641,7 +641,14 @@ public class Helpers {
 	public static void insertFileIntoDB(Context context, String filename){
 		long nowDate = System.currentTimeMillis();
 		StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
-		db.insertFile(filename, true, false, StingleDbHelper.INITIAL_VERSION, nowDate, nowDate);
+
+		try {
+			String headers = Crypto.getFileHeaders(FileManager.getHomeDir(context) + "/" + filename, FileManager.getThumbsDir(context) + "/" + filename);
+			db.insertFile(filename, true, false, StingleDbHelper.INITIAL_VERSION, nowDate, nowDate, headers);
+		} catch (IOException | CryptoException e) {
+			e.printStackTrace();
+		}
+
 		db.close();
 	}
 

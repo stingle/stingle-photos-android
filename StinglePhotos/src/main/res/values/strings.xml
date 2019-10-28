@@ -85,8 +85,8 @@
     <string name="change">Change</string>
     <string name="current_password">Current Password</string>
     <string name="new_password">New Password</string>
-    <string name="sdcard_perm_explain">SafeCamera requires access to SD card in order to show and create photos. Please allow access to continue.</string>
-    <string name="camera_perm_explain">SafeCamera requires access to camera in order to take photos. Please allow access to continue.</string>
+    <string name="sdcard_perm_explain">Stingle Photos requires access to SD card in order to show and create photos. Please allow access to continue.</string>
+    <string name="camera_perm_explain">Stingle Photos requires access to camera in order to take photos. Please allow access to continue.</string>
     <string name="shutter_sound">Camera shutter sound</string>
     <string name="shutter_sound_desc">Play sound when taking photos</string>
     <string name="title_activity_settings">Settings</string>
@@ -163,5 +163,8 @@
     <string name="empty_trash">Empty trash</string>
     <string name="confirm_empty_trash">Are you sure you want to empty trash? This action cannot be undone!</string>
     <string name="emptying_trash">Emptying trash...</string>
+    <string name="resync_db_desc">Resync database with filesystem</string>
+    <string name="resync_db">Resync database</string>
+    <string name="syncing_db">Syncing database...</string>
 
 </resources>

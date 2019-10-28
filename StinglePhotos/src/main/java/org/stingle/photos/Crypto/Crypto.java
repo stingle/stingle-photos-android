@@ -15,6 +15,7 @@ import com.sun.jna.NativeLong;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import android.util.Base64;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Crypto {
 
@@ -526,30 +526,28 @@ public class Crypto {
         return filename;
     }
 
-    public EncryptResult encryptFile(OutputStream out, byte[] data, String filename, int fileType, int videoDuration) throws IOException, CryptoException {
-        return encryptFile(out, data, filename, fileType, null, null, videoDuration);
+    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, int videoDuration) throws IOException, CryptoException {
+        return encryptFile(out, data, filename, fileType, null, videoDuration);
     }
 
-    public EncryptResult encryptFile(OutputStream out, byte[] data, String filename, int fileType, byte[] fileId, byte[] symmetricKey, int videoDuration) throws IOException, CryptoException {
+    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, byte[] fileId, int videoDuration) throws IOException, CryptoException {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
-        return encryptFile(in, out, filename, fileType, data.length, fileId, symmetricKey, videoDuration);
+        return encryptFile(in, out, filename, fileType, data.length, fileId, videoDuration);
     }
 
-    public EncryptResult encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, int videoDuration) throws IOException, CryptoException {
-        return encryptFile(in, out, filename, fileType, dataLength, null, null, videoDuration, null, null);
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, int videoDuration) throws IOException, CryptoException {
+        return encryptFile(in, out, filename, fileType, dataLength, null, videoDuration, null, null);
     }
 
-    public EncryptResult encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, byte[] symmetricKey, int videoDuration) throws IOException, CryptoException {
-        return encryptFile(in, out, filename, fileType, dataLength, fileId, symmetricKey, videoDuration, null, null);
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration) throws IOException, CryptoException {
+        return encryptFile(in, out, filename, fileType, dataLength, fileId, videoDuration, null, null);
     }
 
-    public EncryptResult encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, byte[] symmetricKey, int videoDuration, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
 
-        if(symmetricKey == null || symmetricKey.length != KeyDerivation.MASTER_KEY_BYTES) {
-            symmetricKey = new byte[KeyDerivation.MASTER_KEY_BYTES];
-            so.crypto_kdf_keygen(symmetricKey);
-        }
+        byte[] symmetricKey = new byte[KeyDerivation.MASTER_KEY_BYTES];
+        so.crypto_kdf_keygen(symmetricKey);
 
         if(fileId == null) {
             fileId = new byte[FILE_FILE_ID_LEN];
@@ -561,11 +559,7 @@ public class Crypto {
 
         encryptData(in, out, header, progress, task);
 
-        EncryptResult result = new EncryptResult();
-        result.fileId = fileId;
-        result.symmetricKey = symmetricKey;
-
-        return result;
+        return fileId;
     }
 
     public byte[] getNewFileId(){
@@ -823,6 +817,66 @@ public class Crypto {
         return Base64.decode(base64str, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 decoding
     }
 
+    public static String getFileHeaders(String encFilePath, String encThumbPath) throws IOException, CryptoException {
+        byte[] fileEncHeader = getFileHeaderAsIs(encFilePath);
+        byte[] thumbEncHeader = getFileHeaderAsIs(encThumbPath);
+
+        return byteArrayToBase64(fileEncHeader) + "*" + byteArrayToBase64(thumbEncHeader);
+    }
+
+    public static byte[] getFileHeaderAsIs(String filePath) throws IOException, CryptoException {
+
+        int overallHeaderSize = getOverallHeaderSize(new FileInputStream(filePath));
+
+        FileInputStream in = new FileInputStream(filePath);
+
+        byte[] encHeader = new byte[overallHeaderSize];
+        in.read(encHeader);
+
+        return encHeader;
+    }
+
+    public static int getOverallHeaderSize(InputStream in) throws IOException, CryptoException {
+        int overallHeaderSize = 0;
+
+        // Read and validate file beginning
+        byte[] fileBeginning = new byte[FILE_BEGGINIG_LEN];
+        in.read(fileBeginning);
+        overallHeaderSize += FILE_BEGGINIG_LEN;
+
+        if (!new String(fileBeginning, "UTF-8").equals(FILE_BEGGINING)) {
+            throw new CryptoException("Invalid file header, not our file");
+        }
+
+        // Read and validate file version
+        int fileVersion = in.read();
+        if (fileVersion != CURRENT_FILE_VERSION) {
+            throw new CryptoException("Unsupported version number: " + String.valueOf(fileVersion));
+        }
+        overallHeaderSize += FILE_FILE_VERSION_LEN;
+
+        // Read File ID
+        byte[] fileId = new byte[FILE_FILE_ID_LEN];
+        in.read(fileId);
+        overallHeaderSize += FILE_FILE_ID_LEN;
+
+
+        // Read header size
+        byte[] headerSizeBytes = new byte[FILE_HEADER_SIZE_LEN];
+        in.read(headerSizeBytes);
+        int headerSize = byteArrayToInt(headerSizeBytes);
+
+        if(headerSize < 1 || headerSize > MAX_BUFFER_LENGTH){
+            throw new CryptoException("Invalid header size");
+        }
+        overallHeaderSize += FILE_HEADER_SIZE_LEN;
+
+        overallHeaderSize += headerSize;
+        in.close();
+
+        return overallHeaderSize;
+    }
+
     public class Header{
         public int fileVersion;
         public byte[] fileId;
@@ -854,10 +908,5 @@ public class Crypto {
 
                     "Overall Header Size - " + String.valueOf(overallHeaderSize);
         }
-    }
-
-    public class EncryptResult{
-        public byte[] fileId;
-        public byte[] symmetricKey;
     }
 }

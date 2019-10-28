@@ -9,6 +9,8 @@ import android.util.Log;
 import com.drew.lang.StringUtil;
 
 import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
@@ -130,8 +132,14 @@ public class SyncManager {
 				if(currentFolderFiles != null) {
 					for (File file : currentFolderFiles) {
 						if (file.isFile() && file.getName().endsWith(StinglePhotosApplication.FILE_EXTENSION) && db.getFileIfExists(file.getName()) == null && trashDb.getFileIfExists(file.getName()) == null) {
-							db.insertFile(file.getName(), true, false, StingleDbHelper.INITIAL_VERSION, file.lastModified(), file.lastModified());
-							needToUpdateUI = true;
+							try {
+								String headers = Crypto.getFileHeaders(file.getAbsolutePath(), FileManager.getThumbsDir(context) + "/" + file.getName());
+								db.insertFile(file.getName(), true, false, StingleDbHelper.INITIAL_VERSION, file.lastModified(), file.lastModified(), headers);
+								needToUpdateUI = true;
+							} catch (IOException | CryptoException e) {
+								e.printStackTrace();
+							}
+
 						}
 					}
 				}
@@ -228,6 +236,7 @@ public class SyncManager {
 			String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_VERSION));
 			String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED));
 			String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED));
+			String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_HEADERS));
 
 			if(progress != null){
 				progress.currentFile(filename);
@@ -259,6 +268,7 @@ public class SyncManager {
 			postParams.put("version", version);
 			postParams.put("dateCreated", dateCreated);
 			postParams.put("dateModified", dateModified);
+			postParams.put("headers", headers);
 
 			JSONObject resp = HttpsClient.multipartUpload(
 					context.getString(R.string.api_server_url) + context.getString(R.string.upload_file_path),
@@ -268,8 +278,6 @@ public class SyncManager {
 			StingleResponse response = new StingleResponse(this.context, resp, false);
 			if(response.isStatusOk()){
 				db.markFileAsRemote(filename);
-
-
 
 				String spaceUsedStr = response.get("spaceUsed");
 				String spaceQuotaStr = response.get("spaceQuota");
@@ -460,7 +468,7 @@ public class SyncManager {
 			StingleDbFile file = myDb.getFileIfExists(remoteFile.filename);
 
 			if(file == null){
-				myDb.insertFile(remoteFile.filename, false, true, remoteFile.version, remoteFile.dateCreated, remoteFile.dateModified);
+				myDb.insertFile(remoteFile.filename, false, true, remoteFile.version, remoteFile.dateCreated, remoteFile.dateModified, remoteFile.headers);
 			}
 			else {
 				boolean needUpdate = false;

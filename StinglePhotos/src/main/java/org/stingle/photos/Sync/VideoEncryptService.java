@@ -104,7 +104,7 @@ public class VideoEncryptService extends Service {
 
 					int videoDuration = FileManager.getVideoDurationFromUri(context, Uri.fromFile(file));
 
-					Crypto.EncryptResult result = StinglePhotosApplication.getCrypto().encryptFile(in, out, file.getName(), Crypto.FILE_TYPE_VIDEO, in.getChannel().size(), videoDuration);
+					byte[] fileId = StinglePhotosApplication.getCrypto().encryptFile(in, out, file.getName(), Crypto.FILE_TYPE_VIDEO, in.getChannel().size(), videoDuration);
 
 					out.close();
 
@@ -112,7 +112,7 @@ public class VideoEncryptService extends Service {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-					Helpers.generateThumbnail(context, bos.toByteArray(), result.symmetricKey, videoFilenameEnc, file.getName(), result.fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+					Helpers.generateThumbnail(context, bos.toByteArray(), videoFilenameEnc, file.getName(), fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 					Helpers.insertFileIntoDB(context, videoFilenameEnc);
 					file.delete();
 				} catch (IOException | CryptoException e) {

@@ -9,6 +9,11 @@
         android:title="@string/lock_time" />
 
     <Preference
+        android:key="resync_db"
+        android:summary="@string/resync_db_desc"
+        android:title="@string/resync_db" />
+
+    <Preference
         android:key="clear_cache"
         android:summary="@string/clear_cache_desc"
         android:title="@string/clear_cache" />

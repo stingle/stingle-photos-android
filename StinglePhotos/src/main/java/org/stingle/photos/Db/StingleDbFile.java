@@ -13,6 +13,7 @@ public class StingleDbFile {
 	public Integer reupload = StingleDbHelper.REUPLOAD_NO;
 	public Long dateCreated;
 	public Long dateModified;
+	public String headers;
 
 	public StingleDbFile(Cursor cursor){
 		this.filename = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_FILENAME));
@@ -35,6 +36,9 @@ public class StingleDbFile {
 		if((index = cursor.getColumnIndex(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED)) != -1) {
 			this.dateModified =  cursor.getLong(index);
 		}
+		if((index = cursor.getColumnIndex(StingleDbContract.Files.COLUMN_NAME_HEADERS)) != -1) {
+			this.headers =  cursor.getString(index);
+		}
 	}
 
 	public StingleDbFile(JSONObject json) throws JSONException {
@@ -46,5 +50,6 @@ public class StingleDbFile {
 		}
 		this.dateCreated = json.getLong("dateCreated");
 		this.dateModified = json.getLong("dateModified");
+		this.headers = json.getString("headers");
 	}
 }

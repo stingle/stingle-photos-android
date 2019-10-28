@@ -18,6 +18,7 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_REUPLOAD = "reupload";
 		public static final String COLUMN_NAME_DATE_CREATED = "date_created";
 		public static final String COLUMN_NAME_DATE_MODIFIED = "date_modified";
+		public static final String COLUMN_NAME_HEADERS = "headers";
 	}
 
 	public static final String SQL_CREATE_FILES =
@@ -29,7 +30,8 @@ public class StingleDbContract {
 					Files.COLUMN_NAME_VERSION + " INTEGER," +
 					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
 					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
-					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER, " +
+					Files.COLUMN_NAME_HEADERS + " TEXT" +
 					")";
 
 	public static final String SQL_DELETE_FILES =
@@ -45,7 +47,8 @@ public class StingleDbContract {
 					Files.COLUMN_NAME_VERSION + " INTEGER," +
 					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
 					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
-					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER, " +
+					Files.COLUMN_NAME_HEADERS + " TEXT" +
 					")";
 
 	public static final String SQL_DELETE_TRASH =

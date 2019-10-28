@@ -2,6 +2,7 @@ package org.stingle.photos;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.view.MenuItem;
 
 import org.stingle.photos.Camera.CameraImageSize;
 import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.AsyncTasks;
 import org.stingle.photos.Auth.FingerprintManagerWrapper;
 import org.stingle.photos.Util.Helpers;
@@ -189,6 +191,7 @@ public class SettingsActivity extends PreferenceActivity {
             // guidelines.
 
             initClearCacheButton();
+            initResyncDBButton();
 
             bindPreferenceSummaryToValue(findPreference("lock_time"));
         }
@@ -225,6 +228,22 @@ public class SettingsActivity extends PreferenceActivity {
                     builder.setNegativeButton(getString(R.string.no), null);
                     AlertDialog dialog = builder.create();
                     dialog.show();
+                    return true;
+                }
+            });
+        }
+        protected void initResyncDBButton() {
+            Preference resyncDBPref = findPreference("resync_db");
+            resyncDBPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+                public boolean onPreferenceClick(Preference preference) {
+                    final ProgressDialog spinner = Helpers.showProgressDialog(GeneralPreferenceFragment.this.getContext(), getString(R.string.syncing_db), null);
+                    SyncManager.syncFSToDB(GeneralPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
+                        @Override
+                        public void onFinish(Boolean needToUpdateUI) {
+                            spinner.dismiss();
+                        }
+                    }, AsyncTask.THREAD_POOL_EXECUTOR);
                     return true;
                 }
             });

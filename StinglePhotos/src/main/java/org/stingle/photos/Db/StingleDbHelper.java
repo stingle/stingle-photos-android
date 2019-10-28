@@ -65,10 +65,10 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	}
 
 	public long insertFile(StingleDbFile file){
-		return insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, file.dateModified);
+		return insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, file.dateModified, file.headers);
 	}
 
-	public long insertFile(String filename, boolean isLocal, boolean isRemote, int version, long dateCreated, long dateModified){
+	public long insertFile(String filename, boolean isLocal, boolean isRemote, int version, long dateCreated, long dateModified, String headers){
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, filename);
 		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
@@ -78,6 +78,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
+		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, headers);
 
 		return openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
@@ -93,6 +94,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, file.dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, file.dateModified);
+		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, file.headers);
 
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { file.filename };
@@ -176,7 +178,8 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_VERSION,
 				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Files.COLUMN_NAME_HEADERS
 		};
 
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
@@ -209,7 +212,8 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_VERSION,
 				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Files.COLUMN_NAME_HEADERS
 		};
 
 		String selection = null;
@@ -269,7 +273,8 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_VERSION,
 				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Files.COLUMN_NAME_HEADERS
 		};
 
 		String selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_REUPLOAD + " = ?";
