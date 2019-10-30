@@ -191,7 +191,8 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 		boxesParent.removeAllViews();
 
 		if(purchasedSkus == null || purchasedSkus.size() == 0) {
-			createPaymentBox("1 GB", null, null);
+			int spaceQuota = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_QUOTA, 0);
+			createPaymentBox(Helpers.formatSpaceUnits(spaceQuota), null, null);
 		}
 		createPaymentBox("1 TB", skuDetailsMap.get("1tb_monthly"), skuDetailsMap.get("1tb_yearly"));
 		createPaymentBox("3 TB", skuDetailsMap.get("3tb_monthly"), skuDetailsMap.get("3tb_yearly"));

@@ -26,6 +26,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import android.util.Base64;
+import android.util.Log;
+
 import java.util.HashMap;
 
 public class Crypto {
@@ -651,7 +653,6 @@ public class Crypto {
                     break;
                 }
             }
-
             chunkNumber++;
         }
 

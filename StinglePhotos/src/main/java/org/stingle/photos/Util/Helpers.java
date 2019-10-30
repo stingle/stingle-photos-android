@@ -72,17 +72,22 @@ public class Helpers {
 	private static PowerManager.WakeLock wakelock;
 
 
-	public static void acquireWakeLock(Context context){
-		PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		wakelock = pm.newWakeLock(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, context.getString(R.string.app_name) + "decrypt");
-		wakelock.acquire();
+	public static void acquireWakeLock(Activity activity){
+		/*PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+		if(pm != null) {
+			wakelock = pm.newWakeLock(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, context.getString(R.string.app_name) + "decrypt");
+			wakelock.acquire(1000 * 60 * 10);
+		}*/
+		activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 	}
 
-	public static void releaseWakeLock(){
-		if(wakelock != null){
+	public static void releaseWakeLock(Activity activity){
+		/*if(wakelock != null){
 			wakelock.release();
 			wakelock = null;
-		}
+		}*/
+		activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
 	public static void deleteTmpDir(Context context) {

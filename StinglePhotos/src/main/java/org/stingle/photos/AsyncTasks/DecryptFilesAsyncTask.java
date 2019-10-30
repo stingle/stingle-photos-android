@@ -63,13 +63,14 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 			public void onCancel(DialogInterface dialog) {
 				DecryptFilesAsyncTask.this.cancel(false);
+				Helpers.releaseWakeLock((Activity)context);
 			}
 		});
 		progressDialog.setMessage(context.getString(R.string.decrypting_files));
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.show();
 
-		Helpers.acquireWakeLock(context);
+		Helpers.acquireWakeLock((Activity)context);
 	}
 
 	@Override
@@ -154,7 +155,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		super.onPostExecute(decryptedFiles);
 
 		progressDialog.dismiss();
-		Helpers.releaseWakeLock();
+		Helpers.releaseWakeLock((Activity)context);
 
 		if (onFinishListener != null) {
 			onFinishListener.onFinish(decryptedFiles);

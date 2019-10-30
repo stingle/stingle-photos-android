@@ -1,7 +1,9 @@
 package org.stingle.photos.AsyncTasks;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
@@ -10,6 +12,8 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
+
+import androidx.constraintlayout.solver.widgets.Helper;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -46,7 +50,14 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 	protected void onPreExecute() {
 		super.onPreExecute();
 
-		progress = Helpers.showProgressDialogWithBar(context, context.getString(R.string.importing_files), uris.size(), null);
+		progress = Helpers.showProgressDialogWithBar(context, context.getString(R.string.importing_files), uris.size(), new DialogInterface.OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialogInterface) {
+				Helpers.releaseWakeLock((Activity)context);
+				ImportFilesAsyncTask.this.cancel(false);
+			}
+		});
+		Helpers.acquireWakeLock((Activity)context);
 	}
 
 	@Override
@@ -124,12 +135,10 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
 					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
-					Log.e("thumb", "generatedVideoThumb");
 				}
 
 				FileOutputStream outputStream = new FileOutputStream(encFilePath);
-				StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration);
-
+				StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, this);
 				long nowDate = System.currentTimeMillis();
 				StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 
@@ -170,5 +179,6 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 		if(onFinish != null){
 			onFinish.onFinish();
 		}
+		Helpers.releaseWakeLock((Activity)context);
 	}
 }

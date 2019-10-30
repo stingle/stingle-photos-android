@@ -349,6 +349,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         closeCamera();
         stopBackgroundThread();
         destroyOrientationListener();
+        Helpers.releaseWakeLock(this);
         super.onPause();
     }
 
@@ -1705,7 +1706,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         ((Chronometer)findViewById(R.id.chrono)).stop();
         ((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter_video));
 
-        Helpers.releaseWakeLock();
+        Helpers.releaseWakeLock(this);
 
         (new ShowLastVideoThumb(lastVideoFilename)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
