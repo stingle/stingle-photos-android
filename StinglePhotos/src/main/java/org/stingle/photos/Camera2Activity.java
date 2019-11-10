@@ -307,6 +307,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         modeChangerButton.setOnClickListener(toggleCameraMode());
 
         findViewById(R.id.switchCamButton).setOnClickListener(toggleCamera());
+        findViewById(R.id.optionsButton).setOnClickListener(openSettings());
 
         setFlashButtonImage();
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(Camera2Activity.this);
@@ -1937,6 +1938,15 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 closeCamera();
                 openCamera();
                 configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
+            }
+        };
+    }
+    private View.OnClickListener openSettings() {
+        return new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(Camera2Activity.this, SettingsActivity.class);
+                startActivity(intent);
             }
         };
     }

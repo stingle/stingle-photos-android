@@ -166,5 +166,6 @@
     <string name="resync_db_desc">Resync database with filesystem</string>
     <string name="resync_db">Resync database</string>
     <string name="syncing_db">Syncing database...</string>
+    <string name="immediately">Immediately</string>
 
 </resources>

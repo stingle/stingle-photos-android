@@ -1,6 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference
+    <!--<SwitchPreference
         android:defaultValue="true"
         android:key="volume_take_photo"
         android:summary="@string/volume_take_photo_desc"
@@ -18,7 +18,7 @@
         android:entryValues="@array/timerDurationValues"
         android:key="timerDuration"
         android:summary="@string/timer_duartion_desc"
-        android:title="@string/timer_duration" />
+        android:title="@string/timer_duration" />-->
 
     <PreferenceCategory
         android:title="@string/photo"

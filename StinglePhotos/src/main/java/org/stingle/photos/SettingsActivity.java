@@ -190,7 +190,7 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
 
-            initClearCacheButton();
+            //initClearCacheButton();
             initResyncDBButton();
 
             bindPreferenceSummaryToValue(findPreference("lock_time"));
@@ -305,7 +305,7 @@ public class SettingsActivity extends PreferenceActivity {
             setHasOptionsMenu(true);
 
             initCameraResolution();
-            bindPreferenceSummaryToValue(findPreference("timerDuration"));
+            //bindPreferenceSummaryToValue(findPreference("timerDuration"));
             bindPreferenceSummaryToValue(findPreference("front_photo_res"));
             bindPreferenceSummaryToValue(findPreference("front_video_res"));
             bindPreferenceSummaryToValue(findPreference("back_photo_res"));
