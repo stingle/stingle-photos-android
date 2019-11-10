@@ -18,8 +18,8 @@ android {
     }
     buildTypes {
         release {
-            //minifyEnabled true
-            //proguardFiles 'proguard.cfg'
+            minifyEnabled true
+            proguardFiles 'proguard.cfg'
             signingConfig signingConfigs.release
             resValue "string", "content_provider", "org.stingle.photos.share"
         }

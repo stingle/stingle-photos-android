@@ -56,6 +56,7 @@ public class SyncService extends Service {
 	private NotificationManager mNotifyManager;
 	private Notification.Builder notificationBuilder;
 	private boolean isNotificationActive = false;
+	private SyncManager.UploadToCloudAsyncTask uploadTask;
 
 	public SyncService() {
 	}
@@ -106,6 +107,16 @@ public class SyncService extends Service {
 	}
 
 	@Override
+	public void onDestroy() {
+		super.onDestroy();
+
+		if(uploadTask != null){
+			uploadTask.cancel(true);
+			stopForeground(true);
+		}
+	}
+
+	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		return START_STICKY;
 	}
@@ -142,7 +153,7 @@ public class SyncService extends Service {
 				}
 
 				if(!isUploadSuspended) {
-					SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
+					uploadTask = SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
 						@Override
 						public void onFinish(Boolean needUpdateUI) {
 							currentStatus = STATUS_IDLE;

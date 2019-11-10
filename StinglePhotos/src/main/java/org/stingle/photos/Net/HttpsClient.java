@@ -340,12 +340,14 @@ public class HttpsClient {
 				String key = keys.next();
 				String value = params.get(key);
 
-				outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-				outputStream.writeBytes("Content-Disposition: form-data; name=\"" + key + "\"" + lineEnd);
-				outputStream.writeBytes("Content-Type: text/plain" + lineEnd);
-				outputStream.writeBytes(lineEnd);
-				outputStream.writeBytes(value);
-				outputStream.writeBytes(lineEnd);
+				if(value != null) {
+					outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+					outputStream.writeBytes("Content-Disposition: form-data; name=\"" + key + "\"" + lineEnd);
+					outputStream.writeBytes("Content-Type: text/plain" + lineEnd);
+					outputStream.writeBytes(lineEnd);
+					outputStream.writeBytes(value);
+					outputStream.writeBytes(lineEnd);
+				}
 			}
 
 			outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);

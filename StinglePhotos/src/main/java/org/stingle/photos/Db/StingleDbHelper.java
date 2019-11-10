@@ -170,6 +170,10 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		return openWriteDb().delete(tableName, selection, selectionArgs);
 	}
 
+	public int truncateTable(){
+		return openWriteDb().delete(tableName, null, null);
+	}
+
 	public StingleDbFile getFileIfExists(String filename){
 		String[] projection = {
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,

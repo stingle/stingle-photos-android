@@ -13,6 +13,7 @@ import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import org.json.JSONObject;
@@ -112,12 +113,17 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		progressDialog.dismiss();
 		if(result) {
-			Intent intent = new Intent();
-			intent.setClass(context, GalleryActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			context.startActivity(intent);
-			context.finish();
+			SyncManager.syncFSToDB(context, new SyncManager.OnFinish() {
+				@Override
+				public void onFinish(Boolean needToUpdateUI) {
+					Intent intent = new Intent();
+					intent.setClass(context, GalleryActivity.class);
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(intent);
+					context.finish();
+				}
+			}, AsyncTask.SERIAL_EXECUTOR);
 		}
 		else{
 			if(response.areThereErrorInfos()) {

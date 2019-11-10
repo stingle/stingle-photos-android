@@ -294,12 +294,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
 		scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
-        LinearLayout textureHolder = (LinearLayout)findViewById(R.id.textureHolder);
-        mTextureView = new AutoFitTextureView(this);
-		mTextureView.setOnTouchListener(getOnTouchListener());
-		textureHolder.addView(mTextureView);
-
-
         preferences = getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, MODE_PRIVATE);
         flashMode = preferences.getInt(FLASH_MODE_PREF, FLASH_MODE_AUTO);
 
@@ -316,6 +310,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         setFlashButtonImage();
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(Camera2Activity.this);
+        requestNextPermission();
     }
 
 
@@ -324,12 +319,27 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     public void onResume() {
         super.onResume();
 
+        LoginManager.checkIfLoggedIn(this);
+
 		mLastThumbBitmap = null;
+
+        if (hasAllPermissionsGranted()) {
+            initCamera();
+        }
+    }
+
+    public void initCamera(){
+        Log.e("InitCamera", "qaq");
+        LinearLayout textureHolder = (LinearLayout)findViewById(R.id.textureHolder);
+        mTextureView = new AutoFitTextureView(this);
+        mTextureView.setOnTouchListener(getOnTouchListener());
+        textureHolder.removeAllViews();
+        textureHolder.addView(mTextureView);
 
         initOrientationListener();
         startBackgroundThread();
         openCamera();
-		showLastPhotoThumb();
+        showLastPhotoThumb();
 
         if (mTextureView.isAvailable()) {
             configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
@@ -343,6 +353,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     @Override
     public void onPause() {
+        if(mIsRecordingVideo){
+            stopRecordingVideo();
+        }
+
         if (mOrientationListener != null) {
             mOrientationListener.disable();
         }
@@ -1105,15 +1119,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         return choices[choices.length - 1];
     }
 
-    private boolean hasAllPermissionsGranted() {
-        for (String permission : CAMERA_PERMISSIONS) {
-            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * Opens the camera specified by {@link #mCameraId}.
      */
@@ -1122,12 +1127,6 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         if (!setUpCameraOutputs()) {
             return;
         }
-        if (!hasAllPermissionsGranted()) {
-            requestCameraPermission();
-            requestAudioPermission();
-            return;
-        }
-        Log.d("Func", "openCamera");
         CameraManager manager = (CameraManager) Camera2Activity.this.getSystemService(Context.CAMERA_SERVICE);
         try {
             // Wait for any previously running session to finish.
@@ -1150,6 +1149,34 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
         }
+    }
+
+    public void requestNextPermission(){
+        for (String permission : CAMERA_PERMISSIONS) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                if(permission.equals(Manifest.permission.CAMERA)){
+                    requestCameraPermission();
+                    break;
+                }
+                else if(permission.equals(Manifest.permission.RECORD_AUDIO)){
+                    requestAudioPermission();
+                    break;
+                }
+                else if(permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE) || permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                    FileManager.requestSDCardPermission(this);
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean hasAllPermissionsGranted() {
+        for (String permission : CAMERA_PERMISSIONS) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean requestCameraPermission() {
@@ -1211,18 +1238,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case StinglePhotosApplication.REQUEST_CAMERA_PERMISSION:
-            case StinglePhotosApplication.REQUEST_AUDIO_PERMISSION:{
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    closeCamera();
-                    openCamera();
-                } else {
-                    finish();
-                }
-                return;
-            }
-        }
+        /*if(hasAllPermissionsGranted()){
+            initCamera();
+        }*/
+        requestNextPermission();
     }
 
 
@@ -1286,15 +1305,17 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
      */
     private void stopBackgroundThread() {
         Log.d("Func", "stopBackgroundThread");
-        mBackgroundThread.quitSafely();
-        try {
-            mBackgroundThread.join();
-            mBackgroundThread = null;
-            synchronized (mCameraStateLock) {
-                mBackgroundHandler = null;
+        if(mBackgroundThread != null) {
+            mBackgroundThread.quitSafely();
+            try {
+                mBackgroundThread.join();
+                mBackgroundThread = null;
+                synchronized (mCameraStateLock) {
+                    mBackgroundHandler = null;
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
@@ -1653,6 +1674,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             surfaces.add(recorderSurface);
             mPreviewRequestBuilder.addTarget(recorderSurface);
 
+            findViewById(R.id.optionsButton).setVisibility(View.INVISIBLE);
+            findViewById(R.id.switchCamButton).setVisibility(View.INVISIBLE);
+            findViewById(R.id.modeChanger).setVisibility(View.INVISIBLE);
+            findViewById(R.id.flashButton).setVisibility(View.INVISIBLE);
+
             // Start a capture session
             // Once the session starts, we can update the UI and start recording
             mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
@@ -1705,6 +1731,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         ((RelativeLayout)findViewById(R.id.chronoBar)).setVisibility(View.INVISIBLE);
         ((Chronometer)findViewById(R.id.chrono)).stop();
         ((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter_video));
+
+        findViewById(R.id.optionsButton).setVisibility(View.VISIBLE);
+        findViewById(R.id.switchCamButton).setVisibility(View.VISIBLE);
+        findViewById(R.id.modeChanger).setVisibility(View.VISIBLE);
+        findViewById(R.id.flashButton).setVisibility(View.VISIBLE);
 
         Helpers.releaseWakeLock(this);
 

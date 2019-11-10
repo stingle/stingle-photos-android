@@ -229,8 +229,8 @@ public class FileManager {
         }
     }
 
-	public static boolean requestSDCardPermission(final Activity activity, OnFinish onFinish){
-		if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+	public static boolean requestSDCardPermission(final Activity activity){
+		/*if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
 			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 				new AlertDialog.Builder(activity)
@@ -253,7 +253,7 @@ public class FileManager {
 				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION);
 			}
 			return false;
-		}
+		}*/
 		if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
 			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -278,7 +278,6 @@ public class FileManager {
 			}
 			return false;
 		}
-		onFinish.onFinish();
 		return true;
 	}
 

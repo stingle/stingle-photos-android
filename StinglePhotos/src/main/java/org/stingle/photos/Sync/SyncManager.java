@@ -66,11 +66,14 @@ public class SyncManager {
 		}
 		(new FsSyncAsyncTask(context, onFinish)).executeOnExecutor(executor);
 	}
-	public static void uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish, Executor executor){
+	public static UploadToCloudAsyncTask uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish, Executor executor){
 		if(executor == null){
 			executor = AsyncTask.THREAD_POOL_EXECUTOR;
 		}
-		(new UploadToCloudAsyncTask(context, progress, onFinish)).executeOnExecutor(executor);
+		UploadToCloudAsyncTask uploadTask = new UploadToCloudAsyncTask(context, progress, onFinish);
+		uploadTask.executeOnExecutor(executor);
+		return uploadTask;
+
 	}
 	public static void syncCloudToLocalDb(Context context, OnFinish onFinish, Executor executor){
 		if(executor == null){
@@ -210,6 +213,9 @@ public class SyncManager {
 
 			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL, StingleDbHelper.SORT_ASC);
 			while(result.moveToNext()) {
+				if(isCancelled()){
+					break;
+				}
 				uploadedFilesCount++;
 				if(progress != null){
 					progress.uploadProgress(uploadedFilesCount);
@@ -220,6 +226,9 @@ public class SyncManager {
 
 			Cursor reuploadResult = db.getReuploadFilesList();
 			while(reuploadResult.moveToNext()) {
+				if(isCancelled()){
+					break;
+				}
 				uploadedFilesCount++;
 				if(progress != null){
 					progress.uploadProgress(uploadedFilesCount);
@@ -891,5 +900,18 @@ public class SyncManager {
 
 	public static abstract class OnFinish{
 		public abstract void onFinish(Boolean needToUpdateUI);
+	}
+
+	public static void resetAndStopSync(Context context){
+		Helpers.storePreference(context, SyncManager.PREF_LAST_SEEN_TIME, null);
+		Helpers.storePreference(context, SyncManager. PREF_LAST_DEL_SEEN_TIME, null);
+
+		StingleDbHelper filesDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+		filesDb.truncateTable();
+		filesDb.close();
+
+		StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+		trashDb.truncateTable();
+		trashDb.close();
 	}
 }

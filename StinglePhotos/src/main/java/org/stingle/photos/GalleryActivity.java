@@ -1,5 +1,6 @@
 package org.stingle.photos;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -40,6 +41,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -61,6 +63,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.Menu;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
@@ -107,6 +110,9 @@ public class GalleryActivity extends AppCompatActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gallery);
+
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+
 		toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		setSupportActionBar(toolbar);
@@ -209,7 +215,12 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
-				recyclerView.setAdapter(adapter);
+				if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+					initGallery();
+				}
+				else{
+					FileManager.requestSDCardPermission(GalleryActivity.this);
+				}
 			}
 
 			@Override
@@ -224,18 +235,16 @@ public class GalleryActivity extends AppCompatActivity
 
 			@Override
 			public void onLoggedIn() {
-				FileManager.requestSDCardPermission(GalleryActivity.this, new FileManager.OnFinish() {
-					@Override
-					public void onFinish() {
-						initGallery();
-					}
-				});
+
 			}
 		});
 		LoginManager.disableLockTimer(GalleryActivity.this);
 	}
 
 	private void initGallery(){
+		Log.e("InitGallery", "qaq");
+		findViewById(R.id.topBar).setVisibility(View.VISIBLE);
+		recyclerView.setAdapter(adapter);
 		Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
 		try {
 			startService(serviceIntent);
@@ -262,7 +271,7 @@ public class GalleryActivity extends AppCompatActivity
 			unbindService(mConnection);
 			isBound = false;
 		}
-
+		findViewById(R.id.topBar).setVisibility(View.INVISIBLE);
 	}
 
 	@Override

@@ -16,12 +16,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.LoginActivity;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 
 import java.util.HashMap;
@@ -268,6 +272,11 @@ public class LoginManager {
         FingerprintManagerWrapper.turnOffFingerprint(context);
         Helpers.storePreference(context, StinglePhotosApplication.USER_EMAIL, null);
         Helpers.deleteTmpDir(context);
+
+        SyncManager.resetAndStopSync(context);
+
+        Intent intent = new Intent(context, SyncService.class);
+        context.stopService(intent);
 
         if(dialog != null){
             dialog.dismiss();

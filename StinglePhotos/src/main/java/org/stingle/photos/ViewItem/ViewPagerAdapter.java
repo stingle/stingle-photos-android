@@ -26,6 +26,8 @@ public class ViewPagerAdapter extends PagerAdapter {
 	private LayoutInflater layoutInflater;
 	private StingleDbHelper db;
 	private int currentPosition = 0;
+	private int lastFilesCount = -1;
+	private int countDifference = 0;
 	private int folder = SyncManager.FOLDER_MAIN;
 	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
 	private View.OnTouchListener gestureTouchListener;
@@ -40,7 +42,14 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 	@Override
 	public int getCount() {
-		return (int)db.getTotalFilesCount();
+		int count = (int)db.getTotalFilesCount();
+		countDifference = count - lastFilesCount;
+
+		if(lastFilesCount == -1){
+			lastFilesCount = count;
+		}
+
+		return lastFilesCount;
 	}
 
 	@Override
@@ -55,7 +64,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		ImageHolderLayout parent = (ImageHolderLayout)layout.findViewById(R.id.parent_layout);
 		ContentLoadingProgressBar loading = (ContentLoadingProgressBar)layout.findViewById(R.id.loading_spinner);
 
-		(new ViewItemAsyncTask(context, this, position, parent, loading, db, folder, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		(new ViewItemAsyncTask(context, this, position + countDifference, parent, loading, db, folder, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		container.addView(layout);
 		return layout;
@@ -64,6 +73,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 	@Override
 	public void destroyItem(ViewGroup container, int position, Object view) {
 		container.removeView((View) view);
+		position += countDifference;
 		if(players.containsKey(position)){
 			SimpleExoPlayer player = players.get(position);
 			if(player != null) {
@@ -80,7 +90,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 	public void addPlayer(int position, SimpleExoPlayer player){
 		synchronized (this) {
-			players.put(position, player);
+			players.put(position + countDifference, player);
 		}
 	}
 
