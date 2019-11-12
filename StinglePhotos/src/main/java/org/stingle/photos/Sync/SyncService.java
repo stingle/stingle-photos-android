@@ -7,6 +7,10 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +18,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.stingle.photos.Db.StingleDbContract;
@@ -21,6 +26,7 @@ import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
 import java.util.ArrayList;
@@ -48,6 +54,9 @@ public class SyncService extends Service {
 	static final public int STATUS_REFRESHING = 1;
 	static final public int STATUS_UPLOADING = 2;
 	static final public int STATUS_NO_SPACE_LEFT = 3;
+	static final public int STATUS_DISABLED = 4;
+	static final public int STATUS_NOT_WIFI = 5;
+	static final public int STATUS_BATTERY_LOW = 6;
 
 	protected int currentStatus = STATUS_IDLE;
 	protected SyncManager.UploadToCloudAsyncTask.UploadProgress progress;
@@ -152,7 +161,18 @@ public class SyncService extends Service {
 					}
 				}
 
-				if(!isUploadSuspended) {
+				int allowedStatus = isUploadAllowed(SyncService.this);
+				if(isUploadSuspended) {
+					Log.d("upload", "upload is disabled, no space");
+					currentStatus = STATUS_IDLE;
+					sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", STATUS_NO_SPACE_LEFT);
+				}
+				else if(allowedStatus != 0) {
+					Log.d("upload", "upload is disabled, not allowed");
+					currentStatus = STATUS_IDLE;
+					sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", allowedStatus);
+				}
+				else{
 					uploadTask = SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
 						@Override
 						public void onFinish(Boolean needUpdateUI) {
@@ -168,12 +188,6 @@ public class SyncService extends Service {
 						}
 					}, cachedThreadPool);
 				}
-				else{
-					Log.d("upload", "upload is disabled, no space");
-					currentStatus = STATUS_IDLE;
-					sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", STATUS_NO_SPACE_LEFT);
-					//sendMessageToUI(MSG_SYNC_FINISHED);
-				}
 			}
 		}, cachedThreadPool);
 
@@ -188,6 +202,44 @@ public class SyncService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mMessenger.getBinder();
+	}
+
+	private int isUploadAllowed(Context context){
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean isEnabled = prefs.getBoolean(SyncManager.PREF_BACKUP_ENABLED, true);
+
+		if(!isEnabled){
+			return STATUS_DISABLED;
+		}
+
+		boolean isOnlyOnWifi = prefs.getBoolean(SyncManager.PREF_BACKUP_ONLY_WIFI, false);
+		int uploadBatteryLevel = prefs.getInt(SyncManager.PREF_BACKUP_BATTERY_LEVEL, 30);
+
+		if(isOnlyOnWifi) {
+			ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+			if (activeNetwork != null) {
+				// connected to the internet
+				if (activeNetwork.getType() != ConnectivityManager.TYPE_WIFI) {
+					return STATUS_NOT_WIFI;
+				}
+			} else {
+				return STATUS_NOT_WIFI;
+			}
+		}
+
+		if(uploadBatteryLevel > 0){
+			BatteryManager bm = (BatteryManager)getSystemService(BATTERY_SERVICE);
+			int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+
+			Log.d("battery level", String.valueOf(batLevel));
+
+			if(batLevel < uploadBatteryLevel){
+				return STATUS_BATTERY_LOW;
+			}
+		}
+
+		return 0;
 	}
 
 	private void sendStringToUi(int type, String key, String value) {

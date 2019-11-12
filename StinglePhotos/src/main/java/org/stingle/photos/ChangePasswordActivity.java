@@ -42,7 +42,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 			}
 		});
 
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		Helpers.blockScreenshotsIfEnabled(this);
 
 
 		findViewById(R.id.change).setOnClickListener(changeClick());

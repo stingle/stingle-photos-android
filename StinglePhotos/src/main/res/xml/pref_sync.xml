@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="enable_backup"
+        android:title="@string/enable_backup"
+        android:summary="@string/enable_backup_desc" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="upload_only_on_wifi"
+        android:dependency="enable_backup"
+        android:title="@string/upload_only_on_wifi"
+        android:summary="@string/upload_only_on_wifi_desc" />
+
+    <org.stingle.photos.Widget.SeekBarPreference
+        android:defaultValue="30"
+        android:key="upload_battery_level"
+        android:max="100"
+        android:text="%"
+        android:dependency="enable_backup"
+        android:title="@string/upload_battery" />
+
+</PreferenceScreen>

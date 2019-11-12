@@ -111,7 +111,7 @@ public class GalleryActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gallery);
 
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		Helpers.blockScreenshotsIfEnabled(this);
 
 		toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
@@ -438,6 +438,24 @@ public class GalleryActivity extends AppCompatActivity
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.no_space_left));
 			updateQuotaInfo();
+		} else if (syncStatus == SyncService.STATUS_DISABLED) {
+			refreshCProgress.setVisibility(View.GONE);
+			syncPhoto.setVisibility(View.GONE);
+			syncProgress.setVisibility(View.INVISIBLE);
+			syncText.setText(getString(R.string.sync_disabled));
+			updateQuotaInfo();
+		} else if (syncStatus == SyncService.STATUS_NOT_WIFI) {
+			refreshCProgress.setVisibility(View.GONE);
+			syncPhoto.setVisibility(View.GONE);
+			syncProgress.setVisibility(View.INVISIBLE);
+			syncText.setText(getString(R.string.sync_not_on_wifi));
+			updateQuotaInfo();
+		} else if (syncStatus == SyncService.STATUS_BATTERY_LOW) {
+			refreshCProgress.setVisibility(View.GONE);
+			syncPhoto.setVisibility(View.GONE);
+			syncProgress.setVisibility(View.INVISIBLE);
+			syncText.setText(getString(R.string.sync_battery_low));
+			updateQuotaInfo();
 		} else if (syncStatus == SyncService.STATUS_IDLE) {
 			syncText.setText(getString(R.string.backup_complete));
 			syncPhoto.setVisibility(View.GONE);
@@ -558,6 +576,10 @@ public class GalleryActivity extends AppCompatActivity
 		else if (id == R.id.nav_settings) {
 			Intent intent = new Intent();
 			intent.setClass(this, SettingsActivity.class);
+			startActivity(intent);
+		}
+		else if (id == R.id.nav_telegram) {
+			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/stingle_photos_group"));
 			startActivity(intent);
 		}
 		else if (id == R.id.nav_logout) {

@@ -79,7 +79,7 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 			}
 		});
 
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		Helpers.blockScreenshotsIfEnabled(this);
 
 		billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build();
 		boxesParent = findViewById(R.id.payment_boxes);

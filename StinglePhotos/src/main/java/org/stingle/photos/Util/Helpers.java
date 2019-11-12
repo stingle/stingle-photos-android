@@ -19,6 +19,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -245,6 +246,9 @@ public class Helpers {
 	}
 
 	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide) {
+		if(bitmap == null){
+			return null;
+		}
 		int imgWidth = bitmap.getWidth();
 		int imgHeight = bitmap.getHeight();
 
@@ -655,6 +659,13 @@ public class Helpers {
 		}
 
 		db.close();
+	}
+
+	public static void blockScreenshotsIfEnabled(Activity activity){
+		boolean blockScreenshots = PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(StinglePhotosApplication.BLOCK_SCREENSHOTS, false);
+		if(blockScreenshots) {
+			activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		}
 	}
 
 }

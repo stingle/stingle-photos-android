@@ -1,100 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:layout_height="fill_parent">
 
-	<ImageView
-		android:id="@+id/imageView1"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="15dp"
-		android:src="@mipmap/ic_stingle_photos_round"
-		android:layout_gravity="center"
-		android:contentDescription="@string/app_name" />
-
-
-    
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="30dp"
-        android:layout_gravity="center"
-        android:textSize="30sp"
-        android:text="@string/sign_in" />
+        android:orientation="vertical">
 
-	<EditText
-		android:id="@+id/email"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_margin="10dp"
-		android:hint="@string/email"
-		android:inputType="textEmailAddress">
-
-		<requestFocus />
-	</EditText>
-
-    <EditText
-        android:id="@+id/password"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:inputType="textPassword"
-        android:imeOptions="actionGo"
-		android:hint="@string/password">
-    </EditText>
-
-    <TextView
-        android:id="@+id/forgot_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:textColor="@color/sec_color_light"
-        android:layout_marginRight="10dp"
-        android:textSize="12sp"
-        android:text="@string/forgot_password" />
-
-    <Button
-        android:id="@+id/login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center"
-		style="@style/Widget.AppCompat.Button.Borderless.Colored"
-        android:text="@string/sign_in" />
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:contentDescription="@string/app_name"
+            android:src="@mipmap/ic_stingle_photos_round" />
 
 
-	<TextView
-		android:id="@+id/register"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="center"
-		android:textColor="@color/design_default_color_primary"
-		android:layout_marginTop="30dp"
-		android:textSize="16sp"
-		android:text="@string/create_account" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="30dp"
+            android:text="@string/sign_in"
+            android:textSize="30sp" />
 
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:gravity="bottom"
-		android:orientation="vertical">
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress">
 
-		<TextView
-			android:id="@+id/versionText"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal|bottom"
-			android:gravity="center"
-			android:textColor="@color/sec_color_light" />
+            <requestFocus />
+        </EditText>
 
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal|bottom"
-			android:autoLink="web"
-			android:gravity="center"
-			android:paddingBottom="15dp"
-			android:text="@string/bottom_text" />
-	</LinearLayout>
-</LinearLayout>
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:hint="@string/password"
+            android:imeOptions="actionGo"
+            android:inputType="textPassword"/>
+
+        <!--<TextView
+            android:id="@+id/forgot_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:textColor="@color/sec_color_light"
+            android:layout_marginRight="10dp"
+            android:textSize="12sp"
+            android:text="@string/forgot_password" />-->
+
+        <Button
+            android:id="@+id/login"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="@string/sign_in" />
+
+
+        <TextView
+            android:id="@+id/register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:text="@string/create_account"
+            android:textColor="@color/design_default_color_primary"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:layout_marginTop="60dp">
+
+            <TextView
+                android:id="@+id/versionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|bottom"
+                android:gravity="center"
+                android:textColor="@color/sec_color_light" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|bottom"
+                android:autoLink="web"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:text="@string/bottom_text" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

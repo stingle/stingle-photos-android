@@ -201,8 +201,11 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 		if(result.getCount() > 0){
 			result.moveToNext();
-			return new StingleDbFile(result);
+			StingleDbFile dbFile = new StingleDbFile(result);
+			result.close();
+			return dbFile;
 		}
+		result.close();
 		return null;
 	}
 

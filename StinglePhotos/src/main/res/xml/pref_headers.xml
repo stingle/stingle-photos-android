@@ -13,6 +13,11 @@
         android:title="@string/pref_header_security" />
 
     <header
+        android:fragment="org.stingle.photos.SettingsActivity$SyncPreferenceFragment"
+        android:icon="@drawable/ic_backup"
+        android:title="@string/pref_header_sync" />
+
+    <header
         android:fragment="org.stingle.photos.SettingsActivity$CameraPreferenceFragment"
         android:icon="@drawable/ic_camera"
         android:title="@string/pref_header_camera" />

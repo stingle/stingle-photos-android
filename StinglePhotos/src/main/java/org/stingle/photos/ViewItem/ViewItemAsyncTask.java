@@ -91,6 +91,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		this.onClickListener = onClickListener;
 		this.touchListener = touchListener;
 		this.memCache = memCache;
+
+		if(position < 0){
+			position = 0;
+		}
 	}
 
 	@Override

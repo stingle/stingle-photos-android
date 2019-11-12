@@ -45,6 +45,7 @@ public class ViewItemActivity extends AppCompatActivity {
 	protected GestureDetector gestureDetector;
 	protected View.OnTouchListener gestureTouchListener;
 	private BroadcastReceiver receiver;
+	private BroadcastReceiver encVideoReceiver;
 
 	private static final int SWIPE_MIN_DISTANCE = 100;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -54,7 +55,8 @@ public class ViewItemActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+
+		Helpers.blockScreenshotsIfEnabled(this);
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_view_item);
@@ -95,6 +97,19 @@ public class ViewItemActivity extends AppCompatActivity {
 			}
 		};
 		registerReceiver(receiver, intentFilter);
+
+		IntentFilter videoEncIntentFilter = new IntentFilter();
+		videoEncIntentFilter.addAction("org.stingle.photos.VIDEO_ENC_FINISH");
+		encVideoReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if(adapter != null) {
+					adapter.notifyDataSetChanged();
+					viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+				}
+			}
+		};
+		registerReceiver(encVideoReceiver, videoEncIntentFilter);
 	}
 
 	@Override
@@ -146,6 +161,9 @@ public class ViewItemActivity extends AppCompatActivity {
 		super.onDestroy();
 		if(receiver != null){
 			unregisterReceiver(receiver);
+		}
+		if(encVideoReceiver != null){
+			unregisterReceiver(encVideoReceiver);
 		}
 	}
 

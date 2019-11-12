@@ -43,6 +43,11 @@ public class SyncManager {
 	public static final String PREF_LAST_SPACE_QUOTA = "last_space_quota";
 	public static final String PREF_SUSPEND_UPLOAD = "suspend_upload";
 	public static final String PREF_LAST_AVAILABLE_SPACE = "last_available_space";
+
+	public static final String PREF_BACKUP_ENABLED = "enable_backup";
+	public static final String PREF_BACKUP_ONLY_WIFI = "upload_only_on_wifi";
+	public static final String PREF_BACKUP_BATTERY_LEVEL = "upload_battery_level";
+
 	public static final String SP_FILE_MIME_TYPE = "application/stinglephoto";
 
 	public static final int FOLDER_MAIN = 0;
@@ -147,6 +152,7 @@ public class SyncManager {
 					}
 				}
 			}
+			result.close();
 			db.close();
 
 			return needToUpdateUI;
@@ -851,6 +857,7 @@ public class SyncManager {
 			}
 			notifyCloudAboutEmptyTrash();
 
+			result.close();
 			trashDb.close();
 			return null;
 		}

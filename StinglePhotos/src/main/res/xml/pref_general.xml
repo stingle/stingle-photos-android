@@ -8,6 +8,11 @@
         android:summary="@string/lock_time_desc"
         android:title="@string/lock_time" />
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="block_screenshots"
+        android:title="@string/block_screenshots" />
+
     <Preference
         android:key="resync_db"
         android:summary="@string/resync_db_desc"

@@ -284,7 +284,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        Helpers.blockScreenshotsIfEnabled(this);
 
         setContentView(R.layout.activity_camera2);
 
@@ -1742,8 +1742,8 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
         (new ShowLastVideoThumb(lastVideoFilename)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        Intent serviceIntent = new Intent(Camera2Activity.this, VideoEncryptService.class);
-        startForegroundService(serviceIntent);
+        Intent serviceIntent = new Intent(this, VideoEncryptService.class);
+        startService(serviceIntent);
     }
 
 

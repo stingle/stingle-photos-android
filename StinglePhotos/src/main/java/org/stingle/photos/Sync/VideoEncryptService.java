@@ -129,6 +129,10 @@ public class VideoEncryptService extends Service {
 			if(onFinish != null){
 				onFinish.onFinish();
 			}
+
+			Intent broadcastIntent = new Intent();
+			broadcastIntent.setAction("org.stingle.photos.VIDEO_ENC_FINISH");
+			context.sendBroadcast(broadcastIntent);
 		}
 		public static abstract class OnFinish{
 			public abstract void onFinish();

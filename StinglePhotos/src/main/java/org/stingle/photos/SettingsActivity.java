@@ -32,6 +32,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
  * handset devices, settings are presented as a single list. On tablets,
@@ -53,6 +55,7 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+        Helpers.blockScreenshotsIfEnabled(this);
     }
 
     @Override
@@ -83,6 +86,9 @@ public class SettingsActivity extends PreferenceActivity {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
+            }
+            else if (preference.getKey().equals("upload_battery_level")) {
+                preference.setSummary(stringValue + "%");
             }
             else {
                 // For all other preferences, set the summary to the value's
@@ -121,6 +127,18 @@ public class SettingsActivity extends PreferenceActivity {
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
+    }
+
+    private static void bindPreferenceSummaryToValueInt(Preference preference) {
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        // Trigger the listener immediately with the preference's
+        // current value.
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getInt(preference.getKey(), 0));
     }
 
 
@@ -171,6 +189,7 @@ public class SettingsActivity extends PreferenceActivity {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || SecurityPreferenceFragment.class.getName().equals(fragmentName)
+                || SyncPreferenceFragment.class.getName().equals(fragmentName)
                 || CameraPreferenceFragment.class.getName().equals(fragmentName);
     }
 
@@ -194,6 +213,28 @@ public class SettingsActivity extends PreferenceActivity {
             initResyncDBButton();
 
             bindPreferenceSummaryToValue(findPreference("lock_time"));
+
+			SwitchPreference blockScreenshotsSetting = (SwitchPreference)findPreference("block_screenshots");
+
+            blockScreenshotsSetting.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+				@Override
+				public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    final Context context = GeneralPreferenceFragment.this.getContext();
+                    Helpers.showConfirmDialog(context, getString(R.string.need_restart), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            Intent intent = new Intent(context, GalleryActivity.class);
+                            intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                            //intent.putExtra(KEY_RESTART_INTENT, nextIntent);
+                            context.startActivity(intent);
+
+                            Runtime.getRuntime().exit(0);
+                        }
+                    }, null);
+					return true;
+				}
+			});
         }
 
         @Override
@@ -280,6 +321,35 @@ public class SettingsActivity extends PreferenceActivity {
                     return true;
                 }
             });
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public static class SyncPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_sync);
+            setHasOptionsMenu(true);
+
+            bindPreferenceSummaryToValueInt(findPreference("upload_battery_level"));
+
+            /*Preference uploadBatteryLevel = findPreference("upload_battery_level");
+
+            uploadBatteryLevel.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(uploadBatteryLevel,
+                    String.valueOf(PreferenceManager
+                            .getDefaultSharedPreferences(uploadBatteryLevel.getContext())
+                            .getInt(uploadBatteryLevel.getKey(), 0)) + "%");*/
         }
 
         @Override

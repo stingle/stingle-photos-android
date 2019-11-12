@@ -167,5 +167,17 @@
     <string name="resync_db">Resync database</string>
     <string name="syncing_db">Syncing database...</string>
     <string name="immediately">Immediately</string>
+    <string name="telegram_group">Official Telegram group</string>
+    <string name="block_screenshots">Disallow screenshots of this app</string>
+    <string name="need_restart">For this setting to take effect application needs to be restarted. Do you want to restart it now?</string>
+    <string name="enable_backup">Enable backup and sync</string>
+    <string name="enable_backup_desc">Backup and sync your photos and videos to the cloud as soon as you take or import them</string>
+    <string name="pref_header_sync">Backup and Sync</string>
+    <string name="upload_only_on_wifi">Backup only on Wifi</string>
+    <string name="upload_only_on_wifi_desc">Backup only when you are connected to Wifi network</string>
+    <string name="upload_battery">Backup only if battery level is more than</string>
+    <string name="sync_disabled">Backup is disabled</string>
+    <string name="sync_not_on_wifi">Backup suspended. Not connected to Wifi network</string>
+    <string name="sync_battery_low">Backup suspended. Low battery</string>
 
 </resources>

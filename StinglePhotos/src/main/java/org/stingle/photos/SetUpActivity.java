@@ -2,8 +2,10 @@ package org.stingle.photos;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -21,7 +23,7 @@ public class SetUpActivity  extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		Helpers.blockScreenshotsIfEnabled(this);
 
 		setContentView(R.layout.setup);
 

@@ -28,12 +28,12 @@ public class LoginActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		Helpers.blockScreenshotsIfEnabled(this);
 
 		setContentView(R.layout.activity_login);
 
 		((Button) findViewById(R.id.login)).setOnClickListener(login());
-		((TextView) findViewById(R.id.forgot_password)).setOnClickListener(forgotPassword());
+		//((TextView) findViewById(R.id.forgot_password)).setOnClickListener(forgotPassword());
 		((TextView) findViewById(R.id.register)).setOnClickListener(gotoSignUp());
 		((EditText) findViewById(R.id.password)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
