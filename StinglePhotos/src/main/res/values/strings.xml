@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Stingle Photos</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="ok">OK</string>
@@ -40,7 +39,6 @@
     <string name="hour1">1 hour</string>
     <string name="share">Share</string>
     <string name="log_out">Log Out</string>
-    <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="volume_take_photo">Volume Up/Down</string>
     <string name="volume_take_photo_desc">Volume Up/Down takes picture</string>

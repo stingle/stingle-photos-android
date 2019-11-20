@@ -32,12 +32,18 @@
         android:required="false" />
 
     <application
-        android:name="StinglePhotosApplication"
+        android:name=".StinglePhotosApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_stingle_photos_round"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@android:style/Theme.Material.Light">
+
+        <activity android:name=".CameraXActivity"
+            android:theme="@style/AppTheme"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleInstance"
+            android:screenOrientation="landscape"/>
 
         <service
             android:name=".Sync.SyncService"
@@ -47,10 +53,10 @@
             android:name=".Sync.VideoEncryptService"
             android:enabled="true"
             android:exported="false"
-            android:process=":videoenc"/>
+            android:process=":videoenc" />
 
         <activity
-            android:name="GalleryActivity"
+            android:name=".GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
@@ -62,62 +68,78 @@
             </intent-filter>
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="stingle.org" />
+
+                <data
+                    android:host="stingle.org"
+                    android:scheme="https" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.PICK_FILE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.OPENABLE" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="file" />
                 <data android:mimeType="image/*" />
                 <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.OPENABLE" />
+
                 <data android:mimeType="image/*" />
                 <data android:mimeType="video/*" />
             </intent-filter>
         </activity>
         <activity
-            android:name="ViewItemActivity"
+            android:name=".ViewItemActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_view_item"
-            android:theme="@style/AppThemeDark"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:theme="@style/AppThemeDark" />
         <activity
-            android:name="LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/login"
             android:theme="@style/AppTheme" />
         <activity
-            android:name="Camera2Activity"
+            android:name=".Camera2Activity"
             android:clearTaskOnLaunch="true"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="Camera"
+            android:label="@string/camera"
             android:launchMode="singleInstance"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -140,25 +162,24 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
         </activity>
         <activity
-            android:name="SetUpActivity"
+            android:name=".SetUpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_setup"
             android:theme="@style/AppTheme" />
         <activity
-            android:name="ChangePasswordActivity"
+            android:name=".ChangePasswordActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_change_password"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
         <activity
-            android:name="AccountActivity"
+            android:name=".AccountActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_account"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
         <activity
-            android:name="SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppThemeNoCompat" />
 

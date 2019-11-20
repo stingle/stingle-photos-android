@@ -537,6 +537,11 @@ public class GalleryActivity extends AppCompatActivity
 			startActivity(intent);
 			finish();
 		}
+		else if (id == R.id.action_camera) {
+			Intent intent = new Intent();
+			intent.setClass(this, CameraXActivity.class);
+			startActivity(intent);
+		}
 		else if (id == R.id.action_empty_trash) {
 			emptyTrash();
 		}
