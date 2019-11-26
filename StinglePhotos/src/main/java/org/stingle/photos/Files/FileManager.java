@@ -334,11 +334,16 @@ public class FileManager {
 
 	public static int getVideoDurationFromUri(Context context, Uri uri){
 		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-		retriever.setDataSource(context, uri);
-		String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-		int duration = (int)(Long.parseLong(time) / 1000);
+		int duration = 0;
+		
+		try {
+			retriever.setDataSource(context, uri);
+			String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+			duration = (int) (Long.parseLong(time) / 1000);
 
-		retriever.release();
+			retriever.release();
+		}
+		catch (RuntimeException e){ }
 
 		return duration;
 	}

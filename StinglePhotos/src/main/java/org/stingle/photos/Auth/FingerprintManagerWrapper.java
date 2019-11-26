@@ -63,10 +63,7 @@ public class FingerprintManagerWrapper {
     }
 
     public boolean isFingerprintAvailable(){
-        if (fingerprintManager.isHardwareDetected()) {
-            return true;
-        }
-        return false;
+        return fingerprintManager != null && fingerprintManager.isHardwareDetected();
     }
 
     private byte[] generateIv() {

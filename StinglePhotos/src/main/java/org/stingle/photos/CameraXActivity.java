@@ -6,13 +6,17 @@ import androidx.appcompat.app.AppCompatActivity;
 // Your IDE likely can auto-import these classes, but there are several
 // different implementations so we list them here to disambiguate.
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Rational;
@@ -22,6 +26,8 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -40,12 +46,15 @@ import androidx.lifecycle.LifecycleOwner;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+
 import android.os.Bundle;
 
+import org.stingle.photos.Camera.CameraImageSize;
 import org.stingle.photos.CameraX.CameraView;
 import org.stingle.photos.Util.Helpers;
 
@@ -65,15 +74,21 @@ public class CameraXActivity extends AppCompatActivity {
 	private ImageButton flashButton;
 	private FlashMode flashMode = FlashMode.AUTO;
 	private SharedPreferences preferences;
+	private SharedPreferences settings;
 	private boolean isInVideoMode = false;
 	private boolean isRecordingVideo = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 		setContentView(R.layout.activity_camera_x);
 
 		preferences = getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, MODE_PRIVATE);
+		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
 		cameraView = findViewById(R.id.view_finder);
 		cameraParent = findViewById(R.id.camera_parent);
@@ -86,12 +101,58 @@ public class CameraXActivity extends AppCompatActivity {
 	}
 
 
-
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+			// TODO: Consider calling
+			//    Activity#requestPermissions
+			// here to request the missing permissions, and then overriding
+			//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+			//                                          int[] grantResults)
+			// to handle the case where the user grants the permission. See the documentation
+			// for Activity#requestPermissions for more details.
+			return;
+		}
+		applyResolution();
 		cameraView.bindToLifecycle(this);
 		applyLastFlashMode();
+	}
+
+	private void applyResolution(){
+		CameraCharacteristics characteristics = cameraView.getCameraCharacteristics();
+		if(characteristics != null){
+			StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+			String sizeIndex = "0";
+			if(cameraView.getCameraLensFacing() == CameraX.LensFacing.FRONT){
+				if(isInVideoMode) {
+					sizeIndex = settings.getString("front_video_res", "0");
+				}
+				else{
+					sizeIndex = settings.getString("front_photo_res", "0");
+				}
+			}
+			else if(cameraView.getCameraLensFacing() == CameraX.LensFacing.BACK){
+				if(isInVideoMode) {
+					sizeIndex = settings.getString("back_video_res", "0");
+				}
+				else{
+					sizeIndex = settings.getString("back_photo_res", "0");
+				}
+			}
+
+			ArrayList<CameraImageSize> photoSizes = Helpers.parsePhotoOutputs(this, map, characteristics);
+			CameraImageSize size;
+			if(isInVideoMode) {
+				size = Helpers.parseVideoOutputs(this, map, characteristics).get(Integer.parseInt(sizeIndex));
+			}
+			else{
+				size = Helpers.parsePhotoOutputs(this, map, characteristics).get(Integer.parseInt(sizeIndex));
+			}
+
+			cameraView.setCustomImageSize(size);
+		}
 	}
 
 	private void applyLastFlashMode() {
@@ -150,6 +211,7 @@ public class CameraXActivity extends AppCompatActivity {
 
 	private View.OnClickListener getSwitchCamListener() {
 		return v -> {
+			applyResolution();
 			cameraView.toggleCamera();
 		};
 	}
@@ -170,10 +232,12 @@ public class CameraXActivity extends AppCompatActivity {
 		};
 	}
 
+	@SuppressLint("MissingPermission")
 	private View.OnClickListener getModeChangerListener() {
 		return v -> {
 			isInVideoMode = !isInVideoMode;
 
+			applyResolution();
 			if(!isInVideoMode){
 				cameraView.setCaptureMode(CameraView.CaptureMode.IMAGE);
 				((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter));
@@ -182,7 +246,6 @@ public class CameraXActivity extends AppCompatActivity {
 				cameraView.setCaptureMode(CameraView.CaptureMode.VIDEO);
 				((ImageButton)findViewById(R.id.take_photo)).setImageDrawable(getDrawable(R.drawable.button_shutter_video));
 			}
-
 		};
 	}
 

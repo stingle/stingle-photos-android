@@ -55,6 +55,7 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 
+import org.stingle.photos.Camera.CameraImageSize;
 import org.stingle.photos.CameraX.CameraView;
 
 import java.io.File;
@@ -111,6 +112,8 @@ public final class CameraXModule {
 	private Rect mCropRegion;
 	@Nullable
 	private CameraX.LensFacing mCameraLensFacing = LensFacing.BACK;
+
+	private CameraImageSize customImageSize = null;
 
 	public CameraXModule(CameraView view) {
 		this.mCameraView = view;
@@ -224,12 +227,33 @@ public final class CameraXModule {
 				|| getDisplayRotationDegrees() == 180;
 
 		Rational targetAspectRatio;
-		if (getCaptureMode() == CameraView.CaptureMode.IMAGE) {
+		/*if (getCaptureMode() == CameraView.CaptureMode.IMAGE) {
 			mImageCaptureConfigBuilder.setTargetAspectRatio(AspectRatio.RATIO_4_3);
 			targetAspectRatio = isDisplayPortrait ? ASPECT_RATIO_3_4 : ASPECT_RATIO_4_3;
 		} else {
 			mImageCaptureConfigBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
 			targetAspectRatio = isDisplayPortrait ? ASPECT_RATIO_9_16 : ASPECT_RATIO_16_9;
+		}*/
+
+		if(customImageSize != null){
+			mImageCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
+			mVideoCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
+			if(customImageSize.maxFps > 0) {
+				//mVideoCaptureConfigBuilder.setVideoFrameRate(customImageSize.maxFps);
+				mVideoCaptureConfigBuilder.setVideoFrameRate(60);
+			}
+			targetAspectRatio = isDisplayPortrait ? new Rational(customImageSize.height, customImageSize.width) : new Rational(customImageSize.width, customImageSize.height);
+			Log.d("resolution", String.valueOf(customImageSize.width) + " - " + String.valueOf(customImageSize.height));
+			Log.d("ratio", String.valueOf(targetAspectRatio.toString()));
+		}
+		else{
+			if (getCaptureMode() == CameraView.CaptureMode.IMAGE) {
+				mImageCaptureConfigBuilder.setTargetAspectRatio(AspectRatio.RATIO_4_3);
+				targetAspectRatio = isDisplayPortrait ? ASPECT_RATIO_3_4 : ASPECT_RATIO_4_3;
+			} else {
+				mImageCaptureConfigBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
+				targetAspectRatio = isDisplayPortrait ? ASPECT_RATIO_9_16 : ASPECT_RATIO_16_9;
+			}
 		}
 
 		mImageCaptureConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
@@ -276,6 +300,10 @@ public final class CameraXModule {
 		mCurrentLifecycle.getLifecycle().addObserver(mCurrentLifecycleObserver);
 		// Enable flash setting in ImageCapture after use cases are created and binded.
 		setFlash(getFlash());
+	}
+
+	public void setCustomImageSize(CameraImageSize imageSize){
+		this.customImageSize = imageSize;
 	}
 
 	public void open() {
@@ -556,6 +584,14 @@ public final class CameraXModule {
 		}
 
 		mCurrentLifecycle = null;
+	}
+
+	public CameraCharacteristics getCameraCharacteristics(){
+		try {
+			return mCameraManager.getCameraCharacteristics(getActiveCamera());
+		} catch (CameraAccessException | CameraInfoUnavailableException e) { }
+
+		return null;
 	}
 
 	private Rect getSensorSize(String cameraId) throws CameraAccessException {

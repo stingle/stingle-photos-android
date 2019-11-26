@@ -24,6 +24,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Bundle;
@@ -66,6 +67,7 @@ import androidx.camera.core.VideoCapture.OnVideoSavedListener;
 import androidx.camera.view.TextureViewMeteringPointFactory;
 import androidx.lifecycle.LifecycleOwner;
 
+import org.stingle.photos.Camera.CameraImageSize;
 import org.stingle.photos.CameraX.CameraXModule;
 import org.stingle.photos.R;
 
@@ -572,6 +574,14 @@ public final class CameraView extends ViewGroup {
 			mScaleType = scaleType;
 			requestLayout();
 		}
+	}
+
+	public CameraCharacteristics getCameraCharacteristics(){
+		return mCameraModule.getCameraCharacteristics();
+	}
+
+	public void setCustomImageSize(CameraImageSize imageSize){
+		mCameraModule.setCustomImageSize(imageSize);
 	}
 
 	/**

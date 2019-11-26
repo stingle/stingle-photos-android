@@ -52,7 +52,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
-            android:keepScreenOn="true" />
+            android:keepScreenOn="true"
+            app:scaleType="centerInside" />
     </LinearLayout>
 
     <RelativeLayout
