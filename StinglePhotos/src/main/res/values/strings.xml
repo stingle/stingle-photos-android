@@ -178,4 +178,7 @@
     <string name="sync_not_on_wifi">Backup suspended. Not connected to Wifi network</string>
     <string name="sync_battery_low">Backup suspended. Low battery</string>
 
+    <string name="title_activity_camera_settings">Camera Settings</string>
+
+
 </resources>

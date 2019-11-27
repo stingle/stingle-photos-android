@@ -189,8 +189,7 @@ public class SettingsActivity extends PreferenceActivity {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || SecurityPreferenceFragment.class.getName().equals(fragmentName)
-                || SyncPreferenceFragment.class.getName().equals(fragmentName)
-                || CameraPreferenceFragment.class.getName().equals(fragmentName);
+                || SyncPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
@@ -363,87 +362,4 @@ public class SettingsActivity extends PreferenceActivity {
         }
     }
 
-    /**
-     * This fragment shows data and sync preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    public static class CameraPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_camera);
-            setHasOptionsMenu(true);
-
-            initCameraResolution();
-            //bindPreferenceSummaryToValue(findPreference("timerDuration"));
-            bindPreferenceSummaryToValue(findPreference("front_photo_res"));
-            bindPreferenceSummaryToValue(findPreference("front_video_res"));
-            bindPreferenceSummaryToValue(findPreference("back_photo_res"));
-            bindPreferenceSummaryToValue(findPreference("back_video_res"));
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
-
-        public void initCameraResolution(){
-            try {
-                CameraManager manager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
-                if (manager != null) {
-                    for (String cameraId : manager.getCameraIdList()) {
-                        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-                        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-                        StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-
-                        ArrayList<CameraImageSize> imageSizes = Helpers.parsePhotoOutputs(getContext(), map, characteristics);
-                        ArrayList<CameraImageSize> videoSizes = Helpers.parseVideoOutputs(getContext(), map, characteristics);
-
-                        ListPreference photoRes;
-                        ListPreference videoRes;
-                        if(facing == CameraCharacteristics.LENS_FACING_FRONT) {
-                            photoRes = (ListPreference) findPreference("front_photo_res");
-                            videoRes = (ListPreference) findPreference("front_video_res");
-                        }
-                        else {
-                            photoRes = (ListPreference) findPreference("back_photo_res");
-                            videoRes = (ListPreference) findPreference("back_video_res");
-                        }
-
-                        CharSequence[] imageEntries = new CharSequence[imageSizes.size()];
-                        CharSequence[] imageEntriesValues = new CharSequence[imageSizes.size()];
-                        CharSequence[] videoEntries = new CharSequence[videoSizes.size()];
-                        CharSequence[] videoEntriesValues = new CharSequence[videoSizes.size()];
-
-                        for(int i=0;i<imageSizes.size();i++){
-                            imageEntries[i] = imageSizes.get(i).getPhotoString();
-                            imageEntriesValues[i] = String.valueOf(i);
-                        }
-                        for(int i=0;i<videoSizes.size();i++){
-                            videoEntries[i] = videoSizes.get(i).getVideoString();
-                            videoEntriesValues[i] = String.valueOf(i);
-                        }
-                        photoRes.setEntries(imageEntries);
-                        photoRes.setEntryValues(imageEntriesValues);
-                        if(photoRes.getValue() == null) {
-                            photoRes.setValueIndex(0);
-                        }
-
-                        videoRes.setEntries(videoEntries);
-                        videoRes.setEntryValues(videoEntriesValues);
-                        if(videoRes.getValue() == null) {
-                            videoRes.setValueIndex(0);
-                        }
-
-                    }
-                }
-            }
-            catch (Exception e){}
-        }
-    }
 }

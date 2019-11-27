@@ -39,11 +39,11 @@
         android:largeHeap="true"
         android:theme="@android:style/Theme.Material.Light">
 
-        <activity android:name=".CameraXActivity"
-            android:theme="@style/AppTheme"
+        <activity
+            android:name=".CameraXActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:launchMode="singleInstance"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape"
+            android:theme="@style/AppTheme" />
 
         <service
             android:name=".Sync.SyncService"
@@ -182,6 +182,11 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppThemeNoCompat" />
+
+        <activity
+            android:name=".CameraSettingsActivity"
+            android:label="@string/title_activity_camera_settings"
+            android:theme="@style/AppThemeCompatWithActionBar"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -475,80 +475,27 @@ public class Helpers {
 	}
 
 
-	public static ArrayList<CameraImageSize> parseVideoOutputs(Context context, StreamConfigurationMap map, CameraCharacteristics characteristics){
+	public static ArrayList<CameraImageSize> parseVideoOutputs(Context context, StreamConfigurationMap map){
 		ArrayList<CameraImageSize> videoSizes = new ArrayList<>();
-		ArrayList<int[]> aeFpsRanges = new ArrayList<>();
-		for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
-			aeFpsRanges.add(new int[] {r.getLower(), r.getUpper()});
-		}
-		Collections.sort(aeFpsRanges, new CameraImageSize.RangeSorter());
-
-		int minFps = 9999;
-		int minFpsCapture = 9999;
-		Log.d("fps-range-len", String.valueOf(aeFpsRanges.size()));
-		for(int[] r : aeFpsRanges) {
-			Log.d("fps-range", String.valueOf(r[0]) + " - " + String.valueOf(r[1]));
-			if(r[0] >= 30){
-				minFpsCapture = Math.min(minFpsCapture, r[0]);
-			}
-			minFps = Math.min(minFps, r[0]);
-		}
-		if(minFpsCapture == 9999){
-			minFpsCapture = 30;
-		}
 
 		android.util.Size [] cameraVideoSizes = map.getOutputSizes(MediaRecorder.class);
 		for(android.util.Size size : cameraVideoSizes) {
-			if( size.getWidth() > 4096 || size.getHeight() > 2160 || size.getHeight() < 480) {
+			/*if( size.getWidth() > 4096 || size.getHeight() > 2160 || size.getHeight() < 480) {
 				continue; // Nexus 6 returns these, even though not supported?!
-			}
-			long mfd = map.getOutputMinFrameDuration(MediaRecorder.class, size);
-			int  maxFps = (int)((1.0 / mfd) * 1000000000L);
-
-			Range<Integer> fpsRange = new Range<Integer>(minFps, maxFps);
-			if(minFpsCapture != maxFps) {
-				videoSizes.add(new CameraImageSize(context, size.getWidth(), size.getHeight(), fpsRange, maxFps));
-				videoSizes.add(new CameraImageSize(context, size.getWidth(), size.getHeight(), fpsRange, minFpsCapture));
-			}
-			else {
-				videoSizes.add(new CameraImageSize(context, size.getWidth(), size.getHeight(), fpsRange, maxFps));
-			}
+			}*/
+			videoSizes.add(new CameraImageSize(context, size.getWidth(), size.getHeight()));
 		}
 		Collections.sort(videoSizes, new CameraImageSize.SizeSorter());
 
 		return videoSizes;
 	}
 
-	public static ArrayList<CameraImageSize> parsePhotoOutputs(Context context, StreamConfigurationMap map, CameraCharacteristics characteristics){
+	public static ArrayList<CameraImageSize> parsePhotoOutputs(Context context, StreamConfigurationMap map){
 		ArrayList<CameraImageSize> photoSizes = new ArrayList<>();
-
-		ArrayList<int[]> aeFpsRanges = new ArrayList<>();
-		for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
-			aeFpsRanges.add(new int[] {r.getLower(), r.getUpper()});
-			Log.d("fps", String.valueOf(r.getLower()) + " - " + String.valueOf(r.getUpper()));
-		}
-		Collections.sort(aeFpsRanges, new CameraImageSize.RangeSorter());
-
-		int minFps = 9999;
-		for(int[] r : aeFpsRanges) {
-			minFps = Math.min(minFps, r[0]);
-		}
 
 		android.util.Size [] cameraPhotoSizes = map.getOutputSizes(ImageFormat.JPEG);
 		for(android.util.Size size : cameraPhotoSizes) {
-			long mfd = 0;
-			int  maxFps = 30;
-			Range<Integer> fpsRange;
-			try {
-				mfd = map.getOutputMinFrameDuration(MediaRecorder.class, size);
-				maxFps = (int)((1.0 / mfd) * 1000000000L);
-				fpsRange = new Range<Integer>(minFps, maxFps);
-			}
-			catch (IllegalArgumentException e){
-				fpsRange = new Range<Integer>(minFps, maxFps);
-			}
-
-			CameraImageSize photoSize = new CameraImageSize(context, size.getWidth(), size.getHeight(), fpsRange, maxFps);
+			CameraImageSize photoSize = new CameraImageSize(context, size.getWidth(), size.getHeight());
 			if(photoSize.megapixel < 0.9){
 				continue;
 			}

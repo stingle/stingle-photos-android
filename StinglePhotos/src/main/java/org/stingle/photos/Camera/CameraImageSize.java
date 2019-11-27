@@ -2,6 +2,7 @@ package org.stingle.photos.Camera;
 
 import android.content.Context;
 import android.util.Range;
+import android.util.Rational;
 import android.util.Size;
 
 import org.stingle.photos.R;
@@ -12,46 +13,31 @@ import java.util.Comparator;
 public class CameraImageSize {
 	public final int width;
 	public final int height;
-	public final Range<Integer> fpsRange;
-	public final int maxFps;
 	public final float megapixel;
 	public final String aspectRatio;
 	protected Context context;
 
-	public CameraImageSize(Context context, int width, int height, Range<Integer> fpsRange, int maxFps) {
+	public CameraImageSize(Context context, int width, int height) {
 		this.context = context;
 		this.width = width;
 		this.height = height;
-		this.fpsRange = fpsRange;
-		this.maxFps = maxFps;;
 		this.megapixel = (float)Math.round((float)width*(float)height / 100000) /10;
 		this.aspectRatio = getAspectRatio(width,height);
 	}
 
 	private static String getAspectRatio(int width, int height) {
-		int gcf = greatestCommonFactor(width, height);
-		if( gcf > 0 ) {
-			// had a Google Play crash due to gcf being 0!? Implies width must be zero
-			width /= gcf;
-			height /= gcf;
-		}
-		return width + ":" + height;
-	}
-	private static int greatestCommonFactor(int a, int b) {
-		while( b > 0 ) {
-			int temp = b;
-			b = a % b;
-			a = temp;
-		}
-		return a;
+		return (new Rational(width, height)).toString().replace("/",":");
 	}
 
 	@Override
 	public String toString() {
-		return "(" + this.aspectRatio + ") " + String.valueOf(this.megapixel) + " " + context.getString(R.string.megapixels);
+		return "(" + this.aspectRatio + ") " + this.megapixel + " " + context.getString(R.string.megapixels);
 	}
 
 	public String getResolutionName(int width, int height){
+		if(width >= 4000 && width <= 4500){
+			return " (4K)";
+		}
 		switch (height){
 			case 2160:
 				return " (UHD)";
@@ -70,7 +56,7 @@ public class CameraImageSize {
 	}
 
 	public String getVideoString(){
-		return "(" + this.aspectRatio + ") " + String.valueOf(width) + "x" + String.valueOf(height) + " " + String.valueOf(this.maxFps) + " " + context.getString(R.string.fps) + getResolutionName(width, height);
+		return "(" + this.aspectRatio + ") " + width + "x" + height + " " + getResolutionName(width, height);
 	}
 
 	public Size getSize(){

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -98,6 +99,7 @@ public class CameraXActivity extends AppCompatActivity {
 		findViewById(R.id.switchCamButton).setOnClickListener(getSwitchCamListener());
 		findViewById(R.id.modeChanger).setOnClickListener(getModeChangerListener());
 		findViewById(R.id.flashButton).setOnClickListener(toggleFlash());
+		findViewById(R.id.optionsButton).setOnClickListener(openSettings());
 	}
 
 
@@ -117,6 +119,16 @@ public class CameraXActivity extends AppCompatActivity {
 		applyResolution();
 		cameraView.bindToLifecycle(this);
 		applyLastFlashMode();
+	}
+
+	private View.OnClickListener openSettings() {
+		return new View.OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(CameraXActivity.this, CameraSettingsActivity.class);
+				startActivity(intent);
+			}
+		};
 	}
 
 	private void applyResolution(){
@@ -142,13 +154,12 @@ public class CameraXActivity extends AppCompatActivity {
 				}
 			}
 
-			ArrayList<CameraImageSize> photoSizes = Helpers.parsePhotoOutputs(this, map, characteristics);
 			CameraImageSize size;
 			if(isInVideoMode) {
-				size = Helpers.parseVideoOutputs(this, map, characteristics).get(Integer.parseInt(sizeIndex));
+				size = Helpers.parseVideoOutputs(this, map).get(Integer.parseInt(sizeIndex));
 			}
 			else{
-				size = Helpers.parsePhotoOutputs(this, map, characteristics).get(Integer.parseInt(sizeIndex));
+				size = Helpers.parsePhotoOutputs(this, map).get(Integer.parseInt(sizeIndex));
 			}
 
 			cameraView.setCustomImageSize(size);

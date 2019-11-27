@@ -239,7 +239,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 
     private String lastVideoFilename = "";
     private SharedPreferences sharedPrefs;
-    private Range<Integer> mPreviewFpsRange = null;
+    //private Range<Integer> mPreviewFpsRange = null;
 
     static {
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -1034,11 +1034,11 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
                 CameraImageSize largestJpeg = null;
                 if(!isInVideoMode) {
                     largestJpeg = getPhotoSize(map, characteristics);
-                    mPreviewFpsRange = largestJpeg.fpsRange;
+                    //mPreviewFpsRange = largestJpeg.fpsRange;
                 }
                 else {
                     mVideoSize = getVideoSize(map, characteristics);
-                    mPreviewFpsRange = mVideoSize.fpsRange;
+                    //mPreviewFpsRange = mVideoSize.fpsRange;
                 }
 
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
@@ -1459,10 +1459,10 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
             builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
         }
 
-        if(mPreviewFpsRange != null) {
+        /*if(mPreviewFpsRange != null) {
             Log.d("prevewFps", String.valueOf(mPreviewFpsRange));
             builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, mPreviewFpsRange);
-        }
+        }*/
     }
 
     /**
@@ -1586,7 +1586,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     }
 
     public CameraImageSize getPhotoSize(StreamConfigurationMap map, CameraCharacteristics characteristics){
-        ArrayList<CameraImageSize> photoSizes = Helpers.parsePhotoOutputs(this, map, characteristics);
+        ArrayList<CameraImageSize> photoSizes = Helpers.parsePhotoOutputs(this, map);
         String sizeIndex = "0";
         if(isFrontCamera){
             sizeIndex = sharedPrefs.getString("front_photo_res", "0");
@@ -1599,7 +1599,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
     }
 
     public CameraImageSize getVideoSize(StreamConfigurationMap map, CameraCharacteristics characteristics){
-        ArrayList<CameraImageSize> videoSizes = Helpers.parseVideoOutputs(this, map, characteristics);
+        ArrayList<CameraImageSize> videoSizes = Helpers.parseVideoOutputs(this, map);
         String sizeIndex = "0";
         if(isFrontCamera){
             sizeIndex = sharedPrefs.getString("front_video_res", "0");
@@ -1767,7 +1767,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         Log.d("audioCodec", String.valueOf(profile.audioCodec));
         Log.d("width", String.valueOf(mVideoSize.width));
         Log.d("height", String.valueOf( mVideoSize.height));
-        Log.d("framerate", String.valueOf( mVideoSize.maxFps));
+        //Log.d("framerate", String.valueOf( mVideoSize.maxFps));
 
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
@@ -1783,7 +1783,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
         mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
         mMediaRecorder.setAudioChannels(profile.audioChannels);
 
-        mMediaRecorder.setVideoFrameRate(mVideoSize.maxFps);
+        //mMediaRecorder.setVideoFrameRate(mVideoSize.maxFps);
         mMediaRecorder.setVideoSize(mVideoSize.width, mVideoSize.height);
         mMediaRecorder.setVideoEncoder(profile.videoCodec);
         mMediaRecorder.setAudioEncoder(profile.audioCodec);

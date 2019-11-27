@@ -238,10 +238,10 @@ public final class CameraXModule {
 		if(customImageSize != null){
 			mImageCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
 			mVideoCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
-			if(customImageSize.maxFps > 0) {
+			/*if(customImageSize.maxFps > 0) {
 				//mVideoCaptureConfigBuilder.setVideoFrameRate(customImageSize.maxFps);
 				mVideoCaptureConfigBuilder.setVideoFrameRate(60);
-			}
+			}*/
 			targetAspectRatio = isDisplayPortrait ? new Rational(customImageSize.height, customImageSize.width) : new Rational(customImageSize.width, customImageSize.height);
 			Log.d("resolution", String.valueOf(customImageSize.width) + " - " + String.valueOf(customImageSize.height));
 			Log.d("ratio", String.valueOf(targetAspectRatio.toString()));
