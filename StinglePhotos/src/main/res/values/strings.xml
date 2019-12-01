@@ -179,6 +179,7 @@
     <string name="sync_battery_low">Backup suspended. Low battery</string>
 
     <string name="title_activity_camera_settings">Camera Settings</string>
+    <string name="encrypting_media">Encrypting media files...</string>
 
 
 </resources>

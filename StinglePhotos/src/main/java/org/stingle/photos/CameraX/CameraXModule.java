@@ -25,21 +25,27 @@ import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CaptureRequest;
+import android.media.CamcorderProfile;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.annotation.UiThread;
+import androidx.camera.camera2.Camera2Config;
 import androidx.camera.core.AspectRatio;
 import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraOrientationUtil;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.CameraX.LensFacing;
+import androidx.camera.core.CaptureConfig;
 import androidx.camera.core.FlashMode;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCapture.OnImageCapturedListener;
@@ -227,24 +233,29 @@ public final class CameraXModule {
 				|| getDisplayRotationDegrees() == 180;
 
 		Rational targetAspectRatio;
-		/*if (getCaptureMode() == CameraView.CaptureMode.IMAGE) {
-			mImageCaptureConfigBuilder.setTargetAspectRatio(AspectRatio.RATIO_4_3);
-			targetAspectRatio = isDisplayPortrait ? ASPECT_RATIO_3_4 : ASPECT_RATIO_4_3;
-		} else {
-			mImageCaptureConfigBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
-			targetAspectRatio = isDisplayPortrait ? ASPECT_RATIO_9_16 : ASPECT_RATIO_16_9;
-		}*/
 
 		if(customImageSize != null){
-			mImageCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
-			mVideoCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
-			/*if(customImageSize.maxFps > 0) {
-				//mVideoCaptureConfigBuilder.setVideoFrameRate(customImageSize.maxFps);
-				mVideoCaptureConfigBuilder.setVideoFrameRate(60);
-			}*/
+			if(isDisplayPortrait){
+				mImageCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.height, customImageSize.width));
+				mVideoCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.height, customImageSize.width));
+			}
+			else {
+				mImageCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
+				mVideoCaptureConfigBuilder.setTargetResolution(new Size(customImageSize.width, customImageSize.height));
+			}
+			mImageCaptureConfigBuilder.setCaptureMode(ImageCapture.CaptureMode.MAX_QUALITY);
+			CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+			mVideoCaptureConfigBuilder.setVideoFrameRate(profile.videoFrameRate);
+			mVideoCaptureConfigBuilder.setBitRate(profile.videoBitRate);
+			mVideoCaptureConfigBuilder.setAudioBitRate(profile.audioBitRate);
+			mVideoCaptureConfigBuilder.setAudioSampleRate(profile.audioSampleRate);
+			mVideoCaptureConfigBuilder.setAudioChannelCount(profile.audioChannels);
+
+			/*Camera2Config.Extender camera2Extender = new Camera2Config.Extender(mVideoCaptureConfigBuilder)
+					.setCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range(10,60));*/
+
+
 			targetAspectRatio = isDisplayPortrait ? new Rational(customImageSize.height, customImageSize.width) : new Rational(customImageSize.width, customImageSize.height);
-			Log.d("resolution", String.valueOf(customImageSize.width) + " - " + String.valueOf(customImageSize.height));
-			Log.d("ratio", String.valueOf(targetAspectRatio.toString()));
 		}
 		else{
 			if (getCaptureMode() == CameraView.CaptureMode.IMAGE) {
@@ -264,6 +275,7 @@ public final class CameraXModule {
 		mVideoCaptureConfigBuilder.setLensFacing(mCameraLensFacing);
 		mVideoCapture = new VideoCapture(mVideoCaptureConfigBuilder.build());
 		mPreviewConfigBuilder.setLensFacing(mCameraLensFacing);
+
 
 		// Adjusts the preview resolution according to the view size and the target aspect ratio.
 		int height = (int) (getMeasuredWidth() / targetAspectRatio.floatValue());
@@ -708,6 +720,36 @@ public final class CameraXModule {
 
 	protected int getDisplaySurfaceRotation() {
 		return mCameraView.getDisplaySurfaceRotation();
+		//return getJpegOrientation(getCameraCharacteristics(), mCameraView.getDisplaySurfaceRotation());
+	}
+
+	private int getJpegOrientation(CameraCharacteristics c, int deviceOrientation) {
+		if (deviceOrientation == android.view.OrientationEventListener.ORIENTATION_UNKNOWN) return 0;
+		int sensorOrientation = c.get(CameraCharacteristics.SENSOR_ORIENTATION);
+
+		// Round device orientation to a multiple of 90
+		deviceOrientation = (deviceOrientation + 45) / 90 * 90;
+
+		// Reverse device orientation for front-facing cameras
+		boolean facingFront = c.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+		if (facingFront) deviceOrientation = -deviceOrientation;
+
+		// Calculate desired JPEG orientation relative to camera orientation to make
+		// the image upright relative to the device orientation
+		int jpegOrientation = (sensorOrientation + deviceOrientation + 360) % 360;
+
+		switch (jpegOrientation){
+			case 0:
+				return Surface.ROTATION_0;
+			case 90:
+				return Surface.ROTATION_90;
+			case 180:
+				return Surface.ROTATION_180;
+			case 270:
+				return Surface.ROTATION_270;
+
+		}
+		return Surface.ROTATION_0;
 	}
 
 	public void setSurfaceTexture(SurfaceTexture st) {

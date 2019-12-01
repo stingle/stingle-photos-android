@@ -20,7 +20,7 @@ import android.os.Bundle;
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
+import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Files.ShareManager;
@@ -41,6 +41,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.util.Log;
 import android.view.View;
 
@@ -58,12 +60,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.Menu;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
@@ -79,7 +81,7 @@ public class GalleryActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapterPisasso.Listener {
 
 	public static final int REQUEST_VIEW_PHOTO = 1;
-	protected BroadcastReceiver receiver;
+	private LocalBroadcastManager lbm;
 	protected DragSelectRecyclerView recyclerView;
 	protected GalleryAdapterPisasso adapter;
 	protected AutoFitGridLayoutManager layoutManager;
@@ -105,6 +107,13 @@ public class GalleryActivity extends AppCompatActivity
 	private boolean dontStartSyncYet = false;
 	private View headerView;
 
+	private BroadcastReceiver onLogout = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			LoginManager.redirectToLogin(GalleryActivity.this);
+		}
+	};
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +121,8 @@ public class GalleryActivity extends AppCompatActivity
 		setContentView(R.layout.activity_gallery);
 
 		Helpers.blockScreenshotsIfEnabled(this);
+
+		lbm = LocalBroadcastManager.getInstance(this);
 
 		toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
@@ -172,15 +183,7 @@ public class GalleryActivity extends AppCompatActivity
 			lastScrollPosition = savedInstanceState.getInt("scroll");
 		}
 
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction("org.stingle.photos.ACTION_LOGOUT");
-		receiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				LoginManager.redirectToLogin(GalleryActivity.this);
-			}
-		};
-		registerReceiver(receiver, intentFilter);
+		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 
 		handleIncomingIntent(getIntent());
 
@@ -204,9 +207,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected void onDestroy() {
 		super.onDestroy();
 		FileManager.deleteTempFiles(this);
-		if(receiver != null){
-			unregisterReceiver(receiver);
-		}
+		lbm.unregisterReceiver(onLogout);
 	}
 
 	@Override
@@ -242,21 +243,33 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void initGallery(){
-		Log.e("InitGallery", "qaq");
-		findViewById(R.id.topBar).setVisibility(View.VISIBLE);
-		recyclerView.setAdapter(adapter);
-		Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
-		try {
-			startService(serviceIntent);
-			bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+		/*String homedir = FileManager.getHomeDir(this);
+		if(homedir == null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N){
+			//File sdCard = new File(Environment.getExternalStorageDirectory().getPath());
+			//StorageManager storageManager = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
+			//StorageVolume storageVolume = storageManager.getStorageVolume(sdCard);
+			final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+			//intent.putExtra(EXTRA_STORAGE_VOLUME, this);
+			intent.putExtra("EXTRA_INITIAL_URI", "file://" + getString(R.string.default_home_folder_name));
+			startActivityForResult(intent, 7);
 		}
-		catch (IllegalStateException ignored){}
-		layoutManager.scrollToPosition(lastScrollPosition);
+		else {*/
+			Log.e("InitGallery", "qaq");
+			findViewById(R.id.topBar).setVisibility(View.VISIBLE);
+			recyclerView.setAdapter(adapter);
+			Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
+			try {
+				startService(serviceIntent);
+				bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+			} catch (IllegalStateException ignored) {
+			}
+			layoutManager.scrollToPosition(lastScrollPosition);
 
-		if(adapter != null){
-			adapter.updateDataSet();
-		}
-		updateQuotaInfo();
+			if (adapter != null) {
+				adapter.updateDataSet();
+			}
+			updateQuotaInfo();
+		//}
 	}
 
 	@Override
@@ -373,7 +386,7 @@ public class GalleryActivity extends AppCompatActivity
 					syncProgress.setMax(totalItemsNumber);
 					syncProgress.setProgress(uploadedFilesCount);
 					syncText.setText(getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
-					(new ShowThumbInImageView(GalleryActivity.this, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					(new ShowEncThumbInImageView(GalleryActivity.this, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					setSyncStatus(SyncService.STATUS_UPLOADING);
 				} else if (syncStatus == SyncService.STATUS_REFRESHING) {
 					setSyncStatus(SyncService.STATUS_REFRESHING);
@@ -385,7 +398,7 @@ public class GalleryActivity extends AppCompatActivity
 			else if(msg.what == SyncService.MSG_SYNC_CURRENT_FILE) {
 				Bundle bundle = msg.getData();
 				String currentFile = bundle.getString("currentFile");
-				(new ShowThumbInImageView(GalleryActivity.this, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				(new ShowEncThumbInImageView(GalleryActivity.this, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 				setSyncStatus(SyncService.STATUS_UPLOADING);
 			}
@@ -899,6 +912,18 @@ public class GalleryActivity extends AppCompatActivity
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
+		/*else if(requestCode == 7){
+			Log.e("result", data.toString());
+			Uri uri = data.getData();
+
+			grantUriPermission(getPackageName(), uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+					Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+			final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+					Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+			getContentResolver().takePersistableUriPermission(uri, takeFlags);
+		}*/
 	}
 
 }

@@ -21,24 +21,18 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
-import android.graphics.Typeface;
 import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -70,7 +64,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.util.Log;
-import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
@@ -79,7 +72,6 @@ import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Chronometer;
@@ -87,36 +79,21 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.core.widget.ContentLoadingProgressBar;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
+import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
 import org.stingle.photos.Camera.CameraImageSize;
-import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Sync.VideoEncryptService;
-import org.stingle.photos.Util.AsyncTasks;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.ViewItem.ViewItemAsyncTask;
 import org.stingle.photos.Widget.AutoFitTextureView;
 import org.stingle.photos.Widget.FocusCircleView;
-import org.stingle.photos.Widget.ImageHolderLayout;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -2583,7 +2560,7 @@ public class Camera2Activity extends Activity implements View.OnClickListener {
 				final int thumbSize = (int) Math.round(Helpers.getThumbSize(Camera2Activity.this) / 1.4);
 
 				if (StinglePhotosApplication.getKey() != null) {
-                    ShowThumbInImageView task = new ShowThumbInImageView(Camera2Activity.this, lastFile.getName(), galleryButton);
+                    ShowEncThumbInImageView task = new ShowEncThumbInImageView(Camera2Activity.this, lastFile.getName(), galleryButton);
                     task.setThumbSize(thumbSize);
                     task.setOnFinish(new OnAsyncTaskFinish() {
                         @Override

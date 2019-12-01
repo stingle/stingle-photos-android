@@ -16,6 +16,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.LoginActivity;
@@ -291,9 +293,7 @@ public class LoginManager {
             redirectToLogin((Activity)context);
         }
 
-        Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction("org.stingle.photos.ACTION_LOGOUT");
-        context.sendBroadcast(broadcastIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("ACTION_LOGOUT"));
     }
 
     public static void redirectToLogin(Activity activity) {

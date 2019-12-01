@@ -37,13 +37,14 @@
         android:icon="@mipmap/ic_stingle_photos_round"
         android:label="@string/app_name"
         android:largeHeap="true"
+        android:requestLegacyExternalStorage="true"
         android:theme="@android:style/Theme.Material.Light">
 
-        <activity
+        <!--<activity
             android:name=".CameraXActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme" />-->
 
         <service
             android:name=".Sync.SyncService"
@@ -54,6 +55,10 @@
             android:enabled="true"
             android:exported="false"
             android:process=":videoenc" />
+        <service
+            android:name=".CameraX.MediaEncryptService"
+            android:enabled="true"
+            android:exported="false" />
 
         <activity
             android:name=".GalleryActivity"
@@ -136,10 +141,37 @@
             android:label="@string/login"
             android:theme="@style/AppTheme" />
         <activity
+            android:name=".CameraXActivity"
+            android:clearTaskOnLaunch="true"
+            android:label="@string/camera"
+            android:screenOrientation="fullUser"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.media.action.STILL_IMAGE_CAMERA" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.media.action.STILL_IMAGE_CAMERA_SECURE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.media.action.VIDEO_CAMERA" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".Camera2Activity"
             android:clearTaskOnLaunch="true"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/camera"
+            android:label="Camera 2 Dev"
             android:launchMode="singleInstance"
             android:screenOrientation="landscape">
             <intent-filter>

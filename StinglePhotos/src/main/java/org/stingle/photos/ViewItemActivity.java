@@ -21,6 +21,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
@@ -44,8 +45,7 @@ public class ViewItemActivity extends AppCompatActivity {
 	protected ViewPagerAdapter adapter;
 	protected GestureDetector gestureDetector;
 	protected View.OnTouchListener gestureTouchListener;
-	private BroadcastReceiver receiver;
-	private BroadcastReceiver encVideoReceiver;
+	private LocalBroadcastManager lbm;
 
 	private static final int SWIPE_MIN_DISTANCE = 100;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -57,6 +57,8 @@ public class ViewItemActivity extends AppCompatActivity {
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 
 		Helpers.blockScreenshotsIfEnabled(this);
+
+		lbm = LocalBroadcastManager.getInstance(this);
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_view_item);
@@ -88,28 +90,8 @@ public class ViewItemActivity extends AppCompatActivity {
 			}
 		};
 
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction("org.stingle.photos.ACTION_LOGOUT");
-		receiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				finish();
-			}
-		};
-		registerReceiver(receiver, intentFilter);
-
-		IntentFilter videoEncIntentFilter = new IntentFilter();
-		videoEncIntentFilter.addAction("org.stingle.photos.VIDEO_ENC_FINISH");
-		encVideoReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				if(adapter != null) {
-					adapter.notifyDataSetChanged();
-					viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
-				}
-			}
-		};
-		registerReceiver(encVideoReceiver, videoEncIntentFilter);
+		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
+		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
 	}
 
 	@Override
@@ -159,13 +141,25 @@ public class ViewItemActivity extends AppCompatActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if(receiver != null){
-			unregisterReceiver(receiver);
-		}
-		if(encVideoReceiver != null){
-			unregisterReceiver(encVideoReceiver);
-		}
+		lbm.unregisterReceiver(onLogout);
+		lbm.unregisterReceiver(onEncFinish);
 	}
+
+	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(adapter != null) {
+				adapter.notifyDataSetChanged();
+				viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+			}
+		}
+	};
+	private BroadcastReceiver onLogout = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			finish();
+		}
+	};
 
 	protected ViewPager.OnPageChangeListener getOnPageChangeListener(){
 		return new ViewPager.OnPageChangeListener() {

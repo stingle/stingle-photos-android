@@ -8,6 +8,8 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.UriPermission;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -15,6 +17,8 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -47,6 +51,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,16 +129,32 @@ public class FileManager {
 	}
 
 	public static String getHomeDir(Context context) {
-		String externalStorage = Environment.getExternalStorageDirectory().getPath();
-
-		String homeDirPath = externalStorage + "/" + context.getString(R.string.default_home_folder_name) + "/" + Helpers.getPreference(context, StinglePhotosApplication.USER_HOME_FOLDER, "default");
-
-		File homeDir = new File(homeDirPath);
-		if(!homeDir.exists()){
-			homeDir.mkdirs();
+		/*Uri homeUri = getHomeUri(context);
+		if(homeUri != null){
+			return homeUri.getPath();
 		}
+		else {*/
 
-		return homeDir.getPath();
+			String externalStorage = Environment.getExternalStorageDirectory().getPath();
+
+			String homeDirPath = externalStorage + "/" + context.getString(R.string.default_home_folder_name) + "/" + Helpers.getPreference(context, StinglePhotosApplication.USER_HOME_FOLDER, "default");
+
+			File homeDir = new File(homeDirPath);
+			if (!homeDir.exists()) {
+				homeDir.mkdirs();
+			}
+
+			return homeDir.getPath();
+		//}
+	}
+
+	public static Uri getHomeUri(Context context) {
+		List<UriPermission> persistedUriPermissions = context.getContentResolver().getPersistedUriPermissions();
+		if (persistedUriPermissions.size() > 0) {
+			UriPermission uriPermission = persistedUriPermissions.get(0);
+			return uriPermission.getUri();
+		}
+		return null;
 	}
 
 	public static String ensureLastSlash(String path){

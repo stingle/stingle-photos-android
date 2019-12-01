@@ -103,17 +103,6 @@ public class Helpers {
 		}
 	}
 
-	public static void registerForBroadcastReceiver(final Activity activity) {
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction("org.stingle.photos.ACTION_LOGOUT");
-		activity.registerReceiver(new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				activity.finish();
-			}
-		}, intentFilter);
-	}
-
 	public static String getNewEncFilename() {
 		String filename = Crypto.byteArrayToBase64(StinglePhotosApplication.getCrypto().getRandomData(StinglePhotosApplication.FILENAME_LENGTH));
 
