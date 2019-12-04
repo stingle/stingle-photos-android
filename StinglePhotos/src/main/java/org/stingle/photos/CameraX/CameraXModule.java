@@ -177,6 +177,17 @@ public final class CameraXModule {
 		}
 	}
 
+	public void setMediaRotation(Integer degrees){
+		if (getCaptureMode() == CameraView.CaptureMode.IMAGE) {
+			mImageCapture.setTargetRotation(degrees);
+		} else if (getCaptureMode() == CameraView.CaptureMode.VIDEO) {
+			mVideoCapture.setTargetRotation(degrees);
+		} else {
+			mImageCapture.setTargetRotation(degrees);
+			mVideoCapture.setTargetRotation(degrees);
+		}
+	}
+
 	@RequiresPermission(permission.CAMERA)
 	public void bindToLifecycleAfterViewMeasured() {
 		if (mNewLifecycle == null) {
@@ -268,10 +279,12 @@ public final class CameraXModule {
 		}
 
 		mImageCaptureConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
+		mVideoCaptureConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
+		mPreviewConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
+
 		mImageCaptureConfigBuilder.setLensFacing(mCameraLensFacing);
 		mImageCapture = new ImageCapture(mImageCaptureConfigBuilder.build());
 
-		mVideoCaptureConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
 		mVideoCaptureConfigBuilder.setLensFacing(mCameraLensFacing);
 		mVideoCapture = new VideoCapture(mVideoCaptureConfigBuilder.build());
 		mPreviewConfigBuilder.setLensFacing(mCameraLensFacing);
@@ -358,7 +371,7 @@ public final class CameraXModule {
 		}
 
 		ImageCapture.Metadata metadata = new ImageCapture.Metadata();
-		metadata.isReversedHorizontal = mCameraLensFacing == LensFacing.FRONT;
+		//metadata.isReversedHorizontal = mCameraLensFacing == LensFacing.FRONT;
 		mImageCapture.takePicture(saveLocation, metadata, executor, listener);
 	}
 
@@ -720,36 +733,6 @@ public final class CameraXModule {
 
 	protected int getDisplaySurfaceRotation() {
 		return mCameraView.getDisplaySurfaceRotation();
-		//return getJpegOrientation(getCameraCharacteristics(), mCameraView.getDisplaySurfaceRotation());
-	}
-
-	private int getJpegOrientation(CameraCharacteristics c, int deviceOrientation) {
-		if (deviceOrientation == android.view.OrientationEventListener.ORIENTATION_UNKNOWN) return 0;
-		int sensorOrientation = c.get(CameraCharacteristics.SENSOR_ORIENTATION);
-
-		// Round device orientation to a multiple of 90
-		deviceOrientation = (deviceOrientation + 45) / 90 * 90;
-
-		// Reverse device orientation for front-facing cameras
-		boolean facingFront = c.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
-		if (facingFront) deviceOrientation = -deviceOrientation;
-
-		// Calculate desired JPEG orientation relative to camera orientation to make
-		// the image upright relative to the device orientation
-		int jpegOrientation = (sensorOrientation + deviceOrientation + 360) % 360;
-
-		switch (jpegOrientation){
-			case 0:
-				return Surface.ROTATION_0;
-			case 90:
-				return Surface.ROTATION_90;
-			case 180:
-				return Surface.ROTATION_180;
-			case 270:
-				return Surface.ROTATION_270;
-
-		}
-		return Surface.ROTATION_0;
 	}
 
 	public void setSurfaceTexture(SurfaceTexture st) {

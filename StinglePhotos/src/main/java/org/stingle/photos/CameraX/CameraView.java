@@ -553,6 +553,10 @@ public final class CameraView extends ViewGroup {
 		}
 	}
 
+	public void setMediaRotation(int degrees){
+		mCameraModule.setMediaRotation(degrees);
+	}
+
 	/**
 	 * Returns the scale type used to scale the preview.
 	 *

@@ -144,7 +144,8 @@
             android:name=".CameraXActivity"
             android:clearTaskOnLaunch="true"
             android:label="@string/camera"
-            android:screenOrientation="fullUser"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="landscape"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

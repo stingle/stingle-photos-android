@@ -18,7 +18,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.SensorManager;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.CamcorderProfile;
 import android.media.ThumbnailUtils;
@@ -27,9 +29,14 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.OrientationEventListener;
+import android.view.Surface;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -87,6 +94,16 @@ public class CameraXActivity extends AppCompatActivity {
 	private Chronometer chronometer;
 	private RelativeLayout chronoBar;
 
+	private OrientationEventListener mOrientationEventListener;
+	private int mOrientation = -1;
+
+	private static final int ORIENTATION_PORTRAIT_NORMAL = 1;
+	private static final int ORIENTATION_PORTRAIT_INVERTED = 2;
+	private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
+	private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
+	private int mDeviceRotation = 0;
+	private int mOverallRotation = 0;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -140,6 +157,7 @@ public class CameraXActivity extends AppCompatActivity {
 	protected void onPause() {
 		super.onPause();
 		sendCameraStatusBroadcast(false);
+		destroyOrientationListener();
 	}
 
 	@SuppressLint("MissingPermission")
@@ -151,6 +169,8 @@ public class CameraXActivity extends AppCompatActivity {
 
 		startService(new Intent(this, MediaEncryptService.class));
 		sendCameraStatusBroadcast(true);
+
+		initOrientationListener();
 	}
 
 	private boolean hasAllPermissionsGranted() {
@@ -344,6 +364,7 @@ public class CameraXActivity extends AppCompatActivity {
 
 	private View.OnClickListener getTakePhotoListener() {
 		return v -> {
+			cameraView.setMediaRotation(getPhotoRotation(cameraView.getCameraCharacteristics()));
 			if(!isInVideoMode) {
 				String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
 				cameraView.takePicture(new File(getTmpDir() + filename), AsyncTask.THREAD_POOL_EXECUTOR, new ImageCapture.OnImageSavedListener() {
@@ -487,4 +508,198 @@ public class CameraXActivity extends AppCompatActivity {
 		}, 100L);
 	}
 
+	private void initOrientationListener() {
+		if (mOrientationEventListener == null) {
+			mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+
+				@Override
+				public void onOrientationChanged(int orientation) {
+					if (orientation == ORIENTATION_UNKNOWN) {
+						return;
+					}
+
+					orientation = (orientation + 45) / 90 * 90;
+					int currentOrientation = orientation % 360;
+					int newRotation = 0;
+
+					// determine our orientation based on sensor response
+					int lastOrientation = mOrientation;
+
+					if (orientation >= 315 || orientation < 45) {
+						if (mOrientation != ORIENTATION_PORTRAIT_NORMAL) {
+							mOrientation = ORIENTATION_PORTRAIT_NORMAL;
+						}
+					} else if (orientation < 315 && orientation >= 225) {
+						if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL) {
+							mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
+						}
+					} else if (orientation < 225 && orientation >= 135) {
+						if (mOrientation != ORIENTATION_PORTRAIT_INVERTED) {
+							mOrientation = ORIENTATION_PORTRAIT_INVERTED;
+						}
+					} else { // orientation <135 && orientation > 45
+						if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED) {
+							mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
+						}
+					}
+
+					if (lastOrientation != mOrientation) {
+						rotateUIElements();
+					}
+				}
+			};
+		}
+		if (mOrientationEventListener.canDetectOrientation()) {
+			mOrientationEventListener.enable();
+		}
+	}
+
+	private void destroyOrientationListener() {
+		if (mOrientationEventListener != null) {
+			mOrientationEventListener.disable();
+			mOrientationEventListener = null;
+		}
+	}
+
+	private int getCurrentDeviceRotation(){
+		switch (mOrientation){
+			case ORIENTATION_PORTRAIT_NORMAL:
+				return 0;
+			case ORIENTATION_PORTRAIT_INVERTED:
+				return 180;
+			case ORIENTATION_LANDSCAPE_NORMAL:
+				return 90;
+			case ORIENTATION_LANDSCAPE_INVERTED:
+				return 270;
+		}
+		return -1;
+	}
+
+	private int getCurrentDeviceRotationForCameraX(int deg){
+		switch (deg){
+			case 0:
+				return Surface.ROTATION_0;
+			case 180:
+				return Surface.ROTATION_180;
+			case 90:
+				return Surface.ROTATION_90;
+			case 270:
+				return Surface.ROTATION_270;
+		}
+		return -1;
+	}
+
+	private int getPhotoRotation(CameraCharacteristics characteristics){
+		Integer sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+		int deviceRotation = getCurrentDeviceRotation();
+
+		sensorOrientation -= 90;
+		int result;
+		if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+			result = (sensorOrientation + deviceRotation + 180) % 360;
+		} else {
+			result = (sensorOrientation + deviceRotation) % 360;
+		}
+		return getCurrentDeviceRotationForCameraX(result);
+	}
+
+
+	private void rotateUIElements(){
+		int oldDeviceRotation = mDeviceRotation;
+		int oldOverallRotation = mOverallRotation;
+		mDeviceRotation = getCurrentDeviceRotation();
+
+		mOverallRotation += getHowMuchRotated(oldDeviceRotation, getCurrentDeviceRotation());
+
+		oldOverallRotation -= 90;
+		int overallRotation1 = mOverallRotation - 90;
+
+		rotateElement(galleryButton, oldOverallRotation, overallRotation1);
+		rotateElement(flashButton, oldOverallRotation, overallRotation1);
+		rotateElement(switchCamButton, oldOverallRotation, overallRotation1);
+		rotateElement(modeChangerButton, oldOverallRotation, overallRotation1);
+	}
+
+	private void rotateElement(View view, int start, int end){
+		RotateAnimation rotateAnimation = new RotateAnimation(start, end, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		rotateAnimation.setInterpolator(new LinearInterpolator());
+		rotateAnimation.setDuration(500);
+		rotateAnimation.setFillAfter(true);
+		rotateAnimation.setFillEnabled(true);
+
+		view.startAnimation(rotateAnimation);
+	}
+
+	private int getHowMuchRotated(int oldRotation, int currentRotation){
+		int howMuchRotated = 0;
+
+		switch(oldRotation){
+			case 0:
+				switch(currentRotation){
+					case 0:
+						howMuchRotated = 0;
+						break;
+					case 90:
+						howMuchRotated = 90;
+						break;
+					case 180:
+						howMuchRotated = 180;
+						break;
+					case 270:
+						howMuchRotated = -90;
+						break;
+				}
+				break;
+			case 90:
+				switch(currentRotation){
+					case 0:
+						howMuchRotated = -90;
+						break;
+					case 90:
+						howMuchRotated = 0;
+						break;
+					case 180:
+						howMuchRotated = 90;
+						break;
+					case 270:
+						howMuchRotated = 180;
+						break;
+				}
+				break;
+			case 180:
+				switch(currentRotation){
+					case 0:
+						howMuchRotated = 180;
+						break;
+					case 90:
+						howMuchRotated = -90;
+						break;
+					case 180:
+						howMuchRotated = 0;
+						break;
+					case 270:
+						howMuchRotated = 90;
+						break;
+				}
+				break;
+			case 270:
+				switch(currentRotation){
+					case 0:
+						howMuchRotated = 90;
+						break;
+					case 90:
+						howMuchRotated = 180;
+						break;
+					case 180:
+						howMuchRotated = -90;
+						break;
+					case 270:
+						howMuchRotated = 0;
+						break;
+				}
+				break;
+		}
+
+		return howMuchRotated;
+	}
 }
