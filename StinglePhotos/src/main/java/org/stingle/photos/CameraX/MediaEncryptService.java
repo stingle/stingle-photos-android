@@ -14,6 +14,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -94,6 +95,10 @@ public class MediaEncryptService extends Service {
 					public void onFinish() {
 						lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 						tasksStack.remove(filePath);
+
+						if (!isCameraRunning && tasksStack.size() == 0) {
+							stopSelf();
+						}
 					}
 				});
 				task.executeOnExecutor(cachedThreadPool);
@@ -105,26 +110,22 @@ public class MediaEncryptService extends Service {
 	private BroadcastReceiver onCameraStatus = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			try {
-				Thread.sleep(1500);
-			} catch (InterruptedException ignored) { }
-
 			isCameraRunning = intent.getBooleanExtra("isRunning", true);
 
-			if(!isCameraRunning && tasksStack.size() == 0){
+			if (!isCameraRunning && tasksStack.size() == 0) {
+
 				File tmpDir = new File(FileManager.getCameraTmpDir(MediaEncryptService.this));
 				File[] files = tmpDir.listFiles();
-				if(files.length > 0){
+				if (files.length > 0) {
 					(new EncryptMediaTask(MediaEncryptService.this, files, new EncryptMediaTask.OnFinish() {
 						@Override
 						public void onFinish() {
 							lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
-							stopForeground(true);
+							stopSelf();
 						}
 					})).executeOnExecutor(cachedThreadPool);
-				}
-				else {
-					stopForeground(true);
+				} else {
+					stopSelf();
 				}
 			}
 		}
