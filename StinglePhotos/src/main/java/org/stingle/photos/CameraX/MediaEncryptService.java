@@ -32,8 +32,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -109,7 +111,19 @@ public class MediaEncryptService extends Service {
 			isCameraRunning = intent.getBooleanExtra("isRunning", true);
 
 			if(!isCameraRunning && tasksStack.size() == 0){
-				stopSelf();
+				File tmpDir = new File(FileManager.getCameraTmpDir(MediaEncryptService.this));
+				File[] files = tmpDir.listFiles();
+				if(files.length > 0){
+					(new EncryptMediaTask(MediaEncryptService.this, files, new EncryptMediaTask.OnFinish() {
+						@Override
+						public void onFinish() {
+							stopSelf();;
+						}
+					})).executeOnExecutor(cachedThreadPool);
+				}
+				else {
+					stopSelf();
+				}
 			}
 		}
 	};
@@ -118,13 +132,17 @@ public class MediaEncryptService extends Service {
 	private static class EncryptMediaTask extends AsyncTask<Void, Void, Void>{
 
 		private Context context;
-		private String filePath;
+		private File[] files;
 		private EncryptMediaTask.OnFinish onFinish;
 		private LocalBroadcastManager lbm;
 
 		EncryptMediaTask(Context context, String filePath, EncryptMediaTask.OnFinish onFinish){
+			this(context, new File[]{new File(filePath)}, onFinish);
+		}
+
+		EncryptMediaTask(Context context, File[] files, EncryptMediaTask.OnFinish onFinish){
 			this.context = context;
-			this.filePath = filePath;
+			this.files = files;
 			this.onFinish = onFinish;
 
 			lbm = LocalBroadcastManager.getInstance(context);
@@ -132,52 +150,52 @@ public class MediaEncryptService extends Service {
 
 		@Override
 		protected Void doInBackground(Void... voids) {
-			File file = new File(filePath);
-			try {
-				int type = FileManager.getFileTypeFromUri(filePath);
+			for(File file : this.files) {
+				try {
+					int type = FileManager.getFileTypeFromUri(file.getAbsolutePath());
 
-				if(type != Crypto.FILE_TYPE_PHOTO && type != Crypto.FILE_TYPE_VIDEO){
-					return null;
-				}
-
-				String encFilename = Helpers.getNewEncFilename();
-				byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
-				int videoDuration = 0;
-				String realFilename = file.getName();
-
-				if(type == Crypto.FILE_TYPE_PHOTO){
-					InputStream thumbIn = new FileInputStream(file);
-					ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-					int numRead = 0;
-					byte[] buf = new byte[1024];
-					while ((numRead = thumbIn.read(buf)) >= 0) {
-						bytes.write(buf, 0, numRead);
+					if (type != Crypto.FILE_TYPE_PHOTO && type != Crypto.FILE_TYPE_VIDEO) {
+						return null;
 					}
-					thumbIn.close();
 
-					Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_PHOTO, 0);
+					String encFilename = Helpers.getNewEncFilename();
+					byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
+					int videoDuration = 0;
+					String realFilename = file.getName();
+
+					if (type == Crypto.FILE_TYPE_PHOTO) {
+						InputStream thumbIn = new FileInputStream(file);
+						ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+						int numRead = 0;
+						byte[] buf = new byte[1024];
+						while ((numRead = thumbIn.read(buf)) >= 0) {
+							bytes.write(buf, 0, numRead);
+						}
+						thumbIn.close();
+
+						Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_PHOTO, 0);
+					} else if (type == Crypto.FILE_TYPE_VIDEO) {
+						videoDuration = FileManager.getVideoDurationFromUri(context, Uri.fromFile(file));
+
+						Bitmap thumb = ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
+
+						Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+					}
+
+					String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;
+					FileInputStream in = new FileInputStream(file);
+					FileOutputStream out = new FileOutputStream(encFilePath);
+					StinglePhotosApplication.getCrypto().encryptFile(in, out, realFilename, type, file.length(), fileId, videoDuration);
+
+					Helpers.insertFileIntoDB(context, encFilename);
+
+					file.delete();
+
+				} catch (IOException | CryptoException e) {
+					e.printStackTrace();
 				}
-				else if(type == Crypto.FILE_TYPE_VIDEO) {
-					videoDuration = FileManager.getVideoDurationFromUri(context, Uri.fromFile(file));
-
-					Bitmap thumb = ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
-
-					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
-				}
-
-				String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;
-				FileInputStream in = new FileInputStream(file);
-				FileOutputStream out = new FileOutputStream(encFilePath);
-				StinglePhotosApplication.getCrypto().encryptFile(in, out, realFilename, type, file.length(), fileId, videoDuration);
-
-				Helpers.insertFileIntoDB(context, encFilename);
-
-				file.delete();
-
-			} catch (IOException | CryptoException e) {
-				e.printStackTrace();
 			}
 			return null;
 		}

@@ -383,6 +383,13 @@ public class FileManager {
 		}
 	}
 
+	public static String getCameraTmpDir(Context context) {
+		File cacheDir = context.getCacheDir();
+		File tmpDir = new File(cacheDir.getAbsolutePath() + "/camera_tmp/");
+		tmpDir.mkdirs();
+		return tmpDir.getAbsolutePath() + "/";
+	}
+
 	public static abstract class OnFinish{
 		public abstract void onFinish();
 	}

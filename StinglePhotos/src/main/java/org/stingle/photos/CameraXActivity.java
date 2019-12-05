@@ -351,6 +351,7 @@ public class CameraXActivity extends AppCompatActivity {
 	}
 
 	private void sendNewMediaBroadcast(File file){
+		startService(new Intent(this, MediaEncryptService.class));
 		Intent broadcastIntent = new Intent("NEW_MEDIA");
 		broadcastIntent.putExtra("file", file.getAbsolutePath());
 		lbm.sendBroadcast(broadcastIntent);
@@ -367,7 +368,7 @@ public class CameraXActivity extends AppCompatActivity {
 			cameraView.setMediaRotation(getPhotoRotation(cameraView.getCameraCharacteristics()));
 			if(!isInVideoMode) {
 				String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
-				cameraView.takePicture(new File(getTmpDir() + filename), AsyncTask.THREAD_POOL_EXECUTOR, new ImageCapture.OnImageSavedListener() {
+				cameraView.takePicture(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new ImageCapture.OnImageSavedListener() {
 					@Override
 					public void onImageSaved(@NonNull File file) {
 						sendNewMediaBroadcast(file);
@@ -393,7 +394,7 @@ public class CameraXActivity extends AppCompatActivity {
 					Helpers.acquireWakeLock(this);
 
 					String filename = Helpers.getTimestampedFilename(Helpers.VIDEO_FILE_PREFIX, ".mp4");
-					cameraView.startRecording(new File(getTmpDir() + filename), AsyncTask.THREAD_POOL_EXECUTOR, new VideoCapture.OnVideoSavedListener() {
+					cameraView.startRecording(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new VideoCapture.OnVideoSavedListener() {
 						@Override
 						public void onVideoSaved(@NonNull File file) {
 							sendNewMediaBroadcast(file);
@@ -484,14 +485,6 @@ public class CameraXActivity extends AppCompatActivity {
 		cameraView.setFlash(flashMode);
 		preferences.edit().putString(FLASH_MODE_PREF, flashMode.name()).apply();
 	}
-
-	private String getTmpDir() {
-		File cacheDir = getCacheDir();
-		File tmpDir = new File(cacheDir.getAbsolutePath() + "/camera_tmp/");
-		tmpDir.mkdirs();
-		return tmpDir.getAbsolutePath() + "/";
-	}
-
 
 	private void whitenScreen(){
 		cameraParent.postDelayed(new Runnable() {
