@@ -7,9 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -20,7 +17,6 @@ import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 import android.view.MenuItem;
 
-import org.stingle.photos.Camera.CameraImageSize;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.AsyncTasks;

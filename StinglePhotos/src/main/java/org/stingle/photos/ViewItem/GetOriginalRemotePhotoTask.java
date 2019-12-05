@@ -83,7 +83,6 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 			}
 
 			byte[] fileBeginning = Arrays.copyOfRange(encFile, 0, Crypto.FILE_BEGGINIG_LEN);
-			Log.d("beg", new String(fileBeginning, "UTF-8"));
 			if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
 				return null;
 			}
@@ -113,7 +112,6 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 			}
 			else {
 				Bitmap bitmap = Helpers.decodeBitmap(data, ViewItemAsyncTask.getSize(context));
-				Log.d("update", " qaq");
 				//image.setImageResource(R.drawable.no);
 				image.setImageBitmap(bitmap);
 

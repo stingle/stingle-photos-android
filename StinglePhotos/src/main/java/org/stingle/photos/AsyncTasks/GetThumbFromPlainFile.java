@@ -7,48 +7,38 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.widget.ImageView;
 
-import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Camera2Activity;
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
+public class GetThumbFromPlainFile extends AsyncTask<Void, Void, Bitmap> {
 
 	private Context context;
 	private File file;
-	private ImageView imageView;
 	private Integer thumbSize = null;
 	private boolean isVideo = false;
 	private OnAsyncTaskFinish onFinish;
 
-	public ShowThumbInImageView(Context context, File file, ImageView imageView){
+	public GetThumbFromPlainFile(Context context, File file){
 		this.context = context;
 		this.file = file;
-		this.imageView = imageView;
 	}
 
-	public ShowThumbInImageView setThumbSize(int size){
+	public GetThumbFromPlainFile setThumbSize(int size){
 		thumbSize = size;
 		return this;
 	}
 
-	public ShowThumbInImageView setIsVideo(boolean isVideo){
+	public GetThumbFromPlainFile setIsVideo(boolean isVideo){
 		this.isVideo = isVideo;
 		return this;
 	}
 
-	public ShowThumbInImageView setOnFinish(OnAsyncTaskFinish onFinish){
+	public GetThumbFromPlainFile setOnFinish(OnAsyncTaskFinish onFinish){
 		this.onFinish = onFinish;
 		return this;
 	}
@@ -96,9 +86,8 @@ public class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 		super.onPostExecute(bitmap);
 
 		if(bitmap != null){
-			imageView.setImageBitmap(bitmap);
 			if(onFinish != null){
-				onFinish.onFinish();
+				onFinish.onFinish(bitmap);
 			}
 		}
 	}

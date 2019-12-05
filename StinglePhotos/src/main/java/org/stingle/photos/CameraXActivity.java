@@ -1,10 +1,5 @@
 package org.stingle.photos;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-// Your IDE likely can auto-import these classes, but there are several
-// different implementations so we list them here to disambiguate.
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -20,15 +15,11 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.SensorManager;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.CamcorderProfile;
-import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -41,31 +32,31 @@ import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.FlashMode;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.VideoCapture;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
-import android.os.Bundle;
-import android.widget.RelativeLayout;
-
+import org.stingle.photos.AsyncTasks.GetThumbFromPlainFile;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ShowLastThumbAsyncTask;
-import org.stingle.photos.AsyncTasks.ShowThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Camera.CameraImageSize;
+import org.stingle.photos.CameraX.CameraImageSize;
 import org.stingle.photos.CameraX.CameraView;
 import org.stingle.photos.CameraX.MediaEncryptService;
-import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Sync.VideoEncryptService;
 import org.stingle.photos.Util.Helpers;
+
+import java.io.File;
+
+// Your IDE likely can auto-import these classes, but there are several
+// different implementations so we list them here to disambiguate.
 
 
 public class CameraXActivity extends AppCompatActivity {
@@ -103,6 +94,7 @@ public class CameraXActivity extends AppCompatActivity {
 	private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
 	private int mDeviceRotation = 0;
 	private int mOverallRotation = 0;
+	private int thumbSize;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -137,12 +129,14 @@ public class CameraXActivity extends AppCompatActivity {
 		lbm = LocalBroadcastManager.getInstance(this);
 
 		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
+		thumbSize = (int) Math.round(Helpers.getThumbSize(this) / 1.4);
 	}
 
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		LoginManager.checkIfLoggedIn(this);
 
 		if (hasAllPermissionsGranted()) {
 			initCamera();
@@ -165,7 +159,7 @@ public class CameraXActivity extends AppCompatActivity {
 		applyResolution();
 		cameraView.bindToLifecycle(this);
 		applyLastFlashMode();
-		showLastThumb(null, false);
+		showLastThumb();
 
 		startService(new Intent(this, MediaEncryptService.class));
 		sendCameraStatusBroadcast(true);
@@ -269,23 +263,28 @@ public class CameraXActivity extends AppCompatActivity {
 	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			showLastThumb(null, false);
+			showLastThumb();
 		}
 	};
 
-	private void showLastThumb(File file, boolean isVideo){
-		int thumbSize = (int) Math.round(Helpers.getThumbSize(this) / 1.4);
-		if(file != null){
-			(new ShowThumbInImageView(CameraXActivity.this, file, galleryButton))
-					.setThumbSize(thumbSize)
-					.setIsVideo(isVideo)
-					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
-		else{
-			(new ShowLastThumbAsyncTask(this, galleryButton))
-					.setThumbSize(thumbSize)
-					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
+	private void showLastThumb(){
+
+		(new ShowLastThumbAsyncTask(this, galleryButton))
+				.setThumbSize(thumbSize)
+				.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
+	private void getThumbIntoMemory(File file, boolean isVideo){
+		(new GetThumbFromPlainFile(this, file).setThumbSize(thumbSize).setIsVideo(isVideo).setOnFinish(new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish(Object object) {
+				super.onFinish(object);
+				if(object != null) {
+					galleryButton.setImageBitmap((Bitmap) object);
+				}
+
+			}
+		})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	private View.OnClickListener openSettings() {
@@ -371,6 +370,9 @@ public class CameraXActivity extends AppCompatActivity {
 				cameraView.takePicture(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new ImageCapture.OnImageSavedListener() {
 					@Override
 					public void onImageSaved(@NonNull File file) {
+						if(!LoginManager.isKeyInMemory()){
+							getThumbIntoMemory(file, false);
+						}
 						sendNewMediaBroadcast(file);
 					}
 
@@ -397,6 +399,9 @@ public class CameraXActivity extends AppCompatActivity {
 					cameraView.startRecording(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new VideoCapture.OnVideoSavedListener() {
 						@Override
 						public void onVideoSaved(@NonNull File file) {
+							if(!LoginManager.isKeyInMemory()){
+								getThumbIntoMemory(file, true);
+							}
 							sendNewMediaBroadcast(file);
 							runOnUiThread(() -> {
 								whitenScreen();

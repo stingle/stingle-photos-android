@@ -1,7 +1,6 @@
-package org.stingle.photos.Camera;
+package org.stingle.photos.CameraX;
 
 import android.content.Context;
-import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 

@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -93,10 +94,6 @@ public class MediaEncryptService extends Service {
 					public void onFinish() {
 						lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 						tasksStack.remove(filePath);
-
-						if(tasksStack.size() == 0 && !isCameraRunning){
-							stopSelf();
-						}
 					}
 				});
 				task.executeOnExecutor(cachedThreadPool);
@@ -108,6 +105,10 @@ public class MediaEncryptService extends Service {
 	private BroadcastReceiver onCameraStatus = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			try {
+				Thread.sleep(1500);
+			} catch (InterruptedException ignored) { }
+
 			isCameraRunning = intent.getBooleanExtra("isRunning", true);
 
 			if(!isCameraRunning && tasksStack.size() == 0){
@@ -117,12 +118,13 @@ public class MediaEncryptService extends Service {
 					(new EncryptMediaTask(MediaEncryptService.this, files, new EncryptMediaTask.OnFinish() {
 						@Override
 						public void onFinish() {
-							stopSelf();;
+							lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
+							stopForeground(true);
 						}
 					})).executeOnExecutor(cachedThreadPool);
 				}
 				else {
-					stopSelf();
+					stopForeground(true);
 				}
 			}
 		}
@@ -227,7 +229,7 @@ public class MediaEncryptService extends Service {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			String NOTIFICATION_CHANNEL_ID = "org.stingle.photos";
-			String channelName = "Media Encrypt Service";
+			String channelName = getString(R.string.encryption_service);
 			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
 			chan.setLightColor(getColor(R.color.primaryLightColor));
 			chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
@@ -246,7 +248,7 @@ public class MediaEncryptService extends Service {
 		Notification notification = notificationBuilder
 				.setSmallIcon(R.drawable.ic_sp)  // the status icon
 				.setWhen(System.currentTimeMillis())  // the time stamp
-				.setContentTitle(getText(R.string.encrypting_media))  // the label of the entry
+				.setContentTitle(getText(R.string.encryption_service))  // the label of the entry
 				.setContentIntent(contentIntent)  // The intent to send when the entry is clicked
 				.build();
 

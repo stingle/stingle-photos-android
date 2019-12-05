@@ -254,7 +254,6 @@ public class GalleryActivity extends AppCompatActivity
 			startActivityForResult(intent, 7);
 		}
 		else {*/
-			Log.e("InitGallery", "qaq");
 			findViewById(R.id.topBar).setVisibility(View.VISIBLE);
 			recyclerView.setAdapter(adapter);
 			Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);

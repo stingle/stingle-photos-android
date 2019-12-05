@@ -67,8 +67,6 @@ import androidx.camera.core.VideoCapture.OnVideoSavedListener;
 import androidx.camera.view.TextureViewMeteringPointFactory;
 import androidx.lifecycle.LifecycleOwner;
 
-import org.stingle.photos.Camera.CameraImageSize;
-import org.stingle.photos.CameraX.CameraXModule;
 import org.stingle.photos.R;
 
 import java.io.File;

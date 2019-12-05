@@ -111,7 +111,6 @@ public class FileManager {
 		}
 
 		byte[] fileBeginning = Arrays.copyOfRange(encFile, 0, Crypto.FILE_BEGGINIG_LEN);
-		Log.d("beg", new String(fileBeginning, "UTF-8"));
 		if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
 			return null;
 		}
