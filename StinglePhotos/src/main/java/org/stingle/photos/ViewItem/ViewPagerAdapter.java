@@ -27,7 +27,6 @@ public class ViewPagerAdapter extends PagerAdapter {
 	private StingleDbHelper db;
 	private int currentPosition = 0;
 	private int lastFilesCount = -1;
-	//private int countDifference = 0;
 	private int folder = SyncManager.FOLDER_MAIN;
 	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
 	private View.OnTouchListener gestureTouchListener;
@@ -42,7 +41,10 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 	@Override
 	public int getCount() {
-		return (int)db.getTotalFilesCount();
+		if(lastFilesCount == -1) {
+			lastFilesCount = (int) db.getTotalFilesCount();
+		}
+		return lastFilesCount;
 		/*
 		int count = (int)db.getTotalFilesCount();
 		countDifference = count - lastFilesCount;
@@ -55,6 +57,12 @@ public class ViewPagerAdapter extends PagerAdapter {
 		}
 
 		return lastFilesCount;*/
+	}
+
+	@Override
+	public void notifyDataSetChanged() {
+		lastFilesCount = -1;
+		super.notifyDataSetChanged();
 	}
 
 	@Override

@@ -37,7 +37,9 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,6 +52,8 @@ public class MediaEncryptService extends Service {
 	private LocalBroadcastManager lbm;
 	private boolean isCameraRunning = true;
 	private ConcurrentHashMap<String, AsyncTask> tasksStack = new ConcurrentHashMap<String, AsyncTask>();
+
+	private static String PROC_EXT = "_proc";
 
 	public MediaEncryptService() {
 	}
@@ -90,20 +94,24 @@ public class MediaEncryptService extends Service {
 		public void onReceive(Context context, Intent intent) {
 			String filePath = intent.getStringExtra("file");
 			if(filePath != null){
-				AsyncTask<Void, Void, Void> task = new EncryptMediaTask(MediaEncryptService.this, filePath, new EncryptMediaTask.OnFinish() {
-					@Override
-					public void onFinish() {
-						lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
-						tasksStack.remove(filePath);
+				File file = new File(filePath);
+				if(!tasksStack.containsKey(file.getName())) {
+					AsyncTask<Void, Void, Void> task = new EncryptMediaTask(MediaEncryptService.this, file, new EncryptMediaTask.OnFinish() {
+						@Override
+						public void onFinish() {
+							Log.d("encrypt_n", "encrypted " + file.getName());
+							lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
+							tasksStack.remove(file.getName());
 
-						if (!isCameraRunning && tasksStack.size() == 0) {
-							stopSelf();
+							if (!isCameraRunning && tasksStack.size() == 0) {
+								stopSelf();
+							}
 						}
-					}
-				});
-				task.executeOnExecutor(cachedThreadPool);
+					});
+					task.executeOnExecutor(cachedThreadPool);
 
-				tasksStack.put(filePath, task);
+					tasksStack.put(file.getName(), task);
+				}
 			}
 		}
 	};
@@ -115,11 +123,26 @@ public class MediaEncryptService extends Service {
 			if (!isCameraRunning && tasksStack.size() == 0) {
 
 				File tmpDir = new File(FileManager.getCameraTmpDir(MediaEncryptService.this));
-				File[] files = tmpDir.listFiles();
+				File[] files = tmpDir.listFiles(new FilenameFilter() {
+					@Override
+					public boolean accept(File dir, String name) {
+						if(name.endsWith(PROC_EXT)) {
+							return false;
+						}
+						return true;
+					}
+				});
 				if (files.length > 0) {
-					(new EncryptMediaTask(MediaEncryptService.this, files, new EncryptMediaTask.OnFinish() {
+					ArrayList<File> filesList = new ArrayList<>(Arrays.asList(files));
+					for(File file : filesList) {
+						if (tasksStack.containsKey(file.getName())){
+							filesList.remove(file);
+						}
+					}
+					(new EncryptMediaTask(MediaEncryptService.this, filesList, new EncryptMediaTask.OnFinish() {
 						@Override
 						public void onFinish() {
+							Log.d("encrypt_l", "encrypted " + filesList.toString());
 							lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 							stopSelf();
 						}
@@ -135,15 +158,15 @@ public class MediaEncryptService extends Service {
 	private static class EncryptMediaTask extends AsyncTask<Void, Void, Void>{
 
 		private Context context;
-		private File[] files;
+		private List<File> files;
 		private EncryptMediaTask.OnFinish onFinish;
 		private LocalBroadcastManager lbm;
 
-		EncryptMediaTask(Context context, String filePath, EncryptMediaTask.OnFinish onFinish){
-			this(context, new File[]{new File(filePath)}, onFinish);
+		EncryptMediaTask(Context context, File file, EncryptMediaTask.OnFinish onFinish){
+			this(context, Arrays.asList(file), onFinish);
 		}
 
-		EncryptMediaTask(Context context, File[] files, EncryptMediaTask.OnFinish onFinish){
+		EncryptMediaTask(Context context, List<File> files, EncryptMediaTask.OnFinish onFinish){
 			this.context = context;
 			this.files = files;
 			this.onFinish = onFinish;
@@ -153,9 +176,16 @@ public class MediaEncryptService extends Service {
 
 		@Override
 		protected Void doInBackground(Void... voids) {
-			for(File file : this.files) {
+			for(File origfile : this.files) {
 				try {
-					int type = FileManager.getFileTypeFromUri(file.getAbsolutePath());
+					String realFilename = origfile.getName();
+					int type = FileManager.getFileTypeFromUri(origfile.getAbsolutePath());
+
+					if(!origfile.renameTo(new File(origfile.getAbsolutePath() + PROC_EXT))){
+						return null;
+					}
+					File file = new File(origfile.getAbsolutePath() + PROC_EXT);
+
 
 					if (type != Crypto.FILE_TYPE_PHOTO && type != Crypto.FILE_TYPE_VIDEO) {
 						return null;
@@ -164,7 +194,7 @@ public class MediaEncryptService extends Service {
 					String encFilename = Helpers.getNewEncFilename();
 					byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
 					int videoDuration = 0;
-					String realFilename = file.getName();
+
 
 					if (type == Crypto.FILE_TYPE_PHOTO) {
 						InputStream thumbIn = new FileInputStream(file);
