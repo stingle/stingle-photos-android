@@ -1,12 +1,23 @@
 apply plugin: 'com.android.application'
 
+// Creates a variable called keystorePropertiesFile, and initializes it to the
+// keystore.properties file.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+// Initializes a new Properties() object called keystoreProperties.
+def keystoreProperties = new Properties()
+
+// Loads the keystore.properties file into the keystoreProperties object.
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+
 android {
     signingConfigs {
         release {
-            storeFile file('S:\\APK Signing Key\\MainNew')
-            keyAlias = 'main'
-            storePassword '***REMOVED***'
-            keyPassword '***REMOVED***'
+            storeFile file(keystoreProperties['storeFile'])
+            keyAlias keystoreProperties['keyAlias']
+            storePassword keystoreProperties['storePassword']
+            keyPassword keystoreProperties['keyPassword']
         }
     }
     compileSdkVersion 29
