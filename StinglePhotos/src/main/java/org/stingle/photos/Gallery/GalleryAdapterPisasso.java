@@ -324,7 +324,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 					holder.checkbox.setChecked(false);
 				}
 			} else {
-				int size = Helpers.convertDpToPixels(context, 5);
+				int size = Helpers.convertDpToPixels(context, 2);
 				holder.image.setPadding(size, size, size, size);
 				holder.checkbox.setVisibility(View.GONE);
 			}
@@ -333,7 +333,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			holder.videoIcon.setVisibility(View.GONE);
 			holder.videoDuration.setVisibility(View.GONE);
 			holder.noCloudIcon.setVisibility(View.GONE);
-			holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
+			//holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
 
 			String folder = "m";
 			if(folderType == SyncManager.FOLDER_TRASH){

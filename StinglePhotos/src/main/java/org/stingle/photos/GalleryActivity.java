@@ -93,6 +93,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected ProgressBar refreshCProgress;
 	protected ImageView syncPhoto;
 	protected TextView syncText;
+	private ImageView backupCompleteIcon;
 	protected Messenger mService = null;
 	protected boolean isBound = false;
 	final Messenger mMessenger = new Messenger(new IncomingHandler());
@@ -142,6 +143,7 @@ public class GalleryActivity extends AppCompatActivity
 		refreshCProgress = findViewById(R.id.refreshCProgress);
 		syncPhoto = findViewById(R.id.syncPhoto);
 		syncText = findViewById(R.id.syncText);
+		backupCompleteIcon = findViewById(R.id.backupComplete);
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -439,40 +441,47 @@ public class GalleryActivity extends AppCompatActivity
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.VISIBLE);
 			syncProgress.setVisibility(View.VISIBLE);
+			backupCompleteIcon.setVisibility(View.GONE);
 		} else if (syncStatus == SyncService.STATUS_REFRESHING) {
 			refreshCProgress.setVisibility(View.VISIBLE);
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.refreshing));
+			backupCompleteIcon.setVisibility(View.GONE);
 		} else if (syncStatus == SyncService.STATUS_NO_SPACE_LEFT) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.no_space_left));
+			backupCompleteIcon.setVisibility(View.GONE);
 			updateQuotaInfo();
 		} else if (syncStatus == SyncService.STATUS_DISABLED) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.sync_disabled));
+			backupCompleteIcon.setVisibility(View.GONE);
 			updateQuotaInfo();
 		} else if (syncStatus == SyncService.STATUS_NOT_WIFI) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.sync_not_on_wifi));
+			backupCompleteIcon.setVisibility(View.GONE);
 			updateQuotaInfo();
 		} else if (syncStatus == SyncService.STATUS_BATTERY_LOW) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(getString(R.string.sync_battery_low));
+			backupCompleteIcon.setVisibility(View.GONE);
 			updateQuotaInfo();
 		} else if (syncStatus == SyncService.STATUS_IDLE) {
 			syncText.setText(getString(R.string.backup_complete));
 			syncPhoto.setVisibility(View.GONE);
 			syncProgress.setVisibility(View.INVISIBLE);
 			refreshCProgress.setVisibility(View.GONE);
+			backupCompleteIcon.setVisibility(View.VISIBLE);
 			updateQuotaInfo();
 		}
 	}

@@ -180,6 +180,7 @@
 
     <string name="title_activity_camera_settings">Camera Settings</string>
     <string name="encryption_service">Camera encryption service</string>
+    <string name="upload_current_image">Current photo or video that is being uploaded</string>
 
 
 </resources>

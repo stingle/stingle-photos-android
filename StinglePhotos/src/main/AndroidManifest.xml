@@ -132,6 +132,7 @@
         <activity
             android:name=".CameraXActivity"
             android:clearTaskOnLaunch="true"
+            android:launchMode="singleInstance"
             android:label="@string/camera"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape"
