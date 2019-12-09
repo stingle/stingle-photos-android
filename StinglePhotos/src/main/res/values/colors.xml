@@ -8,6 +8,7 @@
     <color name="box_bg">#36B6B6B6</color>
     <color name="box_bg_sel">#C6B71C1C</color>
     <color name="link">#DF0945CA</color>
+    <color name="textColor">#DF000000</color>
 
     <color name="primaryColor">#b71c1c</color>
     <color name="primaryLightColor">#f05545</color>

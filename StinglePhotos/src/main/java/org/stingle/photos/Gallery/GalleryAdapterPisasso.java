@@ -35,8 +35,12 @@ import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
@@ -189,10 +193,22 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		dates.clear();
 		Cursor result = db.getAvailableDates();
 		while(result.moveToNext()) {
-			DateGroup group = new DateGroup(result.getString(0), result.getInt(1));
+			DateGroup group = new DateGroup(convertDate(result.getString(0)), result.getInt(1));
 			dates.add(group);
-			//Log.d("dates", group.date + " - " + group.itemCount);
 		}
+	}
+
+	private String convertDate(String dateString){
+		try {
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = fmt.parse(dateString);
+
+			SimpleDateFormat fmtOut = new SimpleDateFormat("MMMM d, y");
+			return fmtOut.format(date);
+		}
+		catch (ParseException ignored) {}
+
+		return dateString;
 	}
 
 	private void calculateDatePositions(){
@@ -258,7 +274,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	public int getDbPositionFromRaw(int pos){
-		return ((PosTranslate) Objects.requireNonNull(translatePos(pos))).dbPosition;
+		return Objects.requireNonNull(translatePos(pos)).dbPosition;
 	}
 
 	public void updateItem(int dbPosition){

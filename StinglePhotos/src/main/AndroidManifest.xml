@@ -39,6 +39,7 @@
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@android:style/Theme.Material.Light">
+        <activity android:name=".WelcomeActivity"></activity>
 
         <service
             android:name=".Sync.SyncService"
@@ -132,9 +133,9 @@
         <activity
             android:name=".CameraXActivity"
             android:clearTaskOnLaunch="true"
-            android:launchMode="singleInstance"
-            android:label="@string/camera"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/camera"
+            android:launchMode="singleInstance"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -158,7 +159,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".SetUpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -178,7 +178,6 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppThemeNoCompat" />
-
         <activity
             android:name=".CameraSettingsActivity"
             android:label="@string/title_activity_camera_settings"

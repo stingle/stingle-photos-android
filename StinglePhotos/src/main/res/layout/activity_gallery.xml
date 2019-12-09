@@ -47,8 +47,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginBottom="12dp"
-                >
+                android:layout_marginBottom="12dp" >
 
                 <TextView
                     android:id="@+id/syncText"
@@ -56,8 +55,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="#000"
                     android:layout_margin="10dp"
-                    android:layout_centerVertical="true"
-                    />
+                    android:layout_centerVertical="true" />
 
                 <ImageView
                     android:id="@+id/syncPhoto"
@@ -104,7 +102,7 @@
                     android:scrollbars="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingTop="60dp"
+                    android:paddingTop="72dp"
                     android:clipToPadding="false"/>
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
