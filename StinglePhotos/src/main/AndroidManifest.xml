@@ -39,7 +39,6 @@
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@android:style/Theme.Material.Light">
-        <activity android:name=".WelcomeActivity"></activity>
 
         <service
             android:name=".Sync.SyncService"
@@ -129,6 +128,10 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/login"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".WelcomeActivity"
+            android:label="@string/welcome"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".CameraXActivity"

@@ -29,6 +29,7 @@ import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.WelcomeActivity;
 
 import java.util.HashMap;
 
@@ -298,7 +299,7 @@ public class LoginManager {
 
     public static void redirectToLogin(Activity activity) {
         Intent intent = new Intent();
-        intent.setClass(activity, LoginActivity.class);
+        intent.setClass(activity, WelcomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activity.startActivity(intent);

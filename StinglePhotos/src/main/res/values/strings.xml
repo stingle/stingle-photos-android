@@ -130,7 +130,7 @@
     <string name="fail_login">Something went wrong during login, please try again.</string>
     <string name="create_account">Create an account</string>
     <string name="login_intead">Already have an account? Go to Login</string>
-    <string name="uploading_file">"Uploading file %s out of %s"</string>
+    <string name="uploading_file">"Uploading file %1$s out of %2$s"</string>
     <string name="refreshing">Refreshing...</string>
     <string name="backup_complete">Backup/Sync complete</string>
     <string name="logging_out">Logging out...</string>
@@ -142,7 +142,7 @@
     <string name="warning_chpass">Warning! Changing password will logout all other devices currently connected to this account and you will need to login them again with new credentials.</string>
     <string name="home_folder_problem">Please check that app has access to external storage</string>
     <string name="no_space_left">Unable to upload file(s), no space left in your account!</string>
-    <string name="quota_text">%s of %s (%s) used</string>
+    <string name="quota_text">%1$s of %s (%2$s) used</string>
     <string name="menu_account">Account</string>
     <string name="title_account">Account</string>
     <string name="current_storage">Current storage</string>
@@ -150,7 +150,7 @@
     <string name="pending_purchase">Your payment is still in progress.</string>
     <string name="payment_error">Failed to notify server about the purchase</string>
     <string name="monthly_plan">%s / month</string>
-    <string name="yearly_plan">%s / year (save %s)</string>
+    <string name="yearly_plan">%1$s / year (save %2$s)</string>
     <string name="free">Free</string>
     <string name="upgrade">Upgrade</string>
     <string name="current_plan">Current plan</string>
@@ -181,6 +181,18 @@
     <string name="title_activity_camera_settings">Camera Settings</string>
     <string name="encryption_service">Camera encryption service</string>
     <string name="upload_current_image">Current photo or video that is being uploaded</string>
+
+
+    <string name="welcome">Welcome</string>
+    <string name="welcome_header1">Trust no one Encryption</string>
+    <string name="welcome_desc1">Your data yours and only yours. Nobody except you can see it. Even we as a provider, our cloud provider, government or any other entity can\'t see your data. It\'s always encrypted and secure!</string>
+    <string name="welcome_header2">True privacy</string>
+    <string name="welcome_desc2">Stingle Photos aims to keep you as anonymous as possible.  We don\'t collect any personal information, analytics, we don\'t serve any ads.</string>
+    <string name="welcome_header3">Backup and sync</string>
+    <string name="welcome_desc3">All your photos and videos are securely backed up to the cloud and synced to your other devices.</string>
+    <string name="welcome_header4">Fast, Easy to use</string>
+    <string name="welcome_desc4">Stingle Photos is optimized not only for security, but also for speed. it\'s so fast that you don\'t really feel that you are browsing through encrypted files.</string>
+    <string name="have_an_account">Already  have an account?</string>
 
 
 </resources>
