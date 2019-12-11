@@ -129,7 +129,6 @@
     <string name="signing_in">Signing in...</string>
     <string name="fail_login">Something went wrong during login, please try again.</string>
     <string name="create_account">Create an account</string>
-    <string name="login_intead">Already have an account? Go to Login</string>
     <string name="uploading_file">"Uploading file %1$s out of %2$s"</string>
     <string name="refreshing">Refreshing...</string>
     <string name="backup_complete">Backup/Sync complete</string>
@@ -192,7 +191,8 @@
     <string name="welcome_desc3">All your photos and videos are securely backed up to the cloud and synced to your other devices.</string>
     <string name="welcome_header4">Fast, Easy to use</string>
     <string name="welcome_desc4">Stingle Photos is optimized not only for security, but also for speed. it\'s so fast that you don\'t really feel that you are browsing through encrypted files.</string>
-    <string name="have_an_account">Already  have an account?</string>
+    <string name="have_an_account">Already have an account?</string>
+    <string name="dont_have_an_account">Don\'t have an account?</string>
 
 
 </resources>

@@ -128,7 +128,7 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/login"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".WelcomeActivity"
             android:label="@string/welcome"
@@ -166,7 +166,7 @@
             android:name=".SetUpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_setup"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".ChangePasswordActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

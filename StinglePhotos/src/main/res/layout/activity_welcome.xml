@@ -5,23 +5,26 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="org.stingle.photos.WelcomeActivity">
-
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/dotsContainer"
-        android:layout_alignParentTop="true"/>
-
     <LinearLayout
-        android:id="@+id/dotsContainer"
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:layout_marginBottom="12dp"
         android:layout_above="@+id/sign_up"
-        android:gravity="center"
-        android:layout_centerHorizontal="true"
-        android:orientation="horizontal" />
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <org.stingle.photos.Widget.WrapContentViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:id="@+id/dotsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"
+            android:orientation="horizontal" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/sign_up"

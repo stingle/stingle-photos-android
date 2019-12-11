@@ -111,11 +111,11 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
 
-		progressDialog.dismiss();
 		if(result) {
 			SyncManager.syncFSToDB(context, new SyncManager.OnFinish() {
 				@Override
 				public void onFinish(Boolean needToUpdateUI) {
+					progressDialog.dismiss();
 					Intent intent = new Intent();
 					intent.setClass(context, GalleryActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

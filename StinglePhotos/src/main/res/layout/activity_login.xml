@@ -8,28 +8,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="15dp"
-            android:contentDescription="@string/app_name"
-            android:src="@mipmap/ic_stingle_photos_round" />
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="30dp"
-            android:text="@string/sign_in"
-            android:textSize="30sp" />
-
         <EditText
             android:id="@+id/email"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="40dp"
             android:layout_margin="10dp"
             android:hint="@string/email"
             android:inputType="textEmailAddress">
@@ -58,47 +41,35 @@
 
         <Button
             android:id="@+id/login"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="wrap_content"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"
             android:layout_gravity="center"
-            android:layout_marginTop="10dp"
             android:text="@string/sign_in" />
 
-
-        <TextView
-            android:id="@+id/register"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="@string/create_account"
-            android:textColor="@color/design_default_color_primary"
-            android:textSize="16sp" />
-
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:id="@+id/sign_in_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:orientation="vertical"
-            android:layout_marginTop="60dp">
-
-            <TextView
-                android:id="@+id/versionText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
-                android:gravity="center"
-                android:textColor="@color/sec_color_light" />
-
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal"
+            android:gravity="center">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
-                android:autoLink="web"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:text="@string/bottom_text" />
+                android:layout_gravity="center"
+                android:text="@string/dont_have_an_account"
+                android:textSize="16sp" />
+            <Button
+                android:id="@+id/register"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_up" />
         </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

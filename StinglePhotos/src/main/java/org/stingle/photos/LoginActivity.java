@@ -16,11 +16,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.stingle.photos.AsyncTasks.LoginAsyncTask;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Auth.LoginManager;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends AppCompatActivity {
 
 
 
@@ -32,8 +35,13 @@ public class LoginActivity extends Activity {
 
 		setContentView(R.layout.activity_login);
 
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
+		actionBar.setTitle(getString(R.string.sign_in));
+
 		((Button) findViewById(R.id.login)).setOnClickListener(login());
-		//((TextView) findViewById(R.id.forgot_password)).setOnClickListener(forgotPassword());
 		((TextView) findViewById(R.id.register)).setOnClickListener(gotoSignUp());
 		((EditText) findViewById(R.id.password)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -46,26 +54,18 @@ public class LoginActivity extends Activity {
 				return false;
 			}
 		});
-
-		displayVersionName();
 	}
 
 	private OnClickListener login() {
-		return new OnClickListener() {
-			public void onClick(View v) {
-				doLogin();
-			}
-		};
+		return v -> doLogin();
 	}
 
 	private OnClickListener gotoSignUp() {
-		return new OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent();
-				intent.setClass(LoginActivity.this, SetUpActivity.class);
-				startActivity(intent);
-				finish();
-			}
+		return v -> {
+			Intent intent = new Intent();
+			intent.setClass(LoginActivity.this, SetUpActivity.class);
+			startActivity(intent);
+			finish();
 		};
 	}
 
@@ -94,41 +94,9 @@ public class LoginActivity extends Activity {
 
 	}
 
-	protected OnClickListener forgotPassword(){
-        return new OnClickListener() {
-            public void onClick(View v) {
-                /*AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                builder.setTitle(getString(R.string.forgot_password));
-                builder.setMessage(getString(R.string.reset_password));
-                builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences preferences = getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, MODE_PRIVATE);
-                        preferences.edit().remove(StinglePhotosApplication.PASSWORD).commit();
-						StinglePhotosApplication.setKey(null);
-
-                        Intent intent = new Intent();
-                        intent.setClass(LoginActivity.this, SetUpActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                builder.setNegativeButton(getString(R.string.no), null);
-                AlertDialog dialog = builder.create();
-                dialog.show();*/
-            }
-        };
-    }
-
-
-	private void displayVersionName() {
-		String versionName = "";
-		PackageInfo packageInfo;
-		try {
-			packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-			versionName = "v " + packageInfo.versionName;
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
-		((TextView) findViewById(R.id.versionText)).setText(versionName);
+	@Override
+	public boolean onSupportNavigateUp() {
+		onBackPressed();
+		return true;
 	}
 }
