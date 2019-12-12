@@ -119,6 +119,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setTheme(R.style.AppTheme);
 		setContentView(R.layout.activity_gallery);
 
 		Helpers.blockScreenshotsIfEnabled(this);
@@ -146,12 +147,9 @@ public class GalleryActivity extends AppCompatActivity
 		backupCompleteIcon = findViewById(R.id.backupComplete);
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
-		pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-			@Override
-			public void onRefresh() {
-				sendMessageToSyncService(SyncService.MSG_START_SYNC);
-				pullToRefresh.setRefreshing(false);
-			}
+		pullToRefresh.setOnRefreshListener(() -> {
+			sendMessageToSyncService(SyncService.MSG_START_SYNC);
+			pullToRefresh.setRefreshing(false);
 		});
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
@@ -561,6 +559,9 @@ public class GalleryActivity extends AppCompatActivity
 		else if (id == R.id.action_camera) {
 			Intent intent = new Intent();
 			intent.setClass(this, CameraXActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 		}
 		else if (id == R.id.action_empty_trash) {

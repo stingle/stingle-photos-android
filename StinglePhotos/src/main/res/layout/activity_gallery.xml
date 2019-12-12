@@ -47,7 +47,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginBottom="12dp" >
+                android:layout_marginBottom="12dp">
 
                 <TextView
                     android:id="@+id/syncText"
@@ -80,8 +80,7 @@
                     android:layout_height="50dp"
                     android:layout_alignParentEnd="true"
                     android:layout_margin="12dp"
-                    android:visibility="gone"
-                    />
+                    android:visibility="gone" />
                 <ProgressBar
                     android:id="@+id/syncProgress"
                     android:layout_width="match_parent"
@@ -89,8 +88,7 @@
                     android:layout_alignParentBottom="true"
                     android:paddingTop="12dp"
                     android:visibility="gone"
-                    style="@android:style/Widget.Material.ProgressBar.Horizontal"
-                    />
+                    style="@android:style/Widget.Material.ProgressBar.Horizontal" />
             </RelativeLayout>
 
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

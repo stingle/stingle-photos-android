@@ -119,6 +119,7 @@ public class CameraXActivity extends AppCompatActivity {
 		galleryButton = findViewById(R.id.lastPhoto);
 		chronometer = findViewById(R.id.chrono);
 		chronoBar = findViewById(R.id.chronoBar);
+		findViewById(R.id.lastPhoto).setClipToOutline(true);
 
 		takePhotoButton.setOnClickListener(getTakePhotoListener());
 		switchCamButton.setOnClickListener(getSwitchCamListener());
@@ -326,7 +327,7 @@ public class CameraXActivity extends AppCompatActivity {
 			}
 
 			cameraView.setCustomImageSize(size);
-			if((boolean)characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)){
+			if(characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)){
 				flashButton.setVisibility(View.VISIBLE);
 			}
 			else{

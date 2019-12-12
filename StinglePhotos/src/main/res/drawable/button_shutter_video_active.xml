@@ -11,10 +11,10 @@
              </shape>
          </item>
          <item
-             android:bottom="20dp"
-             android:left="20dp"
-             android:right="20dp"
-             android:top="20dp">
+             android:bottom="30dp"
+             android:left="30dp"
+             android:right="30dp"
+             android:top="30dp">
              <shape android:shape="rectangle"  >
                  <solid android:color="@android:color/background_light"/>
              </shape>
@@ -32,10 +32,10 @@
             </shape>
         </item>
         <item
-            android:bottom="20dp"
-            android:left="20dp"
-            android:right="20dp"
-            android:top="20dp">
+            android:bottom="30dp"
+            android:left="30dp"
+            android:right="30dp"
+            android:top="30dp">
             <shape android:shape="rectangle"  >
                 <solid android:color="@android:color/background_light"/>
             </shape>
@@ -53,10 +53,10 @@
             </shape>
         </item>
         <item
-            android:bottom="20dp"
-            android:left="20dp"
-            android:right="20dp"
-            android:top="20dp">
+            android:bottom="30dp"
+            android:left="30dp"
+            android:right="30dp"
+            android:top="30dp">
             <shape android:shape="rectangle"  >
                 <solid android:color="@android:color/background_light"/>
             </shape>

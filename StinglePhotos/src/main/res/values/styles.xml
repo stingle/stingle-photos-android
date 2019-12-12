@@ -68,4 +68,9 @@
         <item name="android:shadowDy">1</item>
         <item name="android:shadowRadius">1</item>
     </style>
+
+    <style name="AppTheme.Launcher">
+     <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
+    </style>
 </resources>
