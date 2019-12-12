@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -136,15 +137,13 @@ public class CameraXActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		LoginManager.checkIfLoggedIn(this);
-
-		if (hasAllPermissionsGranted()) {
-			initCamera();
+		if(LoginManager.checkIfLoggedIn(this)) {
+			if (hasAllPermissionsGranted()) {
+				initCamera();
+			} else {
+				requestNextPermission();
+			}
 		}
-		else{
-			requestNextPermission();
-		}
-
 	}
 
 	@Override

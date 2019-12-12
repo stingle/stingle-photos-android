@@ -211,10 +211,12 @@ public class MediaEncryptService extends Service {
 						videoDuration = FileManager.getVideoDurationFromUri(context, Uri.fromFile(file));
 
 						Bitmap thumb = ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
+						if(thumb != null) {
+							ByteArrayOutputStream bos = new ByteArrayOutputStream();
+							thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
 
-						Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+							Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+						}
 					}
 
 					String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;

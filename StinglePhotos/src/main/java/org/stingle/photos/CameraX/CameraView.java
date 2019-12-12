@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCharacteristics;
@@ -33,6 +34,7 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.view.Display;
@@ -43,6 +45,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.BaseInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
@@ -132,6 +135,7 @@ public final class CameraView extends ViewGroup {
 	// For accessibility event
 	private MotionEvent mUpEvent;
 	private @Nullable Paint mLayerPaint;
+	private DisplayMetrics displayMetrics;
 
 	public CameraView(Context context) {
 		this(context, null);
@@ -254,6 +258,10 @@ public final class CameraView extends ViewGroup {
 		}
 
 		mPinchToZoomGestureDetector = new PinchToZoomGestureDetector(context);
+
+		WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+		displayMetrics = new DisplayMetrics();
+		wm.getDefaultDisplay().getMetrics(displayMetrics);
 	}
 
 	@Override
@@ -446,6 +454,7 @@ public final class CameraView extends ViewGroup {
 			int parentHeight,
 			int displayRotation,
 			ScaleType scaleType) {
+
 		int inWidth = srcSize.getWidth();
 		int inHeight = srcSize.getHeight();
 		if (displayRotation == Surface.ROTATION_90 || displayRotation == Surface.ROTATION_270) {

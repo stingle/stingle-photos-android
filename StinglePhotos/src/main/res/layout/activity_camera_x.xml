@@ -44,13 +44,13 @@
         android:id="@+id/camera_parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/topPanel"
+        android:layout_toEndOf="@id/topPanel"
         android:orientation="horizontal">
 
         <org.stingle.photos.CameraX.CameraView
             android:id="@+id/view_finder"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:keepScreenOn="true"
             app:scaleType="centerInside" />
