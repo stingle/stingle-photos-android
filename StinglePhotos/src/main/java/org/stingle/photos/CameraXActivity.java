@@ -20,7 +20,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -609,8 +608,8 @@ public class CameraXActivity extends AppCompatActivity {
 
 		mOverallRotation += getHowMuchRotated(oldDeviceRotation, getCurrentDeviceRotation());
 
-		oldOverallRotation -= 90;
-		int overallRotation1 = mOverallRotation - 90;
+		//oldOverallRotation -= 90;
+		int overallRotation1 = mOverallRotation;
 
 		rotateElement(galleryButton, oldOverallRotation, overallRotation1);
 		rotateElement(flashButton, oldOverallRotation, overallRotation1);

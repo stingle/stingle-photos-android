@@ -141,7 +141,7 @@
     <string name="warning_chpass">Warning! Changing password will logout all other devices currently connected to this account and you will need to login them again with new credentials.</string>
     <string name="home_folder_problem">Please check that app has access to external storage</string>
     <string name="no_space_left">Unable to upload file(s), no space left in your account!</string>
-    <string name="quota_text">%1$s of %s (%2$s) used</string>
+    <string name="quota_text">%1$s of %2$s (%3$s) used</string>
     <string name="menu_account">Account</string>
     <string name="title_account">Account</string>
     <string name="current_storage">Current storage</string>
@@ -149,7 +149,7 @@
     <string name="pending_purchase">Your payment is still in progress.</string>
     <string name="payment_error">Failed to notify server about the purchase</string>
     <string name="monthly_plan">%s / month</string>
-    <string name="yearly_plan">%1$s / year (save %2$s)</string>
+    <string name="yearly_plan">%1$s / year</string>
     <string name="free">Free</string>
     <string name="upgrade">Upgrade</string>
     <string name="current_plan">Current plan</string>
@@ -193,6 +193,9 @@
     <string name="welcome_desc4">Stingle Photos is optimized not only for security, but also for speed. it\'s so fast that you don\'t really feel that you are browsing through encrypted files.</string>
     <string name="have_an_account">Already have an account?</string>
     <string name="dont_have_an_account">Don\'t have an account?</string>
+    <string name="menu_storage">Storage</string>
+    <string name="title_storage">Storage</string>
+    <string name="yearly_plan_save">Or prepay annually (save %s):</string>
 
 
 </resources>

@@ -15,4 +15,6 @@
     <color name="primaryDarkColor">#7f0000</color>
     <color name="colorAccent">#b71c1c</color>
     <color name="lightAccent">#D5D5D5</color>
+    <color name="disabledText">#61000000</color>
+    <color name="secondaryText">#8A000000</color>
 </resources>

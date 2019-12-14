@@ -258,10 +258,6 @@ public final class CameraView extends ViewGroup {
 		}
 
 		mPinchToZoomGestureDetector = new PinchToZoomGestureDetector(context);
-
-		WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-		displayMetrics = new DisplayMetrics();
-		wm.getDefaultDisplay().getMetrics(displayMetrics);
 	}
 
 	@Override

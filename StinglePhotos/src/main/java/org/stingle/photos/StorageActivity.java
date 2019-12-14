@@ -1,14 +1,12 @@
 package org.stingle.photos;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,7 +33,6 @@ import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Billing.BillingSecurity;
 import org.stingle.photos.Billing.StingleBilling;
 import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.IOException;
@@ -44,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AccountActivity extends AppCompatActivity implements PurchasesUpdatedListener {
+public class StorageActivity extends AppCompatActivity implements PurchasesUpdatedListener {
 
 	private BillingClient billingClient;
 
@@ -63,10 +60,10 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
 		//getActionBar().setHomeButtonEnabled(true);
 
-		setContentView(R.layout.activity_account);
+		setContentView(R.layout.activity_storage);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
-		toolbar.setTitle(getString(R.string.title_account));
+		toolbar.setTitle(getString(R.string.title_storage));
 		setSupportActionBar(toolbar);
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -138,7 +135,7 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 		int percent = Math.round(spaceUsed * 100 / spaceQuota);
 
 
-		String quotaText = getString(R.string.quota_text, Helpers.formatSpaceUnits(spaceUsed), Helpers.formatSpaceUnits(spaceQuota), String.valueOf(percent) + "%");
+		String quotaText = getString(R.string.quota_text, Helpers.formatSpaceUnits(spaceUsed), Helpers.formatSpaceUnits(spaceQuota), percent + "%");
 		((TextView) findViewById(R.id.quotaInfo)).setText(quotaText);
 		ContentLoadingProgressBar progressBar = findViewById(R.id.quotaBar);
 
@@ -199,14 +196,6 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 		createPaymentBox("5 TB", skuDetailsMap.get("5tb_monthly"), null);
 		createPaymentBox("10 TB", skuDetailsMap.get("10tb_monthly"), null);
 		createPaymentBox("20 TB", skuDetailsMap.get("20tb_monthly"), null);
-
-		if(purchasedSkus != null && purchasedSkus.size() > 0){
-			SkuDetails sku = skuDetailsMap.get(purchasedSkus.get(0).getSku());
-			((TextView) findViewById(R.id.planInfo)).setText(sku.getDescription());
-		}
-		else {
-			((TextView) findViewById(R.id.planInfo)).setText(getString(R.string.free));
-		}
 	}
 
 	private void createPaymentBox(String title, SkuDetails monthly, SkuDetails yearly){
@@ -226,47 +215,43 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 
 		if(isPurchased || (purchasedSkus.size() == 0 && monthly == null && yearly == null)){
 			box.setBackground(getDrawable(R.drawable.rectangle_selected));
-		}
+			((Button)box.findViewById(R.id.pay)).setText(getString(R.string.current_plan));
+			((Button)box.findViewById(R.id.pay)).setEnabled(false);
+			((Button)box.findViewById(R.id.pay)).setTextColor(getColor(R.color.disabledText));
 
-		if(monthly != null) {
-			if(isPurchased){
-				box.findViewById(R.id.price_monthly).setVisibility(View.GONE);
-				((Button)box.findViewById(R.id.pay)).setText(getString(R.string.current_plan));
-				((Button)box.findViewById(R.id.pay)).setEnabled(false);
-				((Button)box.findViewById(R.id.pay)).setTextColor(getColor(R.color.primaryDarkColor));
+			String monthlyPrice = "";
+			if(monthly != null){
+				monthlyPrice = getString(R.string.monthly_plan, monthly.getPrice());
 			}
 			else{
-				((TextView) box.findViewById(R.id.price_monthly)).setText(getString(R.string.monthly_plan, monthly.getPrice()));
-				final String monthlySku = monthly.getSku();
-				box.findViewById(R.id.pay).setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						pay(monthlySku);
-					}
-				});
+				monthlyPrice = getString(R.string.free);
 			}
 
+			((TextView)box.findViewById(R.id.price_monthly)).setText(monthlyPrice);
 
 		}
 		else{
-			((TextView) box.findViewById(R.id.price_monthly)).setText(getString(R.string.free));
-			box.findViewById(R.id.pay).setVisibility(View.GONE);
+			((TextView)box.findViewById(R.id.price_monthly)).setVisibility(View.GONE);
+		}
+
+		if(monthly != null && !isPurchased) {
+			((Button)box.findViewById(R.id.pay)).setText(getString(R.string.monthly_plan, monthly.getPrice()));
+			final String monthlySku = monthly.getSku();
+			box.findViewById(R.id.pay).setOnClickListener(view -> pay(monthlySku));
 		}
 
 		if(yearly != null && !isPurchased) {
 			double saved = (monthly.getPriceAmountMicros() / 1000000.0 * 12.0) - (yearly.getPriceAmountMicros() / 1000000.0);
 			saved = Math.round(saved *100.0)/100.0;
-			String yearlyText = getString(R.string.yearly_plan, yearly.getPrice(), yearly.getPriceCurrencyCode() + " " + String.valueOf(saved));
-			((TextView) box.findViewById(R.id.yearly)).setText(yearlyText);
+			String yearlyText = getString(R.string.yearly_plan_save, yearly.getPriceCurrencyCode() + " " + saved);
+			String yearlyPrice = getString(R.string.yearly_plan, yearly.getPrice());
+			((TextView) box.findViewById(R.id.yearlyInfo)).setText(yearlyText);
+			((TextView) box.findViewById(R.id.yearly)).setText(yearlyPrice);
 			final String yearlySku = yearly.getSku();
-			box.findViewById(R.id.yearly).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					pay(yearlySku);
-				}
-			});
+			box.findViewById(R.id.yearly).setOnClickListener(view -> pay(yearlySku));
 		}
 		else{
+			box.findViewById(R.id.yearlyInfo).setVisibility(View.GONE);
 			box.findViewById(R.id.yearly).setVisibility(View.GONE);
 		}
 		boxesParent.addView(box);
@@ -288,7 +273,7 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 
 					BillingFlowParams flowParams = flowParamsBuilder.build();
 
-					BillingResult responseCode = billingClient.launchBillingFlow(AccountActivity.this, flowParams);
+					BillingResult responseCode = billingClient.launchBillingFlow(StorageActivity.this, flowParams);
 					Log.e("responseCode", responseCode.toString());
 				}
 			}
@@ -415,7 +400,7 @@ public class AccountActivity extends AppCompatActivity implements PurchasesUpdat
 
 	private void notifyServerAboutPurchase(Purchase purchase){
 		final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.confirming_purchase), null);
-		(new StingleBilling.NotifyServerAboutPurchase(AccountActivity.this, purchase.getSku(), purchase.getPurchaseToken(), new StingleBilling.OnFinish() {
+		(new StingleBilling.NotifyServerAboutPurchase(StorageActivity.this, purchase.getSku(), purchase.getPurchaseToken(), new StingleBilling.OnFinish() {
 			@Override
 			public void onFinish(boolean isSuccess) {
 				if(isSuccess) {

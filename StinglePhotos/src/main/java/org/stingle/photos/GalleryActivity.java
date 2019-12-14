@@ -41,9 +41,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageVolume;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -590,9 +587,9 @@ public class GalleryActivity extends AppCompatActivity
 			toolbar.setTitle(getString(R.string.title_trash));
 			invalidateOptionsMenu();
 		}
-		else if (id == R.id.nav_account) {
+		else if (id == R.id.nav_storage) {
 			Intent intent = new Intent();
-			intent.setClass(this, AccountActivity.class);
+			intent.setClass(this, StorageActivity.class);
 			startActivity(intent);
 		}
 		else if (id == R.id.nav_change_pass) {

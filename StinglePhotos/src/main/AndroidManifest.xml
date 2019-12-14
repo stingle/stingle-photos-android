@@ -140,7 +140,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/camera"
             android:launchMode="singleInstance"
-            android:screenOrientation="landscape"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -174,9 +174,9 @@
             android:label="@string/title_change_password"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".AccountActivity"
+            android:name=".StorageActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_account"
+            android:label="@string/title_storage"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".SettingsActivity"

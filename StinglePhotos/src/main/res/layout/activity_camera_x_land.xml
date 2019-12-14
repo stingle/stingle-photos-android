@@ -11,33 +11,31 @@
 
     <RelativeLayout
         android:id="@+id/topPanel"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentTop="true"
+        android:layout_width="50dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentStart="true"
         android:elevation="1dp"
         android:background="@drawable/camera_top_gradient">
 
         <ImageButton
             android:id="@+id/flashButton"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
             android:background="@null"
             android:contentDescription="@string/flash"
-            android:layout_marginEnd="16dp"
-            android:scaleType="fitCenter"
+            android:padding="10dp"
+            android:scaleType="centerInside"
             android:src="@drawable/flash_auto" />
 
         <ImageButton
             android:id="@+id/optionsButton"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
             android:background="@null"
             android:contentDescription="@string/options"
-            android:layout_marginStart="16dp"
+            android:padding="10dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_settings_white" />
     </RelativeLayout>
@@ -47,7 +45,7 @@
         android:id="@+id/camera_parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
         android:orientation="horizontal">
 
         <org.stingle.photos.CameraX.CameraView
@@ -63,7 +61,7 @@
         android:id="@+id/chronoBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/topPanel"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_margin="10dp"
         android:layout_marginTop="20dp"
@@ -81,11 +79,31 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/timerLabelContainer"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:background="#000"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/timerLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="30sp" />
+    </LinearLayout>
+
     <RelativeLayout
-        android:id="@+id/bottomPanel"
-        android:layout_width="fill_parent"
-        android:layout_height="120dp"
-        android:layout_alignParentBottom="true"
+        android:id="@+id/rightPanel"
+        android:layout_width="120dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:background="@drawable/camera_bottom_gradient"
         tools:ignore="RtlHardcoded">
 
@@ -93,9 +111,9 @@
             android:id="@+id/switchCamButton"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
             android:background="@null"
             android:contentDescription="@string/camera"
             android:scaleType="fitCenter"
@@ -106,10 +124,9 @@
             android:id="@+id/modeChanger"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_toLeftOf="@+id/switchCamButton"
-            android:layout_toRightOf="@+id/take_photo"
-            android:layout_centerVertical="true"
+            android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
+            android:layout_marginTop="70dp"
             android:background="@null"
             android:padding="10dp"
             android:scaleType="fitCenter"
@@ -130,9 +147,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/round_shape"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="16dp"
-            android:layout_centerVertical="true">
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true">
             <ImageView
                 android:id="@+id/lastPhoto"
                 android:layout_width="65dp"

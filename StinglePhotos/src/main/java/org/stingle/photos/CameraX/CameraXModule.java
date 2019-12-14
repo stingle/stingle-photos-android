@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.util.Rational;
 import android.util.Size;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -271,8 +272,8 @@ public final class CameraXModule {
 		}
 
 		mImageCaptureConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
-		mVideoCaptureConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
-		mPreviewConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
+		//mVideoCaptureConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
+		//mPreviewConfigBuilder.setTargetRotation(getDisplaySurfaceRotation());
 
 		mImageCaptureConfigBuilder.setLensFacing(mCameraLensFacing);
 		mImageCapture = new ImageCapture(mImageCaptureConfigBuilder.build());
@@ -292,6 +293,7 @@ public final class CameraXModule {
 					@Override
 					public void onUpdated(@NonNull Preview.PreviewOutput output) {
 						boolean needReverse = cameraOrientation != 0 && cameraOrientation != 180;
+						Log.e("update", String.valueOf(needReverse));
 						int textureWidth =
 								needReverse
 										? output.getTextureSize().getHeight()

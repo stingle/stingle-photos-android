@@ -386,7 +386,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 						holder.videoIcon.setVisibility(View.GONE);
 					}
 
-					if (props.videoDuration > 0) {
+					if (props.fileType == Crypto.FILE_TYPE_VIDEO && props.videoDuration >= 0) {
 						holder.videoDuration.setText(Helpers.formatVideoDuration(props.videoDuration));
 						holder.videoDuration.setVisibility(View.VISIBLE);
 					} else {
