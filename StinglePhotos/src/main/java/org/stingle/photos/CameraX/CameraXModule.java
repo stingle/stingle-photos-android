@@ -179,6 +179,16 @@ public final class CameraXModule {
 			mImageCapture.setTargetRotation(degrees);
 			mVideoCapture.setTargetRotation(degrees);
 		}
+
+		boolean isDisplayPortrait;
+		if(degrees == Surface.ROTATION_0 || degrees == Surface.ROTATION_180){
+			isDisplayPortrait = true;
+		}
+		else {
+			isDisplayPortrait = false;
+		}
+		Rational targetAspectRatio = isDisplayPortrait ? new Rational(customImageSize.height, customImageSize.width) : new Rational(customImageSize.width, customImageSize.height);
+		mImageCapture.setTargetAspectRatioCustom(targetAspectRatio);
 	}
 
 	@RequiresPermission(permission.CAMERA)

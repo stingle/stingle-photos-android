@@ -587,17 +587,20 @@ public class CameraXActivity extends AppCompatActivity {
 	}
 
 	private int getPhotoRotation(CameraCharacteristics characteristics){
-		Integer sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-		int deviceRotation = getCurrentDeviceRotation();
+		if(characteristics != null) {
+			Integer sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+			int deviceRotation = getCurrentDeviceRotation();
 
-		sensorOrientation -= 90;
-		int result;
-		if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
-			result = (sensorOrientation + deviceRotation + 180) % 360;
-		} else {
-			result = (sensorOrientation + deviceRotation) % 360;
+			sensorOrientation -= 90;
+			int result;
+			if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+				result = (sensorOrientation + deviceRotation + 180) % 360;
+			} else {
+				result = (sensorOrientation + deviceRotation) % 360;
+			}
+			return getCurrentDeviceRotationForCameraX(result);
 		}
-		return getCurrentDeviceRotationForCameraX(result);
+		return 0;
 	}
 
 

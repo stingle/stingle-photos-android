@@ -46,7 +46,7 @@ public class ShareManager {
 			Intent share = new Intent(Intent.ACTION_SEND);
 			share.setType(getMimeType(fileToShare.get(0).getPath()));
 
-			share.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context.getApplicationContext(), "org.stingle.photos.share", fileToShare.get(0)));
+			share.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context.getApplicationContext(), context.getString(R.string.content_provider), fileToShare.get(0)));
 			context.startActivity(Intent.createChooser(share, "Share Image"));
 		}
 		else if (fileToShare.size() > 1) {
@@ -67,7 +67,7 @@ public class ShareManager {
 				}
 				mimeType = thisMimeType;
 
-				uris.add(FileProvider.getUriForFile(context.getApplicationContext(), "org.stingle.photos.share", fileToShare.get(i)));
+				uris.add(FileProvider.getUriForFile(context.getApplicationContext(), context.getString(R.string.content_provider), fileToShare.get(i)));
 			}
 
 			if(sameMimeType) {
@@ -91,11 +91,11 @@ public class ShareManager {
 				super.onFinish(files);
 				if(files != null) {
 					if (originalIntent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)) {
-						Uri fileUri = FileProvider.getUriForFile(activity, "org.stingle.photos.share", files.get(0));
+						Uri fileUri = FileProvider.getUriForFile(activity, activity.getString(R.string.content_provider), files.get(0));
 						originalIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 						ClipData clipData = ClipData.newRawUri(null, fileUri);
 						for(int i=1; i< files.size(); i++) {
-							clipData.addItem(new ClipData.Item(FileProvider.getUriForFile(activity, "org.stingle.photos.share", files.get(i))));
+							clipData.addItem(new ClipData.Item(FileProvider.getUriForFile(activity, activity.getString(R.string.content_provider), files.get(i))));
 						}
 						originalIntent.setClipData(clipData);
 						originalIntent.setDataAndType(fileUri, activity.getContentResolver().getType(fileUri));
@@ -104,7 +104,7 @@ public class ShareManager {
 						return;
 					}
 					else{
-						Uri fileUri = FileProvider.getUriForFile(activity, "org.stingle.photos.share", files.get(0));
+						Uri fileUri = FileProvider.getUriForFile(activity, activity.getString(R.string.content_provider), files.get(0));
 						originalIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 						originalIntent.setDataAndType(fileUri, activity.getContentResolver().getType(fileUri));
 						activity.setResult(Activity.RESULT_OK, originalIntent);
