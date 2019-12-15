@@ -1,0 +1,9 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="biometrics"
+        app:summary="@string/biometric_auth_desc"
+        app:title="@string/biometric_auth" />
+
+</PreferenceScreen>

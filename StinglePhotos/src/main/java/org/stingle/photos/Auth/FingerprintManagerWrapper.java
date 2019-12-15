@@ -81,7 +81,7 @@ public class FingerprintManagerWrapper {
     }
 
     public boolean setupFingerprint(Preference preference){
-        final Preference preferenceFinal = preference;
+       /* final Preference preferenceFinal = preference;
         // Obtain a reference to the Keystore using the standard Android keystore container identifier (“AndroidKeystore”)//
         try {
             keyStore = KeyStore.getInstance("AndroidKeyStore");
@@ -161,21 +161,21 @@ public class FingerprintManagerWrapper {
             });
             helper.startAuth(fingerprintManager, cryptoObject, null, false, false);
         }
-
+*/
         return false;
     }
 
     public static void turnOffFingerprint(Context context){
-        SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+        /*SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
         preferences.edit().remove(StinglePhotosApplication.PASSWORD_FINGERPRINT).commit();
         preferences.edit().remove(StinglePhotosApplication.PASSWORD_FINGERPRINT_IV).commit();
 
         SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();
+        defaultSharedPrefs.edit().putBoolean("fingerprint", false).commit();*/
     }
 
     public boolean unlock(final PasswordReceivedHandler passwordHandler, final LoginManager.UserLogedinCallback loginCallback, boolean showLogout){
-
+/*
         // Obtain a reference to the Keystore using the standard Android keystore container identifier (“AndroidKeystore”)//
         try {
             keyStore = KeyStore.getInstance("AndroidKeyStore");
@@ -238,7 +238,7 @@ public class FingerprintManagerWrapper {
             helper.startAuth(fingerprintManager, cryptoObject, loginCallback, true, showLogout);
         }
 
-
+*/
 
         return false;
     }

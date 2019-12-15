@@ -88,4 +88,7 @@ dependencies {
     // If you to use Camera Extensions
     implementation "androidx.camera:camera-extensions:$camerax_ext_version"
 
+
+    implementation "androidx.biometric:biometric:1.0.0"
+
 }

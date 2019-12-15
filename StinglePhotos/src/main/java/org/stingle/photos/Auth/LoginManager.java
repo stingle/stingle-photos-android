@@ -16,16 +16,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbHelper;
-import org.stingle.photos.LoginActivity;
+import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
@@ -35,11 +33,8 @@ import java.util.HashMap;
 
 public class LoginManager {
 
-    public static final String FINGERPRINT_PREFERENCE = "fingerprint";
+    public static final String BIOMETRIC_PREFERENCE = "biometrics";
     public static final String LAST_LOCK_TIME = "lock_time";
-    public static final String LOGINS_COUNT_FOR_POPUP = "logins_count_fp";
-    public static final String DONT_SHOW_POPUP = "dont_show_popup";
-    public static final String POPUP_LATERS_COUNT = "laters_count";
 
     private static AlertDialog dialog = null;
 
@@ -47,11 +42,11 @@ public class LoginManager {
 
     }
 
-    public static void checkLogin(Activity activity) {
+    public static void checkLogin(AppCompatActivity activity) {
         checkLogin(activity, null);
     }
 
-    public static void checkLogin(final Activity activity, final UserLogedinCallback loginCallback) {
+    public static void checkLogin(final AppCompatActivity activity, final UserLogedinCallback loginCallback) {
 
         if(!checkIfLoggedIn(activity)){
             if(loginCallback != null) {
@@ -80,12 +75,12 @@ public class LoginManager {
 
 
             SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-            boolean isFingerprintSetup = defaultSharedPrefs.getBoolean(FINGERPRINT_PREFERENCE, false);
+            boolean isBiometricSetup = defaultSharedPrefs.getBoolean(BIOMETRIC_PREFERENCE, false);
 
-            if(isFingerprintSetup) {
+            if(isBiometricSetup) {
 
-                FingerprintManagerWrapper fingerprintManager = new FingerprintManagerWrapper(activity);
-                fingerprintManager.unlock(new FingerprintManagerWrapper.PasswordReceivedHandler() {
+                BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
+                biometricsManagerWrapper.unlock(new BiometricsManagerWrapper.PasswordReceivedHandler() {
                     @Override
                     public void onPasswordReceived(String password) {
                         unlockWithPassword(activity, password, loginCallback);

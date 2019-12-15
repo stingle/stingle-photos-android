@@ -6,7 +6,6 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -14,6 +13,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <uses-feature
         android:name="android.hardware.camera2.full"
@@ -33,12 +33,15 @@
 
     <application
         android:name=".StinglePhotosApplication"
-        android:allowBackup="true"
         android:icon="@mipmap/ic_stingle_photos_round"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@android:style/Theme.Material.Light">
+        <activity
+            android:name=".SettingsActivity"
+            android:theme="@style/AppThemeCompatWithActionBar"
+            android:label="@string/title_activity_settings" />
 
         <service
             android:name=".Sync.SyncService"
@@ -135,8 +138,8 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".CameraXActivity"
-            android:clearTaskOnLaunch="true"
             android:alwaysRetainTaskState="true"
+            android:clearTaskOnLaunch="true"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/camera"
             android:launchMode="singleInstance"
@@ -179,13 +182,9 @@
             android:label="@string/title_storage"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:theme="@style/AppThemeNoCompat" />
-        <activity
             android:name=".CameraSettingsActivity"
-            android:label="@string/title_activity_camera_settings"
             android:alwaysRetainTaskState="true"
+            android:label="@string/title_activity_camera_settings"
             android:theme="@style/AppThemeCompatWithActionBar" />
 
         <provider

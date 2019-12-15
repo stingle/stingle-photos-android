@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreference
+        app:defaultValue="true"
+        app:key="enable_backup"
+        app:title="@string/enable_backup"
+        app:summary="@string/enable_backup_desc" />
+
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="upload_only_on_wifi"
+        app:dependency="enable_backup"
+        app:title="@string/upload_only_on_wifi"
+        app:summary="@string/upload_only_on_wifi_desc" />
+
+    <SeekBarPreference
+        app:defaultValue="30"
+        app:key="upload_battery_level"
+        app:dependency="enable_backup"
+        app:title="@string/upload_battery" />
+
+</PreferenceScreen>

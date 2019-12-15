@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:defaultValue="60"
+        app:entries="@array/lockTimes"
+        app:entryValues="@array/lockTimesValues"
+        app:key="lock_time"
+        app:summary="@string/lock_time_desc"
+        app:title="@string/lock_time" />
+
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="block_screenshots"
+        app:title="@string/block_screenshots" />
+
+    <Preference
+        app:key="resync_db"
+        app:summary="@string/resync_db_desc"
+        app:title="@string/resync_db" />
+
+    <!--<Preference
+        app:key="clear_cache"
+        app:summary="@string/clear_cache_desc"
+        app:title="@string/clear_cache" />-->
+
+</PreferenceScreen>

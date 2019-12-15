@@ -24,8 +24,8 @@ public class StinglePhotosApplication extends Application{
 
     public static final String DEFAULT_PREFS = "default_prefs";
     public static final String API_TOKEN = "api_token";
-    public static final String PASSWORD_FINGERPRINT = "password_finger";
-    public static final String PASSWORD_FINGERPRINT_IV = "password_finger_iv";
+    public static final String PASSWORD_BIOMETRICS = "password_bio";
+    public static final String PASSWORD_BIOMETRICS_IV = "password_bio_iv";
     public static final String BLOCK_SCREENSHOTS = "block_screenshots";
 
     public static final String USER_ID = "user_id";
