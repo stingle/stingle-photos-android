@@ -72,8 +72,8 @@ public class BiometricsManagerWrapper {
 
     private BiometricPrompt.PromptInfo getPrompt(boolean showPasswordOption){
         BiometricPrompt.PromptInfo.Builder promptBuilder = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle(activity.getString(R.string.biometric_auth))
-                .setSubtitle(activity.getString(R.string.biometric_login_desc));
+                .setTitle(activity.getString(R.string.biometric_auth));
+                //.setSubtitle(activity.getString(R.string.biometric_login_desc));
         if(showPasswordOption) {
             promptBuilder.setNegativeButtonText(activity.getString(R.string.login_using_password));
         }

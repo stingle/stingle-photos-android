@@ -198,7 +198,7 @@
     <string name="yearly_plan_save">Or prepay annually (save %s):</string>
     <string name="biometric_auth">Biometric authentication</string>
     <string name="biometric_login_desc">Log in using biometrics</string>
-    <string name="login_using_password">Use account password</string>
+    <string name="login_using_password">Use password</string>
     <string name="failed_biometrics_setup">Failed to setup biometrics</string>
     <string name="biometric_auth_desc">Use biometrics to unlock Stingle Photos</string>
     <string name="failed_biometrics_auth">Biometric authentication failed</string>
