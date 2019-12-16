@@ -128,7 +128,7 @@ public class FileManager {
 	}
 
 	public static String getHomeDir(Context context) {
-		/*Uri homeUri = getHomeUri(context);
+		/*Uri homeUri = getHomeUri(activity);
 		if(homeUri != null){
 			return homeUri.getPath();
 		}

@@ -9,7 +9,6 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.biometric.BiometricManager;
 import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -62,6 +61,9 @@ public class SettingsActivity extends AppCompatActivity implements
 	public boolean onSupportNavigateUp() {
 		if (getSupportFragmentManager().popBackStackImmediate()) {
 			return true;
+		}
+		else{
+			finish();
 		}
 		return super.onSupportNavigateUp();
 	}
@@ -149,14 +151,13 @@ public class SettingsActivity extends AppCompatActivity implements
 			SwitchPreference biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
 
 			BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper((AppCompatActivity) getActivity());
-			BiometricManager biometricManager = BiometricManager.from(getActivity());
-			if(biometricManager.canAuthenticate() != BiometricManager.BIOMETRIC_SUCCESS){
+			if(biometricsManagerWrapper.isBiometricsAvailable()){
 				biometricSetting.setEnabled(false);
 			}
 			biometricSetting.setOnPreferenceChangeListener((preference, newValue) -> {
 				boolean isEnabled = (boolean)newValue;
 				if (isEnabled) {
-					biometricsManagerWrapper.setupBiometrics(biometricSetting);
+					biometricsManagerWrapper.setupBiometrics(biometricSetting, null);
 					return false;
 				}
 				return true;

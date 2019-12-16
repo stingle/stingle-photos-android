@@ -68,9 +68,9 @@ public class Helpers {
 
 
 	public static void acquireWakeLock(Activity activity){
-		/*PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+		/*PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
 		if(pm != null) {
-			wakelock = pm.newWakeLock(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, context.getString(R.string.app_name) + "decrypt");
+			wakelock = pm.newWakeLock(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, activity.getString(R.string.app_name) + "decrypt");
 			wakelock.acquire(1000 * 60 * 10);
 		}*/
 		activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

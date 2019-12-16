@@ -349,7 +349,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			holder.videoIcon.setVisibility(View.GONE);
 			holder.videoDuration.setVisibility(View.GONE);
 			holder.noCloudIcon.setVisibility(View.GONE);
-			//holder.image.setBackgroundColor(context.getResources().getColor(R.color.galery_item_bg));
+			//holder.image.setBackgroundColor(activity.getResources().getColor(R.color.galery_item_bg));
 
 			String folder = "m";
 			if(folderType == SyncManager.FOLDER_TRASH){

@@ -5,7 +5,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 
-import org.stingle.photos.Auth.FingerprintManagerWrapper;
+import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Net.HttpsClient;
@@ -70,7 +70,7 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 					boolean uploadResult = KeyManagement.uploadKeyBundle(activity, newPassword);
 					if (uploadResult) {
 						((StinglePhotosApplication) activity.getApplication()).setKey(StinglePhotosApplication.getCrypto().getPrivateKey(newPassword));
-						FingerprintManagerWrapper.turnOffFingerprint(activity);
+						BiometricsManagerWrapper.turnOffBiometrics(activity);
 						return true;
 					}
 

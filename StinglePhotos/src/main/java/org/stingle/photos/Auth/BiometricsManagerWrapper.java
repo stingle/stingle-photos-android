@@ -4,10 +4,10 @@ import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
@@ -50,16 +49,10 @@ import javax.crypto.spec.IvParameterSpec;
 public class BiometricsManagerWrapper {
 
     private static final String KEY_NAME = "sc_key";
-    private final String RANDOM_ALGORITHM = "SHA1PRNG";
-    public static final int IV_LENGTH = 16;
     private final Executor executor;
-    private final BiometricPrompt.PromptInfo promptInfo;
 
     protected AppCompatActivity activity;
     protected KeyguardManager keyguardManager;
-    protected KeyStore keyStore;
-    protected KeyGenerator keyGenerator;
-    private FingerprintManager.CryptoObject cryptoObject;
     private BiometricManager biometricManager;
 
     public BiometricsManagerWrapper(AppCompatActivity activity){
@@ -68,12 +61,6 @@ public class BiometricsManagerWrapper {
         biometricManager = BiometricManager.from(activity);
         keyguardManager = (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
         executor = ContextCompat.getMainExecutor(activity);
-
-        promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle(activity.getString(R.string.biometric_auth))
-                .setSubtitle(activity.getString(R.string.biometric_login_desc))
-                .setNegativeButtonText(activity.getString(R.string.login_using_password))
-                .build();
     }
 
     public boolean isBiometricsAvailable(){
@@ -83,8 +70,35 @@ public class BiometricsManagerWrapper {
         return false;
     }
 
+    private BiometricPrompt.PromptInfo getPrompt(boolean showPasswordOption){
+        BiometricPrompt.PromptInfo.Builder promptBuilder = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle(activity.getString(R.string.biometric_auth))
+                .setSubtitle(activity.getString(R.string.biometric_login_desc));
+        if(showPasswordOption) {
+            promptBuilder.setNegativeButtonText(activity.getString(R.string.login_using_password));
+        }
+        else{
+            promptBuilder.setNegativeButtonText(activity.getString(R.string.cancel));
+        }
+        return promptBuilder.build();
+    }
 
-    public boolean setupBiometrics(Preference preference){
+
+    public boolean setupBiometrics(Preference preference, String password){
+        return setupBiometrics(preference, password, new BiometricsSetupCallback() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFailed() {
+
+            }
+        });
+    }
+
+    public boolean setupBiometrics(Preference preference, String password, @NonNull BiometricsSetupCallback callback){
         final Preference preferenceFinal = preference;
 
         try {
@@ -114,32 +128,37 @@ public class BiometricsManagerWrapper {
 
                     Cipher cipher = result.getCryptoObject().getCipher();
 
+                    if(password != null){
+                        if(encryptAndSavePassword(cipher, iv, password)) {
+                            if (preferenceFinal != null) {
+                                ((SwitchPreference) preferenceFinal).setChecked(true);
+                            }
+                            callback.onSuccess();
+                        }
+                        else {
+                            callback.onFailed();
+                        }
+                    }
                     LoginManager.getPasswordFromUser(activity, false, new PasswordReturnListener() {
                         @Override
-                        public void passwordReceived(String password) {
-                            try {
-                                try{
-                                    StinglePhotosApplication.getCrypto().getPrivateKey(password);
-                                }
-                                catch (CryptoException e) {
-                                    Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
-                                    return;
+                        public void passwordReceived(String enteredPassword, AlertDialog dialog) {
+                            if(encryptAndSavePassword(cipher, iv, enteredPassword)) {
+                                if (preferenceFinal != null) {
+                                    ((SwitchPreference) preferenceFinal).setChecked(true);
                                 }
 
-                                SharedPreferences preferences = activity.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-                                byte[] encPassword = Objects.requireNonNull(cipher).doFinal(password.getBytes());
-
-                                preferences.edit().putString(StinglePhotosApplication.PASSWORD_BIOMETRICS, Crypto.byte2hex(encPassword)).apply();
-                                preferences.edit().putString(StinglePhotosApplication.PASSWORD_BIOMETRICS_IV, Crypto.byte2hex(iv)).apply();
-
-                                SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-                                defaultSharedPrefs.edit().putBoolean(LoginManager.BIOMETRIC_PREFERENCE, true).apply();
-                                ((SwitchPreference) preferenceFinal).setChecked(true);
-
-                                LoginManager.dismissLoginDialog();
-                            } catch (BadPaddingException | IllegalBlockSizeException e) {
-                                Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_setup));
+                                LoginManager.dismissLoginDialog(dialog);
+                                callback.onSuccess();
                             }
+                            else{
+                                ((EditText) dialog.findViewById(R.id.password)).setText("");
+                                callback.onFailed();
+                            }
+                        }
+
+                        @Override
+                        public void passwordReceiveFailed(AlertDialog dialog) {
+                            LoginManager.dismissLoginDialog(dialog);
                         }
                     });
                 }
@@ -149,28 +168,52 @@ public class BiometricsManagerWrapper {
                 public void onAuthenticationError(int errorCode,
                                                   @NonNull CharSequence errString) {
                     super.onAuthenticationError(errorCode, errString);
-                    Toast.makeText(activity,
-                            "Authentication error: " + errString, Toast.LENGTH_SHORT)
-                            .show();
+                    callback.onFailed();
                 }
 
                 @Override
                 public void onAuthenticationFailed() {
                     super.onAuthenticationFailed();
-                    Toast.makeText(activity, "Authentication failed",
-                            Toast.LENGTH_SHORT)
-                            .show();
+                    callback.onFailed();
                 }
             });
-            biometricPrompt.authenticate(promptInfo,
+
+            biometricPrompt.authenticate(getPrompt(false),
                     new BiometricPrompt.CryptoObject(cipher));
 
-
-
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | IOException | CertificateException | UnrecoverableKeyException | InvalidKeyException | NoSuchPaddingException | KeyStoreException e) {
+            return true;
+        }
+        catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | IOException | CertificateException | UnrecoverableKeyException | InvalidKeyException | NoSuchPaddingException | KeyStoreException e) {
             Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_setup));
+            callback.onFailed();
         }
 
+        return false;
+    }
+
+    private boolean encryptAndSavePassword(Cipher cipher, byte[] iv, String password){
+        try {
+            try{
+                StinglePhotosApplication.getCrypto().getPrivateKey(password);
+            }
+            catch (CryptoException e) {
+                Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
+                return false;
+            }
+
+            SharedPreferences preferences = activity.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
+            byte[] encPassword = Objects.requireNonNull(cipher).doFinal(password.getBytes());
+
+            preferences.edit().putString(StinglePhotosApplication.PASSWORD_BIOMETRICS, Crypto.byte2hex(encPassword)).apply();
+            preferences.edit().putString(StinglePhotosApplication.PASSWORD_BIOMETRICS_IV, Crypto.byte2hex(iv)).apply();
+
+            SharedPreferences defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
+            defaultSharedPrefs.edit().putBoolean(LoginManager.BIOMETRIC_PREFERENCE, true).apply();
+
+            return true;
+        } catch (BadPaddingException | IllegalBlockSizeException e) {
+            Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_setup));
+        }
         return false;
     }
 
@@ -183,7 +226,7 @@ public class BiometricsManagerWrapper {
         defaultSharedPrefs.edit().putBoolean("biometrics", false).apply();
     }
 
-    public boolean unlock(final PasswordReceivedHandler passwordHandler, final LoginManager.UserLogedinCallback loginCallback, boolean showLogout){
+    public boolean unlock(final BiometricsCallback biometricsCallback, final LoginManager.UserLogedinCallback loginCallback, boolean showLogout){
         try{
             SharedPreferences preferences = activity.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
             String storedIvHex = preferences.getString(StinglePhotosApplication.PASSWORD_BIOMETRICS_IV, "");
@@ -195,7 +238,7 @@ public class BiometricsManagerWrapper {
 
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParamSpec);
 
-            BiometricPrompt biometricPrompt = new BiometricPrompt((FragmentActivity) activity,
+            BiometricPrompt biometricPrompt = new BiometricPrompt(activity,
                     executor, new BiometricPrompt.AuthenticationCallback() {
 
                 @Override
@@ -211,7 +254,7 @@ public class BiometricsManagerWrapper {
                         byte[] decPassBytes = Objects.requireNonNull(cipher).doFinal(Crypto.hex2byte(encPass));
                         String decPass = new String(decPassBytes);
 
-                        passwordHandler.onPasswordReceived(decPass);
+                        biometricsCallback.onPasswordReceived(decPass);
 
                     } catch (BadPaddingException | IllegalBlockSizeException e) {
                         Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_auth));
@@ -223,9 +266,12 @@ public class BiometricsManagerWrapper {
                 public void onAuthenticationError(int errorCode,
                                                   @NonNull CharSequence errString) {
                     super.onAuthenticationError(errorCode, errString);
-                    Toast.makeText(activity,
-                            "Authentication error: " + errString, Toast.LENGTH_SHORT)
-                            .show();
+                    if(errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON){
+                        biometricsCallback.onAuthUsingPassword();
+                    }
+                    else{
+                        biometricsCallback.onAuthFailed();
+                    }
                 }
 
                 @Override
@@ -236,7 +282,7 @@ public class BiometricsManagerWrapper {
                             .show();
                 }
             });
-            biometricPrompt.authenticate(promptInfo,
+            biometricPrompt.authenticate(getPrompt(true),
                     new BiometricPrompt.CryptoObject(cipher));
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException | CertificateException | UnrecoverableKeyException | InvalidKeyException | NoSuchPaddingException | KeyStoreException e) {
             Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_auth));
@@ -265,20 +311,14 @@ public class BiometricsManagerWrapper {
                 + KeyProperties.ENCRYPTION_PADDING_PKCS7);
     }
 
-
-
-
-
-    protected void showError(String title, String description){
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(title);
-        builder.setMessage(description);
-        builder.setPositiveButton(activity.getString(R.string.ok), null);
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    public static abstract class BiometricsCallback{
+        public abstract void onPasswordReceived(String password);
+        public abstract void onAuthUsingPassword();
+        public abstract void onAuthFailed();
     }
 
-    public static abstract class PasswordReceivedHandler{
-        public abstract void onPasswordReceived(String password);
+    public static abstract class BiometricsSetupCallback{
+        public abstract void onSuccess();
+        public abstract void onFailed();
     }
 }

@@ -14,7 +14,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -35,12 +34,6 @@ public class LoginManager {
 
     public static final String BIOMETRIC_PREFERENCE = "biometrics";
     public static final String LAST_LOCK_TIME = "lock_time";
-
-    private static AlertDialog dialog = null;
-
-    public LoginManager(){
-
-    }
 
     public static void checkLogin(AppCompatActivity activity) {
         checkLogin(activity, null);
@@ -80,10 +73,21 @@ public class LoginManager {
             if(isBiometricSetup) {
 
                 BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
-                biometricsManagerWrapper.unlock(new BiometricsManagerWrapper.PasswordReceivedHandler() {
+                biometricsManagerWrapper.unlock(new BiometricsManagerWrapper.BiometricsCallback() {
                     @Override
                     public void onPasswordReceived(String password) {
                         unlockWithPassword(activity, password, loginCallback);
+                    }
+
+                    @Override
+                    public void onAuthUsingPassword() {
+                        showEnterPasswordToUnlock(activity, loginCallback);
+                    }
+
+                    @Override
+                    public void onAuthFailed() {
+                        loginCallback.onUserAuthFail();
+                        activity.finish();
                     }
                 }, loginCallback, true);
             }
@@ -98,26 +102,55 @@ public class LoginManager {
         }
     }
 
+    public static void dismissLoginDialog(AlertDialog dialog){
+        if(dialog != null){
+            dialog.dismiss();
+        }
+    }
+
     public static void showEnterPasswordToUnlock(Activity activity, final UserLogedinCallback loginCallback){
         final Activity activityFinal = activity;
         getPasswordFromUser(activity, true, new PasswordReturnListener() {
             @Override
-            public void passwordReceived(String enteredPassword) {
-                unlockWithPassword(activityFinal, enteredPassword, loginCallback);
+            public void passwordReceived(String enteredPassword, AlertDialog dialog) {
+                unlockWithPassword(activityFinal, enteredPassword, new UserLogedinCallback() {
+                    @Override
+                    public void onUserAuthSuccess() {
+                        dismissLoginDialog(dialog);
+                        loginCallback.onUserAuthSuccess();
+                    }
+
+                    @Override
+                    public void onUserAuthFail() {
+                        if(dialog != null) {
+                            ((EditText) dialog.findViewById(R.id.password)).setText("");
+                        }
+                        loginCallback.onUserAuthFail();
+                    }
+
+                    @Override
+                    public void onNotLoggedIn() {
+                        loginCallback.onNotLoggedIn();
+                    }
+
+                    @Override
+                    public void onLoggedIn() {
+                        loginCallback.onLoggedIn();
+                    }
+                });
+            }
+
+            @Override
+            public void passwordReceiveFailed(AlertDialog dialog) {
+                dismissLoginDialog(dialog);
             }
         });
     }
 
     public static void unlockWithPassword(Activity activity, String password, UserLogedinCallback loginCallback){
-
-
         try{
             StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(password));
             if(loginCallback != null) {
-                if(dialog!=null) {
-                    dialog.dismiss();
-                    dialog = null;
-                }
                 loginCallback.onUserAuthSuccess();
             }
         }
@@ -133,72 +166,59 @@ public class LoginManager {
         return (StinglePhotosApplication.getKey() == null ? false : true);
     }
 
-    public static void dismissLoginDialog(){
-        if(dialog != null){
-            dialog.dismiss();
-            dialog = null;
-        }
-    }
-
     public static void getPasswordFromUser(final Activity activity, final boolean showLogout, final PasswordReturnListener listener){
         final Context myContext = activity;
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(R.layout.password);
-        builder.setCancelable(false);
-        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface mDialog, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK){
-                    if(dialog != null){
-                        dialog.dismiss();
-                        dialog = null;
-                    }
-                    if(showLogout) {
-                        activity.finish();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
-        dismissLoginDialog();
-        dialog = builder.create();
+        builder.setCancelable(showLogout == false);
+        AlertDialog dialog = builder.create();
         dialog.show();
 
-        Button okButton = (Button)dialog.findViewById(R.id.okButton);
-        final EditText passwordField = (EditText)dialog.findViewById(R.id.password);
-        Button logoutButton = (Button)dialog.findViewById(R.id.logoutButton);
+        Button okButton = dialog.findViewById(R.id.okButton);
+        final EditText passwordField = dialog.findViewById(R.id.password);
+        Button logoutButton = dialog.findViewById(R.id.logoutButton);
 
         final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 
-        okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                listener.passwordReceived(passwordField.getText().toString());
-            }
+        okButton.setOnClickListener(v -> {
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            listener.passwordReceived(passwordField.getText().toString(), dialog);
         });
 
-        passwordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_GO) {
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                    listener.passwordReceived(passwordField.getText().toString());
-                    return true;
+        dialog.setOnCancelListener(dialog1 -> listener.passwordReceiveFailed(dialog));
+
+        dialog.setOnKeyListener((mDialog, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_BACK){
+                dialog.dismiss();
+                if(showLogout) {
+                    activity.finish();
                 }
-                return false;
+                return true;
             }
+            return false;
+        });
+
+        passwordField.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                listener.passwordReceived(passwordField.getText().toString(), dialog);
+                if(dialog != null){
+                    dialog.dismiss();
+                }
+                return true;
+            }
+            return false;
         });
 
 
         if(showLogout) {
-            logoutButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                    LoginManager.logout(activity);
+            logoutButton.setOnClickListener(v -> {
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                if(dialog != null){
+                    dialog.dismiss();
                 }
+                LoginManager.logout(activity);
             });
         }
         else{
@@ -227,11 +247,11 @@ public class LoginManager {
     }
 
     public static void setLockedTime(Context context) {
-        context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LAST_LOCK_TIME, System.currentTimeMillis()).commit();
+        context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LAST_LOCK_TIME, System.currentTimeMillis()).apply();
     }
 
     public static void disableLockTimer(Context context) {
-        context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LAST_LOCK_TIME, 0).commit();
+        context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(LAST_LOCK_TIME, 0).apply();
     }
 
 
@@ -267,7 +287,7 @@ public class LoginManager {
         StinglePhotosApplication.setKey(null);
         KeyManagement.deleteLocalKeys();
         KeyManagement.removeApiToken(context);
-        FingerprintManagerWrapper.turnOffFingerprint(context);
+        BiometricsManagerWrapper.turnOffBiometrics(context);
         Helpers.storePreference(context, StinglePhotosApplication.USER_EMAIL, null);
         Helpers.deleteTmpDir(context);
 
@@ -275,15 +295,6 @@ public class LoginManager {
 
         Intent intent = new Intent(context, SyncService.class);
         context.stopService(intent);
-
-        if(dialog != null){
-            dialog.dismiss();
-            dialog = null;
-        }
-        if(FingerprintHandler.dialog != null){
-            FingerprintHandler.dialog.dismiss();
-            FingerprintHandler.dialog = null;
-        }
 
         if(context instanceof Activity){
             redirectToLogin((Activity)context);
@@ -300,7 +311,6 @@ public class LoginManager {
         activity.startActivity(intent);
         activity.finish();
     }
-
 
     public static abstract class UserLogedinCallback{
         public abstract void onUserAuthSuccess();
