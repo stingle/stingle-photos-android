@@ -196,6 +196,7 @@
     <string name="menu_storage">Storage</string>
     <string name="title_storage">Storage</string>
     <string name="yearly_plan_save">Or prepay annually (save %s):</string>
+    <string name="change_to_monthly_plan">Or change to monthly payment and pay:</string>
     <string name="biometric_auth">Biometric authentication</string>
     <string name="biometric_login_desc">Log in using biometrics</string>
     <string name="login_using_password">Use password</string>

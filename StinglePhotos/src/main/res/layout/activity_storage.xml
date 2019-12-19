@@ -14,62 +14,71 @@
         android:theme="@style/AppBarOverlay"
         tools:context="org.stingle.photos.GalleryActivity">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:context="org.stingle.photos.GalleryActivity">
 
-            <ScrollView
-                android:id="@+id/scrollView1"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
 
-                <LinearLayout
-                    android:layout_width="fill_parent"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                tools:context="org.stingle.photos.GalleryActivity">
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/pullToRefresh"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_margin="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#000"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
-                        android:text="@string/current_storage"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"/>
-
-                    <TextView
-                        android:id="@+id/quotaInfo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#000"
-                        android:textSize="15sp"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"/>
-
-                    <androidx.core.widget.ContentLoadingProgressBar
-                        android:id="@+id/quotaBar"
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp"
-                        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                        android:progressDrawable="@drawable/navview_progress" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                <ScrollView
+                    android:id="@+id/scrollView1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="32dp"
-                        android:id="@+id/payment_boxes" />
+                        android:layout_margin="10dp"
+                        android:orientation="vertical">
 
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/current_storage"
+                            android:textColor="#000"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-            </ScrollView>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/quotaInfo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:textColor="#000"
+                            android:textSize="15sp" />
+
+                        <androidx.core.widget.ContentLoadingProgressBar
+                            android:id="@+id/quotaBar"
+                            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:progressDrawable="@drawable/navview_progress" />
+
+                        <LinearLayout
+                            android:id="@+id/payment_boxes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="32dp"
+                            android:orientation="vertical" />
+
+                    </LinearLayout>
+
+                </ScrollView>
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"

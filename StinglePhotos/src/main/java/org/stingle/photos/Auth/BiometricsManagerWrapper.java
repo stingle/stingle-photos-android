@@ -8,7 +8,6 @@ import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -266,26 +265,37 @@ public class BiometricsManagerWrapper {
                 public void onAuthenticationError(int errorCode,
                                                   @NonNull CharSequence errString) {
                     super.onAuthenticationError(errorCode, errString);
-                    if(errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON){
-                        biometricsCallback.onAuthUsingPassword();
-                    }
-                    else{
-                        biometricsCallback.onAuthFailed();
+                    switch (errorCode){
+                        case BiometricPrompt.ERROR_NEGATIVE_BUTTON:
+                        case BiometricPrompt.ERROR_LOCKOUT:
+                        case BiometricPrompt.ERROR_LOCKOUT_PERMANENT:
+                        case BiometricPrompt.ERROR_UNABLE_TO_PROCESS:
+                            biometricsCallback.onAuthUsingPassword();
+                            break;
+                        case BiometricPrompt.ERROR_HW_NOT_PRESENT:
+                        case BiometricPrompt.ERROR_HW_UNAVAILABLE:
+                        case BiometricPrompt.ERROR_NO_BIOMETRICS:
+                        case BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL:
+                        case BiometricPrompt.ERROR_NO_SPACE:
+                        case BiometricPrompt.ERROR_TIMEOUT:
+                        case BiometricPrompt.ERROR_CANCELED:
+                        case BiometricPrompt.ERROR_USER_CANCELED:
+                            biometricsCallback.onAuthFailed();
+                            break;
+
                     }
                 }
 
                 @Override
                 public void onAuthenticationFailed() {
                     super.onAuthenticationFailed();
-                    Toast.makeText(activity, "Authentication failed",
-                            Toast.LENGTH_SHORT)
-                            .show();
                 }
             });
             biometricPrompt.authenticate(getPrompt(true),
                     new BiometricPrompt.CryptoObject(cipher));
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException | CertificateException | UnrecoverableKeyException | InvalidKeyException | NoSuchPaddingException | KeyStoreException e) {
-            Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_auth));
+            turnOffBiometrics(activity);
+            biometricsCallback.onAuthUsingPassword();
         }
         return false;
     }

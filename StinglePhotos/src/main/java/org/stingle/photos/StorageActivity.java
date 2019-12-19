@@ -14,9 +14,9 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
-import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.BillingResponseCode;
 import com.android.billingclient.api.BillingClientStateListener;
@@ -26,7 +26,6 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
-import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.Auth.LoginManager;
@@ -46,19 +45,18 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	private BillingClient billingClient;
 
 	private List<String> skus = new ArrayList<>();
+	private List<HashMap<String, String>> paymentBoxDetails = new ArrayList<>();
 	private List<Purchase> purchasedSkus = new ArrayList<>();
 	private Map<String, SkuDetails> skuDetailsMap = new HashMap<>();
 	private boolean isServiceConnected = false;
-	private int billingClientResponseCode;
 	private LinearLayout boxesParent;
 
 	private static final String BASE_64_ENCODED_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA00IIe/BqA9IUbrj2y1bgvgi6Tqu37ulDOndT3v4ElDCViaZI+JFF97lvYX0ijPIZ0ryj3Jo2mC+ncXXtQKeFZsvh9EauJyQXyQbsVERGjpTZ+sMdTkYu46zRjHezl3siLWWZMuc9UFQcvU1qkMOH6MI1gic1PAXi46wuMSL+kanDyQ2UfO3VlQsVkq9o/JwZGzaA4D8NkS1Ja2JcvdLxg2ES9YLaJBL/b2inHjiZW5tO59eAy6KqZy+N6kMfaoL421AhKovocejza7g4LFkkNvqdKfLZe4CEJVhYHN2OOBsqci7KwODsyEZEv3WztqnaylnuQpDVRZztdt9qnMqKnQIDAQAB";
+	private int billingClientResponseCode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//getActionBar().setDisplayHomeAsUpEnabled(true);
-		//getActionBar().setHomeButtonEnabled(true);
 
 		setContentView(R.layout.activity_storage);
 
@@ -82,6 +80,13 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 		boxesParent = findViewById(R.id.payment_boxes);
 
 		initSkus();
+
+		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
+		pullToRefresh.setOnRefreshListener(() -> {
+			updateQuotaInfo();
+			getSkuDetails();
+			pullToRefresh.setRefreshing(false);
+		});
 	}
 
 	@Override
@@ -129,6 +134,15 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 		skus.add("20tb_monthly");
 	}
 
+	private void initPaymentBoxDetails(){
+		paymentBoxDetails.clear();
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "1 TB"); put("monthly", "1tb_monthly"); put("yearly", "1tb_yearly");}});
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "3 TB"); put("monthly", "3tb_monthly"); put("yearly", "3tb_yearly");}});
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "5 TB"); put("monthly", "5tb_monthly"); put("yearly", null);}});
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "10 TB"); put("monthly", "10tb_monthly"); put("yearly", null);}});
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "20 TB"); put("monthly", "20tb_monthly"); put("yearly", null);}});
+	}
+
 	private void updateQuotaInfo() {
 		int spaceUsed = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_USED, 0);
 		int spaceQuota = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_QUOTA, 1);
@@ -147,113 +161,150 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	private void getSkuDetails() {
 		purchasedSkus.clear();
 		skuDetailsMap.clear();
-		Runnable queryRequest = new Runnable() {
-			@Override
-			public void run() {
-				Purchase.PurchasesResult subscriptionResult = billingClient.queryPurchases(BillingClient.SkuType.SUBS);
-				if (subscriptionResult.getResponseCode() == BillingResponseCode.OK) {
-					purchasedSkus.addAll(subscriptionResult.getPurchasesList());
-					Log.d("purchasedItems", purchasedSkus.toString());
-				}
-				else {
-					Log.e("qaq", "Got an error response trying to query subscription purchases");
-				}
-
-
-				SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-				params.setSkusList(skus).setType(BillingClient.SkuType.SUBS);
-				billingClient.querySkuDetailsAsync(params.build(),
-						new SkuDetailsResponseListener() {
-							@Override
-							public void onSkuDetailsResponse(BillingResult billingResult,
-															 List<SkuDetails> skuDetailsList) {
-								if (billingResult.getResponseCode() == BillingResponseCode.OK && skuDetailsList != null) {
-									Log.d("skuDetails", skuDetailsList.toString());
-									for (SkuDetails skuDetails : skuDetailsList) {
-										skuDetailsMap.put(skuDetails.getSku(), skuDetails);
-									}
-
-									createPaymentBoxes();
-								}
-
-							}
-						});
+		Runnable queryRequest = () -> {
+			Purchase.PurchasesResult subscriptionResult = billingClient.queryPurchases(BillingClient.SkuType.SUBS);
+			if (subscriptionResult.getResponseCode() == BillingResponseCode.OK) {
+				purchasedSkus.addAll(subscriptionResult.getPurchasesList());
+				Log.d("purchasedItems", purchasedSkus.toString());
 			}
+			else {
+				Log.e("qaq", "Got an error response trying to query subscription purchases");
+			}
+
+
+			SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
+			params.setSkusList(skus).setType(BillingClient.SkuType.SUBS);
+			billingClient.querySkuDetailsAsync(params.build(),
+					(billingResult, skuDetailsList) -> {
+						if (billingResult.getResponseCode() == BillingResponseCode.OK && skuDetailsList != null) {
+							Log.d("skuDetails", skuDetailsList.toString());
+							for (SkuDetails skuDetails : skuDetailsList) {
+								skuDetailsMap.put(skuDetails.getSku(), skuDetails);
+							}
+
+							createPaymentBoxes();
+						}
+
+					});
 		};
 		executeServiceRequest(queryRequest);
 	}
 
 	private void createPaymentBoxes(){
-
+		initPaymentBoxDetails();
 		boxesParent.removeAllViews();
 
 		if(purchasedSkus == null || purchasedSkus.size() == 0) {
 			int spaceQuota = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_QUOTA, 0);
 			createPaymentBox(Helpers.formatSpaceUnits(spaceQuota), null, null);
 		}
-		createPaymentBox("1 TB", skuDetailsMap.get("1tb_monthly"), skuDetailsMap.get("1tb_yearly"));
-		createPaymentBox("3 TB", skuDetailsMap.get("3tb_monthly"), skuDetailsMap.get("3tb_yearly"));
-		createPaymentBox("5 TB", skuDetailsMap.get("5tb_monthly"), null);
-		createPaymentBox("10 TB", skuDetailsMap.get("10tb_monthly"), null);
-		createPaymentBox("20 TB", skuDetailsMap.get("20tb_monthly"), null);
+		else{
+			String purchasedSku = purchasedSkus.get(0).getSku();
+			for(int i = 0; i < paymentBoxDetails.size(); i++) {
+				HashMap<String, String> boxDetails = paymentBoxDetails.get(i);
+				if(boxDetails != null && boxDetails.get("monthly").equals(purchasedSku) || (boxDetails.get("yearly") != null && boxDetails.get("yearly").equals(purchasedSku))){
+					paymentBoxDetails.remove(i);
+					paymentBoxDetails.add(0, boxDetails);
+					break;
+				}
+			}
+		}
+
+		for(HashMap<String, String> boxDetails : paymentBoxDetails) {
+			createPaymentBox(boxDetails.get("title"), skuDetailsMap.get(boxDetails.get("monthly")), (boxDetails.get("yearly") != null ? skuDetailsMap.get(boxDetails.get("yearly")) : null ));
+		}
 	}
 
 	private void createPaymentBox(String title, SkuDetails monthly, SkuDetails yearly){
 		LinearLayout box = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.payment_box, boxesParent, false);
 		((TextView) box.findViewById(R.id.storage_type)).setText(title);
 
-		boolean isPurchased = false;
-		for(Purchase purchase : purchasedSkus){
-			String purchasedSku = purchase.getSku();
-			if(monthly != null && monthly.getSku().equals(purchasedSku)){
-				isPurchased = true;
+		boolean isPurchasedMonthly = false;
+		boolean isPurchasedYearly = false;
+		if(purchasedSkus.size() > 0 && purchasedSkus.get(0) != null) {
+			String purchasedSku = purchasedSkus.get(0).getSku();
+			if (monthly != null && monthly.getSku().equals(purchasedSku)) {
+				isPurchasedMonthly = true;
 			}
-			if(yearly != null && yearly.getSku().equals(purchasedSku)){
-				isPurchased = true;
+			if (yearly != null && yearly.getSku().equals(purchasedSku)) {
+				isPurchasedYearly = true;
 			}
 		}
+		boolean isPurchased = isPurchasedMonthly || isPurchasedYearly;
+		boolean isFreePlan = !isPurchased && monthly == null && yearly == null;
+		TextView storageType = box.findViewById(R.id.storage_type);
+		TextView priceTop = box.findViewById(R.id.price_top);
+		Button payButton = box.findViewById(R.id.pay);
+		TextView yearlyInfo = box.findViewById(R.id.yearlyInfo);
+		TextView yearlyPrice = box.findViewById(R.id.yearly);
 
-		if(isPurchased || (purchasedSkus.size() == 0 && monthly == null && yearly == null)){
+		if(isPurchased || isFreePlan){
 			box.setBackground(getDrawable(R.drawable.rectangle_selected));
-			((Button)box.findViewById(R.id.pay)).setText(getString(R.string.current_plan));
-			((Button)box.findViewById(R.id.pay)).setEnabled(false);
-			((Button)box.findViewById(R.id.pay)).setTextColor(getColor(R.color.disabledText));
+			payButton.setText(getString(R.string.current_plan));
+			payButton.setEnabled(false);
+			payButton.setTextColor(getColor(R.color.disabledText));
 
-			String monthlyPrice = "";
-			if(monthly != null){
-				monthlyPrice = getString(R.string.monthly_plan, monthly.getPrice());
+			String topPrice = "";
+			if(isFreePlan){
+				topPrice = getString(R.string.free);
+				yearlyInfo.setVisibility(View.GONE);
+				yearlyPrice.setVisibility(View.GONE);
+			}
+			else if(monthly != null && isPurchasedMonthly){
+				topPrice = getString(R.string.monthly_plan, monthly.getPrice());
+
+				if(yearly != null){
+					double saved = (monthly.getPriceAmountMicros() / 1000000.0 * 12.0) - (yearly.getPriceAmountMicros() / 1000000.0);
+					saved = Math.round(saved * 100.0) / 100.0;
+					yearlyInfo.setText(getString(R.string.yearly_plan_save, yearly.getPriceCurrencyCode() + " " + saved));
+					yearlyPrice.setText(getString(R.string.yearly_plan, yearly.getPrice()));
+					final String yearlySku = yearly.getSku();
+					yearlyPrice.setOnClickListener(view -> pay(yearlySku));
+				}
+				else{
+					yearlyInfo.setVisibility(View.GONE);
+					yearlyPrice.setVisibility(View.GONE);
+				}
+			}
+			else if(yearly != null && isPurchasedYearly){
+				topPrice = getString(R.string.yearly_plan, yearly.getPrice());
+
+				if(monthly != null){
+					yearlyInfo.setText(getString(R.string.change_to_monthly_plan));
+					yearlyPrice.setText(getString(R.string.monthly_plan, monthly.getPrice()));
+					final String monthlySku = monthly.getSku();
+					yearlyPrice.setOnClickListener(view -> pay(monthlySku));
+				}
+				else{
+					yearlyInfo.setVisibility(View.GONE);
+					yearlyPrice.setVisibility(View.GONE);
+				}
+			}
+			priceTop.setText(topPrice);
+		}
+		else{
+			priceTop.setVisibility(View.GONE);
+			payButton.setText(getString(R.string.monthly_plan, monthly.getPrice()));
+
+			final String monthlySku = monthly.getSku();
+			payButton.setOnClickListener(view -> pay(monthlySku));
+
+			if(yearly != null) {
+				double saved = (monthly.getPriceAmountMicros() / 1000000.0 * 12.0) - (yearly.getPriceAmountMicros() / 1000000.0);
+				saved = Math.round(saved * 100.0) / 100.0;
+				yearlyInfo.setText(getString(R.string.yearly_plan_save, yearly.getPriceCurrencyCode() + " " + saved));
+				yearlyPrice.setText(getString(R.string.yearly_plan, yearly.getPrice()));
+
+				final String yearlySku = yearly.getSku();
+				yearlyPrice.setOnClickListener(view -> pay(yearlySku));
 			}
 			else{
-				monthlyPrice = getString(R.string.free);
+				yearlyInfo.setVisibility(View.GONE);
+				yearlyPrice.setVisibility(View.GONE);
 			}
-
-			((TextView)box.findViewById(R.id.price_monthly)).setText(monthlyPrice);
-
-		}
-		else{
-			((TextView)box.findViewById(R.id.price_monthly)).setVisibility(View.GONE);
 		}
 
-		if(monthly != null && !isPurchased) {
-			((Button)box.findViewById(R.id.pay)).setText(getString(R.string.monthly_plan, monthly.getPrice()));
-			final String monthlySku = monthly.getSku();
-			box.findViewById(R.id.pay).setOnClickListener(view -> pay(monthlySku));
-		}
 
-		if(yearly != null && !isPurchased) {
-			double saved = (monthly.getPriceAmountMicros() / 1000000.0 * 12.0) - (yearly.getPriceAmountMicros() / 1000000.0);
-			saved = Math.round(saved *100.0)/100.0;
-			String yearlyText = getString(R.string.yearly_plan_save, yearly.getPriceCurrencyCode() + " " + saved);
-			String yearlyPrice = getString(R.string.yearly_plan, yearly.getPrice());
-			((TextView) box.findViewById(R.id.yearlyInfo)).setText(yearlyText);
-			((TextView) box.findViewById(R.id.yearly)).setText(yearlyPrice);
-			final String yearlySku = yearly.getSku();
-			box.findViewById(R.id.yearly).setOnClickListener(view -> pay(yearlySku));
-		}
-		else{
-			box.findViewById(R.id.yearlyInfo).setVisibility(View.GONE);
-			box.findViewById(R.id.yearly).setVisibility(View.GONE);
-		}
 		boxesParent.addView(box);
 	}
 
@@ -279,42 +330,6 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 			}
 		};
 		executeServiceRequest(queryRequest);
-
-
-
-
-
-
-		/*Purchase.PurchasesResult subscriptionResult
-				= billingClient.queryPurchases(BillingClient.SkuType.SUBS);
-		Log.i("qaq", "Querying subscriptions result code: "
-				+ subscriptionResult.getResponseCode()
-				+ " res: " + subscriptionResult.getPurchasesList().size());
-
-		if (subscriptionResult.getResponseCode() == BillingResponseCode.OK) {
-			Log.e("subres", subscriptionResult.getPurchasesList().toString());
-		} else {
-			Log.e("qaq", "Got an error response trying to query subscription purchases");
-		}
-
-		List<String> skuList = new ArrayList<>();
-		skuList.add("1tb_monthly");
-
-
-		SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-		params.setSkusList(skuList).setType(BillingClient.SkuType.SUBS);
-		billingClient.querySkuDetailsAsync(params.build(),
-				new SkuDetailsResponseListener() {
-					@Override
-					public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
-						Log.e("skudetails", skuDetailsList.toString());
-						if (skuDetailsList != null && skuDetailsList.size() == 1) {
-
-						}
-					}
-
-
-				});*/
 	}
 
 	public void startServiceConnection(final Runnable executeOnSuccess) {
@@ -378,14 +393,11 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 						.setPurchaseToken(purchase.getPurchaseToken())
 						.setDeveloperPayload(Helpers.getPreference(this, StinglePhotosApplication.USER_ID, ""))
 						.build();
-				billingClient.acknowledgePurchase(params, new AcknowledgePurchaseResponseListener() {
-					@Override
-					public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
-						Log.d("purchase", purchase.getSku() + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
+				billingClient.acknowledgePurchase(params, billingResult -> {
+					Log.d("purchase", purchase.getSku() + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
 
-						if (billingResult.getResponseCode() == BillingResponseCode.OK) {
-							notifyServerAboutPurchase(purchase);
-						}
+					if (billingResult.getResponseCode() == BillingResponseCode.OK) {
+						notifyServerAboutPurchase(purchase);
 					}
 				});
 			}
@@ -405,8 +417,8 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 			public void onFinish(boolean isSuccess) {
 				if(isSuccess) {
 					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
-					getSkuDetails();
 					updateQuotaInfo();
+					getSkuDetails();
 				}
 				else{
 					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_error), Snackbar.LENGTH_LONG).show();

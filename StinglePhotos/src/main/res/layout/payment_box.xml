@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:textColor="#000"
         android:textSize="15sp"
-        android:id="@+id/price_monthly"/>
+        android:id="@+id/price_top"/>
 
     <Button
         android:id="@+id/pay"
