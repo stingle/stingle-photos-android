@@ -31,7 +31,7 @@ android {
         release {
             //minifyEnabled true
             //proguardFiles 'proguard.cfg'
-            debuggable true
+            //debuggable true
             signingConfig signingConfigs.release
             resValue "string", "app_name", "Stingle Photos"
             resValue "string", "camera", "Camera"
