@@ -11,7 +11,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:id="@+id/slide_image"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="300dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"

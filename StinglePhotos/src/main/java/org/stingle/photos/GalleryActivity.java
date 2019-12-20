@@ -16,24 +16,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
-import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
-import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
-import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Files.ShareManager;
-import org.stingle.photos.Gallery.AutoFitGridLayoutManager;
-import org.stingle.photos.Gallery.GalleryAdapterPisasso;
-import org.stingle.photos.Gallery.HidingScrollListener;
-import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Sync.SyncService;
-import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.Gallery.DragSelectRecyclerView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,33 +23,46 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.view.ActionMode;
-import androidx.core.view.GravityCompat;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-
-import android.view.MenuItem;
-
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.core.widget.ContentLoadingProgressBar;
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.SimpleItemAnimator;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.SimpleItemAnimator;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+
+import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
+import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.Files.ShareManager;
+import org.stingle.photos.Gallery.AutoFitGridLayoutManager;
+import org.stingle.photos.Gallery.DragSelectRecyclerView;
+import org.stingle.photos.Gallery.GalleryAdapterPisasso;
+import org.stingle.photos.Gallery.HidingScrollListener;
+import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Sync.SyncService;
+import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -111,6 +106,15 @@ public class GalleryActivity extends AppCompatActivity
 			LoginManager.redirectToLogin(GalleryActivity.this);
 		}
 	};
+	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(adapter != null) {
+				adapter.updateDataSet();
+			}
+		}
+	};
+	private boolean isImporting = false;
 
 
 	@Override
@@ -181,6 +185,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
+		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
 
 		handleIncomingIntent(getIntent());
 
@@ -210,6 +215,13 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		if(!isImporting){
+			checkLoginAndInit();
+		}
+	}
+
+	private void checkLoginAndInit(){
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
@@ -253,12 +265,7 @@ public class GalleryActivity extends AppCompatActivity
 		else {*/
 			findViewById(R.id.topBar).setVisibility(View.VISIBLE);
 			recyclerView.setAdapter(adapter);
-			Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
-			try {
-				startService(serviceIntent);
-				bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
-			} catch (IllegalStateException ignored) {
-			}
+			startAndBindService();
 			layoutManager.scrollToPosition(lastScrollPosition);
 
 			if (adapter != null) {
@@ -281,6 +288,20 @@ public class GalleryActivity extends AppCompatActivity
 			isBound = false;
 		}
 		findViewById(R.id.topBar).setVisibility(View.INVISIBLE);
+	}
+
+	private void startAndBindService(){
+		Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
+		try {
+			startService(serviceIntent);
+			bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+		} catch (IllegalStateException ignored) { }
+	}
+
+	private void startSync(){
+		Intent serviceIntent = new Intent(this, SyncService.class);
+		serviceIntent.putExtra("START_SYNC", true);
+		startService(serviceIntent);
 	}
 
 	@Override
@@ -329,11 +350,14 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		if(urisToImport.size() > 0){
+			isImporting = true;
 			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
 					adapter.updateDataSet();
-					sendMessageToSyncService(SyncService.MSG_START_SYNC);
+					startSync();
+					isImporting = false;
+					checkLoginAndInit();
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}

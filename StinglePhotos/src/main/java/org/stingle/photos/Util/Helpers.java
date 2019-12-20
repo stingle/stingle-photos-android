@@ -26,6 +26,13 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
+
+import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
+import org.apache.sanselan.common.IImageMetadata;
+import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
+import org.apache.sanselan.formats.tiff.TiffField;
+import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 import org.stingle.photos.CameraX.CameraImageSize;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -34,13 +41,6 @@ import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
-
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
-import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
-import org.apache.sanselan.formats.tiff.TiffField;
-import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.io.BufferedInputStream;
@@ -48,7 +48,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -182,7 +181,7 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, String encFilename, String realFileName, byte[] fileId, int type, int videoDuration) throws FileNotFoundException {
+	public static Bitmap generateThumbnail(Context context, byte[] data, String encFilename, String realFileName, byte[] fileId, int type, int videoDuration) throws IOException, CryptoException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
 		//Bitmap thumbBitmap = null;
@@ -193,14 +192,8 @@ public class Helpers {
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream);
 
 			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encFilename);
-			try {
-				StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
-				out.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (CryptoException e) {
-				e.printStackTrace();
-			}
+			StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
+			out.close();
 
 			//Helpers.getAESCrypt(activity).encrypt(stream.toByteArray(), out);
 		}
@@ -577,16 +570,12 @@ public class Helpers {
 		return String.valueOf(mb);
 	}
 
-	public static void insertFileIntoDB(Context context, String filename){
+	public static void insertFileIntoDB(Context context, String filename) throws IOException, CryptoException {
 		long nowDate = System.currentTimeMillis();
 		StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 
-		try {
-			String headers = Crypto.getFileHeaders(FileManager.getHomeDir(context) + "/" + filename, FileManager.getThumbsDir(context) + "/" + filename);
-			db.insertFile(filename, true, false, StingleDbHelper.INITIAL_VERSION, nowDate, nowDate, headers);
-		} catch (IOException | CryptoException e) {
-			e.printStackTrace();
-		}
+		String headers = Crypto.getFileHeaders(FileManager.getHomeDir(context) + "/" + filename, FileManager.getThumbsDir(context) + "/" + filename);
+		db.insertFile(filename, true, false, StingleDbHelper.INITIAL_VERSION, nowDate, nowDate, headers);
 
 		db.close();
 	}

@@ -172,7 +172,8 @@
     <string name="pref_header_sync">Backup and Sync</string>
     <string name="upload_only_on_wifi">Backup only on Wifi</string>
     <string name="upload_only_on_wifi_desc">Backup only when you are connected to Wifi network</string>
-    <string name="upload_battery">Backup only if battery level is more than</string>
+    <string name="upload_battery">Minimum battery level</string>
+    <string name="upload_battery_summary">Backup only if battery level is more than (%)</string>
     <string name="sync_disabled">Backup is disabled</string>
     <string name="sync_not_on_wifi">Backup suspended. Not connected to Wifi network</string>
     <string name="sync_battery_low">Backup suspended. Low battery</string>
@@ -219,6 +220,7 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="enable_biometrics">Do you want to enable biometric authentication?</string>
+    <string name="volume_keys_snap">Take photos using volume keys</string>
 
 
 </resources>

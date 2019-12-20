@@ -16,7 +16,7 @@
              android:right="30dp"
              android:top="30dp">
              <shape android:shape="rectangle"  >
-                 <solid android:color="@android:color/background_light"/>
+                 <solid android:color="#FFFFFF"/>
              </shape>
          </item>
      </layer-list>
@@ -37,7 +37,7 @@
             android:right="30dp"
             android:top="30dp">
             <shape android:shape="rectangle"  >
-                <solid android:color="@android:color/background_light"/>
+                <solid android:color="#FFFFFF"/>
             </shape>
         </item>
     </layer-list>
@@ -58,7 +58,7 @@
             android:right="30dp"
             android:top="30dp">
             <shape android:shape="rectangle"  >
-                <solid android:color="@android:color/background_light"/>
+                <solid android:color="#FFFFFF"/>
             </shape>
         </item>
     </layer-list>

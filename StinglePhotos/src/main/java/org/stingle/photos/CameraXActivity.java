@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -54,10 +55,9 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
-
-// Your IDE likely can auto-import these classes, but there are several
-// different implementations so we list them here to disambiguate.
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class CameraXActivity extends AppCompatActivity {
 
@@ -84,6 +84,9 @@ public class CameraXActivity extends AppCompatActivity {
 	private ImageButton takePhotoButton;
 	private Chronometer chronometer;
 	private RelativeLayout chronoBar;
+	private RelativeLayout topPanel;
+	private LinearLayout lastPhotoContainer;
+
 
 	private OrientationEventListener mOrientationEventListener;
 	private int mOrientation = -1;
@@ -118,6 +121,8 @@ public class CameraXActivity extends AppCompatActivity {
 		galleryButton = findViewById(R.id.lastPhoto);
 		chronometer = findViewById(R.id.chrono);
 		chronoBar = findViewById(R.id.chronoBar);
+		topPanel = findViewById(R.id.topPanel);
+		lastPhotoContainer = findViewById(R.id.lastPhotoContainer);
 		findViewById(R.id.lastPhoto).setClipToOutline(true);
 
 		takePhotoButton.setOnClickListener(getTakePhotoListener());
@@ -148,9 +153,18 @@ public class CameraXActivity extends AppCompatActivity {
 
 	@Override
 	protected void onPause() {
-		super.onPause();
-		sendCameraStatusBroadcast(false);
+
+
+		if(isRecordingVideo){
+			takePhotoClick();
+			sendCameraStatusBroadcast(false, true);
+		}
+		else {
+			sendCameraStatusBroadcast(false, false);
+		}
 		destroyOrientationListener();
+
+		super.onPause();
 	}
 
 	@SuppressLint("MissingPermission")
@@ -161,10 +175,28 @@ public class CameraXActivity extends AppCompatActivity {
 		showLastThumb();
 
 		startService(new Intent(this, MediaEncryptService.class));
-		sendCameraStatusBroadcast(true);
+		sendCameraStatusBroadcast(true, false);
 
 		initOrientationListener();
 	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+			takePhotoClick();
+			return true;
+		}
+
+		boolean volumeKeysTakePhoto = settings.getBoolean("volume_keys_snap", true);
+
+		if(volumeKeysTakePhoto && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+			takePhotoClick();
+			return true;
+		}
+
+		return super.onKeyDown(keyCode, event);
+	}
+
 
 	private boolean hasAllPermissionsGranted() {
 		for (String permission : CAMERA_PERMISSIONS) {
@@ -317,20 +349,29 @@ public class CameraXActivity extends AppCompatActivity {
 				}
 			}
 
-			CameraImageSize size;
+			CameraImageSize size = null;
 			if(isInVideoMode) {
-				size = Helpers.parseVideoOutputs(this, map).get(Integer.parseInt(sizeIndex));
+				ArrayList<CameraImageSize> videoOutputs = Helpers.parseVideoOutputs(this, map);
+				if(videoOutputs.size() > 0) {
+					size = videoOutputs.get(Integer.parseInt(sizeIndex));
+				}
 			}
 			else{
-				size = Helpers.parsePhotoOutputs(this, map).get(Integer.parseInt(sizeIndex));
+				ArrayList<CameraImageSize> photoOutputs = Helpers.parsePhotoOutputs(this, map);
+				if(photoOutputs.size() > 0) {
+					size = photoOutputs.get(Integer.parseInt(sizeIndex));
+				}
 			}
 
-			cameraView.setCustomImageSize(size);
+			if(size != null) {
+				cameraView.setCustomImageSize(size);
+			}
+
 			if(characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)){
-				flashButton.setVisibility(View.VISIBLE);
+				showElements(Arrays.asList(flashButton));
 			}
 			else{
-				flashButton.setVisibility(View.INVISIBLE);
+				hideElements(Arrays.asList(flashButton));
 			}
 		}
 	}
@@ -355,81 +396,137 @@ public class CameraXActivity extends AppCompatActivity {
 		lbm.sendBroadcast(broadcastIntent);
 	}
 
-	private void sendCameraStatusBroadcast(boolean isRunning){
+	private void sendCameraStatusBroadcast(boolean isRunning, boolean wasRecoringVideo){
 		Intent broadcastIntent = new Intent("CAMERA_STATUS");
 		broadcastIntent.putExtra("isRunning", isRunning);
+		broadcastIntent.putExtra("wasRecoringVideo", wasRecoringVideo);
 		lbm.sendBroadcast(broadcastIntent);
 	}
 
 	private View.OnClickListener getTakePhotoListener() {
 		return v -> {
-			cameraView.setMediaRotation(getPhotoRotation(cameraView.getCameraCharacteristics()));
-			if(!isInVideoMode) {
-				String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
-				cameraView.takePicture(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new ImageCapture.OnImageSavedListener() {
+			takePhotoClick();
+		};
+
+	}
+
+	private void takePhotoClick(){
+		cameraView.setMediaRotation(getPhotoRotation(cameraView.getCameraCharacteristics()));
+		if(!isInVideoMode) {
+			String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
+			cameraView.takePicture(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new ImageCapture.OnImageSavedListener() {
+				@Override
+				public void onImageSaved(@NonNull File file) {
+					if(!LoginManager.isKeyInMemory()){
+						getThumbIntoMemory(file, false);
+					}
+					sendNewMediaBroadcast(file);
+				}
+
+				@Override
+				public void onError(@NonNull ImageCapture.ImageCaptureError imageCaptureError, @NonNull String message, @Nullable Throwable cause) {
+
+				}
+			});
+			whitenScreen();
+		}
+		else{
+			if(!isRecordingVideo) {
+				repositionChronoBar();
+				hideElements(Arrays.asList(optionsButton, switchCamButton, modeChangerButton, lastPhotoContainer));
+
+				chronoBar.setVisibility(View.VISIBLE);
+				chronometer.setBase(SystemClock.elapsedRealtime());
+				chronometer.start();
+				takePhotoButton.setImageDrawable(getDrawable(R.drawable.button_shutter_video_active));
+				Helpers.acquireWakeLock(CameraXActivity.this);
+
+				String filename = Helpers.getTimestampedFilename(Helpers.VIDEO_FILE_PREFIX, ".mp4");
+				cameraView.startRecording(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new VideoCapture.OnVideoSavedListener() {
 					@Override
-					public void onImageSaved(@NonNull File file) {
-						if(!LoginManager.isKeyInMemory()){
-							getThumbIntoMemory(file, false);
-						}
+					public void onVideoSaved(@NonNull File file) {
 						sendNewMediaBroadcast(file);
+						if(!LoginManager.isKeyInMemory()){
+							getThumbIntoMemory(file, true);
+						}
+						runOnUiThread(() -> {
+							whitenScreen();
+
+							chronoBar.setVisibility(View.INVISIBLE);
+							chronometer.stop();
+							takePhotoButton.setImageDrawable(getDrawable(R.drawable.button_shutter_video));
+
+							showElements(Arrays.asList(optionsButton, switchCamButton, modeChangerButton, lastPhotoContainer));
+							Helpers.releaseWakeLock(CameraXActivity.this);
+						});
 					}
 
 					@Override
-					public void onError(@NonNull ImageCapture.ImageCaptureError imageCaptureError, @NonNull String message, @Nullable Throwable cause) {
+					public void onError(@NonNull VideoCapture.VideoCaptureError videoCaptureError, @NonNull String message, @Nullable Throwable cause) {
 
 					}
 				});
-				whitenScreen();
+				isRecordingVideo = true;
 			}
 			else{
-				if(!isRecordingVideo) {
-					optionsButton.setVisibility(View.INVISIBLE);
-					switchCamButton.setVisibility(View.INVISIBLE);
-					modeChangerButton.setVisibility(View.INVISIBLE);
-					flashButton.setVisibility(View.INVISIBLE);
-					chronoBar.setVisibility(View.VISIBLE);
-					chronometer.setBase(SystemClock.elapsedRealtime());
-					chronometer.start();
-					takePhotoButton.setImageDrawable(getDrawable(R.drawable.button_shutter_video_active));
-					Helpers.acquireWakeLock(this);
-
-					String filename = Helpers.getTimestampedFilename(Helpers.VIDEO_FILE_PREFIX, ".mp4");
-					cameraView.startRecording(new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename), AsyncTask.THREAD_POOL_EXECUTOR, new VideoCapture.OnVideoSavedListener() {
-						@Override
-						public void onVideoSaved(@NonNull File file) {
-							if(!LoginManager.isKeyInMemory()){
-								getThumbIntoMemory(file, true);
-							}
-							sendNewMediaBroadcast(file);
-							runOnUiThread(() -> {
-								whitenScreen();
-
-								chronoBar.setVisibility(View.INVISIBLE);
-								chronometer.stop();
-								takePhotoButton.setImageDrawable(getDrawable(R.drawable.button_shutter_video));
-
-								optionsButton.setVisibility(View.VISIBLE);
-								switchCamButton.setVisibility(View.VISIBLE);
-								modeChangerButton.setVisibility(View.VISIBLE);
-								flashButton.setVisibility(View.VISIBLE);
-								Helpers.releaseWakeLock(CameraXActivity.this);
-							});
-						}
-
-						@Override
-						public void onError(@NonNull VideoCapture.VideoCaptureError videoCaptureError, @NonNull String message, @Nullable Throwable cause) {
-
-						}
-					});
-					isRecordingVideo = true;
-				}
-				else{
-					cameraView.stopRecording();
-					isRecordingVideo = false;
-				}
+				cameraView.stopRecording();
+				isRecordingVideo = false;
 			}
-		};
+		}
+	}
+
+	private void repositionChronoBar(){
+		int rotation = getCurrentDeviceRotation();
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(chronoBar.getLayoutParams());
+
+		params.addRule(RelativeLayout.BELOW, 0);
+		params.addRule(RelativeLayout.ABOVE, 0);
+		params.addRule(RelativeLayout.CENTER_VERTICAL, 0);
+		params.addRule(RelativeLayout.CENTER_HORIZONTAL, 0);
+		params.addRule(RelativeLayout.ALIGN_PARENT_START, 0);
+		params.addRule(RelativeLayout.ALIGN_PARENT_END, 0);
+
+		int marginPx = Helpers.convertDpToPixels(this,10);
+
+		params.topMargin = marginPx;
+		params.rightMargin = marginPx;
+		params.bottomMargin = marginPx;
+		params.leftMargin = marginPx;
+
+		switch (rotation){
+			case 0:
+				params.addRule(RelativeLayout.BELOW, R.id.topPanel);
+				params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+				break;
+			case 90:
+				params.addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE);
+				params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+				break;
+			case 180:
+				params.addRule(RelativeLayout.ABOVE, R.id.bottomPanel);
+				params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+				break;
+			case 270:
+				params.addRule(RelativeLayout.ALIGN_PARENT_START, RelativeLayout.TRUE);
+				params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+				break;
+		}
+		chronoBar.setLayoutParams(params);
+		chronoBar.setRotation(rotation);
+	}
+
+	private void hideElements(List<View> views){
+		for(View view : views){
+			view.setVisibility(View.INVISIBLE);
+			view.setAlpha(0f);
+		}
+	}
+
+	private void showElements(List<View> views){
+		for(View view : views){
+			view.setVisibility(View.VISIBLE);
+			view.setAlpha(1f);
+		}
 	}
 
 	private View.OnClickListener getSwitchCamListener() {
@@ -441,14 +538,21 @@ public class CameraXActivity extends AppCompatActivity {
 
 	private View.OnClickListener toggleFlash() {
 		return v -> {
-			if (flashMode == FlashMode.OFF) {
-				setFlashMode(FlashMode.AUTO);
+			if(!isInVideoMode) {
+				if (flashMode == FlashMode.OFF) {
+					setFlashMode(FlashMode.AUTO);
+				} else if (flashMode == FlashMode.AUTO) {
+					setFlashMode(FlashMode.ON);
+				} else if (flashMode == FlashMode.ON) {
+					setFlashMode(FlashMode.OFF);
+				}
 			}
-			else if (flashMode == FlashMode.AUTO) {
-				setFlashMode(FlashMode.ON);
-			}
-			else if (flashMode == FlashMode.ON) {
-				setFlashMode(FlashMode.OFF);
+			else{
+				if (flashMode == FlashMode.OFF) {
+					setFlashMode(FlashMode.ON);
+				} else if (flashMode == FlashMode.ON) {
+					setFlashMode(FlashMode.OFF);
+				}
 			}
 
 			//
@@ -470,6 +574,7 @@ public class CameraXActivity extends AppCompatActivity {
 				cameraView.setCaptureMode(CameraView.CaptureMode.VIDEO);
 				modeChangerButton.setImageResource(R.drawable.ic_video);
 				takePhotoButton.setImageDrawable(getDrawable(R.drawable.button_shutter_video));
+				setFlashMode(FlashMode.OFF);
 			}
 		};
 	}
@@ -486,8 +591,13 @@ public class CameraXActivity extends AppCompatActivity {
 			flashButton.setImageResource(R.drawable.flash_on);
 		}
 
-		cameraView.setFlash(flashMode);
-		preferences.edit().putString(FLASH_MODE_PREF, flashMode.name()).apply();
+		if(!isInVideoMode) {
+			cameraView.setFlash(flashMode);
+			preferences.edit().putString(FLASH_MODE_PREF, flashMode.name()).apply();
+		}
+		else{
+			cameraView.enableTorch(flashMode == FlashMode.ON);
+		}
 	}
 
 	private void whitenScreen(){

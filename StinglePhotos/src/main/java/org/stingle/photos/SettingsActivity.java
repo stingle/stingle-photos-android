@@ -151,7 +151,7 @@ public class SettingsActivity extends AppCompatActivity implements
 			SwitchPreference biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
 
 			BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper((AppCompatActivity) getActivity());
-			if(biometricsManagerWrapper.isBiometricsAvailable()){
+			if(!biometricsManagerWrapper.isBiometricsAvailable()){
 				biometricSetting.setEnabled(false);
 			}
 			biometricSetting.setOnPreferenceChangeListener((preference, newValue) -> {

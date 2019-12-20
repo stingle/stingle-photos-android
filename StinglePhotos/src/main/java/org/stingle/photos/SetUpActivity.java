@@ -1,23 +1,14 @@
 package org.stingle.photos;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.stingle.photos.AsyncTasks.SignUpAsyncTask;
-import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Util.Helpers;
 
 public class SetUpActivity  extends AppCompatActivity {
@@ -36,7 +27,7 @@ public class SetUpActivity  extends AppCompatActivity {
 		}
 		actionBar.setTitle(getString(R.string.sign_up));
 
-		findViewById(R.id.signup).setOnClickListener(signup());
+		findViewById(R.id.signup).setOnClickListener(signUp());
 		findViewById(R.id.loginBtn).setOnClickListener(gotoLogin());
 	}
 
@@ -55,7 +46,7 @@ public class SetUpActivity  extends AppCompatActivity {
 		};
 	}
 
-	private OnClickListener signup() {
+	private OnClickListener signUp() {
 		return v -> {
 			final String email = ((EditText)findViewById(R.id.email)).getText().toString();
 			final String password1 = ((EditText)findViewById(R.id.password1)).getText().toString();

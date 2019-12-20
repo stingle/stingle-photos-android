@@ -125,31 +125,36 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				@Override
 				public void onFinish(Boolean needToUpdateUI) {
 					progressDialog.dismiss();
+					BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
+					if(biometricsManagerWrapper.isBiometricsAvailable()) {
+						Helpers.showConfirmDialog(activity, activity.getString(R.string.enable_biometrics),
+								(dialog, which) -> {
+									biometricsManagerWrapper.setupBiometrics(null, password, new BiometricsManagerWrapper.BiometricsSetupCallback() {
+										@Override
+										public void onSuccess() {
+											gotoGallery();
+										}
 
-					Helpers.showConfirmDialog(activity, activity.getString(R.string.enable_biometrics),
-							(dialog, which) -> {
-								BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
-								biometricsManagerWrapper.setupBiometrics(null, password, new BiometricsManagerWrapper.BiometricsSetupCallback() {
-									@Override
-									public void onSuccess() {
-										gotoGallery();
-									}
+										@Override
+										public void onFailed() {
+											gotoGallery();
+										}
+									});
 
-									@Override
-									public void onFailed() {
-										gotoGallery();
-									}
+								},
+								(dialog, which) -> {
+									gotoGallery();
 								});
-
-							},
-							(dialog, which) -> {
-								gotoGallery();
-							});
+					}
+					else{
+						gotoGallery();
+					}
 
 				}
 			}, AsyncTask.SERIAL_EXECUTOR);
 		}
 		else{
+			progressDialog.dismiss();
 			if(response.areThereErrorInfos()) {
 				response.showErrorsInfos();
 			}
@@ -157,6 +162,5 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_login));
 			}
 		}
-
 	}
 }

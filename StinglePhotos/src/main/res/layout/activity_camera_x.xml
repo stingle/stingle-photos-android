@@ -65,18 +65,27 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/topPanel"
         android:layout_centerHorizontal="true"
-        android:layout_margin="10dp"
-        android:layout_marginTop="20dp"
+        android:layout_margin="20dp"
         android:background="@drawable/chrono_bg"
         android:elevation="1dp"
         android:orientation="horizontal"
         android:padding="10dp"
         android:visibility="invisible">
 
+        <ImageView
+            android:id="@+id/chronoRec"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/chrono_rec_circle"/>
+
         <Chronometer
             android:id="@+id/chrono"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/chronoRec"
             android:textColor="#FFFFFF"
             android:textStyle="bold" />
     </RelativeLayout>
@@ -99,8 +108,7 @@
             android:background="@null"
             android:contentDescription="@string/camera"
             android:scaleType="fitCenter"
-            android:src="@drawable/flip_camera"
-            android:visibility="visible" />
+            android:src="@drawable/flip_camera" />
 
         <ImageButton
             android:id="@+id/modeChanger"
@@ -113,8 +121,7 @@
             android:background="@null"
             android:padding="10dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_photo"
-            android:visibility="visible" />
+            android:src="@drawable/ic_photo" />
 
 
         <ImageButton
@@ -127,6 +134,7 @@
             android:src="@drawable/button_shutter" />
 
         <LinearLayout
+            android:id="@+id/lastPhotoContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/round_shape"
@@ -141,8 +149,7 @@
                 android:layout_margin="2dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/lock_cam"
-                android:background="@drawable/round_shape"
-                android:visibility="visible" />
+                android:background="@drawable/round_shape" />
         </LinearLayout>
     </RelativeLayout>
 

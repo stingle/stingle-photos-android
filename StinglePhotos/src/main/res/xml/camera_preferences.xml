@@ -16,6 +16,11 @@
 
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <SwitchPreference
+        app:defaultValue="true"
+        app:key="volume_keys_snap"
+        app:title="@string/volume_keys_snap" />
+
     <PreferenceCategory app:title="@string/photo">
 
         <ListPreference

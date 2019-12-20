@@ -21,12 +21,11 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
 import java.util.ArrayList;
@@ -127,10 +126,18 @@ public class SyncService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		if(intent != null && intent.hasExtra("START_SYNC")){
+			startSync();
+		}
 		return START_STICKY;
 	}
 
 	protected void startSync(){
+
+		if(!LoginManager.isLoggedIn(this)){
+			return;
+		}
+
 		if(currentStatus != STATUS_IDLE){
 			restartSyncAfterComplete = true;
 			return;

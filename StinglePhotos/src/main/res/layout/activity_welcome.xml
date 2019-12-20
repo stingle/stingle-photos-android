@@ -5,54 +5,62 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="org.stingle.photos.WelcomeActivity">
-    <LinearLayout
-        android:layout_above="@+id/sign_up"
-        android:layout_width="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
 
-        <org.stingle.photos.Widget.WrapContentViewPager
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/sign_up"
+        android:layout_alignParentTop="true">
 
         <LinearLayout
-            android:id="@+id/dotsContainer"
             android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:layout_marginBottom="12dp"
-            android:gravity="center"
-            android:orientation="horizontal" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+
+            android:orientation="vertical">
+
+            <org.stingle.photos.Widget.WrapContentViewPager
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:id="@+id/dotsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="16dp"
+                android:layout_marginBottom="12dp"
+                android:gravity="center"
+                android:orientation="horizontal" />
+        </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/sign_up"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="match_parent"
-        android:layout_above="@+id/sign_in_container"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/sign_in_container"
+        android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:layout_marginLeft="32dp"
+        android:layout_marginTop="10dp"
         android:layout_marginRight="32dp"
-        android:layout_marginTop="40dp"
-        android:layout_centerHorizontal="true"
         android:text="@string/sign_up" />
 
     <LinearLayout
         android:id="@+id/sign_in_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/have_an_account"/>
+            android:text="@string/have_an_account" />
+
         <Button
             android:id="@+id/sign_in"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"

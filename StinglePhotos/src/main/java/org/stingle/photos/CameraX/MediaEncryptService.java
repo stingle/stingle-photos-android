@@ -28,13 +28,13 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -99,12 +99,12 @@ public class MediaEncryptService extends Service {
 					AsyncTask<Void, Void, Void> task = new EncryptMediaTask(MediaEncryptService.this, file, new EncryptMediaTask.OnFinish() {
 						@Override
 						public void onFinish() {
-							Log.d("encrypt_n", "encrypted " + file.getName());
+							Log.e("encrypt_n", "encrypted " + file.getName());
 							lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 							tasksStack.remove(file.getName());
 
 							if (!isCameraRunning && tasksStack.size() == 0) {
-								stopSelf();
+								triggerSyncAndStop();
 							}
 						}
 					});
@@ -119,18 +119,16 @@ public class MediaEncryptService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			isCameraRunning = intent.getBooleanExtra("isRunning", true);
+			boolean wasRecoringVideo = intent.getBooleanExtra("wasRecoringVideo", false);
 
 			if (!isCameraRunning && tasksStack.size() == 0) {
 
 				File tmpDir = new File(FileManager.getCameraTmpDir(MediaEncryptService.this));
-				File[] files = tmpDir.listFiles(new FilenameFilter() {
-					@Override
-					public boolean accept(File dir, String name) {
-						if(name.endsWith(PROC_EXT)) {
-							return false;
-						}
-						return true;
+				File[] files = tmpDir.listFiles((dir, name) -> {
+					if(name.endsWith(PROC_EXT)) {
+						return false;
 					}
+					return true;
 				});
 				if (files.length > 0) {
 					ArrayList<File> filesList = new ArrayList<>(Arrays.asList(files));
@@ -139,21 +137,37 @@ public class MediaEncryptService extends Service {
 							filesList.remove(file);
 						}
 					}
-					(new EncryptMediaTask(MediaEncryptService.this, filesList, new EncryptMediaTask.OnFinish() {
-						@Override
-						public void onFinish() {
-							Log.d("encrypt_l", "encrypted " + filesList.toString());
-							lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
-							stopSelf();
-						}
-					})).executeOnExecutor(cachedThreadPool);
+					if(wasRecoringVideo) {
+						(new Handler()).postDelayed(() -> encryptFileList(filesList), 3000);
+					}
+					else{
+						encryptFileList(filesList);
+					}
 				} else {
-					stopSelf();
+					triggerSyncAndStop();
 				}
 			}
 		}
 	};
 
+	private void encryptFileList(ArrayList<File> filesList){
+		(new EncryptMediaTask(MediaEncryptService.this, filesList, new EncryptMediaTask.OnFinish() {
+			@Override
+			public void onFinish() {
+				Log.e("encrypt_l", "encrypted " + filesList.toString());
+				lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
+				triggerSyncAndStop();
+			}
+		})).executeOnExecutor(cachedThreadPool);
+	}
+
+
+	private void triggerSyncAndStop(){
+		Intent serviceIntent = new Intent(this, SyncService.class);
+		serviceIntent.putExtra("START_SYNC", true);
+		startService(serviceIntent);
+		stopSelf();
+	}
 
 	private static class EncryptMediaTask extends AsyncTask<Void, Void, Void>{
 
@@ -177,6 +191,7 @@ public class MediaEncryptService extends Service {
 		@Override
 		protected Void doInBackground(Void... voids) {
 			for(File origfile : this.files) {
+				File file = new File(origfile.getAbsolutePath() + PROC_EXT);
 				try {
 					String realFilename = origfile.getName();
 					int type = FileManager.getFileTypeFromUri(origfile.getAbsolutePath());
@@ -184,8 +199,6 @@ public class MediaEncryptService extends Service {
 					if(!origfile.renameTo(new File(origfile.getAbsolutePath() + PROC_EXT))){
 						return null;
 					}
-					File file = new File(origfile.getAbsolutePath() + PROC_EXT);
-
 
 					if (type != Crypto.FILE_TYPE_PHOTO && type != Crypto.FILE_TYPE_VIDEO) {
 						return null;
@@ -217,6 +230,9 @@ public class MediaEncryptService extends Service {
 
 							Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 						}
+						else{
+							throw new IOException("Failed to generate video thumbnail");
+						}
 					}
 
 					String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;
@@ -225,11 +241,15 @@ public class MediaEncryptService extends Service {
 					StinglePhotosApplication.getCrypto().encryptFile(in, out, realFilename, type, file.length(), fileId, videoDuration);
 
 					Helpers.insertFileIntoDB(context, encFilename);
+					Log.e("insertFileIntoDB", encFilename);
 
 					file.delete();
 
 				} catch (IOException | CryptoException e) {
 					e.printStackTrace();
+					String path = file.getAbsolutePath();
+					String newPath = path.substring(0, path.length() - PROC_EXT.length());
+					file.renameTo(new File(newPath));
 				}
 			}
 			return null;

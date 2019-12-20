@@ -63,7 +63,7 @@ public class BiometricsManagerWrapper {
     }
 
     public boolean isBiometricsAvailable(){
-        if(biometricManager.canAuthenticate() != BiometricManager.BIOMETRIC_SUCCESS){
+        if(biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS){
             return true;
         }
         return false;

@@ -17,6 +17,8 @@
         app:defaultValue="30"
         app:key="upload_battery_level"
         app:dependency="enable_backup"
-        app:title="@string/upload_battery" />
+        app:showSeekBarValue="true"
+        app:title="@string/upload_battery"
+        app:summary="@string/upload_battery_summary"/>
 
 </PreferenceScreen>
