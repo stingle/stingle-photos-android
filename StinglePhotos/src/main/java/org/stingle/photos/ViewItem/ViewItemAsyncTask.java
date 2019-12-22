@@ -1,7 +1,6 @@
 package org.stingle.photos.ViewItem;
 
 import android.content.Context;
-import android.drm.DrmStore;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,24 +14,6 @@ import android.widget.ImageView;
 
 import androidx.core.widget.ContentLoadingProgressBar;
 
-import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
-import org.stingle.photos.Net.HttpsClient;
-import org.stingle.photos.Net.StingleResponse;
-import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.Util.MemoryCache;
-import org.stingle.photos.Video.StingleDataSourceFactory;
-import org.stingle.photos.Video.StingleHttpDataSource;
-import org.stingle.photos.Widget.AnimatedGifImageView;
-import org.stingle.photos.Widget.ImageHolderLayout;
-import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -49,9 +30,26 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.FileDataSource;
-import com.google.android.exoplayer2.video.VideoListener;
 
 import org.json.JSONObject;
+import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.StingleDbHelper;
+import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.Net.HttpsClient;
+import org.stingle.photos.Net.StingleResponse;
+import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.Util.MemoryCache;
+import org.stingle.photos.Video.StingleDataSourceFactory;
+import org.stingle.photos.Video.StingleHttpDataSource;
+import org.stingle.photos.Widget.AnimatedGifImageView;
+import org.stingle.photos.Widget.ImageHolderLayout;
+import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -143,6 +141,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		else if(dbFile.isRemote){
 			try{
 				byte[] encThumb = FileManager.getAndCacheThumb(context, dbFile.filename, folder);
+				if(encThumb == null){
+					return result;
+				}
 				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new ByteArrayInputStream(encThumb));
 				fileType = fileHeader.fileType;
 				result.fileType = fileType;

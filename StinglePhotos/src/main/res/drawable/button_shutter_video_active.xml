@@ -16,7 +16,7 @@
              android:right="30dp"
              android:top="30dp">
              <shape android:shape="rectangle"  >
-                 <solid android:color="#FFFFFF"/>
+                 <solid android:color="#FFFFFFFF"/>
              </shape>
          </item>
      </layer-list>
@@ -37,12 +37,12 @@
             android:right="30dp"
             android:top="30dp">
             <shape android:shape="rectangle"  >
-                <solid android:color="#FFFFFF"/>
+                <solid android:color="#FFFFFFFF"/>
             </shape>
         </item>
     </layer-list>
-</item>  
-<item >
+</item>
+<item>
     <layer-list>
         <item
             android:left="0dp"
@@ -58,7 +58,7 @@
             android:right="30dp"
             android:top="30dp">
             <shape android:shape="rectangle"  >
-                <solid android:color="#FFFFFF"/>
+                <solid android:color="#FFFFFFFF"/>
             </shape>
         </item>
     </layer-list>

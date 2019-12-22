@@ -31,7 +31,6 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected StingleDbFile doInBackground(Void... params) {
 		StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
@@ -42,15 +41,17 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 	protected void onPostExecute(StingleDbFile dbFile) {
 		super.onPostExecute(dbFile);
 
-		boolean isRemote = false;
-		if(!dbFile.isLocal && dbFile.isRemote){
-			isRemote = true;
-		}
+		if(dbFile != null) {
+			boolean isRemote = false;
+			if (!dbFile.isLocal && dbFile.isRemote) {
+				isRemote = true;
+			}
 
-		(new ShowEncThumbInImageView(context, dbFile.filename, imageView))
-				.setisRemote(isRemote)
-				.setThumbSize(thumbSize)
-				.setFolder(folder)
-				.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			(new ShowEncThumbInImageView(context, dbFile.filename, imageView))
+					.setisRemote(isRemote)
+					.setThumbSize(thumbSize)
+					.setFolder(folder)
+					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
 	}
 }
