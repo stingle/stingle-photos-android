@@ -43,8 +43,8 @@
         android:theme="@android:style/Theme.Material.Light">
         <activity
             android:name=".SettingsActivity"
-            android:theme="@style/AppThemeCompatWithActionBar"
-            android:label="@string/title_activity_settings" />
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppThemeCompatWithActionBar" />
 
         <service
             android:name=".Sync.SyncService"
@@ -138,8 +138,8 @@
         <activity
             android:name=".WelcomeActivity"
             android:label="@string/welcome"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".CameraXActivity"
             android:alwaysRetainTaskState="true"
@@ -151,6 +151,7 @@
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -189,6 +190,11 @@
             android:alwaysRetainTaskState="true"
             android:label="@string/title_activity_camera_settings"
             android:theme="@style/AppThemeCompatWithActionBar" />
+
+        <activity
+            android:name=".BackupKeyActivity"
+            android:theme="@style/AppThemeCompatWithActionBar"
+            android:label="@string/title_activity_backup_key"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

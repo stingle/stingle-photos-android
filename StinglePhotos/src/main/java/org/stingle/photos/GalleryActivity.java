@@ -232,21 +232,6 @@ public class GalleryActivity extends AppCompatActivity
 					FileManager.requestSDCardPermission(GalleryActivity.this);
 				}
 			}
-
-			@Override
-			public void onUserAuthFail() {
-
-			}
-
-			@Override
-			public void onNotLoggedIn() {
-
-			}
-
-			@Override
-			public void onLoggedIn() {
-
-			}
 		});
 		LoginManager.disableLockTimer(GalleryActivity.this);
 	}
@@ -619,6 +604,11 @@ public class GalleryActivity extends AppCompatActivity
 		else if (id == R.id.nav_change_pass) {
 			Intent intent = new Intent();
 			intent.setClass(this, ChangePasswordActivity.class);
+			startActivity(intent);
+		}
+		else if (id == R.id.nav_backup) {
+			Intent intent = new Intent();
+			intent.setClass(this, BackupKeyActivity.class);
 			startActivity(intent);
 		}
 		else if (id == R.id.nav_settings) {

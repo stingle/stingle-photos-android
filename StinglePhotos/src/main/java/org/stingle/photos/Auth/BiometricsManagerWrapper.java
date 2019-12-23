@@ -138,7 +138,13 @@ public class BiometricsManagerWrapper {
                             callback.onFailed();
                         }
                     }
-                    LoginManager.getPasswordFromUser(activity, false, new PasswordReturnListener() {
+                    LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
+                        showCancel = true;
+                        showLogout = false;
+                        quitActivityOnCancel = false;
+                        cancellable = true;
+                    }};
+                    LoginManager.getPasswordFromUser(activity, loginConfig, new PasswordReturnListener() {
                         @Override
                         public void passwordReceived(String enteredPassword, AlertDialog dialog) {
                             if(encryptAndSavePassword(cipher, iv, enteredPassword)) {

@@ -1,15 +1,18 @@
 package org.stingle.photos;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
@@ -25,6 +28,14 @@ public class SettingsActivity extends AppCompatActivity implements
 		PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
 	private static final String TITLE_TAG = "settingsActivityTitle";
+
+	private LocalBroadcastManager lbm;
+	private BroadcastReceiver onLogout = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			LoginManager.redirectToLogin(SettingsActivity.this);
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +59,30 @@ public class SettingsActivity extends AppCompatActivity implements
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+
+		lbm = LocalBroadcastManager.getInstance(this);
+		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		LoginManager.checkLogin(this);
+		LoginManager.disableLockTimer(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		LoginManager.setLockedTime(this);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		lbm.unregisterReceiver(onLogout);
 	}
 
 	@Override

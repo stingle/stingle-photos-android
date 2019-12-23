@@ -1,6 +1,10 @@
 package org.stingle.photos;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,6 +18,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
@@ -54,6 +59,14 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	private static final String BASE_64_ENCODED_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA00IIe/BqA9IUbrj2y1bgvgi6Tqu37ulDOndT3v4ElDCViaZI+JFF97lvYX0ijPIZ0ryj3Jo2mC+ncXXtQKeFZsvh9EauJyQXyQbsVERGjpTZ+sMdTkYu46zRjHezl3siLWWZMuc9UFQcvU1qkMOH6MI1gic1PAXi46wuMSL+kanDyQ2UfO3VlQsVkq9o/JwZGzaA4D8NkS1Ja2JcvdLxg2ES9YLaJBL/b2inHjiZW5tO59eAy6KqZy+N6kMfaoL421AhKovocejza7g4LFkkNvqdKfLZe4CEJVhYHN2OOBsqci7KwODsyEZEv3WztqnaylnuQpDVRZztdt9qnMqKnQIDAQAB";
 	private int billingClientResponseCode;
 
+	private LocalBroadcastManager lbm;
+	private BroadcastReceiver onLogout = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			LoginManager.redirectToLogin(StorageActivity.this);
+		}
+	};
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -82,6 +95,9 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 			getSkuDetails();
 			pullToRefresh.setRefreshing(false);
 		});
+
+		lbm = LocalBroadcastManager.getInstance(this);
+		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 	}
 
 	@Override
@@ -94,21 +110,6 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 				updateQuotaInfo();
 				getSkuDetails();
 			}
-
-			@Override
-			public void onUserAuthFail() {
-
-			}
-
-			@Override
-			public void onNotLoggedIn() {
-
-			}
-
-			@Override
-			public void onLoggedIn() {
-
-			}
 		});
 		LoginManager.disableLockTimer(this);
 	}
@@ -117,6 +118,12 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	protected void onPause() {
 		super.onPause();
 		LoginManager.setLockedTime(this);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		lbm.unregisterReceiver(onLogout);
 	}
 
 	private void initSkus() {

@@ -36,10 +36,14 @@ public class LoginManager {
     public static final String LAST_LOCK_TIME = "lock_time";
 
     public static void checkLogin(AppCompatActivity activity) {
-        checkLogin(activity, null);
+        checkLogin(activity, new LoginConfig(), null);
     }
 
-    public static void checkLogin(final AppCompatActivity activity, final UserLogedinCallback loginCallback) {
+    public static void checkLogin(AppCompatActivity activity, UserLogedinCallback loginCallback) {
+        checkLogin(activity, new LoginConfig(), loginCallback);
+    }
+
+    public static void checkLogin(final AppCompatActivity activity, LoginConfig config, final UserLogedinCallback loginCallback) {
 
         if(!checkIfLoggedIn(activity)){
             if(loginCallback != null) {
@@ -92,7 +96,7 @@ public class LoginManager {
                 }, loginCallback, true);
             }
             else{
-                showEnterPasswordToUnlock(activity, loginCallback);
+                showEnterPasswordToUnlock(activity, config, loginCallback);
             }
         }
         else {
@@ -109,8 +113,12 @@ public class LoginManager {
     }
 
     public static void showEnterPasswordToUnlock(Activity activity, final UserLogedinCallback loginCallback){
+        showEnterPasswordToUnlock(activity, new LoginConfig(), loginCallback);
+    }
+
+    public static void showEnterPasswordToUnlock(Activity activity, LoginConfig config, final UserLogedinCallback loginCallback){
         final Activity activityFinal = activity;
-        getPasswordFromUser(activity, true, new PasswordReturnListener() {
+        getPasswordFromUser(activity, config, new PasswordReturnListener() {
             @Override
             public void passwordReceived(String enteredPassword, AlertDialog dialog) {
                 unlockWithPassword(activityFinal, enteredPassword, new UserLogedinCallback() {
@@ -127,22 +135,16 @@ public class LoginManager {
                         }
                         loginCallback.onUserAuthFail();
                     }
-
-                    @Override
-                    public void onNotLoggedIn() {
-                        loginCallback.onNotLoggedIn();
-                    }
-
-                    @Override
-                    public void onLoggedIn() {
-                        loginCallback.onLoggedIn();
-                    }
                 });
             }
 
             @Override
             public void passwordReceiveFailed(AlertDialog dialog) {
                 dismissLoginDialog(dialog);
+                loginCallback.onLoginCancelled();
+                if(config.quitActivityOnCancel) {
+                    activity.finish();
+                }
             }
         });
     }
@@ -166,17 +168,18 @@ public class LoginManager {
         return (StinglePhotosApplication.getKey() == null ? false : true);
     }
 
-    public static void getPasswordFromUser(final Activity activity, final boolean showLogout, final PasswordReturnListener listener){
+    public static void getPasswordFromUser(final Activity activity, LoginConfig config, final PasswordReturnListener listener){
         final Context myContext = activity;
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(R.layout.password);
-        builder.setCancelable(showLogout == false);
+        builder.setCancelable(config.cancellable);
         AlertDialog dialog = builder.create();
         dialog.show();
 
         Button okButton = dialog.findViewById(R.id.okButton);
         final EditText passwordField = dialog.findViewById(R.id.password);
         Button logoutButton = dialog.findViewById(R.id.logoutButton);
+        Button cancelButton = dialog.findViewById(R.id.cancelButton);
 
         final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
@@ -187,13 +190,10 @@ public class LoginManager {
         });
 
         dialog.setOnCancelListener(dialog1 -> listener.passwordReceiveFailed(dialog));
-
         dialog.setOnKeyListener((mDialog, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK){
                 dialog.dismiss();
-                if(showLogout) {
-                    activity.finish();
-                }
+                listener.passwordReceiveFailed(dialog);
                 return true;
             }
             return false;
@@ -212,17 +212,35 @@ public class LoginManager {
         });
 
 
-        if(showLogout) {
+        if(config.showLogout) {
             logoutButton.setOnClickListener(v -> {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 if(dialog != null){
                     dialog.dismiss();
                 }
-                LoginManager.logout(activity);
+                LoginManager.logout(activity, (dialog12, which) -> {
+                    listener.passwordReceiveFailed(dialog);
+                }, (dialog13, which) -> {
+                    listener.passwordReceiveFailed(dialog);
+                });
+
             });
         }
         else{
             logoutButton.setVisibility(View.GONE);
+        }
+
+        if(config.showCancel) {
+            cancelButton.setOnClickListener(v -> {
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                if(dialog != null){
+                    dialog.dismiss();
+                }
+                listener.passwordReceiveFailed(dialog);
+            });
+        }
+        else{
+            cancelButton.setVisibility(View.GONE);
         }
     }
 
@@ -261,6 +279,10 @@ public class LoginManager {
     }
 
     public static void logout(final Activity activity){
+        logout(activity, null,null);
+    }
+
+    public static void logout(final Activity activity, DialogInterface.OnClickListener yes, DialogInterface.OnClickListener no){
         Helpers.showConfirmDialog(activity, activity.getString(R.string.confirm_logout), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface mDialog, int which) {
@@ -274,10 +296,13 @@ public class LoginManager {
                             spinner.dismiss();
                             logoutLocally(activity);
                         }
+                        if(yes != null) {
+                            yes.onClick(mDialog, which);
+                        }
                     }
                 });
             }
-        }, null);
+        }, no);
     }
 
     public static void logoutLocally(Context context){
@@ -313,9 +338,18 @@ public class LoginManager {
     }
 
     public static abstract class UserLogedinCallback{
-        public abstract void onUserAuthSuccess();
-        public abstract void onUserAuthFail();
-        public abstract void onNotLoggedIn();
-        public abstract void onLoggedIn();
+        public void onUserAuthSuccess(){}
+        public void onUserAuthFail(){}
+        public void onNotLoggedIn(){}
+        public void onLoggedIn(){}
+        public void onLoginCancelled(){}
+    }
+
+    public static class LoginConfig{
+        public boolean showLogout = true;
+        public boolean showCancel = false;
+        public boolean quitActivityOnCancel = true;
+        public boolean cancellable = false;
+
     }
 }

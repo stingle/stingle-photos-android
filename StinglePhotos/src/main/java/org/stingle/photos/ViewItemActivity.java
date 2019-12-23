@@ -7,6 +7,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.StingleDbContract;
@@ -16,23 +30,6 @@ import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.ViewItem.ViewPagerAdapter;
-
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.viewpager.widget.ViewPager;
-
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-
-import org.stingle.photos.R;
 
 import java.util.ArrayList;
 
@@ -107,21 +104,6 @@ public class ViewItemActivity extends AppCompatActivity {
 				adapter = new ViewPagerAdapter(ViewItemActivity.this, folder, gestureTouchListener);
 				viewPager.setAdapter(adapter);
 				viewPager.setCurrentItem(itemPosition);
-			}
-
-			@Override
-			public void onUserAuthFail() {
-
-			}
-
-			@Override
-			public void onNotLoggedIn() {
-
-			}
-
-			@Override
-			public void onLoggedIn() {
-
 			}
 		});
 		LoginManager.disableLockTimer(this);

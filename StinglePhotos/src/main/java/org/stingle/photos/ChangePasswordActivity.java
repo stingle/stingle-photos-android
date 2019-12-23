@@ -1,12 +1,16 @@
 package org.stingle.photos;
 
 import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.stingle.photos.AsyncTasks.ChangePasswordAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
@@ -15,7 +19,14 @@ import org.stingle.photos.Util.Helpers;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
-	private BroadcastReceiver receiver;
+	private LocalBroadcastManager lbm;
+
+	private BroadcastReceiver onLogout = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			LoginManager.redirectToLogin(ChangePasswordActivity.this);
+		}
+	};
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -29,6 +40,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
 		getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 		Helpers.blockScreenshotsIfEnabled(this);
+
+		lbm = LocalBroadcastManager.getInstance(this);
+		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 
 		findViewById(R.id.change).setOnClickListener(changeClick());
 		findViewById(R.id.cancel).setOnClickListener(cancelClick());
@@ -47,6 +61,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
 		super.onPause();
 
 		LoginManager.setLockedTime(this);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		lbm.unregisterReceiver(onLogout);
 	}
 
 	@Override
