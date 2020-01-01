@@ -224,6 +224,8 @@
     <string name="title_activity_backup_key">Backup key</string>
     <string name="backup_key">Backup key</string>
     <string name="backup_key_desc">Warning!!! This is your backup phrase. \n\nThis backup phrase is the most valuable secret of your account. \n\nPlease make sure to back it up in safe place. \n\nIf anyone get this phrase he/she can get access to all of your data.</string>
+    <string name="biometrics_confirm">Require confirmation</string>
+    <string name="biometrics_confirm_desc">Require to press confirm button after biometric authentication</string>
 
 
 </resources>

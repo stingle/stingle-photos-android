@@ -153,8 +153,7 @@ public class CameraXActivity extends AppCompatActivity {
 
 	@Override
 	protected void onPause() {
-
-
+		super.onPause();
 		if(isRecordingVideo){
 			takePhotoClick();
 			sendCameraStatusBroadcast(false, true);
@@ -163,8 +162,6 @@ public class CameraXActivity extends AppCompatActivity {
 			sendCameraStatusBroadcast(false, false);
 		}
 		destroyOrientationListener();
-
-		super.onPause();
 	}
 
 	@SuppressLint("MissingPermission")
@@ -287,7 +284,8 @@ public class CameraXActivity extends AppCompatActivity {
 		return v -> {
 			Intent intent = new Intent();
 			intent.setClass(CameraXActivity.this, ViewItemActivity.class);
-			startActivityForResult(intent, GalleryActivity.REQUEST_VIEW_PHOTO);
+			intent.putExtra("WAIT_FOR_CAMERA_TO_CLOSE", true);
+			startActivity(intent);
 		};
 	}
 
@@ -812,4 +810,6 @@ public class CameraXActivity extends AppCompatActivity {
 
 		return howMuchRotated;
 	}
+
+
 }

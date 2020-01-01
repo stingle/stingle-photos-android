@@ -36,6 +36,7 @@ android {
             resValue "string", "app_name", "Stingle Photos"
             resValue "string", "camera", "Camera"
             resValue "string", "content_provider", "org.stingle.photos.share"
+            resValue "string", "api_server_url", "https://api.stingle.org/"
         }
         debug {
             applicationIdSuffix '.debug'
@@ -43,6 +44,7 @@ android {
             resValue "string", "content_provider", "org.stingle.photos.share.debug"
             resValue "string", "app_name", "Stingle Photos Dev"
             resValue "string", "camera", "Camera Dev"
+            resValue "string", "api_server_url", "https://192.168.1.155/"
         }
     }
     productFlavors {
@@ -57,8 +59,6 @@ dependencies {
     implementation files('libs/Sanselan.jar')
     implementation files('libs/metadata-extractor-2.6.2.jar')
     implementation files('libs/xmpcore.jar')
-    //implementation files('libs/Robosodium.aar')
-    //implementation 'com.goterl.lazycode:lazysodium-android:3.5.0@aar'
     implementation "com.goterl.lazycode:lazysodium-android:3.7.0@aar"
     implementation 'net.java.dev.jna:jna:5.4.0@aar'
     implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'

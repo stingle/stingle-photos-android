@@ -19,11 +19,13 @@ package org.stingle.photos.CameraX;
 import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.media.CamcorderProfile;
 import android.os.Looper;
@@ -36,6 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.annotation.UiThread;
+import androidx.camera.camera2.Camera2Config;
 import androidx.camera.core.AspectRatio;
 import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraInfoUnavailableException;
@@ -56,6 +59,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
 import java.util.Arrays;
@@ -293,6 +297,31 @@ public final class CameraXModule {
 		mPreviewConfigBuilder.setLensFacing(mCameraLensFacing);
 
 
+		Camera2Config.Extender camera2Extender = new Camera2Config.Extender(mPreviewConfigBuilder)
+				.setDeviceStateCallback(new CameraDevice.StateCallback() {
+					@Override
+					public void onOpened(@NonNull @android.support.annotation.NonNull CameraDevice camera) {
+					}
+
+					@Override
+					public void onDisconnected(@NonNull @android.support.annotation.NonNull CameraDevice camera) {
+					}
+
+					@Override
+					public void onError(@NonNull @android.support.annotation.NonNull CameraDevice camera, int error) {
+
+					}
+
+					@Override
+					public void onClosed(@NonNull @android.support.annotation.NonNull CameraDevice camera) {
+						super.onClosed(camera);
+						LocalBroadcastManager lbm = lbm = LocalBroadcastManager.getInstance(mCameraView.getContext());
+						Intent broadcastIntent = new Intent("CAMERA_CLOSED");
+						lbm.sendBroadcast(broadcastIntent);
+					}
+				});
+
+
 		// Adjusts the preview resolution according to the view size and the target aspect ratio.
 		int height = (int) (getMeasuredWidth() / targetAspectRatio.floatValue());
 		mPreviewConfigBuilder.setTargetResolution(new Size(getMeasuredWidth(), height));
@@ -325,6 +354,7 @@ public final class CameraXModule {
 		} else {
 			CameraX.bindToLifecycle(mCurrentLifecycle, mImageCapture, mVideoCapture, mPreview);
 		}
+
 		setZoomLevel(mZoomLevel);
 		mCurrentLifecycle.getLifecycle().addObserver(mCurrentLifecycleObserver);
 		// Enable flash setting in ImageCapture after use cases are created and binded.

@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -49,6 +50,7 @@ public class BiometricsManagerWrapper {
 
     private static final String KEY_NAME = "sc_key";
     private final Executor executor;
+    private final SharedPreferences settings;
 
     protected AppCompatActivity activity;
     protected KeyguardManager keyguardManager;
@@ -60,6 +62,7 @@ public class BiometricsManagerWrapper {
         biometricManager = BiometricManager.from(activity);
         keyguardManager = (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
         executor = ContextCompat.getMainExecutor(activity);
+        settings = android.preference.PreferenceManager.getDefaultSharedPreferences(activity);
     }
 
     public boolean isBiometricsAvailable(){
@@ -71,7 +74,8 @@ public class BiometricsManagerWrapper {
 
     private BiometricPrompt.PromptInfo getPrompt(boolean showPasswordOption){
         BiometricPrompt.PromptInfo.Builder promptBuilder = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle(activity.getString(R.string.biometric_auth));
+                .setTitle(activity.getString(R.string.biometric_auth))
+                .setConfirmationRequired(settings.getBoolean("biometrics_confirm", false));
                 //.setSubtitle(activity.getString(R.string.biometric_login_desc));
         if(showPasswordOption) {
             promptBuilder.setNegativeButtonText(activity.getString(R.string.login_using_password));
@@ -271,6 +275,7 @@ public class BiometricsManagerWrapper {
                 public void onAuthenticationError(int errorCode,
                                                   @NonNull CharSequence errString) {
                     super.onAuthenticationError(errorCode, errString);
+                    Log.e("onAuthenticationError", errorCode + " -" + errString);
                     switch (errorCode){
                         case BiometricPrompt.ERROR_NEGATIVE_BUTTON:
                         case BiometricPrompt.ERROR_LOCKOUT:

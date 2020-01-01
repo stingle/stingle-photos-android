@@ -43,6 +43,7 @@ public class ViewItemActivity extends AppCompatActivity {
 	protected GestureDetector gestureDetector;
 	protected View.OnTouchListener gestureTouchListener;
 	private LocalBroadcastManager lbm;
+	private boolean waitingForCameraToClose = false;
 
 	private static final int SWIPE_MIN_DISTANCE = 100;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -89,16 +90,27 @@ public class ViewItemActivity extends AppCompatActivity {
 
 		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
+		lbm.registerReceiver(onCameraClosed, new IntentFilter("CAMERA_CLOSED"));
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Intent incommingIntent = getIntent();
+		if(!incommingIntent.hasExtra("WAIT_FOR_CAMERA_TO_CLOSE")) {
+			init();
+		}
+		else{
+			waitingForCameraToClose = true;
+		}
+		LoginManager.disableLockTimer(this);
+	}
 
+	private void init(){
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
-				if(adapter != null){
+				if (adapter != null) {
 					adapter.releasePlayers();
 				}
 				adapter = new ViewPagerAdapter(ViewItemActivity.this, folder, gestureTouchListener);
@@ -106,7 +118,6 @@ public class ViewItemActivity extends AppCompatActivity {
 				viewPager.setCurrentItem(itemPosition);
 			}
 		});
-		LoginManager.disableLockTimer(this);
 	}
 
 	@Override
@@ -133,6 +144,14 @@ public class ViewItemActivity extends AppCompatActivity {
 			if(adapter != null) {
 				adapter.notifyDataSetChanged();
 				viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+			}
+		}
+	};
+	private BroadcastReceiver onCameraClosed = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(waitingForCameraToClose){
+				init();;
 			}
 		}
 	};

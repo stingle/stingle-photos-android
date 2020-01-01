@@ -6,4 +6,11 @@
         app:summary="@string/biometric_auth_desc"
         app:title="@string/biometric_auth" />
 
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="biometrics_confirm"
+        app:summary="@string/biometrics_confirm_desc"
+        app:title="@string/biometrics_confirm"
+        app:dependency="biometrics"/>
+
 </PreferenceScreen>

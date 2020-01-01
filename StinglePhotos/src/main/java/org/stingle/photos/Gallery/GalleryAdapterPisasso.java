@@ -2,7 +2,6 @@ package org.stingle.photos.Gallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,18 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
-import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.Util.MemoryCache;
-
-import com.drew.lang.StringUtil;
 import com.squareup.picasso3.Callback;
 import com.squareup.picasso3.NetworkPolicy;
 import com.squareup.picasso3.Picasso;
@@ -34,13 +21,21 @@ import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.StingleDbHelper;
+import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.Util.MemoryCache;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {

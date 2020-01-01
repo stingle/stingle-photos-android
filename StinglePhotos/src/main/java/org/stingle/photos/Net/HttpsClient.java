@@ -6,6 +6,7 @@ import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stingle.photos.BuildConfig;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -24,12 +25,15 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class HttpsClient {
 
@@ -39,7 +43,26 @@ public class HttpsClient {
 	public static void uploadFiles(Context context, String urlStr, HashMap<String, String> params, ArrayList<FileToUpload> files, OnUploadFinish onFinish) {
 		new UploadRequest(context, urlStr, params, files, onFinish).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
+	private static TrustManager[] getTrustingManager() {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			@Override
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
 
+			@Override
+			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+				// Do nothing
+			}
+
+			@Override
+			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+				// Do nothing
+			}
+
+		} };
+		return trustAllCerts;
+	}
 	public static JSONObject postFunc(String urlStr, HashMap<String, String> params) {
 		JSONObject json = null;
 		try {
@@ -50,10 +73,17 @@ public class HttpsClient {
 			URL url = new URL(urlStr);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
+
 			// Create the SSL connection
 			SSLContext sc;
 			sc = SSLContext.getInstance("TLS");
-			sc.init(null, null, new java.security.SecureRandom());
+			if(BuildConfig.DEBUG) {
+				sc.init(null, getTrustingManager(), new java.security.SecureRandom());
+				conn.setHostnameVerifier((s, sslSession) -> true);
+			}
+			else{
+				sc.init(null, null, new java.security.SecureRandom());
+			}
 			conn.setSSLSocketFactory(sc.getSocketFactory());
 
 			// Use this if you need SSL authentication
@@ -123,7 +153,13 @@ public class HttpsClient {
 		// Create the SSL connection
 		SSLContext sc;
 		sc = SSLContext.getInstance("TLS");
-		sc.init(null, null, new java.security.SecureRandom());
+		if(BuildConfig.DEBUG) {
+			sc.init(null, getTrustingManager(), new java.security.SecureRandom());
+			conn.setHostnameVerifier((s, sslSession) -> true);
+		}
+		else{
+			sc.init(null, null, new java.security.SecureRandom());
+		}
 		conn.setSSLSocketFactory(sc.getSocketFactory());
 
 		// Use this if you need SSL authentication
@@ -196,7 +232,13 @@ public class HttpsClient {
 		// Create the SSL connection
 		SSLContext sc;
 		sc = SSLContext.getInstance("TLS");
-		sc.init(null, null, new java.security.SecureRandom());
+		if(BuildConfig.DEBUG) {
+			sc.init(null, getTrustingManager(), new java.security.SecureRandom());
+			conn.setHostnameVerifier((s, sslSession) -> true);
+		}
+		else{
+			sc.init(null, null, new java.security.SecureRandom());
+		}
 		conn.setSSLSocketFactory(sc.getSocketFactory());
 
 		// Use this if you need SSL authentication
@@ -290,7 +332,13 @@ public class HttpsClient {
 			// Create the SSL connection
 			SSLContext sc;
 			sc = SSLContext.getInstance("TLS");
-			sc.init(null, null, new java.security.SecureRandom());
+			if(BuildConfig.DEBUG) {
+				sc.init(null, getTrustingManager(), new java.security.SecureRandom());
+				connection.setHostnameVerifier((s, sslSession) -> true);
+			}
+			else{
+				sc.init(null, null, new java.security.SecureRandom());
+			}
 			connection.setSSLSocketFactory(sc.getSocketFactory());
 
 			connection.setDoInput(true);
