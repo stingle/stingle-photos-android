@@ -71,6 +71,11 @@ public class Crypto {
     public static final int KEY_FILE_TYPE_BUNDLE_PLAIN = 1;
     public static final int KEY_FILE_TYPE_PUBLIC_PLAIN = 2;
 
+    public static final int KEY_FILE_BEGGINING_LEN = KEY_FILE_BEGGINING.length();
+    public static final int KEY_FILE_VER_LEN = 1;
+    public static final int KEY_FILE_TYPE_LEN = 1;
+    public static final int KEY_FILE_HEADER_LEN = KEY_FILE_BEGGINING_LEN + KEY_FILE_VER_LEN + KEY_FILE_TYPE_LEN;
+
     public static final int KDF_DIFFICULTY_NORMAL = 1;
     public static final int KDF_DIFFICULTY_HARD = 2;
     public static final int KDF_DIFFICULTY_ULTRA = 3;
@@ -86,16 +91,22 @@ public class Crypto {
     }
 
     public void generateMainKeypair(String password) throws CryptoException{
+        generateMainKeypair(password, null, null);
+    }
+
+    public void generateMainKeypair(String password, byte[] privateKey, byte[] publicKey) throws CryptoException{
 
         // Generate key derivation salt and save it
         byte[] pwdSalt = new byte[PwHash.ARGON2ID_SALTBYTES];
         so.randombytes_buf(pwdSalt, pwdSalt.length);
         savePrivateFile(PWD_SALT_FILENAME, pwdSalt);
 
-        // Generate main keypair
-        byte[] privateKey = new byte[Box.SECRETKEYBYTES];
-        byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
-        so.crypto_box_keypair(publicKey, privateKey);
+        if(privateKey == null || publicKey == null) {
+            // Generate main keypair
+            privateKey = new byte[Box.SECRETKEYBYTES];
+            publicKey = new byte[Box.PUBLICKEYBYTES];
+            so.crypto_box_keypair(publicKey, privateKey);
+        }
 
         // Derive symmetric encryption key from password
         byte[] pwdKey = getKeyFromPassword(password, KDF_DIFFICULTY_NORMAL);
@@ -132,6 +143,10 @@ public class Crypto {
 
     public byte[] getEncryptedPrivateKey(){
         return readPrivateFile(PRIVATE_KEY_FILENAME);
+    }
+
+    public byte[] getPublicKey(){
+        return readPrivateFile(PUBLIC_KEY_FILENAME);
     }
 
     public void saveEncryptedPrivateKey(byte[] encryptedPrivateKey){
@@ -173,6 +188,10 @@ public class Crypto {
         out.write(KEY_FILE_TYPE_PUBLIC_PLAIN);
         out.write(readPrivateFile(PUBLIC_KEY_FILENAME));
         return out.toByteArray();
+    }
+
+    public static byte[] getPublicKeyFromExport(byte[] exportedPublicKey) throws IOException {
+        return Arrays.copyOfRange(exportedPublicKey, KEY_FILE_HEADER_LEN, exportedPublicKey.length);
     }
 
     public void importKeyBundle(byte[] keys, String password) throws IOException, CryptoException {
@@ -751,6 +770,10 @@ public class Crypto {
 
     protected boolean deletePrivateFile(String filename){
         return context.deleteFile(filename);
+    }
+
+    public static String getKeyHash(byte[] key){
+        return byte2hex(sha256(key));
     }
 
     public static byte[] sha256(byte[] data){

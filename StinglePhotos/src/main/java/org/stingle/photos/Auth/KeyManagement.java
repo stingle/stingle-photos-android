@@ -4,13 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
 
+import org.json.JSONObject;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Net.HttpsClient;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -85,5 +84,4 @@ public class KeyManagement {
 	public static void deleteLocalKeys(){
 		StinglePhotosApplication.getCrypto().deleteKeys();
 	}
-
 }

@@ -41,6 +41,7 @@
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@android:style/Theme.Material.Light">
+
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -190,12 +191,14 @@
             android:alwaysRetainTaskState="true"
             android:label="@string/title_activity_camera_settings"
             android:theme="@style/AppThemeCompatWithActionBar" />
-
         <activity
             android:name=".BackupKeyActivity"
-            android:theme="@style/AppThemeCompatWithActionBar"
-            android:label="@string/title_activity_backup_key"/>
-
+            android:label="@string/title_activity_backup_key"
+            android:theme="@style/AppThemeCompatWithActionBar" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:label="@string/title_forgot_password"
+            android:theme="@style/AppThemeCompatWithActionBar"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="@string/content_provider"

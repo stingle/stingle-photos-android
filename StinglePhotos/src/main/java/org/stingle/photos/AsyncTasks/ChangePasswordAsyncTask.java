@@ -69,7 +69,7 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 					boolean uploadResult = KeyManagement.uploadKeyBundle(activity, newPassword);
 					if (uploadResult) {
-						((StinglePhotosApplication) activity.getApplication()).setKey(StinglePhotosApplication.getCrypto().getPrivateKey(newPassword));
+						StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(newPassword));
 						BiometricsManagerWrapper.turnOffBiometrics(activity);
 						return true;
 					}

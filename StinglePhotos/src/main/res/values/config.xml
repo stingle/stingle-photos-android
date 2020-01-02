@@ -35,5 +35,7 @@
     <string name="empty_trash_path">sync/emptyTrash</string>
     <string name="get_url_path">sync/getUrl</string>
     <string name="notify_purchase">billing/purchase</string>
+    <string name="check_key">login/checkKey</string>
+    <string name="set_sk_hash">keys/setSKHash</string>
 
 </resources>

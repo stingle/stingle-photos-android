@@ -25,13 +25,12 @@
         android:background="#20000000"
         android:fontFamily="monospace"
         android:lineSpacingExtra="10sp"
+        android:textIsSelectable="true"
         android:padding="10dp"
         android:textAlignment="textStart"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/backupDesc" />
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

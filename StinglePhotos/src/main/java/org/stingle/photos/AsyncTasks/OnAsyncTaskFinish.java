@@ -11,5 +11,9 @@ public abstract class OnAsyncTaskFinish {
 	public void onFinish(Integer result){
 		onFinish();
 	}
+	public void onFinish(Boolean result){
+		onFinish();
+	}
 	public void onFinish(Object object){ onFinish(); };
+	public void onFail(){};
 }

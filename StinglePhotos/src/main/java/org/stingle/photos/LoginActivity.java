@@ -1,18 +1,12 @@
 package org.stingle.photos;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -20,8 +14,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.stingle.photos.AsyncTasks.LoginAsyncTask;
-import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Util.Helpers;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -41,8 +35,9 @@ public class LoginActivity extends AppCompatActivity {
 		}
 		actionBar.setTitle(getString(R.string.sign_in));
 
-		((Button) findViewById(R.id.login)).setOnClickListener(login());
-		((TextView) findViewById(R.id.register)).setOnClickListener(gotoSignUp());
+		findViewById(R.id.login).setOnClickListener(login());
+		findViewById(R.id.register).setOnClickListener(gotoSignUp());
+		findViewById(R.id.forgot_password).setOnClickListener(gotoForgotPassword());
 		((EditText) findViewById(R.id.password)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_GO) {
@@ -66,6 +61,13 @@ public class LoginActivity extends AppCompatActivity {
 			intent.setClass(LoginActivity.this, SetUpActivity.class);
 			startActivity(intent);
 			finish();
+		};
+	}
+	private OnClickListener gotoForgotPassword() {
+		return v -> {
+			Intent intent = new Intent();
+			intent.setClass(LoginActivity.this, ForgotPasswordActivity.class);
+			startActivity(intent);
 		};
 	}
 

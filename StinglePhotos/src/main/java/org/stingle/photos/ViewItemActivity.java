@@ -136,6 +136,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		super.onDestroy();
 		lbm.unregisterReceiver(onLogout);
 		lbm.unregisterReceiver(onEncFinish);
+		lbm.unregisterReceiver(onCameraClosed);
 	}
 
 	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
