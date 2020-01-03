@@ -7,10 +7,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.MnemonicUtils;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.IOException;
@@ -51,20 +53,28 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 				return false;
 			}
 
-			HashMap<String, String> postParams = new HashMap<String, String>();
+			HashMap<String, String> postParams = new HashMap<>();
 
 			postParams.put("email", email);
-			postParams.put("skHash", Crypto.getKeyHash(privateKey));
-			postParams.put("justCheck", "yes");
 
 			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.check_key), postParams);
 			response = new StingleResponse(this.activity, resultJson, false);
 
-			if (response.isStatusOk() && response.get("result").equals("OK")) {
-				return true;
+			if (response.isStatusOk()) {
+				String challenge = response.get("challenge");
+				if(challenge != null) {
+					byte[] publicKey = StinglePhotosApplication.getCrypto().getPublicKeyFromPrivateKey(privateKey);
+					byte[] msgBytes = StinglePhotosApplication.getCrypto().decryptSeal(Crypto.base64ToByteArrayDefault(challenge), publicKey, privateKey);
+
+					String msg = new String(msgBytes);
+					if(msg.startsWith("validkey_")) {
+						StinglePhotosApplication.setTempStore("serverPK", response.get("serverPK"));
+						return true;
+					}
+				}
 
 			}
-		} catch (IOException e) {
+		} catch (IOException | CryptoException e) {
 			e.printStackTrace();
 		}
 

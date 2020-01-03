@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.Net.HttpsClient;
@@ -75,11 +76,13 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				if (response.isStatusOk()) {
 					String token = response.get("token");
 					String keyBundle = response.get("keyBundle");
+					String serverPublicKey = response.get("serverPublicKey");
 					String userId = response.get("userId");
 					String homeFolder = response.get("homeFolder");
 					if (token != null && keyBundle != null && homeFolder != null && userId != null && token.length() > 0 && keyBundle.length() > 0 && homeFolder.length() > 0 && userId.length() > 0) {
 						try {
-							boolean importResult = KeyManagement.importKeyBundle(activity, keyBundle, password);
+							boolean importResult = KeyManagement.importKeyBundle(keyBundle, password);
+							KeyManagement.importServerPublicKey(serverPublicKey);
 
 							if (!importResult) {
 								return false;
@@ -121,6 +124,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		super.onPostExecute(result);
 
 		if(result) {
+			LoginManager.disableLockTimer(activity);
 			SyncManager.syncFSToDB(activity, new SyncManager.OnFinish() {
 				@Override
 				public void onFinish(Boolean needToUpdateUI) {

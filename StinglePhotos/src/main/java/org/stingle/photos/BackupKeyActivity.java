@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
@@ -14,8 +13,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.SetSKHashAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.MnemonicUtils;
@@ -35,8 +32,6 @@ public class BackupKeyActivity extends AppCompatActivity {
 	private TextView keyText;
 	private TextView backupDesc;
 	private SharedPreferences preferences;
-
-	public static final String IS_SET_SK_HASH = "isSKHashSet";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -73,22 +68,6 @@ public class BackupKeyActivity extends AppCompatActivity {
 				showMnemonicKey();
 			}
 		});
-
-		if(!preferences.contains(IS_SET_SK_HASH)){
-			(new SetSKHashAsyncTask(this, new OnAsyncTaskFinish() {
-				@Override
-				public void onFinish(Boolean result) {
-					super.onFinish(result);
-
-					if(result) {
-						preferences.edit().putBoolean(IS_SET_SK_HASH, true).apply();
-					}
-					else{
-						BackupKeyActivity.this.finish();
-					}
-				}
-			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
 	}
 
 	@Override

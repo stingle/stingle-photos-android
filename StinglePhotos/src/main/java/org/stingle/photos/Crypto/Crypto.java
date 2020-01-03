@@ -49,6 +49,7 @@ public class Crypto {
     protected static final String SK_NONCE_FILENAME = "skNonce";
     protected static final String PRIVATE_KEY_FILENAME = "private";
     protected static final String PUBLIC_KEY_FILENAME = "public";
+    protected static final String SERVER_PUBLIC_KEY_FILENAME = "server_public";
 
     public static final String XCHACHA20POLY1305_IETF_CONTEXT = "__data__";
     public static final int MAX_BUFFER_LENGTH = 1024*1024*64;
@@ -149,6 +150,10 @@ public class Crypto {
         return readPrivateFile(PUBLIC_KEY_FILENAME);
     }
 
+    public byte[] getServerPublicKey(){
+        return readPrivateFile(SERVER_PUBLIC_KEY_FILENAME);
+    }
+
     public void saveEncryptedPrivateKey(byte[] encryptedPrivateKey){
         savePrivateFile(PRIVATE_KEY_FILENAME, encryptedPrivateKey);
     }
@@ -205,29 +210,75 @@ public class Crypto {
         }
 
         int keyFileVersion = in.read();
-        if (keyFileVersion != CURRENT_KEY_FILE_VERSION) {
+        if (keyFileVersion > CURRENT_KEY_FILE_VERSION) {
             throw new CryptoException("Unsupported key file version number: " + String.valueOf(keyFileVersion));
         }
 
         int keyFileType = in.read();
-        if (keyFileType != KEY_FILE_TYPE_BUNDLE_ENCRYPTED) {
+        if (keyFileType != KEY_FILE_TYPE_BUNDLE_ENCRYPTED && keyFileType != KEY_FILE_TYPE_BUNDLE_PLAIN && keyFileType != KEY_FILE_TYPE_PUBLIC_PLAIN) {
             throw new CryptoException("Can't import! This is not a encrypted key file");
         }
 
+        if(keyFileType == KEY_FILE_TYPE_BUNDLE_ENCRYPTED) {
+            byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
+            byte[] encryptedPrivateKey = new byte[Box.SECRETKEYBYTES + SecretBox.MACBYTES];
+            byte[] pwdSalt = new byte[PwHash.ARGON2ID_SALTBYTES];
+            byte[] skNonce = new byte[SecretBox.NONCEBYTES];
+
+            in.read(publicKey);
+            in.read(encryptedPrivateKey);
+            in.read(pwdSalt);
+            in.read(skNonce);
+
+            savePrivateFile(PUBLIC_KEY_FILENAME, publicKey);
+            savePrivateFile(PWD_SALT_FILENAME, pwdSalt);
+            savePrivateFile(SK_NONCE_FILENAME, skNonce);
+            savePrivateFile(PRIVATE_KEY_FILENAME, getPrivateKeyFromExportedKey(password, encryptedPrivateKey));
+        }
+        else if(keyFileType == KEY_FILE_TYPE_PUBLIC_PLAIN) {
+            byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
+
+            in.read(publicKey);
+
+            savePrivateFile(PUBLIC_KEY_FILENAME, publicKey);
+        }
+    }
+
+    public void importServerPublicKey(byte[] publicKey) throws IOException {
+        savePrivateFile(SERVER_PUBLIC_KEY_FILENAME, publicKey);
+    }
+
+    public byte[] decryptSeal(byte[] enc, byte[] publicKey, byte[] privateKey) throws CryptoException {
+        byte[] msg = new byte[enc.length - Box.SEALBYTES];
+        if(so.crypto_box_seal_open(msg, enc, enc.length, publicKey, privateKey) != 0){
+            throw new CryptoException("Unable to decrypt sealed message");
+        }
+
+        return msg;
+    }
+
+    public byte[] encryptCryptoBox(byte[] message, byte[] publicKey, byte[] privateKey) throws CryptoException {
+        byte[] cypherText = new byte[message.length + Box.MACBYTES];
+
+        byte[] nonce = new byte[SecretBox.NONCEBYTES];
+        so.randombytes_buf(nonce, nonce.length);
+
+        if(so.crypto_box_easy(cypherText, message, message.length, nonce, publicKey, privateKey) != 0){
+            throw new CryptoException("Unable to encrypt box");
+        }
+
+        byte[] result = new byte[SecretBox.NONCEBYTES + cypherText.length];
+        System.arraycopy(nonce,0, result,0, nonce.length);
+        System.arraycopy(cypherText,0, result, nonce.length, cypherText.length);
+
+        return result;
+    }
+
+    public byte[] getPublicKeyFromPrivateKey(byte[] privateKey) {
         byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
-        byte[] encryptedPrivateKey = new byte[Box.SECRETKEYBYTES + SecretBox.MACBYTES];
-        byte[] pwdSalt = new byte[PwHash.ARGON2ID_SALTBYTES];
-        byte[] skNonce = new byte[SecretBox.NONCEBYTES];
+        so.crypto_scalarmult_base(publicKey, privateKey);
 
-        in.read(publicKey);
-        in.read(encryptedPrivateKey);
-        in.read(pwdSalt);
-        in.read(skNonce);
-
-        savePrivateFile(PUBLIC_KEY_FILENAME, publicKey);
-        savePrivateFile(PWD_SALT_FILENAME, pwdSalt);
-        savePrivateFile(SK_NONCE_FILENAME, skNonce);
-        savePrivateFile(PRIVATE_KEY_FILENAME, getPrivateKeyFromExportedKey(password, encryptedPrivateKey));
+        return publicKey;
     }
 
     public void deleteKeys(){
@@ -235,6 +286,7 @@ public class Crypto {
         deletePrivateFile(PWD_SALT_FILENAME);
         deletePrivateFile(SK_NONCE_FILENAME);
         deletePrivateFile(PRIVATE_KEY_FILENAME);
+        deletePrivateFile(SERVER_PUBLIC_KEY_FILENAME);
     }
 
     public byte[] getKeyFromPassword(String password, int difficulty) throws CryptoException{
@@ -772,10 +824,6 @@ public class Crypto {
         return context.deleteFile(filename);
     }
 
-    public static String getKeyHash(byte[] key){
-        return byte2hex(sha256(key));
-    }
-
     public static byte[] sha256(byte[] data){
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -839,6 +887,13 @@ public class Crypto {
     }
     public static byte[] base64ToByteArray(String base64str) {
         return Base64.decode(base64str, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 decoding
+    }
+
+    public static String byteArrayToBase64Default(byte[] bytes) {
+        return Base64.encodeToString(bytes, Base64.NO_WRAP); //base64 encoding
+    }
+    public static byte[] base64ToByteArrayDefault(String base64str) {
+        return Base64.decode(base64str, Base64.NO_WRAP); //base64 decoding
     }
 
     public static String getFileHeaders(String encFilePath, String encThumbPath) throws IOException, CryptoException {

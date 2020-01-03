@@ -49,6 +49,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
@@ -258,6 +259,21 @@ public class GalleryActivity extends AppCompatActivity
 			}
 			updateQuotaInfo();
 		//}
+
+		byte[] serverPK = StinglePhotosApplication.getCrypto().getServerPublicKey();
+		if(serverPK == null){
+			(new GetServerPKAsyncTask(this)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+
+		/*SodiumAndroid so = new SodiumAndroid();
+
+		byte[] pk = new byte[Box.PUBLICKEYBYTES];
+		so.crypto_scalarmult_base(pk, StinglePhotosApplication.getKey());
+
+		byte[] myPk = StinglePhotosApplication.getCrypto().getPublicKey();
+
+		Log.e("myPk", Crypto.byteArrayToBase64(myPk));
+		Log.e("genPk", Crypto.byteArrayToBase64(pk));*/
 	}
 
 	@Override

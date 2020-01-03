@@ -2,13 +2,9 @@ package org.stingle.photos.Auth;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Base64;
 
-import org.json.JSONObject;
+import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Net.HttpsClient;
-import org.stingle.photos.Net.StingleResponse;
-import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 
 import java.io.IOException;
@@ -23,57 +19,54 @@ public class KeyManagement {
 
 	public static void setApiToken(Context context, String token){
 		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS,context. MODE_PRIVATE);
-		preferences.edit().putString(StinglePhotosApplication.API_TOKEN, token).commit();
+		preferences.edit().putString(StinglePhotosApplication.API_TOKEN, token).apply();
 	}
 
 	public static void removeApiToken(Context context){
 		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS,context. MODE_PRIVATE);
-		preferences.edit().remove(StinglePhotosApplication.API_TOKEN).commit();
+		preferences.edit().remove(StinglePhotosApplication.API_TOKEN).apply();
 	}
 
-	public static boolean uploadKeyBundleAsync(Context context, String password, HttpsClient.OnNetworkFinish onFinish){
-		HttpsClient.post(context, context.getString(R.string.api_server_url) + context.getString(R.string.upload_key_bundle_path), getUploadKeyBundlePostParams(context, password), onFinish);
-		return true;
-	}
-
-	public static boolean uploadKeyBundle(Context context, String password){
-		JSONObject resultJson = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.upload_key_bundle_path), getUploadKeyBundlePostParams(context, password));
-		StingleResponse response = new StingleResponse(context, resultJson, false);
-		if(response.isStatusOk()){
-			return true;
-		}
-		return false;
-	}
-
-	private static HashMap<String, String> getUploadKeyBundlePostParams(Context context, String password){
+	public static HashMap<String, String> getUploadKeyBundlePostParams(String password, boolean includePrivateKey){
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
-		String keyBundle;
-		String publicKey;
 		try {
-			byte[] keyBundleBytes = StinglePhotosApplication.getCrypto().exportKeyBundle(password);
-			keyBundle = Base64.encodeToString(keyBundleBytes, Base64.NO_WRAP);
+			byte[] keyBundleBytes;
+			if(includePrivateKey) {
+				keyBundleBytes = StinglePhotosApplication.getCrypto().exportKeyBundle(password);
+			}
+			else{
+				keyBundleBytes = StinglePhotosApplication.getCrypto().exportPublicKey();
+			}
+			String keyBundle = Crypto.byteArrayToBase64Default(keyBundleBytes);
+			postParams.put("keyBundle", keyBundle);
 
-			byte[] publicKeyBytes = StinglePhotosApplication.getCrypto().exportPublicKey();
-			publicKey = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP);
 		} catch (IOException | CryptoException e) {
 			e.printStackTrace();
-			return null;
 		}
-
-		postParams.put("token", getApiToken(context));
-		postParams.put("keyBundle", keyBundle);
-		postParams.put("publicKey", publicKey);
 
 		return postParams;
 	}
 
-	public static boolean importKeyBundle(Context context, String keyBundle, String password){
+	public static boolean importKeyBundle(String keyBundle, String password){
 		try {
-			byte[] keyBundleBytes = Base64.decode(keyBundle, Base64.NO_WRAP);
+			byte[] keyBundleBytes = Crypto.base64ToByteArrayDefault(keyBundle);
 
 			StinglePhotosApplication.getCrypto().importKeyBundle(keyBundleBytes, password);
 		} catch (IOException | CryptoException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+
+	public static boolean importServerPublicKey(String publicKey){
+		try {
+			byte[] pk = Crypto.base64ToByteArrayDefault(publicKey);
+
+			StinglePhotosApplication.getCrypto().importServerPublicKey(pk);
+		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}

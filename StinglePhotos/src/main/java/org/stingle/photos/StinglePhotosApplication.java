@@ -6,6 +6,8 @@ import android.content.Context;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Util.MemoryCache;
 
+import java.util.HashMap;
+
 public class StinglePhotosApplication extends Application{
 
 	public static final int REQUEST_SD_CARD_PERMISSION = 1;
@@ -21,6 +23,7 @@ public class StinglePhotosApplication extends Application{
 	private static Context context;
 	private static MemoryCache cache;
 	private static Crypto crypto;
+	private static HashMap<String, String> tempStore = new HashMap<>();
 
     public static final String DEFAULT_PREFS = "default_prefs";
     public static final String API_TOKEN = "api_token";
@@ -59,4 +62,15 @@ public class StinglePhotosApplication extends Application{
 	public static void setKey(byte[] pKey){
 		key = pKey;
 	}
+
+	public static void setTempStore(String key, String value){
+    	tempStore.put(key,value);
+	}
+	public static String getTempStore(String key){
+    	return tempStore.get(key);
+	}
+	public static void deleteTempStore(String key){
+		tempStore.remove(key);
+	}
+
 }

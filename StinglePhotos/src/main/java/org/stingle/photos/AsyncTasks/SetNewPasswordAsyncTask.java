@@ -2,7 +2,6 @@ package org.stingle.photos.AsyncTasks;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.util.Base64;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,6 +9,7 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Crypto.MnemonicUtils;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -49,71 +49,48 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... params) {
+	protected Boolean doInBackground(Void... p) {
 		try {
 			byte[] privateKey = MnemonicUtils.generateKey(activity, phrase);
 			if(!MnemonicUtils.validateMnemonic(activity, phrase)){
 				return false;
 			}
 
-			HashMap<String, String> postParams = new HashMap<String, String>();
+			byte[] publicKey = StinglePhotosApplication.getCrypto().getPublicKeyFromPrivateKey(privateKey);
 
+			String serverPKB64 = StinglePhotosApplication.getTempStore("serverPK");
+			if(serverPKB64 == null){
+				return false;
+			}
+			byte[] serverPK = Crypto.base64ToByteArrayDefault(serverPKB64);
+
+			StinglePhotosApplication.getCrypto().generateMainKeypair(password, privateKey, publicKey);
+
+			HashMap<String, String> loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password);
+
+			HashMap<String, String> params = new HashMap<>();
+
+			params.put("newPassword", loginHash.get("hash"));
+			params.put("newSalt", loginHash.get("salt"));
+			params.putAll(KeyManagement.getUploadKeyBundlePostParams(password, true));
+
+			HashMap<String, String> postParams = new HashMap<>();
 			postParams.put("email", email);
-			postParams.put("skHash", Crypto.getKeyHash(privateKey));
-			postParams.put("justCheck", "no");
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params, serverPK, privateKey));
 
-			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.check_key), postParams);
+			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.recover_account), postParams);
 			StingleResponse response = new StingleResponse(this.activity, resultJson, true);
 
-			if (response.isStatusOk() && response.get("result").equals("OK")) {
-				if(response.get("token") == null ||	response.get("publicKey") == null){
-					return false;
+			if (response.isStatusOk()) {
+				String result = response.get("result");
+				if(result != null && result.equals("OK")) {
+					return true;
 				}
-
-				String token = response.get("token");
-				KeyManagement.setApiToken(activity, token);
-				byte[] publicKeyExport = Base64.decode(response.get("publicKey"), Base64.NO_WRAP);
-				byte[] publicKey = Crypto.getPublicKeyFromExport(publicKeyExport);
-
-				try {
-					StinglePhotosApplication.getCrypto().generateMainKeypair(password, privateKey, publicKey);
-
-					boolean uploadResult = KeyManagement.uploadKeyBundle(activity, password);
-					if(uploadResult) {
-						if(changePasswordHashesOnServer(token)) {
-							return true;
-						}
-					}
-				}
-				catch (CryptoException e) {
-					e.printStackTrace();
-				}
-
-				return true;
 			}
-		} catch (IOException e) {
+		} catch (IOException | CryptoException e) {
 			e.printStackTrace();
 		}
 
-		return false;
-	}
-
-	private boolean changePasswordHashesOnServer(String token){
-		HashMap<String, String> newLoginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password);
-
-		HashMap<String, String> postParams = new HashMap<String, String>();
-
-		postParams.put("token", token);
-		postParams.put("newPassword", newLoginHash.get("hash"));
-		postParams.put("newSalt", newLoginHash.get("salt"));
-		postParams.put("dontIssueToken", "1");
-
-		JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.change_pass_path), postParams);
-		StingleResponse response = new StingleResponse(activity, resultJson, true);
-
-		if (response.isStatusOk()) {
-			return true;
-		}
 		return false;
 	}
 
@@ -128,6 +105,7 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			(new LoginAsyncTask(activity, email, password)).execute();
 		}
 		else{
+			StinglePhotosApplication.getCrypto().deleteKeys();
 			onFinish.onFail();
 			Helpers.showAlertDialog(activity, activity.getString(R.string.something_went_wrong));
 		}

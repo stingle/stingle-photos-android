@@ -5,16 +5,16 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 
+import org.json.JSONObject;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
-
-import org.json.JSONObject;
 
 import java.util.HashMap;
 
@@ -44,36 +44,34 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... params) {
+	protected Boolean doInBackground(Void... p) {
 		byte[] currentEncPrivKey = StinglePhotosApplication.getCrypto().getEncryptedPrivateKey();
 		try {
 			HashMap<String, String> newLoginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(newPassword);
 
 			StinglePhotosApplication.getCrypto().reencryptPrivateKey(oldPassword, newPassword);
 
-			HashMap<String, String> postParams = new HashMap<String, String>();
+			HashMap<String, String> params = new HashMap<>();
+			params.put("newPassword", newLoginHash.get("hash"));
+			params.put("newSalt", newLoginHash.get("salt"));
+			params.putAll(KeyManagement.getUploadKeyBundlePostParams(newPassword, true));
+
+			HashMap<String, String> postParams = new HashMap<>();
 
 			postParams.put("token", KeyManagement.getApiToken(activity));
-			postParams.put("newPassword", newLoginHash.get("hash"));
-			postParams.put("newSalt", newLoginHash.get("salt"));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
 			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.change_pass_path), postParams);
 			response = new StingleResponse(this.activity, resultJson, false);
 
-
 			if (response.isStatusOk()) {
 				String token = response.get("token");
 				if (token != null) {
-
 					KeyManagement.setApiToken(activity, token);
 
-					boolean uploadResult = KeyManagement.uploadKeyBundle(activity, newPassword);
-					if (uploadResult) {
-						StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(newPassword));
-						BiometricsManagerWrapper.turnOffBiometrics(activity);
-						return true;
-					}
-
+					StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(newPassword));
+					BiometricsManagerWrapper.turnOffBiometrics(activity);
+					return true;
 				}
 			}
 		} catch (CryptoException e) {
