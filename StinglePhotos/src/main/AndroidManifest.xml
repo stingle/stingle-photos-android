@@ -149,6 +149,7 @@
             android:label="@string/camera"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
+            android:icon="@mipmap/ic_stingle_camera"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

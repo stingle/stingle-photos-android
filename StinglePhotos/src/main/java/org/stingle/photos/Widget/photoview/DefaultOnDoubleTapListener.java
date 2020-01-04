@@ -75,9 +75,11 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
 
             if (scale < photoViewAttacher.getMediumScale()) {
                 photoViewAttacher.setScale(photoViewAttacher.getMediumScale(), x, y, true);
-            } else if (scale >= photoViewAttacher.getMediumScale() && scale < photoViewAttacher.getMaximumScale()) {
+            }
+            /*else if (scale >= photoViewAttacher.getMediumScale() && scale < photoViewAttacher.getMaximumScale()) {
                 photoViewAttacher.setScale(photoViewAttacher.getMaximumScale(), x, y, true);
-            } else {
+            }*/
+            else {
                 photoViewAttacher.setScale(photoViewAttacher.getMinimumScale(), x, y, true);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
