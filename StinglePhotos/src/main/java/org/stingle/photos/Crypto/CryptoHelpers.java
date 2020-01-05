@@ -21,6 +21,10 @@ public class CryptoHelpers {
 			privateKey = StinglePhotosApplication.getKey();
 		}
 
+		if(serverPK == null || privateKey == null){
+			return "";
+		}
+
 		return Crypto.byteArrayToBase64Default(
 				StinglePhotosApplication.getCrypto().encryptCryptoBox(
 						json.toString().getBytes(),
