@@ -1,23 +1,24 @@
 package org.stingle.photos;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.MnemonicUtils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class BackupKeyActivity extends AppCompatActivity {
 
@@ -29,16 +30,12 @@ public class BackupKeyActivity extends AppCompatActivity {
 		}
 	};
 
-	private TextView keyText;
-	private TextView backupDesc;
-	private SharedPreferences preferences;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_backup_key);
 
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
@@ -46,28 +43,15 @@ public class BackupKeyActivity extends AppCompatActivity {
 		lbm = LocalBroadcastManager.getInstance(this);
 		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 
-		keyText = findViewById(R.id.keyText);
-		backupDesc = findViewById(R.id.backupDesc);
-
-		preferences = getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, MODE_PRIVATE);
+		findViewById(R.id.getPhrase).setOnClickListener(getPhraseClickListener());
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		keyText.setText("");
-		backupDesc.setText("");
-
 		LoginManager.checkLogin(this);
 		LoginManager.disableLockTimer(this);
-
-		LoginManager.showEnterPasswordToUnlock(this, new LoginManager.LoginConfig(){{showLogout=false;showCancel=true;}}, new LoginManager.UserLogedinCallback() {
-			@Override
-			public void onUserAuthSuccess() {
-				showMnemonicKey();
-			}
-		});
 	}
 
 	@Override
@@ -89,25 +73,30 @@ public class BackupKeyActivity extends AppCompatActivity {
 		return true;
 	}
 
-	private void showMnemonicKey(){
+	private View.OnClickListener getPhraseClickListener(){
+		return v -> LoginManager.showEnterPasswordToUnlock(this, new LoginManager.LoginConfig(){{showLogout=false;showCancel=true;quitActivityOnCancel=false;}}, new LoginManager.UserLogedinCallback() {
+			@Override
+			public void onUserAuthSuccess() {
+				AlertDialog.Builder builder = new AlertDialog.Builder(BackupKeyActivity.this);
+				builder.setView(R.layout.backup_phrase_popup);
+				builder.setCancelable(true);
+				AlertDialog dialog = builder.create();
+				dialog.show();
 
-		backupDesc.setText(getString(R.string.backup_key_desc));
+				Button okButton = dialog.findViewById(R.id.okButton);
+				TextView keyText = dialog.findViewById(R.id.keyText);
 
-		try {
-			byte[] privateKey = StinglePhotosApplication.getKey();
+				okButton.setOnClickListener(v -> dialog.dismiss());
 
-			String mnenmonicKey = MnemonicUtils.generateMnemonic(this, privateKey);
+				try {
+					byte[] privateKey = StinglePhotosApplication.getKey();
 
-			Log.e("privateKey", Crypto.byteArrayToBase64(privateKey));
-			Log.e("mnenmonicKey", mnenmonicKey);
-			keyText.setText(mnenmonicKey);
+					String mnemonicKey = MnemonicUtils.generateMnemonic(BackupKeyActivity.this, privateKey);
 
-			/*byte[] privateKey2 = MnemonicUtils.generateKey(this, mnenmonicKey);
-			boolean valid = MnemonicUtils.validateMnemonic(this, mnenmonicKey);
-			Log.e("isValid", (valid ? "yes" : "no"));
-			Log.e("privateKey2", Crypto.byteArrayToBase64(privateKey2));*/
+					keyText.setText(mnemonicKey);
 
-		} catch (IllegalArgumentException | IOException ignored){ }
-
+				} catch (IllegalArgumentException | IOException ignored){ }
+			}
+		});
 	}
 }

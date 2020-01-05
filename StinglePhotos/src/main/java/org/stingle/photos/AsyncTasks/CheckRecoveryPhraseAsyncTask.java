@@ -74,9 +74,7 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 				}
 
 			}
-		} catch (IOException | CryptoException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException | CryptoException | IllegalArgumentException ignored) { }
 
 		return false;
 	}
@@ -92,7 +90,7 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 		}
 		else{
 			onFinish.onFail();
-			if(response.areThereErrorInfos()) {
+			if(response != null && response.areThereErrorInfos()) {
 				response.showErrorsInfos();
 			}
 			else {

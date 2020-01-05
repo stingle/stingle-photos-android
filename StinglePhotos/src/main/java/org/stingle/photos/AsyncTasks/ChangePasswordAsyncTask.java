@@ -98,7 +98,7 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				}
 			});
 		} else {
-			if (response.areThereErrorInfos()) {
+			if (response!= null && response.areThereErrorInfos()) {
 				response.showErrorsInfos();
 			} else {
 				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_reg));

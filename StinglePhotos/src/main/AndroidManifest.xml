@@ -194,7 +194,7 @@
             android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".BackupKeyActivity"
-            android:label="@string/title_activity_backup_key"
+            android:label="@string/title_activity_backup_phrase"
             android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".ForgotPasswordActivity"
