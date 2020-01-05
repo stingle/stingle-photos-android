@@ -1,0 +1,4 @@
+* Backup phrase and account restore in case you forget your password. Get your backup phrase from burger menu and keep it in a very safe place please.
+* Improvements on biometric authentication using face unlock
+* New camera icon
+* Lot's of bugfixes

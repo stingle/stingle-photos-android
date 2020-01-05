@@ -1,0 +1,15 @@
+Stingle Photos is a secure, zero knowledge photo/video encryption and backup application. Formerly known as SafeCamera.
+Stingle Photos is a convenient, easy to use Gallery/Camera application with Backup and Sync functionality for your photos and videos which seamlessly provides strong security, privacy and encryption.
+All photos and videos are encrypted prior to being stored and backed up, so they are secure at rest, in transit and on cloud storage.
+Stingle photos aims to keep you as anonymous as possible. For registration you only need to provide email and password and that's it. All metadata of photos and videos are 100% encrypted. We do not collect any personal information, analytics, we don't serve any ads.
+Stingle Photos uses libsodium for encryption. Libsodium is well vetted cryptographic library created by world famous cryptographers.
+Key features:
+Solid crypto model (developed in collaboration with world famous cryptographers who are part of a crypto team for ZCoin). Stingle Photos uses XChacha20 with Poly-1305 as a main symmetric algorithm for encryption which gives nearly 10x performance in comparison to AES256 on mobile devices. it's so fast that you really can't feel that you are browsing through encrypted files.
+Full video support, recording and playback
+Fingerprint and face unlock support for fast unlocking
+Ability to take photos and videos without entering password or providing fingerprint. Password or fingerprint will be needed only for viewing your photos and videos
+Backup and sync functionality. All your photos and videos are backed up in the background to the cloud and synced to other devices using the same account
+Free up space. You can delete local copies of files that are already backed up to free up space on your device.
+As anonymous as possible. Registration just takes email and password and you can start using the app.
+App is completely free and includes free 1GB cloud storage space. You only pay for more cloud storage. Of course no ads or third party libraries is used in the app like analytics.
+We as a provider don't have any ability to see anything in your account. We just can see number of files and their size, that's it. Whole system is designed in such a way that in the unlikely case that servers are hacked and EVERYTHING is stolen, hackers will not get anything valuable. Of course the same applies to law enforcement if they come to us with a subpoena.
