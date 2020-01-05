@@ -305,15 +305,17 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			playerView.setPlayer(player);
 			player.addListener(getPlayerEventListener());
 
-			MediaSource mediaSource;
+			MediaSource mediaSource = null;
 			if(result.isRemote){
-				Uri uri = Uri.parse(result.url);
-				Log.d("url", result.url);
+				if(result.url != null) {
+					Uri uri = Uri.parse(result.url);
+					Log.d("url", result.url);
 
-				StingleHttpDataSource http = new StingleHttpDataSource("stingle", null);
-				StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, http);
+					StingleHttpDataSource http = new StingleHttpDataSource("stingle", null);
+					StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, http);
 
-				mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
+					mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
+				}
 			}
 			else{
 				Uri uri = Uri.fromFile(new File(FileManager.getHomeDir(context) + "/" + result.filename));
@@ -322,17 +324,19 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
 			}
 
-			player.setPlayWhenReady(false);
-
-			/*if(adapter.getCurrentPosition() == position) {
-				player.setPlayWhenReady(true);
-			}
-			else{
+			if(mediaSource != null) {
 				player.setPlayWhenReady(false);
-			}*/
-			playerView.setShowShuffleButton(false);
-			player.prepare(mediaSource, true, false);
-			loading.setVisibility(View.INVISIBLE);
+
+				/*if(adapter.getCurrentPosition() == position) {
+					player.setPlayWhenReady(true);
+				}
+				else{
+					player.setPlayWhenReady(false);
+				}*/
+				playerView.setShowShuffleButton(false);
+				player.prepare(mediaSource, true, false);
+				loading.setVisibility(View.INVISIBLE);
+			}
 		}
 	}
 
