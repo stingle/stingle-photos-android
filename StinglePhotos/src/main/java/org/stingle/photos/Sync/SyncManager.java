@@ -6,22 +6,22 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Util.Helpers;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -632,21 +632,29 @@ public class SyncManager {
 		}
 
 		protected boolean notifyCloudAboutTrash(ArrayList<String> filenamesToNotify){
-			HashMap<String, String> postParams = new HashMap<String, String>();
+			HashMap<String, String> params = new HashMap<>();
 
-			postParams.put("token", KeyManagement.getApiToken(context));
-			postParams.put("count", String.valueOf(filenamesToNotify.size()));
+			params.put("count", String.valueOf(filenamesToNotify.size()));
 			for(int i=0; i < filenamesToNotify.size(); i++) {
-				postParams.put("filename" + String.valueOf(i), filenamesToNotify.get(i));
+				params.put("filename" + i, filenamesToNotify.get(i));
 			}
 
-			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.trash_file_path), postParams);
-			StingleResponse response = new StingleResponse(this.context, json, false);
+			try {
+				HashMap<String, String> postParams = new HashMap<>();
+				postParams.put("token", KeyManagement.getApiToken(context));
+				postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			if(response.isStatusOk()) {
-				return true;
+				JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.trash_file_path), postParams);
+				StingleResponse response = new StingleResponse(this.context, json, false);
+
+				if (response.isStatusOk()) {
+					return true;
+				}
+				return false;
 			}
-			return false;
+			catch (CryptoException e){
+				return false;
+			}
 		}
 
 		@Override
@@ -710,21 +718,29 @@ public class SyncManager {
 		}
 
 		protected boolean notifyCloudAboutRestore(ArrayList<String> filenamesToNotify){
-			HashMap<String, String> postParams = new HashMap<String, String>();
+			HashMap<String, String> params = new HashMap<>();
 
-			postParams.put("token", KeyManagement.getApiToken(context));
-			postParams.put("count", String.valueOf(filenamesToNotify.size()));
+			params.put("count", String.valueOf(filenamesToNotify.size()));
 			for(int i=0; i < filenamesToNotify.size(); i++) {
-				postParams.put("filename" + String.valueOf(i), filenamesToNotify.get(i));
+				params.put("filename" + i, filenamesToNotify.get(i));
 			}
 
-			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.restore_file_path), postParams);
-			StingleResponse response = new StingleResponse(this.context, json, false);
+			try {
+				HashMap<String, String> postParams = new HashMap<>();
+				postParams.put("token", KeyManagement.getApiToken(context));
+				postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			if(response.isStatusOk()) {
-				return true;
+				JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.restore_file_path), postParams);
+				StingleResponse response = new StingleResponse(this.context, json, false);
+
+				if (response.isStatusOk()) {
+					return true;
+				}
+				return false;
 			}
-			return false;
+			catch (CryptoException e){
+				return false;
+			}
 		}
 
 		@Override
@@ -794,21 +810,29 @@ public class SyncManager {
 		}
 
 		protected boolean notifyCloudAboutDelete(ArrayList<String> filenamesToNotify){
-			HashMap<String, String> postParams = new HashMap<String, String>();
+			HashMap<String, String> params = new HashMap<String, String>();
 
-			postParams.put("token", KeyManagement.getApiToken(context));
-			postParams.put("count", String.valueOf(filenamesToNotify.size()));
+			params.put("count", String.valueOf(filenamesToNotify.size()));
 			for(int i=0; i < filenamesToNotify.size(); i++) {
-				postParams.put("filename" + String.valueOf(i), filenamesToNotify.get(i));
+				params.put("filename" + i, filenamesToNotify.get(i));
 			}
 
-			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.delete_file_path), postParams);
-			StingleResponse response = new StingleResponse(this.context, json, false);
+			try {
+				HashMap<String, String> postParams = new HashMap<>();
+				postParams.put("token", KeyManagement.getApiToken(context));
+				postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			if (response.isStatusOk()) {
-				return true;
+				JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.delete_file_path), postParams);
+				StingleResponse response = new StingleResponse(this.context, json, false);
+
+				if (response.isStatusOk()) {
+					return true;
+				}
+				return false;
 			}
-			return false;
+			catch (CryptoException e){
+				return false;
+			}
 		}
 
 		@Override
@@ -833,6 +857,10 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			if(!notifyCloudAboutEmptyTrash()){
+				return null;
+			}
+
 			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 			String homeDir = FileManager.getHomeDir(context);
 			String thumbDir = FileManager.getThumbsDir(context);
@@ -853,7 +881,7 @@ public class SyncManager {
 				}
 				trashDb.deleteFile(dbFile.filename);
 			}
-			notifyCloudAboutEmptyTrash();
+
 
 			result.close();
 			trashDb.close();
@@ -861,17 +889,26 @@ public class SyncManager {
 		}
 
 		protected boolean notifyCloudAboutEmptyTrash(){
-			HashMap<String, String> postParams = new HashMap<String, String>();
+			HashMap<String, String> params = new HashMap<>();
+			long timestamp = System.currentTimeMillis();
+			params.put("time", String.valueOf(timestamp));
 
-			postParams.put("token", KeyManagement.getApiToken(context));
+			try {
+				HashMap<String, String> postParams = new HashMap<>();
+				postParams.put("token", KeyManagement.getApiToken(context));
+				postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.empty_trash_path), postParams);
-			StingleResponse response = new StingleResponse(this.context, json, false);
+				JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.empty_trash_path), postParams);
+				StingleResponse response = new StingleResponse(this.context, json, false);
 
-			if (response.isStatusOk()) {
-				return true;
+				if (response.isStatusOk()) {
+					return true;
+				}
+				return false;
 			}
-			return false;
+			catch (CryptoException e){
+				return false;
+			}
 		}
 
 		@Override
