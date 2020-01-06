@@ -21,18 +21,8 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifIFD0Directory;
+import androidx.exifinterface.media.ExifInterface;
 
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
-import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
-import org.apache.sanselan.formats.tiff.TiffField;
-import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 import org.stingle.photos.CameraX.CameraImageSize;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -247,107 +237,24 @@ public class Helpers {
 		return Bitmap.createScaledBitmap(cropedImg, squareSide, squareSide, true);
 	}
 
-	public static int getExifRotation(byte[] data){
-		try {
-			return getRotationFromMetadata(Sanselan.getMetadata(data));
-		}
-		catch (ImageReadException e) {}
-		catch (IOException e) {}
-		
-		return 0;
-	}
-	
 	public static int getExifRotation(File file){
+
+		
+		return 0;
+	}
+
+	public static int getExifRotation(InputStream stream){
 		try {
-			return getRotationFromMetadata(Sanselan.getMetadata(file));
+			ExifInterface exif = new ExifInterface(stream);
+			return exif.getRotationDegrees();
 		}
-		catch (ImageReadException e) {}
-		catch (IOException e) {}
-		
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		return 0;
 	}
-	
-	public static int getAltExifRotation(BufferedInputStream stream){
-		try{
-			return getRotationFromMetadata(ImageMetadataReader.readMetadata(stream, false));
-		}
-		catch (ImageProcessingException e) {}
-		catch (IOException e) {}
-		
-		return 0;
-	}
-	
-	public static int getAltExifRotation(File file){
-		try{
-			return getRotationFromMetadata(ImageMetadataReader.readMetadata(new BufferedInputStream(new FileInputStream(file)), false));
-		}
-		catch (ImageProcessingException e) {}
-		catch (IOException e) {}
-		
-		return 0;
-	}
-	
-	private static int getRotationFromMetadata(IImageMetadata meta){
-		int currentRotation = 1;
-		try {
-			JpegImageMetadata metaJpg = null;
-			TiffField orientationField = null;
-			
-			if(meta instanceof JpegImageMetadata){
-				metaJpg = (JpegImageMetadata) meta;
-			}
-			
-			if (null != metaJpg){
-				orientationField =  metaJpg.findEXIFValue(TiffConstants.EXIF_TAG_ORIENTATION);
-				if(orientationField != null){
-					currentRotation = orientationField.getIntValue();
-				}
-			}
-		}
-		catch (ImageReadException e1) {}
-		
-		switch(currentRotation){
-			case 3:
-				//It's 180 deg now
-				return 180;
-			case 6:
-				//It's 90 deg now
-				return 90;
-			case 8:
-				//It's 270 deg now
-				return 270;
-			default:
-				//It's 0 deg now
-				return 0;
-		}
-	}
-	
-	private static int getRotationFromMetadata(Metadata metadata){
-		try {
-			ExifIFD0Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
-			if(directory != null){
-				int exifRotation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-				
-				switch(exifRotation){
-					case 3:
-						//It's 180 deg now
-						return 180;
-					case 6:
-						//It's 90 deg now
-						return 90;
-					case 8:
-						//It's 270 deg now
-						return 270;
-					default:
-						//It's 0 deg now
-						return 0;
-				}
-			}
-		}
-		catch (MetadataException e) {}
-		return 0;
-	}
-	
+
 	public static Bitmap getRotatedBitmap(Bitmap bitmap, int deg){
 		if(bitmap != null){
 			Matrix matrix = new Matrix();
@@ -364,7 +271,7 @@ public class Helpers {
 	
 	public static Bitmap decodeBitmap(byte[] data, int requiredSize, boolean isFront) {
 		if(data != null){
-			Integer rotation = getAltExifRotation(new BufferedInputStream(new ByteArrayInputStream(data)));
+			Integer rotation = getExifRotation(new BufferedInputStream(new ByteArrayInputStream(data)));
 			
 			if(rotation == 90 && isFront){
 				rotation = 270;
@@ -397,34 +304,6 @@ public class Helpers {
 			}
 		}
 		return null;
-	}
-	
-	public static Bitmap decodeFile(InputStream stream, int requiredSize) {
-		Integer rotation = getAltExifRotation(new BufferedInputStream(stream));
-		
-		// Decode image size
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inJustDecodeBounds = true;
-		BitmapFactory.decodeStream(stream, null, o);
-
-		// Find the correct scale value. It should be the power of 2.
-		requiredSize = requiredSize * requiredSize;
-		int scale = 1;
-	    while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > requiredSize) {
-	    	scale++;
-	    }
-
-		// Decode with inSampleSize
-		BitmapFactory.Options o2 = new BitmapFactory.Options();
-		o2.inSampleSize = scale;
-		
-		//stream.reset();
-		if(rotation != null){
-			return getRotatedBitmap(BitmapFactory.decodeStream(stream, null, o2), rotation);
-		}
-		else{
-			return BitmapFactory.decodeStream(stream, null, o2);
-		}
 	}
 	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {

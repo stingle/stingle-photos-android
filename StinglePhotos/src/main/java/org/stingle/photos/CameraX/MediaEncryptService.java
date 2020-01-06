@@ -270,7 +270,6 @@ public class MediaEncryptService extends Service {
 
 
 	@Nullable
-	@android.support.annotation.Nullable
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;

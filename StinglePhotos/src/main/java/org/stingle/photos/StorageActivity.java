@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -376,7 +375,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	}
 
 	@Override
-	public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> purchases) {
+	public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
 		if (billingResult.getResponseCode() == BillingResponseCode.OK) {
 			for (Purchase purchase : purchases) {
 				handlePurchase(purchase);

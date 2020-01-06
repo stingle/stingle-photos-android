@@ -300,20 +300,20 @@ public final class CameraXModule {
 		Camera2Config.Extender camera2Extender = new Camera2Config.Extender(mPreviewConfigBuilder)
 				.setDeviceStateCallback(new CameraDevice.StateCallback() {
 					@Override
-					public void onOpened(@NonNull @android.support.annotation.NonNull CameraDevice camera) {
+					public void onOpened(@NonNull CameraDevice camera) {
 					}
 
 					@Override
-					public void onDisconnected(@NonNull @android.support.annotation.NonNull CameraDevice camera) {
+					public void onDisconnected(@NonNull CameraDevice camera) {
 					}
 
 					@Override
-					public void onError(@NonNull @android.support.annotation.NonNull CameraDevice camera, int error) {
+					public void onError(@NonNull CameraDevice camera, int error) {
 
 					}
 
 					@Override
-					public void onClosed(@NonNull @android.support.annotation.NonNull CameraDevice camera) {
+					public void onClosed(@NonNull CameraDevice camera) {
 						super.onClosed(camera);
 						LocalBroadcastManager lbm = lbm = LocalBroadcastManager.getInstance(mCameraView.getContext());
 						Intent broadcastIntent = new Intent("CAMERA_CLOSED");
