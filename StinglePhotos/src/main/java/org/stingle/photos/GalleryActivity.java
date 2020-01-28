@@ -632,8 +632,8 @@ public class GalleryActivity extends AppCompatActivity
 			intent.setClass(this, SettingsActivity.class);
 			startActivity(intent);
 		}
-		else if (id == R.id.nav_telegram) {
-			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/stingle_photos_group"));
+		else if (id == R.id.nav_website) {
+			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://stingle.org"));
 			startActivity(intent);
 		}
 		else if (id == R.id.nav_logout) {

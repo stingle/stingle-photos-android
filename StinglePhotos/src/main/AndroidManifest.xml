@@ -75,6 +75,7 @@
 
                 <data
                     android:host="stingle.org"
+                    android:pathPrefix="/app"
                     android:scheme="https" />
             </intent-filter>
             <intent-filter>

@@ -164,7 +164,7 @@
     <string name="resync_db">Resync database</string>
     <string name="syncing_db">Syncing database...</string>
     <string name="immediately">Immediately</string>
-    <string name="telegram_group">Official Telegram group</string>
+    <string name="website_link">Official Website</string>
     <string name="block_screenshots">Disallow screenshots of this app</string>
     <string name="need_restart">For this setting to take effect application needs to be restarted. Do you want to restart it now?</string>
     <string name="enable_backup">Enable backup and sync</string>
