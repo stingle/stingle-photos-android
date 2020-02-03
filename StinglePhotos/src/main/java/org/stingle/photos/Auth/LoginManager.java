@@ -184,6 +184,8 @@ public class LoginManager {
         final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 
+        //okButton.setText(activity.getString(R.string.login));
+
         okButton.setOnClickListener(v -> {
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             listener.passwordReceived(passwordField.getText().toString(), dialog);

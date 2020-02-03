@@ -3,7 +3,9 @@ package org.stingle.photos.AsyncTasks;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 
 import org.json.JSONObject;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
@@ -51,10 +53,13 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 			StinglePhotosApplication.getCrypto().reencryptPrivateKey(oldPassword, newPassword);
 
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(activity);
+			boolean isKeyBackedUp = settings.getBoolean(StinglePhotosApplication.IS_KEY_BACKED_UP, true);
+
 			HashMap<String, String> params = new HashMap<>();
 			params.put("newPassword", newLoginHash.get("hash"));
 			params.put("newSalt", newLoginHash.get("salt"));
-			params.putAll(KeyManagement.getUploadKeyBundlePostParams(newPassword, true));
+			params.putAll(KeyManagement.getUploadKeyBundlePostParams(newPassword, isKeyBackedUp));
 
 			HashMap<String, String> postParams = new HashMap<>();
 

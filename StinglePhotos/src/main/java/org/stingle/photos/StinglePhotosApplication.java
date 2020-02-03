@@ -34,6 +34,7 @@ public class StinglePhotosApplication extends Application{
     public static final String USER_ID = "user_id";
     public static final String USER_EMAIL = "user_email";
     public static final String USER_HOME_FOLDER = "user_home_folder";
+    public static final String IS_KEY_BACKED_UP = "is_key_backed_up";
 
     @Override
 	public void onCreate(){

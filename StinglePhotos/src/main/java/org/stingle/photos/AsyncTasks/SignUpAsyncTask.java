@@ -21,14 +21,16 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	protected AppCompatActivity activity;
 	protected String email;
 	protected String password;
+	protected Boolean isBackup;
 	protected ProgressDialog progressDialog;
 	protected StingleResponse response;
 
 
-	public SignUpAsyncTask(AppCompatActivity activity, String email, String password){
+	public SignUpAsyncTask(AppCompatActivity activity, String email, String password, Boolean isBackup){
 		this.activity = activity;
 		this.email = email;
 		this.password = password;
+		this.isBackup = isBackup;
 	}
 
 	@Override
@@ -53,7 +55,8 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			postParams.put("email", email);
 			postParams.put("password", loginHash.get("hash"));
 			postParams.put("salt", loginHash.get("salt"));
-			postParams.putAll(KeyManagement.getUploadKeyBundlePostParams(password, true));
+			postParams.put("isBackup", (isBackup ? "1" : "0"));
+			postParams.putAll(KeyManagement.getUploadKeyBundlePostParams(password, isBackup));
 
 			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.registration_path), postParams);
 			response = new StingleResponse(this.activity, resultJson, false);

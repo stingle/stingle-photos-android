@@ -2,6 +2,7 @@ package org.stingle.photos.AsyncTasks;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public abstract class OnAsyncTaskFinish {
 	public void onFinish(){}
@@ -15,5 +16,6 @@ public abstract class OnAsyncTaskFinish {
 		onFinish();
 	}
 	public void onFinish(Object object){ onFinish(); };
+	public void onFinish(HashMap<String, Object> params){ onFinish(); };
 	public void onFail(){};
 }

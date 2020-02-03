@@ -73,4 +73,8 @@
      <item name="android:windowBackground">@drawable/launch_screen</item>
         <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
     </style>
+
+    <style name="simpletooltip_default" parent="@android:style/TextAppearance.Medium">
+
+    </style>
 </resources>

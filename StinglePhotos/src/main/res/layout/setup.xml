@@ -13,7 +13,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center"
-			android:paddingTop="40dp"
+			android:paddingTop="20dp"
 			android:layout_margin="10dp"
 			android:text="@string/setup_info" />
 
@@ -46,6 +46,36 @@
 			android:layout_margin="10dp"
 			android:inputType="textPassword" />
 
+		<LinearLayout
+			android:id="@+id/advanced_container"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_margin="20dp"
+			android:orientation="horizontal"
+			android:gravity="end">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/backup_key"
+				android:textSize="16sp" />
+
+			<ImageView
+				android:id="@+id/backup_keys_info"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:src="@drawable/ic_info"
+				android:layout_marginStart="10dp"
+				android:layout_marginEnd="5dp" />
+
+			<androidx.appcompat.widget.SwitchCompat
+				android:id="@+id/is_backup_keys"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:checked="true" />
+
+		</LinearLayout>
+
 		<Button
 			android:id="@+id/signup"
 			android:layout_width="match_parent"
@@ -55,6 +85,8 @@
 			android:layout_marginLeft="32dp"
 			android:layout_marginRight="32dp"
 			android:text="@string/sign_up" />
+
+
 
 		<LinearLayout
 			android:id="@+id/sign_in_container"

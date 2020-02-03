@@ -1,9 +1,14 @@
 package org.stingle.photos.AsyncTasks;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,11 +29,15 @@ import java.util.HashMap;
 
 public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-	protected AppCompatActivity activity;
-	protected String email;
-	protected String password;
-	protected ProgressDialog progressDialog;
-	protected StingleResponse response;
+	private AppCompatActivity activity;
+	private String email;
+	private String password;
+	private ProgressDialog progressDialog;
+	private StingleResponse response;
+	private Boolean isKeyBackedUp = true;
+	private String userId;
+	private String homeFolder;
+	private String token;
 
 
 	public LoginAsyncTask(AppCompatActivity context, String email, String password){
@@ -74,11 +83,12 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 
 				if (response.isStatusOk()) {
-					String token = response.get("token");
 					String keyBundle = response.get("keyBundle");
 					String serverPublicKey = response.get("serverPublicKey");
-					String userId = response.get("userId");
-					String homeFolder = response.get("homeFolder");
+					token = response.get("token");
+					userId = response.get("userId");
+					isKeyBackedUp = response.get("isKeyBackedUp").equals("1");
+					homeFolder = response.get("homeFolder");
 					if (token != null && keyBundle != null && homeFolder != null && userId != null && token.length() > 0 && keyBundle.length() > 0 && homeFolder.length() > 0 && userId.length() > 0) {
 						try {
 							boolean importResult = KeyManagement.importKeyBundle(keyBundle, password);
@@ -88,12 +98,9 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 								return false;
 							}
 
-							KeyManagement.setApiToken(activity, token);
-							Helpers.storePreference(activity, StinglePhotosApplication.USER_ID, userId);
-							Helpers.storePreference(activity, StinglePhotosApplication.USER_EMAIL, email);
-							Helpers.storePreference(activity, StinglePhotosApplication.USER_HOME_FOLDER, homeFolder);
-
-							StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(password));
+							if(isKeyBackedUp) {
+								StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(password));
+							}
 
 							return true;
 						} catch (CryptoException e) {
@@ -125,37 +132,46 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		if(result) {
 			LoginManager.disableLockTimer(activity);
-			SyncManager.syncFSToDB(activity, new SyncManager.OnFinish() {
-				@Override
-				public void onFinish(Boolean needToUpdateUI) {
-					progressDialog.dismiss();
-					BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
-					if(biometricsManagerWrapper.isBiometricsAvailable()) {
-						Helpers.showConfirmDialog(activity, activity.getString(R.string.enable_biometrics),
-								(dialog, which) -> {
-									biometricsManagerWrapper.setupBiometrics(null, password, new BiometricsManagerWrapper.BiometricsSetupCallback() {
-										@Override
-										public void onSuccess() {
-											gotoGallery();
-										}
 
-										@Override
-										public void onFailed() {
-											gotoGallery();
-										}
-									});
+			if(!isKeyBackedUp){
+				AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+				builder.setView(R.layout.enter_phrase_dialog);
+				builder.setCancelable(false);
+				AlertDialog dialog = builder.create();
+				dialog.show();
 
-								},
-								(dialog, which) -> {
-									gotoGallery();
-								});
+				Button okButton = dialog.findViewById(R.id.okButton);
+				Button cancelButton = dialog.findViewById(R.id.cancelButton);
+
+				okButton.setOnClickListener(v -> {
+					String backupPhrase = ((EditText)dialog.findViewById(R.id.backup_phrase_dialog)).getText().toString();
+					(new CheckRecoveryPhraseAsyncTask(activity, email, backupPhrase, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							(new SetNewPasswordAsyncTask(activity, email, backupPhrase, password, true, new OnAsyncTaskFinish() {
+								@Override
+								public void onFinish() {
+									super.onFinish();
+									dialog.dismiss();
+									loginSuccess();
+								}
+							})).setShowProgress(false).execute();
+						}
+					})).setShowProgress(false).execute();
+
+				});
+
+				cancelButton.setOnClickListener(v -> {
+					if(dialog != null){
+						dialog.dismiss();
+						progressDialog.dismiss();
 					}
-					else{
-						gotoGallery();
-					}
+				});
+			}
+			else{
+				loginSuccess();
+			}
 
-				}
-			}, AsyncTask.SERIAL_EXECUTOR);
 		}
 		else{
 			progressDialog.dismiss();
@@ -166,5 +182,47 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_login));
 			}
 		}
+	}
+
+	private void loginSuccess(){
+		KeyManagement.setApiToken(activity, token);
+		Helpers.storePreference(activity, StinglePhotosApplication.USER_ID, userId);
+		Helpers.storePreference(activity, StinglePhotosApplication.USER_EMAIL, email);
+		Helpers.storePreference(activity, StinglePhotosApplication.USER_HOME_FOLDER, homeFolder);
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(activity);
+		settings.edit().putBoolean(StinglePhotosApplication.IS_KEY_BACKED_UP, isKeyBackedUp).apply();
+
+		SyncManager.syncFSToDB(activity, new SyncManager.OnFinish() {
+			@Override
+			public void onFinish(Boolean needToUpdateUI) {
+				progressDialog.dismiss();
+				BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
+				if(biometricsManagerWrapper.isBiometricsAvailable()) {
+					Helpers.showConfirmDialog(activity, activity.getString(R.string.enable_biometrics),
+							(dialog, which) -> {
+								biometricsManagerWrapper.setupBiometrics(null, password, new BiometricsManagerWrapper.BiometricsSetupCallback() {
+									@Override
+									public void onSuccess() {
+										gotoGallery();
+									}
+
+									@Override
+									public void onFailed() {
+										gotoGallery();
+									}
+								});
+
+							},
+							(dialog, which) -> {
+								gotoGallery();
+							});
+				}
+				else{
+					gotoGallery();
+				}
+
+			}
+		}, AsyncTask.SERIAL_EXECUTOR);
 	}
 }

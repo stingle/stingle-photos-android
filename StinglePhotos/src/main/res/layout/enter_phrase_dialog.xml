@@ -6,28 +6,26 @@
     android:padding="10dp">
 
     <TextView
-        android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/app_locked" />
+        android:text="@string/enter_backup_phrase" />
+
     <TextView
-        android:id="@+id/subtitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/enter_password_desc" />
-
+        android:paddingTop="20dp"
+        android:text="@string/enter_backup_phrase_desc" />
 
     <EditText
-        android:id="@+id/password"
+        android:id="@+id/backup_phrase_dialog"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="20dp"
         android:layout_margin="10dp"
-        android:inputType="textPassword"
-        android:imeOptions="actionGo" >
-
-        <requestFocus />
-    </EditText>
+        android:hint="@string/backup_phrase_enter_desc"
+        android:inputType="textMultiLine"
+        android:digits="abcdefghijklmnopqrstuvwxyz "/>
 
     <LinearLayout
         android:id="@+id/buttons"
@@ -35,14 +33,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:orientation="horizontal">
-        <Button
-            android:id="@+id/logoutButton"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:text="@string/log_out" />
 
         <Button
             android:id="@+id/cancelButton"

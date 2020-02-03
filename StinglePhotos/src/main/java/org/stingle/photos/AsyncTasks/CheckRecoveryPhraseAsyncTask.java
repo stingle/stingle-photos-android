@@ -26,6 +26,8 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 	private ProgressDialog progressDialog;
 	private StingleResponse response;
 	private OnAsyncTaskFinish onFinish;
+	private boolean showProgress = true;
+	private Boolean isKeyBackedUp = true;
 
 
 	public CheckRecoveryPhraseAsyncTask(AppCompatActivity context, String email, String phrase, OnAsyncTaskFinish onFinish){
@@ -35,14 +37,21 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 		this.onFinish = onFinish;
 	}
 
+	public CheckRecoveryPhraseAsyncTask setShowProgress(boolean showProgress){
+		this.showProgress = showProgress;
+		return this;
+	}
+
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		progressDialog = new ProgressDialog(activity);
-		progressDialog.setMessage(activity.getString(R.string.checking_phrase));
-		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		progressDialog.setCancelable(false);
-		progressDialog.show();
+		if(showProgress) {
+			progressDialog = new ProgressDialog(activity);
+			progressDialog.setMessage(activity.getString(R.string.checking_phrase));
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.setCancelable(false);
+			progressDialog.show();
+		}
 	}
 
 	@Override
@@ -62,6 +71,7 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 
 			if (response.isStatusOk()) {
 				String challenge = response.get("challenge");
+				isKeyBackedUp = response.get("isKeyBackedUp").equals("1");
 				if(challenge != null) {
 					byte[] publicKey = StinglePhotosApplication.getCrypto().getPublicKeyFromPrivateKey(privateKey);
 					byte[] msgBytes = StinglePhotosApplication.getCrypto().decryptSeal(Crypto.base64ToByteArrayDefault(challenge), publicKey, privateKey);
@@ -83,10 +93,12 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
 
-		progressDialog.dismiss();
+		if(showProgress) {
+			progressDialog.dismiss();
+		}
 
 		if(result) {
-			onFinish.onFinish();
+			onFinish.onFinish(isKeyBackedUp);
 		}
 		else{
 			onFinish.onFail();

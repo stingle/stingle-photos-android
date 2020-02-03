@@ -38,5 +38,6 @@
     <string name="check_key">login/checkKey</string>
     <string name="recover_account">login/recoverAccount</string>
     <string name="get_server_pk">keys/getServerPK</string>
+    <string name="reupload_keys">keys/reuploadKeys</string>
 
 </resources>

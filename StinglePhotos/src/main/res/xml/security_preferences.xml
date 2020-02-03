@@ -13,4 +13,10 @@
         app:title="@string/biometrics_confirm"
         app:dependency="biometrics"/>
 
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="is_key_backed_up"
+        app:summary="@string/backup_key_desc_pref"
+        app:title="@string/backup_key"/>
+
 </PreferenceScreen>

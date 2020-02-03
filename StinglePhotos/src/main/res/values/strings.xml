@@ -64,6 +64,7 @@
     <string name="read_only">"Read Only"</string>
     <string name="home_folder_problem_title">"Problem with StinglePhotos folder"</string>
     <string name="please_enter_password">"Please enter password"</string>
+    <string name="app_locked">"Stignle Photos is locked"</string>
     <string name="use_fingerprint">"Fingerprint authentication"</string>
     <string name="use_fingerprint_desc">"Use your fingerprint instead of entering password"</string>
     <string name="error_fingerprint_perm">"Please enable the fingerprint permission"</string>
@@ -239,6 +240,16 @@
     <string name="backup_phrase">Backup phrase</string>
     <string name="get_backup_phrase">Understood, get the backup phrase</string>
     <string name="your_backup_phrase">Your backup phrase</string>
+    <string name="backup_key">Backup my keys</string>
+    <string name="backup_key_desc">When you create an account keys will be generated locally which are the main secret of your account.\n\nIf you choose to backup them they will be strongly encrypted before backup and you will be able to login from another device effortlessly.\n\nHowever you can choose not backup keys, in that case you will absolutely need to write down your backup phrase, otherwise you will NOT be able to login again in the future.</string>
+    <string name="enter_backup_phrase">Please enter your backup phrase</string>
+    <string name="enter_backup_phrase_desc">Because you have chosen not to backup your provate key, you have to enter your backup phrase to reconstruct your private key locally. Without one it\'s impossible to decrypt your photos and videos.</string>
+    <string name="backup_key_desc_pref">Backup my keys to allow login without entering backup phrase</string>
+    <string name="key_backup_delete_confirm">ATTENTION!!!\n\nAre you sure you want to delete backup of your keys?\n\nTo login again you will need to enter your backup phrase!</string>
+    <string name="deleting_keys">Deleting keys...</string>
+    <string name="uploading_keys">Uploading keys...</string>
+    <string name="success_delete_keys">Your key backup is successfully deleted. From now on you will need to enter your backup phrase after login along side with your email and password.</string>
+    <string name="success_backup_keys">Your keys have been successfully backed up.</string>
 
 
 </resources>

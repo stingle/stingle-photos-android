@@ -26,26 +26,46 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private String email;
 	private String phrase;
 	private String password;
-	private ProgressDialog progressDialog;
+	private Boolean localOnly;
 	private OnAsyncTaskFinish onFinish;
 
+	private ProgressDialog progressDialog;
+	private boolean showProgress = true;
+	private boolean uploadPrivateKey = true;
 
 	public SetNewPasswordAsyncTask(AppCompatActivity context, String email, String phrase, String password, OnAsyncTaskFinish onFinish){
+		this(context, email, phrase, password, false, onFinish);
+	}
+
+	public SetNewPasswordAsyncTask(AppCompatActivity context, String email, String phrase, String password, Boolean localOnly, OnAsyncTaskFinish onFinish){
 		this.activity = context;
 		this.email = email;
 		this.phrase = phrase;
 		this.password = password;
+		this.localOnly = localOnly;
 		this.onFinish = onFinish;
+	}
+
+	public SetNewPasswordAsyncTask setShowProgress(boolean showProgress){
+		this.showProgress = showProgress;
+		return this;
+	}
+
+	public SetNewPasswordAsyncTask setUploadPrivateKey(boolean uploadPrivateKey){
+		this.uploadPrivateKey = uploadPrivateKey;
+		return this;
 	}
 
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		progressDialog = new ProgressDialog(activity);
-		progressDialog.setMessage(activity.getString(R.string.setting_new_password));
-		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		progressDialog.setCancelable(false);
-		progressDialog.show();
+		if(showProgress) {
+			progressDialog = new ProgressDialog(activity);
+			progressDialog.setMessage(activity.getString(R.string.setting_new_password));
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.setCancelable(false);
+			progressDialog.show();
+		}
 	}
 
 	@Override
@@ -66,25 +86,31 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 			StinglePhotosApplication.getCrypto().generateMainKeypair(password, privateKey, publicKey);
 
-			HashMap<String, String> loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password);
+			if(localOnly) {
+				StinglePhotosApplication.setKey(privateKey);
+				return true;
+			}
+			else{
+				HashMap<String, String> loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password);
 
-			HashMap<String, String> params = new HashMap<>();
+				HashMap<String, String> params = new HashMap<>();
 
-			params.put("newPassword", loginHash.get("hash"));
-			params.put("newSalt", loginHash.get("salt"));
-			params.putAll(KeyManagement.getUploadKeyBundlePostParams(password, true));
+				params.put("newPassword", loginHash.get("hash"));
+				params.put("newSalt", loginHash.get("salt"));
+				params.putAll(KeyManagement.getUploadKeyBundlePostParams(password, uploadPrivateKey));
 
-			HashMap<String, String> postParams = new HashMap<>();
-			postParams.put("email", email);
-			postParams.put("params", CryptoHelpers.encryptParamsForServer(params, serverPK, privateKey));
+				HashMap<String, String> postParams = new HashMap<>();
+				postParams.put("email", email);
+				postParams.put("params", CryptoHelpers.encryptParamsForServer(params, serverPK, privateKey));
 
-			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.recover_account), postParams);
-			StingleResponse response = new StingleResponse(this.activity, resultJson, true);
+				JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.recover_account), postParams);
+				StingleResponse response = new StingleResponse(this.activity, resultJson, true);
 
-			if (response.isStatusOk()) {
-				String result = response.get("result");
-				if(result != null && result.equals("OK")) {
-					return true;
+				if (response.isStatusOk()) {
+					String result = response.get("result");
+					if (result != null && result.equals("OK")) {
+						return true;
+					}
 				}
 			}
 		} catch (IOException | CryptoException e) {
@@ -98,11 +124,15 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
 
-		progressDialog.dismiss();
+		if(showProgress) {
+			progressDialog.dismiss();
+		}
 
 		if(result) {
 			onFinish.onFinish();
-			(new LoginAsyncTask(activity, email, password)).execute();
+			if(!localOnly) {
+				(new LoginAsyncTask(activity, email, password)).execute();
+			}
 		}
 		else{
 			StinglePhotosApplication.getCrypto().deleteKeys();

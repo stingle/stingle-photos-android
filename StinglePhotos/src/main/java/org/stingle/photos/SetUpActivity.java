@@ -1,15 +1,19 @@
 package org.stingle.photos;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import org.stingle.photos.AsyncTasks.SignUpAsyncTask;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.Widget.Tooltip.SimpleTooltip;
 
 public class SetUpActivity  extends AppCompatActivity {
 
@@ -29,6 +33,7 @@ public class SetUpActivity  extends AppCompatActivity {
 
 		findViewById(R.id.signup).setOnClickListener(signUp());
 		findViewById(R.id.loginBtn).setOnClickListener(gotoLogin());
+		findViewById(R.id.backup_keys_info).setOnClickListener(backupKeysInfo());
 	}
 
 	@Override
@@ -43,6 +48,20 @@ public class SetUpActivity  extends AppCompatActivity {
 			intent.setClass(SetUpActivity.this, LoginActivity.class);
 			startActivity(intent);
 			finish();
+		};
+	}
+
+	private OnClickListener backupKeysInfo() {
+		return v -> {
+			new SimpleTooltip.Builder(this)
+					.anchorView(v)
+					.text(getString(R.string.backup_key_desc))
+					.gravity(Gravity.TOP)
+					.transparentOverlay(false)
+					.overlayWindowBackgroundColor(Color.BLACK)
+					.build()
+					.show();
+
 		};
 	}
 
@@ -72,8 +91,9 @@ public class SetUpActivity  extends AppCompatActivity {
 				return;
 			}
 
+			SwitchCompat isBackup = findViewById(R.id.is_backup_keys);
 
-			(new SignUpAsyncTask(SetUpActivity.this, email, password1)).execute();
+			(new SignUpAsyncTask(SetUpActivity.this, email, password1, isBackup.isChecked())).execute();
 		};
 	}
 

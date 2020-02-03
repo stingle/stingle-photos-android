@@ -13,14 +13,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -67,9 +64,6 @@ public class HttpsClient {
 		JSONObject json = null;
 		try {
 			Log.d("url", urlStr);
-			for(String key : params.keySet()) {
-				Log.d("param", key + " = " + params.get(key));
-			}
 			URL url = new URL(urlStr);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
@@ -97,14 +91,19 @@ public class HttpsClient {
 			conn.setRequestMethod("POST");
 			conn.setDoInput(true);
 
+			// Insert app version to all requests
+			if(params == null){
+				params = new HashMap<>();
+			}
+			params.put("v", String.valueOf(BuildConfig.VERSION_CODE));
+
 			// Add any data you wish to post here
 			String data = "";
-			if(params != null) {
-				for (String key : params.keySet()) {
-					String value = params.get(key);
-					if(value != null) {
-						data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8") + "&";
-					}
+			for (String key : params.keySet()) {
+				String value = params.get(key);
+				if(value != null) {
+					Log.d("param", key + " = " + params.get(key));
+					data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8") + "&";
 				}
 			}
 
@@ -131,13 +130,7 @@ public class HttpsClient {
 
 			reader.close();
 		}
-		catch (IOException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (KeyManagementException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
+		catch (IOException | NoSuchAlgorithmException | KeyManagementException | JSONException e) {
 			e.printStackTrace();
 		}
 
@@ -174,12 +167,17 @@ public class HttpsClient {
 		conn.setDoInput(true);
 		conn.setDoOutput(true);
 
+		// Insert app version to all requests
+		if(params == null){
+			params = new HashMap<>();
+		}
+		params.put("v", String.valueOf(BuildConfig.VERSION_CODE));
+
 		// Add any data you wish to post here
 		String data = "";
-		if(params != null) {
-			for (String key : params.keySet()) {
-				data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
-			}
+		for (String key : params.keySet()) {
+			Log.d("param", key + " = " + params.get(key));
+			data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 		}
 
 		if (data.length() > 0) {
@@ -253,13 +251,17 @@ public class HttpsClient {
 		conn.setDoInput(true);
 		conn.setDoOutput(true);
 
+		// Insert app version to all requests
+		if(params == null){
+			params = new HashMap<>();
+		}
+		params.put("v", String.valueOf(BuildConfig.VERSION_CODE));
+
 		// Add any data you wish to post here
 		String data = "";
-		if(params != null) {
-			for (String key : params.keySet()) {
-				Log.d("param" , key + " - " + params.get(key));
-				data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
-			}
+		for (String key : params.keySet()) {
+			Log.d("param" , key + " - " + params.get(key));
+			data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 		}
 
 		if (data.length() > 0) {
@@ -321,7 +323,7 @@ public class HttpsClient {
 
 		int bytesRead, bytesAvailable, bufferSize;
 		byte[] buffer;
-		int maxBufferSize = 1 * 1024 * 1024;
+		int maxBufferSize = 1024 * 1024;
 
 
 
@@ -382,11 +384,18 @@ public class HttpsClient {
 				fileInputStream.close();
 			}
 
+			// Insert app version to all requests
+			if(params == null){
+				params = new HashMap<>();
+			}
+			params.put("v", String.valueOf(BuildConfig.VERSION_CODE));
+
 			// Upload POST Data
 			Iterator<String> keys = params.keySet().iterator();
 			while (keys.hasNext()) {
 				String key = keys.next();
 				String value = params.get(key);
+				Log.d("param", key + " = " + value);
 
 				if(value != null) {
 					outputStream.writeBytes(twoHyphens + boundary + lineEnd);
@@ -416,19 +425,7 @@ public class HttpsClient {
 			Log.e("resultStr", result);
 			json = new JSONObject(result);
 
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (ProtocolException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (KeyManagementException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
+		} catch (IOException | NoSuchAlgorithmException | KeyManagementException | JSONException e) {
 			e.printStackTrace();
 		}
 

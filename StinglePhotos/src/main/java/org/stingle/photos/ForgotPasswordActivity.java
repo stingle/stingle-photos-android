@@ -22,6 +22,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 	private EditText email;
 	private EditText phrase;
 	private Button checkBtn;
+	private Boolean isKeyBackedUp = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +60,10 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 		return v -> {
 			(new CheckRecoveryPhraseAsyncTask(ForgotPasswordActivity.this, email.getText().toString(), phrase.getText().toString(), new OnAsyncTaskFinish() {
 				@Override
-				public void onFinish() {
+				public void onFinish(Boolean isKeyBackedUpParam) {
 					super.onFinish();
 					showPasswordChangeDialog();
+					isKeyBackedUp = isKeyBackedUpParam;
 				}
 			})).execute();
 		};
@@ -109,7 +111,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 					super.onFinish();
 					dialog.dismiss();
 				}
-			})).execute();
+			})).setUploadPrivateKey(isKeyBackedUp).execute();
 		});
 
 		cancelButton.setOnClickListener(v -> {

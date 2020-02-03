@@ -1,5 +1,6 @@
 package org.stingle.photos;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,8 +18,11 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.ReuploadKeysAsyncTask;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Auth.PasswordReturnListener;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -137,42 +141,36 @@ public class SettingsActivity extends AppCompatActivity implements
 
 			initResyncDBButton();
 
-			SwitchPreference blockScreenshotsSetting = (SwitchPreference)findPreference("block_screenshots");
-			blockScreenshotsSetting.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-				@Override
-				public boolean onPreferenceChange(Preference preference, Object newValue) {
-					final Context context = GeneralPreferenceFragment.this.getContext();
-					Helpers.showConfirmDialog(context, getString(R.string.need_restart), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialogInterface, int i) {
+			SwitchPreference blockScreenshotsSetting = findPreference("block_screenshots");
+			blockScreenshotsSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				final Context context = GeneralPreferenceFragment.this.getContext();
+				Helpers.showConfirmDialog(context, getString(R.string.need_restart), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
 
-							Intent intent = new Intent(context, GalleryActivity.class);
-							intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-							//intent.putExtra(KEY_RESTART_INTENT, nextIntent);
-							context.startActivity(intent);
+						Intent intent = new Intent(context, GalleryActivity.class);
+						intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+						//intent.putExtra(KEY_RESTART_INTENT, nextIntent);
+						context.startActivity(intent);
 
-							Runtime.getRuntime().exit(0);
-						}
-					}, null);
-					return true;
-				}
+						Runtime.getRuntime().exit(0);
+					}
+				}, null);
+				return true;
 			});
 		}
 
 		protected void initResyncDBButton() {
 			Preference resyncDBPref = findPreference("resync_db");
-			resyncDBPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-				public boolean onPreferenceClick(Preference preference) {
-					final ProgressDialog spinner = Helpers.showProgressDialog(GeneralPreferenceFragment.this.getContext(), getString(R.string.syncing_db), null);
-					SyncManager.syncFSToDB(GeneralPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
-						@Override
-						public void onFinish(Boolean needToUpdateUI) {
-							spinner.dismiss();
-						}
-					}, AsyncTask.THREAD_POOL_EXECUTOR);
-					return true;
-				}
+			resyncDBPref.setOnPreferenceClickListener(preference -> {
+				final ProgressDialog spinner = Helpers.showProgressDialog(GeneralPreferenceFragment.this.getContext(), getString(R.string.syncing_db), null);
+				SyncManager.syncFSToDB(GeneralPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
+					@Override
+					public void onFinish(Boolean needToUpdateUI) {
+						spinner.dismiss();
+					}
+				}, AsyncTask.THREAD_POOL_EXECUTOR);
+				return true;
 			});
 		}
 	}
@@ -196,6 +194,50 @@ public class SettingsActivity extends AppCompatActivity implements
 					return false;
 				}
 				return true;
+			});
+
+			SwitchPreference keyBackupPref = findPreference("is_key_backed_up");
+			keyBackupPref.setOnPreferenceChangeListener((preference, newValue) -> {
+				final Context context = SecurityPreferenceFragment.this.getContext();
+				if((Boolean)newValue == false){
+					Helpers.showConfirmDialog(context, getString(R.string.key_backup_delete_confirm), (dialogInterface, i) -> {
+						(new ReuploadKeysAsyncTask(SecurityPreferenceFragment.this.getActivity(), null, true, new OnAsyncTaskFinish() {
+							@Override
+							public void onFinish() {
+								keyBackupPref.setChecked(false);
+							}
+						})).execute();
+
+					}, null);
+				}
+				else{
+					LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
+						showCancel = true;
+						showLogout = false;
+						quitActivityOnCancel = false;
+						cancellable = true;
+					}};
+					LoginManager.getPasswordFromUser(SecurityPreferenceFragment.this.getActivity(), loginConfig, new PasswordReturnListener() {
+						@Override
+						public void passwordReceived(String enteredPassword, AlertDialog dialog) {
+							LoginManager.dismissLoginDialog(dialog);
+							(new ReuploadKeysAsyncTask(SecurityPreferenceFragment.this.getActivity(), enteredPassword, false, new OnAsyncTaskFinish() {
+								@Override
+								public void onFinish() {
+									keyBackupPref.setChecked(true);
+								}
+							})).execute();
+						}
+
+						@Override
+						public void passwordReceiveFailed(AlertDialog dialog) {
+
+						}
+
+					});
+				}
+
+				return false;
 			});
 		}
 	}
