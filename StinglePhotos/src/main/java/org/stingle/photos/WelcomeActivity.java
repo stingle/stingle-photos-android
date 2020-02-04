@@ -7,7 +7,6 @@ import androidx.viewpager.widget.ViewPager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -79,7 +78,7 @@ public class WelcomeActivity extends AppCompatActivity {
 	private View.OnClickListener goToSignUp(){
 		return v -> {
 			Intent intent = new Intent();
-			intent.setClass(WelcomeActivity.this, SetUpActivity.class);
+			intent.setClass(WelcomeActivity.this, SignUpActivity.class);
 			startActivity(intent);
 		};
 	}

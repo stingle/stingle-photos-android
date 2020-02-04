@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
@@ -16,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SeekBarPreference;
 import androidx.preference.SwitchPreference;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -133,75 +133,23 @@ public class SettingsActivity extends AppCompatActivity implements
 		}
 	}
 
-	public static class GeneralPreferenceFragment extends PreferenceFragmentCompat {
+	public static class AccountPreferenceFragment extends PreferenceFragmentCompat {
 
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-			setPreferencesFromResource(R.xml.general_preferences, rootKey);
+			setPreferencesFromResource(R.xml.account_preferences, rootKey);
 
-			initResyncDBButton();
-
-			SwitchPreference blockScreenshotsSetting = findPreference("block_screenshots");
-			blockScreenshotsSetting.setOnPreferenceChangeListener((preference, newValue) -> {
-				final Context context = GeneralPreferenceFragment.this.getContext();
-				Helpers.showConfirmDialog(context, getString(R.string.need_restart), new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialogInterface, int i) {
-
-						Intent intent = new Intent(context, GalleryActivity.class);
-						intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-						//intent.putExtra(KEY_RESTART_INTENT, nextIntent);
-						context.startActivity(intent);
-
-						Runtime.getRuntime().exit(0);
-					}
-				}, null);
-				return true;
-			});
+			initKeyBackupSettings();
+			initChangePassword();
 		}
 
-		protected void initResyncDBButton() {
-			Preference resyncDBPref = findPreference("resync_db");
-			resyncDBPref.setOnPreferenceClickListener(preference -> {
-				final ProgressDialog spinner = Helpers.showProgressDialog(GeneralPreferenceFragment.this.getContext(), getString(R.string.syncing_db), null);
-				SyncManager.syncFSToDB(GeneralPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
-					@Override
-					public void onFinish(Boolean needToUpdateUI) {
-						spinner.dismiss();
-					}
-				}, AsyncTask.THREAD_POOL_EXECUTOR);
-				return true;
-			});
-		}
-	}
-
-	public static class SecurityPreferenceFragment extends PreferenceFragmentCompat {
-
-		@Override
-		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-			setPreferencesFromResource(R.xml.security_preferences, rootKey);
-
-			SwitchPreference biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
-
-			BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper((AppCompatActivity) getActivity());
-			if(!biometricsManagerWrapper.isBiometricsAvailable()){
-				biometricSetting.setEnabled(false);
-			}
-			biometricSetting.setOnPreferenceChangeListener((preference, newValue) -> {
-				boolean isEnabled = (boolean)newValue;
-				if (isEnabled) {
-					biometricsManagerWrapper.setupBiometrics(biometricSetting, null);
-					return false;
-				}
-				return true;
-			});
-
+		private void initKeyBackupSettings(){
 			SwitchPreference keyBackupPref = findPreference("is_key_backed_up");
 			keyBackupPref.setOnPreferenceChangeListener((preference, newValue) -> {
-				final Context context = SecurityPreferenceFragment.this.getContext();
+				final Context context = AccountPreferenceFragment.this.getContext();
 				if((Boolean)newValue == false){
 					Helpers.showConfirmDialog(context, getString(R.string.key_backup_delete_confirm), (dialogInterface, i) -> {
-						(new ReuploadKeysAsyncTask(SecurityPreferenceFragment.this.getActivity(), null, true, new OnAsyncTaskFinish() {
+						(new ReuploadKeysAsyncTask(AccountPreferenceFragment.this.getActivity(), null, true, new OnAsyncTaskFinish() {
 							@Override
 							public void onFinish() {
 								keyBackupPref.setChecked(false);
@@ -217,11 +165,11 @@ public class SettingsActivity extends AppCompatActivity implements
 						quitActivityOnCancel = false;
 						cancellable = true;
 					}};
-					LoginManager.getPasswordFromUser(SecurityPreferenceFragment.this.getActivity(), loginConfig, new PasswordReturnListener() {
+					LoginManager.getPasswordFromUser(AccountPreferenceFragment.this.getActivity(), loginConfig, new PasswordReturnListener() {
 						@Override
 						public void passwordReceived(String enteredPassword, AlertDialog dialog) {
 							LoginManager.dismissLoginDialog(dialog);
-							(new ReuploadKeysAsyncTask(SecurityPreferenceFragment.this.getActivity(), enteredPassword, false, new OnAsyncTaskFinish() {
+							(new ReuploadKeysAsyncTask(AccountPreferenceFragment.this.getActivity(), enteredPassword, false, new OnAsyncTaskFinish() {
 								@Override
 								public void onFinish() {
 									keyBackupPref.setChecked(true);
@@ -240,6 +188,65 @@ public class SettingsActivity extends AppCompatActivity implements
 				return false;
 			});
 		}
+
+		private void initChangePassword(){
+			Preference changePassPref = findPreference("change_password");
+			changePassPref.setOnPreferenceClickListener(preference -> {
+				Intent intent = new Intent();
+				intent.setClass(AccountPreferenceFragment.this.getActivity(), ChangePasswordActivity.class);
+				startActivity(intent);
+				return false;
+			});
+
+		}
+
+	}
+
+	public static class SecurityPreferenceFragment extends PreferenceFragmentCompat {
+
+		@Override
+		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+			setPreferencesFromResource(R.xml.security_preferences, rootKey);
+
+			initBiometricsSettings();
+			initBlockScreenshotsSettings();
+		}
+
+		private void initBiometricsSettings(){
+			SwitchPreference biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
+
+			BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper((AppCompatActivity) getActivity());
+			if(!biometricsManagerWrapper.isBiometricsAvailable()){
+				biometricSetting.setEnabled(false);
+			}
+			biometricSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				boolean isEnabled = (boolean)newValue;
+				if (isEnabled) {
+					biometricsManagerWrapper.setupBiometrics(biometricSetting, null);
+					return false;
+				}
+				return true;
+			});
+		}
+
+
+
+		private void initBlockScreenshotsSettings(){
+			SwitchPreference blockScreenshotsSetting = findPreference("block_screenshots");
+			blockScreenshotsSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				final Context context = SecurityPreferenceFragment.this.getContext();
+				Helpers.showConfirmDialog(context, getString(R.string.need_restart), (dialogInterface, i) -> {
+
+					Intent intent = new Intent(context, GalleryActivity.class);
+					intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+					//intent.putExtra(KEY_RESTART_INTENT, nextIntent);
+					context.startActivity(intent);
+
+					Runtime.getRuntime().exit(0);
+				}, null);
+				return true;
+			});
+		}
 	}
 
 	public static class SyncPreferenceFragment extends PreferenceFragmentCompat {
@@ -247,6 +254,42 @@ public class SettingsActivity extends AppCompatActivity implements
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.sync_preferences, rootKey);
+
+			initBatteryPref();
+		}
+
+		private void initBatteryPref(){
+			SeekBarPreference pref = findPreference("upload_battery_level");
+			pref.setSummary(getString(R.string.upload_battery_summary, String.valueOf(pref.getValue())));
+			pref.setOnPreferenceChangeListener((preference, newValue) -> {
+				final int progress = Integer.valueOf(String.valueOf(newValue));
+				preference.setSummary(getString(R.string.upload_battery_summary, String.valueOf(progress)));
+				return true;
+			});
+		}
+	}
+
+	public static class AdvancedPreferenceFragment extends PreferenceFragmentCompat {
+
+		@Override
+		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+			setPreferencesFromResource(R.xml.advanced_preferences, rootKey);
+
+			initResyncDBButton();
+		}
+
+		protected void initResyncDBButton() {
+			Preference resyncDBPref = findPreference("resync_db");
+			resyncDBPref.setOnPreferenceClickListener(preference -> {
+				final ProgressDialog spinner = Helpers.showProgressDialog(AdvancedPreferenceFragment.this.getContext(), getString(R.string.syncing_db), null);
+				SyncManager.syncFSToDB(AdvancedPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
+					@Override
+					public void onFinish(Boolean needToUpdateUI) {
+						spinner.dismiss();
+					}
+				}, AsyncTask.THREAD_POOL_EXECUTOR);
+				return true;
+			});
 		}
 	}
 }

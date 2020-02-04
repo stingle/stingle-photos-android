@@ -17,10 +17,6 @@
             android:icon="@drawable/ic_storage"
             android:title="@string/menu_storage" />
         <item
-            android:id="@+id/nav_change_pass"
-            android:icon="@drawable/ic_change_pass"
-            android:title="@string/menu_change_password" />
-        <item
             android:id="@+id/nav_backup"
             android:icon="@drawable/ic_lock"
             android:title="@string/backup_phrase" />

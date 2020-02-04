@@ -17,10 +17,10 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Preference
-        app:fragment="org.stingle.photos.SettingsActivity$GeneralPreferenceFragment"
-        app:icon="@drawable/ic_info"
-        app:key="general_header"
-        app:title="@string/pref_header_general" />
+        app:fragment="org.stingle.photos.SettingsActivity$AccountPreferenceFragment"
+        app:icon="@drawable/ic_account"
+        app:key="account_header"
+        app:title="@string/pref_header_account" />
 
     <Preference
         app:fragment="org.stingle.photos.SettingsActivity$SecurityPreferenceFragment"
@@ -33,5 +33,11 @@
         app:icon="@drawable/ic_backup"
         app:key="sync_header"
         app:title="@string/pref_header_sync" />
+
+    <Preference
+        app:fragment="org.stingle.photos.SettingsActivity$AdvancedPreferenceFragment"
+        app:icon="@drawable/ic_settings"
+        app:key="advanced_header"
+        app:title="@string/pref_header_advanced" />
 
 </PreferenceScreen>

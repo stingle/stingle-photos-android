@@ -617,11 +617,6 @@ public class GalleryActivity extends AppCompatActivity
 			intent.setClass(this, StorageActivity.class);
 			startActivity(intent);
 		}
-		else if (id == R.id.nav_change_pass) {
-			Intent intent = new Intent();
-			intent.setClass(this, ChangePasswordActivity.class);
-			startActivity(intent);
-		}
 		else if (id == R.id.nav_backup) {
 			Intent intent = new Intent();
 			intent.setClass(this, BackupKeyActivity.class);

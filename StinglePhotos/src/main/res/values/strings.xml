@@ -173,8 +173,8 @@
     <string name="pref_header_sync">Backup and Sync</string>
     <string name="upload_only_on_wifi">Backup only on Wifi</string>
     <string name="upload_only_on_wifi_desc">Backup only when you are connected to Wifi network</string>
-    <string name="upload_battery">Minimum battery level</string>
-    <string name="upload_battery_summary">Backup only if battery level is more than (%)</string>
+    <string name="upload_battery">Don\'t backup if battery is below</string>
+    <string name="upload_battery_summary">%s%%</string>
     <string name="sync_disabled">Backup is disabled</string>
     <string name="sync_not_on_wifi">Backup suspended. Not connected to Wifi network</string>
     <string name="sync_battery_low">Backup suspended. Low battery</string>
@@ -225,7 +225,7 @@
     <string name="title_activity_backup_phrase">Backup phrase</string>
     <string name="backup_phrase_desc">Your backup phrase is the most valuable secret of your account. \n\nPlease make sure to back it up in safe place. \n\nIf someone gets this phrase then they can get access to all of your data!</string>
     <string name="biometrics_confirm">Require confirmation</string>
-    <string name="biometrics_confirm_desc">Require to press confirm button after biometric authentication</string>
+    <string name="biometrics_confirm_desc">Press confirm button after face unlock</string>
     <string name="title_forgot_password">Forgot password</string>
     <string name="backup_phrase_enter_desc">Please enter your 24 word recovery phrase</string>
     <string name="recovery_desc">Please enter your email address and your recovery phrase. If correct you will be able to set a new password for your account.</string>
@@ -250,6 +250,12 @@
     <string name="uploading_keys">Uploading keys...</string>
     <string name="success_delete_keys">Your key backup is successfully deleted. From now on you will need to enter your backup phrase after login along side with your email and password.</string>
     <string name="success_backup_keys">Your keys have been successfully backed up.</string>
+    <string name="pref_header_account">Account</string>
+    <string name="pref_header_advanced">Advanced</string>
+    <string name="authentication">Authentication</string>
+    <string name="locking">App access</string>
+    <string name="key_management">Key Management</string>
+    <string name="advanced">Advanced</string>
 
 
 </resources>

@@ -174,7 +174,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SetUpActivity"
+            android:name=".SignUpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_setup"
             android:theme="@style/AppThemeCompatWithActionBar" />

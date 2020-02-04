@@ -1,22 +1,41 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <SwitchPreference
-        app:defaultValue="false"
-        app:key="biometrics"
-        app:summary="@string/biometric_auth_desc"
-        app:title="@string/biometric_auth" />
+    <PreferenceCategory android:title="@string/locking">
+        <ListPreference
+            app:icon="@drawable/ic_time_red"
+            app:defaultValue="60"
+            app:entries="@array/lockTimes"
+            app:entryValues="@array/lockTimesValues"
+            app:key="lock_time"
+            app:useSimpleSummaryProvider="true"
+            app:title="@string/lock_time" />
+    </PreferenceCategory>
 
-    <SwitchPreference
-        app:defaultValue="false"
-        app:key="biometrics_confirm"
-        app:summary="@string/biometrics_confirm_desc"
-        app:title="@string/biometrics_confirm"
-        app:dependency="biometrics"/>
+    <PreferenceCategory android:title="@string/authentication">
 
-    <SwitchPreference
-        app:defaultValue="false"
-        app:key="is_key_backed_up"
-        app:summary="@string/backup_key_desc_pref"
-        app:title="@string/backup_key"/>
+        <SwitchPreference
+            app:icon="@drawable/ic_fingerprint_red"
+            app:defaultValue="false"
+            app:key="biometrics"
+            app:summary="@string/biometric_auth_desc"
+            app:title="@string/biometric_auth" />
 
+        <SwitchPreference
+            app:icon="@drawable/ic_check_red"
+            app:defaultValue="false"
+            app:key="biometrics_confirm"
+            app:summary="@string/biometrics_confirm_desc"
+            app:title="@string/biometrics_confirm"
+            app:dependency="biometrics"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/other">
+        <SwitchPreference
+            app:icon="@drawable/ic_screen_lock_red"
+            app:defaultValue="false"
+            app:key="block_screenshots"
+            app:title="@string/block_screenshots" />
+    </PreferenceCategory>
 </PreferenceScreen>

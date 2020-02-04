@@ -1,0 +1,14 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:icon="@drawable/ic_refresh_red"
+        app:key="resync_db"
+        app:summary="@string/resync_db_desc"
+        app:title="@string/resync_db" />
+
+    <!--<Preference
+        app:key="clear_cache"
+        app:summary="@string/clear_cache_desc"
+        app:title="@string/clear_cache" />-->
+
+</PreferenceScreen>

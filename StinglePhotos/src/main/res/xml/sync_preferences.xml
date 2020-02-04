@@ -1,12 +1,14 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <SwitchPreference
+        app:icon="@drawable/ic_backup"
         app:defaultValue="true"
         app:key="enable_backup"
         app:title="@string/enable_backup"
         app:summary="@string/enable_backup_desc" />
 
     <SwitchPreference
+        app:icon="@drawable/ic_wifi_red"
         app:defaultValue="false"
         app:key="upload_only_on_wifi"
         app:dependency="enable_backup"
@@ -14,11 +16,12 @@
         app:summary="@string/upload_only_on_wifi_desc" />
 
     <SeekBarPreference
+        app:icon="@drawable/ic_battery_charging_red"
         app:defaultValue="30"
         app:key="upload_battery_level"
         app:dependency="enable_backup"
-        app:showSeekBarValue="true"
         app:title="@string/upload_battery"
+        app:updatesContinuously="true"
         app:summary="@string/upload_battery_summary"/>
 
 </PreferenceScreen>
