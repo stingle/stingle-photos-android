@@ -74,29 +74,42 @@ public class BackupKeyActivity extends AppCompatActivity {
 	}
 
 	private View.OnClickListener getPhraseClickListener(){
-		return v -> LoginManager.showEnterPasswordToUnlock(this, new LoginManager.LoginConfig(){{showLogout=false;showCancel=true;quitActivityOnCancel=false;}}, new LoginManager.UserLogedinCallback() {
-			@Override
-			public void onUserAuthSuccess() {
-				AlertDialog.Builder builder = new AlertDialog.Builder(BackupKeyActivity.this);
-				builder.setView(R.layout.backup_phrase_popup);
-				builder.setCancelable(true);
-				AlertDialog dialog = builder.create();
-				dialog.show();
+		return v -> {
+			LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
+				showCancel = true;
+				showLogout = false;
+				quitActivityOnCancel = false;
+				cancellable = true;
+				okButtonText = getString(R.string.ok);
+				titleText = getString(R.string.please_enter_password);
+				subTitleText = getString(R.string.password_for_backup);
+			}};
 
-				Button okButton = dialog.findViewById(R.id.okButton);
-				TextView keyText = dialog.findViewById(R.id.keyText);
+			LoginManager.showEnterPasswordToUnlock(this, loginConfig, new LoginManager.UserLogedinCallback() {
+				@Override
+				public void onUserAuthSuccess() {
+					AlertDialog.Builder builder = new AlertDialog.Builder(BackupKeyActivity.this);
+					builder.setView(R.layout.backup_phrase_popup);
+					builder.setCancelable(true);
+					AlertDialog dialog = builder.create();
+					dialog.show();
 
-				okButton.setOnClickListener(v -> dialog.dismiss());
+					Button okButton = dialog.findViewById(R.id.okButton);
+					TextView keyText = dialog.findViewById(R.id.keyText);
 
-				try {
-					byte[] privateKey = StinglePhotosApplication.getKey();
+					okButton.setOnClickListener(v -> dialog.dismiss());
 
-					String mnemonicKey = MnemonicUtils.generateMnemonic(BackupKeyActivity.this, privateKey);
+					try {
+						byte[] privateKey = StinglePhotosApplication.getKey();
 
-					keyText.setText(mnemonicKey);
+						String mnemonicKey = MnemonicUtils.generateMnemonic(BackupKeyActivity.this, privateKey);
 
-				} catch (IllegalArgumentException | IOException ignored){ }
-			}
-		});
+						keyText.setText(mnemonicKey);
+
+					} catch (IllegalArgumentException | IOException ignored) {
+					}
+				}
+			});
+		};
 	}
 }

@@ -164,6 +164,10 @@ public class SettingsActivity extends AppCompatActivity implements
 						showLogout = false;
 						quitActivityOnCancel = false;
 						cancellable = true;
+						okButtonText = getString(R.string.ok);
+						titleText = getString(R.string.please_enter_password);
+						subTitleText = getString(R.string.password_for_key_backup);
+						showLockIcon = false;
 					}};
 					LoginManager.getPasswordFromUser(AccountPreferenceFragment.this.getActivity(), loginConfig, new PasswordReturnListener() {
 						@Override

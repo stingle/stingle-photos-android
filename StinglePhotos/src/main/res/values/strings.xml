@@ -75,7 +75,7 @@
     <string name="fingerprint_auth_failed">"Authentication failed"</string>
     <string name="fingerprint_auth_success">"Success!"</string>
     <string name="fingerprint_auth_help">"Authentication help\n%s"</string>
-    <string name="enter_password_desc">"Please enter your password to continue"</string>
+    <string name="enter_password_desc">"Please enter your password to unlock"</string>
     <string name="other">"Other"</string>
 
 
@@ -256,6 +256,10 @@
     <string name="locking">App access</string>
     <string name="key_management">Key Management</string>
     <string name="advanced">Advanced</string>
+    <string name="password_for_biometrics">To setup biometric auth please enter your password</string>
+    <string name="password_for_backup">To show your backup phrase please enter your password</string>
+    <string name="password_for_key_backup">To backup your keys please enter your password</string>
+    <string name="exit">Exit</string>
 
 
 </resources>

@@ -142,34 +142,39 @@ public class BiometricsManagerWrapper {
                             callback.onFailed();
                         }
                     }
-                    LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
-                        showCancel = true;
-                        showLogout = false;
-                        quitActivityOnCancel = false;
-                        cancellable = true;
-                    }};
-                    LoginManager.getPasswordFromUser(activity, loginConfig, new PasswordReturnListener() {
-                        @Override
-                        public void passwordReceived(String enteredPassword, AlertDialog dialog) {
-                            if(encryptAndSavePassword(cipher, iv, enteredPassword)) {
-                                if (preferenceFinal != null) {
-                                    ((SwitchPreference) preferenceFinal).setChecked(true);
+                    else {
+                        LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
+                            showCancel = true;
+                            showLogout = false;
+                            quitActivityOnCancel = false;
+                            cancellable = true;
+                            okButtonText = activity.getString(R.string.ok);
+                            titleText = activity.getString(R.string.please_enter_password);
+                            subTitleText = activity.getString(R.string.password_for_biometrics);
+                            showLockIcon = false;
+                        }};
+                        LoginManager.getPasswordFromUser(activity, loginConfig, new PasswordReturnListener() {
+                            @Override
+                            public void passwordReceived(String enteredPassword, AlertDialog dialog) {
+                                if (encryptAndSavePassword(cipher, iv, enteredPassword)) {
+                                    if (preferenceFinal != null) {
+                                        ((SwitchPreference) preferenceFinal).setChecked(true);
+                                    }
+
+                                    LoginManager.dismissLoginDialog(dialog);
+                                    callback.onSuccess();
+                                } else {
+                                    ((EditText) dialog.findViewById(R.id.password)).setText("");
+                                    callback.onFailed();
                                 }
+                            }
 
+                            @Override
+                            public void passwordReceiveFailed(AlertDialog dialog) {
                                 LoginManager.dismissLoginDialog(dialog);
-                                callback.onSuccess();
                             }
-                            else{
-                                ((EditText) dialog.findViewById(R.id.password)).setText("");
-                                callback.onFailed();
-                            }
-                        }
-
-                        @Override
-                        public void passwordReceiveFailed(AlertDialog dialog) {
-                            LoginManager.dismissLoginDialog(dialog);
-                        }
-                    });
+                        });
+                    }
                 }
 
 

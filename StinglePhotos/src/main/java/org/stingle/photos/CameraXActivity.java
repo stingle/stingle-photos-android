@@ -565,12 +565,12 @@ public class CameraXActivity extends AppCompatActivity {
 			applyResolution();
 			if(!isInVideoMode){
 				cameraView.setCaptureMode(CameraView.CaptureMode.IMAGE);
-				modeChangerButton.setImageResource(R.drawable.ic_photo);
+				modeChangerButton.setImageResource(R.drawable.ic_video);
 				takePhotoButton.setImageDrawable(getDrawable(R.drawable.button_shutter));
 			}
 			else{
 				cameraView.setCaptureMode(CameraView.CaptureMode.VIDEO);
-				modeChangerButton.setImageResource(R.drawable.ic_video);
+				modeChangerButton.setImageResource(R.drawable.ic_photo);
 				takePhotoButton.setImageDrawable(getDrawable(R.drawable.button_shutter_video));
 				setFlashMode(FlashMode.OFF);
 			}

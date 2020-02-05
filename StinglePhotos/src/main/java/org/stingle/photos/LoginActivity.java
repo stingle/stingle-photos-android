@@ -3,12 +3,10 @@ package org.stingle.photos;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,16 +36,14 @@ public class LoginActivity extends AppCompatActivity {
 		findViewById(R.id.login).setOnClickListener(login());
 		findViewById(R.id.register).setOnClickListener(gotoSignUp());
 		findViewById(R.id.forgot_password).setOnClickListener(gotoForgotPassword());
-		((EditText) findViewById(R.id.password)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_GO) {
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-					doLogin();
-					return true;
-				}
-				return false;
+		((EditText) findViewById(R.id.password)).setOnEditorActionListener((v, actionId, event) -> {
+			if (actionId == EditorInfo.IME_ACTION_GO) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+				doLogin();
+				return true;
 			}
+			return false;
 		});
 	}
 

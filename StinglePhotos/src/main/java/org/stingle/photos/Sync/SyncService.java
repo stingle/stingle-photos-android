@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -236,12 +237,19 @@ public class SyncService extends Service {
 		}
 
 		if(uploadBatteryLevel > 0){
+			IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+			Intent batteryStatus = context.registerReceiver(null, iFilter);
+			int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+			boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+					status == BatteryManager.BATTERY_STATUS_FULL;
+
+
 			BatteryManager bm = (BatteryManager)getSystemService(BATTERY_SERVICE);
 			int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
 			Log.d("battery level", String.valueOf(batLevel));
 
-			if(batLevel < uploadBatteryLevel){
+			if(!isCharging && batLevel < uploadBatteryLevel){
 				return STATUS_BATTERY_LOW;
 			}
 		}

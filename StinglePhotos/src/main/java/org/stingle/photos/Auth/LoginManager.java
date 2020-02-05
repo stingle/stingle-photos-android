@@ -14,6 +14,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -28,12 +29,14 @@ import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.WelcomeActivity;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 public class LoginManager {
 
     public static final String BIOMETRIC_PREFERENCE = "biometrics";
     public static final String LAST_LOCK_TIME = "lock_time";
+    private static WeakReference<AlertDialog> loginDialogRef;
 
     public static void checkLogin(AppCompatActivity activity) {
         checkLogin(activity, new LoginConfig(), null);
@@ -43,7 +46,7 @@ public class LoginManager {
         checkLogin(activity, new LoginConfig(), loginCallback);
     }
 
-    public static void checkLogin(final AppCompatActivity activity, LoginConfig config, final UserLogedinCallback loginCallback) {
+    public static void checkLogin(final AppCompatActivity activity, LoginConfig loginConfig, final UserLogedinCallback loginCallback) {
 
         if(!checkIfLoggedIn(activity)){
             if(loginCallback != null) {
@@ -56,6 +59,13 @@ public class LoginManager {
             loginCallback.onLoggedIn();
         }
 
+        if(loginConfig == null){
+            loginConfig = new LoginConfig();
+        }
+        loginConfig.okButtonText = activity.getString(R.string.login);
+        loginConfig.cancelButtonText = activity.getString(R.string.exit);
+        loginConfig.showCancel = true;
+
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
         int lockTimeout = Integer.valueOf(sharedPrefs.getString(LAST_LOCK_TIME, "60")) * 1000;
 
@@ -67,6 +77,8 @@ public class LoginManager {
                 lock(activity);
             }
         }
+
+        final LoginConfig loginConfigF = loginConfig;
 
         if (StinglePhotosApplication.getKey() == null) {
 
@@ -85,7 +97,7 @@ public class LoginManager {
 
                     @Override
                     public void onAuthUsingPassword() {
-                        showEnterPasswordToUnlock(activity, loginCallback);
+                        showEnterPasswordToUnlock(activity, loginConfigF, loginCallback);
                     }
 
                     @Override
@@ -96,7 +108,7 @@ public class LoginManager {
                 }, loginCallback, true);
             }
             else{
-                showEnterPasswordToUnlock(activity, config, loginCallback);
+                showEnterPasswordToUnlock(activity, loginConfigF, loginCallback);
             }
         }
         else {
@@ -170,32 +182,53 @@ public class LoginManager {
 
     public static void getPasswordFromUser(final Activity activity, LoginConfig config, final PasswordReturnListener listener){
         final Context myContext = activity;
+
+        if(loginDialogRef != null && loginDialogRef.get() != null){
+            loginDialogRef.get().dismiss();
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(R.layout.password);
         builder.setCancelable(config.cancellable);
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        AlertDialog loginDialog = builder.create();
+        loginDialogRef = new WeakReference<AlertDialog>(loginDialog);
+        loginDialog.show();
 
-        Button okButton = dialog.findViewById(R.id.okButton);
-        final EditText passwordField = dialog.findViewById(R.id.password);
-        Button logoutButton = dialog.findViewById(R.id.logoutButton);
-        Button cancelButton = dialog.findViewById(R.id.cancelButton);
+        Button okButton = loginDialog.findViewById(R.id.okButton);
+        final EditText passwordField = loginDialog.findViewById(R.id.password);
+        Button logoutButton = loginDialog.findViewById(R.id.logoutButton);
+        Button cancelButton = loginDialog.findViewById(R.id.cancelButton);
 
         final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 
-        //okButton.setText(activity.getString(R.string.login));
+        if(config.okButtonText != null) {
+            okButton.setText(config.okButtonText);
+        }
+        if(config.cancelButtonText != null) {
+            cancelButton.setText(config.cancelButtonText);
+        }
+        if(config.titleText != null) {
+            ((TextView)loginDialog.findViewById(R.id.titleTextView)).setText(config.titleText);
+        }
+        if(config.subTitleText != null) {
+            ((TextView)loginDialog.findViewById(R.id.subtitleTextView)).setText(config.subTitleText);
+        }
+        if(!config.showLockIcon) {
+            loginDialog.findViewById(R.id.loginLockIcon).setVisibility(View.GONE);
+        }
+
 
         okButton.setOnClickListener(v -> {
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-            listener.passwordReceived(passwordField.getText().toString(), dialog);
+            listener.passwordReceived(passwordField.getText().toString(), loginDialog);
         });
 
-        dialog.setOnCancelListener(dialog1 -> listener.passwordReceiveFailed(dialog));
-        dialog.setOnKeyListener((mDialog, keyCode, event) -> {
+        loginDialog.setOnCancelListener(dialog1 -> listener.passwordReceiveFailed(loginDialog));
+        loginDialog.setOnKeyListener((mDialog, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK){
-                dialog.dismiss();
-                listener.passwordReceiveFailed(dialog);
+                loginDialog.dismiss();
+                listener.passwordReceiveFailed(loginDialog);
                 return true;
             }
             return false;
@@ -204,9 +237,9 @@ public class LoginManager {
         passwordField.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO) {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                listener.passwordReceived(passwordField.getText().toString(), dialog);
-                if(dialog != null){
-                    dialog.dismiss();
+                listener.passwordReceived(passwordField.getText().toString(), loginDialog);
+                if(loginDialog != null){
+                    loginDialog.dismiss();
                 }
                 return true;
             }
@@ -217,13 +250,13 @@ public class LoginManager {
         if(config.showLogout) {
             logoutButton.setOnClickListener(v -> {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                if(dialog != null){
-                    dialog.dismiss();
+                if(loginDialog != null){
+                    loginDialog.dismiss();
                 }
                 LoginManager.logout(activity, (dialog12, which) -> {
-                    listener.passwordReceiveFailed(dialog);
+                    listener.passwordReceiveFailed(loginDialog);
                 }, (dialog13, which) -> {
-                    listener.passwordReceiveFailed(dialog);
+                    listener.passwordReceiveFailed(loginDialog);
                 });
 
             });
@@ -235,10 +268,10 @@ public class LoginManager {
         if(config.showCancel) {
             cancelButton.setOnClickListener(v -> {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                if(dialog != null){
-                    dialog.dismiss();
+                if(loginDialog != null){
+                    loginDialog.dismiss();
                 }
-                listener.passwordReceiveFailed(dialog);
+                listener.passwordReceiveFailed(loginDialog);
             });
         }
         else{
@@ -352,6 +385,10 @@ public class LoginManager {
         public boolean showCancel = false;
         public boolean quitActivityOnCancel = true;
         public boolean cancellable = false;
-
+        public boolean showLockIcon = true;
+        public String okButtonText = null;
+        public String cancelButtonText = null;
+        public String titleText = null;
+        public String subTitleText = null;
     }
 }
