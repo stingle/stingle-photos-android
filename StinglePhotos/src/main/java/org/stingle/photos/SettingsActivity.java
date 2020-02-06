@@ -139,8 +139,14 @@ public class SettingsActivity extends AppCompatActivity implements
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.account_preferences, rootKey);
 
+			initEmail();
 			initKeyBackupSettings();
 			initChangePassword();
+		}
+
+		private void initEmail(){
+			Preference email = findPreference("email");
+			email.setSummary(Helpers.getPreference(AccountPreferenceFragment.this.getActivity(), StinglePhotosApplication.USER_EMAIL, ""));
 		}
 
 		private void initKeyBackupSettings(){
