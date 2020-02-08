@@ -127,10 +127,12 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);*/
 					Bitmap thumb = getVideoThumbnail(context, uri);
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
+					if(thumb != null) {
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
-					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+						Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+					}
 				}
 
 				FileOutputStream outputStream = new FileOutputStream(encFilePath);
@@ -155,6 +157,11 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 	private Bitmap getVideoThumbnail(Context context, Uri uri) throws IllegalArgumentException,
 			SecurityException{
 		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+		if(uri == null){
+			return null;
+		}
+
 		retriever.setDataSource(context,uri);
 		return retriever.getFrameAtTime();
 	}

@@ -64,7 +64,7 @@
     <string name="read_only">"Read Only"</string>
     <string name="home_folder_problem_title">"Problem with StinglePhotos folder"</string>
     <string name="please_enter_password">"Please enter password"</string>
-    <string name="app_locked">"Stignle Photos is locked"</string>
+    <string name="app_locked">"Stingle Photos is locked"</string>
     <string name="use_fingerprint">"Fingerprint authentication"</string>
     <string name="use_fingerprint_desc">"Use your fingerprint instead of entering password"</string>
     <string name="error_fingerprint_perm">"Please enable the fingerprint permission"</string>
