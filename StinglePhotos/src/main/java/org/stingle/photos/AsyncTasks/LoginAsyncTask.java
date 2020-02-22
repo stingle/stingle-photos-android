@@ -38,12 +38,17 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private String userId;
 	private String homeFolder;
 	private String token;
+	private boolean privateKeyIsAlreadySaved = false;
 
 
 	public LoginAsyncTask(AppCompatActivity context, String email, String password){
 		this.activity = context;
 		this.email = email;
 		this.password = password;
+	}
+
+	public void setPrivateKeyIsAlreadySaved(boolean privateKeyIsAlreadySaved) {
+		this.privateKeyIsAlreadySaved = privateKeyIsAlreadySaved;
 	}
 
 	@Override
@@ -91,16 +96,22 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 					homeFolder = response.get("homeFolder");
 					if (token != null && keyBundle != null && homeFolder != null && userId != null && token.length() > 0 && keyBundle.length() > 0 && homeFolder.length() > 0 && userId.length() > 0) {
 						try {
-							boolean importResult = KeyManagement.importKeyBundle(keyBundle, password);
-							KeyManagement.importServerPublicKey(serverPublicKey);
-
-							if (!importResult) {
-								return false;
-							}
-
-							if(isKeyBackedUp) {
+							if(privateKeyIsAlreadySaved) {
 								StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(password));
 							}
+							else {
+								boolean importResult = KeyManagement.importKeyBundle(keyBundle, password);
+								KeyManagement.importServerPublicKey(serverPublicKey);
+
+								if (!importResult) {
+									return false;
+								}
+
+								if(isKeyBackedUp) {
+									StinglePhotosApplication.setKey(StinglePhotosApplication.getCrypto().getPrivateKey(password));
+								}
+							}
+
 
 							return true;
 						} catch (CryptoException e) {
@@ -133,7 +144,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		if(result) {
 			LoginManager.disableLockTimer(activity);
 
-			if(!isKeyBackedUp){
+			if(!isKeyBackedUp && !privateKeyIsAlreadySaved){
 				AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 				builder.setView(R.layout.enter_phrase_dialog);
 				builder.setCancelable(false);

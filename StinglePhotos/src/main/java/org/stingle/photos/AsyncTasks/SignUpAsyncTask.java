@@ -78,7 +78,9 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		progressDialog.dismiss();
 		if(result) {
-			(new LoginAsyncTask(activity, email, password)).execute();
+			LoginAsyncTask loginAsyncTask = new LoginAsyncTask(activity, email, password);
+			loginAsyncTask.setPrivateKeyIsAlreadySaved(true);
+			loginAsyncTask.execute();
 		}
 		else{
 			if(response.areThereErrorInfos()) {

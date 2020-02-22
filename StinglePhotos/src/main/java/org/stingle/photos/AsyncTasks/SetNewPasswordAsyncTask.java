@@ -131,7 +131,9 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		if(result) {
 			onFinish.onFinish();
 			if(!localOnly) {
-				(new LoginAsyncTask(activity, email, password)).execute();
+				LoginAsyncTask loginAsyncTask = new LoginAsyncTask(activity, email, password);
+				loginAsyncTask.setPrivateKeyIsAlreadySaved(true);
+				loginAsyncTask.execute();
 			}
 		}
 		else{
