@@ -1,8 +1,7 @@
 package org.stingle.photos.AsyncTasks;
 
+import android.content.Context;
 import android.os.AsyncTask;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
@@ -14,10 +13,10 @@ import java.util.HashMap;
 
 public class GetServerPKAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-	private AppCompatActivity activity;
+	private Context activity;
 
 
-	public GetServerPKAsyncTask(AppCompatActivity context){
+	public GetServerPKAsyncTask(Context context){
 		this.activity = context;
 	}
 

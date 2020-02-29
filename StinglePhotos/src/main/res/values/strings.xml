@@ -260,6 +260,8 @@
     <string name="password_for_backup">To show your backup phrase please enter your password</string>
     <string name="password_for_key_backup">To backup your keys please enter your password</string>
     <string name="exit">Exit</string>
+    <string name="albums">Albums</string>
+    <string name="sharing">Sharing</string>
 
 
 </resources>

@@ -10,7 +10,7 @@ import android.provider.BaseColumns;
 
 public class StingleDbHelper extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = 2;
 	public static final String DATABASE_NAME = "stingleFiles.db";
 
 	public static final int GET_MODE_ALL = 0;
@@ -38,17 +38,34 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		this.tableName = tableName;
 	}
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(StingleDbContract.SQL_CREATE_FILES);
-		db.execSQL(StingleDbContract.SQL_CREATE_TRASH);
+		createTables(db);
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL(StingleDbContract.SQL_DELETE_FILES);
-		db.execSQL(StingleDbContract.SQL_DELETE_TRASH);
-		onCreate(db);
+		if(oldVersion == 1 && newVersion ==2){
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
+			db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
+		}
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		onUpgrade(db, oldVersion, newVersion);
+	}
+
+	private void createTables(SQLiteDatabase db){
+		db.execSQL(StingleDbContract.SQL_CREATE_FILES);
+		db.execSQL(StingleDbContract.SQL_CREATE_TRASH);
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
+		db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
+	}
+
+	private void deleteTables(SQLiteDatabase db){
+		db.execSQL(StingleDbContract.SQL_DELETE_FILES);
+		db.execSQL(StingleDbContract.SQL_DELETE_TRASH);
+		db.execSQL(StingleDbContract.SQL_DELETE_ALBUMS);
+		db.execSQL(StingleDbContract.SQL_DELETE_ALBUM_FILES);
+		db.execSQL(StingleDbContract.SQL_DELETE_SHARES);
 	}
 
 	protected SQLiteDatabase openWriteDb(){
