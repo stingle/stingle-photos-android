@@ -945,8 +945,8 @@ public class SyncManager {
 	}
 
 	public static void resetAndStopSync(Context context){
-		Helpers.storePreference(context, SyncManager.PREF_LAST_SEEN_TIME, null);
-		Helpers.storePreference(context, SyncManager. PREF_LAST_DEL_SEEN_TIME, null);
+		Helpers.deletePreference(context, SyncManager.PREF_LAST_SEEN_TIME);
+		Helpers.deletePreference(context, SyncManager. PREF_LAST_DEL_SEEN_TIME);
 
 		StingleDbHelper filesDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
 		filesDb.truncateTable();

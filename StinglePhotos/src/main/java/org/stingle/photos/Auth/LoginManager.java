@@ -348,7 +348,9 @@ public class LoginManager {
         KeyManagement.deleteLocalKeys();
         KeyManagement.removeApiToken(context);
         BiometricsManagerWrapper.turnOffBiometrics(context);
-        Helpers.storePreference(context, StinglePhotosApplication.USER_EMAIL, null);
+        Helpers.deletePreference(context, StinglePhotosApplication.USER_ID);
+        Helpers.deletePreference(context, StinglePhotosApplication.USER_EMAIL);
+        Helpers.deletePreference(context, StinglePhotosApplication.USER_HOME_FOLDER);
         Helpers.deleteTmpDir(context);
 
         SyncManager.resetAndStopSync(context);
