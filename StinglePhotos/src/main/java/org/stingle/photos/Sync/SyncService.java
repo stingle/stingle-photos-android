@@ -23,8 +23,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.Util.Helpers;
@@ -86,7 +86,7 @@ public class SyncService extends Service {
 
 			@Override
 			public void fileUploadFinished(String filename, int folder) {
-				StingleDbHelper db = new StingleDbHelper(SyncService.this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+				FilesTrashDb db = new FilesTrashDb(SyncService.this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
 				Integer filePos = db.getFilePositionByFilename(filename);
 				db.close();
@@ -161,7 +161,7 @@ public class SyncService extends Service {
 				if(isUploadSuspended){
 					int lastAvailableSpace = Helpers.getPreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
 					int availableSpace = Helpers.getAvailableUploadSpace(SyncService.this);
-					if(availableSpace > lastAvailableSpace){
+					if(availableSpace > lastAvailableSpace || availableSpace > 0){
 						Helpers.storePreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
 						Helpers.deletePreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE);
 						isUploadSuspended = false;

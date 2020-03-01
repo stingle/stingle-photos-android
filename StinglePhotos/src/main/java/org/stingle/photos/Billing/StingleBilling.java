@@ -2,23 +2,15 @@ package org.stingle.photos.Billing;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
-import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
-import java.io.File;
 import java.util.HashMap;
 
 public class StingleBilling {

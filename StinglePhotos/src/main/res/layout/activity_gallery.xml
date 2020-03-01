@@ -95,14 +95,11 @@
                 android:id="@+id/pullToRefresh"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-                <org.stingle.photos.Gallery.DragSelectRecyclerView
-                    android:id="@+id/gallery_recycler_view"
-                    android:scrollbars="vertical"
+                <FrameLayout
+                    android:id="@+id/galleryContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingTop="72dp"
-                    android:paddingBottom="@dimen/bottom_nav_height"
-                    android:clipToPadding="false"/>
+                    android:layout_height="match_parent" />
+
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

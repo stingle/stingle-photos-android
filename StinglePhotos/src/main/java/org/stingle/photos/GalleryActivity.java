@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,10 +40,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -57,27 +59,22 @@ import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
-import org.stingle.photos.Gallery.AutoFitGridLayoutManager;
-import org.stingle.photos.Gallery.DragSelectRecyclerView;
-import org.stingle.photos.Gallery.GalleryAdapterPisasso;
-import org.stingle.photos.Gallery.HidingScrollListener;
+import org.stingle.photos.Gallery.AlbumsFragment;
+import org.stingle.photos.Gallery.GalleryFragment;
+import org.stingle.photos.Gallery.GalleryFragmentParent;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 public class GalleryActivity extends AppCompatActivity
-		implements NavigationView.OnNavigationItemSelectedListener, GalleryAdapterPisasso.Listener {
+		implements NavigationView.OnNavigationItemSelectedListener, GalleryFragmentParent {
 
 	public static final int REQUEST_VIEW_PHOTO = 1;
 	private LocalBroadcastManager lbm;
-	protected DragSelectRecyclerView recyclerView;
-	protected GalleryAdapterPisasso adapter;
-	protected AutoFitGridLayoutManager layoutManager;
+	protected GalleryFragment galleryFragment;
 	protected ActionMode actionMode;
 	protected Toolbar toolbar;
 	protected int currentFolder = SyncManager.FOLDER_MAIN;
@@ -110,8 +107,8 @@ public class GalleryActivity extends AppCompatActivity
 	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if(adapter != null) {
-				adapter.updateDataSet();
+			if(galleryFragment != null) {
+				galleryFragment.updateDataSet();
 			}
 		}
 	};
@@ -140,7 +137,6 @@ public class GalleryActivity extends AppCompatActivity
 		toggle.syncState();
 		navigationView.setNavigationItemSelectedListener(this);
 
-		recyclerView = findViewById(R.id.gallery_recycler_view);
 		syncBar = findViewById(R.id.syncBar);
 		syncProgress = findViewById(R.id.syncProgress);
 		refreshCProgress = findViewById(R.id.refreshCProgress);
@@ -154,36 +150,6 @@ public class GalleryActivity extends AppCompatActivity
 			pullToRefresh.setRefreshing(false);
 		});
 
-		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
-		recyclerView.setHasFixedSize(true);
-		layoutManager = new AutoFitGridLayoutManager(GalleryActivity.this, Helpers.getThumbSize(GalleryActivity.this));
-		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
-			@Override
-			public int getSpanSize(int position) {
-				if (adapter.getItemViewType(position) == GalleryAdapterPisasso.TYPE_DATE) {
-					return layoutManager.getCurrentCalcSpanCount();
-				}
-				return 1;
-			}
-		});
-		recyclerView.setLayoutManager(layoutManager);
-		adapter = new GalleryAdapterPisasso(GalleryActivity.this, GalleryActivity.this, layoutManager, SyncManager.FOLDER_MAIN);
-		recyclerView.addOnScrollListener(new HidingScrollListener() {
-			@Override
-			public void onHide() {
-				syncBar.animate().translationY(-syncBar.getHeight()-Helpers.convertDpToPixels(GalleryActivity.this, 20)).setInterpolator(new AccelerateInterpolator(4));
-			}
-
-
-			@Override
-			public void onShow() {
-				syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
-			}
-		});
-
-		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){
-			lastScrollPosition = savedInstanceState.getInt("scroll");
-		}
 
 		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
@@ -192,6 +158,9 @@ public class GalleryActivity extends AppCompatActivity
 
 		headerView = ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0);
 		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
+
+		initGalleryFragment(SyncManager.FOLDER_MAIN, null, false);
+		setupBottomNavigationView();
 	}
 
 	@Override
@@ -222,6 +191,54 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	}
 
+	private void initGalleryFragment(int folderType, Integer folderId, boolean initNow){
+		if(folderId == null){
+			folderId = -1;
+		}
+
+		FragmentManager fm = getSupportFragmentManager();
+
+
+		Bundle bundle = new Bundle();
+		bundle.putInt("currentFolder", folderType);
+		bundle.putInt("folderId", folderId);
+		bundle.putBoolean("initNow", initNow);
+
+		galleryFragment = new GalleryFragment();
+		galleryFragment.setArguments(bundle);
+
+		Fragment fragment = fm.findFragmentById(R.id.galleryContainer);
+		FragmentTransaction ft = fm.beginTransaction();
+		if (fragment==null) {
+
+			ft.add(R.id.galleryContainer, galleryFragment);
+		}
+		else {
+			ft.replace(R.id.galleryContainer, galleryFragment);
+		}
+		ft.commit();
+	}
+
+	private void initAlbumsFragment(){
+		FragmentManager fm = getSupportFragmentManager();
+
+		Bundle bundle = new Bundle();
+
+		AlbumsFragment albumsFragment = new AlbumsFragment();
+		albumsFragment.setArguments(bundle);
+
+		Fragment fragment = fm.findFragmentById(R.id.galleryContainer);
+		FragmentTransaction ft = fm.beginTransaction();
+		if (fragment==null) {
+
+			ft.add(R.id.galleryContainer, albumsFragment);
+		}
+		else {
+			ft.replace(R.id.galleryContainer, albumsFragment);
+		}
+		ft.commit();
+	}
+
 	private void checkLoginAndInit(){
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
@@ -238,6 +255,18 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void initGallery(){
+
+		galleryFragment.init();
+
+		findViewById(R.id.topBar).setVisibility(View.VISIBLE);
+		startAndBindService();
+		updateQuotaInfo();
+
+		byte[] serverPK = StinglePhotosApplication.getCrypto().getServerPublicKey();
+		if(serverPK == null){
+			(new GetServerPKAsyncTask(this)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+
 		/*String homedir = FileManager.getHomeDir(this);
 		if(homedir == null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N){
 			//File sdCard = new File(Environment.getExternalStorageDirectory().getPath());
@@ -249,21 +278,8 @@ public class GalleryActivity extends AppCompatActivity
 			startActivityForResult(intent, 7);
 		}
 		else {*/
-			findViewById(R.id.topBar).setVisibility(View.VISIBLE);
-			recyclerView.setAdapter(adapter);
-			startAndBindService();
-			layoutManager.scrollToPosition(lastScrollPosition);
 
-			if (adapter != null) {
-				adapter.updateDataSet();
-			}
-			updateQuotaInfo();
 		//}
-
-		byte[] serverPK = StinglePhotosApplication.getCrypto().getServerPublicKey();
-		if(serverPK == null){
-			(new GetServerPKAsyncTask(this)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
 
 		/*SodiumAndroid so = new SodiumAndroid();
 
@@ -279,9 +295,8 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onPause() {
 		super.onPause();
-		lastScrollPosition = layoutManager.findFirstVisibleItemPosition();
 
-		recyclerView.setAdapter(null);
+
 		LoginManager.setLockedTime(this);
 
 		if (isBound) {
@@ -305,12 +320,6 @@ public class GalleryActivity extends AppCompatActivity
 		startService(serviceIntent);
 	}
 
-	@Override
-	public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
-		super.onSaveInstanceState(outState, outPersistentState);
-
-		outState.putInt("scroll", layoutManager.findFirstVisibleItemPosition());
-	}
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -355,7 +364,7 @@ public class GalleryActivity extends AppCompatActivity
 			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
-					adapter.updateDataSet();
+					galleryFragment.updateDataSet();
 					startSync();
 					isImporting = false;
 					checkLoginAndInit();
@@ -440,15 +449,13 @@ public class GalleryActivity extends AppCompatActivity
 				setSyncStatus(newStatus);
 			}
 			else if(msg.what == SyncService.MSG_REFRESH_GALLERY) {
-				int lastScrollPos = recyclerView.getScrollY();
-				adapter.updateDataSet();
-				recyclerView.setScrollY(lastScrollPos);
+				galleryFragment.updateDataSet();
 			}
 			else if(msg.what == SyncService.MSG_REFRESH_GALLERY_ITEM) {
 				Bundle bundle = msg.getData();
 				int position = bundle.getInt("position");
 
-				adapter.updateItem(position);
+				galleryFragment.updateItem(position);
 			}
 			else{
 				super.handleMessage(msg);
@@ -527,7 +534,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	public void onConfigurationChanged(@NonNull Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		layoutManager.updateAutoFit();
+		galleryFragment.updateAutoFit();
 	}
 
 	@Override
@@ -536,7 +543,7 @@ public class GalleryActivity extends AppCompatActivity
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
 			drawer.closeDrawer(GravityCompat.START);
 		}
-		else if (adapter.isSelectionModeActive()) {
+		else if (galleryFragment.isSelectionModeActive()) {
 			exitActionMode();
 		}
 		else {
@@ -593,22 +600,48 @@ public class GalleryActivity extends AppCompatActivity
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void setupBottomNavigationView() {
+		BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+		if (bottomNavigationView != null) {
+
+			// Set action to perform when any menu-item is selected.
+			bottomNavigationView.setOnNavigationItemSelectedListener(
+					item -> {
+						item.setChecked(true);
+
+						switch (item.getItemId()) {
+							case R.id.action_gallery:
+								initGalleryFragment(SyncManager.FOLDER_MAIN, null, true);
+								break;
+							case R.id.action_albums:
+								initAlbumsFragment();
+								break;
+							case R.id.action_sharing:
+								break;
+						}
+						return false;
+					});
+		}
+	}
+
 	@Override
 	public boolean onNavigationItemSelected(MenuItem item) {
 		// Handle navigation view item clicks here.
 		int id = item.getItemId();
 
 		if (id == R.id.nav_gallery) {
-			adapter.setFolder(SyncManager.FOLDER_MAIN);
+			//adapter.setFolder(SyncManager.FOLDER_MAIN);
 			currentFolder = SyncManager.FOLDER_MAIN;
-			recyclerView.scrollToPosition(0);
+			initGalleryFragment(SyncManager.FOLDER_MAIN, null, true);
+			//galleryFragment.scrollToTop();
 			toolbar.setTitle(getString(R.string.title_gallery_for_app));
 			invalidateOptionsMenu();
 		}
 		else if (id == R.id.nav_trash) {
-			adapter.setFolder(SyncManager.FOLDER_TRASH);
+			//adapter.setFolder(SyncManager.FOLDER_TRASH);
 			currentFolder = SyncManager.FOLDER_TRASH;
-			recyclerView.scrollToPosition(0);
+			initGalleryFragment(SyncManager.FOLDER_TRASH, null, true);
+			//galleryFragment.scrollToTop();
 			toolbar.setTitle(getString(R.string.title_trash));
 			invalidateOptionsMenu();
 		}
@@ -642,39 +675,28 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	@Override
-	public void onClick(int index) {
-		if (adapter.isSelectionModeActive()){
-			adapter.toggleSelected(index);
+	public boolean onClick(StingleDbFile file) {
+		if (!galleryFragment.isSelectionModeActive() && sendBackDecryptedFile){
+			ArrayList<StingleDbFile> selectedFiles = new ArrayList<>();
+			selectedFiles.add(file);
+			ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentFolder);
+			return false;
 		}
-		else {
-			if(sendBackDecryptedFile){
-				ArrayList<StingleDbFile> selectedFiles = new ArrayList<>();
-				selectedFiles.add(adapter.getStingleFileAtPosition(index));
-				ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentFolder);
-			}
-			else {
-				Intent intent = new Intent();
-				intent.setClass(this, ViewItemActivity.class);
-				intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
-				intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
-				startActivity(intent);
-			}
-		}
+
+		return true;
 	}
 
 	@Override
-	public void onLongClick(int index) {
-		recyclerView.setDragSelectActive(true, index);
-		if(!adapter.isSelectionModeActive()){
+	public boolean onLongClick(int index) {
+		if(!galleryFragment.isSelectionModeActive()){
 			actionMode = startSupportActionMode(getActionModeCallback());
-			onSelectionChanged(1);
 		}
-		adapter.setSelectionModeActive(true);
+		return true;
 	}
 
 
 	@Override
-	public void onSelectionChanged(int count) {
+	public boolean onSelectionChanged(int count) {
 		if(actionMode != null) {
 			if(count == 0){
 				actionMode.setTitle("");
@@ -683,6 +705,17 @@ public class GalleryActivity extends AppCompatActivity
 				actionMode.setTitle(String.valueOf(count));
 			}
 		}
+		return true;
+	}
+
+	@Override
+	public void scrolledDown() {
+		syncBar.animate().translationY(-syncBar.getHeight()-Helpers.convertDpToPixels(this, 20)).setInterpolator(new AccelerateInterpolator(4));
+	}
+
+	@Override
+	public void scrolledUp() {
+		syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
 	}
 
 
@@ -746,25 +779,15 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void shareSelected() {
-		List<Integer> indices = adapter.getSelectedIndices();
-		ArrayList<StingleDbFile> files = new ArrayList<>();
-		for(Integer index : indices){
-			files.add(adapter.getStingleFileAtPosition(index));
-		}
-
-		ShareManager.shareDbFiles(this, files, currentFolder);
+		ShareManager.shareDbFiles(this, galleryFragment.getSelectedFiles(), currentFolder);
 	}
 
 	private void decryptSelected() {
-		final List<Integer> indices = adapter.getSelectedIndices();
+		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
 		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_decrypt_files)), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.decrypting_files), null);
-						ArrayList<StingleDbFile> files = new ArrayList<>();
-						for(Integer index : indices){
-							files.add(adapter.getStingleFileAtPosition(index));
-						}
 
 						File decryptDir = new File(Environment.getExternalStorageDirectory().getPath() + "/" + FileManager.DECRYPT_DIR);
 						DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(GalleryActivity.this, decryptDir, new OnAsyncTaskFinish() {
@@ -784,40 +807,28 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void sendBackSelected() {
-		List<Integer> indices = adapter.getSelectedIndices();
-		ArrayList<StingleDbFile> files = new ArrayList<>();
-		for(Integer index : indices){
-			files.add(adapter.getStingleFileAtPosition(index));
-		}
-
-		ShareManager.sendBackSelection(this, originalIntent, files, currentFolder);
+		ShareManager.sendBackSelection(this, originalIntent, galleryFragment.getSelectedFiles(), currentFolder);
 	}
 
 
 	protected void exitActionMode(){
-		adapter.clearSelected();
-		recyclerView.setDragSelectActive(false, 0);
+		galleryFragment.clearSelected();
 		if(actionMode != null){
 			actionMode.finish();
 		}
 	}
 
 	protected void trashSelected(){
-		final List<Integer> indices = adapter.getSelectedIndices();
-		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_trash_files), String.valueOf(indices.size())), new DialogInterface.OnClickListener() {
+		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_trash_files), String.valueOf(files.size())), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.trashing_files), null);
-				ArrayList<String> filenames = new ArrayList<>();
-				for(Integer index : indices){
-					StingleDbFile file = adapter.getStingleFileAtPosition(index);
-					filenames.add(file.filename);
-				}
 
-				new SyncManager.MoveToTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
+				new SyncManager.MoveToTrashAsyncTask(GalleryActivity.this, files, new SyncManager.OnFinish(){
 					@Override
 					public void onFinish(Boolean needToUpdateUI) {
-						adapter.updateDataSet();
+						galleryFragment.updateDataSet();
 						exitActionMode();
 						spinner.dismiss();
 					}
@@ -828,19 +839,14 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void restoreSelected(){
-		final List<Integer> indices = adapter.getSelectedIndices();
+		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
 
 		final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.restoring_files), null);
-		ArrayList<String> filenames = new ArrayList<>();
-		for(Integer index : indices){
-			StingleDbFile file = adapter.getStingleFileAtPosition(index);
-			filenames.add(file.filename);
-		}
 
-		new SyncManager.RestoreFromTrashAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
+		new SyncManager.RestoreFromTrashAsyncTask(GalleryActivity.this, files, new SyncManager.OnFinish(){
 			@Override
 			public void onFinish(Boolean needToUpdateUI) {
-				adapter.updateDataSet();
+				galleryFragment.updateDataSet();
 				exitActionMode();
 				spinner.dismiss();
 			}
@@ -849,21 +855,16 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void deleteSelected(){
-		final List<Integer> indices = adapter.getSelectedIndices();
-		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(indices.size())), new DialogInterface.OnClickListener() {
+		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(files.size())), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.deleting_files), null);
-						ArrayList<String> filenames = new ArrayList<>();
-						for(Integer index : indices){
-							StingleDbFile file = adapter.getStingleFileAtPosition(index);
-							filenames.add(file.filename);
-						}
 
-						new SyncManager.DeleteFilesAsyncTask(GalleryActivity.this, filenames, new SyncManager.OnFinish(){
+						new SyncManager.DeleteFilesAsyncTask(GalleryActivity.this, files, new SyncManager.OnFinish(){
 							@Override
 							public void onFinish(Boolean needToUpdateUI) {
-								adapter.updateDataSet();
+								galleryFragment.updateDataSet();
 								exitActionMode();
 								spinner.dismiss();
 							}
@@ -874,37 +875,31 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void emptyTrash(){
-		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_empty_trash)), new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.emptying_trash), null);
+		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_empty_trash)), (dialog, which) -> {
+			final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.emptying_trash), null);
 
-						new SyncManager.EmptyTrashAsyncTask(GalleryActivity.this, new SyncManager.OnFinish(){
-							@Override
-							public void onFinish(Boolean needToUpdateUI) {
-								adapter.updateDataSet();
-								spinner.dismiss();
-							}
-						}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-					}
-				},
+			new SyncManager.EmptyTrashAsyncTask(GalleryActivity.this, new SyncManager.OnFinish(){
+				@Override
+				public void onFinish(Boolean needToUpdateUI) {
+					galleryFragment.updateDataSet();
+					spinner.dismiss();
+				}
+			}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		},
 				null);
 	}
 
 	protected View.OnClickListener getImportOnClickListener(){
-		return new View.OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-				intent.setType("*/*");
-				String[] mimetypes = {"image/*", "video/*"};
-				intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-				//intent.addCategory(Intent.CATEGORY_DEFAULT);
-				intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-				// Note: This is not documented, but works: Show the Internal Storage menu item in the drawer!
-				//intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
-				startActivityForResult(Intent.createChooser(intent, "Select photos and videos"), INTENT_IMPORT);
-			}
+		return v -> {
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.setType("*/*");
+			String[] mimetypes = {"image/*", "video/*"};
+			intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+			//intent.addCategory(Intent.CATEGORY_DEFAULT);
+			intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+			// Note: This is not documented, but works: Show the Internal Storage menu item in the drawer!
+			//intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
+			startActivityForResult(Intent.createChooser(intent, "Select photos and videos"), INTENT_IMPORT);
 		};
 	}
 
@@ -917,8 +912,7 @@ public class GalleryActivity extends AppCompatActivity
 		if(requestCode == INTENT_IMPORT){
 			dontStartSyncYet = true;
 
-			lastScrollPosition = 0;
-			layoutManager.scrollToPosition(lastScrollPosition);
+			galleryFragment.scrollToTop();
 			ArrayList<Uri> urisToImport = new ArrayList<>();
 			ClipData clipData = data.getClipData();
 			if (clipData != null && clipData.getItemCount() > 0) {
@@ -937,7 +931,7 @@ public class GalleryActivity extends AppCompatActivity
 			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
-					adapter.updateDataSet();
+					galleryFragment.updateDataSet();
 					dontStartSyncYet = false;
 					sendMessageToSyncService(SyncService.MSG_START_SYNC);
 				}

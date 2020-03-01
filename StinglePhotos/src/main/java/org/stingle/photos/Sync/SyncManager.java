@@ -13,9 +13,9 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -50,6 +50,8 @@ public class SyncManager {
 
 	public static final int FOLDER_MAIN = 0;
 	public static final int FOLDER_TRASH = 1;
+	public static final int FOLDER_ALBUM = 2;
+	public static final int FOLDER_SHARE = 2;
 
 	public static final int DELETE_EVENT_TRASH = 1;
 	public static final int DELETE_EVENT_RESTORE = 2;
@@ -57,10 +59,6 @@ public class SyncManager {
 
 	public SyncManager(Context context){
 		this.context = context;
-
-		StingleDbHelper dbHelper = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-
 	}
 
 	public static void syncFSToDB(Context context, OnFinish onFinish, Executor executor){
@@ -105,10 +103,10 @@ public class SyncManager {
 
 		protected boolean fsSyncFolder(int folder){
 			boolean needToUpdateUI = false;
-			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 			File dir = new File(FileManager.getHomeDir(this.context));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ALL, StingleDbHelper.SORT_ASC);
+			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ALL, FilesTrashDb.SORT_ASC);
 
 			while(result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
@@ -133,14 +131,14 @@ public class SyncManager {
 			if(folder == FOLDER_MAIN) {
 				File[] currentFolderFiles = dir.listFiles();
 
-				StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+				FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 
 				if(currentFolderFiles != null) {
 					for (File file : currentFolderFiles) {
 						if (file.isFile() && file.getName().endsWith(StinglePhotosApplication.FILE_EXTENSION) && db.getFileIfExists(file.getName()) == null && trashDb.getFileIfExists(file.getName()) == null) {
 							try {
 								String headers = Crypto.getFileHeaders(file.getAbsolutePath(), FileManager.getThumbsDir(context) + "/" + file.getName());
-								db.insertFile(file.getName(), true, false, StingleDbHelper.INITIAL_VERSION, file.lastModified(), file.lastModified(), headers);
+								db.insertFile(file.getName(), true, false, FilesTrashDb.INITIAL_VERSION, file.lastModified(), file.lastModified(), headers);
 								needToUpdateUI = true;
 							} catch (IOException | CryptoException e) {
 								e.printStackTrace();
@@ -197,9 +195,9 @@ public class SyncManager {
 		}
 
 		protected int getFilesCountToUpload(int folder){
-			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL, StingleDbHelper.SORT_ASC);
+			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, FilesTrashDb.SORT_ASC);
 			int uploadCount = result.getCount();
 			result.close();
 
@@ -213,9 +211,9 @@ public class SyncManager {
 		}
 
 		protected void uploadFolder(int folder){
-			StingleDbHelper db = new StingleDbHelper(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
-			Cursor result = db.getFilesList(StingleDbHelper.GET_MODE_ONLY_LOCAL, StingleDbHelper.SORT_ASC);
+			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, FilesTrashDb.SORT_ASC);
 			while(result.moveToNext()) {
 				if(isCancelled()){
 					break;
@@ -244,7 +242,7 @@ public class SyncManager {
 			db.close();
 		}
 
-		protected void uploadFile(int folder, StingleDbHelper db, Cursor result, boolean isReupload){
+		protected void uploadFile(int folder, FilesTrashDb db, Cursor result, boolean isReupload){
 			String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_FILENAME));
 			String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_VERSION));
 			String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED));
@@ -353,16 +351,16 @@ public class SyncManager {
 
 		protected Context context;
 		protected OnFinish onFinish = null;
-		protected StingleDbHelper db;
-		protected StingleDbHelper trashDb;
+		protected FilesTrashDb db;
+		protected FilesTrashDb trashDb;
 		protected long lastSeenTime = 0;
 		protected long lastDelSeenTime = 0;
 
 		public SyncCloudToLocalDbAsyncTask(Context context, OnFinish onFinish){
 			this.context = context;
 			this.onFinish = onFinish;
-			db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
-			trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 		}
 
 		@Override
@@ -473,7 +471,7 @@ public class SyncManager {
 		}
 
 		protected void processFile(StingleDbFile remoteFile, int folder){
-			StingleDbHelper myDb = db;
+			FilesTrashDb myDb = db;
 			if (folder == FOLDER_TRASH){
 				myDb = trashDb;
 			}
@@ -585,28 +583,25 @@ public class SyncManager {
 	public static class MoveToTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
-		protected ArrayList<String> filenames;
+		protected ArrayList<StingleDbFile> files;
 		protected OnFinish onFinish;
 
-		public MoveToTrashAsyncTask(Context context, ArrayList<String> filenames, OnFinish onFinish){
+		public MoveToTrashAsyncTask(Context context, ArrayList<StingleDbFile> files, OnFinish onFinish){
 			this.context = context;
-			this.filenames = filenames;
+			this.files = files;
 			this.onFinish = onFinish;
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
-			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
-			for(String filename : filenames) {
-				StingleDbFile file = db.getFileIfExists(filename);
-				if (file != null) {
-					if (file.isRemote) {
-						filenamesToNotify.add(file.filename);
-					}
+			for(StingleDbFile file : files) {
+				if (file.isRemote) {
+					filenamesToNotify.add(file.filename);
 				}
 			}
 
@@ -616,13 +611,10 @@ public class SyncManager {
 				return null;
 			}
 
-			for(String filename : filenames) {
-				StingleDbFile file = db.getFileIfExists(filename);
-				if(file != null) {
-					db.deleteFile(file.filename);
-					file.dateModified = System.currentTimeMillis();
-					trashDb.insertFile(file);
-				}
+			for(StingleDbFile file : files) {
+				db.deleteFile(file.filename);
+				file.dateModified = System.currentTimeMillis();
+				trashDb.insertFile(file);
 			}
 
 
@@ -671,28 +663,25 @@ public class SyncManager {
 	public static class RestoreFromTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
-		protected ArrayList<String> filenames;
+		protected ArrayList<StingleDbFile> files;
 		protected OnFinish onFinish;
 
-		public RestoreFromTrashAsyncTask(Context context, ArrayList<String> filenames, OnFinish onFinish){
+		public RestoreFromTrashAsyncTask(Context context, ArrayList<StingleDbFile> files, OnFinish onFinish){
 			this.context = context;
-			this.filenames = filenames;
+			this.files = files;
 			this.onFinish = onFinish;
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
-			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
-			for(String filename : filenames) {
-				StingleDbFile file = trashDb.getFileIfExists(filename);
-				if (file != null) {
-					if (file.isRemote) {
-						filenamesToNotify.add(filename);
-					}
+			for(StingleDbFile file : files) {
+				if (file.isRemote) {
+					filenamesToNotify.add(file.filename);
 				}
 			}
 
@@ -702,13 +691,10 @@ public class SyncManager {
 				return null;
 			}
 
-			for(String filename : filenames) {
-				StingleDbFile file = trashDb.getFileIfExists(filename);
-				if(file != null) {
-					trashDb.deleteFile(file.filename);
-					file.dateModified = System.currentTimeMillis();
-					db.insertFile(file);
-				}
+			for(StingleDbFile file : files) {
+				trashDb.deleteFile(file.filename);
+				file.dateModified = System.currentTimeMillis();
+				db.insertFile(file);
 			}
 
 
@@ -756,29 +742,26 @@ public class SyncManager {
 	public static class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
-		protected ArrayList<String> filenames;
+		protected ArrayList<StingleDbFile> files;
 		protected OnFinish onFinish;
 
-		public DeleteFilesAsyncTask(Context context, ArrayList<String> filenames, OnFinish onFinish){
+		public DeleteFilesAsyncTask(Context context, ArrayList<StingleDbFile> files, OnFinish onFinish){
 			this.context = context;
-			this.filenames = filenames;
+			this.files = files;
 			this.onFinish = onFinish;
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 			String homeDir = FileManager.getHomeDir(context);
 			String thumbDir = FileManager.getThumbsDir(context);
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
-			for(String filename : filenames) {
-				StingleDbFile file = trashDb.getFileIfExists(filename);
-				if (file != null) {
-					if (file.isRemote) {
-						filenamesToNotify.add(file.filename);
-					}
+			for(StingleDbFile file : files) {
+				if (file.isRemote) {
+					filenamesToNotify.add(file.filename);
 				}
 			}
 
@@ -787,10 +770,9 @@ public class SyncManager {
 				return null;
 			}
 
-			for(String filename : filenames) {
-				StingleDbFile file = trashDb.getFileIfExists(filename);
-				File mainFile = new File(homeDir + "/" + filename);
-				File thumbFile = new File(thumbDir + "/" + filename);
+			for(StingleDbFile file : files) {
+				File mainFile = new File(homeDir + "/" + file.filename);
+				File thumbFile = new File(thumbDir + "/" + file.filename);
 
 				if(mainFile.exists()){
 					mainFile.delete();
@@ -861,11 +843,11 @@ public class SyncManager {
 				return null;
 			}
 
-			StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 			String homeDir = FileManager.getHomeDir(context);
 			String thumbDir = FileManager.getThumbsDir(context);
 
-			Cursor result = trashDb.getFilesList(StingleDbHelper.GET_MODE_ALL, StingleDbHelper.SORT_ASC);
+			Cursor result = trashDb.getFilesList(FilesTrashDb.GET_MODE_ALL, FilesTrashDb.SORT_ASC);
 
 			while(result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
@@ -948,11 +930,11 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager. PREF_LAST_DEL_SEEN_TIME);
 
-		StingleDbHelper filesDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+		FilesTrashDb filesDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
 		filesDb.truncateTable();
 		filesDb.close();
 
-		StingleDbHelper trashDb = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+		FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
 		trashDb.truncateTable();
 		trashDb.close();
 	}

@@ -5,13 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-public class StingleDbHelper extends SQLiteOpenHelper {
-	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 2;
-	public static final String DATABASE_NAME = "stingleFiles.db";
+public class FilesTrashDb {
 
 	public static final int GET_MODE_ALL = 0;
 	public static final int GET_MODE_ONLY_LOCAL = 1;
@@ -27,59 +23,14 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	public static final int REUPLOAD_NO = 0;
 	public static final int REUPLOAD_YES = 1;
 
-	protected SQLiteDatabase dbWrite;
-	protected SQLiteDatabase dbRead;
+	private String tableName;
+	private StingleDb db;
 
-	protected String tableName;
-
-	public StingleDbHelper(Context context, String tableName) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-
+	public FilesTrashDb(Context context, String tableName) {
 		this.tableName = tableName;
-	}
-	public void onCreate(SQLiteDatabase db) {
-		createTables(db);
+		db = new StingleDb(context);
 	}
 
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if(oldVersion == 1 && newVersion ==2){
-			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
-			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
-			db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
-		}
-	}
-	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		onUpgrade(db, oldVersion, newVersion);
-	}
-
-	private void createTables(SQLiteDatabase db){
-		db.execSQL(StingleDbContract.SQL_CREATE_FILES);
-		db.execSQL(StingleDbContract.SQL_CREATE_TRASH);
-		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
-		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
-		db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
-	}
-
-	private void deleteTables(SQLiteDatabase db){
-		db.execSQL(StingleDbContract.SQL_DELETE_FILES);
-		db.execSQL(StingleDbContract.SQL_DELETE_TRASH);
-		db.execSQL(StingleDbContract.SQL_DELETE_ALBUMS);
-		db.execSQL(StingleDbContract.SQL_DELETE_ALBUM_FILES);
-		db.execSQL(StingleDbContract.SQL_DELETE_SHARES);
-	}
-
-	protected SQLiteDatabase openWriteDb(){
-		if(this.dbWrite == null || !this.dbWrite.isOpen()) {
-			this.dbWrite = getWritableDatabase();
-		}
-		return this.dbWrite;
-	}
-	protected SQLiteDatabase openReadDb(){
-		if(this.dbRead == null || !this.dbRead.isOpen()) {
-			this.dbRead = getReadableDatabase();
-		}
-		return this.dbRead;
-	}
 
 	public long insertFile(StingleDbFile file){
 		return insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, file.dateModified, file.headers);
@@ -97,7 +48,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
 		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, headers);
 
-		return openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		return db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
 	}
 
@@ -116,7 +67,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { file.filename };
 
-		return openWriteDb().update(
+		return db.openWriteDb().update(
 				tableName,
 				values,
 				selection,
@@ -130,7 +81,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return openWriteDb().update(
+		return db.openWriteDb().update(
 				tableName,
 				values,
 				selection,
@@ -152,7 +103,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return openWriteDb().update(
+		return db.openWriteDb().update(
 				tableName,
 				values,
 				selection,
@@ -173,7 +124,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return openWriteDb().update(
+		return db.openWriteDb().update(
 				tableName,
 				values,
 				selection,
@@ -184,11 +135,11 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return openWriteDb().delete(tableName, selection, selectionArgs);
+		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
 
 	public int truncateTable(){
-		return openWriteDb().delete(tableName, null, null);
+		return db.openWriteDb().delete(tableName, null, null);
 	}
 
 	public StingleDbFile getFileIfExists(String filename){
@@ -206,7 +157,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = {filename};
 
-		Cursor result = openReadDb().query(
+		Cursor result = db.openReadDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -275,7 +226,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 		String sortOrder =
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == SORT_DESC ? " DESC" : " ASC");
 
-		return openReadDb().query(
+		return db.openReadDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -305,7 +256,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 		String[] selectionArgs = {"1", "1"};
 
-		return openReadDb().query(
+		return db.openReadDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -323,13 +274,16 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
 				StingleDbContract.Files.COLUMN_NAME_VERSION,
-				StingleDbContract.Files.COLUMN_NAME_REUPLOAD
+				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Files.COLUMN_NAME_HEADERS
 		};
 
 		String sortOrder =
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + " DESC";
 
-		Cursor result = openReadDb().query(
+		Cursor result = db.openReadDb().query(
 				false,
 				tableName,
 				projection,
@@ -350,7 +304,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 
 	public Integer getFilePositionByFilename(String filename){
 		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created <= b.date_created) AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"'";
-		Cursor cursor = openReadDb().rawQuery(query, null);
+		Cursor cursor = db.openReadDb().rawQuery(query, null);
 		if(cursor.getCount() == 1){
 			cursor.moveToNext();
 			return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
@@ -359,7 +313,7 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	}
 
 	public Cursor getAvailableDates(){
-		return openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
+		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"GROUP BY cdate " +
 						"ORDER BY cdate DESC"
@@ -368,16 +322,11 @@ public class StingleDbHelper extends SQLiteOpenHelper {
 	}
 
 	public long getTotalFilesCount(){
-		return DatabaseUtils.queryNumEntries(openReadDb(), tableName);
+		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
 
 	public void close(){
-		if(this.dbWrite != null) {
-			this.dbWrite.close();
-		}
-		if(this.dbRead != null) {
-			this.dbRead.close();
-		}
+		db.close();
 	}
 }
 

@@ -4,79 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/AppBarOverlay">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/topBar"
-        android:visibility="invisible">
 
-        <RelativeLayout
+        <org.stingle.photos.Gallery.DragSelectRecyclerView
+            android:id="@+id/gallery_recycler_view"
+            android:scrollbars="vertical"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:orientation="horizontal"
-            android:id="@+id/syncBar"
-            android:background="@drawable/layout_border"
-            android:elevation="1dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="12dp">
+            android:layout_height="match_parent"
+            android:paddingTop="@dimen/gallery_top_padding_with_syncbar"
+            android:paddingBottom="@dimen/bottom_nav_height"
+            android:clipToPadding="false"/>
 
-            <TextView
-                android:id="@+id/syncText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#000"
-                android:layout_margin="10dp"
-                android:layout_centerVertical="true" />
-
-            <ImageView
-                android:id="@+id/syncPhoto"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_alignParentEnd="true"
-                android:visibility="gone"
-                android:contentDescription="@string/upload_current_image" />
-            <ImageView
-                android:id="@+id/backupComplete"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerHorizontal="true"
-                android:layout_margin="16dp"
-                android:visibility="gone"
-                android:src="@drawable/ic_cloud_done"
-                android:contentDescription="@string/backup_complete" />
-            <ProgressBar
-                android:id="@+id/refreshCProgress"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentEnd="true"
-                android:layout_margin="12dp"
-                android:visibility="gone" />
-            <ProgressBar
-                android:id="@+id/syncProgress"
-                android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:layout_alignParentBottom="true"
-                android:paddingTop="12dp"
-                android:visibility="gone"
-                style="@android:style/Widget.Material.ProgressBar.Horizontal" />
-        </RelativeLayout>
-
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/pullToRefresh"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <org.stingle.photos.Gallery.DragSelectRecyclerView
-                android:id="@+id/gallery_recycler_view"
-                android:scrollbars="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingTop="72dp"
-                android:paddingBottom="@dimen/bottom_nav_height"
-                android:clipToPadding="false"/>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

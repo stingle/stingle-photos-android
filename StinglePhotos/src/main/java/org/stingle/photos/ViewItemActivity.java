@@ -23,9 +23,9 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -218,7 +218,7 @@ public class ViewItemActivity extends AppCompatActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		int id = item.getItemId();
-		StingleDbHelper db = new StingleDbHelper(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		FilesTrashDb db = new FilesTrashDb(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
 		if (id == R.id.share) {
 			ArrayList<StingleDbFile> files = new ArrayList<StingleDbFile>();
@@ -229,11 +229,11 @@ public class ViewItemActivity extends AppCompatActivity {
 		}
 		else if (id == R.id.trash) {
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
-			ArrayList<String> filenames = new ArrayList<String>();
-			filenames.add(db.getFileAtPosition(adapter.getCurrentPosition()).filename);
+			ArrayList<StingleDbFile> files = new ArrayList<>();
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition()));
 
 
-			new SyncManager.MoveToTrashAsyncTask(this, filenames, new SyncManager.OnFinish(){
+			new SyncManager.MoveToTrashAsyncTask(this, files, new SyncManager.OnFinish(){
 				@Override
 				public void onFinish(Boolean needToUpdateUI) {
 					if(adapter != null) {

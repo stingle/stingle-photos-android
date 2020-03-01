@@ -11,12 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.viewpager.widget.PagerAdapter;
 
+import com.google.android.exoplayer2.SimpleExoPlayer;
+
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Widget.ImageHolderLayout;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.util.HashMap;
 
@@ -24,7 +25,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 	private Context context;
 	private LayoutInflater layoutInflater;
-	private StingleDbHelper db;
+	private FilesTrashDb db;
 	private int currentPosition = 0;
 	private int lastFilesCount = -1;
 	private int folder = SyncManager.FOLDER_MAIN;
@@ -36,7 +37,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		this.folder = folder;
 		this.gestureTouchListener = gestureTouchListener;
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		db = new StingleDbHelper(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package org.stingle.photos.Gallery;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,40 +9,36 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.R;
-import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.ViewItemActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.Listener{
+public class AlbumsFragment extends Fragment implements AlbumsAdapterPisasso.Listener{
 
 	private DragSelectRecyclerView recyclerView;
-	private GalleryAdapterPisasso adapter;
+	private AlbumsAdapterPisasso adapter;
 	private AutoFitGridLayoutManager layoutManager;
 
 	private int lastScrollPosition = 0;
 
-	private GalleryFragmentParent parentActivity;
-
-	private int currentFolder = SyncManager.FOLDER_MAIN;
-	private int folderId = -1;
+	private AppCompatActivity parentActivity;
 
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.gallery_fragment,	container, false);
+		View view = inflater.inflate(R.layout.albums_fragment,	container, false);
 
-		recyclerView = view.findViewById(R.id.gallery_recycler_view);
-		parentActivity = (GalleryFragmentParent)getActivity();
+		recyclerView = view.findViewById(R.id.albums_recycler_view);
+		parentActivity = (AppCompatActivity)getActivity();
 
 		return view;
 	}
@@ -51,51 +46,19 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Override
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		Log.e("function", "onActivityCreated");
-		Bundle bundle = getArguments();
-		boolean initNow = false;
-		if (bundle != null) {
-			currentFolder = bundle.getInt("currentFolder", SyncManager.FOLDER_MAIN);
-			folderId = bundle.getInt("folderId", -1);
-			initNow = bundle.getBoolean("initNow", false);
-		}
-
 
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
-		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext()));
-		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
-			@Override
-			public int getSpanSize(int position) {
-				if (adapter.getItemViewType(position) == GalleryAdapterPisasso.TYPE_DATE) {
-					return layoutManager.getCurrentCalcSpanCount();
-				}
-				return 1;
-			}
-		});
+		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext(), 2));
 		recyclerView.setLayoutManager(layoutManager);
-		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentFolder);
-		recyclerView.addOnScrollListener(new HidingScrollListener() {
-			@Override
-			public void onHide() {
-				parentActivity.scrolledDown();
-			}
-
-
-			@Override
-			public void onShow() {
-				parentActivity.scrolledUp();
-			}
-		});
+		adapter = new AlbumsAdapterPisasso(getContext(), this, layoutManager);
 
 		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){
 			lastScrollPosition = savedInstanceState.getInt("scroll");
 		}
 
-		if(initNow){
-			init();
-		}
+		recyclerView.setAdapter(adapter);
 	}
 
 	@Override
@@ -138,7 +101,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	@Override
 	public void onClick(int index) {
-		StingleDbFile file = adapter.getStingleFileAtPosition(index);
+		/*StingleDbFile file = adapter.getStingleFileAtPosition(index);
 		if(!parentActivity.onClick(file)){
 			return;
 		}
@@ -152,31 +115,20 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
 			intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
 			startActivity(intent);
-		}
+		}*/
 	}
 
 	@Override
 	public void onLongClick(int index) {
-		if(!parentActivity.onLongClick(index)){
-			return;
-		}
 
-		recyclerView.setDragSelectActive(true, index);
-		if(!adapter.isSelectionModeActive()){
-			onSelectionChanged(1);
-		}
-		adapter.setSelectionModeActive(true);
 	}
 
 
 	@Override
 	public void onSelectionChanged(int count) {
-		parentActivity.onSelectionChanged(count);
+		//parentActivity.onSelectionChanged(count);
 	}
 
-	public void init(){
-		recyclerView.setAdapter(adapter);
-	}
 
 	public void updateDataSet(){
 		int lastScrollPos = recyclerView.getScrollY();
@@ -209,14 +161,11 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	public ArrayList<StingleDbFile> getSelectedFiles(){
 		List<Integer> indices = adapter.getSelectedIndices();
 		ArrayList<StingleDbFile> files = new ArrayList<>();
-		for(Integer index : indices){
-			files.add(adapter.getStingleFileAtPosition(index));
-		}
+//		for(Integer index : indices){
+//			files.add(adapter.getStingleFileAtPosition(index));
+//		}
 		return files;
 	}
 
-	public GalleryAdapterPisasso getAdapter(){
-		return adapter;
-	}
 
 }

@@ -17,9 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
@@ -39,7 +39,7 @@ import java.util.List;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryVH> implements IDragSelectAdapter {
 	private Context context;
-	private StingleDbHelper db;
+	private FilesTrashDb db;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private final HashMap<Integer, GetDecryptedBitmap> tasksQueue = new HashMap<Integer, GetDecryptedBitmap>();
 	private final Listener callback;
@@ -97,7 +97,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 	public GalleryAdapter(Context context, Listener callback, AutoFitGridLayoutManager lm) {
 		this.context = context;
 		this.callback = callback;
-		this.db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+		this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
 
@@ -247,11 +247,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 	public class GetDecryptedBitmap extends AsyncTask<Void, Void, GalleryDecItem> {
 
 		protected Context context;
-		protected StingleDbHelper db;
+		protected FilesTrashDb db;
 		protected int position;
 		protected GalleryVH holder;
 
-		public GetDecryptedBitmap(Context context, StingleDbHelper db,  int position, GalleryVH holder){
+		public GetDecryptedBitmap(Context context, FilesTrashDb db, int position, GalleryVH holder){
 			this.context = context;
 			this.db = db;
 			this.position = position;

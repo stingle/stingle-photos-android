@@ -35,8 +35,8 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -65,7 +65,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final ImageHolderLayout parent;
 	private final ContentLoadingProgressBar loading;
 	private final ViewPagerAdapter adapter;
-	private final StingleDbHelper db;
+	private final FilesTrashDb db;
 	private int folder = SyncManager.FOLDER_MAIN;
 
 	private final OnClickListener onClickListener;
@@ -77,7 +77,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private int fileType;
 
 
-	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, StingleDbHelper db, int folder, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
+	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesTrashDb db, int folder, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
 		this.context = context;
 		this.adapter = adapter;

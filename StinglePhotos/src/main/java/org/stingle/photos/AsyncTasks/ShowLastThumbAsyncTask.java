@@ -4,9 +4,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.Sync.SyncManager;
 
 public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile> {
@@ -33,7 +33,7 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 
 	@Override
 	protected StingleDbFile doInBackground(Void... params) {
-		StingleDbHelper db = new StingleDbHelper(context, StingleDbContract.Files.TABLE_NAME_FILES);
+		FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
 		return db.getFileAtPosition(0);
 	}
 

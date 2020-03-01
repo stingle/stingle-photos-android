@@ -22,9 +22,9 @@ import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Db.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
@@ -40,7 +40,7 @@ import java.util.Objects;
 
 public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
 	private Context context;
-	private StingleDbHelper db;
+	private FilesTrashDb db;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private final Listener callback;
 	private final ArrayList<Integer> selectedIndices = new ArrayList<Integer>();
@@ -60,7 +60,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		this.context = context;
 		this.callback = callback;
 		this.folderType = folderType;
-		this.db = new StingleDbHelper(context, (folderType == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		this.db = new FilesTrashDb(context, (folderType == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
 
@@ -86,7 +86,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	public void setFolder(int folder){
 		synchronized (this){
-			this.db = new StingleDbHelper(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			this.db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 			folderType = folder;
 			picasso.cancelAll();
 			this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();

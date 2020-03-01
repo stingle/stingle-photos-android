@@ -3,21 +3,21 @@ package org.stingle.photos.Gallery;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.StingleDbFile;
-import org.stingle.photos.Db.StingleDbHelper;
-import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Util.Helpers;
 import com.squareup.picasso3.Picasso;
 import com.squareup.picasso3.RequestHandler;
+
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,10 +28,10 @@ import java.io.IOException;
 public class StinglePicassoLoader extends RequestHandler {
 
 	private Context context;
-	private StingleDbHelper db;
+	private FilesTrashDb db;
 	private int thumbSize;
 
-	public StinglePicassoLoader(Context context, StingleDbHelper db, int thumbSize){
+	public StinglePicassoLoader(Context context, FilesTrashDb db, int thumbSize){
 		this.context = context;
 		this.db = db;
 		this.thumbSize = thumbSize;
