@@ -73,6 +73,14 @@ public class GalleryActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener, GalleryFragmentParent {
 
 	public static final int REQUEST_VIEW_PHOTO = 1;
+
+	public static final int FRAGMENT_GALLERY = 1;
+	public static final int FRAGMENT_ALBUMS_LIST = 2;
+	public static final int FRAGMENT_ALBUM = 3;
+	public static final int FRAGMENT_SHARES = 4;
+	public static final int FRAGMENT_SHARED_ALBUM = 5;
+
+
 	private LocalBroadcastManager lbm;
 	protected GalleryFragment galleryFragment;
 	protected ActionMode actionMode;
@@ -91,12 +99,13 @@ public class GalleryActivity extends AppCompatActivity
 	private boolean sendBackDecryptedFile = false;
 	private Intent originalIntent = null;
 
-	protected int lastScrollPosition = 0;
-
 	protected int INTENT_IMPORT = 1;
 
 	private boolean dontStartSyncYet = false;
 	private View headerView;
+
+	private int currentFragment = FRAGMENT_GALLERY;
+	private int currentFolderId = 0;
 
 	private BroadcastReceiver onLogout = new BroadcastReceiver() {
 		@Override
@@ -254,9 +263,22 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.disableLockTimer(GalleryActivity.this);
 	}
 
+	private void initCurrentFragment(){
+		galleryFragment.init();
+		switch (currentFragment){
+			case FRAGMENT_GALLERY:
+				initGalleryFragment(currentFolder, null, true);
+				break;
+			case FRAGMENT_ALBUMS_LIST:
+				initAlbumsFragment();
+				break;
+		}
+	}
+
 	private void initGallery(){
 
-		galleryFragment.init();
+		initCurrentFragment();
+
 
 		findViewById(R.id.topBar).setVisibility(View.VISIBLE);
 		startAndBindService();
@@ -611,10 +633,12 @@ public class GalleryActivity extends AppCompatActivity
 
 						switch (item.getItemId()) {
 							case R.id.action_gallery:
-								initGalleryFragment(SyncManager.FOLDER_MAIN, null, true);
+								currentFragment = FRAGMENT_GALLERY;
+								initCurrentFragment();
 								break;
 							case R.id.action_albums:
-								initAlbumsFragment();
+								currentFragment = FRAGMENT_ALBUMS_LIST;
+								initCurrentFragment();
 								break;
 							case R.id.action_sharing:
 								break;

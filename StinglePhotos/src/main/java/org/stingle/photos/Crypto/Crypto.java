@@ -15,7 +15,6 @@ import com.sun.jna.NativeLong;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +25,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import android.util.Base64;
-import android.util.Log;
 
 import java.util.HashMap;
 
@@ -956,6 +954,75 @@ public class Crypto {
         return overallHeaderSize;
     }
 
+    public HashMap<String, byte[]> generateEncryptedAlbumData(byte[] userPK, String albumName) throws IOException {
+
+        byte[] privateKey = new byte[Box.SECRETKEYBYTES];
+        byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
+
+        so.crypto_box_keypair(publicKey, privateKey);
+
+        ByteArrayOutputStream dataByteStream = new ByteArrayOutputStream();
+
+        // Album private key
+        dataByteStream.write(privateKey);
+
+        byte[] albumNameBytes = albumName.getBytes();
+
+        // name length
+        dataByteStream.write(intToByteArray(albumName.length()));
+
+        // name itself
+        dataByteStream.write(albumNameBytes);
+
+        byte[] dataBytes = dataByteStream.toByteArray();
+
+        int encDataLength = dataBytes.length + Box.SEALBYTES;
+
+        byte[] encryptedData = new byte[encDataLength];
+        so.crypto_box_seal(encryptedData, dataBytes, dataBytes.length, userPK);
+
+        HashMap<String, byte[]> result = new HashMap<String, byte[]>();
+        result.put("data", encryptedData);
+        result.put("pk", publicKey);
+
+        return result;
+    }
+
+    public AlbumData parseAlbumData(byte[] encData) throws IOException, CryptoException {
+
+        byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
+        byte[] privateKey = StinglePhotosApplication.getKey();
+
+        byte[] dataBytes = new byte[encData.length - Box.SEALBYTES];
+
+        if(so.crypto_box_seal_open(dataBytes, encData, encData.length, publicKey, privateKey) != 0){
+            throw new CryptoException("Unable to decrypt album data");
+        }
+
+        ByteArrayInputStream in = new ByteArrayInputStream(dataBytes);
+        AlbumData albumData = new AlbumData();
+
+        albumData.privateKey = new byte[Box.SECRETKEYBYTES];
+        in.read(albumData.privateKey);
+
+        // Read album name size
+        byte[] albumNameSizeBytes = new byte[4];
+        in.read(albumNameSizeBytes);
+        int albumNameSize = byteArrayToInt(albumNameSizeBytes);
+
+        if(albumNameSize > 0) {
+            // Read filename
+            byte[] albumNameBytes = new byte[albumNameSize];
+            in.read(albumNameBytes);
+            albumData.name = new String(albumNameBytes);
+        }
+        else{
+            albumData.name = "";
+        }
+
+        return albumData;
+    }
+
     public class Header{
         public int fileVersion;
         public byte[] fileId;
@@ -987,5 +1054,10 @@ public class Crypto {
 
                     "Overall Header Size - " + String.valueOf(overallHeaderSize);
         }
+    }
+
+    public class AlbumData{
+        public byte[] privateKey;
+        public String name;
     }
 }

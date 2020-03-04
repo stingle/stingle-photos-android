@@ -191,7 +191,7 @@ public class LoginManager {
         builder.setView(R.layout.password);
         builder.setCancelable(config.cancellable);
         AlertDialog loginDialog = builder.create();
-        loginDialogRef = new WeakReference<AlertDialog>(loginDialog);
+        loginDialogRef = new WeakReference<>(loginDialog);
         loginDialog.show();
 
         Button okButton = loginDialog.findViewById(R.id.okButton);

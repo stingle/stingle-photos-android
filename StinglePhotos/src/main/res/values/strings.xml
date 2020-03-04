@@ -262,6 +262,8 @@
     <string name="exit">Exit</string>
     <string name="albums">Albums</string>
     <string name="sharing">Sharing</string>
+    <string name="enter_album_name">Please enter album name</string>
+    <string name="add_album_failed">Failed to add album</string>
 
 
 </resources>

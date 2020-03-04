@@ -9,7 +9,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:src="@drawable/ic_no_image_24"
         android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/albumName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:textColor="#000"
+        android:text="@string/enter_album_name" />
 
     <ImageView
         android:id="@+id/noCloudIcon"

@@ -1,11 +1,16 @@
 package org.stingle.photos.Gallery;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
+import org.stingle.photos.AsyncTasks.AddAlbumAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.R;
 import org.stingle.photos.Util.Helpers;
@@ -101,6 +108,9 @@ public class AlbumsFragment extends Fragment implements AlbumsAdapterPisasso.Lis
 
 	@Override
 	public void onClick(int index) {
+		if(index == 0){
+			addAlbum();
+		}
 		/*StingleDbFile file = adapter.getStingleFileAtPosition(index);
 		if(!parentActivity.onClick(file)){
 			return;
@@ -167,5 +177,43 @@ public class AlbumsFragment extends Fragment implements AlbumsAdapterPisasso.Lis
 		return files;
 	}
 
+	private void addAlbum(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+		builder.setView(R.layout.add_album_dialog);
+		builder.setCancelable(true);
+		AlertDialog addAlbumDialog = builder.create();
+		addAlbumDialog.show();
 
+		Button okButton = addAlbumDialog.findViewById(R.id.okButton);
+		Button cancelButton = addAlbumDialog.findViewById(R.id.cancelButton);
+		final EditText albumNameText = addAlbumDialog.findViewById(R.id.album_name);
+
+		final InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+
+		okButton.setOnClickListener(v -> {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+			String albumName = albumNameText.getText().toString();
+			(new AddAlbumAsyncTask(getContext(), albumName, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					addAlbumDialog.dismiss();
+					updateDataSet();
+				}
+
+				@Override
+				public void onFail() {
+					super.onFail();
+					Helpers.showAlertDialog(getContext(), getString(R.string.add_album_failed));
+					addAlbumDialog.dismiss();
+				}
+			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		});
+
+		cancelButton.setOnClickListener(v -> {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+			addAlbumDialog.dismiss();
+		});
+	}
 }

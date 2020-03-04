@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,7 +20,6 @@ import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
-import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.AlbumsDb;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -39,7 +39,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	private boolean isSelectModeActive = false;
 	private AutoFitGridLayoutManager lm;
 	private Picasso picasso;
-	private LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
+	private LruCache<Integer, AlbumProps> filePropsCache = new LruCache<Integer, AlbumProps>(512);
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_ADD = 1;
@@ -76,6 +76,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		public RelativeLayout layout;
 		public ImageView image;
 		public CheckBox checkbox;
+		public TextView albumName;
 		public int currentPos = -1;
 
 		public AlbumVH(RelativeLayout v) {
@@ -83,6 +84,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			layout = v;
 			image = v.findViewById(R.id.thumbImage);
 			checkbox = v.findViewById(R.id.checkBox);
+			albumName = v.findViewById(R.id.albumName);
 			checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
@@ -113,7 +115,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		public AlbumAddVH(RelativeLayout v) {
 			super(v);
 			layout = v;
-			image = v.findViewById(R.id.thumbImage);
+			image = v.findViewById(R.id.addAlbumButton);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
 		}
@@ -214,6 +216,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			}
 
 			holder.image.setImageBitmap(null);
+			holder.albumName.setText("");
 
 			final RequestCreator req = picasso.load("a" + dbPos);
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
@@ -228,15 +231,19 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 					}
 					AlbumVH holder = (AlbumVH) request.tag;
 
-					FileProps props = filePropsCache.get(pos);
+					AlbumProps props = filePropsCache.get(pos);
 					if (props == null) {
-						props = (FileProps) result.getProperty("fileProps");
+						props = (AlbumProps) result.getProperty("albumProps");
 						if (props != null) {
 							filePropsCache.put(pos, props);
 						}
 						else{
-							props = new FileProps();
+							props = new AlbumProps();
 						}
+					}
+
+					if(props.name != null){
+						holder.albumName.setText(props.name);
 					}
 				}
 
@@ -327,8 +334,8 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	}
 
 
-	public static class FileProps{
-		public int fileType = Crypto.FILE_TYPE_PHOTO;
+	public static class AlbumProps{
+		public String name;
 		public boolean isUploaded = true;
 	}
 

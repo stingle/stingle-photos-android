@@ -1,15 +1,19 @@
 package org.stingle.photos.Gallery;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
 
 import com.squareup.picasso3.Picasso;
 import com.squareup.picasso3.RequestHandler;
 
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.AlbumsDb;
 import org.stingle.photos.Db.StingleDbAlbum;
-import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 
 import java.io.IOException;
 
@@ -42,18 +46,13 @@ public class AlbumsPicassoLoader extends RequestHandler {
 			//Log.e("interrupted", String.valueOf(position));
 		}*/
 		String uri = request.uri.toString();
-		String folderStr = uri.substring(1, 2);
-		String position = uri.substring(2);
+		String position = uri.substring(1);
 
-		int folder = SyncManager.FOLDER_MAIN;
-		if(folderStr.equals("t")){
-			folder = SyncManager.FOLDER_TRASH;
-		}
 
-		StingleDbAlbum file = db.getAlbumAtPosition(Integer.parseInt(position), AlbumsDb.SORT_ASC);
+		StingleDbAlbum album = db.getAlbumAtPosition(Integer.parseInt(position), AlbumsDb.SORT_ASC);
 
-			/*try {
-				File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
+			try {
+				/*File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 				FileInputStream input = new FileInputStream(fileToDec);
 				byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input);
 
@@ -65,27 +64,28 @@ public class AlbumsPicassoLoader extends RequestHandler {
 					Crypto.Header header = StinglePhotosApplication.getCrypto().getFileHeader(streamForHeader);
 					streamForHeader.close();
 
-					Result result = new Result(bitmap, Picasso.LoadedFrom.DISK);
 
-					GalleryAdapterPisasso.FileProps props = new GalleryAdapterPisasso.FileProps();
-
-					props.fileType = header.fileType;
-					props.videoDuration = header.videoDuration;
-					props.isUploaded = file.isRemote;
-
-					result.addProperty("fileProps", props);
-
-					callback.onSuccess(result);
+				}*/
+				Drawable drawable = context.getDrawable(R.drawable.ic_no_image);
+				if(drawable == null){
+					return;
 				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (CryptoException e) {
-				e.printStackTrace();
-			}*/
+				Result result = new Result(drawable, Picasso.LoadedFrom.DISK);
 
+				AlbumsAdapterPisasso.AlbumProps props = new AlbumsAdapterPisasso.AlbumProps();
+				Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(Crypto.base64ToByteArrayDefault(album.data));
+				props.name = albumData.name;
+
+				result.addProperty("albumProps", props);
+
+				callback.onSuccess(result);
+
+			} catch (IOException | CryptoException e) {
+				e.printStackTrace();
+			}
 
 
 	}
+
+
 }
