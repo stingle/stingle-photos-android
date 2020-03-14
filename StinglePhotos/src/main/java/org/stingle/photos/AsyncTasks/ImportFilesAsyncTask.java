@@ -140,7 +140,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 				long nowDate = System.currentTimeMillis();
 				FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
 
-				String headers = Crypto.getFileHeaders(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
+				String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
 
 				db.insertFile(encFilename, true, false, FilesTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
 				db.close();

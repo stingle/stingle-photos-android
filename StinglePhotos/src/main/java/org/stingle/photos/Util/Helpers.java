@@ -453,7 +453,7 @@ public class Helpers {
 		long nowDate = System.currentTimeMillis();
 		FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
 
-		String headers = Crypto.getFileHeaders(FileManager.getHomeDir(context) + "/" + filename, FileManager.getThumbsDir(context) + "/" + filename);
+		String headers = Crypto.getFileHeadersFromFile(FileManager.getHomeDir(context) + "/" + filename, FileManager.getThumbsDir(context) + "/" + filename);
 		db.insertFile(filename, true, false, FilesTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
 
 		db.close();

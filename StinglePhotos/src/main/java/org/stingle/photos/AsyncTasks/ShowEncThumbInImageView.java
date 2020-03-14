@@ -65,7 +65,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 			if(!isRemote) {
 				File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + filename);
 				FileInputStream input = new FileInputStream(fileToDec);
-				decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input);
+				decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null);
 			}
 			else{
 				byte[] encFile = FileManager.getAndCacheThumb(context, filename, folder);
@@ -74,7 +74,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 					return null;
 				}
 
-				decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encFile);
+				decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encFile, null);
 			}
 
 			if (decryptedData != null) {

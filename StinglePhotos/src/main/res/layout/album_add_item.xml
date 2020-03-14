@@ -5,12 +5,22 @@
     android:background="@drawable/layout_border">
 
     <ImageView
-        android:id="@+id/addAlbumButton"
+        android:id="@+id/thumbImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:src="@drawable/ic_add_circle"
         android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/albumName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:textColor="#000"
+        android:text="@string/new_album" />
 
 
 </RelativeLayout>

@@ -7,21 +7,22 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
-public class AlbumsDb {
+public class AlbumFilesDb {
 
 	private StingleDb db;
 
-	private String tableName = StingleDbContract.Files.TABLE_NAME_ALBUMS;
+	private String tableName = StingleDbContract.Files.TABLE_NAME_ALBUM_FILES;
 
-	public AlbumsDb(Context context) {
+	public AlbumFilesDb(Context context) {
 		db = new StingleDb(context);
 	}
 
 
-	public long insertAlbum(String data, String albumPK, long dateCreated, long dateModified){
+	public long insertAlbumFile(Integer albumId, String filename, String headers, long dateCreated, long dateModified){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATA, data);
-		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_PK, albumPK);
+		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_ID, albumId);
+		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, filename);
+		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, headers);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
 
@@ -29,15 +30,16 @@ public class AlbumsDb {
 
 	}
 
-	public int updateAlbum(StingleDbAlbum album){
+	public int updateAlbumFile(StingleDbAlbumFile file){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATA, album.data);
-		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_PK, album.albumPK);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, album.dateCreated);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, album.dateModified);
+		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_ID, file.albumId);
+		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, file.filename);
+		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, file.headers);
+		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, file.dateCreated);
+		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, file.dateModified);
 
 		String selection = StingleDbContract.Files._ID + " = ?";
-		String[] selectionArgs = { String.valueOf(album.id) };
+		String[] selectionArgs = { String.valueOf(file.id) };
 
 		return db.openWriteDb().update(
 				tableName,
@@ -48,7 +50,7 @@ public class AlbumsDb {
 
 
 
-	public int deleteAlbum(Integer id){
+	public int deleteAlbumFile(Integer id){
 		String selection = StingleDbContract.Files._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(id) };
 
@@ -61,17 +63,19 @@ public class AlbumsDb {
 
 
 
-	public Cursor getAlbumsList(int sort){
+	public Cursor getAlbumFilesList(int albumId, int sort, String limit){
 
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_DATA,
-				StingleDbContract.Files.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Files.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Files.COLUMN_NAME_FILENAME,
+				StingleDbContract.Files.COLUMN_NAME_HEADERS,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
 		};
 
-		String selection = null;
+		String selection = StingleDbContract.Files.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = { String.valueOf(albumId) };
 
 		String sortOrder =
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
@@ -80,56 +84,30 @@ public class AlbumsDb {
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
-				null,          // The values for the WHERE clause
+				selectionArgs,          // The values for the WHERE clause
 				null,                   // don't group the rows
 				null,                   // don't filter by row groups
-				sortOrder               // The sort order
+				sortOrder,               // The sort order
+				limit
 		);
 
 	}
 
-	public StingleDbAlbum getAlbumAtPosition(int pos, int sort){
+	public StingleDbAlbumFile getAlbumFileAtPosition(int albumId, int pos, int sort){
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_DATA,
-				StingleDbContract.Files.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Files.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Files.COLUMN_NAME_FILENAME,
+				StingleDbContract.Files.COLUMN_NAME_HEADERS,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
 		};
+
+		String selection = StingleDbContract.Files.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = { String.valueOf(albumId) };
 
 		String sortOrder =
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
-
-		Cursor result = db.openReadDb().query(
-				false,
-				tableName,
-				projection,
-				null,
-				null,
-				null,
-				null,
-				sortOrder,
-				String.valueOf(pos) + ", 1"
-		);
-
-		if(result.getCount() > 0){
-			result.moveToNext();
-			return new StingleDbAlbum(result);
-		}
-		return null;
-	}
-
-	public StingleDbAlbum getAlbumById(long albumId){
-		String[] projection = {
-				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_DATA,
-				StingleDbContract.Files.COLUMN_NAME_ALBUM_PK,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
-		};
-
-		String selection = StingleDbContract.Files._ID + " = ?";
-		String[] selectionArgs = { String.valueOf(albumId) };
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -139,18 +117,20 @@ public class AlbumsDb {
 				selectionArgs,
 				null,
 				null,
-				null,
-				null
+				sortOrder,
+				String.valueOf(pos) + ", 1"
 		);
 
 		if(result.getCount() > 0){
 			result.moveToNext();
-			return new StingleDbAlbum(result);
+			return new StingleDbAlbumFile(result);
 		}
 		return null;
 	}
 
-	public long getTotalAlbumsCount(){
+
+
+	public long getTotalAlbumFilesCount(){
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
 

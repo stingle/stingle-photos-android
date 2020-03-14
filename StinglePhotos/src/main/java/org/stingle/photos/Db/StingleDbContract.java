@@ -69,9 +69,10 @@ public class StingleDbContract {
 	public static final String SQL_CREATE_ALBUMS =
 			"CREATE TABLE " + Files.TABLE_NAME_ALBUMS + " (" +
 					Files._ID + " INTEGER PRIMARY KEY," +
-					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
 					Files.COLUMN_NAME_DATA + " TEXT NOT NULL," +
-					Files.COLUMN_NAME_ALBUM_PK + " TEXT NOT NULL" +
+					Files.COLUMN_NAME_ALBUM_PK + " TEXT NOT NULL, " +
+					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
+					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
 
 	public static final String SQL_DELETE_ALBUMS =
@@ -82,7 +83,9 @@ public class StingleDbContract {
 					Files._ID + " INTEGER PRIMARY KEY," +
 					Files.COLUMN_NAME_ALBUM_ID + " INTEGER," +
 					Files.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
-					Files.COLUMN_NAME_HEADERS + " TEXT" +
+					Files.COLUMN_NAME_HEADERS + " TEXT, " +
+					Files.COLUMN_NAME_DATE_CREATED + " INTEGER, " +
+					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
 
 	public static final String SQL_DELETE_ALBUM_FILES =
@@ -95,7 +98,9 @@ public class StingleDbContract {
 					Files.COLUMN_NAME_FROM_USER_ID + " INTEGER," +
 					Files.COLUMN_NAME_TO_DATA + " TEXT NOT NULL," +
 					Files.COLUMN_NAME_FROM_DATA + " TEXT NOT NULL," +
-					Files.COLUMN_NAME_IS_APPROVED + " INTEGER" +
+					Files.COLUMN_NAME_IS_APPROVED + " INTEGER, " +
+					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
+					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
 
 	public static final String SQL_DELETE_SHARES =

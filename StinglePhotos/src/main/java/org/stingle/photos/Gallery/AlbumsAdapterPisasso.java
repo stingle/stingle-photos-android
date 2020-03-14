@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -20,7 +21,10 @@ import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
+import org.stingle.photos.Db.AlbumFilesDb;
 import org.stingle.photos.Db.AlbumsDb;
+import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Db.StingleDbAlbum;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
@@ -32,26 +36,31 @@ import java.util.List;
 public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
 	private Context context;
 	private AlbumsDb db;
+	private AlbumFilesDb filesDb;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
-	private final Listener callback;
+	private Listener listener;
 	private final ArrayList<Integer> selectedIndices = new ArrayList<Integer>();
 	private int thumbSize;
 	private boolean isSelectModeActive = false;
-	private AutoFitGridLayoutManager lm;
+	private RecyclerView.LayoutManager lm;
 	private Picasso picasso;
 	private LruCache<Integer, AlbumProps> filePropsCache = new LruCache<Integer, AlbumProps>(512);
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_ADD = 1;
 
-	public AlbumsAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm) {
+	public static final int LAYOUT_GRID = 0;
+	public static final int LAYOUT_LIST = 1;
+	private int layoutStyle = LAYOUT_GRID;
+
+	public AlbumsAdapterPisasso(Context context, RecyclerView.LayoutManager lm) {
 		this.context = context;
-		this.callback = callback;
 		this.db = new AlbumsDb(context);
+		this.filesDb = new AlbumFilesDb(context);
 		this.thumbSize = Helpers.getThumbSize(context,2);
 		this.lm = lm;
 
-		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, thumbSize)).build();
+		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, filesDb, thumbSize)).build();
 
 	}
 
@@ -61,10 +70,18 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		db.close();
 	}
 
+	public void setListener(Listener listener){
+		this.listener = listener;
+	}
+
 	public void updateDataSet(){
 		filePropsCache.evictAll();
 		picasso.evictAll();
 		notifyDataSetChanged();
+	}
+
+	public void setLayoutStyle(int layoutStyle){
+		this.layoutStyle = layoutStyle;
 	}
 
 
@@ -73,13 +90,13 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	// you provide access to all the views for a data item in a view holder
 	public class AlbumVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 		// each data item is just a string in this case
-		public RelativeLayout layout;
+		public View layout;
 		public ImageView image;
 		public CheckBox checkbox;
 		public TextView albumName;
 		public int currentPos = -1;
 
-		public AlbumVH(RelativeLayout v) {
+		public AlbumVH(View v) {
 			super(v);
 			layout = v;
 			image = v.findViewById(R.id.thumbImage);
@@ -88,19 +105,21 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
+			albumName.setOnClickListener(this);
+			albumName.setOnLongClickListener(this);
 		}
 
 		@Override
 		public void onClick(View v) {
-			if (callback != null) {
-				callback.onClick(getAdapterPosition());
+			if (listener != null) {
+				listener.onClick(getAdapterPosition());
 			}
 		}
 
 		@Override
 		public boolean onLongClick(View v) {
-			if (callback != null) {
-				callback.onLongClick(getAdapterPosition());
+			if (listener != null) {
+				listener.onLongClick(getAdapterPosition());
 			}
 			return true;
 		}
@@ -108,29 +127,32 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 	public class AlbumAddVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 		// each data item is just a string in this case
-		public RelativeLayout layout;
+		public View layout;
 		public ImageView image;
-		public int currentPos = -1;
+		public TextView albumName;
 
-		public AlbumAddVH(RelativeLayout v) {
+		public AlbumAddVH(View v) {
 			super(v);
 			layout = v;
-			image = v.findViewById(R.id.addAlbumButton);
+			image = v.findViewById(R.id.thumbImage);
+			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
+			albumName.setOnClickListener(this);
+			albumName.setOnLongClickListener(this);
 		}
 
 		@Override
 		public void onClick(View v) {
-			if (callback != null) {
-				callback.onClick(getAdapterPosition());
+			if (listener != null) {
+				listener.onClick(getAdapterPosition());
 			}
 		}
 
 		@Override
 		public boolean onLongClick(View v) {
-			if (callback != null) {
-				callback.onLongClick(getAdapterPosition());
+			if (listener != null) {
+				listener.onLongClick(getAdapterPosition());
 			}
 			return true;
 		}
@@ -145,10 +167,10 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	}
 
 
-	private int translateDbPosToGalleryPos(int dbPos){
+	public int translateDbPosToGalleryPos(int dbPos){
 		return dbPos + 1;
 	}
-	private int translateGalleryPosToDbPos(int pos){
+	public int translateGalleryPosToDbPos(int pos){
 		return pos - 1;
 	}
 
@@ -165,25 +187,44 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	// Create new views (invoked by the layout manager)
 	@Override
 	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-		if(viewType == TYPE_ITEM) {
-			// create a new view
-			RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-					.inflate(R.layout.album_item, parent, false);
+		if(layoutStyle == LAYOUT_GRID) {
+			if (viewType == TYPE_ITEM) {
+				// create a new view
+				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
+						.inflate(R.layout.album_item, parent, false);
 
-			AlbumVH vh = new AlbumVH(v);
+				AlbumVH vh = new AlbumVH(v);
 
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(thumbSize, thumbSize);
-			vh.image.setLayoutParams(params);
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(thumbSize, thumbSize);
+				vh.image.setLayoutParams(params);
 
-			return vh;
+				return vh;
+			} else if (viewType == TYPE_ADD) {
+				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
+						.inflate(R.layout.album_add_item, parent, false);
+
+				AlbumAddVH vh = new AlbumAddVH(v);
+
+				return vh;
+			}
 		}
-		else if(viewType == TYPE_ADD){
-			RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-					.inflate(R.layout.album_add_item, parent, false);
+		else if(layoutStyle == LAYOUT_LIST) {
+			if (viewType == TYPE_ITEM) {
+				// create a new view
+				LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
+						.inflate(R.layout.add_to_album_dialog_item, parent, false);
 
-			AlbumAddVH vh = new AlbumAddVH(v);
+				AlbumVH vh = new AlbumVH(v);
 
-			return vh;
+				return vh;
+			} else if (viewType == TYPE_ADD) {
+				LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
+						.inflate(R.layout.add_to_album_dialog_item, parent, false);
+
+				AlbumAddVH vh = new AlbumAddVH(v);
+
+				return vh;
+			}
 		}
 
 		return null;
@@ -255,6 +296,8 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		}
 		else if(holderObj instanceof AlbumAddVH) {
 			AlbumAddVH holder = (AlbumAddVH)holderObj;
+			holder.albumName.setText(context.getString(R.string.new_album));
+			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_add_circle));
 		}
 	}
 
@@ -270,6 +313,10 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		}
 	}
 
+	public StingleDbAlbum getAlbumAtPosition(int position){
+		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), StingleDb.SORT_ASC);
+	}
+
 
 
 	@Override
@@ -281,8 +328,8 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			selectedIndices.add(index);
 		}
 		notifyItemChanged(index);
-		if (callback != null) {
-			callback.onSelectionChanged(selectedIndices.size());
+		if (listener != null) {
+			listener.onSelectionChanged(selectedIndices.size());
 		}
 	}
 
@@ -314,15 +361,15 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			selectedIndices.add(index);
 		}
 		notifyItemChanged(index);
-		if (callback != null) {
-			callback.onSelectionChanged(selectedIndices.size());
+		if (listener != null) {
+			listener.onSelectionChanged(selectedIndices.size());
 		}
 	}
 
 	public void clearSelected() {
 		selectedIndices.clear();
-		if (callback != null) {
-			callback.onSelectionChanged(0);
+		if (listener != null) {
+			listener.onSelectionChanged(0);
 		}
 		setSelectionModeActive(false);
 	}

@@ -9,6 +9,8 @@ public class StingleDb extends SQLiteOpenHelper {
 	public static final int DATABASE_VERSION = 2;
 	public static final String DATABASE_NAME = "stingleFiles.db";
 
+	public static final int SORT_ASC = 0;
+	public static final int SORT_DESC = 1;
 
 	protected SQLiteDatabase dbWrite;
 	protected SQLiteDatabase dbRead;

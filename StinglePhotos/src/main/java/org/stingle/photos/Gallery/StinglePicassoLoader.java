@@ -30,11 +30,13 @@ public class StinglePicassoLoader extends RequestHandler {
 	private Context context;
 	private FilesTrashDb db;
 	private int thumbSize;
+	private Crypto crypto;
 
 	public StinglePicassoLoader(Context context, FilesTrashDb db, int thumbSize){
 		this.context = context;
 		this.db = db;
 		this.thumbSize = thumbSize;
+		this.crypto = StinglePhotosApplication.getCrypto();
 	}
 
 	@Override
@@ -67,14 +69,14 @@ public class StinglePicassoLoader extends RequestHandler {
 			try {
 				File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 				FileInputStream input = new FileInputStream(fileToDec);
-				byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input);
+				byte[] decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(file.headers));
 
 				if (decryptedData != null) {
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
 					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
 
 					FileInputStream streamForHeader = new FileInputStream(fileToDec);
-					Crypto.Header header = StinglePhotosApplication.getCrypto().getFileHeader(streamForHeader);
+					Crypto.Header header = crypto.getFileHeader(streamForHeader);
 					streamForHeader.close();
 
 					Result result = new Result(bitmap, Picasso.LoadedFrom.DISK);
@@ -98,7 +100,7 @@ public class StinglePicassoLoader extends RequestHandler {
 			}
 
 		}
-		else if(!file.isLocal && file.isRemote){
+		else if(file.isRemote){
 
 			try {
 				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename, folder);
@@ -107,13 +109,13 @@ public class StinglePicassoLoader extends RequestHandler {
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));
 				}
 
-				byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encFile);
+				byte[] decryptedData = crypto.decryptFile(encFile, crypto.getThumbHeaderFromHeadersStr(file.headers));
 
 				if (decryptedData != null) {
 
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
 					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
-					Crypto.Header header = StinglePhotosApplication.getCrypto().getFileHeader(encFile);
+					Crypto.Header header = crypto.getFileHeader(encFile);
 
 					if(bitmap == null) {
 						bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.file);

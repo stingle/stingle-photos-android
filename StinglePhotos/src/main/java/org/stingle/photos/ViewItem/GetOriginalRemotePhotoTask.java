@@ -3,7 +3,6 @@ package org.stingle.photos.ViewItem;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -87,7 +86,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				return null;
 			}
 
-			return StinglePhotosApplication.getCrypto().decryptFile(encFile, this);
+			return StinglePhotosApplication.getCrypto().decryptFile(encFile, this, StinglePhotosApplication.getCrypto().getFileHeaderFromHeadersStr(result.headers));
 		}
 		catch (NoSuchAlgorithmException | KeyManagementException | IOException | CryptoException e) {
 

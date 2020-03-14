@@ -264,6 +264,8 @@
     <string name="sharing">Sharing</string>
     <string name="enter_album_name">Please enter album name</string>
     <string name="add_album_failed">Failed to add album</string>
+    <string name="add_to_album">Add to album</string>
+    <string name="new_album">New album</string>
 
 
 </resources>

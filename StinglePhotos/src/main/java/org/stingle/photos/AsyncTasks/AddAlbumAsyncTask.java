@@ -5,13 +5,14 @@ import android.os.AsyncTask;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.AlbumsDb;
+import org.stingle.photos.Db.StingleDbAlbum;
 import org.stingle.photos.StinglePhotosApplication;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
-public class AddAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
+public class AddAlbumAsyncTask extends AsyncTask<Void, Void, StingleDbAlbum> {
 
 	private WeakReference<Context> context;
 	private String albumName;
@@ -26,33 +27,34 @@ public class AddAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... params) {
+	protected StingleDbAlbum doInBackground(Void... params) {
 		try {
 			Context myContext = context.get();
 			if(myContext == null){
-				return false;
+				return null;
 			}
-			HashMap<String, byte[]> albumInfo = crypto.generateEncryptedAlbumData(crypto.getPublicKey(), albumName);
+			HashMap<String, String> albumInfo = crypto.generateEncryptedAlbumData(crypto.getPublicKey(), albumName);
 
 			AlbumsDb db = new AlbumsDb(myContext);
-
-			db.insertAlbum(Crypto.byteArrayToBase64Default(albumInfo.get("data")), Crypto.byteArrayToBase64Default(albumInfo.get("pk")), System.currentTimeMillis());
+			long now = System.currentTimeMillis();
+			long newId = db.insertAlbum(albumInfo.get("data"), albumInfo.get("pk"), now, now);
+			StingleDbAlbum newAlbum = db.getAlbumById(newId);
 			db.close();
+
+			return newAlbum;
 
 		} catch (IOException e) {
 			e.printStackTrace();
-			return false;
+			return null;
 		}
-
-		return true;
 	}
 
 	@Override
-	protected void onPostExecute(Boolean result) {
-		super.onPostExecute(result);
+	protected void onPostExecute(StingleDbAlbum album) {
+		super.onPostExecute(album);
 
-		if(result){
-			onFinishListener.onFinish();
+		if(album != null){
+			onFinishListener.onFinish(album);
 		}
 		else{
 			onFinishListener.onFail();

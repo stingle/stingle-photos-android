@@ -468,16 +468,28 @@ public class Crypto {
 
 
     public Header getFileHeader(byte[] bytes) throws IOException, CryptoException{
+        return getFileHeader(bytes, null, null);
+    }
+
+    public Header getFileHeader(byte[] bytes, byte[] privateKey, byte[] publicKey) throws IOException, CryptoException{
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        return getFileHeader(in);
+        return getFileHeader(in, privateKey, publicKey);
     }
 
     public Header getFileHeader(InputStream in) throws IOException, CryptoException{
+        return getFileHeader(in, null, null);
+    }
+
+    public Header getFileHeader(InputStream in, byte[] privateKey, byte[] publicKey) throws IOException, CryptoException{
         int overallHeaderSize = 0;
         Header header = new Header();
 
-        byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
-        byte[] privateKey = StinglePhotosApplication.getKey();
+        if(publicKey == null) {
+            publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
+        }
+        if(privateKey == null) {
+            privateKey = StinglePhotosApplication.getKey();
+        }
 
         // Read and validate file beginning
         byte[] fileBeginning = new byte[FILE_BEGGINIG_LEN];
@@ -641,32 +653,37 @@ public class Crypto {
     }
 
 
-    public byte[] decryptFile(byte[] bytes) throws IOException, CryptoException{
+    public byte[] decryptFile(byte[] bytes, Header header) throws IOException, CryptoException{
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        return decryptFile(in, null, null);
+        return decryptFile(in, null, null, header);
     }
 
-    public byte[] decryptFile(byte[] bytes, AsyncTask<?,?,?> task) throws IOException, CryptoException{
+    public byte[] decryptFile(byte[] bytes, AsyncTask<?,?,?> task, Header header) throws IOException, CryptoException{
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        return decryptFile(in, null, task);
+        return decryptFile(in, null, task, header);
     }
 
-    public byte[] decryptFile(InputStream in) throws IOException, CryptoException{
-        return decryptFile(in, null, null);
+    public byte[] decryptFile(InputStream in, Header header) throws IOException, CryptoException{
+        return decryptFile(in, null, null, header);
     }
 
-    public byte[] decryptFile(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException{
+    public byte[] decryptFile(InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task, Header header) throws IOException, CryptoException{
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        decryptFile(in, out, progress, task);
+        decryptFile(in, out, progress, task, header);
 
         return out.toByteArray();
     }
 
-    public void decryptFile(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException{
+    public void decryptFile(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task, Header header) throws IOException, CryptoException{
         long time = System.nanoTime();
 
-        Header header = getFileHeader(in);
+        if(header == null) {
+            header = getFileHeader(in);
+        }
+        else{
+            getOverallHeaderSize(in, false);
+        }
 
         decryptData(in, out, header, progress, task);
         long time2 = System.nanoTime();
@@ -894,11 +911,15 @@ public class Crypto {
         return Base64.decode(base64str, Base64.NO_WRAP); //base64 decoding
     }
 
-    public static String getFileHeaders(String encFilePath, String encThumbPath) throws IOException, CryptoException {
+    public static String assembleHeadersString(byte[] fileHeader, byte[] thumbHeader){
+        return byteArrayToBase64(fileHeader) + "*" + byteArrayToBase64(thumbHeader);
+    }
+
+    public static String getFileHeadersFromFile(String encFilePath, String encThumbPath) throws IOException, CryptoException {
         byte[] fileEncHeader = getFileHeaderAsIs(encFilePath);
         byte[] thumbEncHeader = getFileHeaderAsIs(encThumbPath);
 
-        return byteArrayToBase64(fileEncHeader) + "*" + byteArrayToBase64(thumbEncHeader);
+        return assembleHeadersString(fileEncHeader, thumbEncHeader);
     }
 
     public static byte[] getFileHeaderAsIs(String filePath) throws IOException, CryptoException {
@@ -913,7 +934,40 @@ public class Crypto {
         return encHeader;
     }
 
+    public static FileThumbHeaders parseFileHeaders(String headersStr) {
+        String[] headersStrArr = headersStr.split("\\*");
+
+        FileThumbHeaders headers = new FileThumbHeaders();
+
+        headers.file = base64ToByteArray(headersStrArr[0]);
+        headers.thumb = base64ToByteArray(headersStrArr[1]);
+
+        return headers;
+    }
+
+    public Header getFileHeaderFromHeadersStr(String headersStr) throws IOException, CryptoException {
+        return getFileHeaderFromHeadersStr(headersStr, null, null);
+    }
+    public Header getThumbHeaderFromHeadersStr(String headersStr) throws IOException, CryptoException {
+        return getThumbHeaderFromHeadersStr(headersStr, null, null);
+    }
+
+    public Header getFileHeaderFromHeadersStr(String headersStr, byte[] privateKey, byte[] publicKey) throws IOException, CryptoException {
+        FileThumbHeaders headers = parseFileHeaders(headersStr);
+
+        return getFileHeader(headers.file, privateKey, publicKey);
+    }
+    public Header getThumbHeaderFromHeadersStr(String headersStr, byte[] privateKey, byte[] publicKey) throws IOException, CryptoException {
+        FileThumbHeaders headers = parseFileHeaders(headersStr);
+
+        return getFileHeader(headers.thumb, privateKey, publicKey);
+    }
+
     public static int getOverallHeaderSize(InputStream in) throws IOException, CryptoException {
+        return getOverallHeaderSize(in, true);
+    }
+
+    public static int getOverallHeaderSize(InputStream in, boolean closeStream) throws IOException, CryptoException {
         int overallHeaderSize = 0;
 
         // Read and validate file beginning
@@ -947,14 +1001,17 @@ public class Crypto {
             throw new CryptoException("Invalid header size");
         }
         overallHeaderSize += FILE_HEADER_SIZE_LEN;
-
+        in.skip(headerSize);
         overallHeaderSize += headerSize;
-        in.close();
+
+        if(closeStream) {
+            in.close();
+        }
 
         return overallHeaderSize;
     }
 
-    public HashMap<String, byte[]> generateEncryptedAlbumData(byte[] userPK, String albumName) throws IOException {
+    public HashMap<String, String> generateEncryptedAlbumData(byte[] userPK, String albumName) throws IOException {
 
         byte[] privateKey = new byte[Box.SECRETKEYBYTES];
         byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
@@ -981,14 +1038,16 @@ public class Crypto {
         byte[] encryptedData = new byte[encDataLength];
         so.crypto_box_seal(encryptedData, dataBytes, dataBytes.length, userPK);
 
-        HashMap<String, byte[]> result = new HashMap<String, byte[]>();
-        result.put("data", encryptedData);
-        result.put("pk", publicKey);
+        HashMap<String, String> result = new HashMap<String, String>();
+        result.put("data", byteArrayToBase64Default(encryptedData));
+        result.put("pk", byteArrayToBase64Default(publicKey));
 
         return result;
     }
 
-    public AlbumData parseAlbumData(byte[] encData) throws IOException, CryptoException {
+    public AlbumData parseAlbumData(String encDataStr) throws IOException, CryptoException {
+
+        byte[] encData = base64ToByteArrayDefault(encDataStr);
 
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
         byte[] privateKey = StinglePhotosApplication.getKey();
@@ -1021,6 +1080,22 @@ public class Crypto {
         }
 
         return albumData;
+    }
+
+    public String reencryptFileHeaders(String headersStr, byte[] publicKeyTo, byte[] privateKeyFrom, byte[] publicKeyFrom) throws IOException, CryptoException {
+        FileThumbHeaders headers = parseFileHeaders(headersStr);
+
+        Header fileHeader = getFileHeader(headers.file, privateKeyFrom, publicKeyFrom);
+        ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+        writeHeader(fileOut, fileHeader, publicKeyTo);
+        byte[] fileNewHeader = fileOut.toByteArray();
+
+        Header thumbHeader = getFileHeader(headers.thumb, privateKeyFrom, publicKeyFrom);
+        ByteArrayOutputStream thumbOut = new ByteArrayOutputStream();
+        writeHeader(thumbOut, thumbHeader, publicKeyTo);
+        byte[] thumbNewHeader = thumbOut.toByteArray();
+
+        return assembleHeadersString(fileNewHeader, thumbNewHeader);
     }
 
     public class Header{
@@ -1056,8 +1131,13 @@ public class Crypto {
         }
     }
 
-    public class AlbumData{
+    public static class AlbumData{
         public byte[] privateKey;
         public String name;
+    }
+
+    public static class FileThumbHeaders{
+        public byte[] file;
+        public byte[] thumb;
     }
 }

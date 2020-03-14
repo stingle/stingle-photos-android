@@ -7,6 +7,11 @@
         android:title="@string/share"
         app:showAsAction="always|withText" />
     <item
+        android:id="@+id/add_to_album"
+        android:icon="@drawable/ic_action_add"
+        android:title="@string/add_to_album"
+        app:showAsAction="always|withText" />
+    <item
         android:id="@+id/decrypt"
         android:icon="@drawable/ic_action_unlock"
         android:title="@string/save_to_gallery"

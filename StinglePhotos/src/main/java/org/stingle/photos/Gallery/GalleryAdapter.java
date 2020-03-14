@@ -277,7 +277,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 				try {
 					File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 					FileInputStream input = new FileInputStream(fileToDec);
-					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input);
+					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null);
 
 					if (decryptedData != null) {
 						GalleryDecItem item = new GalleryDecItem();
@@ -323,7 +323,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 					tmp.write(encFile);
 					tmp.close();*/
 
-					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encFile);
+					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encFile, null);
 
 					if (decryptedData != null) {
 						GalleryDecItem item = new GalleryDecItem();

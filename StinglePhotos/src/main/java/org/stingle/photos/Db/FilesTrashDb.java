@@ -15,9 +15,6 @@ public class FilesTrashDb {
 	public static final int GET_MODE_LOCAL = 3;
 	public static final int GET_MODE_REMOTE = 4;
 
-	public static final int SORT_ASC = 0;
-	public static final int SORT_DESC = 1;
-
 	public static final int INITIAL_VERSION = 1;
 
 	public static final int REUPLOAD_NO = 0;
@@ -224,7 +221,7 @@ public class FilesTrashDb {
 
 
 		String sortOrder =
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == SORT_DESC ? " DESC" : " ASC");
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		return db.openReadDb().query(
 				tableName,   // The table to query

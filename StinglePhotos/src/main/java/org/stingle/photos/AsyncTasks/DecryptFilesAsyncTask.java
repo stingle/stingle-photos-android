@@ -115,7 +115,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 					String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), destFileName);
 					FileOutputStream outputStream = new FileOutputStream(new File(finalWritePath));
 
-					StinglePhotosApplication.getCrypto().decryptFile(inputStream, outputStream, null, this);
+					StinglePhotosApplication.getCrypto().decryptFile(inputStream, outputStream, null, this, StinglePhotosApplication.getCrypto().getFileHeaderFromHeadersStr(dbFile.headers));
 
 					publishProgress(i + 1);
 					File decryptedFile = new File(finalWritePath);

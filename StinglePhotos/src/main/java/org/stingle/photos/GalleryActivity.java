@@ -2,6 +2,7 @@ package org.stingle.photos;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -44,24 +45,30 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import org.stingle.photos.AsyncTasks.AddFilesToAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.StingleDbAlbum;
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
+import org.stingle.photos.Gallery.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.AlbumsFragment;
 import org.stingle.photos.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.GalleryFragmentParent;
+import org.stingle.photos.Gallery.GalleryHelpers;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
@@ -775,6 +782,9 @@ public class GalleryActivity extends AppCompatActivity
 					case R.id.share:
 						shareSelected();
 						break;
+					case R.id.add_to_album:
+						addToAlbumSelected();
+						break;
 					case R.id.decrypt:
 						decryptSelected();
 						break;
@@ -804,6 +814,81 @@ public class GalleryActivity extends AppCompatActivity
 
 	private void shareSelected() {
 		ShareManager.shareDbFiles(this, galleryFragment.getSelectedFiles(), currentFolder);
+	}
+
+	private void addToAlbumSelected() {
+		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setView(R.layout.add_to_album_dialog);
+		builder.setCancelable(true);
+		final AlertDialog addAlbumDialog = builder.create();
+		addAlbumDialog.show();
+
+		RecyclerView recyclerView = addAlbumDialog.findViewById(R.id.albums_recycler_view);
+
+		recyclerView.setHasFixedSize(true);
+
+		LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+		recyclerView.setLayoutManager(layoutManager);
+
+		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(this, layoutManager);
+
+		adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
+		adapter.setListener(new AlbumsAdapterPisasso.Listener() {
+			@Override
+			public void onClick(int index) {
+
+				OnAsyncTaskFinish onAddFinish = new OnAsyncTaskFinish() {
+					@Override
+					public void onFinish() {
+						super.onFinish();
+						addAlbumDialog.dismiss();
+						exitActionMode();
+					}
+
+					@Override
+					public void onFail() {
+						super.onFail();
+						Helpers.showAlertDialog(GalleryActivity.this, getString(R.string.something_went_wrong));
+					}
+				};
+
+				if(index == 0){
+					GalleryHelpers.addAlbum(GalleryActivity.this, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish(Object albumObj) {
+							super.onFinish(albumObj);
+
+							StingleDbAlbum album = (StingleDbAlbum) albumObj;
+							(new AddFilesToAlbumAsyncTask(GalleryActivity.this, album, files, onAddFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+						}
+
+						@Override
+						public void onFail() {
+							super.onFail();
+						}
+					});
+				}
+				else {
+					(new AddFilesToAlbumAsyncTask(GalleryActivity.this, adapter.getAlbumAtPosition(index), files, onAddFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
+
+			}
+
+			@Override
+			public void onLongClick(int index) {
+
+			}
+
+			@Override
+			public void onSelectionChanged(int count) {
+
+			}
+		});
+
+		recyclerView.setAdapter(adapter);
+
 	}
 
 	private void decryptSelected() {

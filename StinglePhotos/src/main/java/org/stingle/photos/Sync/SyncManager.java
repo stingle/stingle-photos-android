@@ -14,6 +14,7 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
@@ -106,7 +107,7 @@ public class SyncManager {
 			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 			File dir = new File(FileManager.getHomeDir(this.context));
 
-			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ALL, FilesTrashDb.SORT_ASC);
+			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC);
 
 			while(result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
@@ -137,7 +138,7 @@ public class SyncManager {
 					for (File file : currentFolderFiles) {
 						if (file.isFile() && file.getName().endsWith(StinglePhotosApplication.FILE_EXTENSION) && db.getFileIfExists(file.getName()) == null && trashDb.getFileIfExists(file.getName()) == null) {
 							try {
-								String headers = Crypto.getFileHeaders(file.getAbsolutePath(), FileManager.getThumbsDir(context) + "/" + file.getName());
+								String headers = Crypto.getFileHeadersFromFile(file.getAbsolutePath(), FileManager.getThumbsDir(context) + "/" + file.getName());
 								db.insertFile(file.getName(), true, false, FilesTrashDb.INITIAL_VERSION, file.lastModified(), file.lastModified(), headers);
 								needToUpdateUI = true;
 							} catch (IOException | CryptoException e) {
@@ -197,7 +198,7 @@ public class SyncManager {
 		protected int getFilesCountToUpload(int folder){
 			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
-			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, FilesTrashDb.SORT_ASC);
+			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC);
 			int uploadCount = result.getCount();
 			result.close();
 
@@ -213,7 +214,7 @@ public class SyncManager {
 		protected void uploadFolder(int folder){
 			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
-			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, FilesTrashDb.SORT_ASC);
+			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC);
 			while(result.moveToNext()) {
 				if(isCancelled()){
 					break;
@@ -847,7 +848,7 @@ public class SyncManager {
 			String homeDir = FileManager.getHomeDir(context);
 			String thumbDir = FileManager.getThumbsDir(context);
 
-			Cursor result = trashDb.getFilesList(FilesTrashDb.GET_MODE_ALL, FilesTrashDb.SORT_ASC);
+			Cursor result = trashDb.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC);
 
 			while(result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);

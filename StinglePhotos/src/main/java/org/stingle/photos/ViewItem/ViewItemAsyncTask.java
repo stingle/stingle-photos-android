@@ -108,6 +108,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 		StingleDbFile dbFile = db.getFileAtPosition(position);
 		result.filename = dbFile.filename;
+		result.headers = dbFile.headers;
 		if(dbFile.isLocal){
 			File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
 			try {
@@ -122,7 +123,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 					FileInputStream input = new FileInputStream(file);
 
-					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null, this);
+					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null, this, StinglePhotosApplication.getCrypto().getFileHeaderFromHeadersStr(dbFile.headers));
 
 					if (decryptedData != null) {
 						if(isGif){
@@ -154,7 +155,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
-					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encThumb, this);
+					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encThumb, this, StinglePhotosApplication.getCrypto().getThumbHeaderFromHeadersStr(dbFile.headers));
 
 					if (decryptedData != null) {
 						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
@@ -408,5 +409,6 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		public boolean isRemote = false;
 		public String url = null;
 		public int folder = SyncManager.FOLDER_MAIN;
+		public String headers = null;
 	}
 }
