@@ -35,8 +35,11 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -65,8 +68,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final ImageHolderLayout parent;
 	private final ContentLoadingProgressBar loading;
 	private final ViewPagerAdapter adapter;
-	private final FilesTrashDb db;
+	private final FilesDb db;
 	private int folder = SyncManager.FOLDER_MAIN;
+	private int folderId = -1;
 
 	private final OnClickListener onClickListener;
 	private final MemoryCache memCache;
@@ -75,9 +79,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final View.OnTouchListener touchListener;
 
 	private int fileType;
+	private Crypto crypto;
 
 
-	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesTrashDb db, int folder, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
+	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int folder, int folderId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
 		this.context = context;
 		this.adapter = adapter;
@@ -86,9 +91,11 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		this.loading = loading;
 		this.db = db;
 		this.folder = folder;
+		this.folderId = folderId;
 		this.onClickListener = onClickListener;
 		this.touchListener = touchListener;
 		this.memCache = memCache;
+		this.crypto = StinglePhotosApplication.getCrypto();
 
 		if(position < 0){
 			position = 0;
@@ -106,7 +113,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 		result.folder = folder;
 
-		StingleDbFile dbFile = db.getFileAtPosition(position);
+		StingleFile dbFile = db.getFileAtPosition(position, folderId, StingleDb.SORT_DESC);
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
 		if(dbFile.isLocal){
@@ -123,7 +130,17 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 					FileInputStream input = new FileInputStream(file);
 
-					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null, this, StinglePhotosApplication.getCrypto().getFileHeaderFromHeadersStr(dbFile.headers));
+					byte[] decryptedData;
+
+					if(folder == SyncManager.FOLDER_ALBUM){
+						AlbumsDb albumsDb = new AlbumsDb(context);
+						StingleDbAlbum album = albumsDb.getAlbumById(folderId);
+						Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+						decryptedData = crypto.decryptFile(input, null, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
+					}
+					else {
+						decryptedData = crypto.decryptFile(input, null, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers));
+					}
 
 					if (decryptedData != null) {
 						if(isGif){
@@ -155,7 +172,17 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
-					byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encThumb, this, StinglePhotosApplication.getCrypto().getThumbHeaderFromHeadersStr(dbFile.headers));
+					byte[] decryptedData;
+
+					if(folder == SyncManager.FOLDER_ALBUM){
+						AlbumsDb albumsDb = new AlbumsDb(context);
+						StingleDbAlbum album = albumsDb.getAlbumById(folderId);
+						Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+						decryptedData = crypto.decryptFile(encThumb, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
+					}
+					else {
+						decryptedData = crypto.decryptFile(encThumb, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers));
+					}
 
 					if (decryptedData != null) {
 						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));

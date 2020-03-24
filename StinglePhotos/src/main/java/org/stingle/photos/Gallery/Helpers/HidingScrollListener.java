@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Helpers;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;

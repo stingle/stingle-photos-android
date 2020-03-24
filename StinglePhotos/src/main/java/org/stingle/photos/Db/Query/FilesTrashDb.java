@@ -1,4 +1,4 @@
-package org.stingle.photos.Db;
+package org.stingle.photos.Db.Query;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,7 +7,12 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
-public class FilesTrashDb {
+import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Db.StingleDbContract;
+
+public class FilesTrashDb implements FilesDb{
 
 	public static final int GET_MODE_ALL = 0;
 	public static final int GET_MODE_ONLY_LOCAL = 1;
@@ -29,7 +34,7 @@ public class FilesTrashDb {
 	}
 
 
-	public long insertFile(StingleDbFile file){
+	public long insertFile(StingleFile file){
 		return insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, file.dateModified, file.headers);
 	}
 
@@ -265,7 +270,7 @@ public class FilesTrashDb {
 
 	}
 
-	public StingleDbFile getFileAtPosition(int pos){
+	public StingleDbFile getFileAtPosition(int pos, int id, int sort){
 		String[] projection = {
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,
 				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
@@ -278,7 +283,7 @@ public class FilesTrashDb {
 		};
 
 		String sortOrder =
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + " DESC";
+				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -309,7 +314,7 @@ public class FilesTrashDb {
 		return null;
 	}
 
-	public Cursor getAvailableDates(){
+	public Cursor getAvailableDates(int folderId){
 		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"GROUP BY cdate " +
@@ -318,7 +323,7 @@ public class FilesTrashDb {
 
 	}
 
-	public long getTotalFilesCount(){
+	public long getTotalFilesCount(int id){
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
 

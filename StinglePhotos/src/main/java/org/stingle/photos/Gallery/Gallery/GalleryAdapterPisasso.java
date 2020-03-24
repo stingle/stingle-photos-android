@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Gallery;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -22,9 +22,14 @@ import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.Query.FilesTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
+import org.stingle.photos.Gallery.Helpers.IDragSelectAdapter;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
@@ -40,7 +45,7 @@ import java.util.Objects;
 
 public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
 	private Context context;
-	private FilesTrashDb db;
+	private FilesDb db;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private final Listener callback;
 	private final ArrayList<Integer> selectedIndices = new ArrayList<Integer>();
@@ -51,20 +56,32 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
-	private int folderType;
+	private int folderType = SyncManager.FOLDER_MAIN;
+	private int folderId = 0;
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
 
-	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType) {
+	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType, int folderId) {
 		this.context = context;
 		this.callback = callback;
 		this.folderType = folderType;
-		this.db = new FilesTrashDb(context, (folderType == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		this.folderId = folderId;
+		switch (folderType){
+			case SyncManager.FOLDER_MAIN:
+				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+				break;
+			case SyncManager.FOLDER_TRASH:
+				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+				break;
+			case SyncManager.FOLDER_ALBUM:
+				this.db = new AlbumFilesDb(context);
+				break;
+		}
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
 
-		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
+		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize, folderId)).build();
 
 		getAvailableDates();
 		calculateDatePositions();
@@ -82,17 +99,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		getAvailableDates();
 		calculateDatePositions();
 		notifyDataSetChanged();
-	}
-
-	public void setFolder(int folder){
-		synchronized (this){
-			this.db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
-			folderType = folder;
-			picasso.cancelAll();
-			this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize)).build();
-			updateDataSet();
-
-		}
 	}
 
 	// Provide a reference to the views for each data item
@@ -186,7 +192,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	protected void getAvailableDates(){
 		dates.clear();
-		Cursor result = db.getAvailableDates();
+		Cursor result = db.getAvailableDates(folderId);
 		while(result.moveToNext()) {
 			DateGroup group = new DateGroup(convertDate(result.getString(0)), result.getInt(1));
 			dates.add(group);
@@ -350,6 +356,9 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			if(folderType == SyncManager.FOLDER_TRASH){
 				folder = "t";
 			}
+			else if(folderType == SyncManager.FOLDER_ALBUM){
+				folder = "a";
+			}
 
 			final RequestCreator req = picasso.load("p" + folder + String.valueOf(position));
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
@@ -414,8 +423,8 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return (isPositionIsDate(position) ? TYPE_DATE : TYPE_ITEM);
 	}
 
-	public StingleDbFile getStingleFileAtPosition(int position){
-		return db.getFileAtPosition(translatePos(position).dbPosition);
+	public StingleFile getStingleFileAtPosition(int position){
+		return db.getFileAtPosition(translatePos(position).dbPosition, folderId, StingleDb.SORT_DESC);
 	}
 
 	@Override
@@ -486,8 +495,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 
 		return totalItems;
-		//Log.d("totalCount", String.valueOf(db.getTotalFilesCount()));
-		//return (int)db.getTotalFilesCount() + dates.size();
 	}
 
 

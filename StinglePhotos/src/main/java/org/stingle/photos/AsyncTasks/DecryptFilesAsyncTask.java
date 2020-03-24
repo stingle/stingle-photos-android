@@ -8,7 +8,7 @@ import android.os.AsyncTask;
 
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Net.HttpsClient;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Integer, ArrayList<File>> {
+public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer, ArrayList<File>> {
 
 	private ProgressDialog progressDialog;
 	private final Context context;
@@ -74,15 +74,15 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 	}
 
 	@Override
-	protected ArrayList<File> doInBackground(List<StingleDbFile>... params) {
-		List<StingleDbFile> filesToDecrypt = params[0];
+	protected ArrayList<File> doInBackground(List<StingleFile>... params) {
+		List<StingleFile> filesToDecrypt = params[0];
 		ArrayList<File> decryptedFiles = new ArrayList<File>();
 
 		progressDialog.setMax(filesToDecrypt.size());
 		destinationFolder.mkdirs();
 
 		for (int i = 0; i < filesToDecrypt.size(); i++) {
-			StingleDbFile dbFile = filesToDecrypt.get(i);
+			StingleFile dbFile = filesToDecrypt.get(i);
 
 			File file = null;
 

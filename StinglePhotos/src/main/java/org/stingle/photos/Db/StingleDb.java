@@ -55,13 +55,13 @@ public class StingleDb extends SQLiteOpenHelper {
 		createTables(getWritableDatabase());
 	}
 
-	protected SQLiteDatabase openWriteDb(){
+	public SQLiteDatabase openWriteDb(){
 		if(this.dbWrite == null || !this.dbWrite.isOpen()) {
 			this.dbWrite = getWritableDatabase();
 		}
 		return this.dbWrite;
 	}
-	protected SQLiteDatabase openReadDb(){
+	public SQLiteDatabase openReadDb(){
 		if(this.dbRead == null || !this.dbRead.isOpen()) {
 			this.dbRead = getReadableDatabase();
 		}

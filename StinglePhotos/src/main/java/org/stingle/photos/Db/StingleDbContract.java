@@ -29,7 +29,6 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_FROM_USER_ID = "from_user_id";
 		public static final String COLUMN_NAME_TO_DATA = "to_data";
 		public static final String COLUMN_NAME_FROM_DATA = "from_data";
-		public static final String COLUMN_NAME_IS_APPROVED = "is_approved";
 	}
 
 	public static final String SQL_CREATE_FILES =
@@ -83,6 +82,10 @@ public class StingleDbContract {
 					Files._ID + " INTEGER PRIMARY KEY," +
 					Files.COLUMN_NAME_ALBUM_ID + " INTEGER," +
 					Files.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
+					Files.COLUMN_NAME_IS_LOCAL + " INTEGER," +
+					Files.COLUMN_NAME_IS_REMOTE + " INTEGER," +
+					Files.COLUMN_NAME_VERSION + " INTEGER," +
+					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
 					Files.COLUMN_NAME_HEADERS + " TEXT, " +
 					Files.COLUMN_NAME_DATE_CREATED + " INTEGER, " +
 					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
@@ -98,7 +101,6 @@ public class StingleDbContract {
 					Files.COLUMN_NAME_FROM_USER_ID + " INTEGER," +
 					Files.COLUMN_NAME_TO_DATA + " TEXT NOT NULL," +
 					Files.COLUMN_NAME_FROM_DATA + " TEXT NOT NULL," +
-					Files.COLUMN_NAME_IS_APPROVED + " INTEGER, " +
 					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
 					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";

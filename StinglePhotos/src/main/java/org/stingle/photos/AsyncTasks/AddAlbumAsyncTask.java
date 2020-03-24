@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Db.AlbumsDb;
-import org.stingle.photos.Db.StingleDbAlbum;
+import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.StinglePhotosApplication;
 
 import java.io.IOException;

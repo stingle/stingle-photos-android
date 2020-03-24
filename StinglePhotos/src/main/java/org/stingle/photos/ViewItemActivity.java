@@ -23,20 +23,23 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Query.FilesTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.ViewItem.ViewPagerAdapter;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ViewItemActivity extends AppCompatActivity {
 
 	protected int itemPosition = 0;
 	protected int folder = SyncManager.FOLDER_MAIN;
+	protected int folderId = -1;
 	protected int currentPosition = 0;
 	protected ViewPager viewPager;
 	protected ViewPagerAdapter adapter;
@@ -63,7 +66,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setTitle("");
 
@@ -77,6 +80,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		Intent intent = getIntent();
 		itemPosition = intent.getIntExtra("EXTRA_ITEM_POSITION", 0);
 		folder = intent.getIntExtra("EXTRA_ITEM_FOLDER", 0);
+		folderId = intent.getIntExtra("EXTRA_ITEM_FOLDER_ID", -1);
 		currentPosition = itemPosition;
 		viewPager = (ViewPager)findViewById(R.id.viewPager);
 
@@ -113,7 +117,7 @@ public class ViewItemActivity extends AppCompatActivity {
 				if (adapter != null) {
 					adapter.releasePlayers();
 				}
-				adapter = new ViewPagerAdapter(ViewItemActivity.this, folder, gestureTouchListener);
+				adapter = new ViewPagerAdapter(ViewItemActivity.this, folder, folderId, gestureTouchListener);
 				viewPager.setAdapter(adapter);
 				viewPager.setCurrentItem(itemPosition);
 			}
@@ -221,16 +225,16 @@ public class ViewItemActivity extends AppCompatActivity {
 		FilesTrashDb db = new FilesTrashDb(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
 
 		if (id == R.id.share) {
-			ArrayList<StingleDbFile> files = new ArrayList<StingleDbFile>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition()));
+			ArrayList<StingleFile> files = new ArrayList<>();
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), 0, StingleDb.SORT_DESC));
 
 			ShareManager.shareDbFiles(this, files, folder);
 
 		}
 		else if (id == R.id.trash) {
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
-			ArrayList<StingleDbFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition()));
+			ArrayList<StingleFile> files = new ArrayList<>();
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), 0, StingleDb.SORT_DESC));
 
 
 			new SyncManager.MoveToTrashAsyncTask(this, files, new SyncManager.OnFinish(){

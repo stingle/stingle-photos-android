@@ -23,7 +23,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;

@@ -1,4 +1,4 @@
-package org.stingle.photos.Db;
+package org.stingle.photos.Db.Query;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
+
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Db.StingleDbContract;
 
 public class AlbumsDb {
 

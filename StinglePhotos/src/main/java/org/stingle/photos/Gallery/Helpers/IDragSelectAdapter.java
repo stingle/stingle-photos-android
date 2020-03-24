@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Helpers;
 
 public interface IDragSelectAdapter {
 

@@ -32,7 +32,7 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context="org.stingle.photos.GalleryActivity"
-            android:id="@+id/topBar"
+            android:id="@+id/contentHolder"
             android:visibility="invisible">
 
             <RelativeLayout

@@ -5,9 +5,9 @@ import android.os.AsyncTask;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.AlbumFilesDb;
-import org.stingle.photos.Db.StingleDbAlbum;
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.StinglePhotosApplication;
 
 import java.io.IOException;
@@ -18,11 +18,11 @@ public class AddFilesToAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	private WeakReference<Context> context;
 	private StingleDbAlbum album;
-	private ArrayList<StingleDbFile> files;
+	private ArrayList<StingleFile> files;
 	private final OnAsyncTaskFinish onFinishListener;
 	private Crypto crypto;
 
-	public AddFilesToAlbumAsyncTask(Context context, StingleDbAlbum album, ArrayList<StingleDbFile> files, OnAsyncTaskFinish onFinishListener) {
+	public AddFilesToAlbumAsyncTask(Context context, StingleDbAlbum album, ArrayList<StingleFile> files, OnAsyncTaskFinish onFinishListener) {
 		this.context = new WeakReference<>(context);;
 		this.album = album;
 		this.files = files;
@@ -40,10 +40,10 @@ public class AddFilesToAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 			AlbumFilesDb db = new AlbumFilesDb(myContext);
 
-			for(StingleDbFile file : files) {
+			for(StingleFile file : files) {
 				long now = System.currentTimeMillis();
 				String newHeaders = crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArrayDefault(album.albumPK), null, null);
-				db.insertAlbumFile(album.id, file.filename, newHeaders, now, now);
+				db.insertAlbumFile(album.id, file.filename, file.isLocal, file.isRemote, file.version, newHeaders, now, now);
 			}
 			db.close();
 

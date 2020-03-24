@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Gallery;
 
 import android.graphics.Bitmap;
 

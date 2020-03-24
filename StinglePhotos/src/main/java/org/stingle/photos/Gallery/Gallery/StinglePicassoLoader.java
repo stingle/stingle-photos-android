@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Gallery;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,8 +11,11 @@ import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -28,14 +31,16 @@ import java.io.IOException;
 public class StinglePicassoLoader extends RequestHandler {
 
 	private Context context;
-	private FilesTrashDb db;
+	private FilesDb db;
 	private int thumbSize;
 	private Crypto crypto;
+	private int folderId = 0;
 
-	public StinglePicassoLoader(Context context, FilesTrashDb db, int thumbSize){
+	public StinglePicassoLoader(Context context, FilesDb db, int thumbSize, int folderId){
 		this.context = context;
 		this.db = db;
 		this.thumbSize = thumbSize;
+		this.folderId = folderId;
 		this.crypto = StinglePhotosApplication.getCrypto();
 	}
 
@@ -62,14 +67,27 @@ public class StinglePicassoLoader extends RequestHandler {
 		if(folderStr.equals("t")){
 			folder = SyncManager.FOLDER_TRASH;
 		}
+		else if(folderStr.equals("a")){
+			folder = SyncManager.FOLDER_ALBUM;
+		}
 
-		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position));
+		StingleFile file = db.getFileAtPosition(Integer.parseInt(position), folderId, StingleDb.SORT_DESC);
 
 		if(file.isLocal) {
 			try {
 				File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 				FileInputStream input = new FileInputStream(fileToDec);
-				byte[] decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(file.headers));
+
+				byte[] decryptedData;
+				if(folder == SyncManager.FOLDER_ALBUM){
+					AlbumsDb albumsDb = new AlbumsDb(context);
+					StingleDbAlbum album = albumsDb.getAlbumById(folderId);
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+					decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(file.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
+				}
+				else {
+					decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(file.headers));
+				}
 
 				if (decryptedData != null) {
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
@@ -109,7 +127,16 @@ public class StinglePicassoLoader extends RequestHandler {
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));
 				}
 
-				byte[] decryptedData = crypto.decryptFile(encFile, crypto.getThumbHeaderFromHeadersStr(file.headers));
+				byte[] decryptedData;
+				if(folder == SyncManager.FOLDER_ALBUM){
+					AlbumsDb albumsDb = new AlbumsDb(context);
+					StingleDbAlbum album = albumsDb.getAlbumById(folderId);
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+					decryptedData = crypto.decryptFile(encFile, crypto.getThumbHeaderFromHeadersStr(file.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
+				}
+				else {
+					decryptedData = crypto.decryptFile(encFile, crypto.getThumbHeaderFromHeadersStr(file.headers));
+				}
 
 				if (decryptedData != null) {
 

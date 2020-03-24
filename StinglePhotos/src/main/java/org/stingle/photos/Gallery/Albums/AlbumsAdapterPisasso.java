@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Albums;
 
 import android.content.Context;
 import android.util.LruCache;
@@ -21,10 +21,11 @@ import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
-import org.stingle.photos.Db.AlbumFilesDb;
-import org.stingle.photos.Db.AlbumsDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Db.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Gallery.Helpers.IDragSelectAdapter;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
@@ -316,8 +317,6 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	public StingleDbAlbum getAlbumAtPosition(int position){
 		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), StingleDb.SORT_ASC);
 	}
-
-
 
 	@Override
 	public void setSelected(int index, boolean selected) {

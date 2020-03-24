@@ -60,15 +60,15 @@ import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.StingleDbAlbum;
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
-import org.stingle.photos.Gallery.AlbumsAdapterPisasso;
-import org.stingle.photos.Gallery.AlbumsFragment;
-import org.stingle.photos.Gallery.GalleryFragment;
-import org.stingle.photos.Gallery.GalleryFragmentParent;
-import org.stingle.photos.Gallery.GalleryHelpers;
+import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
+import org.stingle.photos.Gallery.Albums.AlbumsFragment;
+import org.stingle.photos.Gallery.Gallery.GalleryFragment;
+import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
@@ -129,6 +129,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	};
 	private boolean isImporting = false;
+	private boolean isSyncBarDisabled = false;
 
 
 	@Override
@@ -175,7 +176,7 @@ public class GalleryActivity extends AppCompatActivity
 		headerView = ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0);
 		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
 
-		initGalleryFragment(SyncManager.FOLDER_MAIN, null, false);
+		//initGalleryFragment(SyncManager.FOLDER_MAIN, null, false);
 		setupBottomNavigationView();
 	}
 
@@ -207,13 +208,63 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	}
 
+	public void showMainGallery(){
+		currentFragment = FRAGMENT_GALLERY;
+		currentFolder = SyncManager.FOLDER_MAIN;
+		currentFolderId = -1;
+		toolbar.setTitle(getString(R.string.title_gallery_for_app));
+		enableSyncBar();
+		initCurrentFragment();
+	}
+	public void showTrash(){
+		currentFragment = FRAGMENT_GALLERY;
+		currentFolder = SyncManager.FOLDER_TRASH;
+		currentFolderId = -1;
+		toolbar.setTitle(getString(R.string.title_trash));
+		disableSyncBar();
+		initCurrentFragment();
+	}
+	public void showAlbumsList(){
+		currentFragment = FRAGMENT_ALBUMS_LIST;
+		currentFolder = -1;
+		currentFolderId = -1;
+		toolbar.setTitle(getString(R.string.albums));
+		disableSyncBar();
+		initCurrentFragment();
+	}
+	public void showAlbum(int albumId, String albumName){
+		currentFragment = FRAGMENT_GALLERY;
+		currentFolder = SyncManager.FOLDER_ALBUM;
+		currentFolderId = albumId;
+		if(albumName != null && albumName.length() > 0){
+			toolbar.setTitle(albumName);
+		}
+		else{
+			toolbar.setTitle(getString(R.string.album));
+		}
+		disableSyncBar();
+		initCurrentFragment();
+	}
+
+	private void initCurrentFragment(){
+		switch (currentFragment){
+			case FRAGMENT_GALLERY:
+				initGalleryFragment(currentFolder, currentFolderId, true);
+				break;
+			case FRAGMENT_ALBUMS_LIST:
+				initAlbumsFragment();
+				break;
+		}
+	}
+
 	private void initGalleryFragment(int folderType, Integer folderId, boolean initNow){
 		if(folderId == null){
 			folderId = -1;
 		}
-
+		currentFragment = FRAGMENT_GALLERY;
+		currentFolder = folderType;
+		currentFolderId = folderId;
 		FragmentManager fm = getSupportFragmentManager();
-
 
 		Bundle bundle = new Bundle();
 		bundle.putInt("currentFolder", folderType);
@@ -270,24 +321,12 @@ public class GalleryActivity extends AppCompatActivity
 		LoginManager.disableLockTimer(GalleryActivity.this);
 	}
 
-	private void initCurrentFragment(){
-		galleryFragment.init();
-		switch (currentFragment){
-			case FRAGMENT_GALLERY:
-				initGalleryFragment(currentFolder, null, true);
-				break;
-			case FRAGMENT_ALBUMS_LIST:
-				initAlbumsFragment();
-				break;
-		}
-	}
-
 	private void initGallery(){
 
 		initCurrentFragment();
 
 
-		findViewById(R.id.topBar).setVisibility(View.VISIBLE);
+		findViewById(R.id.contentHolder).setVisibility(View.VISIBLE);
 		startAndBindService();
 		updateQuotaInfo();
 
@@ -295,30 +334,6 @@ public class GalleryActivity extends AppCompatActivity
 		if(serverPK == null){
 			(new GetServerPKAsyncTask(this)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
-
-		/*String homedir = FileManager.getHomeDir(this);
-		if(homedir == null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N){
-			//File sdCard = new File(Environment.getExternalStorageDirectory().getPath());
-			//StorageManager storageManager = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
-			//StorageVolume storageVolume = storageManager.getStorageVolume(sdCard);
-			final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-			//intent.putExtra(EXTRA_STORAGE_VOLUME, this);
-			intent.putExtra("EXTRA_INITIAL_URI", "file://" + getString(R.string.default_home_folder_name));
-			startActivityForResult(intent, 7);
-		}
-		else {*/
-
-		//}
-
-		/*SodiumAndroid so = new SodiumAndroid();
-
-		byte[] pk = new byte[Box.PUBLICKEYBYTES];
-		so.crypto_scalarmult_base(pk, StinglePhotosApplication.getKey());
-
-		byte[] myPk = StinglePhotosApplication.getCrypto().getPublicKey();
-
-		Log.e("myPk", Crypto.byteArrayToBase64(myPk));
-		Log.e("genPk", Crypto.byteArrayToBase64(pk));*/
 	}
 
 	@Override
@@ -332,7 +347,17 @@ public class GalleryActivity extends AppCompatActivity
 			unbindService(mConnection);
 			isBound = false;
 		}
-		findViewById(R.id.topBar).setVisibility(View.INVISIBLE);
+		findViewById(R.id.contentHolder).setVisibility(View.INVISIBLE);
+	}
+
+	public void disableSyncBar(){
+		isSyncBarDisabled = true;
+		syncBar.setVisibility(View.GONE);
+	}
+	public void enableSyncBar(){
+		isSyncBarDisabled = false;
+		syncBar.setVisibility(View.VISIBLE);
+		syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
 	}
 
 	private void startAndBindService(){
@@ -575,6 +600,12 @@ public class GalleryActivity extends AppCompatActivity
 		else if (galleryFragment.isSelectionModeActive()) {
 			exitActionMode();
 		}
+		else if(currentFolder == SyncManager.FOLDER_ALBUM){
+			showAlbumsList();
+		}
+		else if(currentFolder == SyncManager.FOLDER_TRASH){
+			showMainGallery();
+		}
 		else {
 			super.onBackPressed();
 		}
@@ -640,12 +671,10 @@ public class GalleryActivity extends AppCompatActivity
 
 						switch (item.getItemId()) {
 							case R.id.action_gallery:
-								currentFragment = FRAGMENT_GALLERY;
-								initCurrentFragment();
+								showMainGallery();
 								break;
 							case R.id.action_albums:
-								currentFragment = FRAGMENT_ALBUMS_LIST;
-								initCurrentFragment();
+								showAlbumsList();
 								break;
 							case R.id.action_sharing:
 								break;
@@ -661,19 +690,11 @@ public class GalleryActivity extends AppCompatActivity
 		int id = item.getItemId();
 
 		if (id == R.id.nav_gallery) {
-			//adapter.setFolder(SyncManager.FOLDER_MAIN);
-			currentFolder = SyncManager.FOLDER_MAIN;
-			initGalleryFragment(SyncManager.FOLDER_MAIN, null, true);
-			//galleryFragment.scrollToTop();
-			toolbar.setTitle(getString(R.string.title_gallery_for_app));
+			showMainGallery();
 			invalidateOptionsMenu();
 		}
 		else if (id == R.id.nav_trash) {
-			//adapter.setFolder(SyncManager.FOLDER_TRASH);
-			currentFolder = SyncManager.FOLDER_TRASH;
-			initGalleryFragment(SyncManager.FOLDER_TRASH, null, true);
-			//galleryFragment.scrollToTop();
-			toolbar.setTitle(getString(R.string.title_trash));
+			showTrash();
 			invalidateOptionsMenu();
 		}
 		else if (id == R.id.nav_storage) {
@@ -706,9 +727,9 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	@Override
-	public boolean onClick(StingleDbFile file) {
+	public boolean onClick(StingleFile file) {
 		if (!galleryFragment.isSelectionModeActive() && sendBackDecryptedFile){
-			ArrayList<StingleDbFile> selectedFiles = new ArrayList<>();
+			ArrayList<StingleFile> selectedFiles = new ArrayList<>();
 			selectedFiles.add(file);
 			ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentFolder);
 			return false;
@@ -741,12 +762,16 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public void scrolledDown() {
-		syncBar.animate().translationY(-syncBar.getHeight()-Helpers.convertDpToPixels(this, 20)).setInterpolator(new AccelerateInterpolator(4));
+		if(!isSyncBarDisabled) {
+			syncBar.animate().translationY(-syncBar.getHeight() - Helpers.convertDpToPixels(this, 20)).setInterpolator(new AccelerateInterpolator(4));
+		}
 	}
 
 	@Override
 	public void scrolledUp() {
-		syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
+		if(!isSyncBarDisabled) {
+			syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
+		}
 	}
 
 
@@ -817,14 +842,14 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void addToAlbumSelected() {
-		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		final ArrayList<StingleFile> files = galleryFragment.getSelectedFiles();
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setView(R.layout.add_to_album_dialog);
 		builder.setCancelable(true);
 		final AlertDialog addAlbumDialog = builder.create();
 		addAlbumDialog.show();
 
-		RecyclerView recyclerView = addAlbumDialog.findViewById(R.id.albums_recycler_view);
+		RecyclerView recyclerView = addAlbumDialog.findViewById(R.id.recycler_view);
 
 		recyclerView.setHasFixedSize(true);
 
@@ -892,7 +917,7 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void decryptSelected() {
-		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		final ArrayList<StingleFile> files = galleryFragment.getSelectedFiles();
 		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_decrypt_files)), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -928,7 +953,7 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void trashSelected(){
-		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		final ArrayList<StingleFile> files = galleryFragment.getSelectedFiles();
 		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_trash_files), String.valueOf(files.size())), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -948,7 +973,7 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void restoreSelected(){
-		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		final ArrayList<StingleFile> files = galleryFragment.getSelectedFiles();
 
 		final ProgressDialog spinner = Helpers.showProgressDialog(GalleryActivity.this, getString(R.string.restoring_files), null);
 
@@ -964,7 +989,7 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	protected void deleteSelected(){
-		final ArrayList<StingleDbFile> files = galleryFragment.getSelectedFiles();
+		final ArrayList<StingleFile> files = galleryFragment.getSelectedFiles();
 		Helpers.showConfirmDialog(GalleryActivity.this, String.format(getString(R.string.confirm_delete_files), String.valueOf(files.size())), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {

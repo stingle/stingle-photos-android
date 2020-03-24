@@ -1,4 +1,4 @@
-package org.stingle.photos.Db;
+package org.stingle.photos.Db.Query;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,7 +7,11 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
-public class AlbumFilesDb {
+import org.stingle.photos.Db.Objects.StingleDbAlbumFile;
+import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Db.StingleDbContract;
+
+public class AlbumFilesDb implements FilesDb {
 
 	private StingleDb db;
 
@@ -18,10 +22,14 @@ public class AlbumFilesDb {
 	}
 
 
-	public long insertAlbumFile(Integer albumId, String filename, String headers, long dateCreated, long dateModified){
+	public long insertAlbumFile(Integer albumId, String filename, boolean isLocal, boolean isRemote, int version, String headers, long dateCreated, long dateModified){
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_ID, albumId);
 		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, filename);
+		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
+		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
+		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, version);
+		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, FilesTrashDb.REUPLOAD_NO);
 		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, headers);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
@@ -34,6 +42,10 @@ public class AlbumFilesDb {
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_ID, file.albumId);
 		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, file.filename);
+		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (file.isLocal ? 1 : 0));
+		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (file.isRemote ? 1 : 0));
+		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, file.version);
+		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, file.reupload);
 		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, file.headers);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, file.dateCreated);
 		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, file.dateModified);
@@ -69,6 +81,10 @@ public class AlbumFilesDb {
 				BaseColumns._ID,
 				StingleDbContract.Files.COLUMN_NAME_ALBUM_ID,
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,
+				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_VERSION,
+				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
 				StingleDbContract.Files.COLUMN_NAME_HEADERS,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
@@ -93,11 +109,15 @@ public class AlbumFilesDb {
 
 	}
 
-	public StingleDbAlbumFile getAlbumFileAtPosition(int albumId, int pos, int sort){
+	public StingleDbAlbumFile getFileAtPosition(int pos, int albumId, int sort){
 		String[] projection = {
 				BaseColumns._ID,
 				StingleDbContract.Files.COLUMN_NAME_ALBUM_ID,
 				StingleDbContract.Files.COLUMN_NAME_FILENAME,
+				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Files.COLUMN_NAME_VERSION,
+				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
 				StingleDbContract.Files.COLUMN_NAME_HEADERS,
 				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
@@ -128,10 +148,20 @@ public class AlbumFilesDb {
 		return null;
 	}
 
+	public Cursor getAvailableDates(int albumId){
+		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
+						"FROM " + tableName + " " +
+						"WHERE album_id='" + albumId + "' " +
+						"GROUP BY cdate " +
+						"ORDER BY cdate DESC"
+				, null);
 
+	}
 
-	public long getTotalAlbumFilesCount(){
-		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
+	public long getTotalFilesCount(int albumId){
+		String selection = StingleDbContract.Files.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = { String.valueOf(albumId) };
+		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
 	}
 
 	public void close(){

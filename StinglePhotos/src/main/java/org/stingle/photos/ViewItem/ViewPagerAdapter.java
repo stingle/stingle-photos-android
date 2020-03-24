@@ -13,7 +13,9 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
-import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
@@ -25,39 +27,41 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 	private Context context;
 	private LayoutInflater layoutInflater;
-	private FilesTrashDb db;
+	private FilesDb db;
 	private int currentPosition = 0;
 	private int lastFilesCount = -1;
 	private int folder = SyncManager.FOLDER_MAIN;
+	private int folderId = -1;
 	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
 	private View.OnTouchListener gestureTouchListener;
 
-	public ViewPagerAdapter(Context context, int folder, View.OnTouchListener gestureTouchListener){
+	public ViewPagerAdapter(Context context, int folder, int folderId, View.OnTouchListener gestureTouchListener) {
 		this.context = context;
 		this.folder = folder;
+		this.folderId = folderId;
 		this.gestureTouchListener = gestureTouchListener;
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+
+		switch (folder) {
+			case SyncManager.FOLDER_MAIN:
+				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+				break;
+			case SyncManager.FOLDER_TRASH:
+				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+				break;
+			case SyncManager.FOLDER_ALBUM:
+				this.db = new AlbumFilesDb(context);
+				break;
+		}
 	}
 
 	@Override
 	public int getCount() {
-		if(lastFilesCount == -1) {
-			lastFilesCount = (int) db.getTotalFilesCount();
+		if (lastFilesCount == -1) {
+			lastFilesCount = (int) db.getTotalFilesCount(folderId);
 		}
 		return lastFilesCount;
-		/*
-		int count = (int)db.getTotalFilesCount();
-		countDifference = count - lastFilesCount;
-		if(countDifference < 0){
-			countDifference = 0;
-		}
-
-		if(lastFilesCount == -1){
-			lastFilesCount = count;
-		}
-
-		return lastFilesCount;*/
 	}
 
 	@Override
@@ -75,10 +79,10 @@ public class ViewPagerAdapter extends PagerAdapter {
 	@Override
 	public Object instantiateItem(@NonNull ViewGroup container, int position) {
 		ViewGroup layout = (ViewGroup) layoutInflater.inflate(R.layout.view_item_item, container, false);
-		ImageHolderLayout parent = (ImageHolderLayout)layout.findViewById(R.id.parent_layout);
-		ContentLoadingProgressBar loading = (ContentLoadingProgressBar)layout.findViewById(R.id.loading_spinner);
+		ImageHolderLayout parent = layout.findViewById(R.id.parent_layout);
+		ContentLoadingProgressBar loading = layout.findViewById(R.id.loading_spinner);
 
-		(new ViewItemAsyncTask(context, this, position, parent, loading, db, folder, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		(new ViewItemAsyncTask(context, this, position, parent, loading, db, folder, folderId, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		container.addView(layout);
 		return layout;
@@ -87,9 +91,9 @@ public class ViewPagerAdapter extends PagerAdapter {
 	@Override
 	public void destroyItem(ViewGroup container, int position, Object view) {
 		container.removeView((View) view);
-		if(players.containsKey(position)){
+		if (players.containsKey(position)) {
 			SimpleExoPlayer player = players.get(position);
-			if(player != null) {
+			if (player != null) {
 				player.release();
 			}
 			players.remove(position);
@@ -101,13 +105,13 @@ public class ViewPagerAdapter extends PagerAdapter {
 		return POSITION_NONE;
 	}
 
-	public void addPlayer(int position, SimpleExoPlayer player){
+	public void addPlayer(int position, SimpleExoPlayer player) {
 		synchronized (this) {
 			players.put(position, player);
 		}
 	}
 
-	public void releasePlayers(){
+	public void releasePlayers() {
 		synchronized (this) {
 			for (int pos : players.keySet()) {
 				players.get(pos).release();
@@ -116,7 +120,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		}
 	}
 
-	public void pauseAllPlayers(){
+	public void pauseAllPlayers() {
 		synchronized (this) {
 			for (int pos : players.keySet()) {
 				SimpleExoPlayer player = players.get(pos);
@@ -127,7 +131,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		}
 	}
 
-	public void startPlaying(int position){
+	public void startPlaying(int position) {
 		synchronized (this) {
 			SimpleExoPlayer player = players.get(position);
 			if (player != null) {
@@ -136,15 +140,15 @@ public class ViewPagerAdapter extends PagerAdapter {
 		}
 	}
 
-	public SimpleExoPlayer getPlayer(int position){
+	public SimpleExoPlayer getPlayer(int position) {
 		return players.get(position);
 	}
 
-	public void setCurrentPosition(int pos){
+	public void setCurrentPosition(int pos) {
 		currentPosition = pos;
 	}
 
-	public int getCurrentPosition(){
+	public int getCurrentPosition() {
 		return currentPosition;
 	}
 }

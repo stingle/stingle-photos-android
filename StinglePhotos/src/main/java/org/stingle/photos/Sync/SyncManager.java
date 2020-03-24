@@ -13,10 +13,11 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -584,10 +585,10 @@ public class SyncManager {
 	public static class MoveToTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
-		protected ArrayList<StingleDbFile> files;
+		protected ArrayList<StingleFile> files;
 		protected OnFinish onFinish;
 
-		public MoveToTrashAsyncTask(Context context, ArrayList<StingleDbFile> files, OnFinish onFinish){
+		public MoveToTrashAsyncTask(Context context, ArrayList<StingleFile> files, OnFinish onFinish){
 			this.context = context;
 			this.files = files;
 			this.onFinish = onFinish;
@@ -600,7 +601,7 @@ public class SyncManager {
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
-			for(StingleDbFile file : files) {
+			for(StingleFile file : files) {
 				if (file.isRemote) {
 					filenamesToNotify.add(file.filename);
 				}
@@ -612,7 +613,7 @@ public class SyncManager {
 				return null;
 			}
 
-			for(StingleDbFile file : files) {
+			for(StingleFile file : files) {
 				db.deleteFile(file.filename);
 				file.dateModified = System.currentTimeMillis();
 				trashDb.insertFile(file);
@@ -664,10 +665,10 @@ public class SyncManager {
 	public static class RestoreFromTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
-		protected ArrayList<StingleDbFile> files;
+		protected ArrayList<StingleFile> files;
 		protected OnFinish onFinish;
 
-		public RestoreFromTrashAsyncTask(Context context, ArrayList<StingleDbFile> files, OnFinish onFinish){
+		public RestoreFromTrashAsyncTask(Context context, ArrayList<StingleFile> files, OnFinish onFinish){
 			this.context = context;
 			this.files = files;
 			this.onFinish = onFinish;
@@ -680,7 +681,7 @@ public class SyncManager {
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
-			for(StingleDbFile file : files) {
+			for(StingleFile file : files) {
 				if (file.isRemote) {
 					filenamesToNotify.add(file.filename);
 				}
@@ -692,7 +693,7 @@ public class SyncManager {
 				return null;
 			}
 
-			for(StingleDbFile file : files) {
+			for(StingleFile file : files) {
 				trashDb.deleteFile(file.filename);
 				file.dateModified = System.currentTimeMillis();
 				db.insertFile(file);
@@ -743,10 +744,10 @@ public class SyncManager {
 	public static class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		protected Context context;
-		protected ArrayList<StingleDbFile> files;
+		protected ArrayList<StingleFile> files;
 		protected OnFinish onFinish;
 
-		public DeleteFilesAsyncTask(Context context, ArrayList<StingleDbFile> files, OnFinish onFinish){
+		public DeleteFilesAsyncTask(Context context, ArrayList<StingleFile> files, OnFinish onFinish){
 			this.context = context;
 			this.files = files;
 			this.onFinish = onFinish;
@@ -760,7 +761,7 @@ public class SyncManager {
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
-			for(StingleDbFile file : files) {
+			for(StingleFile file : files) {
 				if (file.isRemote) {
 					filenamesToNotify.add(file.filename);
 				}
@@ -771,7 +772,7 @@ public class SyncManager {
 				return null;
 			}
 
-			for(StingleDbFile file : files) {
+			for(StingleFile file : files) {
 				File mainFile = new File(homeDir + "/" + file.filename);
 				File thumbFile = new File(thumbDir + "/" + file.filename);
 

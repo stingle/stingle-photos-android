@@ -14,7 +14,7 @@ import android.provider.OpenableColumns;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.FilesTrashDb;
+import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;

@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Gallery;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
+import org.stingle.photos.Gallery.Helpers.DragSelectRecyclerView;
+import org.stingle.photos.Gallery.Helpers.HidingScrollListener;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -42,7 +46,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.gallery_fragment,	container, false);
 
-		recyclerView = view.findViewById(R.id.gallery_recycler_view);
+		recyclerView = view.findViewById(R.id.recycler_view);
 		parentActivity = (GalleryFragmentParent)getActivity();
 
 		return view;
@@ -57,10 +61,15 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		if (bundle != null) {
 			currentFolder = bundle.getInt("currentFolder", SyncManager.FOLDER_MAIN);
 			folderId = bundle.getInt("folderId", -1);
-			initNow = bundle.getBoolean("initNow", false);
+			initNow = bundle.getBoolean("initNow", true);
 		}
 
-
+		if(currentFolder == SyncManager.FOLDER_MAIN){
+			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_with_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+		}
+		else{
+			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+		}
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
@@ -75,7 +84,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			}
 		});
 		recyclerView.setLayoutManager(layoutManager);
-		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentFolder);
+		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentFolder, folderId);
 		recyclerView.addOnScrollListener(new HidingScrollListener() {
 			@Override
 			public void onHide() {
@@ -133,12 +142,14 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Override
 	public void onDetach() {
 		super.onDetach();
+		recyclerView.setAdapter(null);
+		adapter = null;
 		Log.e("function", "onDetach");
 	}
 
 	@Override
 	public void onClick(int index) {
-		StingleDbFile file = adapter.getStingleFileAtPosition(index);
+		StingleFile file = adapter.getStingleFileAtPosition(index);
 		if(!parentActivity.onClick(file)){
 			return;
 		}
@@ -151,6 +162,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			intent.setClass(getContext(), ViewItemActivity.class);
 			intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
 			intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
+			intent.putExtra("EXTRA_ITEM_FOLDER_ID", folderId);
 			startActivity(intent);
 		}
 	}
@@ -206,11 +218,11 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		return adapter.isSelectionModeActive();
 	}
 
-	public ArrayList<StingleDbFile> getSelectedFiles(){
+	public ArrayList<StingleFile> getSelectedFiles(){
 		List<Integer> indices = adapter.getSelectedIndices();
-		ArrayList<StingleDbFile> files = new ArrayList<>();
+		ArrayList<StingleFile> files = new ArrayList<>();
 		for(Integer index : indices){
-			files.add(adapter.getStingleFileAtPosition(index));
+			files.add((StingleDbFile)adapter.getStingleFileAtPosition(index));
 		}
 		return files;
 	}

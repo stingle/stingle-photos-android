@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Albums;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,15 +9,23 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.Db.StingleDbFile;
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
+import org.stingle.photos.Gallery.Helpers.DragSelectRecyclerView;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +38,7 @@ public class AlbumsFragment extends Fragment{
 
 	private int lastScrollPosition = 0;
 
-	private AppCompatActivity parentActivity;
+	private GalleryActivity parentActivity;
 
 	private AlbumsAdapterPisasso.Listener adaptorListener = new AlbumsAdapterPisasso.Listener() {
 		@Override
@@ -49,6 +57,18 @@ public class AlbumsFragment extends Fragment{
 						Helpers.showAlertDialog(getContext(), getString(R.string.add_album_failed));
 					}
 				});
+			}
+			else{
+				StingleDbAlbum album = adapter.getAlbumAtPosition(index);
+				String albumName = "";
+				try {
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+					albumName = albumData.name;
+					albumData = null;
+				} catch (IOException | CryptoException e) {
+					e.printStackTrace();
+				}
+				parentActivity.showAlbum(album.id, albumName);
 			}
 		/*StingleDbFile file = adapter.getStingleFileAtPosition(index);
 		if(!parentActivity.onClick(file)){
@@ -84,8 +104,8 @@ public class AlbumsFragment extends Fragment{
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.albums_fragment,	container, false);
 
-		recyclerView = view.findViewById(R.id.albums_recycler_view);
-		parentActivity = (AppCompatActivity)getActivity();
+		recyclerView = view.findViewById(R.id.recycler_view);
+		parentActivity = (GalleryActivity)getActivity();
 
 		return view;
 	}

@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery;
+package org.stingle.photos.Gallery.Albums;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,11 +11,11 @@ import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.AlbumFilesDb;
-import org.stingle.photos.Db.AlbumsDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Db.StingleDbAlbum;
-import org.stingle.photos.Db.StingleDbAlbumFile;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbAlbumFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -81,7 +81,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 				Result result = null;
 
-				StingleDbAlbumFile albumFile = filesDb.getAlbumFileAtPosition(album.id, 0, StingleDb.SORT_ASC);
+				StingleDbAlbumFile albumFile = filesDb.getFileAtPosition(0, album.id, StingleDb.SORT_ASC);
 
 				if(albumFile != null){
 					File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ albumFile.filename);
