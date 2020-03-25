@@ -80,6 +80,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 	private int fileType;
 	private Crypto crypto;
+	private Crypto.Header videoFileHeader = null;
 
 
 	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int folder, int folderId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
@@ -97,7 +98,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		this.memCache = memCache;
 		this.crypto = StinglePhotosApplication.getCrypto();
 
-		if(position < 0){
+		if (position < 0) {
 			position = 0;
 		}
 	}
@@ -116,50 +117,43 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		StingleFile dbFile = db.getFileAtPosition(position, folderId, StingleDb.SORT_DESC);
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
-		if(dbFile.isLocal){
-			File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
-			try {
+		try {
+			if (dbFile.isLocal) {
+				File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
+
 				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new FileInputStream(file));
 				fileType = fileHeader.fileType;
 				result.fileType = fileType;
 
-				if(fileHeader.filename.toLowerCase().endsWith(".gif")){
+				if (fileHeader.filename.toLowerCase().endsWith(".gif")) {
 					isGif = true;
 				}
 
-				if(fileType == Crypto.FILE_TYPE_PHOTO) {
+				if (fileType == Crypto.FILE_TYPE_PHOTO) {
 					FileInputStream input = new FileInputStream(file);
 
 					byte[] decryptedData;
 
-					if(folder == SyncManager.FOLDER_ALBUM){
+					if (folder == SyncManager.FOLDER_ALBUM) {
 						AlbumsDb albumsDb = new AlbumsDb(context);
 						StingleDbAlbum album = albumsDb.getAlbumById(folderId);
 						Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
 						decryptedData = crypto.decryptFile(input, null, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
-					}
-					else {
+					} else {
 						decryptedData = crypto.decryptFile(input, null, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers));
 					}
 
 					if (decryptedData != null) {
-						if(isGif){
+						if (isGif) {
 							result.bitmapBytes = decryptedData;
-						}
-						else{
+						} else {
 							result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
 						}
 					}
 				}
-			}
-			catch (IOException | CryptoException e) {
-				e.printStackTrace();
-			}
-		}
-		else if(dbFile.isRemote){
-			try{
+			} else if (dbFile.isRemote) {
 				byte[] encThumb = FileManager.getAndCacheThumb(context, dbFile.filename, folder);
-				if(encThumb == null){
+				if (encThumb == null) {
 					return result;
 				}
 				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new ByteArrayInputStream(encThumb));
@@ -167,28 +161,26 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				result.fileType = fileType;
 				result.isRemote = true;
 
-				if(fileHeader.filename.toLowerCase().endsWith(".gif")){
+				if (fileHeader.filename.toLowerCase().endsWith(".gif")) {
 					isGif = true;
 				}
 
-				if(fileType == Crypto.FILE_TYPE_PHOTO) {
+				if (fileType == Crypto.FILE_TYPE_PHOTO) {
 					byte[] decryptedData;
 
-					if(folder == SyncManager.FOLDER_ALBUM){
+					if (folder == SyncManager.FOLDER_ALBUM) {
 						AlbumsDb albumsDb = new AlbumsDb(context);
 						StingleDbAlbum album = albumsDb.getAlbumById(folderId);
 						Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
 						decryptedData = crypto.decryptFile(encThumb, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
-					}
-					else {
+					} else {
 						decryptedData = crypto.decryptFile(encThumb, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers));
 					}
 
 					if (decryptedData != null) {
 						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
 					}
-				}
-				else if(fileType == Crypto.FILE_TYPE_VIDEO) {
+				} else if (fileType == Crypto.FILE_TYPE_VIDEO) {
 
 					HashMap<String, String> postParams = new HashMap<String, String>();
 
@@ -207,24 +199,33 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 						}
 					}
 				}
-
-			} catch (IOException | CryptoException e) {
-				e.printStackTrace();
 			}
+			if (fileType == Crypto.FILE_TYPE_VIDEO) {
+				if (folder == SyncManager.FOLDER_ALBUM) {
+					AlbumsDb albumsDb = new AlbumsDb(context);
+					StingleDbAlbum album = albumsDb.getAlbumById(folderId);
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK));
+
+				} else {
+					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers);
+				}
+			}
+		} catch (IOException | CryptoException e) {
+			e.printStackTrace();
 		}
 		return result;
 	}
 
-	public static int getSize(Context context){
+	public static int getSize(Context context) {
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
 		wm.getDefaultDisplay().getMetrics(metrics);
 
 		int size;
-		if(metrics.widthPixels <= metrics.heightPixels){
+		if (metrics.widthPixels <= metrics.heightPixels) {
 			size = (int) Math.floor(metrics.widthPixels * 2);
-		}
-		else{
+		} else {
 			size = (int) Math.floor(metrics.heightPixels * 2);
 		}
 
@@ -239,8 +240,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		parent.setFileType(result.fileType);
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
-		if(result.fileType == Crypto.FILE_TYPE_PHOTO) {
-			if(isGif){
+		if (result.fileType == Crypto.FILE_TYPE_PHOTO) {
+			if (isGif) {
 				AnimatedGifImageView gifMovie = new AnimatedGifImageView(context);
 				PhotoViewAttacher attacher = new PhotoViewAttacher(gifMovie);
 
@@ -258,7 +259,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 				gifMovie.setLayoutParams(params);
 
-				if(result.bitmapBytes != null) {
+				if (result.bitmapBytes != null) {
 					gifMovie.setAnimatedGif(result.bitmapBytes, AnimatedGifImageView.TYPE.FIT_CENTER);
 					loading.setVisibility(View.INVISIBLE);
 				}
@@ -275,8 +276,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 
 				parent.addView(gifMovie);
-			}
-			else {
+			} else {
 				ImageView image = new ImageView(context);
 				PhotoViewAttacher attacher = new PhotoViewAttacher(image);
 				if (touchListener != null) {
@@ -308,8 +308,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				loading.setVisibility(View.INVISIBLE);
 				parent.addView(image);
 			}
-		}
-		else if (result.fileType == Crypto.FILE_TYPE_VIDEO){
+		} else if (result.fileType == Crypto.FILE_TYPE_VIDEO) {
 			PlayerView playerView = new PlayerView(context);
 			playerView.setLayoutParams(params);
 			playerView.setKeepScreenOn(true);
@@ -317,7 +316,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			parent.removeAllViews();
 			parent.addView(playerView);
 
-			if(touchListener != null){
+			if (touchListener != null) {
 				parent.setOnTouchListener(touchListener);
 			}
 			if (onClickListener != null) {
@@ -334,25 +333,24 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			player.addListener(getPlayerEventListener());
 
 			MediaSource mediaSource = null;
-			if(result.isRemote){
-				if(result.url != null) {
+			if (result.isRemote) {
+				if (result.url != null) {
 					Uri uri = Uri.parse(result.url);
 					Log.d("url", result.url);
 
 					StingleHttpDataSource http = new StingleHttpDataSource("stingle", null);
-					StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, http);
+					StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, http, videoFileHeader);
 
 					mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
 				}
-			}
-			else{
+			} else {
 				Uri uri = Uri.fromFile(new File(FileManager.getHomeDir(context) + "/" + result.filename));
 				FileDataSource file = new FileDataSource();
-				StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, file);
+				StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, file, videoFileHeader);
 				mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
 			}
 
-			if(mediaSource != null) {
+			if (mediaSource != null) {
 				player.setPlayWhenReady(false);
 
 				/*if(adapter.getCurrentPosition() == position) {
@@ -368,7 +366,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		}
 	}
 
-	private Player.EventListener getPlayerEventListener(){
+	private Player.EventListener getPlayerEventListener() {
 		return new Player.EventListener() {
 			@Override
 			public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
@@ -387,7 +385,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 			@Override
 			public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-				if (playbackState == ExoPlayer.STATE_BUFFERING){
+				if (playbackState == ExoPlayer.STATE_BUFFERING) {
 					loading.setVisibility(View.VISIBLE);
 					Log.d("buffering", "yes");
 				} else {
@@ -428,7 +426,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		};
 	}
 
-	public class ViewItemTaskResult{
+	public class ViewItemTaskResult {
 		public int fileType = Crypto.FILE_TYPE_PHOTO;
 		public String filename = null;
 		public Bitmap bitmap = null;

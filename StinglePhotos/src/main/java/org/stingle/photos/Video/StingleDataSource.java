@@ -3,13 +3,14 @@ package org.stingle.photos.Video;
 import android.content.Context;
 import android.net.Uri;
 
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.goterl.lazycode.lazysodium.SodiumAndroid;
 import com.goterl.lazycode.lazysodium.interfaces.AEAD;
+
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,10 +32,11 @@ public class StingleDataSource implements DataSource {
 	private byte[] currentChunk;
 	private DataSource upstream;
 
-	public StingleDataSource(Context context, DataSource upstream) {
+	public StingleDataSource(Context context, DataSource upstream, Crypto.Header header) {
 		this.so = new SodiumAndroid();
 		this.crypto = new Crypto(context);
 		this.upstream = upstream;
+		this.header = header;
 	}
 
 	private void getHeader(DataSpec dataSpec) throws IOException {
