@@ -8,4 +8,6 @@ public interface GalleryFragmentParent {
 	abstract boolean onSelectionChanged(int index);
 	abstract void scrolledDown();
 	abstract void scrolledUp();
+	abstract boolean isSyncBarDisabled();
+
 }

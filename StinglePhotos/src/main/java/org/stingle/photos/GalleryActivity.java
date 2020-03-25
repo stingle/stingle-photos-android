@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -130,6 +132,8 @@ public class GalleryActivity extends AppCompatActivity
 	};
 	private boolean isImporting = false;
 	private boolean isSyncBarDisabled = false;
+	private SharedPreferences sharedPreferences;
+	private boolean isSyncEnabled;
 
 
 	@Override
@@ -173,11 +177,12 @@ public class GalleryActivity extends AppCompatActivity
 
 		handleIncomingIntent(getIntent());
 
-		headerView = ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0);
+		headerView = navigationView.getHeaderView(0);
 		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
 
 		//initGalleryFragment(SyncManager.FOLDER_MAIN, null, false);
 		setupBottomNavigationView();
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 	}
 
 	@Override
@@ -202,6 +207,14 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		isSyncEnabled = sharedPreferences.getBoolean(SyncManager.PREF_BACKUP_ENABLED, true);
+		if(!isSyncEnabled){
+			disableSyncBar();
+		}
+		else if (isSyncBarDisabled() && currentFolder == SyncManager.FOLDER_MAIN){
+			enableSyncBar();
+		}
 
 		if(!isImporting){
 			checkLoginAndInit();
@@ -350,14 +363,20 @@ public class GalleryActivity extends AppCompatActivity
 		findViewById(R.id.contentHolder).setVisibility(View.INVISIBLE);
 	}
 
+	public boolean isSyncBarDisabled(){
+		return isSyncBarDisabled;
+	}
+
 	public void disableSyncBar(){
 		isSyncBarDisabled = true;
 		syncBar.setVisibility(View.GONE);
 	}
 	public void enableSyncBar(){
-		isSyncBarDisabled = false;
-		syncBar.setVisibility(View.VISIBLE);
-		syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
+		if(isSyncEnabled) {
+			isSyncBarDisabled = false;
+			syncBar.setVisibility(View.VISIBLE);
+			syncBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(4));
+		}
 	}
 
 	private void startAndBindService(){

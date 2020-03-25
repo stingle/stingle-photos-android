@@ -64,7 +64,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			initNow = bundle.getBoolean("initNow", true);
 		}
 
-		if(currentFolder == SyncManager.FOLDER_MAIN){
+		if(!parentActivity.isSyncBarDisabled()){
 			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_with_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
 		}
 		else{
