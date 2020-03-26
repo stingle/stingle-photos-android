@@ -8,12 +8,12 @@ import android.os.AsyncTask;
 
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -34,6 +34,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer,
 	private final File destinationFolder;
 	private final OnAsyncTaskFinish onFinishListener;
 	private int folder = SyncManager.FOLDER_MAIN;
+	private int folderId = -1;
 
 	private boolean performMediaScan = false;
 
@@ -53,6 +54,9 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer,
 
 	public void setFolder(int folder) {
 		this.folder = folder;
+	}
+	public void setFolderId(int folderId) {
+		this.folderId = folderId;
 	}
 
 	@Override
@@ -115,7 +119,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer,
 					String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), destFileName);
 					FileOutputStream outputStream = new FileOutputStream(new File(finalWritePath));
 
-					StinglePhotosApplication.getCrypto().decryptFile(inputStream, outputStream, null, this, StinglePhotosApplication.getCrypto().getFileHeaderFromHeadersStr(dbFile.headers));
+					CryptoHelpers.decryptDbFile(context, folder, folderId, dbFile.headers, false, inputStream, outputStream, null, this);
 
 					publishProgress(i + 1);
 					File decryptedFile = new File(finalWritePath);

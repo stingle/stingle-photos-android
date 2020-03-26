@@ -481,7 +481,9 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	public void onConfigurationChanged(@NonNull Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		galleryFragment.updateAutoFit();
+		if(galleryFragment != null) {
+			galleryFragment.updateAutoFit();
+		}
 	}
 
 	@Override
@@ -680,6 +682,9 @@ public class GalleryActivity extends AppCompatActivity
 						case SyncManager.FOLDER_TRASH:
 							mode.getMenuInflater().inflate(R.menu.gallery_trash_action_mode, menu);
 							break;
+						case SyncManager.FOLDER_ALBUM:
+							mode.getMenuInflater().inflate(R.menu.gallery_album_action_mode, menu);
+							break;
 					}
 				}
 				else{
@@ -734,6 +739,9 @@ public class GalleryActivity extends AppCompatActivity
 
 	public int getCurrentFolder(){
 		return currentFolder;
+	}
+	public int getCurrentFolderId(){
+		return currentFolderId;
 	}
 
 	public void exitActionMode(){

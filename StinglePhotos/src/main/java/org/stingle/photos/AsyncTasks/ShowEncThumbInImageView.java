@@ -7,8 +7,8 @@ import android.widget.ImageView;
 
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -23,6 +23,8 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 	private ImageView imageView;
 	private Integer thumbSize = null;
 	private int folder = SyncManager.FOLDER_MAIN;
+	private int folderId = -1;
+	private String headers = null;
 	private boolean isRemote = false;
 	private OnAsyncTaskFinish onFinish;
 
@@ -38,6 +40,14 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 	}
 	public ShowEncThumbInImageView setFolder(int folder){
 		this.folder = folder;
+		return this;
+	}
+	public ShowEncThumbInImageView setFolderId(int folderId){
+		this.folderId = folderId;
+		return this;
+	}
+	public ShowEncThumbInImageView setHeaders(String headers){
+		this.headers = headers;
 		return this;
 	}
 
@@ -64,8 +74,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 			byte[] decryptedData = null;
 			if(!isRemote) {
 				File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + filename);
-				FileInputStream input = new FileInputStream(fileToDec);
-				decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input, null);
+				decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, headers, true, new FileInputStream(fileToDec));
 			}
 			else{
 				byte[] encFile = FileManager.getAndCacheThumb(context, filename, folder);
@@ -74,7 +83,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 					return null;
 				}
 
-				decryptedData = StinglePhotosApplication.getCrypto().decryptFile(encFile, null);
+				decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, headers, true, encFile);
 			}
 
 			if (decryptedData != null) {

@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Db.Query.AlbumsDb;
@@ -132,16 +133,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				if (fileType == Crypto.FILE_TYPE_PHOTO) {
 					FileInputStream input = new FileInputStream(file);
 
-					byte[] decryptedData;
-
-					if (folder == SyncManager.FOLDER_ALBUM) {
-						AlbumsDb albumsDb = new AlbumsDb(context);
-						StingleDbAlbum album = albumsDb.getAlbumById(folderId);
-						Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
-						decryptedData = crypto.decryptFile(input, null, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
-					} else {
-						decryptedData = crypto.decryptFile(input, null, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers));
-					}
+					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, dbFile.headers, false, input);
 
 					if (decryptedData != null) {
 						if (isGif) {
@@ -166,16 +158,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 
 				if (fileType == Crypto.FILE_TYPE_PHOTO) {
-					byte[] decryptedData;
-
-					if (folder == SyncManager.FOLDER_ALBUM) {
-						AlbumsDb albumsDb = new AlbumsDb(context);
-						StingleDbAlbum album = albumsDb.getAlbumById(folderId);
-						Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
-						decryptedData = crypto.decryptFile(encThumb, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
-					} else {
-						decryptedData = crypto.decryptFile(encThumb, this, crypto.getFileHeaderFromHeadersStr(dbFile.headers));
-					}
+					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, dbFile.headers, true, encThumb);
 
 					if (decryptedData != null) {
 						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
@@ -434,6 +417,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		public boolean isRemote = false;
 		public String url = null;
 		public int folder = SyncManager.FOLDER_MAIN;
+		public int folderId = -1;
 		public String headers = null;
 	}
 }

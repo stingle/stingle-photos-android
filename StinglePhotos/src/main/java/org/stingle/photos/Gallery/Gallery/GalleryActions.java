@@ -29,7 +29,7 @@ import java.util.ArrayList;
 public class GalleryActions {
 
 	public static void shareSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
-		ShareManager.shareDbFiles(activity, files, activity.getCurrentFolder());
+		ShareManager.shareDbFiles(activity, files, activity.getCurrentFolder(), activity.getCurrentFolderId());
 	}
 
 	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {

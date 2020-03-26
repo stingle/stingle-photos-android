@@ -228,7 +228,7 @@ public class ViewItemActivity extends AppCompatActivity {
 			ArrayList<StingleFile> files = new ArrayList<>();
 			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), 0, StingleDb.SORT_DESC));
 
-			ShareManager.shareDbFiles(this, files, folder);
+			ShareManager.shareDbFiles(this, files, folder, folderId);
 
 		}
 		else if (id == R.id.trash) {

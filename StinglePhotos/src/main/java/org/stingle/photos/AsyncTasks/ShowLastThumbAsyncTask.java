@@ -52,6 +52,7 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 					.setisRemote(isRemote)
 					.setThumbSize(thumbSize)
 					.setFolder(folder)
+					.setHeaders(dbFile.headers)
 					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}

@@ -23,7 +23,7 @@ import java.util.List;
 
 public class ShareManager {
 
-	public static void shareDbFiles(final Context context, List<StingleFile> dbFiles, int folder){
+	public static void shareDbFiles(final Context context, List<StingleFile> dbFiles, int folder, int folderId){
 
 
 		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(context, new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
@@ -34,6 +34,7 @@ public class ShareManager {
 			}
 		});
 		decFilesJob.setFolder(folder);
+		decFilesJob.setFolderId(folderId);
 		decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, dbFiles);
 	}
 

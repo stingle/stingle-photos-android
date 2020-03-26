@@ -11,9 +11,9 @@ import androidx.core.widget.ContentLoadingProgressBar;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
@@ -86,7 +86,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				return null;
 			}
 
-			return StinglePhotosApplication.getCrypto().decryptFile(encFile, this, StinglePhotosApplication.getCrypto().getFileHeaderFromHeadersStr(result.headers));
+			return CryptoHelpers.decryptDbFile(context, result.folder, result.folderId, result.headers, false, encFile);
 		}
 		catch (NoSuchAlgorithmException | KeyManagementException | IOException | CryptoException e) {
 

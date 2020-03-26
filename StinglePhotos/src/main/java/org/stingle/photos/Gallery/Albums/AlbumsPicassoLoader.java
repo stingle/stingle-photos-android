@@ -52,30 +52,11 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 	@Override
 	public void load(@NonNull Picasso picasso, @NonNull com.squareup.picasso3.Request request, @NonNull Callback callback) throws IOException {
-		/*try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			//Log.e("interrupted", String.valueOf(position));
-		}*/
 		String uri = request.uri.toString();
 		String position = uri.substring(1);
 
 
 			try {
-				/*File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
-				FileInputStream input = new FileInputStream(fileToDec);
-				byte[] decryptedData = StinglePhotosApplication.getCrypto().decryptFile(input);
-
-				if (decryptedData != null) {
-					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
-					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
-
-					FileInputStream streamForHeader = new FileInputStream(fileToDec);
-					Crypto.Header header = StinglePhotosApplication.getCrypto().getFileHeader(streamForHeader);
-					streamForHeader.close();
-
-
-				}*/
 				StingleDbAlbum album = db.getAlbumAtPosition(Integer.parseInt(position), StingleDb.SORT_ASC);
 				Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
 
@@ -117,8 +98,5 @@ public class AlbumsPicassoLoader extends RequestHandler {
 				e.printStackTrace();
 			}
 
-
 	}
-
-
 }

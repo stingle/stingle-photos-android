@@ -267,6 +267,7 @@
     <string name="add_to_album">Add to album</string>
     <string name="new_album">New album</string>
     <string name="album">Album</string>
+    <string name="add_to_this_album">Add to this album</string>
 
 
 </resources>

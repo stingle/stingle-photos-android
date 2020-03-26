@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
-import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.Helpers.DragSelectRecyclerView;
@@ -222,13 +221,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		List<Integer> indices = adapter.getSelectedIndices();
 		ArrayList<StingleFile> files = new ArrayList<>();
 		for(Integer index : indices){
-			files.add((StingleDbFile)adapter.getStingleFileAtPosition(index));
+			files.add(adapter.getStingleFileAtPosition(index));
 		}
 		return files;
-	}
-
-	public GalleryAdapterPisasso getAdapter(){
-		return adapter;
 	}
 
 }

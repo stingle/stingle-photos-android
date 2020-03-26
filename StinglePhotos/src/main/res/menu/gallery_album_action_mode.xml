@@ -7,9 +7,9 @@
         android:title="@string/share"
         app:showAsAction="ifRoom|withText" />
     <item
-        android:id="@+id/add_to_album"
+        android:id="@+id/add_to_this_album"
         android:icon="@drawable/ic_action_add"
-        android:title="@string/add_to_album"
+        android:title="@string/add_to_this_album"
         app:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/decrypt"
