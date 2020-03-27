@@ -7,6 +7,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
@@ -15,32 +16,41 @@ public class AlbumsDb {
 
 	private StingleDb db;
 
-	private String tableName = StingleDbContract.Files.TABLE_NAME_ALBUMS;
+	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUMS;
+
+	private static final int ALBUM_ID_LEN = 32;
 
 	public AlbumsDb(Context context) {
 		db = new StingleDb(context);
 	}
 
 
-	public long insertAlbum(String data, String albumPK, long dateCreated, long dateModified){
+	public String insertAlbum(String albumId, String data, String albumPK, long dateCreated, long dateModified){
+		if(albumId == null){
+			albumId = CryptoHelpers.getRandomString(ALBUM_ID_LEN);
+		}
+
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATA, data);
-		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_PK, albumPK);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATA, data);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, albumId);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, albumPK);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, dateCreated);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, dateModified);
 
-		return db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
+		return albumId;
 	}
 
 	public int updateAlbum(StingleDbAlbum album){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATA, album.data);
-		values.put(StingleDbContract.Files.COLUMN_NAME_ALBUM_PK, album.albumPK);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, album.dateCreated);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, album.dateModified);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, album.albumId);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATA, album.data);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, album.albumPK);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, album.dateCreated);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, album.dateModified);
 
-		String selection = StingleDbContract.Files._ID + " = ?";
+		String selection = StingleDbContract.Columns._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(album.id) };
 
 		return db.openWriteDb().update(
@@ -52,9 +62,9 @@ public class AlbumsDb {
 
 
 
-	public int deleteAlbum(Integer id){
-		String selection = StingleDbContract.Files._ID + " = ?";
-		String[] selectionArgs = { String.valueOf(id) };
+	public int deleteAlbum(String albumId){
+		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = { String.valueOf(albumId) };
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
@@ -69,16 +79,17 @@ public class AlbumsDb {
 
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_DATA,
-				StingleDbContract.Files.COLUMN_NAME_ALBUM_PK,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_DATA,
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
 
 		String selection = null;
 
 		String sortOrder =
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		return db.openReadDb().query(
 				tableName,   // The table to query
@@ -95,14 +106,15 @@ public class AlbumsDb {
 	public StingleDbAlbum getAlbumAtPosition(int pos, int sort){
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_DATA,
-				StingleDbContract.Files.COLUMN_NAME_ALBUM_PK,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_DATA,
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
 
 		String sortOrder =
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -123,17 +135,18 @@ public class AlbumsDb {
 		return null;
 	}
 
-	public StingleDbAlbum getAlbumById(long albumId){
+	public StingleDbAlbum getAlbumById(String albumId){
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_DATA,
-				StingleDbContract.Files.COLUMN_NAME_ALBUM_PK,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_DATA,
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
 
-		String selection = StingleDbContract.Files._ID + " = ?";
-		String[] selectionArgs = { String.valueOf(albumId) };
+		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = { albumId };
 
 		Cursor result = db.openReadDb().query(
 				false,

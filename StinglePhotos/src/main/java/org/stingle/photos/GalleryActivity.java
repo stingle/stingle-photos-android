@@ -91,7 +91,7 @@ public class GalleryActivity extends AppCompatActivity
 	private View headerView;
 
 	private int currentFragment = FRAGMENT_GALLERY;
-	private int currentFolderId = 0;
+	private String currentFolderId = null;
 
 	private BroadcastReceiver onLogout = new BroadcastReceiver() {
 		@Override
@@ -210,7 +210,7 @@ public class GalleryActivity extends AppCompatActivity
 	public void showMainGallery(){
 		currentFragment = FRAGMENT_GALLERY;
 		currentFolder = SyncManager.FOLDER_MAIN;
-		currentFolderId = -1;
+		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		enableSyncBar();
 		initCurrentFragment();
@@ -218,7 +218,7 @@ public class GalleryActivity extends AppCompatActivity
 	public void showTrash(){
 		currentFragment = FRAGMENT_GALLERY;
 		currentFolder = SyncManager.FOLDER_TRASH;
-		currentFolderId = -1;
+		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.title_trash));
 		disableSyncBar();
 		initCurrentFragment();
@@ -226,12 +226,12 @@ public class GalleryActivity extends AppCompatActivity
 	public void showAlbumsList(){
 		currentFragment = FRAGMENT_ALBUMS_LIST;
 		currentFolder = -1;
-		currentFolderId = -1;
+		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.albums));
 		disableSyncBar();
 		initCurrentFragment();
 	}
-	public void showAlbum(int albumId, String albumName){
+	public void showAlbum(String albumId, String albumName){
 		currentFragment = FRAGMENT_GALLERY;
 		currentFolder = SyncManager.FOLDER_ALBUM;
 		currentFolderId = albumId;
@@ -256,10 +256,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	}
 
-	private void initGalleryFragment(int folderType, Integer folderId, boolean initNow){
-		if(folderId == null){
-			folderId = -1;
-		}
+	private void initGalleryFragment(int folderType, String folderId, boolean initNow){
 		currentFragment = FRAGMENT_GALLERY;
 		currentFolder = folderType;
 		currentFolderId = folderId;
@@ -267,7 +264,7 @@ public class GalleryActivity extends AppCompatActivity
 
 		Bundle bundle = new Bundle();
 		bundle.putInt("currentFolder", folderType);
-		bundle.putInt("folderId", folderId);
+		bundle.putString("folderId", folderId);
 		bundle.putBoolean("initNow", initNow);
 
 		galleryFragment = new GalleryFragment();
@@ -740,7 +737,7 @@ public class GalleryActivity extends AppCompatActivity
 	public int getCurrentFolder(){
 		return currentFolder;
 	}
-	public int getCurrentFolderId(){
+	public String getCurrentFolderId(){
 		return currentFolderId;
 	}
 

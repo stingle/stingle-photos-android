@@ -53,7 +53,7 @@ public class SyncManager {
 	public static final int FOLDER_MAIN = 0;
 	public static final int FOLDER_TRASH = 1;
 	public static final int FOLDER_ALBUM = 2;
-	public static final int FOLDER_SHARE = 2;
+	public static final int FOLDER_SHARE = 3;
 
 	public static final int DELETE_EVENT_TRASH = 1;
 	public static final int DELETE_EVENT_RESTORE = 2;
@@ -105,7 +105,7 @@ public class SyncManager {
 
 		protected boolean fsSyncFolder(int folder){
 			boolean needToUpdateUI = false;
-			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 			File dir = new File(FileManager.getHomeDir(this.context));
 
 			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC);
@@ -133,7 +133,7 @@ public class SyncManager {
 			if(folder == FOLDER_MAIN) {
 				File[] currentFolderFiles = dir.listFiles();
 
-				FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+				FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 
 				if(currentFolderFiles != null) {
 					for (File file : currentFolderFiles) {
@@ -197,7 +197,7 @@ public class SyncManager {
 		}
 
 		protected int getFilesCountToUpload(int folder){
-			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 
 			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC);
 			int uploadCount = result.getCount();
@@ -213,7 +213,7 @@ public class SyncManager {
 		}
 
 		protected void uploadFolder(int folder){
-			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+			FilesTrashDb db = new FilesTrashDb(context, (folder == FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 
 			Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC);
 			while(result.moveToNext()) {
@@ -245,11 +245,11 @@ public class SyncManager {
 		}
 
 		protected void uploadFile(int folder, FilesTrashDb db, Cursor result, boolean isReupload){
-			String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_FILENAME));
-			String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_VERSION));
-			String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED));
-			String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED));
-			String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Files.COLUMN_NAME_HEADERS));
+			String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
+			String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_VERSION));
+			String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
+			String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
+			String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
 
 			if(progress != null){
 				progress.currentFile(filename);
@@ -361,8 +361,8 @@ public class SyncManager {
 		public SyncCloudToLocalDbAsyncTask(Context context, OnFinish onFinish){
 			this.context = context;
 			this.onFinish = onFinish;
-			db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
-			trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+			trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 		}
 
 		@Override
@@ -508,8 +508,8 @@ public class SyncManager {
 					String mainFilePath = homeDir + "/" + file.filename;
 					String thumbPath = thumbDir + "/" + file.filename;
 
-					downloadFile(context, file.filename, mainFilePath, false);
-					downloadFile(context, file.filename, thumbPath, true);
+					downloadFile(context, file.filename, mainFilePath, false, folder);
+					downloadFile(context, file.filename, thumbPath, true, folder);
 				}
 			}
 
@@ -596,8 +596,8 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
-			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
@@ -676,8 +676,8 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
-			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 
 			ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
@@ -755,7 +755,7 @@ public class SyncManager {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 			String homeDir = FileManager.getHomeDir(context);
 			String thumbDir = FileManager.getThumbsDir(context);
 
@@ -845,7 +845,7 @@ public class SyncManager {
 				return null;
 			}
 
-			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 			String homeDir = FileManager.getHomeDir(context);
 			String thumbDir = FileManager.getThumbsDir(context);
 
@@ -905,11 +905,12 @@ public class SyncManager {
 		}
 	}
 
-	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb){
+	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int folder){
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
 		postParams.put("file", filename);
+		postParams.put("folder", String.valueOf(folder));
 		if(isThumb) {
 			postParams.put("thumb", "1");
 		}
@@ -932,11 +933,11 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager. PREF_LAST_DEL_SEEN_TIME);
 
-		FilesTrashDb filesDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+		FilesTrashDb filesDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
 		filesDb.truncateTable();
 		filesDb.close();
 
-		FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+		FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 		trashDb.truncateTable();
 		trashDb.close();
 	}

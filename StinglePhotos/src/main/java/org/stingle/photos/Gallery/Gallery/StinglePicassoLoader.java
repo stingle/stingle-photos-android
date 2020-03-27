@@ -33,9 +33,9 @@ public class StinglePicassoLoader extends RequestHandler {
 	private FilesDb db;
 	private int thumbSize;
 	private Crypto crypto;
-	private int folderId = 0;
+	private String folderId = null;
 
-	public StinglePicassoLoader(Context context, FilesDb db, int thumbSize, int folderId){
+	public StinglePicassoLoader(Context context, FilesDb db, int thumbSize, String folderId){
 		this.context = context;
 		this.db = db;
 		this.thumbSize = thumbSize;

@@ -71,7 +71,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final ViewPagerAdapter adapter;
 	private final FilesDb db;
 	private int folder = SyncManager.FOLDER_MAIN;
-	private int folderId = -1;
+	private String folderId = null;
 
 	private final OnClickListener onClickListener;
 	private final MemoryCache memCache;
@@ -84,7 +84,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private Crypto.Header videoFileHeader = null;
 
 
-	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int folder, int folderId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
+	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int folder, String folderId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
 		this.context = context;
 		this.adapter = adapter;
@@ -188,7 +188,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					AlbumsDb albumsDb = new AlbumsDb(context);
 					StingleDbAlbum album = albumsDb.getAlbumById(folderId);
 					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
-					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK));
+					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK));
 
 				} else {
 					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers);
@@ -417,7 +417,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		public boolean isRemote = false;
 		public String url = null;
 		public int folder = SyncManager.FOLDER_MAIN;
-		public int folderId = -1;
+		public String folderId = null;
 		public String headers = null;
 	}
 }

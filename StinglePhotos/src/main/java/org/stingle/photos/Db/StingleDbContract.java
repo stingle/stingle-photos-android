@@ -7,7 +7,7 @@ public class StingleDbContract {
 	private StingleDbContract() {}
 
 	/* Inner class that defines the table contents */
-	public static class Files implements BaseColumns {
+	public static class Columns implements BaseColumns {
 		public static final String TABLE_NAME_FILES = "files";
 		public static final String TABLE_NAME_TRASH = "trash";
 		public static final String TABLE_NAME_ALBUMS = "albums";
@@ -32,79 +32,97 @@ public class StingleDbContract {
 	}
 
 	public static final String SQL_CREATE_FILES =
-			"CREATE TABLE " + Files.TABLE_NAME_FILES + " (" +
-					Files._ID + " INTEGER PRIMARY KEY," +
-					Files.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
-					Files.COLUMN_NAME_IS_LOCAL + " INTEGER," +
-					Files.COLUMN_NAME_IS_REMOTE + " INTEGER," +
-					Files.COLUMN_NAME_VERSION + " INTEGER," +
-					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
-					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
-					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER, " +
-					Files.COLUMN_NAME_HEADERS + " TEXT" +
+			"CREATE TABLE " + Columns.TABLE_NAME_FILES + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
+					Columns.COLUMN_NAME_IS_LOCAL + " INTEGER," +
+					Columns.COLUMN_NAME_IS_REMOTE + " INTEGER," +
+					Columns.COLUMN_NAME_VERSION + " INTEGER," +
+					Columns.COLUMN_NAME_REUPLOAD + " INTEGER," +
+					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER, " +
+					Columns.COLUMN_NAME_HEADERS + " TEXT" +
 					")";
 
 	public static final String SQL_DELETE_FILES =
-			"DROP TABLE IF EXISTS " + Files.TABLE_NAME_FILES;
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_FILES;
+
+	public static final String SQL_FILES_FN_INDEX =
+			"CREATE UNIQUE INDEX filename ON "+ Columns.TABLE_NAME_FILES+" ("+ Columns.COLUMN_NAME_FILENAME+")";
+	public static final String SQL_FILES_LR_INDEX =
+			"CREATE INDEX localremote ON "+ Columns.TABLE_NAME_FILES+" ("+ Columns.COLUMN_NAME_IS_LOCAL+", "+ Columns.COLUMN_NAME_IS_REMOTE+")";
 
 
 	public static final String SQL_CREATE_TRASH =
-			"CREATE TABLE " + Files.TABLE_NAME_TRASH + " (" +
-					Files._ID + " INTEGER PRIMARY KEY," +
-					Files.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
-					Files.COLUMN_NAME_IS_LOCAL + " INTEGER," +
-					Files.COLUMN_NAME_IS_REMOTE + " INTEGER," +
-					Files.COLUMN_NAME_VERSION + " INTEGER," +
-					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
-					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
-					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER, " +
-					Files.COLUMN_NAME_HEADERS + " TEXT" +
+			"CREATE TABLE " + Columns.TABLE_NAME_TRASH + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
+					Columns.COLUMN_NAME_IS_LOCAL + " INTEGER," +
+					Columns.COLUMN_NAME_IS_REMOTE + " INTEGER," +
+					Columns.COLUMN_NAME_VERSION + " INTEGER," +
+					Columns.COLUMN_NAME_REUPLOAD + " INTEGER," +
+					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER, " +
+					Columns.COLUMN_NAME_HEADERS + " TEXT" +
 					")";
 
+	public static final String SQL_TRASH_FN_INDEX =
+			"CREATE UNIQUE INDEX trash_filename ON "+ Columns.TABLE_NAME_TRASH+" ("+ Columns.COLUMN_NAME_FILENAME+")";
+	public static final String SQL_TRASH_LR_INDEX =
+			"CREATE INDEX trash_localremote ON "+ Columns.TABLE_NAME_TRASH+" ("+ Columns.COLUMN_NAME_IS_LOCAL+", "+ Columns.COLUMN_NAME_IS_REMOTE+")";
+
 	public static final String SQL_DELETE_TRASH =
-			"DROP TABLE IF EXISTS " + Files.TABLE_NAME_TRASH;
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_TRASH;
 
 
 	public static final String SQL_CREATE_ALBUMS =
-			"CREATE TABLE " + Files.TABLE_NAME_ALBUMS + " (" +
-					Files._ID + " INTEGER PRIMARY KEY," +
-					Files.COLUMN_NAME_DATA + " TEXT NOT NULL," +
-					Files.COLUMN_NAME_ALBUM_PK + " TEXT NOT NULL, " +
-					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
-					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+			"CREATE TABLE " + Columns.TABLE_NAME_ALBUMS + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL UNIQUE," +
+					Columns.COLUMN_NAME_DATA + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_ALBUM_PK + " TEXT NOT NULL, " +
+					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
+	public static final String SQL_CREATE_ALBUMS_AID_INDEX =
+					"CREATE UNIQUE INDEX a_album_id ON "+ Columns.TABLE_NAME_ALBUMS+" ("+ Columns.COLUMN_NAME_ALBUM_ID+")";
 
 	public static final String SQL_DELETE_ALBUMS =
-			"DROP TABLE IF EXISTS " + Files.TABLE_NAME_ALBUMS;
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_ALBUMS;
 
 	public static final String SQL_CREATE_ALBUM_FILES =
-			"CREATE TABLE " + Files.TABLE_NAME_ALBUM_FILES + " (" +
-					Files._ID + " INTEGER PRIMARY KEY," +
-					Files.COLUMN_NAME_ALBUM_ID + " INTEGER," +
-					Files.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
-					Files.COLUMN_NAME_IS_LOCAL + " INTEGER," +
-					Files.COLUMN_NAME_IS_REMOTE + " INTEGER," +
-					Files.COLUMN_NAME_VERSION + " INTEGER," +
-					Files.COLUMN_NAME_REUPLOAD + " INTEGER," +
-					Files.COLUMN_NAME_HEADERS + " TEXT, " +
-					Files.COLUMN_NAME_DATE_CREATED + " INTEGER, " +
-					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+			"CREATE TABLE " + Columns.TABLE_NAME_ALBUM_FILES + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
+					Columns.COLUMN_NAME_IS_LOCAL + " INTEGER," +
+					Columns.COLUMN_NAME_IS_REMOTE + " INTEGER," +
+					Columns.COLUMN_NAME_VERSION + " INTEGER," +
+					Columns.COLUMN_NAME_REUPLOAD + " INTEGER," +
+					Columns.COLUMN_NAME_HEADERS + " TEXT, " +
+					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER, " +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
+	public static final String SQL_CREATE_ALBUM_FILES_AID_INDEX =
+			"CREATE INDEX af_album_id ON "+ Columns.TABLE_NAME_ALBUM_FILES+" ("+ Columns.COLUMN_NAME_ALBUM_ID+")";
 
 	public static final String SQL_DELETE_ALBUM_FILES =
-			"DROP TABLE IF EXISTS " + Files.TABLE_NAME_ALBUM_FILES;
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_ALBUM_FILES;
 
 	public static final String SQL_CREATE_SHARES =
-			"CREATE TABLE " + Files.TABLE_NAME_SHARES + " (" +
-					Files._ID + " INTEGER PRIMARY KEY," +
-					Files.COLUMN_NAME_TO_USER_ID + " INTEGER," +
-					Files.COLUMN_NAME_FROM_USER_ID + " INTEGER," +
-					Files.COLUMN_NAME_TO_DATA + " TEXT NOT NULL," +
-					Files.COLUMN_NAME_FROM_DATA + " TEXT NOT NULL," +
-					Files.COLUMN_NAME_DATE_CREATED + " INTEGER," +
-					Files.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+			"CREATE TABLE " + Columns.TABLE_NAME_SHARES + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_TO_USER_ID + " INTEGER," +
+					Columns.COLUMN_NAME_FROM_USER_ID + " INTEGER," +
+					Columns.COLUMN_NAME_TO_DATA + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_FROM_DATA + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
+	public static final String SQL_CREATE_SHARES_AID_INDEX =
+			"CREATE INDEX s_album_id ON "+ Columns.TABLE_NAME_SHARES+" ("+ Columns.COLUMN_NAME_ALBUM_ID+")";
 
 	public static final String SQL_DELETE_SHARES =
-			"DROP TABLE IF EXISTS " + Files.TABLE_NAME_SHARES;
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_SHARES;
 }

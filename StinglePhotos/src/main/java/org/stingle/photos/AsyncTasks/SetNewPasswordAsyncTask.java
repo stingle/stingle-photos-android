@@ -82,7 +82,7 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			if(serverPKB64 == null){
 				return false;
 			}
-			byte[] serverPK = Crypto.base64ToByteArrayDefault(serverPKB64);
+			byte[] serverPK = Crypto.base64ToByteArray(serverPKB64);
 
 			StinglePhotosApplication.getCrypto().generateMainKeypair(password, privateKey, publicKey);
 

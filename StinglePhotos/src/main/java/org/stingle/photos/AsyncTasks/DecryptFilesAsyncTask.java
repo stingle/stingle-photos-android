@@ -34,7 +34,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer,
 	private final File destinationFolder;
 	private final OnAsyncTaskFinish onFinishListener;
 	private int folder = SyncManager.FOLDER_MAIN;
-	private int folderId = -1;
+	private String folderId = null;
 
 	private boolean performMediaScan = false;
 
@@ -55,7 +55,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer,
 	public void setFolder(int folder) {
 		this.folder = folder;
 	}
-	public void setFolderId(int folderId) {
+	public void setFolderId(String folderId) {
 		this.folderId = folderId;
 	}
 

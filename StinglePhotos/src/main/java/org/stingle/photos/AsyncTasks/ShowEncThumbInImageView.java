@@ -23,7 +23,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 	private ImageView imageView;
 	private Integer thumbSize = null;
 	private int folder = SyncManager.FOLDER_MAIN;
-	private int folderId = -1;
+	private String folderId = null;
 	private String headers = null;
 	private boolean isRemote = false;
 	private OnAsyncTaskFinish onFinish;
@@ -42,7 +42,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 		this.folder = folder;
 		return this;
 	}
-	public ShowEncThumbInImageView setFolderId(int folderId){
+	public ShowEncThumbInImageView setFolderId(String folderId){
 		this.folderId = folderId;
 		return this;
 	}

@@ -68,7 +68,7 @@ public class AlbumsFragment extends Fragment{
 				} catch (IOException | CryptoException e) {
 					e.printStackTrace();
 				}
-				parentActivity.showAlbum(album.id, albumName);
+				parentActivity.showAlbum(album.albumId, albumName);
 			}
 		/*StingleDbFile file = adapter.getStingleFileAtPosition(index);
 		if(!parentActivity.onClick(file)){

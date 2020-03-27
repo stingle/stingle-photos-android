@@ -74,7 +74,7 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 				isKeyBackedUp = response.get("isKeyBackedUp").equals("1");
 				if(challenge != null) {
 					byte[] publicKey = StinglePhotosApplication.getCrypto().getPublicKeyFromPrivateKey(privateKey);
-					byte[] msgBytes = StinglePhotosApplication.getCrypto().decryptSeal(Crypto.base64ToByteArrayDefault(challenge), publicKey, privateKey);
+					byte[] msgBytes = StinglePhotosApplication.getCrypto().decryptSeal(Crypto.base64ToByteArray(challenge), publicKey, privateKey);
 
 					String msg = new String(msgBytes);
 					if(msg.startsWith("validkey_")) {

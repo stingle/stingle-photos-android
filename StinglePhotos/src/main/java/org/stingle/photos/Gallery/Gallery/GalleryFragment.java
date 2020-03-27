@@ -37,7 +37,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	private GalleryFragmentParent parentActivity;
 
 	private int currentFolder = SyncManager.FOLDER_MAIN;
-	private int folderId = -1;
+	private String folderId = null;
 
 
 	@Nullable
@@ -59,7 +59,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		boolean initNow = false;
 		if (bundle != null) {
 			currentFolder = bundle.getInt("currentFolder", SyncManager.FOLDER_MAIN);
-			folderId = bundle.getInt("folderId", -1);
+			folderId = bundle.getString("folderId");
 			initNow = bundle.getBoolean("initNow", true);
 		}
 

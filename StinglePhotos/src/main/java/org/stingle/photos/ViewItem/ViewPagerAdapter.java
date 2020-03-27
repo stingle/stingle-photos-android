@@ -31,24 +31,24 @@ public class ViewPagerAdapter extends PagerAdapter {
 	private int currentPosition = 0;
 	private int lastFilesCount = -1;
 	private int folder = SyncManager.FOLDER_MAIN;
-	private int folderId = -1;
+	private String folderId = null;
 	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
 	private View.OnTouchListener gestureTouchListener;
 
-	public ViewPagerAdapter(Context context, int folder, int folderId, View.OnTouchListener gestureTouchListener) {
+	public ViewPagerAdapter(Context context, int folder, String folderId, View.OnTouchListener gestureTouchListener) {
 		this.context = context;
 		this.folder = folder;
 		this.folderId = folderId;
 		this.gestureTouchListener = gestureTouchListener;
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 
 		switch (folder) {
 			case SyncManager.FOLDER_MAIN:
-				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
 				break;
 			case SyncManager.FOLDER_TRASH:
-				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 				break;
 			case SyncManager.FOLDER_ALBUM:
 				this.db = new AlbumFilesDb(context);

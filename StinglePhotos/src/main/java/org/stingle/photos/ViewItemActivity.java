@@ -39,7 +39,7 @@ public class ViewItemActivity extends AppCompatActivity {
 
 	protected int itemPosition = 0;
 	protected int folder = SyncManager.FOLDER_MAIN;
-	protected int folderId = -1;
+	protected String folderId = null;
 	protected int currentPosition = 0;
 	protected ViewPager viewPager;
 	protected ViewPagerAdapter adapter;
@@ -80,7 +80,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		Intent intent = getIntent();
 		itemPosition = intent.getIntExtra("EXTRA_ITEM_POSITION", 0);
 		folder = intent.getIntExtra("EXTRA_ITEM_FOLDER", 0);
-		folderId = intent.getIntExtra("EXTRA_ITEM_FOLDER_ID", -1);
+		folderId = intent.getStringExtra("EXTRA_ITEM_FOLDER_ID");
 		currentPosition = itemPosition;
 		viewPager = (ViewPager)findViewById(R.id.viewPager);
 
@@ -222,11 +222,11 @@ public class ViewItemActivity extends AppCompatActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		int id = item.getItemId();
-		FilesTrashDb db = new FilesTrashDb(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Files.TABLE_NAME_TRASH : StingleDbContract.Files.TABLE_NAME_FILES));
+		FilesTrashDb db = new FilesTrashDb(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 
 		if (id == R.id.share) {
 			ArrayList<StingleFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), 0, StingleDb.SORT_DESC));
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), null, StingleDb.SORT_DESC));
 
 			ShareManager.shareDbFiles(this, files, folder, folderId);
 
@@ -234,7 +234,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		else if (id == R.id.trash) {
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
 			ArrayList<StingleFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), 0, StingleDb.SORT_DESC));
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), null, StingleDb.SORT_DESC));
 
 
 			new SyncManager.MoveToTrashAsyncTask(this, files, new SyncManager.OnFinish(){

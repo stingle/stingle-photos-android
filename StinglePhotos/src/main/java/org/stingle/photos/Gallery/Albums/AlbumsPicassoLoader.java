@@ -19,6 +19,7 @@ import org.stingle.photos.Db.Objects.StingleDbAlbumFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
@@ -62,12 +63,19 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 				Result result = null;
 
-				StingleDbAlbumFile albumFile = filesDb.getFileAtPosition(0, album.id, StingleDb.SORT_ASC);
+				StingleDbAlbumFile albumFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_ASC);
 
 				if(albumFile != null){
-					File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ albumFile.filename);
-					FileInputStream input = new FileInputStream(fileToDec);
-					byte[] decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(albumFile.headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK)));
+					byte[] decryptedData;
+					if(albumFile.isLocal) {
+						File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + albumFile.filename);
+						FileInputStream input = new FileInputStream(fileToDec);
+						decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(albumFile.headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK)));
+					}
+					else{
+						byte[] encFile = FileManager.getAndCacheThumb(context, albumFile.filename, SyncManager.FOLDER_ALBUM);
+						decryptedData = crypto.decryptFile(encFile, crypto.getThumbHeaderFromHeadersStr(albumFile.headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK)));
+					}
 
 					if (decryptedData != null) {
 						Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);

@@ -28,6 +28,16 @@ public class StingleDb extends SQLiteOpenHelper {
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
 			db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
+
+			db.execSQL(StingleDbContract.SQL_FILES_FN_INDEX);
+			db.execSQL(StingleDbContract.SQL_FILES_LR_INDEX);
+
+			db.execSQL(StingleDbContract.SQL_TRASH_FN_INDEX);
+			db.execSQL(StingleDbContract.SQL_TRASH_LR_INDEX);
+
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
+			db.execSQL(StingleDbContract.SQL_CREATE_SHARES_AID_INDEX);
 		}
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -40,6 +50,16 @@ public class StingleDb extends SQLiteOpenHelper {
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
 		db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
+
+		db.execSQL(StingleDbContract.SQL_FILES_FN_INDEX);
+		db.execSQL(StingleDbContract.SQL_FILES_LR_INDEX);
+
+		db.execSQL(StingleDbContract.SQL_TRASH_FN_INDEX);
+		db.execSQL(StingleDbContract.SQL_TRASH_LR_INDEX);
+
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
+		db.execSQL(StingleDbContract.SQL_CREATE_SHARES_AID_INDEX);
 	}
 
 	private void deleteTables(SQLiteDatabase db){

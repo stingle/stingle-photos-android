@@ -652,6 +652,13 @@ public class Crypto {
         return fileId;
     }
 
+    public String getRandomString(int length){
+        byte[] random = new byte[length];
+        so.randombytes_buf(random, length);
+
+        return byteArrayToBase64UrlSafe(random);
+    }
+
 
     public byte[] decryptFile(byte[] bytes, Header header) throws IOException, CryptoException{
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
@@ -897,22 +904,22 @@ public class Crypto {
         return buffer.getLong();
     }
 
-    public static String byteArrayToBase64(byte[] bytes) {
+    public static String byteArrayToBase64UrlSafe(byte[] bytes) {
         return Base64.encodeToString(bytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 encoding
     }
-    public static byte[] base64ToByteArray(String base64str) {
+    public static byte[] base64ToByteArrayUrlSafe(String base64str) {
         return Base64.decode(base64str, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 decoding
     }
 
-    public static String byteArrayToBase64Default(byte[] bytes) {
+    public static String byteArrayToBase64(byte[] bytes) {
         return Base64.encodeToString(bytes, Base64.NO_WRAP); //base64 encoding
     }
-    public static byte[] base64ToByteArrayDefault(String base64str) {
+    public static byte[] base64ToByteArray(String base64str) {
         return Base64.decode(base64str, Base64.NO_WRAP); //base64 decoding
     }
 
     public static String assembleHeadersString(byte[] fileHeader, byte[] thumbHeader){
-        return byteArrayToBase64(fileHeader) + "*" + byteArrayToBase64(thumbHeader);
+        return byteArrayToBase64UrlSafe(fileHeader) + "*" + byteArrayToBase64UrlSafe(thumbHeader);
     }
 
     public static String getFileHeadersFromFile(String encFilePath, String encThumbPath) throws IOException, CryptoException {
@@ -939,8 +946,8 @@ public class Crypto {
 
         FileThumbHeaders headers = new FileThumbHeaders();
 
-        headers.file = base64ToByteArray(headersStrArr[0]);
-        headers.thumb = base64ToByteArray(headersStrArr[1]);
+        headers.file = base64ToByteArrayUrlSafe(headersStrArr[0]);
+        headers.thumb = base64ToByteArrayUrlSafe(headersStrArr[1]);
 
         return headers;
     }
@@ -1039,15 +1046,15 @@ public class Crypto {
         so.crypto_box_seal(encryptedData, dataBytes, dataBytes.length, userPK);
 
         HashMap<String, String> result = new HashMap<String, String>();
-        result.put("data", byteArrayToBase64Default(encryptedData));
-        result.put("pk", byteArrayToBase64Default(publicKey));
+        result.put("data", byteArrayToBase64(encryptedData));
+        result.put("pk", byteArrayToBase64(publicKey));
 
         return result;
     }
 
     public AlbumData parseAlbumData(String encDataStr) throws IOException, CryptoException {
 
-        byte[] encData = base64ToByteArrayDefault(encDataStr);
+        byte[] encData = base64ToByteArray(encDataStr);
 
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
         byte[] privateKey = StinglePhotosApplication.getKey();
@@ -1116,13 +1123,13 @@ public class Crypto {
         public String toString(){
             return "\n" +
                     "File Version - " + String.valueOf(fileVersion) + "\n" +
-                    "File ID - " + byteArrayToBase64(fileId) + "\n" +
+                    "File ID - " + byteArrayToBase64UrlSafe(fileId) + "\n" +
                     "Header Size - " + String.valueOf(headerSize) + "\n\n" +
 
                     "Header Version - " + String.valueOf(headerVersion) + "\n" +
                     "Chunk Size - " + String.valueOf(chunkSize) + "\n" +
                     "Data Size - " + String.valueOf(dataSize) + "\n" +
-                    "Symmetric Key - " + byteArrayToBase64(symmetricKey) + "\n" +
+                    "Symmetric Key - " + byteArrayToBase64UrlSafe(symmetricKey) + "\n" +
                     "File Type - " + String.valueOf(fileType) + "\n" +
                     "Filename - " + filename + "\n\n" +
                     "Video Duration - " + String.valueOf(videoDuration) + "\n\n" +

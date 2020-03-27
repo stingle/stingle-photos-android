@@ -34,8 +34,8 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 
 	@Override
 	protected StingleDbFile doInBackground(Void... params) {
-		FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
-		return db.getFileAtPosition(0, 0, StingleDb.SORT_DESC);
+		FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+		return db.getFileAtPosition(0, null, StingleDb.SORT_DESC);
 	}
 
 	@Override

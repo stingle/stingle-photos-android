@@ -57,22 +57,22 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
 	private int folderType = SyncManager.FOLDER_MAIN;
-	private int folderId = 0;
+	private String folderId = null;
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
 
-	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType, int folderId) {
+	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType, String folderId) {
 		this.context = context;
 		this.callback = callback;
 		this.folderType = folderType;
 		this.folderId = folderId;
 		switch (folderType){
 			case SyncManager.FOLDER_MAIN:
-				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
 				break;
 			case SyncManager.FOLDER_TRASH:
-				this.db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_TRASH);
+				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 				break;
 			case SyncManager.FOLDER_ALBUM:
 				this.db = new AlbumFilesDb(context);

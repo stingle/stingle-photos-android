@@ -87,7 +87,7 @@ public class Helpers {
 	}
 
 	public static String getNewEncFilename() {
-		String filename = Crypto.byteArrayToBase64(StinglePhotosApplication.getCrypto().getRandomData(StinglePhotosApplication.FILENAME_LENGTH));
+		String filename = Crypto.byteArrayToBase64UrlSafe(StinglePhotosApplication.getCrypto().getRandomData(StinglePhotosApplication.FILENAME_LENGTH));
 
 		return filename + StinglePhotosApplication.FILE_EXTENSION;
 	}
@@ -451,7 +451,7 @@ public class Helpers {
 
 	public static void insertFileIntoDB(Context context, String filename) throws IOException, CryptoException {
 		long nowDate = System.currentTimeMillis();
-		FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+		FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
 
 		String headers = Crypto.getFileHeadersFromFile(FileManager.getHomeDir(context) + "/" + filename, FileManager.getThumbsDir(context) + "/" + filename);
 		db.insertFile(filename, true, false, FilesTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);

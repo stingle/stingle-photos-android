@@ -42,8 +42,8 @@ public class AddFilesToAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 			for(StingleFile file : files) {
 				long now = System.currentTimeMillis();
-				String newHeaders = crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArrayDefault(album.albumPK), null, null);
-				db.insertAlbumFile(album.id, file.filename, file.isLocal, file.isRemote, file.version, newHeaders, now, now);
+				String newHeaders = crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.albumPK), null, null);
+				db.insertAlbumFile(album.albumId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders, now, now);
 			}
 			db.close();
 

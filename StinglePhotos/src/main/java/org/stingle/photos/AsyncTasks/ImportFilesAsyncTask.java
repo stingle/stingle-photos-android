@@ -138,7 +138,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 				FileOutputStream outputStream = new FileOutputStream(encFilePath);
 				StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, this);
 				long nowDate = System.currentTimeMillis();
-				FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Files.TABLE_NAME_FILES);
+				FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
 
 				String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
 

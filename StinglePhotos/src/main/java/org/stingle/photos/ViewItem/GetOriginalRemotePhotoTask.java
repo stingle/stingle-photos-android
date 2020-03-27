@@ -3,6 +3,7 @@ package org.stingle.photos.ViewItem;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -120,6 +121,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				}
 				//attacher.setScale(scale);
 			}
+			Log.d("originalImageGet", "finished");
 		}
 	}
 

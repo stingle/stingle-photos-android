@@ -40,15 +40,15 @@ public class FilesTrashDb implements FilesDb{
 
 	public long insertFile(String filename, boolean isLocal, boolean isRemote, int version, long dateCreated, long dateModified, String headers){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_FILENAME, filename);
-		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
-		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
-		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, version);
-		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, REUPLOAD_NO);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_FILENAME, filename);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
+		values.put(StingleDbContract.Columns.COLUMN_NAME_VERSION, version);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_REUPLOAD, REUPLOAD_NO);
 
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, dateCreated);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, dateModified);
-		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, headers);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, dateCreated);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, dateModified);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_HEADERS, headers);
 
 		return db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
@@ -56,17 +56,17 @@ public class FilesTrashDb implements FilesDb{
 
 	public int updateFile(StingleDbFile file){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_IS_LOCAL, (file.isLocal ? 1 : 0));
-		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, (file.isRemote ? 1 : 0));
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL, (file.isLocal ? 1 : 0));
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE, (file.isRemote ? 1 : 0));
 
-		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, file.version);
-		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, file.reupload);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_VERSION, file.version);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_REUPLOAD, file.reupload);
 
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_CREATED, file.dateCreated);
-		values.put(StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED, file.dateModified);
-		values.put(StingleDbContract.Files.COLUMN_NAME_HEADERS, file.headers);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, file.dateCreated);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, file.dateModified);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_HEADERS, file.headers);
 
-		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { file.filename };
 
 		return db.openWriteDb().update(
@@ -78,9 +78,9 @@ public class FilesTrashDb implements FilesDb{
 
 	public int markFileAsRemote(String filename){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_IS_REMOTE, 1);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE, 1);
 
-		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
 		return db.openWriteDb().update(
@@ -99,10 +99,10 @@ public class FilesTrashDb implements FilesDb{
 		}
 
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_VERSION, file.version +1);
-		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, REUPLOAD_YES);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_VERSION, file.version +1);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_REUPLOAD, REUPLOAD_YES);
 
-		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
 		return db.openWriteDb().update(
@@ -121,9 +121,9 @@ public class FilesTrashDb implements FilesDb{
 		}
 
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Files.COLUMN_NAME_REUPLOAD, REUPLOAD_NO);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_REUPLOAD, REUPLOAD_NO);
 
-		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
 		return db.openWriteDb().update(
@@ -134,7 +134,7 @@ public class FilesTrashDb implements FilesDb{
 	}
 
 	public int deleteFile(String filename){
-		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
@@ -146,17 +146,17 @@ public class FilesTrashDb implements FilesDb{
 
 	public StingleDbFile getFileIfExists(String filename){
 		String[] projection = {
-				StingleDbContract.Files.COLUMN_NAME_FILENAME,
-				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Files.COLUMN_NAME_VERSION,
-				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
-				StingleDbContract.Files.COLUMN_NAME_HEADERS
+				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Columns.COLUMN_NAME_VERSION,
+				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Columns.COLUMN_NAME_HEADERS
 		};
 
-		String selection = StingleDbContract.Files.COLUMN_NAME_FILENAME + " = ?";
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = {filename};
 
 		Cursor result = db.openReadDb().query(
@@ -183,14 +183,14 @@ public class FilesTrashDb implements FilesDb{
 
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_FILENAME,
-				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Files.COLUMN_NAME_VERSION,
-				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
-				StingleDbContract.Files.COLUMN_NAME_HEADERS
+				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Columns.COLUMN_NAME_VERSION,
+				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Columns.COLUMN_NAME_HEADERS
 		};
 
 		String selection = null;
@@ -201,24 +201,24 @@ public class FilesTrashDb implements FilesDb{
 
 				break;
 			case GET_MODE_ONLY_LOCAL:
-				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
 				selectionArgs = new String[2];
 				selectionArgs[0] = "1";
 				selectionArgs[1] = "0";
 				break;
 			case GET_MODE_ONLY_REMOTE:
-				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
 				selectionArgs = new String[2];
 				selectionArgs[0] = "0";
 				selectionArgs[1] = "1";
 				break;
 			case GET_MODE_LOCAL:
-				selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ?";
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ?";
 				selectionArgs = new String[1];
 				selectionArgs[0] = "1";
 				break;
 			case GET_MODE_REMOTE:
-				selection = StingleDbContract.Files.COLUMN_NAME_IS_REMOTE + " = ?";
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
 				selectionArgs = new String[1];
 				selectionArgs[0] = "1";
 				break;
@@ -226,7 +226,7 @@ public class FilesTrashDb implements FilesDb{
 
 
 		String sortOrder =
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		return db.openReadDb().query(
 				tableName,   // The table to query
@@ -244,17 +244,17 @@ public class FilesTrashDb implements FilesDb{
 
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Files.COLUMN_NAME_FILENAME,
-				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Files.COLUMN_NAME_VERSION,
-				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
-				StingleDbContract.Files.COLUMN_NAME_HEADERS
+				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Columns.COLUMN_NAME_VERSION,
+				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Columns.COLUMN_NAME_HEADERS
 		};
 
-		String selection = StingleDbContract.Files.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Files.COLUMN_NAME_REUPLOAD + " = ?";
+		String selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_REUPLOAD + " = ?";
 
 		String[] selectionArgs = {"1", "1"};
 
@@ -270,20 +270,20 @@ public class FilesTrashDb implements FilesDb{
 
 	}
 
-	public StingleDbFile getFileAtPosition(int pos, int id, int sort){
+	public StingleDbFile getFileAtPosition(int pos, String id, int sort){
 		String[] projection = {
-				StingleDbContract.Files.COLUMN_NAME_FILENAME,
-				StingleDbContract.Files.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Files.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Files.COLUMN_NAME_VERSION,
-				StingleDbContract.Files.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Files.COLUMN_NAME_DATE_MODIFIED,
-				StingleDbContract.Files.COLUMN_NAME_HEADERS
+				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Columns.COLUMN_NAME_VERSION,
+				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Columns.COLUMN_NAME_HEADERS
 		};
 
 		String sortOrder =
-				StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -314,8 +314,8 @@ public class FilesTrashDb implements FilesDb{
 		return null;
 	}
 
-	public Cursor getAvailableDates(int folderId){
-		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Files.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Files.COLUMN_NAME_FILENAME + ") " +
+	public Cursor getAvailableDates(String folderId){
+		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"GROUP BY cdate " +
 						"ORDER BY cdate DESC"
@@ -323,7 +323,7 @@ public class FilesTrashDb implements FilesDb{
 
 	}
 
-	public long getTotalFilesCount(int id){
+	public long getTotalFilesCount(String id){
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
 

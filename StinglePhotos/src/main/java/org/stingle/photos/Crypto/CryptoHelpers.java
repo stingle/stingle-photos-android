@@ -36,7 +36,7 @@ public class CryptoHelpers {
 			return "";
 		}
 
-		return Crypto.byteArrayToBase64Default(
+		return Crypto.byteArrayToBase64(
 				StinglePhotosApplication.getCrypto().encryptCryptoBox(
 						json.toString().getBytes(),
 						serverPK,
@@ -46,21 +46,21 @@ public class CryptoHelpers {
 	}
 
 
-	public static byte[] decryptDbFile(Context context, int folder, int folderId, String headers, boolean isThumb, byte[] bytes) throws IOException, CryptoException {
+	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, byte[] bytes) throws IOException, CryptoException {
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 		return decryptDbFile(context, folder, folderId, headers, isThumb, in, null, null);
 	}
 
-	public static byte[] decryptDbFile(Context context, int folder, int folderId, String headers, boolean isThumb, byte[] bytes, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, byte[] bytes, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 		return decryptDbFile(context, folder, folderId, headers, isThumb, in, null, task);
 	}
 
-	public static byte[] decryptDbFile(Context context, int folder, int folderId, String headers, boolean isThumb, InputStream in) throws IOException, CryptoException {
+	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, InputStream in) throws IOException, CryptoException {
 		return decryptDbFile(context, folder, folderId, headers, isThumb, in, null, null);
 	}
 
-	public static byte[] decryptDbFile(Context context, int folder, int folderId, String headers, boolean isThumb, InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		decryptDbFile(context, folder, folderId, headers, isThumb, in, out, progress, task);
@@ -68,7 +68,7 @@ public class CryptoHelpers {
 		return out.toByteArray();
 	}
 
-	public static void decryptDbFile(Context context, int folder, int folderId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+	public static void decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		Crypto crypto = StinglePhotosApplication.getCrypto();
 		Crypto.Header header = null;
 		if(folder == SyncManager.FOLDER_ALBUM){
@@ -77,10 +77,10 @@ public class CryptoHelpers {
 			Crypto.AlbumData albumData = crypto.parseAlbumData(album.data);
 
 			if(isThumb) {
-				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK));
+				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK));
 			}
 			else{
-				header = crypto.getFileHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArrayDefault(album.albumPK));
+				header = crypto.getFileHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK));
 			}
 		}
 		else {
@@ -93,5 +93,10 @@ public class CryptoHelpers {
 		}
 
 		crypto.decryptFile(in, out, progress, task, header);
+	}
+
+	public static String getRandomString(int length){
+		Crypto crypto = StinglePhotosApplication.getCrypto();
+		return crypto.getRandomString(length);
 	}
 }

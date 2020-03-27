@@ -10,6 +10,8 @@ import java.util.HashMap;
 
 public class StinglePhotosApplication extends Application{
 
+	public static final int API_VERSION = 2;
+
 	public static final int REQUEST_SD_CARD_PERMISSION = 1;
 	public static final int REQUEST_CAMERA_PERMISSION = 2;
 	public static final int REQUEST_AUDIO_PERMISSION = 3;

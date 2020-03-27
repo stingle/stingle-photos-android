@@ -37,7 +37,7 @@ public class AddAlbumAsyncTask extends AsyncTask<Void, Void, StingleDbAlbum> {
 
 			AlbumsDb db = new AlbumsDb(myContext);
 			long now = System.currentTimeMillis();
-			long newId = db.insertAlbum(albumInfo.get("data"), albumInfo.get("pk"), now, now);
+			String newId = db.insertAlbum(null, albumInfo.get("data"), albumInfo.get("pk"), now, now);
 			StingleDbAlbum newAlbum = db.getAlbumById(newId);
 			db.close();
 

@@ -38,7 +38,7 @@ public class KeyManagement {
 			else{
 				keyBundleBytes = StinglePhotosApplication.getCrypto().exportPublicKey();
 			}
-			String keyBundle = Crypto.byteArrayToBase64Default(keyBundleBytes);
+			String keyBundle = Crypto.byteArrayToBase64(keyBundleBytes);
 			postParams.put("keyBundle", keyBundle);
 
 		} catch (IOException | CryptoException e) {
@@ -50,7 +50,7 @@ public class KeyManagement {
 
 	public static boolean importKeyBundle(String keyBundle, String password){
 		try {
-			byte[] keyBundleBytes = Crypto.base64ToByteArrayDefault(keyBundle);
+			byte[] keyBundleBytes = Crypto.base64ToByteArray(keyBundle);
 
 			StinglePhotosApplication.getCrypto().importKeyBundle(keyBundleBytes, password);
 		} catch (IOException | CryptoException e) {
@@ -63,7 +63,7 @@ public class KeyManagement {
 
 	public static boolean importServerPublicKey(String publicKey){
 		try {
-			byte[] pk = Crypto.base64ToByteArrayDefault(publicKey);
+			byte[] pk = Crypto.base64ToByteArray(publicKey);
 
 			StinglePhotosApplication.getCrypto().importServerPublicKey(pk);
 		} catch (IOException e) {
