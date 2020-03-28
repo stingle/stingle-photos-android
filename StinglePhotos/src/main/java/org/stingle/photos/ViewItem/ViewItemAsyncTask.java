@@ -115,7 +115,12 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 		result.folder = folder;
 
-		StingleFile dbFile = db.getFileAtPosition(position, folderId, StingleDb.SORT_DESC);
+		int sort = StingleDb.SORT_DESC;
+		if(folder == SyncManager.FOLDER_ALBUM){
+			sort = StingleDb.SORT_ASC;
+		}
+
+		StingleFile dbFile = db.getFileAtPosition(position, folderId, sort);
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
 		try {

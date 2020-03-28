@@ -46,12 +46,15 @@ public class SyncBarHandler {
 			int totalItemsNumber = bundle.getInt("totalItemsNumber");
 			int uploadedFilesCount = bundle.getInt("uploadedFilesCount");
 			String currentFile = bundle.getString("currentFile");
+			String headers = bundle.getString("headers");
 
 			if (syncStatus == SyncService.STATUS_UPLOADING) {
 				syncProgress.setMax(totalItemsNumber);
 				syncProgress.setProgress(uploadedFilesCount);
 				syncText.setText(activity.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
-				(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				if(currentFile != null && headers != null) {
+					(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
 				setSyncStatus(SyncService.STATUS_UPLOADING);
 			} else if (syncStatus == SyncService.STATUS_REFRESHING) {
 				setSyncStatus(SyncService.STATUS_REFRESHING);
@@ -62,7 +65,8 @@ public class SyncBarHandler {
 		} else if (msg.what == SyncService.MSG_SYNC_CURRENT_FILE) {
 			Bundle bundle = msg.getData();
 			String currentFile = bundle.getString("currentFile");
-			(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			String headers = bundle.getString("headers");
+			(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 			setSyncStatus(SyncService.STATUS_UPLOADING);
 		} else if (msg.what == SyncService.MSG_SYNC_UPLOAD_PROGRESS) {

@@ -72,6 +72,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
+		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentFolder, folderId);
 		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext()));
 		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
 			@Override
@@ -83,7 +84,6 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			}
 		});
 		recyclerView.setLayoutManager(layoutManager);
-		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentFolder, folderId);
 		recyclerView.addOnScrollListener(new HidingScrollListener() {
 			@Override
 			public void onHide() {
@@ -120,7 +120,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		if (adapter != null) {
 			adapter.updateDataSet();
 		}
-
+		Log.d("lastScrollPosition", lastScrollPosition + "");
 		layoutManager.scrollToPosition(lastScrollPosition);
 	}
 
@@ -144,6 +144,11 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		recyclerView.setAdapter(null);
 		adapter = null;
 		Log.e("function", "onDetach");
+	}
+
+	public void init(){
+		Log.e("function", "init");
+		recyclerView.setAdapter(adapter);
 	}
 
 	@Override
@@ -185,10 +190,6 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		parentActivity.onSelectionChanged(count);
 	}
 
-	public void init(){
-		recyclerView.setAdapter(adapter);
-	}
-
 	public void updateDataSet(){
 		int lastScrollPos = recyclerView.getScrollY();
 		adapter.updateDataSet();
@@ -214,7 +215,10 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	}
 
 	public boolean isSelectionModeActive(){
-		return adapter.isSelectionModeActive();
+		if(adapter != null) {
+			return adapter.isSelectionModeActive();
+		}
+		return false;
 	}
 
 	public ArrayList<StingleFile> getSelectedFiles(){

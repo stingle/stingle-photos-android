@@ -148,12 +148,12 @@ public class AlbumFilesDb implements FilesDb {
 		return null;
 	}
 
-	public Cursor getAvailableDates(String albumId){
+	public Cursor getAvailableDates(String albumId, int sort){
 		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"WHERE album_id='" + albumId + "' " +
 						"GROUP BY cdate " +
-						"ORDER BY cdate DESC"
+						"ORDER BY cdate " + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC")
 				, null);
 
 	}

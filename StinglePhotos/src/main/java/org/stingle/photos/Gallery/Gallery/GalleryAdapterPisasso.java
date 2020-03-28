@@ -192,7 +192,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	protected void getAvailableDates(){
 		dates.clear();
-		Cursor result = db.getAvailableDates(folderId);
+		Cursor result = db.getAvailableDates(folderId, (folderType == SyncManager.FOLDER_ALBUM ? StingleDb.SORT_ASC : StingleDb.SORT_DESC));
 		while(result.moveToNext()) {
 			DateGroup group = new DateGroup(convertDate(result.getString(0)), result.getInt(1));
 			dates.add(group);

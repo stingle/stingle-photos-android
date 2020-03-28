@@ -62,15 +62,17 @@ public class StinglePicassoLoader extends RequestHandler {
 		String folderStr = uri.substring(1, 2);
 		String position = uri.substring(2);
 
+		int sort = StingleDb.SORT_DESC;
 		int folder = SyncManager.FOLDER_MAIN;
 		if(folderStr.equals("t")){
 			folder = SyncManager.FOLDER_TRASH;
 		}
 		else if(folderStr.equals("a")){
 			folder = SyncManager.FOLDER_ALBUM;
+			sort = StingleDb.SORT_ASC;
 		}
 
-		StingleFile file = db.getFileAtPosition(Integer.parseInt(position), folderId, StingleDb.SORT_DESC);
+		StingleFile file = db.getFileAtPosition(Integer.parseInt(position), folderId, sort);
 
 		if(file.isLocal) {
 			try {

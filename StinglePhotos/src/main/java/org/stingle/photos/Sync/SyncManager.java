@@ -252,7 +252,7 @@ public class SyncManager {
 			String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
 
 			if(progress != null){
-				progress.currentFile(filename);
+				progress.currentFile(filename, headers);
 			}
 
 			Log.d("uploadingFile", filename);
@@ -331,14 +331,16 @@ public class SyncManager {
 		public abstract static class UploadProgress{
 			public int totalItemsNumber = 0;
 			public String currentFile;
+			public String headers;
 			public int uploadedFilesCount;
 
 			public void setTotalItemsNumber(int number){
 				totalItemsNumber = number;
 			}
 
-			public void currentFile(String filename){
+			public void currentFile(String filename, String headers){
 				this.currentFile = filename;
+				this.headers = headers;
 			}
 			public void fileUploadFinished(String filename, int folder){
 

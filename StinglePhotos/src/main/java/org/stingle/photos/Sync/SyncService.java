@@ -79,9 +79,12 @@ public class SyncService extends Service {
 
 		progress = new SyncManager.UploadToCloudAsyncTask.UploadProgress() {
 			@Override
-			public void currentFile(String filename) {
-				super.currentFile(filename);
-				sendStringToUi(MSG_SYNC_CURRENT_FILE, "currentFile", filename);
+			public void currentFile(String filename, String headers) {
+				super.currentFile(filename, headers);
+				Bundle b = new Bundle();
+				b.putString("currentFile", filename);
+				b.putString("headers", headers);
+				sendBundleToUi(MSG_SYNC_CURRENT_FILE, b);
 			}
 
 			@Override
@@ -272,6 +275,19 @@ public class SyncService extends Service {
 		}
 	}
 
+	private void sendBundleToUi(int type, Bundle bundle) {
+		for (int i=mClients.size()-1; i>=0; i--) {
+			try {
+				Message msg = Message.obtain(null, type);
+				msg.setData(bundle);
+				mClients.get(i).send(msg);
+			}
+			catch (RemoteException e) {
+				mClients.remove(i);
+			}
+		}
+	}
+
 	private void sendIntToUi(int type, String key, int value) {
 		for (int i=mClients.size()-1; i>=0; i--) {
 			try {
@@ -335,6 +351,7 @@ public class SyncService extends Service {
 								Bundle b = new Bundle();
 								b.putInt("totalItemsNumber", progress.totalItemsNumber);
 								b.putString("currentFile", progress.currentFile);
+								b.putString("headers", progress.headers);
 								b.putInt("uploadedFilesCount", progress.uploadedFilesCount);
 								b.putInt("syncStatus", currentStatus);
 								Message msgToSend = Message.obtain(null, MSG_RESP_SYNC_STATUS);

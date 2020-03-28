@@ -267,19 +267,43 @@ public class GalleryActivity extends AppCompatActivity
 		bundle.putString("folderId", folderId);
 		bundle.putBoolean("initNow", initNow);
 
-		galleryFragment = new GalleryFragment();
-		galleryFragment.setArguments(bundle);
+		GalleryFragment newGalleryFragment = new GalleryFragment();
+		newGalleryFragment.setArguments(bundle);
+
 
 		Fragment fragment = fm.findFragmentById(R.id.galleryContainer);
 		FragmentTransaction ft = fm.beginTransaction();
 		if (fragment==null) {
-
+			galleryFragment = newGalleryFragment;
 			ft.add(R.id.galleryContainer, galleryFragment);
+			ft.commit();
 		}
 		else {
-			ft.replace(R.id.galleryContainer, galleryFragment);
+			int fragmentCurrentFolder = fragment.getArguments().getInt("currentFolder");
+			String fragmentFolderId = fragment.getArguments().getString("folderId");
+			boolean folderIdsMatch = false;
+			if(fragmentFolderId == null){
+				if(fragmentFolderId == folderId) {
+					folderIdsMatch = true;
+				}
+			}
+			else if (fragmentFolderId.equals(folderId)){
+				folderIdsMatch = true;
+			}
+
+			if(fragment.getClass() != galleryFragment.getClass() ||
+					fragmentCurrentFolder != folderType ||
+					!folderIdsMatch
+			) {
+				galleryFragment = newGalleryFragment;
+				ft.replace(R.id.galleryContainer, galleryFragment);
+				ft.commit();
+			}
+			else{
+				((GalleryFragment)fragment).init();
+			}
 		}
-		ft.commit();
+
 	}
 
 	private void initAlbumsFragment(){
