@@ -7,7 +7,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
-import org.stingle.photos.AsyncTasks.AddAlbumAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.R;
 

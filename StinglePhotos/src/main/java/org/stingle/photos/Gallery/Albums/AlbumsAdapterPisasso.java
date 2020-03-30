@@ -21,48 +21,49 @@ import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Gallery.Helpers.IDragSelectAdapter;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
+public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private Context context;
 	private AlbumsDb db;
 	private AlbumFilesDb filesDb;
+	private boolean showGalleryOption;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private Listener listener;
-	private final ArrayList<Integer> selectedIndices = new ArrayList<Integer>();
 	private int thumbSize;
-	private boolean isSelectModeActive = false;
 	private RecyclerView.LayoutManager lm;
 	private Picasso picasso;
 	private LruCache<Integer, AlbumProps> filePropsCache = new LruCache<Integer, AlbumProps>(512);
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_ADD = 1;
+	public static final int TYPE_GALLERY = 2;
 
 	public static final int LAYOUT_GRID = 0;
 	public static final int LAYOUT_LIST = 1;
 	private int layoutStyle = LAYOUT_GRID;
+	private int otherItemsCount = 1;
 
-	public AlbumsAdapterPisasso(Context context, RecyclerView.LayoutManager lm) {
+	public AlbumsAdapterPisasso(Context context, RecyclerView.LayoutManager lm, boolean showGalleryOption) {
 		this.context = context;
 		this.db = new AlbumsDb(context);
 		this.filesDb = new AlbumFilesDb(context);
 		this.thumbSize = Helpers.getThumbSize(context,2);
 		this.lm = lm;
+		this.showGalleryOption = showGalleryOption;
 
 		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, filesDb, thumbSize)).build();
 
+		if(showGalleryOption){
+			otherItemsCount = 2;
+		}
 	}
 
 	@Override
@@ -167,12 +168,44 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		void onSelectionChanged(int count);
 	}
 
+	public class AlbumAddGalleryVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+		// each data item is just a string in this case
+		public View layout;
+		public ImageView image;
+		public TextView albumName;
+
+		public AlbumAddGalleryVH(View v) {
+			super(v);
+			layout = v;
+			image = v.findViewById(R.id.thumbImage);
+			albumName = v.findViewById(R.id.albumName);
+			image.setOnClickListener(this);
+			image.setOnLongClickListener(this);
+			albumName.setOnClickListener(this);
+			albumName.setOnLongClickListener(this);
+		}
+
+		@Override
+		public void onClick(View v) {
+			if (listener != null) {
+				listener.onClick(getAdapterPosition());
+			}
+		}
+
+		@Override
+		public boolean onLongClick(View v) {
+			if (listener != null) {
+				listener.onLongClick(getAdapterPosition());
+			}
+			return true;
+		}
+	}
 
 	public int translateDbPosToGalleryPos(int dbPos){
-		return dbPos + 1;
+		return dbPos + otherItemsCount;
 	}
 	public int translateGalleryPosToDbPos(int pos){
-		return pos - 1;
+		return pos - otherItemsCount;
 	}
 
 
@@ -225,6 +258,13 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 				AlbumAddVH vh = new AlbumAddVH(v);
 
 				return vh;
+			} else if (viewType == TYPE_GALLERY) {
+				LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
+						.inflate(R.layout.add_to_album_dialog_item, parent, false);
+
+				AlbumAddGalleryVH vh = new AlbumAddGalleryVH(v);
+
+				return vh;
 			}
 		}
 
@@ -234,28 +274,14 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	// Replace the contents of a view (invoked by the layout manager)
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holderObj, final int rawPosition) {
-		// - get element from your dataset at this position
-		// - replace the contents of the view with that element
-		//image.setImageDrawable(null);
+
 		final int dbPos = translateGalleryPosToDbPos(rawPosition);
 
 		if(holderObj instanceof AlbumVH) {
 			AlbumVH holder = (AlbumVH)holderObj;
-			if (isSelectModeActive) {
-				int size = Helpers.convertDpToPixels(context, 20);
-				holder.image.setPadding(size, size, size, size);
-				holder.checkbox.setVisibility(View.VISIBLE);
-
-				if (selectedIndices.contains(rawPosition)) {
-					holder.checkbox.setChecked(true);
-				} else {
-					holder.checkbox.setChecked(false);
-				}
-			} else {
-				int size = Helpers.convertDpToPixels(context, 2);
-				holder.image.setPadding(size, size, size, size);
-				holder.checkbox.setVisibility(View.GONE);
-			}
+			int size = Helpers.convertDpToPixels(context, 2);
+			holder.image.setPadding(size, size, size, size);
+			holder.checkbox.setVisibility(View.GONE);
 
 			holder.image.setImageBitmap(null);
 			holder.albumName.setText("");
@@ -298,7 +324,12 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		else if(holderObj instanceof AlbumAddVH) {
 			AlbumAddVH holder = (AlbumAddVH)holderObj;
 			holder.albumName.setText(context.getString(R.string.new_album));
-			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_add_circle));
+			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_add_circle_outline));
+		}
+		else if(holderObj instanceof AlbumAddGalleryVH) {
+			AlbumAddGalleryVH holder = (AlbumAddGalleryVH)holderObj;
+			holder.albumName.setText(context.getString(R.string.main_gallery));
+			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_image_red));
 		}
 	}
 
@@ -306,77 +337,29 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 	@Override
 	public int getItemViewType(int position) {
-		if(position == 0){
+		if(showGalleryOption){
+			if(position == 0) {
+				return TYPE_GALLERY;
+			}
+			else if (position == 1){
+				return TYPE_ADD;
+			}
+		}
+		else if(position == 0){
 			return TYPE_ADD;
 		}
-		else {
-			return TYPE_ITEM;
-		}
+
+		return TYPE_ITEM;
 	}
 
 	public StingleDbAlbum getAlbumAtPosition(int position){
 		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), StingleDb.SORT_ASC);
 	}
 
-	@Override
-	public void setSelected(int index, boolean selected) {
-
-		if (!selected) {
-			selectedIndices.remove((Integer) index);
-		} else if (!selectedIndices.contains(index)) {
-			selectedIndices.add(index);
-		}
-		notifyItemChanged(index);
-		if (listener != null) {
-			listener.onSelectionChanged(selectedIndices.size());
-		}
-	}
-
-	public void setSelectionModeActive(boolean active){
-		isSelectModeActive = active;
-		notifyDataSetChanged();
-	}
-
-	public boolean isSelectionModeActive(){
-		return isSelectModeActive;
-	}
-
-	public List<Integer> getSelectedIndices() {
-		return selectedIndices;
-	}
-
-	@Override
-	public boolean isIndexSelectable(int index) {
-		// Return false if you don't want this position to be selectable.
-		// Useful for items like section headers.
-		return true;
-	}
-
-	public void toggleSelected(int index) {
-
-		if (selectedIndices.contains(index)) {
-			selectedIndices.remove((Integer) index);
-		} else {
-			selectedIndices.add(index);
-		}
-		notifyItemChanged(index);
-		if (listener != null) {
-			listener.onSelectionChanged(selectedIndices.size());
-		}
-	}
-
-	public void clearSelected() {
-		selectedIndices.clear();
-		if (listener != null) {
-			listener.onSelectionChanged(0);
-		}
-		setSelectionModeActive(false);
-	}
-
 	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
-		return (int)db.getTotalAlbumsCount() + 1;
+		return (int)db.getTotalAlbumsCount() + otherItemsCount;
 	}
 
 

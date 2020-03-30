@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 
 import org.stingle.photos.Db.Objects.StingleDbAlbumFile;
 import org.stingle.photos.Db.StingleDb;
@@ -62,7 +61,7 @@ public class AlbumFilesDb implements FilesDb {
 
 
 
-	public int deleteAlbumFile(Integer id){
+	public int deleteAlbumFile(Long id){
 		String selection = StingleDbContract.Columns._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(id) };
 
@@ -78,7 +77,7 @@ public class AlbumFilesDb implements FilesDb {
 	public Cursor getAlbumFilesList(String albumId, int sort, String limit){
 
 		String[] projection = {
-				BaseColumns._ID,
+				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
@@ -111,7 +110,7 @@ public class AlbumFilesDb implements FilesDb {
 
 	public StingleDbAlbumFile getFileAtPosition(int pos, String albumId, int sort){
 		String[] projection = {
-				BaseColumns._ID,
+				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,

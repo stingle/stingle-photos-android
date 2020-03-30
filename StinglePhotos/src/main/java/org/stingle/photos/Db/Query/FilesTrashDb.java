@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Objects.StingleFile;
@@ -146,6 +145,7 @@ public class FilesTrashDb implements FilesDb{
 
 	public StingleDbFile getFileIfExists(String filename){
 		String[] projection = {
+				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -182,7 +182,7 @@ public class FilesTrashDb implements FilesDb{
 	public Cursor getFilesList(int mode, int sort){
 
 		String[] projection = {
-				BaseColumns._ID,
+				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -243,7 +243,7 @@ public class FilesTrashDb implements FilesDb{
 	public Cursor getReuploadFilesList(){
 
 		String[] projection = {
-				BaseColumns._ID,
+				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -272,6 +272,7 @@ public class FilesTrashDb implements FilesDb{
 
 	public StingleDbFile getFileAtPosition(int pos, String id, int sort){
 		String[] projection = {
+				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,

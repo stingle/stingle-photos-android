@@ -40,6 +40,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -92,6 +93,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	private int currentFragment = FRAGMENT_GALLERY;
 	private String currentFolderId = null;
+	private String currentAlbumName = "";
 
 	private BroadcastReceiver onLogout = new BroadcastReceiver() {
 		@Override
@@ -214,6 +216,7 @@ public class GalleryActivity extends AppCompatActivity
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		enableSyncBar();
 		initCurrentFragment();
+		currentAlbumName = "";
 	}
 	public void showTrash(){
 		currentFragment = FRAGMENT_GALLERY;
@@ -221,6 +224,7 @@ public class GalleryActivity extends AppCompatActivity
 		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.title_trash));
 		disableSyncBar();
+		currentAlbumName = "";
 		initCurrentFragment();
 	}
 	public void showAlbumsList(){
@@ -229,6 +233,7 @@ public class GalleryActivity extends AppCompatActivity
 		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.albums));
 		disableSyncBar();
+		currentAlbumName = "";
 		initCurrentFragment();
 	}
 	public void showAlbum(String albumId, String albumName){
@@ -236,10 +241,12 @@ public class GalleryActivity extends AppCompatActivity
 		currentFolder = SyncManager.FOLDER_ALBUM;
 		currentFolderId = albumId;
 		if(albumName != null && albumName.length() > 0){
+			currentAlbumName = albumName;
 			toolbar.setTitle(albumName);
 		}
 		else{
 			toolbar.setTitle(getString(R.string.album));
+			currentAlbumName = "";
 		}
 		disableSyncBar();
 		initCurrentFragment();
@@ -257,6 +264,7 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void initGalleryFragment(int folderType, String folderId, boolean initNow){
+		exitActionMode();
 		currentFragment = FRAGMENT_GALLERY;
 		currentFolder = folderType;
 		currentFolderId = folderId;
@@ -291,7 +299,7 @@ public class GalleryActivity extends AppCompatActivity
 				folderIdsMatch = true;
 			}
 
-			if(fragment.getClass() != galleryFragment.getClass() ||
+			if(galleryFragment != null && fragment.getClass() != galleryFragment.getClass() ||
 					fragmentCurrentFolder != folderType ||
 					!folderIdsMatch
 			) {
@@ -302,11 +310,13 @@ public class GalleryActivity extends AppCompatActivity
 			else{
 				((GalleryFragment)fragment).init();
 			}
+			invalidateOptionsMenu();
 		}
 
 	}
 
 	private void initAlbumsFragment(){
+		exitActionMode();
 		FragmentManager fm = getSupportFragmentManager();
 
 		Bundle bundle = new Bundle();
@@ -539,6 +549,9 @@ public class GalleryActivity extends AppCompatActivity
 				case SyncManager.FOLDER_TRASH:
 					getMenuInflater().inflate(R.menu.gallery_trash, menu);
 					break;
+				case SyncManager.FOLDER_ALBUM:
+					getMenuInflater().inflate(R.menu.album, menu);
+					break;
 			}
 		}
 		return true;
@@ -571,6 +584,9 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);
+		}
+		else if (id == R.id.action_delete_album) {
+			GalleryActions.deleteAlbum(this);
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -727,7 +743,7 @@ public class GalleryActivity extends AppCompatActivity
 						GalleryActions.shareSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
 						break;
 					case R.id.add_to_album:
-						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
+						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentFolder == SyncManager.FOLDER_ALBUM);
 						break;
 					case R.id.decrypt:
 						GalleryActions.decryptSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
@@ -764,9 +780,14 @@ public class GalleryActivity extends AppCompatActivity
 	public String getCurrentFolderId(){
 		return currentFolderId;
 	}
+	public String getCurrentAlbumName(){
+		return currentAlbumName;
+	}
 
 	public void exitActionMode(){
-		galleryFragment.clearSelected();
+		if(galleryFragment != null){
+			galleryFragment.clearSelected();
+		}
 		if(actionMode != null){
 			actionMode.finish();
 		}

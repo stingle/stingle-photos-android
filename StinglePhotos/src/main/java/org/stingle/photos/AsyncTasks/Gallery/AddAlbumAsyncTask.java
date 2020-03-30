@@ -1,8 +1,9 @@
-package org.stingle.photos.AsyncTasks;
+package org.stingle.photos.AsyncTasks.Gallery;
 
 import android.content.Context;
 import android.os.AsyncTask;
 
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;

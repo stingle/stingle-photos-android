@@ -58,6 +58,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
 	private int folderType = SyncManager.FOLDER_MAIN;
 	private String folderId = null;
+	private int DB_SORT = StingleDb.SORT_DESC;
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
@@ -75,6 +76,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 				break;
 			case SyncManager.FOLDER_ALBUM:
+				DB_SORT = StingleDb.SORT_ASC;
 				this.db = new AlbumFilesDb(context);
 				break;
 		}
@@ -192,7 +194,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	protected void getAvailableDates(){
 		dates.clear();
-		Cursor result = db.getAvailableDates(folderId, (folderType == SyncManager.FOLDER_ALBUM ? StingleDb.SORT_ASC : StingleDb.SORT_DESC));
+		Cursor result = db.getAvailableDates(folderId, DB_SORT);
 		while(result.moveToNext()) {
 			DateGroup group = new DateGroup(convertDate(result.getString(0)), result.getInt(1));
 			dates.add(group);
@@ -424,7 +426,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	public StingleFile getStingleFileAtPosition(int position){
-		return db.getFileAtPosition(translatePos(position).dbPosition, folderId, StingleDb.SORT_DESC);
+		return db.getFileAtPosition(translatePos(position).dbPosition, folderId, DB_SORT);
 	}
 
 	@Override

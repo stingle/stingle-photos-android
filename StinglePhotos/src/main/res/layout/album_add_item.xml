@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@drawable/ic_add_circle"
+        android:src="@drawable/ic_add_circle_outline"
         android:scaleType="centerCrop" />
 
     <TextView

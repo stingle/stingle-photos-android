@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="SafeCameraButton">
-        <attr name="shrink_direction" type="enum">
-	        <enum name="vertical" value="0" />
-		    <enum name="horizontal" value="1" />
-        </attr>
-        <attr name="auto_reset" format="boolean" />
-    </declare-styleable>
-
     <declare-styleable name="DragSelectRecyclerView">
         <attr name="dsrv_autoScrollHotspotHeight" format="dimension"/>
         <attr name="dsrv_autoScrollEnabled" format="boolean"/>
         <attr name="dsrv_autoScrollHotspot_offsetTop" format="dimension"/>
         <attr name="dsrv_autoScrollHotspot_offsetBottom" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="CircleImageView">
+        <attr name="civ_border_width" format="dimension" />
+        <attr name="civ_border_color" format="color" />
+        <attr name="civ_border_overlay" format="boolean" />
+        <attr name="civ_circle_background_color" format="color" />
     </declare-styleable>
 </resources>

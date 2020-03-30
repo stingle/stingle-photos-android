@@ -206,7 +206,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	}
 
 	public void clearSelected(){
-		adapter.clearSelected();
+		if(adapter != null) {
+			adapter.clearSelected();
+		}
 		recyclerView.setDragSelectActive(false, 0);
 	}
 

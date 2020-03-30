@@ -119,8 +119,8 @@
             android:layout_height="@dimen/bottom_nav_height"
             android:layout_gravity="bottom"
             android:background="#FFF"
-            app:itemIconTint="@color/primaryDarkColor"
-            app:itemTextColor="@color/primaryDarkColor"
+            app:itemIconTint="@color/bottom_nav_colors"
+            app:itemTextColor="@color/bottom_nav_colors"
             app:layout_insetEdge="bottom"
             app:menu="@menu/bottom_nav_menu" />
 

@@ -94,7 +94,7 @@ public class StingleDbContract {
 			"CREATE TABLE " + Columns.TABLE_NAME_ALBUM_FILES + " (" +
 					Columns._ID + " INTEGER PRIMARY KEY," +
 					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL," +
-					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
+					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL," +
 					Columns.COLUMN_NAME_IS_LOCAL + " INTEGER," +
 					Columns.COLUMN_NAME_IS_REMOTE + " INTEGER," +
 					Columns.COLUMN_NAME_VERSION + " INTEGER," +

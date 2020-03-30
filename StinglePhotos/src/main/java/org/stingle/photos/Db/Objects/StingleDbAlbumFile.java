@@ -7,11 +7,10 @@ import org.json.JSONObject;
 import org.stingle.photos.Db.StingleDbContract;
 
 public class StingleDbAlbumFile extends StingleFile {
-	public Integer id;
 	public String albumId;
 
 	public StingleDbAlbumFile(Cursor cursor){
-		this.id = cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns._ID));
+		this.id = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns._ID));
 		this.albumId = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
 		this.filename = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
 		this.isLocal = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL)) == 1);
@@ -24,7 +23,6 @@ public class StingleDbAlbumFile extends StingleFile {
 	}
 
 	public StingleDbAlbumFile(JSONObject json) throws JSONException {
-		this.id = json.getInt("id");
 		this.albumId = json.getString("albumId");
 		this.filename = json.getString("filename");
 		this.isLocal = null;

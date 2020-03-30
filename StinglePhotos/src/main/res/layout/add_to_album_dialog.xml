@@ -4,7 +4,35 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_margin="10dp"
-    android:padding="10dp">
+    android:padding="16dp">
+
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp">
+
+        <RadioButton
+            android:id="@+id/add_to_album"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/add_to_album"
+            android:textSize="16sp"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/move_to_album"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:textSize="16sp"
+            android:text="@string/move_to_album" />
+
+    </RadioGroup>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1F000000"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"

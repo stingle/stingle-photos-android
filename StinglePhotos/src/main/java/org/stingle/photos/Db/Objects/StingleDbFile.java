@@ -9,6 +9,7 @@ import org.stingle.photos.Db.StingleDbContract;
 public class StingleDbFile extends StingleFile {
 
 	public StingleDbFile(Cursor cursor){
+		this.id = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns._ID));
 		this.filename = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
 		this.isLocal = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL)) == 1);
 		this.isRemote = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE)) == 1);

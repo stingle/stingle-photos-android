@@ -10,15 +10,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
-import org.stingle.photos.Gallery.Helpers.DragSelectRecyclerView;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
@@ -26,13 +25,11 @@ import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class AlbumsFragment extends Fragment{
 
-	private DragSelectRecyclerView recyclerView;
+	private RecyclerView recyclerView;
 	private AlbumsAdapterPisasso adapter;
 	private AutoFitGridLayoutManager layoutManager;
 
@@ -119,7 +116,7 @@ public class AlbumsFragment extends Fragment{
 		recyclerView.setHasFixedSize(true);
 		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext(), 2));
 		recyclerView.setLayoutManager(layoutManager);
-		adapter = new AlbumsAdapterPisasso(getContext(), layoutManager);
+		adapter = new AlbumsAdapterPisasso(getContext(), layoutManager, false);
 		adapter.setListener(adaptorListener);
 
 		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){
@@ -182,26 +179,8 @@ public class AlbumsFragment extends Fragment{
 		recyclerView.scrollToPosition(0);
 	}
 
-	public void clearSelected(){
-		adapter.clearSelected();
-		recyclerView.setDragSelectActive(false, 0);
-	}
-
 	public void updateAutoFit(){
 		layoutManager.updateAutoFit();
-	}
-
-	public boolean isSelectionModeActive(){
-		return adapter.isSelectionModeActive();
-	}
-
-	public ArrayList<StingleDbFile> getSelectedFiles(){
-		List<Integer> indices = adapter.getSelectedIndices();
-		ArrayList<StingleDbFile> files = new ArrayList<>();
-//		for(Integer index : indices){
-//			files.add(adapter.getStingleFileAtPosition(index));
-//		}
-		return files;
 	}
 
 }

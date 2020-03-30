@@ -6,10 +6,15 @@
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
         app:showAsAction="always|withText" />
-    <item
+    <!--<item
         android:id="@+id/add_to_this_album"
         android:icon="@drawable/ic_action_add"
         android:title="@string/add_to_this_album"
+        app:showAsAction="always|withText" />-->
+    <item
+        android:id="@+id/add_to_album"
+        android:icon="@drawable/ic_action_move"
+        android:title="@string/add_or_move"
         app:showAsAction="always|withText" />
     <item
         android:id="@+id/decrypt"

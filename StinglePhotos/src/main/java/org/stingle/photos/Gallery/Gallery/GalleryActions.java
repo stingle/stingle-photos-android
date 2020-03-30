@@ -5,11 +5,13 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.widget.RadioButton;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.stingle.photos.AsyncTasks.AddFilesToAlbumAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.FileMoveAsyncTask;
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
@@ -32,8 +34,9 @@ public class GalleryActions {
 		ShareManager.shareDbFiles(activity, files, activity.getCurrentFolder(), activity.getCurrentFolderId());
 	}
 
-	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
+	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleFile> files, boolean isFromAlbum) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setTitle(R.string.add_move_to_album);
 		builder.setView(R.layout.add_to_album_dialog);
 		builder.setCancelable(true);
 		final AlertDialog addAlbumDialog = builder.create();
@@ -46,7 +49,7 @@ public class GalleryActions {
 		LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
 		recyclerView.setLayoutManager(layoutManager);
 
-		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager);
+		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, isFromAlbum);
 
 		adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
 		adapter.setListener(new AlbumsAdapterPisasso.Listener() {
@@ -59,6 +62,7 @@ public class GalleryActions {
 						super.onFinish();
 						addAlbumDialog.dismiss();
 						activity.exitActionMode();
+						activity.updateGalleryFragmentData();
 					}
 
 					@Override
@@ -68,15 +72,25 @@ public class GalleryActions {
 					}
 				};
 
-				if (index == 0) {
+				FileMoveAsyncTask addSyncTask = new FileMoveAsyncTask(activity, files, onAddFinish);
+
+				boolean isMoving = ((RadioButton)addAlbumDialog.findViewById(R.id.move_to_album)).isChecked();
+				addSyncTask.setIsMoving(isMoving);
+
+				if (isFromAlbum && index == 0) {
+					addSyncTask.setFromFolder(SyncManager.FOLDER_ALBUM);
+					addSyncTask.setToFolder(SyncManager.FOLDER_MAIN);
+					addSyncTask.setFromFolderId(activity.getCurrentFolderId());
+					addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
+				else if ((isFromAlbum && index == 1) || (!isFromAlbum && index == 0)){
 					GalleryHelpers.addAlbum(activity, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish(Object albumObj) {
 							super.onFinish(albumObj);
 
 							StingleDbAlbum album = (StingleDbAlbum) albumObj;
-							(new AddFilesToAlbumAsyncTask(activity, album, files, onAddFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
+							addToAlbum(addSyncTask, album.albumId);
 						}
 
 						@Override
@@ -84,11 +98,26 @@ public class GalleryActions {
 							super.onFail();
 						}
 					});
-				} else {
-					(new AddFilesToAlbumAsyncTask(activity, adapter.getAlbumAtPosition(index), files, onAddFinish)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
+				else {
+					addToAlbum(addSyncTask, adapter.getAlbumAtPosition(index).albumId);
 				}
 
 			}
+
+			private void addToAlbum(FileMoveAsyncTask addSyncTask, String albumId){
+				if(isFromAlbum) {
+					addSyncTask.setFromFolder(SyncManager.FOLDER_ALBUM);
+					addSyncTask.setFromFolderId(activity.getCurrentFolderId());
+				}
+				else{
+					addSyncTask.setFromFolder(SyncManager.FOLDER_MAIN);
+				}
+				addSyncTask.setToFolder(SyncManager.FOLDER_ALBUM);
+				addSyncTask.setToFolderId(albumId);
+				addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			}
+
 
 			@Override
 			public void onLongClick(int index) {
@@ -120,6 +149,7 @@ public class GalleryActions {
 							}
 						});
 						decFilesJob.setFolder(activity.getCurrentFolder());
+						decFilesJob.setFolderId(activity.getCurrentFolderId());
 						decFilesJob.setPerformMediaScan(true);
 						decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, files);
 					}
@@ -131,14 +161,37 @@ public class GalleryActions {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_trash_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
-					new SyncManager.MoveToTrashAsyncTask(activity, files, new SyncManager.OnFinish() {
+					/*new SyncManager.MoveToTrashAsyncTask(activity, files, new SyncManager.OnFinish() {
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
 							activity.updateGalleryFragmentData();
 							activity.exitActionMode();
 							spinner.dismiss();
 						}
-					}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
+
+					FileMoveAsyncTask moveTask = new FileMoveAsyncTask(activity, files, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							activity.updateGalleryFragmentData();
+							activity.exitActionMode();
+							spinner.dismiss();
+						}
+
+						@Override
+						public void onFail() {
+							super.onFail();
+							activity.updateGalleryFragmentData();
+							activity.exitActionMode();
+							spinner.dismiss();
+						}
+					});
+					moveTask.setFromFolder(activity.getCurrentFolder());
+					moveTask.setFromFolderId(activity.getCurrentFolderId());
+					moveTask.setToFolder(SyncManager.FOLDER_TRASH);
+					moveTask.setIsMoving(true);
+					moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				},
 				null);
 	}
@@ -146,14 +199,28 @@ public class GalleryActions {
 	public static void restoreSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
 		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.restoring_files), null);
 
-		new SyncManager.RestoreFromTrashAsyncTask(activity, files, new SyncManager.OnFinish() {
+		FileMoveAsyncTask moveTask = new FileMoveAsyncTask(activity, files, new OnAsyncTaskFinish() {
 			@Override
-			public void onFinish(Boolean needToUpdateUI) {
+			public void onFinish() {
+				super.onFinish();
 				activity.updateGalleryFragmentData();
 				activity.exitActionMode();
 				spinner.dismiss();
 			}
-		}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+			@Override
+			public void onFail() {
+				super.onFail();
+				activity.updateGalleryFragmentData();
+				activity.exitActionMode();
+				spinner.dismiss();
+			}
+		});
+
+		moveTask.setFromFolder(SyncManager.FOLDER_TRASH);
+		moveTask.setToFolder(SyncManager.FOLDER_MAIN);
+		moveTask.setIsMoving(true);
+		moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 	}
 
@@ -181,6 +248,32 @@ public class GalleryActions {
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
 							activity.updateGalleryFragmentData();
+							spinner.dismiss();
+						}
+					}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				},
+				null);
+	}
+
+	public static void deleteAlbum(GalleryActivity activity) {
+
+		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_album), activity.getCurrentAlbumName()), (dialog, which) -> {
+					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_album), null);
+
+					new DeleteAlbumAsyncTask(activity, activity.getCurrentFolderId(), new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							activity.exitActionMode();
+							spinner.dismiss();
+							activity.showAlbumsList();
+						}
+
+						@Override
+						public void onFail() {
+							super.onFail();
+							activity.updateGalleryFragmentData();
+							activity.exitActionMode();
 							spinner.dismiss();
 						}
 					}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
