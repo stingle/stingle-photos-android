@@ -40,4 +40,6 @@
     <string name="get_server_pk">keys/getServerPK</string>
     <string name="reupload_keys">keys/reuploadKeys</string>
 
+    <string name="add_album">sync/addAlbum</string>
+
 </resources>

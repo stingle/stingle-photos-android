@@ -22,6 +22,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
@@ -59,13 +60,13 @@ public class SyncService extends Service {
 	static final public int STATUS_BATTERY_LOW = 6;
 
 	protected int currentStatus = STATUS_IDLE;
-	protected SyncManager.UploadToCloudAsyncTask.UploadProgress progress;
+	protected UploadToCloudAsyncTask.UploadProgress progress;
 	private boolean restartSyncAfterComplete = false;
 	private ExecutorService cachedThreadPool;
 	private NotificationManager mNotifyManager;
 	private Notification.Builder notificationBuilder;
 	private boolean isNotificationActive = false;
-	private SyncManager.UploadToCloudAsyncTask uploadTask;
+	private UploadToCloudAsyncTask uploadTask;
 
 	public SyncService() {
 	}
@@ -77,7 +78,7 @@ public class SyncService extends Service {
 		cachedThreadPool = Executors.newCachedThreadPool();
 		mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-		progress = new SyncManager.UploadToCloudAsyncTask.UploadProgress() {
+		progress = new UploadToCloudAsyncTask.UploadProgress() {
 			@Override
 			public void currentFile(String filename, String headers) {
 				super.currentFile(filename, headers);

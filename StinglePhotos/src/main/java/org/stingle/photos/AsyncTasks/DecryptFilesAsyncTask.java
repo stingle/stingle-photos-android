@@ -128,6 +128,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer,
 					}
 					decryptedFiles.add(decryptedFile);
 				} catch (IOException | CryptoException e) {
+					e.printStackTrace();
 				}
 			}
 

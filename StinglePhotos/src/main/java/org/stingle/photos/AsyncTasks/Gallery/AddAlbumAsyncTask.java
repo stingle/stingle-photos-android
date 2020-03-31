@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.StinglePhotosApplication;
@@ -38,8 +39,9 @@ public class AddAlbumAsyncTask extends AsyncTask<Void, Void, StingleDbAlbum> {
 
 			AlbumsDb db = new AlbumsDb(myContext);
 			long now = System.currentTimeMillis();
-			String newId = db.insertAlbum(null, albumInfo.get("data"), albumInfo.get("pk"), now, now);
-			StingleDbAlbum newAlbum = db.getAlbumById(newId);
+			String newAbumId = CryptoHelpers.getRandomString(AlbumsDb.ALBUM_ID_LEN);
+			db.insertAlbum(newAbumId, albumInfo.get("data"), albumInfo.get("pk"), now, now);
+			StingleDbAlbum newAlbum = db.getAlbumById(newAbumId);
 			db.close();
 
 			return newAlbum;

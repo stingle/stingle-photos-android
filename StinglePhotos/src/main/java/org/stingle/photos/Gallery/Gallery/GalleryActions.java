@@ -14,6 +14,8 @@ import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.FileMoveAsyncTask;
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.Sync.DeleteFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.Sync.EmptyTrashAsyncTask;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Files.FileManager;
@@ -161,15 +163,6 @@ public class GalleryActions {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_trash_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
-					/*new SyncManager.MoveToTrashAsyncTask(activity, files, new SyncManager.OnFinish() {
-						@Override
-						public void onFinish(Boolean needToUpdateUI) {
-							activity.updateGalleryFragmentData();
-							activity.exitActionMode();
-							spinner.dismiss();
-						}
-					}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
-
 					FileMoveAsyncTask moveTask = new FileMoveAsyncTask(activity, files, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
@@ -228,7 +221,7 @@ public class GalleryActions {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_files), null);
 
-					new SyncManager.DeleteFilesAsyncTask(activity, files, new SyncManager.OnFinish() {
+					new DeleteFilesAsyncTask(activity, files, new SyncManager.OnFinish() {
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
 							activity.updateGalleryFragmentData();
@@ -244,7 +237,7 @@ public class GalleryActions {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_empty_trash)), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.emptying_trash), null);
 
-					new SyncManager.EmptyTrashAsyncTask(activity, new SyncManager.OnFinish(){
+					new EmptyTrashAsyncTask(activity, new SyncManager.OnFinish(){
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
 							activity.updateGalleryFragmentData();

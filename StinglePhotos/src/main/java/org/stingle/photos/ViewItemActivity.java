@@ -22,8 +22,12 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import org.stingle.photos.AsyncTasks.Gallery.FileMoveAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
@@ -222,11 +226,22 @@ public class ViewItemActivity extends AppCompatActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		int id = item.getItemId();
-		FilesTrashDb db = new FilesTrashDb(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		FilesDb db;
+		int sort = StingleDb.SORT_DESC;
+		if(folder == SyncManager.FOLDER_MAIN || folder == SyncManager.FOLDER_TRASH) {
+			db = new FilesTrashDb(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		}
+		else if (folder == SyncManager.FOLDER_ALBUM){
+			db = new AlbumFilesDb(this);
+			sort = StingleDb.SORT_ASC;
+		}
+		else{
+			return false;
+		}
 
 		if (id == R.id.share) {
 			ArrayList<StingleFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), null, StingleDb.SORT_DESC));
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), folderId, sort));
 
 			ShareManager.shareDbFiles(this, files, folder, folderId);
 
@@ -234,12 +249,12 @@ public class ViewItemActivity extends AppCompatActivity {
 		else if (id == R.id.trash) {
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
 			ArrayList<StingleFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), null, StingleDb.SORT_DESC));
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), folderId, sort));
 
-
-			new SyncManager.MoveToTrashAsyncTask(this, files, new SyncManager.OnFinish(){
+			FileMoveAsyncTask moveTask = new FileMoveAsyncTask(this, files, new OnAsyncTaskFinish() {
 				@Override
-				public void onFinish(Boolean needToUpdateUI) {
+				public void onFinish() {
+					super.onFinish();
 					if(adapter != null) {
 						adapter.notifyDataSetChanged();
 					}
@@ -247,7 +262,23 @@ public class ViewItemActivity extends AppCompatActivity {
 					Snackbar mySnackbar = Snackbar.make(findViewById(R.id.view_item_layout), getString(R.string.moved_to_trash), Snackbar.LENGTH_SHORT);
 					mySnackbar.show();
 				}
-			}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+				@Override
+				public void onFail() {
+					super.onFail();
+					if(adapter != null) {
+						adapter.notifyDataSetChanged();
+					}
+					spinner.dismiss();
+					Snackbar mySnackbar = Snackbar.make(findViewById(R.id.view_item_layout), getString(R.string.default_error_msg), Snackbar.LENGTH_SHORT);
+					mySnackbar.show();
+				}
+			});
+			moveTask.setFromFolder(folder);
+			moveTask.setFromFolderId(folderId);
+			moveTask.setToFolder(SyncManager.FOLDER_TRASH);
+			moveTask.setIsMoving(true);
+			moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 
 

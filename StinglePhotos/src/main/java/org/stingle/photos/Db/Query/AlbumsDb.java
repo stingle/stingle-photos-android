@@ -18,7 +18,7 @@ public class AlbumsDb {
 
 	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUMS;
 
-	private static final int ALBUM_ID_LEN = 32;
+	public static final int ALBUM_ID_LEN = 32;
 
 	public AlbumsDb(Context context) {
 		db = new StingleDb(context);

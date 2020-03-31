@@ -4,7 +4,6 @@ import android.database.Cursor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 
 public class StingleDbAlbum {
@@ -12,10 +11,6 @@ public class StingleDbAlbum {
 	public String albumId;
 	public String data;
 	public String albumPK;
-	public Boolean isLocal;
-	public Boolean isRemote;
-	public Integer version = FilesTrashDb.INITIAL_VERSION;
-	public Integer reupload = FilesTrashDb.REUPLOAD_NO;
 	public Long dateCreated;
 	public Long dateModified;
 
