@@ -9,6 +9,7 @@ import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -40,6 +41,11 @@ public class AddAlbumAsyncTask extends AsyncTask<Void, Void, StingleDbAlbum> {
 			AlbumsDb db = new AlbumsDb(myContext);
 			long now = System.currentTimeMillis();
 			String newAbumId = CryptoHelpers.getRandomString(AlbumsDb.ALBUM_ID_LEN);
+
+			if(!SyncManager.notifyCloudAboutAlbumAdd(myContext, newAbumId, albumInfo.get("data"), albumInfo.get("pk"), now,  now)){
+				return null;
+			}
+
 			db.insertAlbum(newAbumId, albumInfo.get("data"), albumInfo.get("pk"), now, now);
 			StingleDbAlbum newAlbum = db.getAlbumById(newAbumId);
 			db.close();
