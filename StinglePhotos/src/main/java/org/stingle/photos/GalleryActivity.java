@@ -40,7 +40,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -48,7 +47,7 @@ import com.google.android.material.navigation.NavigationView;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
@@ -659,9 +658,9 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	@Override
-	public boolean onClick(StingleFile file) {
+	public boolean onClick(StingleDbFile file) {
 		if (!galleryFragment.isSelectionModeActive() && sendBackDecryptedFile){
-			ArrayList<StingleFile> selectedFiles = new ArrayList<>();
+			ArrayList<StingleDbFile> selectedFiles = new ArrayList<>();
 			selectedFiles.add(file);
 			ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentFolder);
 			return false;

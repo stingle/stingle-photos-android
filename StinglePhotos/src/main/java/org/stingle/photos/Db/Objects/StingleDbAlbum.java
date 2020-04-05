@@ -31,7 +31,6 @@ public class StingleDbAlbum {
 	}
 
 	public StingleDbAlbum(JSONObject json) throws JSONException {
-		this.id = json.getInt("id");
 		this.albumId = json.getString("albumId");
 		this.data = json.getString("data");
 		this.albumPK = json.getString("albumPK");

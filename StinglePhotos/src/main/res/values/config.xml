@@ -39,6 +39,7 @@
     <string name="reupload_keys">keys/reuploadKeys</string>
 
     <string name="add_album">sync/addAlbum</string>
+    <string name="delete_album_path">sync/deleteAlbum</string>
     <string name="move_file">sync/moveFile</string>
 
 </resources>

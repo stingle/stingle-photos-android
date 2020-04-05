@@ -27,7 +27,7 @@ import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.Helpers.IDragSelectAdapter;
 import org.stingle.photos.R;
@@ -425,7 +425,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return (isPositionIsDate(position) ? TYPE_DATE : TYPE_ITEM);
 	}
 
-	public StingleFile getStingleFileAtPosition(int position){
+	public StingleDbFile getStingleFileAtPosition(int position){
 		return db.getFileAtPosition(translatePos(position).dbPosition, folderId, DB_SORT);
 	}
 

@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDb;
@@ -24,6 +23,7 @@ public class DeleteAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private Crypto crypto;
 
 	private String albumId = null;
+	private AlbumsDb albumsDb;
 
 
 	public DeleteAlbumAsyncTask(Context context, String albumId, OnAsyncTaskFinish onFinishListener) {
@@ -40,10 +40,10 @@ public class DeleteAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			return false;
 		}
 
-		AlbumsDb albumsDb = new AlbumsDb(myContext);
+		albumsDb = new AlbumsDb(myContext);
 
 		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
-		ArrayList<StingleFile> files = new ArrayList<>();
+		ArrayList<StingleDbFile> files = new ArrayList<>();
 
 		Cursor result = albumFilesDb.getAlbumFilesList(albumId, StingleDb.SORT_ASC, "");
 		while(result.moveToNext()) {
@@ -51,36 +51,30 @@ public class DeleteAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		}
 		albumFilesDb.close();
 
-		FileMoveAsyncTask moveTask = new FileMoveAsyncTask(myContext, files, new OnAsyncTaskFinish() {
-			@Override
-			public void onFinish() {
-				super.onFinish();
+		boolean moveResult = SyncManager.moveFiles(myContext, files, SyncManager.FOLDER_ALBUM, SyncManager.FOLDER_TRASH, albumId, null, true);
 
+		if(moveResult){
+			if(SyncManager.notifyCloudAboutAlbumDelete(context.get(), albumId)){
 				albumsDb.deleteAlbum(albumId);
 				albumsDb.close();
-				onFinishListener.onFinish();
+				return true;
 			}
+		}
 
-			@Override
-			public void onFail() {
-				super.onFail();
-				albumsDb.close();
-				onFinishListener.onFail();
-			}
-		});
-		moveTask.setFromFolder(SyncManager.FOLDER_ALBUM);
-		moveTask.setFromFolderId(albumId);
-		moveTask.setToFolder(SyncManager.FOLDER_TRASH);
-		moveTask.setIsMoving(true);
-		moveTask.execute();
-
-		return true;
+		albumsDb.close();
+		return false;
 	}
 
 	@Override
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
 
+		if(result){
+			onFinishListener.onFinish();
+		}
+		else{
+			onFinishListener.onFail();
+		}
 
 	}
 }

@@ -12,7 +12,7 @@ import com.squareup.picasso3.RequestHandler;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -72,7 +72,7 @@ public class StinglePicassoLoader extends RequestHandler {
 			sort = StingleDb.SORT_ASC;
 		}
 
-		StingleFile file = db.getFileAtPosition(Integer.parseInt(position), folderId, sort);
+		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position), folderId, sort);
 
 		if(file.isLocal) {
 			try {

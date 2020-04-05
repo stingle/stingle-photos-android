@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Files.FileManager;
@@ -24,10 +24,10 @@ import java.util.HashMap;
 public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 
 	protected Context context;
-	protected ArrayList<StingleFile> files;
+	protected ArrayList<StingleDbFile> files;
 	protected SyncManager.OnFinish onFinish;
 
-	public DeleteFilesAsyncTask(Context context, ArrayList<StingleFile> files, SyncManager.OnFinish onFinish){
+	public DeleteFilesAsyncTask(Context context, ArrayList<StingleDbFile> files, SyncManager.OnFinish onFinish){
 		this.context = context;
 		this.files = files;
 		this.onFinish = onFinish;
@@ -41,7 +41,7 @@ public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
-		for(StingleFile file : files) {
+		for(StingleDbFile file : files) {
 			if (file.isRemote) {
 				filenamesToNotify.add(file.filename);
 			}
@@ -52,7 +52,7 @@ public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 			return null;
 		}
 
-		for(StingleFile file : files) {
+		for(StingleDbFile file : files) {
 			File mainFile = new File(homeDir + "/" + file.filename);
 			File thumbFile = new File(thumbDir + "/" + file.filename);
 

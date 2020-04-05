@@ -7,7 +7,6 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 
@@ -33,7 +32,7 @@ public class FilesTrashDb implements FilesDb{
 	}
 
 
-	public long insertFile(StingleFile file){
+	public long insertFile(StingleDbFile file){
 		return insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, file.dateModified, file.headers);
 	}
 
@@ -144,6 +143,10 @@ public class FilesTrashDb implements FilesDb{
 	}
 
 	public StingleDbFile getFileIfExists(String filename){
+		return getFileIfExists(filename, null);
+	}
+
+	public StingleDbFile getFileIfExists(String filename, String folderId){
 		String[] projection = {
 				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,

@@ -11,11 +11,11 @@ import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Db.Objects.StingleDbAlbumFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -63,7 +63,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 				Result result = null;
 
-				StingleDbAlbumFile albumFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_ASC);
+				StingleDbFile albumFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_ASC);
 
 				if(albumFile != null){
 					byte[] decryptedData;

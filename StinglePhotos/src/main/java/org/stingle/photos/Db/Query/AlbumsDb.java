@@ -25,6 +25,10 @@ public class AlbumsDb {
 	}
 
 
+	public String insertAlbum(StingleDbAlbum album){
+		return insertAlbum(album.albumId, album.data, album.albumPK, album.dateCreated, album.dateModified);
+	}
+
 	public String insertAlbum(String albumId, String data, String albumPK, long dateCreated, long dateModified){
 		if(albumId == null){
 			albumId = CryptoHelpers.getRandomString(ALBUM_ID_LEN);

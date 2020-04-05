@@ -4,9 +4,20 @@ import android.database.Cursor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 
-public class StingleDbFile extends StingleFile {
+public class StingleDbFile {
+	public long id;
+	public String albumId = null;
+	public String filename;
+	public Boolean isLocal;
+	public Boolean isRemote;
+	public Integer version = FilesTrashDb.INITIAL_VERSION;
+	public Integer reupload = FilesTrashDb.REUPLOAD_NO;
+	public Long dateCreated;
+	public Long dateModified;
+	public String headers;
 
 	public StingleDbFile(Cursor cursor){
 		this.id = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns._ID));
@@ -18,17 +29,23 @@ public class StingleDbFile extends StingleFile {
 		this.headers = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
 		this.dateCreated = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
 		this.dateModified = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
+
+		try {
+			this.albumId = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
+		}
+		catch (IllegalArgumentException ignored) {}
 	}
 
 	public StingleDbFile(JSONObject json) throws JSONException {
+		this.albumId = json.optString("albumId");
 		this.filename = json.getString("file");
 		this.isLocal = null;
 		this.isRemote = null;
 		if(json.has("version")) {
 			this.version = json.getInt("version");
 		}
+		this.headers = json.getString("headers");
 		this.dateCreated = json.getLong("dateCreated");
 		this.dateModified = json.getLong("dateModified");
-		this.headers = json.getString("headers");
 	}
 }

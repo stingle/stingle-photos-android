@@ -17,7 +17,7 @@ import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Sync.DeleteFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.EmptyTrashAsyncTask;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
@@ -32,11 +32,11 @@ import java.util.ArrayList;
 
 public class GalleryActions {
 
-	public static void shareSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
+	public static void shareSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
 		ShareManager.shareDbFiles(activity, files, activity.getCurrentFolder(), activity.getCurrentFolderId());
 	}
 
-	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleFile> files, boolean isFromAlbum) {
+	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(R.string.add_move_to_album);
 		builder.setView(R.layout.add_to_album_dialog);
@@ -135,7 +135,7 @@ public class GalleryActions {
 		recyclerView.setAdapter(adapter);
 	}
 
-	public static void decryptSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
+	public static void decryptSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_decrypt_files)), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -159,7 +159,7 @@ public class GalleryActions {
 				null);
 	}
 
-	public static void trashSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
+	public static void trashSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_trash_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
@@ -189,7 +189,7 @@ public class GalleryActions {
 				null);
 	}
 
-	public static void restoreSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
+	public static void restoreSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
 		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.restoring_files), null);
 
 		FileMoveAsyncTask moveTask = new FileMoveAsyncTask(activity, files, new OnAsyncTaskFinish() {
@@ -217,7 +217,7 @@ public class GalleryActions {
 
 	}
 
-	public static void deleteSelected(GalleryActivity activity, final ArrayList<StingleFile> files) {
+	public static void deleteSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_files), null);
 

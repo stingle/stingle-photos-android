@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.stingle.photos.Db.Objects.StingleDbAlbumFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 
@@ -20,6 +20,9 @@ public class AlbumFilesDb implements FilesDb {
 		db = new StingleDb(context);
 	}
 
+	public long insertFile(StingleDbFile file){
+		return insertAlbumFile(file.albumId, file.filename, file.isLocal, file.isRemote, file.version,file.headers, file.dateCreated, file.dateModified);
+	}
 
 	public long insertAlbumFile(String albumId, String filename, boolean isLocal, boolean isRemote, int version, String headers, long dateCreated, long dateModified){
 		ContentValues values = new ContentValues();
@@ -37,7 +40,7 @@ public class AlbumFilesDb implements FilesDb {
 
 	}
 
-	public int updateAlbumFile(StingleDbAlbumFile file){
+	public int updateFile(StingleDbFile file){
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, file.albumId);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_FILENAME, file.filename);
@@ -64,6 +67,12 @@ public class AlbumFilesDb implements FilesDb {
 	public int deleteAlbumFile(Long id){
 		String selection = StingleDbContract.Columns._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(id) };
+
+		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+	}
+	public int deleteAlbumFile(String filename, String albumId){
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = { filename, albumId };
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
@@ -108,7 +117,60 @@ public class AlbumFilesDb implements FilesDb {
 
 	}
 
-	public StingleDbAlbumFile getFileAtPosition(int pos, String albumId, int sort){
+	public StingleDbFile getFileIfExists(String filename){
+		return getFileIfExists(filename, null);
+	}
+
+	public StingleDbFile getFileIfExists(String filename, String albumId){
+		String[] projection = {
+				StingleDbContract.Columns._ID,
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Columns.COLUMN_NAME_VERSION,
+				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Columns.COLUMN_NAME_HEADERS
+		};
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
+		if(albumId != null) {
+			selection += " AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+		}
+		String[] selectionArgs;
+		if(albumId != null) {
+			selectionArgs = new String[2];
+			selectionArgs[0] = filename;
+			selectionArgs[1] = albumId;
+		}
+		else{
+			selectionArgs = new String[1];
+			selectionArgs[0] = filename;
+		}
+
+		Cursor result = db.openReadDb().query(
+				tableName,   // The table to query
+				projection,             // The array of columns to return (pass null to get all)
+				selection,              // The columns for the WHERE clause
+				selectionArgs,          // The values for the WHERE clause
+				null,                   // don't group the rows
+				null,                   // don't filter by row groups
+				null               // The sort order
+		);
+
+		if(result.getCount() > 0){
+			result.moveToNext();
+			StingleDbFile dbFile = new StingleDbFile(result);
+			result.close();
+			return dbFile;
+		}
+		result.close();
+		return null;
+	}
+
+	public StingleDbFile getFileAtPosition(int pos, String albumId, int sort){
 		String[] projection = {
 				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
@@ -142,7 +204,7 @@ public class AlbumFilesDb implements FilesDb {
 
 		if(result.getCount() > 0){
 			result.moveToNext();
-			return new StingleDbAlbumFile(result);
+			return new StingleDbFile(result);
 		}
 		return null;
 	}

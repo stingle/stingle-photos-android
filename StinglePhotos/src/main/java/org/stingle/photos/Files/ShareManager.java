@@ -14,7 +14,7 @@ import androidx.core.content.FileProvider;
 
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.R;
 
 import java.io.File;
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class ShareManager {
 
-	public static void shareDbFiles(final Context context, List<StingleFile> dbFiles, int folder, String folderId){
+	public static void shareDbFiles(final Context context, List<StingleDbFile> dbFiles, int folder, String folderId){
 
 
 		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(context, new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
@@ -84,7 +84,7 @@ public class ShareManager {
 		}
 	}
 
-	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleFile> selectedFiles, int folder) {
+	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleDbFile> selectedFiles, int folder) {
 		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new File(activity.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish(ArrayList<File> files) {

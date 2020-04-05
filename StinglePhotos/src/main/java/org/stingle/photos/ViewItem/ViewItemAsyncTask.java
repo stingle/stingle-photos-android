@@ -37,7 +37,7 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.StingleDb;
@@ -120,7 +120,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			sort = StingleDb.SORT_ASC;
 		}
 
-		StingleFile dbFile = db.getFileAtPosition(position, folderId, sort);
+		StingleDbFile dbFile = db.getFileAtPosition(position, folderId, sort);
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
 		try {

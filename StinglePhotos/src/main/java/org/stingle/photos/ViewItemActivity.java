@@ -25,7 +25,7 @@ import com.google.android.material.snackbar.Snackbar;
 import org.stingle.photos.AsyncTasks.Gallery.FileMoveAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.FilesTrashDb;
@@ -240,7 +240,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		}
 
 		if (id == R.id.share) {
-			ArrayList<StingleFile> files = new ArrayList<>();
+			ArrayList<StingleDbFile> files = new ArrayList<>();
 			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), folderId, sort));
 
 			ShareManager.shareDbFiles(this, files, folder, folderId);
@@ -248,7 +248,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		}
 		else if (id == R.id.trash) {
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
-			ArrayList<StingleFile> files = new ArrayList<>();
+			ArrayList<StingleDbFile> files = new ArrayList<>();
 			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), folderId, sort));
 
 			FileMoveAsyncTask moveTask = new FileMoveAsyncTask(this, files, new OnAsyncTaskFinish() {

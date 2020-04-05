@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
-import org.stingle.photos.Db.Objects.StingleFile;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.Helpers.DragSelectRecyclerView;
 import org.stingle.photos.Gallery.Helpers.HidingScrollListener;
@@ -153,7 +153,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	@Override
 	public void onClick(int index) {
-		StingleFile file = adapter.getStingleFileAtPosition(index);
+		StingleDbFile file = adapter.getStingleFileAtPosition(index);
 		if(!parentActivity.onClick(file)){
 			return;
 		}
@@ -192,8 +192,12 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	public void updateDataSet(){
 		int lastScrollPos = recyclerView.getScrollY();
-		adapter.updateDataSet();
-		recyclerView.setScrollY(lastScrollPos);
+		if(adapter != null) {
+			adapter.updateDataSet();
+		}
+		if(recyclerView != null) {
+			recyclerView.setScrollY(lastScrollPos);
+		}
 	}
 
 	public void updateItem(int position){
@@ -223,9 +227,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		return false;
 	}
 
-	public ArrayList<StingleFile> getSelectedFiles(){
+	public ArrayList<StingleDbFile> getSelectedFiles(){
 		List<Integer> indices = adapter.getSelectedIndices();
-		ArrayList<StingleFile> files = new ArrayList<>();
+		ArrayList<StingleDbFile> files = new ArrayList<>();
 		for(Integer index : indices){
 			files.add(adapter.getStingleFileAtPosition(index));
 		}
