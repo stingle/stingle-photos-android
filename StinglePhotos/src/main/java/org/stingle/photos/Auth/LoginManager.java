@@ -324,7 +324,7 @@ public class LoginManager {
                 final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.logging_out), null);
                 HashMap<String, String> postParams = new HashMap<String, String>();
                 postParams.put("token", KeyManagement.getApiToken(activity));
-                HttpsClient.post(activity, activity.getString(R.string.api_server_url) + activity.getString(R.string.logout_path), postParams, new HttpsClient.OnNetworkFinish() {
+                HttpsClient.post(activity, StinglePhotosApplication.getApiUrl() + activity.getString(R.string.logout_path), postParams, new HttpsClient.OnNetworkFinish() {
                     @Override
                     public void onFinish(StingleResponse response) {
                         if (response.isStatusOk()) {

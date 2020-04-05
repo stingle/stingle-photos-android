@@ -103,7 +103,7 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				postParams.put("email", email);
 				postParams.put("params", CryptoHelpers.encryptParamsForServer(params, serverPK, privateKey));
 
-				JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.recover_account), postParams);
+				JSONObject resultJson = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + activity.getString(R.string.recover_account), postParams);
 				StingleResponse response = new StingleResponse(this.activity, resultJson, true);
 
 				if (response.isStatusOk()) {

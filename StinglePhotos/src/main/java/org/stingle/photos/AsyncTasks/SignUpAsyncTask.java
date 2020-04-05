@@ -58,7 +58,7 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			postParams.put("isBackup", (isBackup ? "1" : "0"));
 			postParams.putAll(KeyManagement.getUploadKeyBundlePostParams(password, isBackup));
 
-			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.registration_path), postParams);
+			JSONObject resultJson = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + activity.getString(R.string.registration_path), postParams);
 			response = new StingleResponse(this.activity, resultJson, false);
 
 			if (response.isStatusOk()) {

@@ -18,8 +18,6 @@
     <string name="default_thumb_folder_name">.thumb</string>
     <string name="min_pass_length">6</string>
 
-    <!--<string name="api_server_url">https://api.stingle.org/</string>-->
-
     <string name="registration_path">register/createAccount</string>
     <string name="login_path">login/login</string>
     <string name="change_pass_path">login/changePass</string>
@@ -41,5 +39,6 @@
     <string name="reupload_keys">keys/reuploadKeys</string>
 
     <string name="add_album">sync/addAlbum</string>
+    <string name="move_file">sync/moveFile</string>
 
 </resources>

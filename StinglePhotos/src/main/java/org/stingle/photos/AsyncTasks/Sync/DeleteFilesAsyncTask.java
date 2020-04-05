@@ -14,6 +14,7 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.io.File;
@@ -85,7 +86,7 @@ public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.delete_file_path), postParams);
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.delete_file_path), postParams);
 			StingleResponse response = new StingleResponse(this.context, json, false);
 
 			if (response.isStatusOk()) {

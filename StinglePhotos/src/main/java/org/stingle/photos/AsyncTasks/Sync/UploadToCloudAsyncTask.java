@@ -14,6 +14,7 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -139,7 +140,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 		postParams.put("headers", headers);
 
 		JSONObject resp = HttpsClient.multipartUpload(
-				context.getString(R.string.api_server_url) + context.getString(R.string.upload_file_path),
+				StinglePhotosApplication.getApiUrl() + context.getString(R.string.upload_file_path),
 				postParams,
 				filesToUpload
 		);

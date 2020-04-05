@@ -18,6 +18,7 @@ import org.stingle.photos.Sync.SyncManager;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -87,9 +88,17 @@ public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 				StingleDbAlbum album = albumsDb.getAlbumById(toFolderId);
 
+				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleFile file : files) {
-					String newHeaders = crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.albumPK), null, null);
-					albumFilesDb.insertAlbumFile(album.albumId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders, file.dateCreated, System.currentTimeMillis());
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.albumPK), null, null));
+				}
+
+				if(!SyncManager.notifyCloudAboutFileMove(myContext, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, newHeaders)){
+					return false;
+				}
+
+				for (StingleFile file : files) {
+					albumFilesDb.insertAlbumFile(album.albumId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders.get(file.filename), file.dateCreated, System.currentTimeMillis());
 					if(isMoving) {
 						filesTrashDb.deleteFile(file.filename);
 					}
@@ -108,9 +117,17 @@ public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				StingleDbAlbum album = albumsDb.getAlbumById(fromFolderId);
 				Crypto.AlbumData albumData = crypto.parseAlbumData(album.data);
 
+				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleFile file : files) {
-					String newHeaders = crypto.reencryptFileHeaders(file.headers, crypto.getPublicKey(), albumData.privateKey, Crypto.base64ToByteArray(album.albumPK));
-					filesTrashDb.insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, System.currentTimeMillis(), newHeaders);
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, crypto.getPublicKey(), albumData.privateKey, Crypto.base64ToByteArray(album.albumPK)));
+				}
+
+				if(!SyncManager.notifyCloudAboutFileMove(myContext, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, newHeaders)){
+					return false;
+				}
+
+				for (StingleFile file : files) {
+					filesTrashDb.insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, System.currentTimeMillis(), newHeaders.get(file.filename));
 					if(isMoving) {
 						albumFilesDb.deleteAlbumFile(file.id);
 					}
@@ -128,9 +145,17 @@ public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				Crypto.AlbumData fromAlbumData = crypto.parseAlbumData(fromAlbum.data);
 				StingleDbAlbum toAlbum = albumsDb.getAlbumById(toFolderId);
 
+				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleFile file : files) {
-					String newHeaders = crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(toAlbum.albumPK), fromAlbumData.privateKey, Crypto.base64ToByteArray(fromAlbum.albumPK));
-					albumFilesDb.insertAlbumFile(toAlbum.albumId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders, file.dateCreated, System.currentTimeMillis());
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(toAlbum.albumPK), fromAlbumData.privateKey, Crypto.base64ToByteArray(fromAlbum.albumPK)));
+				}
+
+				if(!SyncManager.notifyCloudAboutFileMove(myContext, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, newHeaders)){
+					return false;
+				}
+
+				for (StingleFile file : files) {
+					albumFilesDb.insertAlbumFile(toAlbum.albumId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders.get(file.filename), file.dateCreated, System.currentTimeMillis());
 					if(isMoving) {
 						albumFilesDb.deleteAlbumFile(file.id);
 					}
@@ -139,6 +164,10 @@ public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			else if(fromFolder == SyncManager.FOLDER_MAIN && toFolder == SyncManager.FOLDER_TRASH) {
 				FilesTrashDb filesDb = new FilesTrashDb(myContext, StingleDbContract.Columns.TABLE_NAME_FILES);
 				FilesTrashDb trashDb = new FilesTrashDb(myContext, StingleDbContract.Columns.TABLE_NAME_TRASH);
+
+				if(!SyncManager.notifyCloudAboutFileMove(myContext, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, null)){
+					return false;
+				}
 
 				for (StingleFile file : files) {
 					file.dateModified = System.currentTimeMillis();
@@ -152,6 +181,10 @@ public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			else if(fromFolder == SyncManager.FOLDER_TRASH && toFolder == SyncManager.FOLDER_MAIN) {
 				FilesTrashDb filesDb = new FilesTrashDb(myContext, StingleDbContract.Columns.TABLE_NAME_FILES);
 				FilesTrashDb trashDb = new FilesTrashDb(myContext, StingleDbContract.Columns.TABLE_NAME_TRASH);
+
+				if(!SyncManager.notifyCloudAboutFileMove(myContext, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, null)){
+					return false;
+				}
 
 				for (StingleFile file : files) {
 					file.dateModified = System.currentTimeMillis();

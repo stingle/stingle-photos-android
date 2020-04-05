@@ -11,16 +11,19 @@ import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
+import org.stingle.photos.Db.Objects.StingleFile;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
 
@@ -88,7 +91,7 @@ public class SyncManager {
 		}
 
 		try {
-			HttpsClient.downloadFile(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams, outputPath);
+			HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, outputPath);
 			return true;
 		}
 		catch (IOException | NoSuchAlgorithmException | KeyManagementException e) {
@@ -128,7 +131,7 @@ public class SyncManager {
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.add_album), postParams);
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.add_album), postParams);
 			StingleResponse response = new StingleResponse(context, json, false);
 
 			if (response.isStatusOk()) {
@@ -142,17 +145,28 @@ public class SyncManager {
 
 	}
 
-	public static boolean notifyCloudAboutFileMove(Context context){
+	public static boolean notifyCloudAboutFileMove(Context context, ArrayList<StingleFile> files, int folderFrom, int folderTo, String folderIdFrom, String folderIdTo, boolean isMoving, HashMap<String, String> headers){
 		HashMap<String, String> params = new HashMap<>();
-		long timestamp = System.currentTimeMillis();
-		params.put("time", String.valueOf(timestamp));
+
+		params.put("folderFrom", String.valueOf(folderFrom));
+		params.put("folderTo", String.valueOf(folderTo));
+		params.put("folderIdFrom", folderIdFrom);
+		params.put("folderIdTo", folderIdTo);
+		params.put("isMoving", (isMoving ? "1" : "0"));
+		params.put("count", String.valueOf(files.size()));
+		for(int i=0; i < files.size(); i++) {
+			params.put("filename" + i, files.get(i).filename);
+			if(headers != null) {
+				params.put("headers" + i, headers.get(files.get(i).filename));
+			}
+		}
 
 		try {
 			HashMap<String, String> postParams = new HashMap<>();
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.empty_trash_path), postParams);
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.move_file), postParams);
 			StingleResponse response = new StingleResponse(context, json, false);
 
 			if (response.isStatusOk()) {
@@ -163,5 +177,7 @@ public class SyncManager {
 		catch (CryptoException e){
 			return false;
 		}
+
 	}
+
 }

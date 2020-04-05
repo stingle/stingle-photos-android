@@ -8,6 +8,7 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -44,7 +45,7 @@ public class StingleBilling {
 
 
 			JSONObject resp = HttpsClient.postFunc(
-					context.getString(R.string.api_server_url) + context.getString(R.string.notify_purchase),
+					StinglePhotosApplication.getApiUrl() + context.getString(R.string.notify_purchase),
 					postParams
 			);
 			StingleResponse response = new StingleResponse(this.context, resp, false);

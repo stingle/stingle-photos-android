@@ -176,7 +176,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					postParams.put("file", dbFile.filename);
 					postParams.put("folder", String.valueOf(folder));
 
-					JSONObject json = HttpsClient.postFunc(context.getString(R.string.api_server_url) + context.getString(R.string.get_url_path), postParams);
+					JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_url_path), postParams);
 					StingleResponse response = new StingleResponse(this.context, json, false);
 
 					if (response.isStatusOk()) {

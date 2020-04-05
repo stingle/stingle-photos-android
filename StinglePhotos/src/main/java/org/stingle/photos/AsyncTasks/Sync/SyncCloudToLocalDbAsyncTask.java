@@ -15,6 +15,7 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -60,7 +61,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 
 		JSONObject resp = HttpsClient.postFunc(
-				context.getString(R.string.api_server_url) + context.getString(R.string.get_updates_path),
+				StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_updates_path),
 				postParams
 		);
 		StingleResponse response = new StingleResponse(this.context, resp, false);

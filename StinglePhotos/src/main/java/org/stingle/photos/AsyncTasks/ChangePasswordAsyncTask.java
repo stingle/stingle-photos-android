@@ -66,7 +66,7 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			postParams.put("token", KeyManagement.getApiToken(activity));
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.change_pass_path), postParams);
+			JSONObject resultJson = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + activity.getString(R.string.change_pass_path), postParams);
 			response = new StingleResponse(this.activity, resultJson, false);
 
 			if (response.isStatusOk()) {

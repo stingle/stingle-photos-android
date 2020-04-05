@@ -14,6 +14,7 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -103,7 +104,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleFile>, Integer,
 
 				try {
 					String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), dbFile.filename);
-					HttpsClient.downloadFile(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams, finalWritePath);
+					HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, finalWritePath);
 					file = new File(finalWritePath);
 				} catch (NoSuchAlgorithmException | IOException | KeyManagementException e) {
 					e.printStackTrace();

@@ -68,7 +68,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		postParams.put("email", email);
 
-		JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.pre_login_path), postParams);
+		JSONObject resultJson = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + activity.getString(R.string.pre_login_path), postParams);
 		response = new StingleResponse(this.activity, resultJson, false);
 
 
@@ -83,7 +83,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				postParams2.put("email", email);
 				postParams2.put("password", loginHash);
 
-				JSONObject resultJson2 = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.login_path), postParams2);
+				JSONObject resultJson2 = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + activity.getString(R.string.login_path), postParams2);
 				response = new StingleResponse(this.activity, resultJson2, false);
 
 

@@ -82,7 +82,7 @@ public class FileManager {
 		byte[] encFile = new byte[0];
 
 		try {
-			encFile = HttpsClient.getFileAsByteArray(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams);
+			encFile = HttpsClient.getFileAsByteArray(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams);
 		}
 		catch (NoSuchAlgorithmException | KeyManagementException e) {
 

@@ -15,6 +15,7 @@ import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
@@ -77,7 +78,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 		postParams.put("folder", String.valueOf(result.folder));
 
 		try {
-			byte[] encFile = HttpsClient.getFileAsByteArray(context.getString(R.string.api_server_url) + context.getString(R.string.download_file_path), postParams);
+			byte[] encFile = HttpsClient.getFileAsByteArray(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams);
 			if(encFile == null || encFile.length == 0){
 				return null;
 			}

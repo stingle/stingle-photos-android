@@ -8,6 +8,7 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 
 import java.util.HashMap;
 
@@ -26,7 +27,7 @@ public class GetServerPKAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		postParams.put("token", KeyManagement.getApiToken(activity));
 
-		JSONObject resultJson = HttpsClient.postFunc(activity.getString(R.string.api_server_url) + activity.getString(R.string.get_server_pk), postParams);
+		JSONObject resultJson = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + activity.getString(R.string.get_server_pk), postParams);
 		StingleResponse response = new StingleResponse(this.activity, resultJson, false);
 
 		if (response.isStatusOk()) {

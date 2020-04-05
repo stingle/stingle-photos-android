@@ -76,4 +76,8 @@ public class StinglePhotosApplication extends Application{
 		tempStore.remove(key);
 	}
 
+	public static String getApiUrl(){
+		return context.getString(R.string.api_server_url) + "v" + StinglePhotosApplication.API_VERSION + "/";
+	}
+
 }
