@@ -104,7 +104,7 @@ public class StingleDbContract {
 					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
 	public static final String SQL_CREATE_ALBUM_FILES_AID_INDEX =
-			"CREATE INDEX af_album_id ON "+ Columns.TABLE_NAME_ALBUM_FILES+" ("+ Columns.COLUMN_NAME_ALBUM_ID+")";
+			"CREATE UNIQUE INDEX af_album_id ON "+ Columns.TABLE_NAME_ALBUM_FILES+" ("+ Columns.COLUMN_NAME_ALBUM_ID+", "+ Columns.COLUMN_NAME_FILENAME+")";
 
 	public static final String SQL_DELETE_ALBUM_FILES =
 			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_ALBUM_FILES;

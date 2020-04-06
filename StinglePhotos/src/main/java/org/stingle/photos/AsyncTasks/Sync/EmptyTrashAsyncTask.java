@@ -42,7 +42,7 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 		String homeDir = FileManager.getHomeDir(context);
 		String thumbDir = FileManager.getThumbsDir(context);
 
-		Cursor result = trashDb.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC);
+		Cursor result = trashDb.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, null);
 
 		while(result.moveToNext()) {
 			StingleDbFile dbFile = new StingleDbFile(result);

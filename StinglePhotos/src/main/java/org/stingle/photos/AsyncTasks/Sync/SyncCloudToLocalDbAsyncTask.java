@@ -53,15 +53,20 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			return false;
 		}
 		lastSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, (long)0);
+		boolean needToUpdateUI = false;
 
-		boolean needToUpdateUI = getFileList(myContext);
-
-		Helpers.storePreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, lastSeenTime);
+		try{
+			needToUpdateUI = getFileList(myContext);
+			Helpers.storePreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, lastSeenTime);
+		}
+		catch (JSONException e){
+			e.printStackTrace();
+		}
 
 		return needToUpdateUI;
 	}
 
-	protected boolean getFileList(Context context){
+	protected boolean getFileList(Context context) throws JSONException {
 		boolean needToUpdateUI = false;
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
@@ -74,19 +79,19 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		);
 		StingleResponse response = new StingleResponse(context, resp, false);
 		if(response.isStatusOk()){
-			if(processDeleteEvents(context, response.get("deletes"))){
+			if (processDeleteEvents(context, response.get("deletes"))) {
 				needToUpdateUI = true;
 			}
-			if(processFilesInFolder(context, response.get("files"), SyncManager.FOLDER_MAIN)){
+			if (processFilesInFolder(context, response.get("files"), SyncManager.FOLDER_MAIN)) {
 				needToUpdateUI = true;
 			}
-			if(processFilesInFolder(context, response.get("trash"), SyncManager.FOLDER_TRASH)){
+			if (processFilesInFolder(context, response.get("trash"), SyncManager.FOLDER_TRASH)) {
 				needToUpdateUI = true;
 			}
-			if(processAlbums(context, response.get("albums"))){
+			if (processAlbums(context, response.get("albums"))) {
 				needToUpdateUI = true;
 			}
-			if(processFilesInFolder(context, response.get("albumFiles"), SyncManager.FOLDER_ALBUM)){
+			if (processFilesInFolder(context, response.get("albumFiles"), SyncManager.FOLDER_ALBUM)) {
 				needToUpdateUI = true;
 			}
 
@@ -95,19 +100,19 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			String spaceQuotaStr = response.get("spaceQuota");
 
 
-			if(spaceUsedStr != null && spaceUsedStr.length() > 0){
+			if (spaceUsedStr != null && spaceUsedStr.length() > 0) {
 				int spaceUsed = Integer.parseInt(spaceUsedStr);
 				int oldSpaceUsed = Helpers.getPreference(context, SyncManager.PREF_LAST_SPACE_USED, 0);
-				if(spaceUsed != oldSpaceUsed){
+				if (spaceUsed != oldSpaceUsed) {
 					Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_USED, spaceUsed);
 					needToUpdateUI = true;
 				}
 			}
 
-			if(spaceQuotaStr != null && spaceQuotaStr.length() > 0){
+			if (spaceQuotaStr != null && spaceQuotaStr.length() > 0) {
 				int spaceQuota = Integer.parseInt(spaceQuotaStr);
 				int oldSpaceQuota = Helpers.getPreference(context, SyncManager.PREF_LAST_SPACE_QUOTA, 0);
-				if(spaceQuota != oldSpaceQuota){
+				if (spaceQuota != oldSpaceQuota) {
 					Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_QUOTA, spaceQuota);
 					needToUpdateUI = true;
 				}
@@ -118,62 +123,51 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		return needToUpdateUI;
 	}
 
-	private boolean processFilesInFolder(Context context, String filesStr, int folder){
+	private boolean processFilesInFolder(Context context, String filesStr, int folder) throws JSONException {
 		boolean result = false;
 		if(filesStr != null && filesStr.length() > 0){
-			try {
-				JSONArray files = new JSONArray(filesStr);
-				for(int i=0; i<files.length(); i++){
-					JSONObject file = files.optJSONObject(i);
-					if(file != null){
-						StingleDbFile dbFile = new StingleDbFile(file);
-						Log.d("receivedFile", dbFile.filename);
-						processFile(context, dbFile, folder);
-						result = true;
-					}
+			JSONArray files = new JSONArray(filesStr);
+			for(int i=0; i<files.length(); i++){
+				JSONObject file = files.optJSONObject(i);
+				if(file != null){
+					StingleDbFile dbFile = new StingleDbFile(file);
+					Log.d("receivedFile", folder + " - " + dbFile.filename);
+					processFile(context, dbFile, folder);
+					result = true;
 				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
 		}
 		return result;
 	}
 
-	private boolean processAlbums(Context context, String albumsStr){
+	private boolean processAlbums(Context context, String albumsStr) throws JSONException {
 		boolean result = false;
 		if(albumsStr != null && albumsStr.length() > 0){
-			try {
-				JSONArray albums = new JSONArray(albumsStr);
-				for(int i=0; i<albums.length(); i++){
-					JSONObject album = albums.optJSONObject(i);
-					if(album != null){
-						StingleDbAlbum dbAlbum = new StingleDbAlbum(album);
-						Log.d("receivedAlbum", dbAlbum.albumId);
-						processAlbum(context, dbAlbum);
-						result = true;
-					}
+			JSONArray albums = new JSONArray(albumsStr);
+			for(int i=0; i<albums.length(); i++){
+				JSONObject album = albums.optJSONObject(i);
+				if(album != null){
+					StingleDbAlbum dbAlbum = new StingleDbAlbum(album);
+					Log.d("receivedAlbum", dbAlbum.albumId);
+					processAlbum(context, dbAlbum);
+					result = true;
 				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
 		}
 		return result;
 	}
 
-	private boolean processDeleteEvents(Context context, String delsStr){
+	private boolean processDeleteEvents(Context context, String delsStr) throws JSONException {
 		boolean result = false;
 		if(delsStr != null && delsStr.length() > 0){
-			try {
-				JSONArray deletes = new JSONArray(delsStr);
-				for(int i=0; i<deletes.length(); i++){
-					JSONObject deleteEvent = deletes.optJSONObject(i);
-					if(deleteEvent != null){
-						processDeleteEvent(context, deleteEvent);
-						result = true;
-					}
+			JSONArray deletes = new JSONArray(delsStr);
+			for(int i=0; i<deletes.length(); i++){
+				JSONObject deleteEvent = deletes.optJSONObject(i);
+				if(deleteEvent != null){
+					Log.d("receivedDelete", deleteEvent.getString("file"));
+					processDeleteEvent(context, deleteEvent);
+					result = true;
 				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
 		}
 		return result;
@@ -196,8 +190,15 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 		StingleDbFile file = myDb.getFileIfExists(remoteFile.filename, remoteFile.albumId);
 
+		File dir = new File(FileManager.getHomeDir(context));
+		File fsFile = new File(dir.getPath() + "/" + remoteFile.filename);
+
+		remoteFile.isLocal = false;
+		if(fsFile.exists()) {
+			remoteFile.isLocal = true;
+		}
+
 		if(file == null){
-			remoteFile.isLocal = false;
 			remoteFile.isRemote = true;
 			myDb.insertFile(remoteFile);
 		}
@@ -210,6 +211,10 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			}
 			if(!file.isRemote) {
 				file.isRemote = true;
+				needUpdate = true;
+			}
+			if(file.isLocal != remoteFile.isLocal) {
+				file.isLocal = remoteFile.isLocal;
 				needUpdate = true;
 			}
 			if (file.version < remoteFile.version) {
@@ -259,71 +264,66 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		return true;
 	}
 
-	protected void processDeleteEvent(Context context, JSONObject event){
+	protected void processDeleteEvent(Context context, JSONObject event) throws JSONException {
 
-		try {
-			String filename = event.getString("file");
-			String albumId = event.getString("albumId");
-			Integer type = event.getInt("type");
-			Long date = event.getLong("date");
+		String filename = event.getString("file");
+		String albumId = event.getString("albumId");
+		Integer type = event.getInt("type");
+		Long date = event.getLong("date");
 
-			if(type == SyncManager.DELETE_EVENT_MAIN) {
-				StingleDbFile file = mainDb.getFileIfExists(filename);
-				if(file != null) {
-					mainDb.deleteFile(file.filename);
-				}
+		if(type == SyncManager.DELETE_EVENT_MAIN) {
+			StingleDbFile file = mainDb.getFileIfExists(filename);
+			if(file != null) {
+				mainDb.deleteFile(file.filename);
 			}
-			else if(type == SyncManager.DELETE_EVENT_TRASH) {
-				StingleDbFile file = trashDb.getFileIfExists(filename);
-				if(file != null) {
-					trashDb.deleteFile(file.filename);
-				}
+		}
+		else if(type == SyncManager.DELETE_EVENT_TRASH) {
+			StingleDbFile file = trashDb.getFileIfExists(filename);
+			if(file != null) {
+				trashDb.deleteFile(file.filename);
 			}
-			else if(type == SyncManager.DELETE_EVENT_ALBUM) {
-				StingleDbAlbum album = albumsDb.getAlbumById(albumId);
-				if(album != null) {
-					albumsDb.deleteAlbum(albumId);
-				}
+		}
+		else if(type == SyncManager.DELETE_EVENT_ALBUM) {
+			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+			if(album != null) {
+				albumsDb.deleteAlbum(albumId);
 			}
-			else if(type == SyncManager.DELETE_EVENT_ALBUM_FILE) {
-				StingleDbFile file = albumFilesDb.getFileIfExists(filename);
-				if(file != null) {
-					albumFilesDb.deleteAlbumFile(file.filename, albumId);
-				}
+		}
+		else if(type == SyncManager.DELETE_EVENT_ALBUM_FILE) {
+			StingleDbFile file = albumFilesDb.getFileIfExists(filename);
+			if(file != null) {
+				albumFilesDb.deleteAlbumFile(file.filename, albumId);
 			}
-			else if(type == SyncManager.DELETE_EVENT_DELETE) {
-				StingleDbFile file = trashDb.getFileIfExists(filename);
-				if(file != null) {
-					trashDb.deleteFile(file.filename);
-				}
-
-				boolean needToDeleteFiles = true;
-
-				if (mainDb.getFileIfExists(filename) != null || albumFilesDb.getFileIfExists(filename) != null){
-					needToDeleteFiles = false;
-				}
-
-				if(needToDeleteFiles) {
-					String homeDir = FileManager.getHomeDir(context);
-					String thumbDir = FileManager.getThumbsDir(context);
-					File mainFile = new File(homeDir + "/" + filename);
-					File thumbFile = new File(thumbDir + "/" + filename);
-
-					if (mainFile.exists()) {
-						mainFile.delete();
-					}
-					if (thumbFile.exists()) {
-						thumbFile.delete();
-					}
-				}
+		}
+		else if(type == SyncManager.DELETE_EVENT_DELETE) {
+			StingleDbFile file = trashDb.getFileIfExists(filename);
+			if(file != null) {
+				trashDb.deleteFile(file.filename);
 			}
 
-			if(date > lastSeenTime) {
-				lastSeenTime = date;
+			boolean needToDeleteFiles = true;
+
+			if (mainDb.getFileIfExists(filename) != null || albumFilesDb.getFileIfExists(filename) != null){
+				needToDeleteFiles = false;
 			}
 
-		} catch (JSONException e) {
-			e.printStackTrace();
+			if(needToDeleteFiles) {
+				String homeDir = FileManager.getHomeDir(context);
+				String thumbDir = FileManager.getThumbsDir(context);
+				File mainFile = new File(homeDir + "/" + filename);
+				File thumbFile = new File(thumbDir + "/" + filename);
+
+				if (mainFile.exists()) {
+					mainFile.delete();
+				}
+				if (thumbFile.exists()) {
+					thumbFile.delete();
+				}
+			}
+		}
+
+		if(date > lastSeenTime) {
+			lastSeenTime = date;
 		}
 	}
 

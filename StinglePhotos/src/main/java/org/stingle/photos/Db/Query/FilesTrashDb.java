@@ -12,17 +12,6 @@ import org.stingle.photos.Db.StingleDbContract;
 
 public class FilesTrashDb implements FilesDb{
 
-	public static final int GET_MODE_ALL = 0;
-	public static final int GET_MODE_ONLY_LOCAL = 1;
-	public static final int GET_MODE_ONLY_REMOTE = 2;
-	public static final int GET_MODE_LOCAL = 3;
-	public static final int GET_MODE_REMOTE = 4;
-
-	public static final int INITIAL_VERSION = 1;
-
-	public static final int REUPLOAD_NO = 0;
-	public static final int REUPLOAD_YES = 1;
-
 	private String tableName;
 	private StingleDb db;
 
@@ -182,7 +171,7 @@ public class FilesTrashDb implements FilesDb{
 		return null;
 	}
 
-	public Cursor getFilesList(int mode, int sort){
+	public Cursor getFilesList(int mode, int sort, String limit, String folderId){
 
 		String[] projection = {
 				StingleDbContract.Columns._ID,
@@ -238,7 +227,8 @@ public class FilesTrashDb implements FilesDb{
 				selectionArgs,          // The values for the WHERE clause
 				null,                   // don't group the rows
 				null,                   // don't filter by row groups
-				sortOrder               // The sort order
+				sortOrder,               // The sort order
+				limit
 		);
 
 	}

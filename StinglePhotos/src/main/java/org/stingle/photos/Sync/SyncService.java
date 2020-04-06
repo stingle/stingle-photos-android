@@ -80,11 +80,13 @@ public class SyncService extends Service {
 
 		progress = new UploadToCloudAsyncTask.UploadProgress() {
 			@Override
-			public void currentFile(String filename, String headers) {
-				super.currentFile(filename, headers);
+			public void currentFile(String filename, String headers, int folder, String folderId) {
+				super.currentFile(filename, headers, folder, folderId);
 				Bundle b = new Bundle();
 				b.putString("currentFile", filename);
 				b.putString("headers", headers);
+				b.putInt("folder", folder);
+				b.putString("folderId", folderId);
 				sendBundleToUi(MSG_SYNC_CURRENT_FILE, b);
 			}
 
@@ -353,6 +355,8 @@ public class SyncService extends Service {
 								b.putInt("totalItemsNumber", progress.totalItemsNumber);
 								b.putString("currentFile", progress.currentFile);
 								b.putString("headers", progress.headers);
+								b.putInt("folder", progress.folder);
+								b.putString("folderId", progress.folderId);
 								b.putInt("uploadedFilesCount", progress.uploadedFilesCount);
 								b.putInt("syncStatus", currentStatus);
 								Message msgToSend = Message.obtain(null, MSG_RESP_SYNC_STATUS);

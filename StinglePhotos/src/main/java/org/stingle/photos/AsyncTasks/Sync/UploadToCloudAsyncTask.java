@@ -7,6 +7,8 @@ import android.util.Log;
 
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
@@ -43,19 +45,29 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... params) {
 		if(progress != null){
-			progress.setTotalItemsNumber(getFilesCountToUpload(SyncManager.FOLDER_MAIN) + getFilesCountToUpload(SyncManager.FOLDER_TRASH));
+			progress.setTotalItemsNumber(getFilesCountToUpload(SyncManager.FOLDER_MAIN) + getFilesCountToUpload(SyncManager.FOLDER_TRASH) + getFilesCountToUpload(SyncManager.FOLDER_ALBUM));
 		}
 
 		uploadFolder(SyncManager.FOLDER_MAIN);
 		uploadFolder(SyncManager.FOLDER_TRASH);
+		uploadFolder(SyncManager.FOLDER_ALBUM);
 
 		return null;
 	}
 
 	protected int getFilesCountToUpload(int folder){
-		FilesTrashDb db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		FilesDb db;
+		if(folder == SyncManager.FOLDER_MAIN || folder == SyncManager.FOLDER_TRASH){
+			db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		}
+		else if (folder == SyncManager.FOLDER_ALBUM){
+			db = new AlbumFilesDb(context);
+		}
+		else{
+			return 0;
+		}
 
-		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC);
+		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, "", null);
 		int uploadCount = result.getCount();
 		result.close();
 
@@ -69,9 +81,18 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 	}
 
 	protected void uploadFolder(int folder){
-		FilesTrashDb db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		FilesDb db;
+		if(folder == SyncManager.FOLDER_MAIN || folder == SyncManager.FOLDER_TRASH){
+			db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		}
+		else if (folder == SyncManager.FOLDER_ALBUM){
+			db = new AlbumFilesDb(context);
+		}
+		else{
+			return;
+		}
 
-		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC);
+		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, null, null);
 		while(result.moveToNext()) {
 			if(isCancelled()){
 				break;
@@ -100,15 +121,20 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 		db.close();
 	}
 
-	protected void uploadFile(int folder, FilesTrashDb db, Cursor result, boolean isReupload){
+	protected void uploadFile(int folder, FilesDb db, Cursor result, boolean isReupload){
 		String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
 		String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_VERSION));
 		String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
 		String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
 		String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
+		String albumId = "";
+		try {
+			albumId = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
+		}
+		catch (IllegalArgumentException ignored) {}
 
 		if(progress != null){
-			progress.currentFile(filename, headers);
+			progress.currentFile(filename, headers, folder, albumId);
 		}
 
 		Log.d("uploadingFile", filename);
@@ -134,6 +160,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		postParams.put("token", KeyManagement.getApiToken(context));
 		postParams.put("folder", String.valueOf(folder));
+		postParams.put("albumId", albumId);
 		postParams.put("version", version);
 		postParams.put("dateCreated", dateCreated);
 		postParams.put("dateModified", dateModified);
@@ -188,15 +215,19 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 		public int totalItemsNumber = 0;
 		public String currentFile;
 		public String headers;
+		public int folder;
+		public String folderId;
 		public int uploadedFilesCount;
 
 		public void setTotalItemsNumber(int number){
 			totalItemsNumber = number;
 		}
 
-		public void currentFile(String filename, String headers){
+		public void currentFile(String filename, String headers, int folder, String folderId){
 			this.currentFile = filename;
 			this.headers = headers;
+			this.folder = folder;
+			this.folderId = folderId;
 		}
 		public void fileUploadFinished(String filename, int folder){
 

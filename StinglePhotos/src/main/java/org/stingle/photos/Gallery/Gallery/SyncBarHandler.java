@@ -46,6 +46,8 @@ public class SyncBarHandler {
 			int totalItemsNumber = bundle.getInt("totalItemsNumber");
 			int uploadedFilesCount = bundle.getInt("uploadedFilesCount");
 			String currentFile = bundle.getString("currentFile");
+			int folder = bundle.getInt("folder");
+			String folderId = bundle.getString("folderId");
 			String headers = bundle.getString("headers");
 
 			if (syncStatus == SyncService.STATUS_UPLOADING) {
@@ -53,7 +55,7 @@ public class SyncBarHandler {
 				syncProgress.setProgress(uploadedFilesCount);
 				syncText.setText(activity.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
 				if(currentFile != null && headers != null) {
-					(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setFolder(folder).setFolderId(folderId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 				setSyncStatus(SyncService.STATUS_UPLOADING);
 			} else if (syncStatus == SyncService.STATUS_REFRESHING) {
@@ -66,7 +68,9 @@ public class SyncBarHandler {
 			Bundle bundle = msg.getData();
 			String currentFile = bundle.getString("currentFile");
 			String headers = bundle.getString("headers");
-			(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			int folder = bundle.getInt("folder");
+			String folderId = bundle.getString("folderId");
+			(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setFolder(folder).setFolderId(folderId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 			setSyncStatus(SyncService.STATUS_UPLOADING);
 		} else if (msg.what == SyncService.MSG_SYNC_UPLOAD_PROGRESS) {
@@ -102,12 +106,14 @@ public class SyncBarHandler {
 		} else if (syncStatus == SyncService.STATUS_REFRESHING) {
 			refreshCProgress.setVisibility(View.VISIBLE);
 			syncPhoto.setVisibility(View.GONE);
+			syncPhoto.setImageDrawable(null);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(activity.getString(R.string.refreshing));
 			backupCompleteIcon.setVisibility(View.GONE);
 		} else if (syncStatus == SyncService.STATUS_NO_SPACE_LEFT) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
+			syncPhoto.setImageDrawable(null);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(activity.getString(R.string.no_space_left));
 			backupCompleteIcon.setVisibility(View.GONE);
@@ -115,6 +121,7 @@ public class SyncBarHandler {
 		} else if (syncStatus == SyncService.STATUS_DISABLED) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
+			syncPhoto.setImageDrawable(null);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(activity.getString(R.string.sync_disabled));
 			backupCompleteIcon.setVisibility(View.GONE);
@@ -122,6 +129,7 @@ public class SyncBarHandler {
 		} else if (syncStatus == SyncService.STATUS_NOT_WIFI) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
+			syncPhoto.setImageDrawable(null);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(activity.getString(R.string.sync_not_on_wifi));
 			backupCompleteIcon.setVisibility(View.GONE);
@@ -129,6 +137,7 @@ public class SyncBarHandler {
 		} else if (syncStatus == SyncService.STATUS_BATTERY_LOW) {
 			refreshCProgress.setVisibility(View.GONE);
 			syncPhoto.setVisibility(View.GONE);
+			syncPhoto.setImageDrawable(null);
 			syncProgress.setVisibility(View.INVISIBLE);
 			syncText.setText(activity.getString(R.string.sync_battery_low));
 			backupCompleteIcon.setVisibility(View.GONE);
@@ -136,6 +145,7 @@ public class SyncBarHandler {
 		} else if (syncStatus == SyncService.STATUS_IDLE) {
 			syncText.setText(activity.getString(R.string.backup_complete));
 			syncPhoto.setVisibility(View.GONE);
+			syncPhoto.setImageDrawable(null);
 			syncProgress.setVisibility(View.INVISIBLE);
 			refreshCProgress.setVisibility(View.GONE);
 			backupCompleteIcon.setVisibility(View.VISIBLE);

@@ -10,6 +10,8 @@ import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 
+import java.util.ArrayList;
+
 public class AlbumFilesDb implements FilesDb {
 
 	private StingleDb db;
@@ -83,7 +85,7 @@ public class AlbumFilesDb implements FilesDb {
 
 
 
-	public Cursor getAlbumFilesList(String albumId, int sort, String limit){
+	public Cursor getFilesList1(int mode, int sort, String limit, String albumId){
 
 		String[] projection = {
 				StingleDbContract.Columns._ID,
@@ -115,6 +117,144 @@ public class AlbumFilesDb implements FilesDb {
 				limit
 		);
 
+	}
+
+	public Cursor getFilesList(int mode, int sort, String limit, String folderId){
+
+		String[] projection = {
+				StingleDbContract.Columns._ID,
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Columns.COLUMN_NAME_VERSION,
+				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Columns.COLUMN_NAME_HEADERS,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
+		};
+
+		String selection = "";
+
+		ArrayList<String> selectionArgs = new ArrayList<>();
+
+		switch(mode){
+			case GET_MODE_ALL:
+
+				break;
+			case GET_MODE_ONLY_LOCAL:
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs.add("1");
+				selectionArgs.add("0");
+				break;
+			case GET_MODE_ONLY_REMOTE:
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs.add("0");
+				selectionArgs.add("1");
+				break;
+			case GET_MODE_LOCAL:
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ?";
+				selectionArgs.add("1");
+				break;
+			case GET_MODE_REMOTE:
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs.add("1");
+				break;
+		}
+
+		if(folderId != null) {
+			if (selection.length() > 0) {
+				selection += " AND ";
+			}
+			selection += StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+			selectionArgs.add(folderId);
+		}
+
+
+		String sortOrder =
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+
+		String[] selArgs = new String[selectionArgs.size()];
+		for (int i = 0;i <selectionArgs.size(); i++){
+			selArgs[i] = selectionArgs.get(i);
+		}
+
+		return db.openReadDb().query(
+				tableName,   // The table to query
+				projection,             // The array of columns to return (pass null to get all)
+				selection,              // The columns for the WHERE clause
+				selArgs,          // The values for the WHERE clause
+				null,                   // don't group the rows
+				null,                   // don't filter by row groups
+				sortOrder,               // The sort order
+				limit
+		);
+
+	}
+
+	public Cursor getReuploadFilesList(){
+
+		String[] projection = {
+				StingleDbContract.Columns._ID,
+				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+				StingleDbContract.Columns.COLUMN_NAME_VERSION,
+				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
+				StingleDbContract.Columns.COLUMN_NAME_HEADERS
+		};
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_REUPLOAD + " = ?";
+
+		String[] selectionArgs = {"1", "1"};
+
+		return db.openReadDb().query(
+				tableName,   // The table to query
+				projection,             // The array of columns to return (pass null to get all)
+				selection,              // The columns for the WHERE clause
+				selectionArgs,          // The values for the WHERE clause
+				null,                   // don't group the rows
+				null,                   // don't filter by row groups
+				null               // The sort order
+		);
+
+	}
+
+	public int markFileAsRemote(String filename){
+		ContentValues values = new ContentValues();
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE, 1);
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
+		String[] selectionArgs = { filename };
+
+		return db.openWriteDb().update(
+				tableName,
+				values,
+				selection,
+				selectionArgs);
+	}
+	public int markFileAsReuploaded(String filename){
+
+		StingleDbFile file = getFileIfExists(filename);
+
+		if(file == null || !file.isLocal){
+			return 0;
+		}
+
+		ContentValues values = new ContentValues();
+		values.put(StingleDbContract.Columns.COLUMN_NAME_REUPLOAD, REUPLOAD_NO);
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
+		String[] selectionArgs = { filename };
+
+		return db.openWriteDb().update(
+				tableName,
+				values,
+				selection,
+				selectionArgs);
 	}
 
 	public StingleDbFile getFileIfExists(String filename){

@@ -40,7 +40,7 @@ public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		FilesTrashDb db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 		File dir = new File(FileManager.getHomeDir(this.context));
 
-		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC);
+		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, null);
 
 		while(result.moveToNext()) {
 			StingleDbFile dbFile = new StingleDbFile(result);
