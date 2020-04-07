@@ -34,7 +34,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 	private final Context context;
 	private final File destinationFolder;
 	private final OnAsyncTaskFinish onFinishListener;
-	private int folder = SyncManager.FOLDER_MAIN;
+	private int folder = SyncManager.GALLERY;
 	private String folderId = null;
 
 	private boolean performMediaScan = false;

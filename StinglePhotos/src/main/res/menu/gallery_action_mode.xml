@@ -7,7 +7,7 @@
         android:title="@string/share"
         app:showAsAction="always|withText" />
     <item
-        android:id="@+id/add_to_album"
+        android:id="@+id/add_to_folder"
         android:icon="@drawable/ic_action_add"
         android:title="@string/add_to_album"
         app:showAsAction="always|withText" />

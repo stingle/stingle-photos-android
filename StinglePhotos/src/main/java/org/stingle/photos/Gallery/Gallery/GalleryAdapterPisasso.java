@@ -22,7 +22,7 @@ import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -56,7 +56,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
-	private int folderType = SyncManager.FOLDER_MAIN;
+	private int folderType = SyncManager.GALLERY;
 	private String folderId = null;
 	private int DB_SORT = StingleDb.SORT_DESC;
 
@@ -69,15 +69,15 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		this.folderType = folderType;
 		this.folderId = folderId;
 		switch (folderType){
-			case SyncManager.FOLDER_MAIN:
+			case SyncManager.GALLERY:
 				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
 				break;
-			case SyncManager.FOLDER_TRASH:
+			case SyncManager.TRASH:
 				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
 				break;
-			case SyncManager.FOLDER_ALBUM:
+			case SyncManager.FOLDER:
 				DB_SORT = StingleDb.SORT_ASC;
-				this.db = new AlbumFilesDb(context);
+				this.db = new FolderFilesDb(context);
 				break;
 		}
 		this.thumbSize = Helpers.getThumbSize(context);
@@ -284,7 +284,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		int galleryPos = translateDbPosToGalleryPos(dbPosition);
 
 		String folder = "m";
-		if(folderType == SyncManager.FOLDER_TRASH){
+		if(folderType == SyncManager.TRASH){
 			folder = "t";
 		}
 
@@ -355,10 +355,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			//holder.image.setBackgroundColor(activity.getResources().getColor(R.color.galery_item_bg));
 
 			String folder = "m";
-			if(folderType == SyncManager.FOLDER_TRASH){
+			if(folderType == SyncManager.TRASH){
 				folder = "t";
 			}
-			else if(folderType == SyncManager.FOLDER_ALBUM){
+			else if(folderType == SyncManager.FOLDER){
 				folder = "a";
 			}
 

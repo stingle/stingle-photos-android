@@ -7,7 +7,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -45,23 +45,23 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... params) {
 		if(progress != null){
-			progress.setTotalItemsNumber(getFilesCountToUpload(SyncManager.FOLDER_MAIN) + getFilesCountToUpload(SyncManager.FOLDER_TRASH) + getFilesCountToUpload(SyncManager.FOLDER_ALBUM));
+			progress.setTotalItemsNumber(getFilesCountToUpload(SyncManager.GALLERY) + getFilesCountToUpload(SyncManager.TRASH) + getFilesCountToUpload(SyncManager.FOLDER));
 		}
 
-		uploadFolder(SyncManager.FOLDER_MAIN);
-		uploadFolder(SyncManager.FOLDER_TRASH);
-		uploadFolder(SyncManager.FOLDER_ALBUM);
+		uploadFolder(SyncManager.GALLERY);
+		uploadFolder(SyncManager.TRASH);
+		uploadFolder(SyncManager.FOLDER);
 
 		return null;
 	}
 
 	protected int getFilesCountToUpload(int folder){
 		FilesDb db;
-		if(folder == SyncManager.FOLDER_MAIN || folder == SyncManager.FOLDER_TRASH){
-			db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH){
+			db = new FilesTrashDb(context, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 		}
-		else if (folder == SyncManager.FOLDER_ALBUM){
-			db = new AlbumFilesDb(context);
+		else if (folder == SyncManager.FOLDER){
+			db = new FolderFilesDb(context);
 		}
 		else{
 			return 0;
@@ -82,11 +82,11 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 
 	protected void uploadFolder(int folder){
 		FilesDb db;
-		if(folder == SyncManager.FOLDER_MAIN || folder == SyncManager.FOLDER_TRASH){
-			db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH){
+			db = new FilesTrashDb(context, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 		}
-		else if (folder == SyncManager.FOLDER_ALBUM){
-			db = new AlbumFilesDb(context);
+		else if (folder == SyncManager.FOLDER){
+			db = new FolderFilesDb(context);
 		}
 		else{
 			return;
@@ -127,14 +127,14 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 		String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
 		String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
 		String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
-		String albumId = "";
+		String folderId = "";
 		try {
-			albumId = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
+			folderId = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID));
 		}
 		catch (IllegalArgumentException ignored) {}
 
 		if(progress != null){
-			progress.currentFile(filename, headers, folder, albumId);
+			progress.currentFile(filename, headers, folder, folderId);
 		}
 
 		Log.d("uploadingFile", filename);
@@ -160,7 +160,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		postParams.put("token", KeyManagement.getApiToken(context));
 		postParams.put("folder", String.valueOf(folder));
-		postParams.put("albumId", albumId);
+		postParams.put("folderId", folderId);
 		postParams.put("version", version);
 		postParams.put("dateCreated", dateCreated);
 		postParams.put("dateModified", dateModified);

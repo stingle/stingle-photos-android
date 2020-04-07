@@ -63,12 +63,12 @@ public class StinglePicassoLoader extends RequestHandler {
 		String position = uri.substring(2);
 
 		int sort = StingleDb.SORT_DESC;
-		int folder = SyncManager.FOLDER_MAIN;
+		int folder = SyncManager.GALLERY;
 		if(folderStr.equals("t")){
-			folder = SyncManager.FOLDER_TRASH;
+			folder = SyncManager.TRASH;
 		}
 		else if(folderStr.equals("a")){
-			folder = SyncManager.FOLDER_ALBUM;
+			folder = SyncManager.FOLDER;
 			sort = StingleDb.SORT_ASC;
 		}
 

@@ -10,8 +10,8 @@ public class StingleDbContract {
 	public static class Columns implements BaseColumns {
 		public static final String TABLE_NAME_FILES = "files";
 		public static final String TABLE_NAME_TRASH = "trash";
-		public static final String TABLE_NAME_ALBUMS = "albums";
-		public static final String TABLE_NAME_ALBUM_FILES = "album_files";
+		public static final String TABLE_NAME_FOLDERS = "folders";
+		public static final String TABLE_NAME_FOLDER_FILES = "folder_files";
 		public static final String TABLE_NAME_SHARES = "shares";
 
 		public static final String COLUMN_NAME_FILENAME = "filename";
@@ -23,8 +23,8 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_DATE_MODIFIED = "date_modified";
 		public static final String COLUMN_NAME_HEADERS = "headers";
 		public static final String COLUMN_NAME_DATA = "data";
-		public static final String COLUMN_NAME_ALBUM_PK = "album_pk";
-		public static final String COLUMN_NAME_ALBUM_ID = "album_id";
+		public static final String COLUMN_NAME_FOLDER_PK = "folder_pk";
+		public static final String COLUMN_NAME_FOLDER_ID = "folder_id";
 		public static final String COLUMN_NAME_TO_USER_ID = "to_user_id";
 		public static final String COLUMN_NAME_FROM_USER_ID = "from_user_id";
 		public static final String COLUMN_NAME_TO_DATA = "to_data";
@@ -75,25 +75,25 @@ public class StingleDbContract {
 			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_TRASH;
 
 
-	public static final String SQL_CREATE_ALBUMS =
-			"CREATE TABLE " + Columns.TABLE_NAME_ALBUMS + " (" +
+	public static final String SQL_CREATE_FOLDERS =
+			"CREATE TABLE " + Columns.TABLE_NAME_FOLDERS + " (" +
 					Columns._ID + " INTEGER PRIMARY KEY," +
-					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL UNIQUE," +
+					Columns.COLUMN_NAME_FOLDER_ID + " TEXT NOT NULL UNIQUE," +
 					Columns.COLUMN_NAME_DATA + " TEXT NOT NULL," +
-					Columns.COLUMN_NAME_ALBUM_PK + " TEXT NOT NULL, " +
+					Columns.COLUMN_NAME_FOLDER_PK + " TEXT NOT NULL, " +
 					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +
 					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
-	public static final String SQL_CREATE_ALBUMS_AID_INDEX =
-					"CREATE UNIQUE INDEX a_album_id ON "+ Columns.TABLE_NAME_ALBUMS+" ("+ Columns.COLUMN_NAME_ALBUM_ID+")";
+	public static final String SQL_CREATE_FOLDERS_FID_INDEX =
+					"CREATE UNIQUE INDEX a_folder_id ON "+ Columns.TABLE_NAME_FOLDERS +" ("+ Columns.COLUMN_NAME_FOLDER_ID +")";
 
-	public static final String SQL_DELETE_ALBUMS =
-			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_ALBUMS;
+	public static final String SQL_DELETE_FOLDERS =
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_FOLDERS;
 
-	public static final String SQL_CREATE_ALBUM_FILES =
-			"CREATE TABLE " + Columns.TABLE_NAME_ALBUM_FILES + " (" +
+	public static final String SQL_CREATE_FOLDER_FILES =
+			"CREATE TABLE " + Columns.TABLE_NAME_FOLDER_FILES + " (" +
 					Columns._ID + " INTEGER PRIMARY KEY," +
-					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_FOLDER_ID + " TEXT NOT NULL," +
 					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL," +
 					Columns.COLUMN_NAME_IS_LOCAL + " INTEGER," +
 					Columns.COLUMN_NAME_IS_REMOTE + " INTEGER," +
@@ -103,16 +103,16 @@ public class StingleDbContract {
 					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER, " +
 					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
-	public static final String SQL_CREATE_ALBUM_FILES_AID_INDEX =
-			"CREATE UNIQUE INDEX af_album_id ON "+ Columns.TABLE_NAME_ALBUM_FILES+" ("+ Columns.COLUMN_NAME_ALBUM_ID+", "+ Columns.COLUMN_NAME_FILENAME+")";
+	public static final String SQL_CREATE_FOLDER_FILES_FID_INDEX =
+			"CREATE UNIQUE INDEX af_folder_id ON "+ Columns.TABLE_NAME_FOLDER_FILES +" ("+ Columns.COLUMN_NAME_FOLDER_ID +", "+ Columns.COLUMN_NAME_FILENAME+")";
 
-	public static final String SQL_DELETE_ALBUM_FILES =
-			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_ALBUM_FILES;
+	public static final String SQL_DELETE_FOLDER_FILES =
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_FOLDER_FILES;
 
 	public static final String SQL_CREATE_SHARES =
 			"CREATE TABLE " + Columns.TABLE_NAME_SHARES + " (" +
 					Columns._ID + " INTEGER PRIMARY KEY," +
-					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_FOLDER_ID + " TEXT NOT NULL," +
 					Columns.COLUMN_NAME_TO_USER_ID + " INTEGER," +
 					Columns.COLUMN_NAME_FROM_USER_ID + " INTEGER," +
 					Columns.COLUMN_NAME_TO_DATA + " TEXT NOT NULL," +
@@ -121,7 +121,7 @@ public class StingleDbContract {
 					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
 	public static final String SQL_CREATE_SHARES_AID_INDEX =
-			"CREATE INDEX s_album_id ON "+ Columns.TABLE_NAME_SHARES+" ("+ Columns.COLUMN_NAME_ALBUM_ID+")";
+			"CREATE INDEX s_folder_id ON "+ Columns.TABLE_NAME_SHARES+" ("+ Columns.COLUMN_NAME_FOLDER_ID +")";
 
 	public static final String SQL_DELETE_SHARES =
 			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_SHARES;

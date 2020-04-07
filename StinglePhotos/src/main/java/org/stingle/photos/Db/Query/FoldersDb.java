@@ -8,54 +8,54 @@ import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbFolder;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 
-public class AlbumsDb {
+public class FoldersDb {
 
 	private StingleDb db;
 
-	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUMS;
+	private String tableName = StingleDbContract.Columns.TABLE_NAME_FOLDERS;
 
-	public static final int ALBUM_ID_LEN = 32;
+	public static final int FOLDER_ID_LEN = 32;
 
-	public AlbumsDb(Context context) {
+	public FoldersDb(Context context) {
 		db = new StingleDb(context);
 	}
 
 
-	public String insertAlbum(StingleDbAlbum album){
-		return insertAlbum(album.albumId, album.data, album.albumPK, album.dateCreated, album.dateModified);
+	public String insertFolder(StingleDbFolder folder){
+		return insertFolder(folder.folderId, folder.data, folder.folderPK, folder.dateCreated, folder.dateModified);
 	}
 
-	public String insertAlbum(String albumId, String data, String albumPK, long dateCreated, long dateModified){
-		if(albumId == null){
-			albumId = CryptoHelpers.getRandomString(ALBUM_ID_LEN);
+	public String insertFolder(String folderId, String data, String folderPK, long dateCreated, long dateModified){
+		if(folderId == null){
+			folderId = CryptoHelpers.getRandomString(FOLDER_ID_LEN);
 		}
 
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATA, data);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, albumId);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, albumPK);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID, folderId);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_FOLDER_PK, folderPK);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, dateModified);
 
 		db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
-		return albumId;
+		return folderId;
 	}
 
-	public int updateAlbum(StingleDbAlbum album){
+	public int updateFolder(StingleDbFolder folder){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, album.albumId);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_DATA, album.data);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, album.albumPK);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, album.dateCreated);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, album.dateModified);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID, folder.folderId);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATA, folder.data);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_FOLDER_PK, folder.folderPK);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, folder.dateCreated);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, folder.dateModified);
 
 		String selection = StingleDbContract.Columns._ID + " = ?";
-		String[] selectionArgs = { String.valueOf(album.id) };
+		String[] selectionArgs = { String.valueOf(folder.id) };
 
 		return db.openWriteDb().update(
 				tableName,
@@ -66,9 +66,9 @@ public class AlbumsDb {
 
 
 
-	public int deleteAlbum(String albumId){
-		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { String.valueOf(albumId) };
+	public int deleteFolder(String folderId){
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
+		String[] selectionArgs = { String.valueOf(folderId) };
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
@@ -79,13 +79,13 @@ public class AlbumsDb {
 
 
 
-	public Cursor getAlbumsList(int sort){
+	public Cursor getFoldersList(int sort){
 
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_DATA,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_PK,
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
@@ -107,12 +107,12 @@ public class AlbumsDb {
 
 	}
 
-	public StingleDbAlbum getAlbumAtPosition(int pos, int sort){
+	public StingleDbFolder getFolderAtPosition(int pos, int sort){
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_DATA,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_PK,
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
@@ -134,23 +134,23 @@ public class AlbumsDb {
 
 		if(result.getCount() > 0){
 			result.moveToNext();
-			return new StingleDbAlbum(result);
+			return new StingleDbFolder(result);
 		}
 		return null;
 	}
 
-	public StingleDbAlbum getAlbumById(String albumId){
+	public StingleDbFolder getFolderById(String folderId){
 		String[] projection = {
 				BaseColumns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_DATA,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_PK,
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
 				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
 
-		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { albumId };
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
+		String[] selectionArgs = { folderId };
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -166,12 +166,12 @@ public class AlbumsDb {
 
 		if(result.getCount() > 0){
 			result.moveToNext();
-			return new StingleDbAlbum(result);
+			return new StingleDbFolder(result);
 		}
 		return null;
 	}
 
-	public long getTotalAlbumsCount(){
+	public long getTotalFoldersCount(){
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
 

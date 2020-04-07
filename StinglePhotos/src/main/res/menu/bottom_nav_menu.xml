@@ -3,7 +3,7 @@
     <item android:id="@+id/action_gallery"
         android:title="@string/gallery"
         android:icon="@drawable/ic_image_black" />
-    <item android:id="@+id/action_albums"
+    <item android:id="@+id/action_folders"
         android:title="@string/albums"
         android:icon="@drawable/ic_menu_gallery" />
     <item android:id="@+id/action_sharing"

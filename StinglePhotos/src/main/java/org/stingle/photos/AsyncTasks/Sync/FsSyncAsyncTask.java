@@ -29,15 +29,15 @@ public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
-		boolean result1 = fsSyncFolder(SyncManager.FOLDER_MAIN);
-		boolean result2 = fsSyncFolder(SyncManager.FOLDER_TRASH);
+		boolean result1 = fsSyncFolder(SyncManager.GALLERY);
+		boolean result2 = fsSyncFolder(SyncManager.TRASH);
 
 		return result1 || result2;
 	}
 
 	protected boolean fsSyncFolder(int folder){
 		boolean needToUpdateUI = false;
-		FilesTrashDb db = new FilesTrashDb(context, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		FilesTrashDb db = new FilesTrashDb(context, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 		File dir = new File(FileManager.getHomeDir(this.context));
 
 		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, null);
@@ -62,7 +62,7 @@ public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			}
 		}
 
-		if(folder == SyncManager.FOLDER_MAIN) {
+		if(folder == SyncManager.GALLERY) {
 			File[] currentFolderFiles = dir.listFiles();
 
 			FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);

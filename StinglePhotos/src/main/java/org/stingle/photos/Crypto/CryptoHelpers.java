@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONObject;
-import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Objects.StingleDbFolder;
+import org.stingle.photos.Db.Query.FoldersDb;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 
@@ -71,16 +71,16 @@ public class CryptoHelpers {
 	public static void decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		Crypto crypto = StinglePhotosApplication.getCrypto();
 		Crypto.Header header = null;
-		if(folder == SyncManager.FOLDER_ALBUM){
-			AlbumsDb albumsDb = new AlbumsDb(context);
-			StingleDbAlbum album = albumsDb.getAlbumById(folderId);
-			Crypto.AlbumData albumData = crypto.parseAlbumData(album.data);
+		if(folder == SyncManager.FOLDER){
+			FoldersDb folderDb = new FoldersDb(context);
+			StingleDbFolder dbFolder = folderDb.getFolderById(folderId);
+			Crypto.FolderData folderData = crypto.parseFolderData(dbFolder.data);
 
 			if(isThumb) {
-				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK));
+				header = crypto.getThumbHeaderFromHeadersStr(headers, folderData.privateKey, Crypto.base64ToByteArray(dbFolder.folderPK));
 			}
 			else{
-				header = crypto.getFileHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK));
+				header = crypto.getFileHeaderFromHeadersStr(headers, folderData.privateKey, Crypto.base64ToByteArray(dbFolder.folderPK));
 			}
 		}
 		else {

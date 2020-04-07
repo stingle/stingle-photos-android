@@ -50,7 +50,7 @@ import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
-import org.stingle.photos.Gallery.Albums.AlbumsFragment;
+import org.stingle.photos.Gallery.Folders.FoldersFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
@@ -67,16 +67,16 @@ public class GalleryActivity extends AppCompatActivity
 	public static final int REQUEST_VIEW_PHOTO = 1;
 
 	public static final int FRAGMENT_GALLERY = 1;
-	public static final int FRAGMENT_ALBUMS_LIST = 2;
-	public static final int FRAGMENT_ALBUM = 3;
+	public static final int FRAGMENT_FOLDERS_LIST = 2;
+	public static final int FRAGMENT_FOLDER = 3;
 	public static final int FRAGMENT_SHARES = 4;
-	public static final int FRAGMENT_SHARED_ALBUM = 5;
+	public static final int FRAGMENT_SHARED_FOLDER = 5;
 
 	private LocalBroadcastManager lbm;
 	protected GalleryFragment galleryFragment;
 	protected ActionMode actionMode;
 	protected Toolbar toolbar;
-	protected int currentFolder = SyncManager.FOLDER_MAIN;
+	protected int currentFolder = SyncManager.GALLERY;
 
 	protected Messenger mService = null;
 	protected boolean isBound = false;
@@ -92,7 +92,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	private int currentFragment = FRAGMENT_GALLERY;
 	private String currentFolderId = null;
-	private String currentAlbumName = "";
+	private String currentFolderName = "";
 
 	private BroadcastReceiver onLogout = new BroadcastReceiver() {
 		@Override
@@ -185,7 +185,7 @@ public class GalleryActivity extends AppCompatActivity
 		if(!isSyncEnabled){
 			disableSyncBar();
 		}
-		else if (isSyncBarDisabled() && currentFolder == SyncManager.FOLDER_MAIN){
+		else if (isSyncBarDisabled() && currentFolder == SyncManager.GALLERY){
 			enableSyncBar();
 		}
 
@@ -210,42 +210,42 @@ public class GalleryActivity extends AppCompatActivity
 
 	public void showMainGallery(){
 		currentFragment = FRAGMENT_GALLERY;
-		currentFolder = SyncManager.FOLDER_MAIN;
+		currentFolder = SyncManager.GALLERY;
 		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		enableSyncBar();
 		initCurrentFragment();
-		currentAlbumName = "";
+		currentFolderName = "";
 	}
 	public void showTrash(){
 		currentFragment = FRAGMENT_GALLERY;
-		currentFolder = SyncManager.FOLDER_TRASH;
+		currentFolder = SyncManager.TRASH;
 		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.title_trash));
 		disableSyncBar();
-		currentAlbumName = "";
+		currentFolderName = "";
 		initCurrentFragment();
 	}
-	public void showAlbumsList(){
-		currentFragment = FRAGMENT_ALBUMS_LIST;
+	public void showFoldersList(){
+		currentFragment = FRAGMENT_FOLDERS_LIST;
 		currentFolder = -1;
 		currentFolderId = null;
 		toolbar.setTitle(getString(R.string.albums));
 		disableSyncBar();
-		currentAlbumName = "";
+		currentFolderName = "";
 		initCurrentFragment();
 	}
-	public void showAlbum(String albumId, String albumName){
+	public void showFolder(String folderId, String folderName){
 		currentFragment = FRAGMENT_GALLERY;
-		currentFolder = SyncManager.FOLDER_ALBUM;
-		currentFolderId = albumId;
-		if(albumName != null && albumName.length() > 0){
-			currentAlbumName = albumName;
-			toolbar.setTitle(albumName);
+		currentFolder = SyncManager.FOLDER;
+		currentFolderId = folderId;
+		if(folderName != null && folderName.length() > 0){
+			currentFolderName = folderName;
+			toolbar.setTitle(folderName);
 		}
 		else{
 			toolbar.setTitle(getString(R.string.album));
-			currentAlbumName = "";
+			currentFolderName = "";
 		}
 		disableSyncBar();
 		initCurrentFragment();
@@ -256,8 +256,8 @@ public class GalleryActivity extends AppCompatActivity
 			case FRAGMENT_GALLERY:
 				initGalleryFragment(currentFolder, currentFolderId, true);
 				break;
-			case FRAGMENT_ALBUMS_LIST:
-				initAlbumsFragment();
+			case FRAGMENT_FOLDERS_LIST:
+				initFoldersFragment();
 				break;
 		}
 	}
@@ -314,23 +314,23 @@ public class GalleryActivity extends AppCompatActivity
 
 	}
 
-	private void initAlbumsFragment(){
+	private void initFoldersFragment(){
 		exitActionMode();
 		FragmentManager fm = getSupportFragmentManager();
 
 		Bundle bundle = new Bundle();
 
-		AlbumsFragment albumsFragment = new AlbumsFragment();
-		albumsFragment.setArguments(bundle);
+		FoldersFragment foldersFragment = new FoldersFragment();
+		foldersFragment.setArguments(bundle);
 
 		Fragment fragment = fm.findFragmentById(R.id.galleryContainer);
 		FragmentTransaction ft = fm.beginTransaction();
 		if (fragment==null) {
 
-			ft.add(R.id.galleryContainer, albumsFragment);
+			ft.add(R.id.galleryContainer, foldersFragment);
 		}
 		else {
-			ft.replace(R.id.galleryContainer, albumsFragment);
+			ft.replace(R.id.galleryContainer, foldersFragment);
 		}
 		ft.commit();
 	}
@@ -452,7 +452,9 @@ public class GalleryActivity extends AppCompatActivity
 			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
-					galleryFragment.updateDataSet();
+					if(galleryFragment != null) {
+						galleryFragment.updateDataSet();
+					}
 					startSync();
 					isImporting = false;
 					checkLoginAndInit();
@@ -525,10 +527,10 @@ public class GalleryActivity extends AppCompatActivity
 		else if (galleryFragment.isSelectionModeActive()) {
 			exitActionMode();
 		}
-		else if(currentFolder == SyncManager.FOLDER_ALBUM){
-			showAlbumsList();
+		else if(currentFolder == SyncManager.FOLDER){
+			showFoldersList();
 		}
-		else if(currentFolder == SyncManager.FOLDER_TRASH){
+		else if(currentFolder == SyncManager.TRASH){
 			showMainGallery();
 		}
 		else {
@@ -542,14 +544,14 @@ public class GalleryActivity extends AppCompatActivity
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if(!sendBackDecryptedFile) {
 			switch (currentFolder) {
-				case SyncManager.FOLDER_MAIN:
+				case SyncManager.GALLERY:
 					getMenuInflater().inflate(R.menu.gallery, menu);
 					break;
-				case SyncManager.FOLDER_TRASH:
+				case SyncManager.TRASH:
 					getMenuInflater().inflate(R.menu.gallery_trash, menu);
 					break;
-				case SyncManager.FOLDER_ALBUM:
-					getMenuInflater().inflate(R.menu.album, menu);
+				case SyncManager.FOLDER:
+					getMenuInflater().inflate(R.menu.folder, menu);
 					break;
 			}
 		}
@@ -584,8 +586,8 @@ public class GalleryActivity extends AppCompatActivity
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);
 		}
-		else if (id == R.id.action_delete_album) {
-			GalleryActions.deleteAlbum(this);
+		else if (id == R.id.action_delete_folder) {
+			GalleryActions.deleteFolder(this);
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -604,8 +606,8 @@ public class GalleryActivity extends AppCompatActivity
 							case R.id.action_gallery:
 								showMainGallery();
 								break;
-							case R.id.action_albums:
-								showAlbumsList();
+							case R.id.action_folders:
+								showFoldersList();
 								break;
 							case R.id.action_sharing:
 								break;
@@ -712,14 +714,14 @@ public class GalleryActivity extends AppCompatActivity
 			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 				if(!sendBackDecryptedFile) {
 					switch (currentFolder) {
-						case SyncManager.FOLDER_MAIN:
+						case SyncManager.GALLERY:
 							mode.getMenuInflater().inflate(R.menu.gallery_action_mode, menu);
 							break;
-						case SyncManager.FOLDER_TRASH:
+						case SyncManager.TRASH:
 							mode.getMenuInflater().inflate(R.menu.gallery_trash_action_mode, menu);
 							break;
-						case SyncManager.FOLDER_ALBUM:
-							mode.getMenuInflater().inflate(R.menu.gallery_album_action_mode, menu);
+						case SyncManager.FOLDER:
+							mode.getMenuInflater().inflate(R.menu.gallery_folder_action_mode, menu);
 							break;
 					}
 				}
@@ -741,8 +743,8 @@ public class GalleryActivity extends AppCompatActivity
 					case R.id.share:
 						GalleryActions.shareSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
 						break;
-					case R.id.add_to_album:
-						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentFolder == SyncManager.FOLDER_ALBUM);
+					case R.id.add_to_folder:
+						GalleryActions.addToFolderSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentFolder == SyncManager.FOLDER);
 						break;
 					case R.id.decrypt:
 						GalleryActions.decryptSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
@@ -779,8 +781,8 @@ public class GalleryActivity extends AppCompatActivity
 	public String getCurrentFolderId(){
 		return currentFolderId;
 	}
-	public String getCurrentAlbumName(){
-		return currentAlbumName;
+	public String getCurrentFolderName(){
+		return currentFolderName;
 	}
 
 	public void exitActionMode(){

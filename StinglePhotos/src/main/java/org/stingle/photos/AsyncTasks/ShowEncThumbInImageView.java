@@ -22,7 +22,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 	private String filename;
 	private ImageView imageView;
 	private Integer thumbSize = null;
-	private int folder = SyncManager.FOLDER_MAIN;
+	private int folder = SyncManager.GALLERY;
 	private String folderId = null;
 	private String headers = null;
 	private boolean isRemote = false;

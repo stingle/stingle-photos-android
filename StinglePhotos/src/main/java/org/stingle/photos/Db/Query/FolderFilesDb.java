@@ -12,23 +12,23 @@ import org.stingle.photos.Db.StingleDbContract;
 
 import java.util.ArrayList;
 
-public class AlbumFilesDb implements FilesDb {
+public class FolderFilesDb implements FilesDb {
 
 	private StingleDb db;
 
-	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUM_FILES;
+	private String tableName = StingleDbContract.Columns.TABLE_NAME_FOLDER_FILES;
 
-	public AlbumFilesDb(Context context) {
+	public FolderFilesDb(Context context) {
 		db = new StingleDb(context);
 	}
 
 	public long insertFile(StingleDbFile file){
-		return insertAlbumFile(file.albumId, file.filename, file.isLocal, file.isRemote, file.version,file.headers, file.dateCreated, file.dateModified);
+		return insertFolderFile(file.folderId, file.filename, file.isLocal, file.isRemote, file.version,file.headers, file.dateCreated, file.dateModified);
 	}
 
-	public long insertAlbumFile(String albumId, String filename, boolean isLocal, boolean isRemote, int version, String headers, long dateCreated, long dateModified){
+	public long insertFolderFile(String folderId, String filename, boolean isLocal, boolean isRemote, int version, String headers, long dateCreated, long dateModified){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, albumId);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID, folderId);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_FILENAME, filename);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
@@ -44,7 +44,7 @@ public class AlbumFilesDb implements FilesDb {
 
 	public int updateFile(StingleDbFile file){
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, file.albumId);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID, file.folderId);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_FILENAME, file.filename);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL, (file.isLocal ? 1 : 0));
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE, (file.isRemote ? 1 : 0));
@@ -66,15 +66,15 @@ public class AlbumFilesDb implements FilesDb {
 
 
 
-	public int deleteAlbumFile(Long id){
+	public int deleteFolderFile(Long id){
 		String selection = StingleDbContract.Columns._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(id) };
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
-	public int deleteAlbumFile(String filename, String albumId){
-		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { filename, albumId };
+	public int deleteFolderFile(String filename, String folderId){
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
+		String[] selectionArgs = { filename, folderId };
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
@@ -85,11 +85,11 @@ public class AlbumFilesDb implements FilesDb {
 
 
 
-	public Cursor getFilesList1(int mode, int sort, String limit, String albumId){
+	public Cursor getFilesList1(int mode, int sort, String limit, String folderId){
 
 		String[] projection = {
 				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -100,8 +100,8 @@ public class AlbumFilesDb implements FilesDb {
 				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
 
-		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { albumId };
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
+		String[] selectionArgs = { folderId };
 
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
@@ -123,7 +123,7 @@ public class AlbumFilesDb implements FilesDb {
 
 		String[] projection = {
 				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -166,7 +166,7 @@ public class AlbumFilesDb implements FilesDb {
 			if (selection.length() > 0) {
 				selection += " AND ";
 			}
-			selection += StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+			selection += StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
 			selectionArgs.add(folderId);
 		}
 
@@ -196,7 +196,7 @@ public class AlbumFilesDb implements FilesDb {
 
 		String[] projection = {
 				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -261,10 +261,10 @@ public class AlbumFilesDb implements FilesDb {
 		return getFileIfExists(filename, null);
 	}
 
-	public StingleDbFile getFileIfExists(String filename, String albumId){
+	public StingleDbFile getFileIfExists(String filename, String folderId){
 		String[] projection = {
 				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -276,14 +276,14 @@ public class AlbumFilesDb implements FilesDb {
 		};
 
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
-		if(albumId != null) {
-			selection += " AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+		if(folderId != null) {
+			selection += " AND " + StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
 		}
 		String[] selectionArgs;
-		if(albumId != null) {
+		if(folderId != null) {
 			selectionArgs = new String[2];
 			selectionArgs[0] = filename;
-			selectionArgs[1] = albumId;
+			selectionArgs[1] = folderId;
 		}
 		else{
 			selectionArgs = new String[1];
@@ -310,10 +310,10 @@ public class AlbumFilesDb implements FilesDb {
 		return null;
 	}
 
-	public StingleDbFile getFileAtPosition(int pos, String albumId, int sort){
+	public StingleDbFile getFileAtPosition(int pos, String folderId, int sort){
 		String[] projection = {
 				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+				StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
 				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
 				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
@@ -324,8 +324,8 @@ public class AlbumFilesDb implements FilesDb {
 				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 		};
 
-		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { albumId };
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
+		String[] selectionArgs = { folderId };
 
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
@@ -349,19 +349,19 @@ public class AlbumFilesDb implements FilesDb {
 		return null;
 	}
 
-	public Cursor getAvailableDates(String albumId, int sort){
+	public Cursor getAvailableDates(String folderId, int sort){
 		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
-						"WHERE album_id='" + albumId + "' " +
+						"WHERE folder_id='" + folderId + "' " +
 						"GROUP BY cdate " +
 						"ORDER BY cdate " + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC")
 				, null);
 
 	}
 
-	public long getTotalFilesCount(String albumId){
-		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { albumId };
+	public long getTotalFilesCount(String folderId){
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID + " = ?";
+		String[] selectionArgs = { folderId };
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
 	}
 

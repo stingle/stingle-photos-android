@@ -13,7 +13,7 @@
         android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/albumName"
+        android:id="@+id/folderName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

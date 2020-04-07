@@ -36,9 +36,9 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbFolder;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.FoldersDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -70,7 +70,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final ContentLoadingProgressBar loading;
 	private final ViewPagerAdapter adapter;
 	private final FilesDb db;
-	private int folder = SyncManager.FOLDER_MAIN;
+	private int folder = SyncManager.GALLERY;
 	private String folderId = null;
 
 	private final OnClickListener onClickListener;
@@ -114,9 +114,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		ViewItemTaskResult result = new ViewItemTaskResult();
 
 		result.folder = folder;
+		result.folderId = folderId;
 
 		int sort = StingleDb.SORT_DESC;
-		if(folder == SyncManager.FOLDER_ALBUM){
+		if(folder == SyncManager.FOLDER){
 			sort = StingleDb.SORT_ASC;
 		}
 
@@ -189,11 +190,11 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 			}
 			if (fileType == Crypto.FILE_TYPE_VIDEO) {
-				if (folder == SyncManager.FOLDER_ALBUM) {
-					AlbumsDb albumsDb = new AlbumsDb(context);
-					StingleDbAlbum album = albumsDb.getAlbumById(folderId);
-					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
-					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK));
+				if (folder == SyncManager.FOLDER) {
+					FoldersDb foldersDb = new FoldersDb(context);
+					StingleDbFolder dbFolder = foldersDb.getFolderById(folderId);
+					Crypto.FolderData folderData = StinglePhotosApplication.getCrypto().parseFolderData(dbFolder.data);
+					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, folderData.privateKey, Crypto.base64ToByteArray(dbFolder.folderPK));
 
 				} else {
 					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers);
@@ -421,7 +422,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		public byte[] bitmapBytes = null;
 		public boolean isRemote = false;
 		public String url = null;
-		public int folder = SyncManager.FOLDER_MAIN;
+		public int folder = SyncManager.GALLERY;
 		public String folderId = null;
 		public String headers = null;
 	}

@@ -36,7 +36,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	private GalleryFragmentParent parentActivity;
 
-	private int currentFolder = SyncManager.FOLDER_MAIN;
+	private int currentFolder = SyncManager.GALLERY;
 	private String folderId = null;
 
 
@@ -58,7 +58,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		Bundle bundle = getArguments();
 		boolean initNow = false;
 		if (bundle != null) {
-			currentFolder = bundle.getInt("currentFolder", SyncManager.FOLDER_MAIN);
+			currentFolder = bundle.getInt("currentFolder", SyncManager.GALLERY);
 			folderId = bundle.getString("folderId");
 			initNow = bundle.getBoolean("initNow", true);
 		}
@@ -201,7 +201,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	}
 
 	public void updateItem(int position){
-		adapter.updateItem(position);
+		if(adapter != null) {
+			adapter.updateItem(position);
+		}
 	}
 
 	public void scrollToTop(){

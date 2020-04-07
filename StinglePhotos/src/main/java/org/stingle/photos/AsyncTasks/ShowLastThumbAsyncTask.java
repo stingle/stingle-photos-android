@@ -14,7 +14,7 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 
 	private Context context;
 	private ImageView imageView;
-	private int folder = SyncManager.FOLDER_MAIN;
+	private int folder = SyncManager.GALLERY;
 	private Integer thumbSize = null;
 
 	public ShowLastThumbAsyncTask(Context context, ImageView imageView) {

@@ -38,8 +38,8 @@
     <string name="get_server_pk">keys/getServerPK</string>
     <string name="reupload_keys">keys/reuploadKeys</string>
 
-    <string name="add_album">sync/addAlbum</string>
-    <string name="delete_album_path">sync/deleteAlbum</string>
+    <string name="add_folder">sync/addFolder</string>
+    <string name="delete_folder_path">sync/deleteFolder</string>
     <string name="move_file">sync/moveFile</string>
 
 </resources>

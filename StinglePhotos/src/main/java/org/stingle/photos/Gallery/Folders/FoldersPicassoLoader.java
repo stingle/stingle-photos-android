@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery.Albums;
+package org.stingle.photos.Gallery.Folders;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,10 +12,10 @@ import com.squareup.picasso3.RequestHandler;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
-import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.Query.FoldersDb;
 import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbFolder;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -27,15 +27,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 
-public class AlbumsPicassoLoader extends RequestHandler {
+public class FoldersPicassoLoader extends RequestHandler {
 
 	private Context context;
-	private AlbumsDb db;
-	private AlbumFilesDb filesDb;
+	private FoldersDb db;
+	private FolderFilesDb filesDb;
 	private int thumbSize;
 	private Crypto crypto;
 
-	public AlbumsPicassoLoader(Context context, AlbumsDb db, AlbumFilesDb filesDb, int thumbSize){
+	public FoldersPicassoLoader(Context context, FoldersDb db, FolderFilesDb filesDb, int thumbSize){
 		this.context = context;
 		this.db = db;
 		this.filesDb = filesDb;
@@ -58,23 +58,23 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 
 			try {
-				StingleDbAlbum album = db.getAlbumAtPosition(Integer.parseInt(position), StingleDb.SORT_ASC);
-				Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+				StingleDbFolder folder = db.getFolderAtPosition(Integer.parseInt(position), StingleDb.SORT_ASC);
+				Crypto.FolderData folderData = StinglePhotosApplication.getCrypto().parseFolderData(folder.data);
 
 				Result result = null;
 
-				StingleDbFile albumFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_ASC);
+				StingleDbFile folderDbFile = filesDb.getFileAtPosition(0, folder.folderId, StingleDb.SORT_ASC);
 
-				if(albumFile != null){
+				if(folderDbFile != null){
 					byte[] decryptedData;
-					if(albumFile.isLocal) {
-						File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + albumFile.filename);
+					if(folderDbFile.isLocal) {
+						File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + folderDbFile.filename);
 						FileInputStream input = new FileInputStream(fileToDec);
-						decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(albumFile.headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK)));
+						decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(folderDbFile.headers, folderData.privateKey, Crypto.base64ToByteArray(folder.folderPK)));
 					}
 					else{
-						byte[] encFile = FileManager.getAndCacheThumb(context, albumFile.filename, SyncManager.FOLDER_ALBUM);
-						decryptedData = crypto.decryptFile(encFile, crypto.getThumbHeaderFromHeadersStr(albumFile.headers, albumData.privateKey, Crypto.base64ToByteArray(album.albumPK)));
+						byte[] encFile = FileManager.getAndCacheThumb(context, folderDbFile.filename, SyncManager.FOLDER);
+						decryptedData = crypto.decryptFile(encFile, crypto.getThumbHeaderFromHeadersStr(folderDbFile.headers, folderData.privateKey, Crypto.base64ToByteArray(folder.folderPK)));
 					}
 
 					if (decryptedData != null) {
@@ -94,11 +94,11 @@ public class AlbumsPicassoLoader extends RequestHandler {
 					result = new Result(drawable, Picasso.LoadedFrom.DISK);
 				}
 
-				AlbumsAdapterPisasso.AlbumProps props = new AlbumsAdapterPisasso.AlbumProps();
+				FoldersAdapterPisasso.FolderProps props = new FoldersAdapterPisasso.FolderProps();
 
-				props.name = albumData.name;
+				props.name = folderData.name;
 
-				result.addProperty("albumProps", props);
+				result.addProperty("folderProps", props);
 
 				callback.onSuccess(result);
 

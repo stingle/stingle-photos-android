@@ -92,7 +92,7 @@ public class SyncService extends Service {
 
 			@Override
 			public void fileUploadFinished(String filename, int folder) {
-				FilesTrashDb db = new FilesTrashDb(SyncService.this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+				FilesTrashDb db = new FilesTrashDb(SyncService.this, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 
 				Integer filePos = db.getFilePositionByFilename(filename);
 				db.close();

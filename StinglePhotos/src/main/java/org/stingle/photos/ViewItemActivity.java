@@ -26,7 +26,7 @@ import org.stingle.photos.AsyncTasks.Gallery.FileMoveAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.FilesTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -42,7 +42,7 @@ import java.util.Objects;
 public class ViewItemActivity extends AppCompatActivity {
 
 	protected int itemPosition = 0;
-	protected int folder = SyncManager.FOLDER_MAIN;
+	protected int folder = SyncManager.GALLERY;
 	protected String folderId = null;
 	protected int currentPosition = 0;
 	protected ViewPager viewPager;
@@ -228,11 +228,11 @@ public class ViewItemActivity extends AppCompatActivity {
 		int id = item.getItemId();
 		FilesDb db;
 		int sort = StingleDb.SORT_DESC;
-		if(folder == SyncManager.FOLDER_MAIN || folder == SyncManager.FOLDER_TRASH) {
-			db = new FilesTrashDb(this, (folder == SyncManager.FOLDER_TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH) {
+			db = new FilesTrashDb(this, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 		}
-		else if (folder == SyncManager.FOLDER_ALBUM){
-			db = new AlbumFilesDb(this);
+		else if (folder == SyncManager.FOLDER){
+			db = new FolderFilesDb(this);
 			sort = StingleDb.SORT_ASC;
 		}
 		else{
@@ -276,7 +276,7 @@ public class ViewItemActivity extends AppCompatActivity {
 			});
 			moveTask.setFromFolder(folder);
 			moveTask.setFromFolderId(folderId);
-			moveTask.setToFolder(SyncManager.FOLDER_TRASH);
+			moveTask.setToFolder(SyncManager.TRASH);
 			moveTask.setIsMoving(true);
 			moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}

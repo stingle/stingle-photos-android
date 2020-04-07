@@ -27,7 +27,7 @@
     </LinearLayout>
 
     <EditText
-        android:id="@+id/album_name"
+        android:id="@+id/folder_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"

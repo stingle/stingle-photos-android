@@ -1018,7 +1018,7 @@ public class Crypto {
         return overallHeaderSize;
     }
 
-    public HashMap<String, String> generateEncryptedAlbumData(byte[] userPK, String albumName) throws IOException {
+    public HashMap<String, String> generateEncryptedFolderData(byte[] userPK, String folderName) throws IOException {
 
         byte[] privateKey = new byte[Box.SECRETKEYBYTES];
         byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
@@ -1027,16 +1027,16 @@ public class Crypto {
 
         ByteArrayOutputStream dataByteStream = new ByteArrayOutputStream();
 
-        // Album private key
+        // Folder private key
         dataByteStream.write(privateKey);
 
-        byte[] albumNameBytes = albumName.getBytes();
+        byte[] folderNameBytes = folderName.getBytes();
 
         // name length
-        dataByteStream.write(intToByteArray(albumName.length()));
+        dataByteStream.write(intToByteArray(folderName.length()));
 
         // name itself
-        dataByteStream.write(albumNameBytes);
+        dataByteStream.write(folderNameBytes);
 
         byte[] dataBytes = dataByteStream.toByteArray();
 
@@ -1052,7 +1052,7 @@ public class Crypto {
         return result;
     }
 
-    public AlbumData parseAlbumData(String encDataStr) throws IOException, CryptoException {
+    public FolderData parseFolderData(String encDataStr) throws IOException, CryptoException {
 
         byte[] encData = base64ToByteArray(encDataStr);
 
@@ -1062,31 +1062,31 @@ public class Crypto {
         byte[] dataBytes = new byte[encData.length - Box.SEALBYTES];
 
         if(so.crypto_box_seal_open(dataBytes, encData, encData.length, publicKey, privateKey) != 0){
-            throw new CryptoException("Unable to decrypt album data");
+            throw new CryptoException("Unable to decrypt folder data");
         }
 
         ByteArrayInputStream in = new ByteArrayInputStream(dataBytes);
-        AlbumData albumData = new AlbumData();
+        FolderData folderData = new FolderData();
 
-        albumData.privateKey = new byte[Box.SECRETKEYBYTES];
-        in.read(albumData.privateKey);
+        folderData.privateKey = new byte[Box.SECRETKEYBYTES];
+        in.read(folderData.privateKey);
 
-        // Read album name size
-        byte[] albumNameSizeBytes = new byte[4];
-        in.read(albumNameSizeBytes);
-        int albumNameSize = byteArrayToInt(albumNameSizeBytes);
+        // Read folder name size
+        byte[] folderNameSizeBytes = new byte[4];
+        in.read(folderNameSizeBytes);
+        int folderNameSize = byteArrayToInt(folderNameSizeBytes);
 
-        if(albumNameSize > 0) {
+        if(folderNameSize > 0) {
             // Read filename
-            byte[] albumNameBytes = new byte[albumNameSize];
-            in.read(albumNameBytes);
-            albumData.name = new String(albumNameBytes);
+            byte[] folderNameBytes = new byte[folderNameSize];
+            in.read(folderNameBytes);
+            folderData.name = new String(folderNameBytes);
         }
         else{
-            albumData.name = "";
+            folderData.name = "";
         }
 
-        return albumData;
+        return folderData;
     }
 
     public String reencryptFileHeaders(String headersStr, byte[] publicKeyTo, byte[] privateKeyFrom, byte[] publicKeyFrom) throws IOException, CryptoException {
@@ -1138,7 +1138,7 @@ public class Crypto {
         }
     }
 
-    public static class AlbumData{
+    public static class FolderData {
         public byte[] privateKey;
         public String name;
     }
