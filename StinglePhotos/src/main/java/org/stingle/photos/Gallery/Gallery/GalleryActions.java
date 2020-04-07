@@ -11,11 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFolderAsyncTask;
-import org.stingle.photos.AsyncTasks.Gallery.FileMoveAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.Sync.DeleteFilesAsyncTask;
-import org.stingle.photos.AsyncTasks.Sync.EmptyTrashAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.Db.Objects.StingleDbFolder;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
@@ -74,7 +74,7 @@ public class GalleryActions {
 					}
 				};
 
-				FileMoveAsyncTask addSyncTask = new FileMoveAsyncTask(activity, files, onAddFinish);
+				MoveFileAsyncTask addSyncTask = new MoveFileAsyncTask(activity, files, onAddFinish);
 
 				boolean isMoving = ((RadioButton)addFolderDialog.findViewById(R.id.move_to_folder)).isChecked();
 				addSyncTask.setIsMoving(isMoving);
@@ -107,7 +107,7 @@ public class GalleryActions {
 
 			}
 
-			private void addToFolder(FileMoveAsyncTask addSyncTask, String folderId){
+			private void addToFolder(MoveFileAsyncTask addSyncTask, String folderId){
 				if(isFromFolder) {
 					addSyncTask.setFromFolder(SyncManager.FOLDER);
 					addSyncTask.setFromFolderId(activity.getCurrentFolderId());
@@ -163,7 +163,7 @@ public class GalleryActions {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_trash_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
-					FileMoveAsyncTask moveTask = new FileMoveAsyncTask(activity, files, new OnAsyncTaskFinish() {
+					MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
 							super.onFinish();
@@ -192,7 +192,7 @@ public class GalleryActions {
 	public static void restoreSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
 		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.restoring_files), null);
 
-		FileMoveAsyncTask moveTask = new FileMoveAsyncTask(activity, files, new OnAsyncTaskFinish() {
+		MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {
 				super.onFinish();

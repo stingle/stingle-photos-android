@@ -8,7 +8,7 @@ public class StingleDbContract {
 
 	/* Inner class that defines the table contents */
 	public static class Columns implements BaseColumns {
-		public static final String TABLE_NAME_FILES = "files";
+		public static final String TABLE_NAME_GALLERY = "gallery";
 		public static final String TABLE_NAME_TRASH = "trash";
 		public static final String TABLE_NAME_FOLDERS = "folders";
 		public static final String TABLE_NAME_FOLDER_FILES = "folder_files";
@@ -32,7 +32,7 @@ public class StingleDbContract {
 	}
 
 	public static final String SQL_CREATE_FILES =
-			"CREATE TABLE " + Columns.TABLE_NAME_FILES + " (" +
+			"CREATE TABLE " + Columns.TABLE_NAME_GALLERY + " (" +
 					Columns._ID + " INTEGER PRIMARY KEY," +
 					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL UNIQUE," +
 					Columns.COLUMN_NAME_IS_LOCAL + " INTEGER," +
@@ -45,12 +45,12 @@ public class StingleDbContract {
 					")";
 
 	public static final String SQL_DELETE_FILES =
-			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_FILES;
+			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_GALLERY;
 
 	public static final String SQL_FILES_FN_INDEX =
-			"CREATE UNIQUE INDEX filename ON "+ Columns.TABLE_NAME_FILES+" ("+ Columns.COLUMN_NAME_FILENAME+")";
+			"CREATE UNIQUE INDEX filename ON "+ Columns.TABLE_NAME_GALLERY +" ("+ Columns.COLUMN_NAME_FILENAME+")";
 	public static final String SQL_FILES_LR_INDEX =
-			"CREATE INDEX localremote ON "+ Columns.TABLE_NAME_FILES+" ("+ Columns.COLUMN_NAME_IS_LOCAL+", "+ Columns.COLUMN_NAME_IS_REMOTE+")";
+			"CREATE INDEX localremote ON "+ Columns.TABLE_NAME_GALLERY +" ("+ Columns.COLUMN_NAME_IS_LOCAL+", "+ Columns.COLUMN_NAME_IS_REMOTE+")";
 
 
 	public static final String SQL_CREATE_TRASH =

@@ -8,13 +8,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Db.Objects.StingleDbFolder;
 import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleDbFolder;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FoldersDb;
-import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -31,8 +30,8 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private WeakReference<Context> context;
 	private SyncManager.OnFinish onFinish = null;
-	private final FilesTrashDb mainDb;
-	private final FilesTrashDb trashDb;
+	private final GalleryTrashDb galleryDb;
+	private final GalleryTrashDb trashDb;
 	private final FoldersDb folderDb;
 	private final FolderFilesDb folderFilesDb;
 	private long lastSeenTime = 0;
@@ -40,8 +39,8 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	public SyncCloudToLocalDbAsyncTask(Context context, SyncManager.OnFinish onFinish){
 		this.context = new WeakReference<>(context);
 		this.onFinish = onFinish;
-		mainDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
-		trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
+		galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
+		trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 		folderDb = new FoldersDb(context);
 		folderFilesDb = new FolderFilesDb(context);
 	}
@@ -176,7 +175,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	private boolean processFile(Context context, StingleDbFile remoteFile, int folder){
 		FilesDb myDb;
 		if (folder == SyncManager.GALLERY){
-			myDb = mainDb;
+			myDb = galleryDb;
 		}
 		else if (folder == SyncManager.TRASH){
 			myDb = trashDb;
@@ -272,9 +271,9 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		Long date = event.getLong("date");
 
 		if(type == SyncManager.DELETE_EVENT_MAIN) {
-			StingleDbFile file = mainDb.getFileIfExists(filename);
+			StingleDbFile file = galleryDb.getFileIfExists(filename);
 			if(file != null) {
-				mainDb.deleteFile(file.filename);
+				galleryDb.deleteFile(file.filename);
 			}
 		}
 		else if(type == SyncManager.DELETE_EVENT_TRASH) {
@@ -303,7 +302,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 			boolean needToDeleteFiles = true;
 
-			if (mainDb.getFileIfExists(filename) != null || folderFilesDb.getFileIfExists(filename) != null){
+			if (galleryDb.getFileIfExists(filename) != null || folderFilesDb.getFileIfExists(filename) != null){
 				needToDeleteFiles = false;
 			}
 
@@ -330,7 +329,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	@Override
 	protected void onPostExecute(Boolean needToUpdateUI) {
 		super.onPostExecute(needToUpdateUI);
-		mainDb.close();
+		galleryDb.close();
 		trashDb.close();
 		folderDb.close();
 		folderFilesDb.close();

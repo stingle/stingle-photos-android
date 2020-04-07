@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.FilesTrashDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Files.FileManager;
@@ -58,7 +58,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 	protected int getFilesCountToUpload(int folder){
 		FilesDb db;
 		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH){
-			db = new FilesTrashDb(context, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+			db = new GalleryTrashDb(context, folder);
 		}
 		else if (folder == SyncManager.FOLDER){
 			db = new FolderFilesDb(context);
@@ -67,7 +67,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			return 0;
 		}
 
-		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, "", null);
+		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, "", null);
 		int uploadCount = result.getCount();
 		result.close();
 
@@ -83,7 +83,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 	protected void uploadFolder(int folder){
 		FilesDb db;
 		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH){
-			db = new FilesTrashDb(context, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+			db = new GalleryTrashDb(context, folder);
 		}
 		else if (folder == SyncManager.FOLDER){
 			db = new FolderFilesDb(context);
@@ -92,7 +92,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			return;
 		}
 
-		Cursor result = db.getFilesList(FilesTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, null, null);
+		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, null, null);
 		while(result.moveToNext()) {
 			if(isCancelled()){
 				break;

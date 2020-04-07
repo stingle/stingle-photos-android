@@ -22,7 +22,6 @@ import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.util.HashMap;
@@ -204,36 +203,30 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(activity);
 		settings.edit().putBoolean(StinglePhotosApplication.IS_KEY_BACKED_UP, isKeyBackedUp).apply();
 
-		SyncManager.syncFSToDB(activity, new SyncManager.OnFinish() {
-			@Override
-			public void onFinish(Boolean needToUpdateUI) {
-				progressDialog.dismiss();
-				BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
-				if(biometricsManagerWrapper.isBiometricsAvailable()) {
-					Helpers.showConfirmDialog(activity, activity.getString(R.string.enable_biometrics),
-							(dialog, which) -> {
-								biometricsManagerWrapper.setupBiometrics(null, password, new BiometricsManagerWrapper.BiometricsSetupCallback() {
-									@Override
-									public void onSuccess() {
-										gotoGallery();
-									}
-
-									@Override
-									public void onFailed() {
-										gotoGallery();
-									}
-								});
-
-							},
-							(dialog, which) -> {
+		progressDialog.dismiss();
+		BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
+		if(biometricsManagerWrapper.isBiometricsAvailable()) {
+			Helpers.showConfirmDialog(activity, activity.getString(R.string.enable_biometrics),
+					(dialog, which) -> {
+						biometricsManagerWrapper.setupBiometrics(null, password, new BiometricsManagerWrapper.BiometricsSetupCallback() {
+							@Override
+							public void onSuccess() {
 								gotoGallery();
-							});
-				}
-				else{
-					gotoGallery();
-				}
+							}
 
-			}
-		}, AsyncTask.SERIAL_EXECUTOR);
+							@Override
+							public void onFailed() {
+								gotoGallery();
+							}
+						});
+
+					},
+					(dialog, which) -> {
+						gotoGallery();
+					});
+		}
+		else{
+			gotoGallery();
+		}
 	}
 }

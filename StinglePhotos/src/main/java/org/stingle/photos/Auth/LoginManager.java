@@ -351,6 +351,7 @@ public class LoginManager {
         Helpers.deletePreference(context, StinglePhotosApplication.USER_ID);
         Helpers.deletePreference(context, StinglePhotosApplication.USER_EMAIL);
         Helpers.deletePreference(context, StinglePhotosApplication.USER_HOME_FOLDER);
+        Helpers.deletePreference(context, SyncManager.PREF_FIRST_SYNC_DONE);
         Helpers.deleteTmpDir(context);
 
         SyncManager.resetAndStopSync(context);

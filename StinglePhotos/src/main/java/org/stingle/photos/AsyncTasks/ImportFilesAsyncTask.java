@@ -14,11 +14,11 @@ import android.provider.OpenableColumns;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.ByteArrayOutputStream;
@@ -138,11 +138,11 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 				FileOutputStream outputStream = new FileOutputStream(encFilePath);
 				StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, this);
 				long nowDate = System.currentTimeMillis();
-				FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+				GalleryTrashDb db = new GalleryTrashDb(context, SyncManager.GALLERY);
 
 				String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
 
-				db.insertFile(encFilename, true, false, FilesTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
+				db.insertFile(encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
 				db.close();
 			} catch (IOException | CryptoException e) {
 				e.printStackTrace();

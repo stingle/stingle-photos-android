@@ -22,12 +22,11 @@ import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Db.Query.FolderFilesDb;
-import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.Helpers.IDragSelectAdapter;
 import org.stingle.photos.R;
@@ -70,10 +69,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		this.folderId = folderId;
 		switch (folderType){
 			case SyncManager.GALLERY:
-				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+				this.db = new GalleryTrashDb(context, SyncManager.GALLERY);
 				break;
 			case SyncManager.TRASH:
-				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
+				this.db = new GalleryTrashDb(context, SyncManager.GALLERY);
 				break;
 			case SyncManager.FOLDER:
 				DB_SORT = StingleDb.SORT_ASC;

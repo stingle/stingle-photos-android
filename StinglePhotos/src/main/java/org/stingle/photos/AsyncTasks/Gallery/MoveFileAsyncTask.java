@@ -12,7 +12,7 @@ import org.stingle.photos.Sync.SyncManager;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
+public class MoveFileAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	private WeakReference<Context> context;
 	private ArrayList<StingleDbFile> files = null;
@@ -25,30 +25,30 @@ public class FileMoveAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private String toFolderId = null;
 	private boolean isMoving = false;
 
-	public FileMoveAsyncTask(Context context, ArrayList<StingleDbFile> files, OnAsyncTaskFinish onFinishListener) {
+	public MoveFileAsyncTask(Context context, ArrayList<StingleDbFile> files, OnAsyncTaskFinish onFinishListener) {
 		this.context = new WeakReference<>(context);
 		this.files = files;
 		this.onFinishListener = onFinishListener;
 		this.crypto = StinglePhotosApplication.getCrypto();
 	}
 
-	public FileMoveAsyncTask setFromFolder(int folder){
+	public MoveFileAsyncTask setFromFolder(int folder){
 		this.fromFolder = folder;
 		return this;
 	}
-	public FileMoveAsyncTask setToFolder(int folder){
+	public MoveFileAsyncTask setToFolder(int folder){
 		this.toFolder = folder;
 		return this;
 	}
-	public FileMoveAsyncTask setToFolderId(String folderId){
+	public MoveFileAsyncTask setToFolderId(String folderId){
 		this.toFolderId = folderId;
 		return this;
 	}
-	public FileMoveAsyncTask setFromFolderId(String folderId){
+	public MoveFileAsyncTask setFromFolderId(String folderId){
 		this.fromFolderId = folderId;
 		return this;
 	}
-	public FileMoveAsyncTask setIsMoving(boolean isMoving){
+	public MoveFileAsyncTask setIsMoving(boolean isMoving){
 		this.isMoving = isMoving;
 		return this;
 	}

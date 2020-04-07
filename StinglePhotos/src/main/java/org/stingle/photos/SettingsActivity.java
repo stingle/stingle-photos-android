@@ -20,6 +20,7 @@ import androidx.preference.SwitchPreference;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ReuploadKeysAsyncTask;
+import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Auth.PasswordReturnListener;
@@ -292,12 +293,14 @@ public class SettingsActivity extends AppCompatActivity implements
 			Preference resyncDBPref = findPreference("resync_db");
 			resyncDBPref.setOnPreferenceClickListener(preference -> {
 				final ProgressDialog spinner = Helpers.showProgressDialog(AdvancedPreferenceFragment.this.getContext(), getString(R.string.syncing_db), null);
-				SyncManager.syncFSToDB(AdvancedPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
+
+				(new FsSyncAsyncTask(AdvancedPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
 					@Override
 					public void onFinish(Boolean needToUpdateUI) {
 						spinner.dismiss();
 					}
-				}, AsyncTask.THREAD_POOL_EXECUTOR);
+				})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
 				return true;
 			});
 		}

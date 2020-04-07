@@ -33,7 +33,7 @@ public class FolderFilesDb implements FilesDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL, (isLocal ? 1 : 0));
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE, (isRemote ? 1 : 0));
 		values.put(StingleDbContract.Columns.COLUMN_NAME_VERSION, version);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_REUPLOAD, FilesTrashDb.REUPLOAD_NO);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_REUPLOAD, GalleryTrashDb.REUPLOAD_NO);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_HEADERS, headers);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, dateModified);

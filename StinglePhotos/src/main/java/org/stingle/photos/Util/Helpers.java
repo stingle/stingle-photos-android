@@ -26,8 +26,7 @@ import androidx.exifinterface.media.ExifInterface;
 import org.stingle.photos.CameraX.CameraImageSize;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -451,10 +450,10 @@ public class Helpers {
 
 	public static void insertFileIntoDB(Context context, String filename) throws IOException, CryptoException {
 		long nowDate = System.currentTimeMillis();
-		FilesTrashDb db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+		GalleryTrashDb db = new GalleryTrashDb(context, SyncManager.GALLERY);
 
 		String headers = Crypto.getFileHeadersFromFile(FileManager.getHomeDir(context) + "/" + filename, FileManager.getThumbsDir(context) + "/" + filename);
-		db.insertFile(filename, true, false, FilesTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
+		db.insertFile(filename, true, false, GalleryTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
 
 		db.close();
 	}

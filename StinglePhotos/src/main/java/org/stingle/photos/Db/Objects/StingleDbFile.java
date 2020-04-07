@@ -4,7 +4,7 @@ import android.database.Cursor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.stingle.photos.Db.Query.FilesTrashDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
 
 public class StingleDbFile {
@@ -13,8 +13,8 @@ public class StingleDbFile {
 	public String filename;
 	public Boolean isLocal;
 	public Boolean isRemote;
-	public Integer version = FilesTrashDb.INITIAL_VERSION;
-	public Integer reupload = FilesTrashDb.REUPLOAD_NO;
+	public Integer version = GalleryTrashDb.INITIAL_VERSION;
+	public Integer reupload = GalleryTrashDb.REUPLOAD_NO;
 	public Long dateCreated;
 	public Long dateModified;
 	public String headers;

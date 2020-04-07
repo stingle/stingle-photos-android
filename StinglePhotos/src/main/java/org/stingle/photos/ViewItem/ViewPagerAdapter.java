@@ -13,10 +13,9 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
-import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Widget.ImageHolderLayout;
@@ -41,14 +40,13 @@ public class ViewPagerAdapter extends PagerAdapter {
 		this.folderId = folderId;
 		this.gestureTouchListener = gestureTouchListener;
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		db = new FilesTrashDb(context, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
 
 		switch (folder) {
 			case SyncManager.GALLERY:
-				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+				this.db = new GalleryTrashDb(context, SyncManager.GALLERY);
 				break;
 			case SyncManager.TRASH:
-				this.db = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
+				this.db = new GalleryTrashDb(context, SyncManager.TRASH);
 				break;
 			case SyncManager.FOLDER:
 				this.db = new FolderFilesDb(context);

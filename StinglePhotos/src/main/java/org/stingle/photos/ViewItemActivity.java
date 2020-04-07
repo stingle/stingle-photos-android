@@ -22,15 +22,14 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import org.stingle.photos.AsyncTasks.Gallery.FileMoveAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.FilesTrashDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -229,7 +228,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		FilesDb db;
 		int sort = StingleDb.SORT_DESC;
 		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH) {
-			db = new FilesTrashDb(this, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+			db = new GalleryTrashDb(this, folder);
 		}
 		else if (folder == SyncManager.FOLDER){
 			db = new FolderFilesDb(this);
@@ -251,7 +250,7 @@ public class ViewItemActivity extends AppCompatActivity {
 			ArrayList<StingleDbFile> files = new ArrayList<>();
 			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), folderId, sort));
 
-			FileMoveAsyncTask moveTask = new FileMoveAsyncTask(this, files, new OnAsyncTaskFinish() {
+			MoveFileAsyncTask moveTask = new MoveFileAsyncTask(this, files, new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();

@@ -22,10 +22,10 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.Util.Helpers;
@@ -92,7 +92,7 @@ public class SyncService extends Service {
 
 			@Override
 			public void fileUploadFinished(String filename, int folder) {
-				FilesTrashDb db = new FilesTrashDb(SyncService.this, (folder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+				GalleryTrashDb db = new GalleryTrashDb(SyncService.this, folder);
 
 				Integer filePos = db.getFilePositionByFilename(filename);
 				db.close();
@@ -153,64 +153,79 @@ public class SyncService extends Service {
 		sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 
 
+		startCloudToLocalSync();
 
+	}
+
+	private void startCloudToLocalSync(){
 		SyncManager.syncCloudToLocalDb(this, new SyncManager.OnFinish() {
 			@Override
 			public void onFinish(Boolean needToUpdateUI) {
 				if (needToUpdateUI){
 					sendMessageToUI(MSG_REFRESH_GALLERY);
 				}
-				currentStatus = STATUS_UPLOADING;
-				sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 
-				boolean isUploadSuspended = Helpers.getPreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
-				if(isUploadSuspended){
-					int lastAvailableSpace = Helpers.getPreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
-					int availableSpace = Helpers.getAvailableUploadSpace(SyncService.this);
-					if(availableSpace > lastAvailableSpace || availableSpace > 0){
-						Helpers.storePreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
-						Helpers.deletePreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE);
-						isUploadSuspended = false;
-						Log.d("upload", "resuming upload");
-					}
-				}
 
-				int allowedStatus = isUploadAllowed(SyncService.this);
-				if(isUploadSuspended) {
-					Log.d("upload", "upload is disabled, no space");
-					currentStatus = STATUS_IDLE;
-					sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", STATUS_NO_SPACE_LEFT);
-				}
-				else if(allowedStatus != 0) {
-					Log.d("upload", "upload is disabled, not allowed");
-					currentStatus = STATUS_IDLE;
-					sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", allowedStatus);
+				boolean isFirstSyncDone = Helpers.getPreference(SyncService.this, SyncManager.PREF_FIRST_SYNC_DONE, false);
+				if(!isFirstSyncDone){
+					(new FsSyncAsyncTask(SyncService.this, new SyncManager.OnFinish() {
+						@Override
+						public void onFinish(Boolean needToUpdateUI) {
+							Helpers.storePreference(SyncService.this, SyncManager.PREF_FIRST_SYNC_DONE, true);
+							startUpload();
+						}
+					})).executeOnExecutor(cachedThreadPool);
 				}
 				else{
-					uploadTask = SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
-						@Override
-						public void onFinish(Boolean needUpdateUI) {
-							currentStatus = STATUS_IDLE;
-							sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
-							//sendMessageToUI(MSG_SYNC_FINISHED);
-							if(restartSyncAfterComplete){
-								restartSyncAfterComplete = false;
-								startSync();
-							}
-							isNotificationActive = false;
-							stopForeground(true);
-						}
-					}, cachedThreadPool);
+					startUpload();
 				}
 			}
 		}, cachedThreadPool);
+	}
 
-		/*SyncManager.syncFSToDB(SyncService.this, new SyncManager.OnFinish(){
-			@Override
-			public void onFinish(Boolean needUpdateFSToDB){
+	private void startUpload(){
+		currentStatus = STATUS_UPLOADING;
+		sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 
+		boolean isUploadSuspended = Helpers.getPreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
+		if(isUploadSuspended){
+			int lastAvailableSpace = Helpers.getPreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
+			int availableSpace = Helpers.getAvailableUploadSpace(SyncService.this);
+			if(availableSpace > lastAvailableSpace || availableSpace > 0){
+				Helpers.storePreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
+				Helpers.deletePreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE);
+				isUploadSuspended = false;
+				Log.d("upload", "resuming upload");
 			}
-		}, cachedThreadPool);*/
+		}
+
+		int allowedStatus = isUploadAllowed(SyncService.this);
+		if(isUploadSuspended) {
+			Log.d("upload", "upload is disabled, no space");
+			currentStatus = STATUS_IDLE;
+			sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", STATUS_NO_SPACE_LEFT);
+		}
+		else if(allowedStatus != 0) {
+			Log.d("upload", "upload is disabled, not allowed");
+			currentStatus = STATUS_IDLE;
+			sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", allowedStatus);
+		}
+		else{
+			uploadTask = SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
+				@Override
+				public void onFinish(Boolean needUpdateUI) {
+					currentStatus = STATUS_IDLE;
+					sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
+					//sendMessageToUI(MSG_SYNC_FINISHED);
+					if(restartSyncAfterComplete){
+						restartSyncAfterComplete = false;
+						startSync();
+					}
+					isNotificationActive = false;
+					stopForeground(true);
+				}
+			}, cachedThreadPool);
+		}
 	}
 
 	@Override
@@ -231,32 +246,37 @@ public class SyncService extends Service {
 
 		if(isOnlyOnWifi) {
 			ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-			NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-			if (activeNetwork != null) {
-				// connected to the internet
-				if (activeNetwork.getType() != ConnectivityManager.TYPE_WIFI) {
+			if(cm != null) {
+				NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+				if (activeNetwork != null) {
+					// connected to the internet
+					if (activeNetwork.getType() != ConnectivityManager.TYPE_WIFI) {
+						return STATUS_NOT_WIFI;
+					}
+				} else {
 					return STATUS_NOT_WIFI;
 				}
-			} else {
-				return STATUS_NOT_WIFI;
 			}
 		}
 
 		if(uploadBatteryLevel > 0){
 			IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 			Intent batteryStatus = context.registerReceiver(null, iFilter);
-			int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-			boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-					status == BatteryManager.BATTERY_STATUS_FULL;
+			if(batteryStatus != null) {
+				int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+				boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+						status == BatteryManager.BATTERY_STATUS_FULL;
 
+				BatteryManager bm = (BatteryManager) getSystemService(BATTERY_SERVICE);
+				if(bm != null) {
+					int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
-			BatteryManager bm = (BatteryManager)getSystemService(BATTERY_SERVICE);
-			int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+					Log.d("battery level", String.valueOf(batLevel));
 
-			Log.d("battery level", String.valueOf(batLevel));
-
-			if(!isCharging && batLevel < uploadBatteryLevel){
-				return STATUS_BATTERY_LOW;
+					if (!isCharging && batLevel < uploadBatteryLevel) {
+						return STATUS_BATTERY_LOW;
+					}
+				}
 			}
 		}
 
@@ -307,11 +327,17 @@ public class SyncService extends Service {
 	}
 
 	private void sendIntToUi(int type, HashMap<String, Integer> values) {
+		if(values == null){
+			return;
+		}
 		for (int i=mClients.size()-1; i>=0; i--) {
 			try {
 				Bundle b = new Bundle();
 				for(String key : values.keySet()) {
-					b.putInt(key, values.get(key));
+					Integer value = values.get(key);
+					if(value != null) {
+						b.putInt(key, value);
+					}
 				}
 				Message msg = Message.obtain(null, type);
 				msg.setData(b);

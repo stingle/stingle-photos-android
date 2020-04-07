@@ -9,14 +9,23 @@ import android.database.sqlite.SQLiteDatabase;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Sync.SyncManager;
 
-public class FilesTrashDb implements FilesDb{
+public class GalleryTrashDb implements FilesDb{
 
 	private String tableName;
 	private StingleDb db;
 
-	public FilesTrashDb(Context context, String tableName) {
-		this.tableName = tableName;
+	public GalleryTrashDb(Context context, int folder) {
+		if(folder == SyncManager.GALLERY) {
+			this.tableName = StingleDbContract.Columns.TABLE_NAME_GALLERY;
+		}
+		else if(folder == SyncManager.TRASH){
+			this.tableName = StingleDbContract.Columns.TABLE_NAME_TRASH;
+		}
+		else{
+			throw new RuntimeException("Invalid folder");
+		}
 		db = new StingleDb(context);
 	}
 

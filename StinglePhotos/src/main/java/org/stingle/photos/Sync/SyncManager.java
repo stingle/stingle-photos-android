@@ -5,19 +5,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import org.json.JSONObject;
-import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.SyncCloudToLocalDbAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Objects.StingleDbFolder;
 import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleDbFolder;
 import org.stingle.photos.Db.Query.FolderFilesDb;
 import org.stingle.photos.Db.Query.FoldersDb;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
@@ -41,6 +39,7 @@ public class SyncManager {
 	public static final String PREF_LAST_SPACE_QUOTA = "last_space_quota";
 	public static final String PREF_SUSPEND_UPLOAD = "suspend_upload";
 	public static final String PREF_LAST_AVAILABLE_SPACE = "last_available_space";
+	public static final String PREF_FIRST_SYNC_DONE = "first_sync_done";
 
 	public static final String PREF_BACKUP_ENABLED = "enable_backup";
 	public static final String PREF_BACKUP_ONLY_WIFI = "upload_only_on_wifi";
@@ -63,12 +62,6 @@ public class SyncManager {
 		this.context = context;
 	}
 
-	public static void syncFSToDB(Context context, OnFinish onFinish, Executor executor) {
-		if (executor == null) {
-			executor = AsyncTask.THREAD_POOL_EXECUTOR;
-		}
-		(new FsSyncAsyncTask(context, onFinish)).executeOnExecutor(executor);
-	}
 
 	public static UploadToCloudAsyncTask uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish, Executor executor) {
 		if (executor == null) {
@@ -115,11 +108,11 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_DEL_SEEN_TIME);
 
-		FilesTrashDb filesDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
-		filesDb.truncateTable();
-		filesDb.close();
+		GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
+		galleryDb.truncateTable();
+		galleryDb.close();
 
-		FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
+		GalleryTrashDb trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 		trashDb.truncateTable();
 		trashDb.close();
 
@@ -144,7 +137,7 @@ public class SyncManager {
 					return false;
 				}
 
-				FilesTrashDb filesTrashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
+				GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 
 				StingleDbFolder folder = foldersDb.getFolderById(toFolderId);
 
@@ -160,18 +153,18 @@ public class SyncManager {
 				for (StingleDbFile file : files) {
 					folderFilesDb.insertFolderFile(folder.folderId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders.get(file.filename), file.dateCreated, System.currentTimeMillis());
 					if (isMoving) {
-						filesTrashDb.deleteFile(file.filename);
+						galleryDb.deleteFile(file.filename);
 					}
 				}
 
-				filesTrashDb.close();
+				galleryDb.close();
 			} else if (fromFolder == SyncManager.FOLDER && (toFolder == SyncManager.GALLERY || toFolder == SyncManager.TRASH)) {
 
 				if (fromFolderId == null) {
 					return false;
 				}
 
-				FilesTrashDb filesTrashDb = new FilesTrashDb(context, (toFolder == SyncManager.TRASH ? StingleDbContract.Columns.TABLE_NAME_TRASH : StingleDbContract.Columns.TABLE_NAME_FILES));
+				GalleryTrashDb galleryTrashDb = new GalleryTrashDb(context, toFolder);
 
 				StingleDbFolder folder = foldersDb.getFolderById(fromFolderId);
 				Crypto.FolderData folderData = crypto.parseFolderData(folder.data);
@@ -186,13 +179,13 @@ public class SyncManager {
 				}
 
 				for (StingleDbFile file : files) {
-					filesTrashDb.insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, System.currentTimeMillis(), newHeaders.get(file.filename));
+					galleryTrashDb.insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, System.currentTimeMillis(), newHeaders.get(file.filename));
 					if (isMoving) {
 						folderFilesDb.deleteFolderFile(file.id);
 					}
 				}
 
-				filesTrashDb.close();
+				galleryTrashDb.close();
 			} else if (fromFolder == SyncManager.FOLDER && toFolder == SyncManager.FOLDER) {
 
 				if (fromFolderId == null || toFolderId == null) {
@@ -219,8 +212,8 @@ public class SyncManager {
 					}
 				}
 			} else if (fromFolder == SyncManager.GALLERY && toFolder == SyncManager.TRASH) {
-				FilesTrashDb filesDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
-				FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
+				GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
+				GalleryTrashDb trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 
 				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, null)) {
 					return false;
@@ -229,14 +222,14 @@ public class SyncManager {
 				for (StingleDbFile file : files) {
 					file.dateModified = System.currentTimeMillis();
 					trashDb.insertFile(file);
-					filesDb.deleteFile(file.filename);
+					galleryDb.deleteFile(file.filename);
 				}
 
-				filesDb.close();
+				galleryDb.close();
 				trashDb.close();
 			} else if (fromFolder == SyncManager.TRASH && toFolder == SyncManager.GALLERY) {
-				FilesTrashDb filesDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_FILES);
-				FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
+				GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
+				GalleryTrashDb trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 
 				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, null)) {
 					return false;
@@ -244,11 +237,11 @@ public class SyncManager {
 
 				for (StingleDbFile file : files) {
 					file.dateModified = System.currentTimeMillis();
-					filesDb.insertFile(file);
+					galleryDb.insertFile(file);
 					trashDb.deleteFile(file.filename);
 				}
 
-				filesDb.close();
+				galleryDb.close();
 				trashDb.close();
 			}
 

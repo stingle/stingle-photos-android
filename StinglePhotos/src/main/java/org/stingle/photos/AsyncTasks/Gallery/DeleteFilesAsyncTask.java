@@ -1,4 +1,4 @@
-package org.stingle.photos.AsyncTasks.Sync;
+package org.stingle.photos.AsyncTasks.Gallery;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -8,8 +8,7 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.FilesTrashDb;
-import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -35,7 +34,7 @@ public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		FilesTrashDb trashDb = new FilesTrashDb(context, StingleDbContract.Columns.TABLE_NAME_TRASH);
+		GalleryTrashDb trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 		String homeDir = FileManager.getHomeDir(context);
 		String thumbDir = FileManager.getThumbsDir(context);
 
