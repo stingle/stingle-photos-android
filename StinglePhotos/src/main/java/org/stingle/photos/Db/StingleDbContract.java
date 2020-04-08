@@ -8,7 +8,7 @@ public class StingleDbContract {
 
 	/* Inner class that defines the table contents */
 	public static class Columns implements BaseColumns {
-		public static final String TABLE_NAME_GALLERY = "gallery";
+		public static final String TABLE_NAME_GALLERY = "files";
 		public static final String TABLE_NAME_TRASH = "trash";
 		public static final String TABLE_NAME_FOLDERS = "folders";
 		public static final String TABLE_NAME_FOLDER_FILES = "folder_files";
