@@ -72,7 +72,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				this.db = new GalleryTrashDb(context, SyncManager.GALLERY);
 				break;
 			case SyncManager.TRASH:
-				this.db = new GalleryTrashDb(context, SyncManager.GALLERY);
+				this.db = new GalleryTrashDb(context, SyncManager.TRASH);
 				break;
 			case SyncManager.FOLDER:
 				DB_SORT = StingleDb.SORT_ASC;

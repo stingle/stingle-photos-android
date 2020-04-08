@@ -126,6 +126,9 @@ public class SyncManager {
 	}
 
 	public static boolean moveFiles(Context context, ArrayList<StingleDbFile> files, int fromFolder, int toFolder, String fromFolderId, String toFolderId, boolean isMoving) {
+		if(files == null || files.size() == 0){
+			return true;
+		}
 		try {
 			Crypto crypto = StinglePhotosApplication.getCrypto();
 			FoldersDb foldersDb = new FoldersDb(context);
@@ -338,6 +341,55 @@ public class SyncManager {
 			return false;
 		}
 
+	}
+
+	public static boolean notifyCloudAboutDelete(Context context, ArrayList<String> filenamesToNotify){
+		HashMap<String, String> params = new HashMap<String, String>();
+
+		params.put("count", String.valueOf(filenamesToNotify.size()));
+		for(int i=0; i < filenamesToNotify.size(); i++) {
+			params.put("filename" + i, filenamesToNotify.get(i));
+		}
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.delete_file_path), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
+	}
+
+	public static boolean notifyCloudAboutEmptyTrash(Context context){
+		HashMap<String, String> params = new HashMap<>();
+		long timestamp = System.currentTimeMillis();
+		params.put("time", String.valueOf(timestamp));
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.empty_trash_path), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
 	}
 
 }
