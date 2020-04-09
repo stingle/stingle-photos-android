@@ -6,19 +6,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Db.StingleDbContract;
 
-public class StingleDbFolder {
+public class StingleDbAlbum {
 	public Integer id;
-	public String folderId;
+	public String albumId;
 	public String data;
-	public String folderPK;
+	public String albumPK;
 	public Long dateCreated;
 	public Long dateModified;
 
-	public StingleDbFolder(Cursor cursor){
+	public StingleDbAlbum(Cursor cursor){
 		this.id = cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns._ID));
-		this.folderId = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID));
+		this.albumId = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
 		this.data = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATA));
-		this.folderPK = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FOLDER_PK));
+		this.albumPK = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK));
 
 		int index;
 
@@ -30,10 +30,10 @@ public class StingleDbFolder {
 		}
 	}
 
-	public StingleDbFolder(JSONObject json) throws JSONException {
-		this.folderId = json.getString("folderId");
+	public StingleDbAlbum(JSONObject json) throws JSONException {
+		this.albumId = json.getString("albumId");
 		this.data = json.getString("data");
-		this.folderPK = json.getString("folderPK");
+		this.albumPK = json.getString("albumPK");
 		this.dateCreated = json.getLong("dateCreated");
 		this.dateModified = json.getLong("dateModified");
 	}

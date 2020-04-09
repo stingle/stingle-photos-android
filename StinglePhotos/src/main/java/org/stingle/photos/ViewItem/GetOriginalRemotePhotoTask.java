@@ -75,7 +75,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 		postParams.put("token", KeyManagement.getApiToken(context));
 		postParams.put("file", result.filename);
 		postParams.put("thumb", "0");
-		postParams.put("folder", String.valueOf(result.folder));
+		postParams.put("set", String.valueOf(result.set));
 
 		try {
 			byte[] encFile = HttpsClient.getFileAsByteArray(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams);
@@ -88,7 +88,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				return null;
 			}
 
-			return CryptoHelpers.decryptDbFile(context, result.folder, result.folderId, result.headers, false, encFile);
+			return CryptoHelpers.decryptDbFile(context, result.set, result.albumId, result.headers, false, encFile);
 		}
 		catch (NoSuchAlgorithmException | KeyManagementException | IOException | CryptoException e) {
 

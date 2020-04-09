@@ -7,8 +7,8 @@ import android.os.AsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.FolderFilesDb;
-import org.stingle.photos.Db.Query.FoldersDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.StinglePhotosApplication;
@@ -17,19 +17,19 @@ import org.stingle.photos.Sync.SyncManager;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class DeleteFolderAsyncTask extends AsyncTask<Void, Void, Boolean> {
+public class DeleteAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	private WeakReference<Context> context;
 	private final OnAsyncTaskFinish onFinishListener;
 	private Crypto crypto;
 
-	private String folderId = null;
-	private FoldersDb foldersDb;
+	private String albumId = null;
+	private AlbumsDb albumsDb;
 
 
-	public DeleteFolderAsyncTask(Context context, String folderId, OnAsyncTaskFinish onFinishListener) {
+	public DeleteAlbumAsyncTask(Context context, String albumId, OnAsyncTaskFinish onFinishListener) {
 		this.context = new WeakReference<>(context);;
-		this.folderId = folderId;;
+		this.albumId = albumId;;
 		this.onFinishListener = onFinishListener;
 		this.crypto = StinglePhotosApplication.getCrypto();
 	}
@@ -37,32 +37,32 @@ public class DeleteFolderAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected Boolean doInBackground(Void... params) {
 		Context myContext = context.get();
-		if(folderId == null){
+		if(albumId == null){
 			return false;
 		}
 
-		foldersDb = new FoldersDb(myContext);
+		albumsDb = new AlbumsDb(myContext);
 
-		FolderFilesDb folderFilesDb = new FolderFilesDb(myContext);
+		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
 		ArrayList<StingleDbFile> files = new ArrayList<>();
 
-		Cursor result = folderFilesDb.getFilesList(FilesDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, folderId);
+		Cursor result = albumFilesDb.getFilesList(FilesDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, albumId);
 		while(result.moveToNext()) {
 			files.add(new StingleDbFile(result));
 		}
-		folderFilesDb.close();
+		albumFilesDb.close();
 
-		boolean moveResult = SyncManager.moveFiles(myContext, files, SyncManager.FOLDER, SyncManager.TRASH, folderId, null, true);
+		boolean moveResult = SyncManager.moveFiles(myContext, files, SyncManager.ALBUM, SyncManager.TRASH, albumId, null, true);
 
 		if(moveResult){
-			if(SyncManager.notifyCloudAboutFolderDelete(context.get(), folderId)){
-				foldersDb.deleteFolder(folderId);
-				foldersDb.close();
+			if(SyncManager.notifyCloudAboutAlbumDelete(context.get(), albumId)){
+				albumsDb.deleteAlbum(albumId);
+				albumsDb.close();
 				return true;
 			}
 		}
 
-		foldersDb.close();
+		albumsDb.close();
 		return false;
 	}
 

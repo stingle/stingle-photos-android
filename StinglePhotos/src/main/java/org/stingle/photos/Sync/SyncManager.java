@@ -12,9 +12,9 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Objects.StingleDbFolder;
-import org.stingle.photos.Db.Query.FolderFilesDb;
-import org.stingle.photos.Db.Query.FoldersDb;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -49,14 +49,14 @@ public class SyncManager {
 
 	public static final int GALLERY = 0;
 	public static final int TRASH = 1;
-	public static final int FOLDER = 2;
+	public static final int ALBUM = 2;
 	public static final int SHARE = 3;
 
 	public static final int DELETE_EVENT_MAIN = 1;
 	public static final int DELETE_EVENT_TRASH = 2;
 	public static final int DELETE_EVENT_DELETE = 3;
-	public static final int DELETE_EVENT_FOLDER = 4;
-	public static final int DELETE_EVENT_FOLDER_FILE = 5;
+	public static final int DELETE_EVENT_ALBUM = 4;
+	public static final int DELETE_EVENT_ALBUM_FILE = 5;
 
 	public SyncManager(Context context) {
 		this.context = context;
@@ -81,12 +81,12 @@ public class SyncManager {
 	}
 
 
-	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int folder) {
+	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int set) {
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
 		postParams.put("file", filename);
-		postParams.put("folder", String.valueOf(folder));
+		postParams.put("set", String.valueOf(set));
 		if (isThumb) {
 			postParams.put("thumb", "1");
 		}
@@ -116,109 +116,109 @@ public class SyncManager {
 		trashDb.truncateTable();
 		trashDb.close();
 
-		FolderFilesDb folderFilesDb = new FolderFilesDb(context);
-		folderFilesDb.truncateTable();
-		folderFilesDb.close();
+		AlbumFilesDb albumFilesDb = new AlbumFilesDb(context);
+		albumFilesDb.truncateTable();
+		albumFilesDb.close();
 
-		FoldersDb foldersDb = new FoldersDb(context);
-		foldersDb.truncateTable();
-		foldersDb.close();
+		AlbumsDb albumsDb = new AlbumsDb(context);
+		albumsDb.truncateTable();
+		albumsDb.close();
 	}
 
-	public static boolean moveFiles(Context context, ArrayList<StingleDbFile> files, int fromFolder, int toFolder, String fromFolderId, String toFolderId, boolean isMoving) {
+	public static boolean moveFiles(Context context, ArrayList<StingleDbFile> files, int fromSet, int toSet, String fromAlbumId, String toAlbumId, boolean isMoving) {
 		if(files == null || files.size() == 0){
 			return true;
 		}
 		try {
 			Crypto crypto = StinglePhotosApplication.getCrypto();
-			FoldersDb foldersDb = new FoldersDb(context);
-			FolderFilesDb folderFilesDb = new FolderFilesDb(context);
+			AlbumsDb albumsDb = new AlbumsDb(context);
+			AlbumFilesDb albumFilesDb = new AlbumFilesDb(context);
 
-			if (fromFolder == SyncManager.GALLERY && toFolder == SyncManager.FOLDER) {
+			if (fromSet == SyncManager.GALLERY && toSet == SyncManager.ALBUM) {
 
-				if (toFolderId == null) {
+				if (toAlbumId == null) {
 					return false;
 				}
 
 				GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 
-				StingleDbFolder folder = foldersDb.getFolderById(toFolderId);
+				StingleDbAlbum album = albumsDb.getAlbumById(toAlbumId);
 
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
-					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(folder.folderPK), null, null));
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.albumPK), null, null));
 				}
 
-				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, newHeaders)) {
+				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, newHeaders)) {
 					return false;
 				}
 
 				for (StingleDbFile file : files) {
-					folderFilesDb.insertFolderFile(folder.folderId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders.get(file.filename), file.dateCreated, System.currentTimeMillis());
+					albumFilesDb.insertAlbumFile(album.albumId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders.get(file.filename), file.dateCreated, System.currentTimeMillis());
 					if (isMoving) {
 						galleryDb.deleteFile(file.filename);
 					}
 				}
 
 				galleryDb.close();
-			} else if (fromFolder == SyncManager.FOLDER && (toFolder == SyncManager.GALLERY || toFolder == SyncManager.TRASH)) {
+			} else if (fromSet == SyncManager.ALBUM && (toSet == SyncManager.GALLERY || toSet == SyncManager.TRASH)) {
 
-				if (fromFolderId == null) {
+				if (fromAlbumId == null) {
 					return false;
 				}
 
-				GalleryTrashDb galleryTrashDb = new GalleryTrashDb(context, toFolder);
+				GalleryTrashDb galleryTrashDb = new GalleryTrashDb(context, toSet);
 
-				StingleDbFolder folder = foldersDb.getFolderById(fromFolderId);
-				Crypto.FolderData folderData = crypto.parseFolderData(folder.data);
+				StingleDbAlbum album = albumsDb.getAlbumById(fromAlbumId);
+				Crypto.AlbumData albumData = crypto.parseAlbumData(album.data);
 
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
-					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, crypto.getPublicKey(), folderData.privateKey, Crypto.base64ToByteArray(folder.folderPK)));
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, crypto.getPublicKey(), albumData.privateKey, Crypto.base64ToByteArray(album.albumPK)));
 				}
 
-				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, newHeaders)) {
+				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, newHeaders)) {
 					return false;
 				}
 
 				for (StingleDbFile file : files) {
 					galleryTrashDb.insertFile(file.filename, file.isLocal, file.isRemote, file.version, file.dateCreated, System.currentTimeMillis(), newHeaders.get(file.filename));
 					if (isMoving) {
-						folderFilesDb.deleteFolderFile(file.id);
+						albumFilesDb.deleteAlbumFile(file.id);
 					}
 				}
 
 				galleryTrashDb.close();
-			} else if (fromFolder == SyncManager.FOLDER && toFolder == SyncManager.FOLDER) {
+			} else if (fromSet == SyncManager.ALBUM && toSet == SyncManager.ALBUM) {
 
-				if (fromFolderId == null || toFolderId == null) {
+				if (fromAlbumId == null || toAlbumId == null) {
 					return false;
 				}
 
-				StingleDbFolder fromDbFolder = foldersDb.getFolderById(fromFolderId);
-				Crypto.FolderData fromFolderData = crypto.parseFolderData(fromDbFolder.data);
-				StingleDbFolder toDbFolder = foldersDb.getFolderById(toFolderId);
+				StingleDbAlbum fromDbAlbum = albumsDb.getAlbumById(fromAlbumId);
+				Crypto.AlbumData fromAlbumData = crypto.parseAlbumData(fromDbAlbum.data);
+				StingleDbAlbum toDbAlbum = albumsDb.getAlbumById(toAlbumId);
 
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
-					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(toDbFolder.folderPK), fromFolderData.privateKey, Crypto.base64ToByteArray(fromDbFolder.folderPK)));
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(toDbAlbum.albumPK), fromAlbumData.privateKey, Crypto.base64ToByteArray(fromDbAlbum.albumPK)));
 				}
 
-				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, newHeaders)) {
+				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, newHeaders)) {
 					return false;
 				}
 
 				for (StingleDbFile file : files) {
-					folderFilesDb.insertFolderFile(toDbFolder.folderId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders.get(file.filename), file.dateCreated, System.currentTimeMillis());
+					albumFilesDb.insertAlbumFile(toDbAlbum.albumId, file.filename, file.isLocal, file.isRemote, file.version, newHeaders.get(file.filename), file.dateCreated, System.currentTimeMillis());
 					if (isMoving) {
-						folderFilesDb.deleteFolderFile(file.id);
+						albumFilesDb.deleteAlbumFile(file.id);
 					}
 				}
-			} else if (fromFolder == SyncManager.GALLERY && toFolder == SyncManager.TRASH) {
+			} else if (fromSet == SyncManager.GALLERY && toSet == SyncManager.TRASH) {
 				GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 				GalleryTrashDb trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 
-				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, null)) {
+				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, null)) {
 					return false;
 				}
 
@@ -230,11 +230,11 @@ public class SyncManager {
 
 				galleryDb.close();
 				trashDb.close();
-			} else if (fromFolder == SyncManager.TRASH && toFolder == SyncManager.GALLERY) {
+			} else if (fromSet == SyncManager.TRASH && toSet == SyncManager.GALLERY) {
 				GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 				GalleryTrashDb trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 
-				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving, null)) {
+				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, null)) {
 					return false;
 				}
 
@@ -248,8 +248,8 @@ public class SyncManager {
 				trashDb.close();
 			}
 
-			foldersDb.close();
-			folderFilesDb.close();
+			albumsDb.close();
+			albumFilesDb.close();
 
 		} catch (IOException | CryptoException e) {
 			e.printStackTrace();
@@ -259,12 +259,12 @@ public class SyncManager {
 		return true;
 	}
 
-	public static boolean notifyCloudAboutFolderAdd(Context context, String folderId, String data, String folderPK, long dateCreated, long dateModified) {
+	public static boolean notifyCloudAboutAlbumAdd(Context context, String albumId, String data, String albumPK, long dateCreated, long dateModified) {
 		HashMap<String, String> params = new HashMap<>();
 
-		params.put("folderId", folderId);
+		params.put("albumId", albumId);
 		params.put("data", data);
-		params.put("folderPK", folderPK);
+		params.put("albumPK", albumPK);
 		params.put("dateCreated", String.valueOf(dateCreated));
 		params.put("dateModified", String.valueOf(dateModified));
 
@@ -273,7 +273,7 @@ public class SyncManager {
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.add_folder), postParams);
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.add_album), postParams);
 			StingleResponse response = new StingleResponse(context, json, false);
 
 			if (response.isStatusOk()) {
@@ -286,17 +286,17 @@ public class SyncManager {
 
 	}
 
-	public static boolean notifyCloudAboutFolderDelete(Context context, String folderId) {
+	public static boolean notifyCloudAboutAlbumDelete(Context context, String albumId) {
 		HashMap<String, String> params = new HashMap<>();
 
-		params.put("folderId", folderId);
+		params.put("albumId", albumId);
 
 		try {
 			HashMap<String, String> postParams = new HashMap<>();
 			postParams.put("token", KeyManagement.getApiToken(context));
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
-			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.delete_folder_path), postParams);
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.delete_album_path), postParams);
 			StingleResponse response = new StingleResponse(context, json, false);
 
 			if (response.isStatusOk()) {
@@ -309,13 +309,13 @@ public class SyncManager {
 
 	}
 
-	public static boolean notifyCloudAboutFileMove(Context context, ArrayList<StingleDbFile> files, int folderFrom, int folderTo, String folderIdFrom, String folderIdTo, boolean isMoving, HashMap<String, String> headers) {
+	public static boolean notifyCloudAboutFileMove(Context context, ArrayList<StingleDbFile> files, int setFrom, int setTo, String albumIdFrom, String albumIdTo, boolean isMoving, HashMap<String, String> headers) {
 		HashMap<String, String> params = new HashMap<>();
 
-		params.put("folderFrom", String.valueOf(folderFrom));
-		params.put("folderTo", String.valueOf(folderTo));
-		params.put("folderIdFrom", folderIdFrom);
-		params.put("folderIdTo", folderIdTo);
+		params.put("setFrom", String.valueOf(setFrom));
+		params.put("setTo", String.valueOf(setTo));
+		params.put("albumIdFrom", albumIdFrom);
+		params.put("albumIdTo", albumIdTo);
 		params.put("isMoving", (isMoving ? "1" : "0"));
 		params.put("count", String.valueOf(files.size()));
 		for (int i = 0; i < files.size(); i++) {

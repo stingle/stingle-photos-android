@@ -15,7 +15,7 @@
         app:civ_border_width="0dp"/>
 
     <TextView
-        android:id="@+id/folderName"
+        android:id="@+id/albumName"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:textColor="#000"

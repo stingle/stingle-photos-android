@@ -16,13 +16,13 @@ public interface FilesDb {
 	public static final int REUPLOAD_NO = 0;
 	public static final int REUPLOAD_YES = 1;
 
-	public Cursor getAvailableDates(String folderId, int sort);
-	public StingleDbFile getFileAtPosition(int pos, String folderId, int sort);
-	public long getTotalFilesCount(String folderId);
-	public StingleDbFile getFileIfExists(String filename, String folderId);
+	public Cursor getAvailableDates(String albumId, int sort);
+	public StingleDbFile getFileAtPosition(int pos, String albumId, int sort);
+	public long getTotalFilesCount(String albumId);
+	public StingleDbFile getFileIfExists(String filename, String albumId);
 	public long insertFile(StingleDbFile file);
 	public int updateFile(StingleDbFile file);
-	public Cursor getFilesList(int mode, int sort, String limit, String folderId);
+	public Cursor getFilesList(int mode, int sort, String limit, String albumId);
 	public Cursor getReuploadFilesList();
 	public int markFileAsRemote(String filename);
 	public int markFileAsReuploaded(String filename);

@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONObject;
-import org.stingle.photos.Db.Objects.StingleDbFolder;
-import org.stingle.photos.Db.Query.FoldersDb;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 
@@ -46,41 +46,41 @@ public class CryptoHelpers {
 	}
 
 
-	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, byte[] bytes) throws IOException, CryptoException {
+	public static byte[] decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, byte[] bytes) throws IOException, CryptoException {
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-		return decryptDbFile(context, folder, folderId, headers, isThumb, in, null, null);
+		return decryptDbFile(context, set, albumId, headers, isThumb, in, null, null);
 	}
 
-	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, byte[] bytes, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+	public static byte[] decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, byte[] bytes, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-		return decryptDbFile(context, folder, folderId, headers, isThumb, in, null, task);
+		return decryptDbFile(context, set, albumId, headers, isThumb, in, null, task);
 	}
 
-	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, InputStream in) throws IOException, CryptoException {
-		return decryptDbFile(context, folder, folderId, headers, isThumb, in, null, null);
+	public static byte[] decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, InputStream in) throws IOException, CryptoException {
+		return decryptDbFile(context, set, albumId, headers, isThumb, in, null, null);
 	}
 
-	public static byte[] decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+	public static byte[] decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, InputStream in, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-		decryptDbFile(context, folder, folderId, headers, isThumb, in, out, progress, task);
+		decryptDbFile(context, set, albumId, headers, isThumb, in, out, progress, task);
 
 		return out.toByteArray();
 	}
 
-	public static void decryptDbFile(Context context, int folder, String folderId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+	public static void decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		Crypto crypto = StinglePhotosApplication.getCrypto();
 		Crypto.Header header = null;
-		if(folder == SyncManager.FOLDER){
-			FoldersDb folderDb = new FoldersDb(context);
-			StingleDbFolder dbFolder = folderDb.getFolderById(folderId);
-			Crypto.FolderData folderData = crypto.parseFolderData(dbFolder.data);
+		if(set == SyncManager.ALBUM){
+			AlbumsDb albumsDb = new AlbumsDb(context);
+			StingleDbAlbum dbAlbum = albumsDb.getAlbumById(albumId);
+			Crypto.AlbumData albumData = crypto.parseAlbumData(dbAlbum.data);
 
 			if(isThumb) {
-				header = crypto.getThumbHeaderFromHeadersStr(headers, folderData.privateKey, Crypto.base64ToByteArray(dbFolder.folderPK));
+				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(dbAlbum.albumPK));
 			}
 			else{
-				header = crypto.getFileHeaderFromHeadersStr(headers, folderData.privateKey, Crypto.base64ToByteArray(dbFolder.folderPK));
+				header = crypto.getFileHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(dbAlbum.albumPK));
 			}
 		}
 		else {

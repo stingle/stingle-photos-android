@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery.Folders;
+package org.stingle.photos.Gallery.Albums;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.Objects.StingleDbFolder;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
@@ -27,23 +27,23 @@ import org.stingle.photos.Util.Helpers;
 import java.io.IOException;
 import java.util.Objects;
 
-public class FoldersFragment extends Fragment{
+public class AlbumsFragment extends Fragment{
 
 	private RecyclerView recyclerView;
-	private FoldersAdapterPisasso adapter;
+	private AlbumsAdapterPisasso adapter;
 	private AutoFitGridLayoutManager layoutManager;
 
 	private int lastScrollPosition = 0;
 
 	private GalleryActivity parentActivity;
 
-	private FoldersAdapterPisasso.Listener adaptorListener = new FoldersAdapterPisasso.Listener() {
+	private AlbumsAdapterPisasso.Listener adaptorListener = new AlbumsAdapterPisasso.Listener() {
 		@Override
 		public void onClick(int index) {
 			if(index == 0){
-				GalleryHelpers.addFolder(getContext(), new OnAsyncTaskFinish() {
+				GalleryHelpers.addAlbum(getContext(), new OnAsyncTaskFinish() {
 					@Override
-					public void onFinish(Object folder) {
+					public void onFinish(Object set) {
 						super.onFinish();
 						updateDataSet();
 					}
@@ -56,16 +56,16 @@ public class FoldersFragment extends Fragment{
 				});
 			}
 			else{
-				StingleDbFolder folder = adapter.getFolderAtPosition(index);
-				String folderName = "";
+				StingleDbAlbum album = adapter.getAlbumAtPosition(index);
+				String albumName = "";
 				try {
-					Crypto.FolderData folderData = StinglePhotosApplication.getCrypto().parseFolderData(folder.data);
-					folderName = folderData.name;
-					folderData = null;
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+					albumName = albumData.name;
+					albumData = null;
 				} catch (IOException | CryptoException e) {
 					e.printStackTrace();
 				}
-				parentActivity.showFolder(folder.folderId, folderName);
+				parentActivity.showAlbum(album.albumId, albumName);
 			}
 		/*StingleDbFile file = adapter.getStingleFileAtPosition(index);
 		if(!parentActivity.onClick(file)){
@@ -79,7 +79,7 @@ public class FoldersFragment extends Fragment{
 			Intent intent = new Intent();
 			intent.setClass(getContext(), ViewItemActivity.class);
 			intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
-			intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
+			intent.putExtra("EXTRA_ITEM_SET", currentSet);
 			startActivity(intent);
 		}*/
 		}
@@ -99,7 +99,7 @@ public class FoldersFragment extends Fragment{
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.folders_fragment,	container, false);
+		View view = inflater.inflate(R.layout.albums_fragment,	container, false);
 
 		recyclerView = view.findViewById(R.id.recycler_view);
 		parentActivity = (GalleryActivity)getActivity();
@@ -116,7 +116,7 @@ public class FoldersFragment extends Fragment{
 		recyclerView.setHasFixedSize(true);
 		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext(), 2));
 		recyclerView.setLayoutManager(layoutManager);
-		adapter = new FoldersAdapterPisasso(getContext(), layoutManager, false);
+		adapter = new AlbumsAdapterPisasso(getContext(), layoutManager, false);
 		adapter.setListener(adaptorListener);
 
 		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){

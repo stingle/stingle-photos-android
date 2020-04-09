@@ -10,17 +10,17 @@ import android.widget.RadioButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.stingle.photos.AsyncTasks.Gallery.DeleteFolderAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
-import org.stingle.photos.Db.Objects.StingleDbFolder;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
-import org.stingle.photos.Gallery.Folders.FoldersAdapterPisasso;
+import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
@@ -33,28 +33,28 @@ import java.util.ArrayList;
 public class GalleryActions {
 
 	public static void shareSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
-		ShareManager.shareDbFiles(activity, files, activity.getCurrentFolder(), activity.getCurrentFolderId());
+		ShareManager.shareDbFiles(activity, files, activity.getCurrentSet(), activity.getCurrentAlbumId());
 	}
 
-	public static void addToFolderSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromFolder) {
+	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(R.string.add_move_to_album);
-		builder.setView(R.layout.add_to_folder_dialog);
+		builder.setView(R.layout.add_to_album_dialog);
 		builder.setCancelable(true);
-		final AlertDialog addFolderDialog = builder.create();
-		addFolderDialog.show();
+		final AlertDialog addAlbumDialog = builder.create();
+		addAlbumDialog.show();
 
-		RecyclerView recyclerView = addFolderDialog.findViewById(R.id.recycler_view);
+		RecyclerView recyclerView = addAlbumDialog.findViewById(R.id.recycler_view);
 
 		recyclerView.setHasFixedSize(true);
 
 		LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
 		recyclerView.setLayoutManager(layoutManager);
 
-		final FoldersAdapterPisasso adapter = new FoldersAdapterPisasso(activity, layoutManager, isFromFolder);
+		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, isFromAlbum);
 
-		adapter.setLayoutStyle(FoldersAdapterPisasso.LAYOUT_LIST);
-		adapter.setListener(new FoldersAdapterPisasso.Listener() {
+		adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
+		adapter.setListener(new AlbumsAdapterPisasso.Listener() {
 			@Override
 			public void onClick(int index) {
 
@@ -62,7 +62,7 @@ public class GalleryActions {
 					@Override
 					public void onFinish() {
 						super.onFinish();
-						addFolderDialog.dismiss();
+						addAlbumDialog.dismiss();
 						activity.exitActionMode();
 						activity.updateGalleryFragmentData();
 					}
@@ -76,23 +76,23 @@ public class GalleryActions {
 
 				MoveFileAsyncTask addSyncTask = new MoveFileAsyncTask(activity, files, onAddFinish);
 
-				boolean isMoving = ((RadioButton)addFolderDialog.findViewById(R.id.move_to_folder)).isChecked();
+				boolean isMoving = ((RadioButton)addAlbumDialog.findViewById(R.id.move_to_album)).isChecked();
 				addSyncTask.setIsMoving(isMoving);
 
-				if (isFromFolder && index == 0) {
-					addSyncTask.setFromFolder(SyncManager.FOLDER);
-					addSyncTask.setToFolder(SyncManager.GALLERY);
-					addSyncTask.setFromFolderId(activity.getCurrentFolderId());
+				if (isFromAlbum && index == 0) {
+					addSyncTask.setFromSet(SyncManager.ALBUM);
+					addSyncTask.setToSet(SyncManager.GALLERY);
+					addSyncTask.setFromAlbumId(activity.getCurrentAlbumId());
 					addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
-				else if ((isFromFolder && index == 1) || (!isFromFolder && index == 0)){
-					GalleryHelpers.addFolder(activity, new OnAsyncTaskFinish() {
+				else if ((isFromAlbum && index == 1) || (!isFromAlbum && index == 0)){
+					GalleryHelpers.addAlbum(activity, new OnAsyncTaskFinish() {
 						@Override
-						public void onFinish(Object folderObj) {
-							super.onFinish(folderObj);
+						public void onFinish(Object albumObj) {
+							super.onFinish(albumObj);
 
-							StingleDbFolder folder = (StingleDbFolder) folderObj;
-							addToFolder(addSyncTask, folder.folderId);
+							StingleDbAlbum album = (StingleDbAlbum) albumObj;
+							addToAlbum(addSyncTask, album.albumId);
 						}
 
 						@Override
@@ -102,21 +102,21 @@ public class GalleryActions {
 					});
 				}
 				else {
-					addToFolder(addSyncTask, adapter.getFolderAtPosition(index).folderId);
+					addToAlbum(addSyncTask, adapter.getAlbumAtPosition(index).albumId);
 				}
 
 			}
 
-			private void addToFolder(MoveFileAsyncTask addSyncTask, String folderId){
-				if(isFromFolder) {
-					addSyncTask.setFromFolder(SyncManager.FOLDER);
-					addSyncTask.setFromFolderId(activity.getCurrentFolderId());
+			private void addToAlbum(MoveFileAsyncTask addSyncTask, String albumId){
+				if(isFromAlbum) {
+					addSyncTask.setFromSet(SyncManager.ALBUM);
+					addSyncTask.setFromAlbumId(activity.getCurrentAlbumId());
 				}
 				else{
-					addSyncTask.setFromFolder(SyncManager.GALLERY);
+					addSyncTask.setFromSet(SyncManager.GALLERY);
 				}
-				addSyncTask.setToFolder(SyncManager.FOLDER);
-				addSyncTask.setToFolderId(folderId);
+				addSyncTask.setToSet(SyncManager.ALBUM);
+				addSyncTask.setToAlbumId(albumId);
 				addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 
@@ -150,8 +150,8 @@ public class GalleryActions {
 								spinner.dismiss();
 							}
 						});
-						decFilesJob.setFolder(activity.getCurrentFolder());
-						decFilesJob.setFolderId(activity.getCurrentFolderId());
+						decFilesJob.setSet(activity.getCurrentSet());
+						decFilesJob.setAlbumId(activity.getCurrentAlbumId());
 						decFilesJob.setPerformMediaScan(true);
 						decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, files);
 					}
@@ -180,9 +180,9 @@ public class GalleryActions {
 							spinner.dismiss();
 						}
 					});
-					moveTask.setFromFolder(activity.getCurrentFolder());
-					moveTask.setFromFolderId(activity.getCurrentFolderId());
-					moveTask.setToFolder(SyncManager.TRASH);
+					moveTask.setFromSet(activity.getCurrentSet());
+					moveTask.setFromAlbumId(activity.getCurrentAlbumId());
+					moveTask.setToSet(SyncManager.TRASH);
 					moveTask.setIsMoving(true);
 					moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				},
@@ -210,8 +210,8 @@ public class GalleryActions {
 			}
 		});
 
-		moveTask.setFromFolder(SyncManager.TRASH);
-		moveTask.setToFolder(SyncManager.GALLERY);
+		moveTask.setFromSet(SyncManager.TRASH);
+		moveTask.setToSet(SyncManager.GALLERY);
 		moveTask.setIsMoving(true);
 		moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -248,18 +248,18 @@ public class GalleryActions {
 				null);
 	}
 
-	public static void deleteFolder(GalleryActivity activity) {
+	public static void deleteAlbum(GalleryActivity activity) {
 
-		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_album), activity.getCurrentFolderName()), (dialog, which) -> {
+		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_album), activity.getCurrentAlbumName()), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_album), null);
 
-					new DeleteFolderAsyncTask(activity, activity.getCurrentFolderId(), new OnAsyncTaskFinish() {
+					new DeleteAlbumAsyncTask(activity, activity.getCurrentAlbumId(), new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
 							super.onFinish();
 							activity.exitActionMode();
 							spinner.dismiss();
-							activity.showFoldersList();
+							activity.showAlbumsList();
 						}
 
 						@Override

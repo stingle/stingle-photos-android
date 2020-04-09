@@ -7,7 +7,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -45,23 +45,23 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... params) {
 		if(progress != null){
-			progress.setTotalItemsNumber(getFilesCountToUpload(SyncManager.GALLERY) + getFilesCountToUpload(SyncManager.TRASH) + getFilesCountToUpload(SyncManager.FOLDER));
+			progress.setTotalItemsNumber(getFilesCountToUpload(SyncManager.GALLERY) + getFilesCountToUpload(SyncManager.TRASH) + getFilesCountToUpload(SyncManager.ALBUM));
 		}
 
-		uploadFolder(SyncManager.GALLERY);
-		uploadFolder(SyncManager.TRASH);
-		uploadFolder(SyncManager.FOLDER);
+		uploadSet(SyncManager.GALLERY);
+		uploadSet(SyncManager.TRASH);
+		uploadSet(SyncManager.ALBUM);
 
 		return null;
 	}
 
-	protected int getFilesCountToUpload(int folder){
+	protected int getFilesCountToUpload(int set){
 		FilesDb db;
-		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH){
-			db = new GalleryTrashDb(context, folder);
+		if(set == SyncManager.GALLERY || set == SyncManager.TRASH){
+			db = new GalleryTrashDb(context, set);
 		}
-		else if (folder == SyncManager.FOLDER){
-			db = new FolderFilesDb(context);
+		else if (set == SyncManager.ALBUM){
+			db = new AlbumFilesDb(context);
 		}
 		else{
 			return 0;
@@ -80,13 +80,13 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 		return uploadCount + reuploadCount;
 	}
 
-	protected void uploadFolder(int folder){
+	protected void uploadSet(int set){
 		FilesDb db;
-		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH){
-			db = new GalleryTrashDb(context, folder);
+		if(set == SyncManager.GALLERY || set == SyncManager.TRASH){
+			db = new GalleryTrashDb(context, set);
 		}
-		else if (folder == SyncManager.FOLDER){
-			db = new FolderFilesDb(context);
+		else if (set == SyncManager.ALBUM){
+			db = new AlbumFilesDb(context);
 		}
 		else{
 			return;
@@ -101,7 +101,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			if(progress != null){
 				progress.uploadProgress(uploadedFilesCount);
 			}
-			uploadFile(folder, db, result, false);
+			uploadFile(set, db, result, false);
 		}
 		result.close();
 
@@ -114,27 +114,27 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			if(progress != null){
 				progress.uploadProgress(uploadedFilesCount);
 			}
-			uploadFile(folder, db, reuploadResult, true);
+			uploadFile(set, db, reuploadResult, true);
 		}
 		reuploadResult.close();
 
 		db.close();
 	}
 
-	protected void uploadFile(int folder, FilesDb db, Cursor result, boolean isReupload){
+	protected void uploadFile(int set, FilesDb db, Cursor result, boolean isReupload){
 		String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
 		String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_VERSION));
 		String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
 		String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
 		String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
-		String folderId = "";
+		String albumId = "";
 		try {
-			folderId = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID));
+			albumId = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
 		}
 		catch (IllegalArgumentException ignored) {}
 
 		if(progress != null){
-			progress.currentFile(filename, headers, folder, folderId);
+			progress.currentFile(filename, headers, set, albumId);
 		}
 
 		Log.d("uploadingFile", filename);
@@ -159,8 +159,8 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
-		postParams.put("folder", String.valueOf(folder));
-		postParams.put("folderId", folderId);
+		postParams.put("set", String.valueOf(set));
+		postParams.put("albumId", albumId);
 		postParams.put("version", version);
 		postParams.put("dateCreated", dateCreated);
 		postParams.put("dateModified", dateModified);
@@ -193,7 +193,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			}
 
 			if(progress != null){
-				progress.fileUploadFinished(filename, folder);
+				progress.fileUploadFinished(filename, set);
 			}
 		}
 
@@ -215,21 +215,21 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 		public int totalItemsNumber = 0;
 		public String currentFile;
 		public String headers;
-		public int folder;
-		public String folderId;
+		public int set;
+		public String albumId;
 		public int uploadedFilesCount;
 
 		public void setTotalItemsNumber(int number){
 			totalItemsNumber = number;
 		}
 
-		public void currentFile(String filename, String headers, int folder, String folderId){
+		public void currentFile(String filename, String headers, int set, String albumId){
 			this.currentFile = filename;
 			this.headers = headers;
-			this.folder = folder;
-			this.folderId = folderId;
+			this.set = set;
+			this.albumId = albumId;
 		}
-		public void fileUploadFinished(String filename, int folder){
+		public void fileUploadFinished(String filename, int set){
 
 		}
 		public void uploadProgress(int uploadedFilesCount){

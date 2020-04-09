@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -36,7 +36,7 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 		}
 
 		GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
-		FolderFilesDb folderFilesDb = new FolderFilesDb(myContext);
+		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
 		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
 		String homeDir = FileManager.getHomeDir(myContext);
 		String thumbDir = FileManager.getThumbsDir(myContext);
@@ -47,9 +47,9 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 			StingleDbFile dbFile = new StingleDbFile(result);
 
 			boolean existsInGallery = galleryDb.getFileIfExists(dbFile.filename) != null;
-			boolean existsInFolders = folderFilesDb.getFileIfExists(dbFile.filename) != null;
+			boolean existsInAlbums = albumFilesDb.getFileIfExists(dbFile.filename) != null;
 
-			if(!existsInGallery && !existsInFolders) {
+			if(!existsInGallery && !existsInAlbums) {
 				if (dbFile.isLocal) {
 					File mainFile = new File(homeDir + "/" + dbFile.filename);
 					if (mainFile.exists()) {
@@ -67,7 +67,7 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		result.close();
 		galleryDb.close();
-		folderFilesDb.close();
+		albumFilesDb.close();
 		trashDb.close();
 		return null;
 	}

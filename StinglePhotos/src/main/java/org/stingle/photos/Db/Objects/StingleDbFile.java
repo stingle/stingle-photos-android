@@ -9,7 +9,7 @@ import org.stingle.photos.Db.StingleDbContract;
 
 public class StingleDbFile {
 	public long id;
-	public String folderId = null;
+	public String albumId = null;
 	public String filename;
 	public Boolean isLocal;
 	public Boolean isRemote;
@@ -31,13 +31,13 @@ public class StingleDbFile {
 		this.dateModified = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
 
 		try {
-			this.folderId = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FOLDER_ID));
+			this.albumId = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
 		}
 		catch (IllegalArgumentException ignored) {}
 	}
 
 	public StingleDbFile(JSONObject json) throws JSONException {
-		this.folderId = json.optString("folderId");
+		this.albumId = json.optString("albumId");
 		this.filename = json.getString("file");
 		this.isLocal = null;
 		this.isRemote = null;

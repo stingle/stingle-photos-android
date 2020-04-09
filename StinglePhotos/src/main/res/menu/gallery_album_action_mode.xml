@@ -12,7 +12,7 @@
         android:title="@string/add_to_this_album"
         app:showAsAction="always|withText" />-->
     <item
-        android:id="@+id/add_to_folder"
+        android:id="@+id/add_to_album"
         android:icon="@drawable/ic_action_move"
         android:title="@string/add_or_move"
         app:showAsAction="always|withText" />

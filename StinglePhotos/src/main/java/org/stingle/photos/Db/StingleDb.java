@@ -25,8 +25,8 @@ public class StingleDb extends SQLiteOpenHelper {
 
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		if(oldVersion == 1 && newVersion ==2){
-			db.execSQL(StingleDbContract.SQL_CREATE_FOLDERS);
-			db.execSQL(StingleDbContract.SQL_CREATE_FOLDER_FILES);
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
 			db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
 
 			db.execSQL(StingleDbContract.SQL_FILES_FN_INDEX);
@@ -35,8 +35,8 @@ public class StingleDb extends SQLiteOpenHelper {
 			db.execSQL(StingleDbContract.SQL_TRASH_FN_INDEX);
 			db.execSQL(StingleDbContract.SQL_TRASH_LR_INDEX);
 
-			db.execSQL(StingleDbContract.SQL_CREATE_FOLDERS_FID_INDEX);
-			db.execSQL(StingleDbContract.SQL_CREATE_FOLDER_FILES_FID_INDEX);
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
+			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
 			db.execSQL(StingleDbContract.SQL_CREATE_SHARES_AID_INDEX);
 		}
 	}
@@ -47,8 +47,8 @@ public class StingleDb extends SQLiteOpenHelper {
 	private void createTables(SQLiteDatabase db){
 		db.execSQL(StingleDbContract.SQL_CREATE_FILES);
 		db.execSQL(StingleDbContract.SQL_CREATE_TRASH);
-		db.execSQL(StingleDbContract.SQL_CREATE_FOLDERS);
-		db.execSQL(StingleDbContract.SQL_CREATE_FOLDER_FILES);
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
 		db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
 
 		db.execSQL(StingleDbContract.SQL_FILES_FN_INDEX);
@@ -57,16 +57,16 @@ public class StingleDb extends SQLiteOpenHelper {
 		db.execSQL(StingleDbContract.SQL_TRASH_FN_INDEX);
 		db.execSQL(StingleDbContract.SQL_TRASH_LR_INDEX);
 
-		db.execSQL(StingleDbContract.SQL_CREATE_FOLDERS_FID_INDEX);
-		db.execSQL(StingleDbContract.SQL_CREATE_FOLDER_FILES_FID_INDEX);
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
+		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
 		db.execSQL(StingleDbContract.SQL_CREATE_SHARES_AID_INDEX);
 	}
 
 	private void deleteTables(SQLiteDatabase db){
 		db.execSQL(StingleDbContract.SQL_DELETE_FILES);
 		db.execSQL(StingleDbContract.SQL_DELETE_TRASH);
-		db.execSQL(StingleDbContract.SQL_DELETE_FOLDERS);
-		db.execSQL(StingleDbContract.SQL_DELETE_FOLDER_FILES);
+		db.execSQL(StingleDbContract.SQL_DELETE_ALBUMS);
+		db.execSQL(StingleDbContract.SQL_DELETE_ALBUM_FILES);
 		db.execSQL(StingleDbContract.SQL_DELETE_SHARES);
 	}
 

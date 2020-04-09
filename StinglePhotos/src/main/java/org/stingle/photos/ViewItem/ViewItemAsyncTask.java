@@ -36,9 +36,9 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Objects.StingleDbFolder;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.FoldersDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -70,8 +70,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final ContentLoadingProgressBar loading;
 	private final ViewPagerAdapter adapter;
 	private final FilesDb db;
-	private int folder = SyncManager.GALLERY;
-	private String folderId = null;
+	private int set = SyncManager.GALLERY;
+	private String albumId = null;
 
 	private final OnClickListener onClickListener;
 	private final MemoryCache memCache;
@@ -84,7 +84,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private Crypto.Header videoFileHeader = null;
 
 
-	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int folder, String folderId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
+	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int set, String albumId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
 		this.context = context;
 		this.adapter = adapter;
@@ -92,8 +92,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		this.parent = parent;
 		this.loading = loading;
 		this.db = db;
-		this.folder = folder;
-		this.folderId = folderId;
+		this.set = set;
+		this.albumId = albumId;
 		this.onClickListener = onClickListener;
 		this.touchListener = touchListener;
 		this.memCache = memCache;
@@ -113,15 +113,15 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	protected ViewItemAsyncTask.ViewItemTaskResult doInBackground(Void... params) {
 		ViewItemTaskResult result = new ViewItemTaskResult();
 
-		result.folder = folder;
-		result.folderId = folderId;
+		result.set = set;
+		result.albumId = albumId;
 
 		int sort = StingleDb.SORT_DESC;
-		if(folder == SyncManager.FOLDER){
+		if(set == SyncManager.ALBUM){
 			sort = StingleDb.SORT_ASC;
 		}
 
-		StingleDbFile dbFile = db.getFileAtPosition(position, folderId, sort);
+		StingleDbFile dbFile = db.getFileAtPosition(position, albumId, sort);
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
 		try {
@@ -139,7 +139,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				if (fileType == Crypto.FILE_TYPE_PHOTO) {
 					FileInputStream input = new FileInputStream(file);
 
-					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, dbFile.headers, false, input);
+					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, false, input);
 
 					if (decryptedData != null) {
 						if (isGif) {
@@ -150,7 +150,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					}
 				}
 			} else if (dbFile.isRemote) {
-				byte[] encThumb = FileManager.getAndCacheThumb(context, dbFile.filename, folder);
+				byte[] encThumb = FileManager.getAndCacheThumb(context, dbFile.filename, set);
 				if (encThumb == null) {
 					return result;
 				}
@@ -164,7 +164,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 
 				if (fileType == Crypto.FILE_TYPE_PHOTO) {
-					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, dbFile.headers, true, encThumb);
+					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, true, encThumb);
 
 					if (decryptedData != null) {
 						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
@@ -175,7 +175,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 					postParams.put("token", KeyManagement.getApiToken(context));
 					postParams.put("file", dbFile.filename);
-					postParams.put("folder", String.valueOf(folder));
+					postParams.put("set", String.valueOf(set));
 
 					JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_url_path), postParams);
 					StingleResponse response = new StingleResponse(this.context, json, false);
@@ -190,11 +190,11 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				}
 			}
 			if (fileType == Crypto.FILE_TYPE_VIDEO) {
-				if (folder == SyncManager.FOLDER) {
-					FoldersDb foldersDb = new FoldersDb(context);
-					StingleDbFolder dbFolder = foldersDb.getFolderById(folderId);
-					Crypto.FolderData folderData = StinglePhotosApplication.getCrypto().parseFolderData(dbFolder.data);
-					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, folderData.privateKey, Crypto.base64ToByteArray(dbFolder.folderPK));
+				if (set == SyncManager.ALBUM) {
+					AlbumsDb albumsDb = new AlbumsDb(context);
+					StingleDbAlbum dbAlbum = albumsDb.getAlbumById(albumId);
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(dbAlbum.data);
+					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArray(dbAlbum.albumPK));
 
 				} else {
 					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers);
@@ -422,8 +422,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		public byte[] bitmapBytes = null;
 		public boolean isRemote = false;
 		public String url = null;
-		public int folder = SyncManager.GALLERY;
-		public String folderId = null;
+		public int set = SyncManager.GALLERY;
+		public String albumId = null;
 		public String headers = null;
 	}
 }

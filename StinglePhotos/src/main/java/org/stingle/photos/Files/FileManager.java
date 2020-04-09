@@ -43,11 +43,11 @@ public class FileManager {
 	static final public String SHARE_CACHE_DIR = "share";
 	static final public String DECRYPT_DIR = "StinglePhotosDecrypted";
 
-	public static byte[] getAndCacheThumb(Context context, String filename, int folder) throws IOException {
-		return getAndCacheThumb(context,filename, folder,null);
+	public static byte[] getAndCacheThumb(Context context, String filename, int set) throws IOException {
+		return getAndCacheThumb(context,filename, set,null);
 	}
 
-	public static byte[] getAndCacheThumb(Context context, String filename, int folder, String cachePath) throws IOException {
+	public static byte[] getAndCacheThumb(Context context, String filename, int set, String cachePath) throws IOException {
 
 		File cacheDir;
 		if(cachePath != null){
@@ -78,7 +78,7 @@ public class FileManager {
 		postParams.put("token", KeyManagement.getApiToken(context));
 		postParams.put("file", filename);
 		postParams.put("thumb", "1");
-		postParams.put("folder", String.valueOf(folder));
+		postParams.put("set", String.valueOf(set));
 		byte[] encFile = new byte[0];
 
 		try {

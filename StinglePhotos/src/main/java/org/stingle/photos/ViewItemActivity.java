@@ -28,7 +28,7 @@ import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Sync.SyncManager;
@@ -41,8 +41,8 @@ import java.util.Objects;
 public class ViewItemActivity extends AppCompatActivity {
 
 	protected int itemPosition = 0;
-	protected int folder = SyncManager.GALLERY;
-	protected String folderId = null;
+	protected int set = SyncManager.GALLERY;
+	protected String albumId = null;
 	protected int currentPosition = 0;
 	protected ViewPager viewPager;
 	protected ViewPagerAdapter adapter;
@@ -82,8 +82,8 @@ public class ViewItemActivity extends AppCompatActivity {
 
 		Intent intent = getIntent();
 		itemPosition = intent.getIntExtra("EXTRA_ITEM_POSITION", 0);
-		folder = intent.getIntExtra("EXTRA_ITEM_FOLDER", 0);
-		folderId = intent.getStringExtra("EXTRA_ITEM_FOLDER_ID");
+		set = intent.getIntExtra("EXTRA_ITEM_SET", 0);
+		albumId = intent.getStringExtra("EXTRA_ITEM_ALBUM_ID");
 		currentPosition = itemPosition;
 		viewPager = (ViewPager)findViewById(R.id.viewPager);
 
@@ -120,7 +120,7 @@ public class ViewItemActivity extends AppCompatActivity {
 				if (adapter != null) {
 					adapter.releasePlayers();
 				}
-				adapter = new ViewPagerAdapter(ViewItemActivity.this, folder, folderId, gestureTouchListener);
+				adapter = new ViewPagerAdapter(ViewItemActivity.this, set, albumId, gestureTouchListener);
 				viewPager.setAdapter(adapter);
 				viewPager.setCurrentItem(itemPosition);
 			}
@@ -227,11 +227,11 @@ public class ViewItemActivity extends AppCompatActivity {
 		int id = item.getItemId();
 		FilesDb db;
 		int sort = StingleDb.SORT_DESC;
-		if(folder == SyncManager.GALLERY || folder == SyncManager.TRASH) {
-			db = new GalleryTrashDb(this, folder);
+		if(set == SyncManager.GALLERY || set == SyncManager.TRASH) {
+			db = new GalleryTrashDb(this, set);
 		}
-		else if (folder == SyncManager.FOLDER){
-			db = new FolderFilesDb(this);
+		else if (set == SyncManager.ALBUM){
+			db = new AlbumFilesDb(this);
 			sort = StingleDb.SORT_ASC;
 		}
 		else{
@@ -240,15 +240,15 @@ public class ViewItemActivity extends AppCompatActivity {
 
 		if (id == R.id.share) {
 			ArrayList<StingleDbFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), folderId, sort));
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort));
 
-			ShareManager.shareDbFiles(this, files, folder, folderId);
+			ShareManager.shareDbFiles(this, files, set, albumId);
 
 		}
 		else if (id == R.id.trash) {
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
 			ArrayList<StingleDbFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), folderId, sort));
+			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort));
 
 			MoveFileAsyncTask moveTask = new MoveFileAsyncTask(this, files, new OnAsyncTaskFinish() {
 				@Override
@@ -273,9 +273,9 @@ public class ViewItemActivity extends AppCompatActivity {
 					mySnackbar.show();
 				}
 			});
-			moveTask.setFromFolder(folder);
-			moveTask.setFromFolderId(folderId);
-			moveTask.setToFolder(SyncManager.TRASH);
+			moveTask.setFromSet(set);
+			moveTask.setFromAlbumId(albumId);
+			moveTask.setToSet(SyncManager.TRASH);
 			moveTask.setIsMoving(true);
 			moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}

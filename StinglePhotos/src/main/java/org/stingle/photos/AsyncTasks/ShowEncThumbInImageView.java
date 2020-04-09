@@ -22,8 +22,8 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 	private String filename;
 	private ImageView imageView;
 	private Integer thumbSize = null;
-	private int folder = SyncManager.GALLERY;
-	private String folderId = null;
+	private int set = SyncManager.GALLERY;
+	private String albumId = null;
 	private String headers = null;
 	private boolean isRemote = false;
 	private OnAsyncTaskFinish onFinish;
@@ -38,12 +38,12 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 		thumbSize = size;
 		return this;
 	}
-	public ShowEncThumbInImageView setFolder(int folder){
-		this.folder = folder;
+	public ShowEncThumbInImageView setSet(int set){
+		this.set = set;
 		return this;
 	}
-	public ShowEncThumbInImageView setFolderId(String folderId){
-		this.folderId = folderId;
+	public ShowEncThumbInImageView setAlbumId(String albumId){
+		this.albumId = albumId;
 		return this;
 	}
 	public ShowEncThumbInImageView setHeaders(String headers){
@@ -51,7 +51,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 		return this;
 	}
 
-	public ShowEncThumbInImageView setisRemote(boolean isRemote){
+	public ShowEncThumbInImageView setIsRemote(boolean isRemote){
 		this.isRemote = isRemote;
 		return this;
 	}
@@ -74,16 +74,16 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 			byte[] decryptedData = null;
 			if(!isRemote) {
 				File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + filename);
-				decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, headers, true, new FileInputStream(fileToDec));
+				decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, headers, true, new FileInputStream(fileToDec));
 			}
 			else{
-				byte[] encFile = FileManager.getAndCacheThumb(context, filename, folder);
+				byte[] encFile = FileManager.getAndCacheThumb(context, filename, set);
 
 				if (encFile == null || encFile.length == 0) {
 					return null;
 				}
 
-				decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, headers, true, encFile);
+				decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, headers, true, encFile);
 			}
 
 			if (decryptedData != null) {

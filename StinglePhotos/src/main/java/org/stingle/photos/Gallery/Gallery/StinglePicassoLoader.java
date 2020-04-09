@@ -33,13 +33,13 @@ public class StinglePicassoLoader extends RequestHandler {
 	private FilesDb db;
 	private int thumbSize;
 	private Crypto crypto;
-	private String folderId = null;
+	private String albumId = null;
 
-	public StinglePicassoLoader(Context context, FilesDb db, int thumbSize, String folderId){
+	public StinglePicassoLoader(Context context, FilesDb db, int thumbSize, String albumId){
 		this.context = context;
 		this.db = db;
 		this.thumbSize = thumbSize;
-		this.folderId = folderId;
+		this.albumId = albumId;
 		this.crypto = StinglePhotosApplication.getCrypto();
 	}
 
@@ -59,27 +59,27 @@ public class StinglePicassoLoader extends RequestHandler {
 			//Log.e("interrupted", String.valueOf(position));
 		}*/
 		String uri = request.uri.toString();
-		String folderStr = uri.substring(1, 2);
+		String setStr = uri.substring(1, 2);
 		String position = uri.substring(2);
 
 		int sort = StingleDb.SORT_DESC;
-		int folder = SyncManager.GALLERY;
-		if(folderStr.equals("t")){
-			folder = SyncManager.TRASH;
+		int set = SyncManager.GALLERY;
+		if(setStr.equals("t")){
+			set = SyncManager.TRASH;
 		}
-		else if(folderStr.equals("a")){
-			folder = SyncManager.FOLDER;
+		else if(setStr.equals("a")){
+			set = SyncManager.ALBUM;
 			sort = StingleDb.SORT_ASC;
 		}
 
-		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position), folderId, sort);
+		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position), albumId, sort);
 
 		if(file.isLocal) {
 			try {
 				File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 				FileInputStream input = new FileInputStream(fileToDec);
 
-				byte[] decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, file.headers, true, input);
+				byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, file.headers, true, input);
 
 				if (decryptedData != null) {
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
@@ -113,13 +113,13 @@ public class StinglePicassoLoader extends RequestHandler {
 		else if(file.isRemote){
 
 			try {
-				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename, folder);
+				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename, set);
 
 				if(encFile == null || encFile.length == 0){
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));
 				}
 
-				byte[] decryptedData = CryptoHelpers.decryptDbFile(context, folder, folderId, file.headers, true, encFile);
+				byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, file.headers, true, encFile);
 
 				if (decryptedData != null) {
 

@@ -21,11 +21,11 @@ public class SyncBarHandler {
 
 	private GalleryActivity activity;
 
-	protected ViewGroup syncBar;
-	protected ProgressBar syncProgress;
-	protected ProgressBar refreshCProgress;
-	protected ImageView syncPhoto;
-	protected TextView syncText;
+	private ViewGroup syncBar;
+	private ProgressBar syncProgress;
+	private ProgressBar refreshCProgress;
+	private ImageView syncPhoto;
+	private TextView syncText;
 	private ImageView backupCompleteIcon;
 
 	public SyncBarHandler(GalleryActivity activity) {
@@ -46,8 +46,8 @@ public class SyncBarHandler {
 			int totalItemsNumber = bundle.getInt("totalItemsNumber");
 			int uploadedFilesCount = bundle.getInt("uploadedFilesCount");
 			String currentFile = bundle.getString("currentFile");
-			int folder = bundle.getInt("folder");
-			String folderId = bundle.getString("folderId");
+			int set = bundle.getInt("set");
+			String albumId = bundle.getString("albumId");
 			String headers = bundle.getString("headers");
 
 			if (syncStatus == SyncService.STATUS_UPLOADING) {
@@ -55,7 +55,7 @@ public class SyncBarHandler {
 				syncProgress.setProgress(uploadedFilesCount);
 				syncText.setText(activity.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
 				if(currentFile != null && headers != null) {
-					(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setFolder(folder).setFolderId(folderId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setSet(set).setAlbumId(albumId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 				setSyncStatus(SyncService.STATUS_UPLOADING);
 			} else if (syncStatus == SyncService.STATUS_REFRESHING) {
@@ -68,9 +68,9 @@ public class SyncBarHandler {
 			Bundle bundle = msg.getData();
 			String currentFile = bundle.getString("currentFile");
 			String headers = bundle.getString("headers");
-			int folder = bundle.getInt("folder");
-			String folderId = bundle.getString("folderId");
-			(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setFolder(folder).setFolderId(folderId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			int set = bundle.getInt("set");
+			String albumId = bundle.getString("albumId");
+			(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setSet(set).setAlbumId(albumId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 			setSyncStatus(SyncService.STATUS_UPLOADING);
 		} else if (msg.what == SyncService.MSG_SYNC_UPLOAD_PROGRESS) {

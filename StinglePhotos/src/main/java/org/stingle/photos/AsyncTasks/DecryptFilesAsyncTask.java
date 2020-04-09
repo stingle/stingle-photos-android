@@ -34,8 +34,8 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 	private final Context context;
 	private final File destinationFolder;
 	private final OnAsyncTaskFinish onFinishListener;
-	private int folder = SyncManager.GALLERY;
-	private String folderId = null;
+	private int set = SyncManager.GALLERY;
+	private String albumId = null;
 
 	private boolean performMediaScan = false;
 
@@ -53,11 +53,11 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		this.performMediaScan = performMediaScan;
 	}
 
-	public void setFolder(int folder) {
-		this.folder = folder;
+	public void setSet(int set) {
+		this.set = set;
 	}
-	public void setFolderId(String folderId) {
-		this.folderId = folderId;
+	public void setAlbumId(String albumId) {
+		this.albumId = albumId;
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 				postParams.put("token", KeyManagement.getApiToken(context));
 				postParams.put("file", dbFile.filename);
 				postParams.put("thumb", "0");
-				postParams.put("folder", String.valueOf(folder));
+				postParams.put("set", String.valueOf(set));
 
 
 				try {
@@ -120,7 +120,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 					String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), destFileName);
 					FileOutputStream outputStream = new FileOutputStream(new File(finalWritePath));
 
-					CryptoHelpers.decryptDbFile(context, folder, folderId, dbFile.headers, false, inputStream, outputStream, null, this);
+					CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, false, inputStream, outputStream, null, this);
 
 					publishProgress(i + 1);
 					File decryptedFile = new File(finalWritePath);

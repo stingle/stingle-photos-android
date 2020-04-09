@@ -25,7 +25,7 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
 import org.stingle.photos.Gallery.Helpers.IDragSelectAdapter;
@@ -55,34 +55,34 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
 	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
-	private int folderType = SyncManager.GALLERY;
-	private String folderId = null;
+	private int set = SyncManager.GALLERY;
+	private String albumId = null;
 	private int DB_SORT = StingleDb.SORT_DESC;
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
 
-	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int folderType, String folderId) {
+	public GalleryAdapterPisasso(Context context, Listener callback, AutoFitGridLayoutManager lm, int set, String albumId) {
 		this.context = context;
 		this.callback = callback;
-		this.folderType = folderType;
-		this.folderId = folderId;
-		switch (folderType){
+		this.set = set;
+		this.albumId = albumId;
+		switch (set){
 			case SyncManager.GALLERY:
 				this.db = new GalleryTrashDb(context, SyncManager.GALLERY);
 				break;
 			case SyncManager.TRASH:
 				this.db = new GalleryTrashDb(context, SyncManager.TRASH);
 				break;
-			case SyncManager.FOLDER:
+			case SyncManager.ALBUM:
 				DB_SORT = StingleDb.SORT_ASC;
-				this.db = new FolderFilesDb(context);
+				this.db = new AlbumFilesDb(context);
 				break;
 		}
 		this.thumbSize = Helpers.getThumbSize(context);
 		this.lm = lm;
 
-		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize, folderId)).build();
+		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize, albumId)).build();
 
 		getAvailableDates();
 		calculateDatePositions();
@@ -193,7 +193,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	protected void getAvailableDates(){
 		dates.clear();
-		Cursor result = db.getAvailableDates(folderId, DB_SORT);
+		Cursor result = db.getAvailableDates(albumId, DB_SORT);
 		while(result.moveToNext()) {
 			DateGroup group = new DateGroup(convertDate(result.getString(0)), result.getInt(1));
 			dates.add(group);
@@ -282,13 +282,13 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	public void updateItem(int dbPosition){
 		int galleryPos = translateDbPosToGalleryPos(dbPosition);
 
-		String folder = "m";
-		if(folderType == SyncManager.TRASH){
-			folder = "t";
+		String set = "m";
+		if(this.set == SyncManager.TRASH){
+			set = "t";
 		}
 
 		filePropsCache.remove(dbPosition);
-		picasso.invalidate("p" + folder + String.valueOf(dbPosition));
+		picasso.invalidate("p" + set + String.valueOf(dbPosition));
 		//picasso.evictAll();
 		notifyItemChanged(galleryPos);
 	}
@@ -353,15 +353,15 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			holder.noCloudIcon.setVisibility(View.GONE);
 			//holder.image.setBackgroundColor(activity.getResources().getColor(R.color.galery_item_bg));
 
-			String folder = "m";
-			if(folderType == SyncManager.TRASH){
-				folder = "t";
+			String set = "m";
+			if(this.set == SyncManager.TRASH){
+				set = "t";
 			}
-			else if(folderType == SyncManager.FOLDER){
-				folder = "a";
+			else if(this.set == SyncManager.ALBUM){
+				set = "a";
 			}
 
-			final RequestCreator req = picasso.load("p" + folder + String.valueOf(position));
+			final RequestCreator req = picasso.load("p" + set + String.valueOf(position));
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
 			req.tag(holder);
 			req.addProp("pos", String.valueOf(position));
@@ -425,7 +425,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	public StingleDbFile getStingleFileAtPosition(int position){
-		return db.getFileAtPosition(translatePos(position).dbPosition, folderId, DB_SORT);
+		return db.getFileAtPosition(translatePos(position).dbPosition, albumId, DB_SORT);
 	}
 
 	@Override

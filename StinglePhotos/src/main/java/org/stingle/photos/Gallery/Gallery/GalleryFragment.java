@@ -36,8 +36,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	private GalleryFragmentParent parentActivity;
 
-	private int currentFolder = SyncManager.GALLERY;
-	private String folderId = null;
+	private int currentSet = SyncManager.GALLERY;
+	private String albumId = null;
 
 
 	@Nullable
@@ -58,8 +58,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		Bundle bundle = getArguments();
 		boolean initNow = false;
 		if (bundle != null) {
-			currentFolder = bundle.getInt("currentFolder", SyncManager.GALLERY);
-			folderId = bundle.getString("folderId");
+			currentSet = bundle.getInt("set", SyncManager.GALLERY);
+			albumId = bundle.getString("albumId");
 			initNow = bundle.getBoolean("initNow", true);
 		}
 
@@ -72,7 +72,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
-		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentFolder, folderId);
+		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentSet, albumId);
 		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext()));
 		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
 			@Override
@@ -165,8 +165,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			Intent intent = new Intent();
 			intent.setClass(getContext(), ViewItemActivity.class);
 			intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
-			intent.putExtra("EXTRA_ITEM_FOLDER", currentFolder);
-			intent.putExtra("EXTRA_ITEM_FOLDER_ID", folderId);
+			intent.putExtra("EXTRA_ITEM_SET", currentSet);
+			intent.putExtra("EXTRA_ITEM_ALBUM_ID", albumId);
 			startActivity(intent);
 		}
 	}

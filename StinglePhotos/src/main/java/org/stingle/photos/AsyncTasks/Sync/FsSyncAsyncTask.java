@@ -6,7 +6,7 @@ import android.util.Log;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.StinglePhotosApplication;
@@ -39,21 +39,21 @@ public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
 		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
-		FolderFilesDb folderFilesDb = new FolderFilesDb(myContext);
+		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
 
 
 		File dir = new File(FileManager.getHomeDir(myContext));
 
-		File[] currentFolderFiles = dir.listFiles();
+		File[] currentFSFiles = dir.listFiles();
 
-		if(currentFolderFiles != null) {
-			for (File file : currentFolderFiles) {
+		if(currentFSFiles != null) {
+			for (File file : currentFSFiles) {
 				boolean isOurFile = file.isFile() && file.getName().endsWith(StinglePhotosApplication.FILE_EXTENSION);
 				boolean existsInGallery = galleryDb.getFileIfExists(file.getName()) != null;
 				boolean existsInTrash = trashDb.getFileIfExists(file.getName()) != null;
-				boolean existsInFolders = folderFilesDb.getFileIfExists(file.getName()) != null;
+				boolean existsInAlbums = albumFilesDb.getFileIfExists(file.getName()) != null;
 
-				if (isOurFile && !existsInGallery && !existsInTrash && !existsInFolders) {
+				if (isOurFile && !existsInGallery && !existsInTrash && !existsInAlbums) {
 					try {
 						String headers = Crypto.getFileHeadersFromFile(file.getAbsolutePath(), FileManager.getThumbsDir(myContext) + "/" + file.getName());
 						galleryDb.insertFile(file.getName(), true, false, GalleryTrashDb.INITIAL_VERSION, file.lastModified(), System.currentTimeMillis(), headers);
@@ -68,7 +68,7 @@ public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		}
 		galleryDb.close();
 		trashDb.close();
-		folderFilesDb.close();
+		albumFilesDb.close();
 
 		return needToUpdateUI;
 	}

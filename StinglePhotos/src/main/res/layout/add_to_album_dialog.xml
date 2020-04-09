@@ -13,7 +13,7 @@
         android:paddingBottom="8dp">
 
         <RadioButton
-            android:id="@+id/add_to_folder"
+            android:id="@+id/add_to_album"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:text="@string/add_to_album"
@@ -21,7 +21,7 @@
             android:checked="true"/>
 
         <RadioButton
-            android:id="@+id/move_to_folder"
+            android:id="@+id/move_to_album"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:textSize="16sp"

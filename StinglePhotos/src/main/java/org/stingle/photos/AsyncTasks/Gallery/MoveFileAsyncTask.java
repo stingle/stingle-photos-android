@@ -19,10 +19,10 @@ public class MoveFileAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private final OnAsyncTaskFinish onFinishListener;
 	private Crypto crypto;
 
-	private int fromFolder = -1;
-	private int toFolder = -1;
-	private String fromFolderId = null;
-	private String toFolderId = null;
+	private int fromSet = -1;
+	private int toSet = -1;
+	private String fromAlbumId = null;
+	private String toAlbumId = null;
 	private boolean isMoving = false;
 
 	public MoveFileAsyncTask(Context context, ArrayList<StingleDbFile> files, OnAsyncTaskFinish onFinishListener) {
@@ -32,20 +32,20 @@ public class MoveFileAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		this.crypto = StinglePhotosApplication.getCrypto();
 	}
 
-	public MoveFileAsyncTask setFromFolder(int folder){
-		this.fromFolder = folder;
+	public MoveFileAsyncTask setFromSet(int set){
+		this.fromSet = set;
 		return this;
 	}
-	public MoveFileAsyncTask setToFolder(int folder){
-		this.toFolder = folder;
+	public MoveFileAsyncTask setToSet(int set){
+		this.toSet = set;
 		return this;
 	}
-	public MoveFileAsyncTask setToFolderId(String folderId){
-		this.toFolderId = folderId;
+	public MoveFileAsyncTask setToAlbumId(String albumId){
+		this.toAlbumId = albumId;
 		return this;
 	}
-	public MoveFileAsyncTask setFromFolderId(String folderId){
-		this.fromFolderId = folderId;
+	public MoveFileAsyncTask setFromAlbumId(String albumId){
+		this.fromAlbumId = albumId;
 		return this;
 	}
 	public MoveFileAsyncTask setIsMoving(boolean isMoving){
@@ -59,7 +59,7 @@ public class MoveFileAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		if(myContext == null){
 			return false;
 		}
-		if(fromFolder == -1 || toFolder == -1){
+		if(fromSet == -1 || toSet == -1){
 			return false;
 		}
 		if(files == null){
@@ -69,7 +69,7 @@ public class MoveFileAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			return true;
 		}
 
-		return SyncManager.moveFiles(myContext, files, fromFolder, toFolder, fromFolderId, toFolderId, isMoving);
+		return SyncManager.moveFiles(myContext, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving);
 	}
 
 	@Override

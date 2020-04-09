@@ -15,7 +15,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.Query.FolderFilesDb;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Widget.ImageHolderLayout;
@@ -29,27 +29,27 @@ public class ViewPagerAdapter extends PagerAdapter {
 	private FilesDb db;
 	private int currentPosition = 0;
 	private int lastFilesCount = -1;
-	private int folder = SyncManager.GALLERY;
-	private String folderId = null;
+	private int set = SyncManager.GALLERY;
+	private String albumId = null;
 	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
 	private View.OnTouchListener gestureTouchListener;
 
-	public ViewPagerAdapter(Context context, int folder, String folderId, View.OnTouchListener gestureTouchListener) {
+	public ViewPagerAdapter(Context context, int set, String albumId, View.OnTouchListener gestureTouchListener) {
 		this.context = context;
-		this.folder = folder;
-		this.folderId = folderId;
+		this.set = set;
+		this.albumId = albumId;
 		this.gestureTouchListener = gestureTouchListener;
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		switch (folder) {
+		switch (set) {
 			case SyncManager.GALLERY:
 				this.db = new GalleryTrashDb(context, SyncManager.GALLERY);
 				break;
 			case SyncManager.TRASH:
 				this.db = new GalleryTrashDb(context, SyncManager.TRASH);
 				break;
-			case SyncManager.FOLDER:
-				this.db = new FolderFilesDb(context);
+			case SyncManager.ALBUM:
+				this.db = new AlbumFilesDb(context);
 				break;
 		}
 	}
@@ -57,7 +57,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 	@Override
 	public int getCount() {
 		if (lastFilesCount == -1) {
-			lastFilesCount = (int) db.getTotalFilesCount(folderId);
+			lastFilesCount = (int) db.getTotalFilesCount(albumId);
 		}
 		return lastFilesCount;
 	}
@@ -80,7 +80,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		ImageHolderLayout parent = layout.findViewById(R.id.parent_layout);
 		ContentLoadingProgressBar loading = layout.findViewById(R.id.loading_spinner);
 
-		(new ViewItemAsyncTask(context, this, position, parent, loading, db, folder, folderId, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		(new ViewItemAsyncTask(context, this, position, parent, loading, db, set, albumId, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		container.addView(layout);
 		return layout;

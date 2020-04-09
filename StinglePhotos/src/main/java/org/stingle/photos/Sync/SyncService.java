@@ -80,19 +80,19 @@ public class SyncService extends Service {
 
 		progress = new UploadToCloudAsyncTask.UploadProgress() {
 			@Override
-			public void currentFile(String filename, String headers, int folder, String folderId) {
-				super.currentFile(filename, headers, folder, folderId);
+			public void currentFile(String filename, String headers, int set, String albumId) {
+				super.currentFile(filename, headers, set, albumId);
 				Bundle b = new Bundle();
 				b.putString("currentFile", filename);
 				b.putString("headers", headers);
-				b.putInt("folder", folder);
-				b.putString("folderId", folderId);
+				b.putInt("set", set);
+				b.putString("albumId", albumId);
 				sendBundleToUi(MSG_SYNC_CURRENT_FILE, b);
 			}
 
 			@Override
-			public void fileUploadFinished(String filename, int folder) {
-				GalleryTrashDb db = new GalleryTrashDb(SyncService.this, folder);
+			public void fileUploadFinished(String filename, int set) {
+				GalleryTrashDb db = new GalleryTrashDb(SyncService.this, set);
 
 				Integer filePos = db.getFilePositionByFilename(filename);
 				db.close();
@@ -381,8 +381,8 @@ public class SyncService extends Service {
 								b.putInt("totalItemsNumber", progress.totalItemsNumber);
 								b.putString("currentFile", progress.currentFile);
 								b.putString("headers", progress.headers);
-								b.putInt("folder", progress.folder);
-								b.putString("folderId", progress.folderId);
+								b.putInt("set", progress.set);
+								b.putString("albumId", progress.albumId);
 								b.putInt("uploadedFilesCount", progress.uploadedFilesCount);
 								b.putInt("syncStatus", currentStatus);
 								Message msgToSend = Message.obtain(null, MSG_RESP_SYNC_STATUS);

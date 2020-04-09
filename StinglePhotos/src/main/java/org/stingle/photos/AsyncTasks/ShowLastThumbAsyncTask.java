@@ -13,7 +13,7 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 
 	private Context context;
 	private ImageView imageView;
-	private int folder = SyncManager.GALLERY;
+	private int set = SyncManager.GALLERY;
 	private Integer thumbSize = null;
 
 	public ShowLastThumbAsyncTask(Context context, ImageView imageView) {
@@ -21,8 +21,8 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 		this.imageView = imageView;
 	}
 
-	public ShowLastThumbAsyncTask setFolder(int folder){
-		this.folder = folder;
+	public ShowLastThumbAsyncTask setSet(int set){
+		this.set = set;
 		return this;
 	}
 
@@ -48,9 +48,9 @@ public class ShowLastThumbAsyncTask extends AsyncTask<Void, Void, StingleDbFile>
 			}
 
 			(new ShowEncThumbInImageView(context, dbFile.filename, imageView))
-					.setisRemote(isRemote)
+					.setIsRemote(isRemote)
 					.setThumbSize(thumbSize)
-					.setFolder(folder)
+					.setSet(set)
 					.setHeaders(dbFile.headers)
 					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}

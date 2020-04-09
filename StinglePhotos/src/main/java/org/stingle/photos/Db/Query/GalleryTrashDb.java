@@ -16,15 +16,15 @@ public class GalleryTrashDb implements FilesDb{
 	private String tableName;
 	private StingleDb db;
 
-	public GalleryTrashDb(Context context, int folder) {
-		if(folder == SyncManager.GALLERY) {
+	public GalleryTrashDb(Context context, int set) {
+		if(set == SyncManager.GALLERY) {
 			this.tableName = StingleDbContract.Columns.TABLE_NAME_GALLERY;
 		}
-		else if(folder == SyncManager.TRASH){
+		else if(set == SyncManager.TRASH){
 			this.tableName = StingleDbContract.Columns.TABLE_NAME_TRASH;
 		}
 		else{
-			throw new RuntimeException("Invalid folder");
+			throw new RuntimeException("Invalid set");
 		}
 		db = new StingleDb(context);
 	}
@@ -144,7 +144,7 @@ public class GalleryTrashDb implements FilesDb{
 		return getFileIfExists(filename, null);
 	}
 
-	public StingleDbFile getFileIfExists(String filename, String folderId){
+	public StingleDbFile getFileIfExists(String filename, String albumId){
 		String[] projection = {
 				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
@@ -180,7 +180,7 @@ public class GalleryTrashDb implements FilesDb{
 		return null;
 	}
 
-	public Cursor getFilesList(int mode, int sort, String limit, String folderId){
+	public Cursor getFilesList(int mode, int sort, String limit, String albumId){
 
 		String[] projection = {
 				StingleDbContract.Columns._ID,
@@ -272,7 +272,7 @@ public class GalleryTrashDb implements FilesDb{
 
 	}
 
-	public StingleDbFile getFileAtPosition(int pos, String id, int sort){
+	public StingleDbFile getFileAtPosition(int pos, String albumId, int sort){
 		String[] projection = {
 				StingleDbContract.Columns._ID,
 				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
@@ -317,7 +317,7 @@ public class GalleryTrashDb implements FilesDb{
 		return null;
 	}
 
-	public Cursor getAvailableDates(String folderId, int sort){
+	public Cursor getAvailableDates(String albumId, int sort){
 		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"GROUP BY cdate " +
@@ -326,7 +326,7 @@ public class GalleryTrashDb implements FilesDb{
 
 	}
 
-	public long getTotalFilesCount(String id){
+	public long getTotalFilesCount(String albumId){
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
 

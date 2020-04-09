@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery.Folders;
+package org.stingle.photos.Gallery.Albums;
 
 import android.content.Context;
 import android.util.LruCache;
@@ -21,26 +21,26 @@ import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
-import org.stingle.photos.Db.Objects.StingleDbFolder;
-import org.stingle.photos.Db.Query.FolderFilesDb;
-import org.stingle.photos.Db.Query.FoldersDb;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
 
-public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private Context context;
-	private FoldersDb db;
-	private FolderFilesDb filesDb;
+	private AlbumsDb db;
+	private AlbumFilesDb filesDb;
 	private boolean showGalleryOption;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private Listener listener;
 	private int thumbSize;
 	private RecyclerView.LayoutManager lm;
 	private Picasso picasso;
-	private LruCache<Integer, FolderProps> filePropsCache = new LruCache<Integer, FolderProps>(512);
+	private LruCache<Integer, AlbumProps> filePropsCache = new LruCache<Integer, AlbumProps>(512);
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_ADD = 1;
@@ -51,15 +51,15 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private int layoutStyle = LAYOUT_GRID;
 	private int otherItemsCount = 1;
 
-	public FoldersAdapterPisasso(Context context, RecyclerView.LayoutManager lm, boolean showGalleryOption) {
+	public AlbumsAdapterPisasso(Context context, RecyclerView.LayoutManager lm, boolean showGalleryOption) {
 		this.context = context;
-		this.db = new FoldersDb(context);
-		this.filesDb = new FolderFilesDb(context);
+		this.db = new AlbumsDb(context);
+		this.filesDb = new AlbumFilesDb(context);
 		this.thumbSize = Helpers.getThumbSize(context,2);
 		this.lm = lm;
 		this.showGalleryOption = showGalleryOption;
 
-		this.picasso = new Picasso.Builder(context).addRequestHandler(new FoldersPicassoLoader(context, db, filesDb, thumbSize)).build();
+		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, filesDb, thumbSize)).build();
 
 		if(showGalleryOption){
 			otherItemsCount = 2;
@@ -90,25 +90,25 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	// Provide a reference to the views for each data item
 	// Complex data items may need more than one view per item, and
 	// you provide access to all the views for a data item in a view holder
-	public class FolderVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+	public class AlbumVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 		// each data item is just a string in this case
 		public View layout;
 		public ImageView image;
 		public CheckBox checkbox;
-		public TextView folderName;
+		public TextView albumName;
 		public int currentPos = -1;
 
-		public FolderVH(View v) {
+		public AlbumVH(View v) {
 			super(v);
 			layout = v;
 			image = v.findViewById(R.id.thumbImage);
 			checkbox = v.findViewById(R.id.checkBox);
-			folderName = v.findViewById(R.id.folderName);
+			albumName = v.findViewById(R.id.albumName);
 			checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
-			folderName.setOnClickListener(this);
-			folderName.setOnLongClickListener(this);
+			albumName.setOnClickListener(this);
+			albumName.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -127,21 +127,21 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 	}
 
-	public class FolderAddVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+	public class AlbumAddVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 		// each data item is just a string in this case
 		public View layout;
 		public ImageView image;
-		public TextView folderName;
+		public TextView albumName;
 
-		public FolderAddVH(View v) {
+		public AlbumAddVH(View v) {
 			super(v);
 			layout = v;
 			image = v.findViewById(R.id.thumbImage);
-			folderName = v.findViewById(R.id.folderName);
+			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
-			folderName.setOnClickListener(this);
-			folderName.setOnLongClickListener(this);
+			albumName.setOnClickListener(this);
+			albumName.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -168,21 +168,21 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		void onSelectionChanged(int count);
 	}
 
-	public class FolderAddGalleryVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+	public class AlbumAddGalleryVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 		// each data item is just a string in this case
 		public View layout;
 		public ImageView image;
-		public TextView folderName;
+		public TextView albumName;
 
-		public FolderAddGalleryVH(View v) {
+		public AlbumAddGalleryVH(View v) {
 			super(v);
 			layout = v;
 			image = v.findViewById(R.id.thumbImage);
-			folderName = v.findViewById(R.id.folderName);
+			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
 			image.setOnLongClickListener(this);
-			folderName.setOnClickListener(this);
-			folderName.setOnLongClickListener(this);
+			albumName.setOnClickListener(this);
+			albumName.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -225,9 +225,9 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			if (viewType == TYPE_ITEM) {
 				// create a new view
 				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.folder_item, parent, false);
+						.inflate(R.layout.album_item, parent, false);
 
-				FolderVH vh = new FolderVH(v);
+				AlbumVH vh = new AlbumVH(v);
 
 				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(thumbSize, thumbSize);
 				vh.image.setLayoutParams(params);
@@ -235,9 +235,9 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				return vh;
 			} else if (viewType == TYPE_ADD) {
 				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.folder_add_item, parent, false);
+						.inflate(R.layout.album_add_item, parent, false);
 
-				FolderAddVH vh = new FolderAddVH(v);
+				AlbumAddVH vh = new AlbumAddVH(v);
 
 				return vh;
 			}
@@ -246,23 +246,23 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			if (viewType == TYPE_ITEM) {
 				// create a new view
 				LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.add_to_folder_dialog_item, parent, false);
+						.inflate(R.layout.add_to_album_dialog_item, parent, false);
 
-				FolderVH vh = new FolderVH(v);
+				AlbumVH vh = new AlbumVH(v);
 
 				return vh;
 			} else if (viewType == TYPE_ADD) {
 				LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.add_to_folder_dialog_item, parent, false);
+						.inflate(R.layout.add_to_album_dialog_item, parent, false);
 
-				FolderAddVH vh = new FolderAddVH(v);
+				AlbumAddVH vh = new AlbumAddVH(v);
 
 				return vh;
 			} else if (viewType == TYPE_GALLERY) {
 				LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.add_to_folder_dialog_item, parent, false);
+						.inflate(R.layout.add_to_album_dialog_item, parent, false);
 
-				FolderAddGalleryVH vh = new FolderAddGalleryVH(v);
+				AlbumAddGalleryVH vh = new AlbumAddGalleryVH(v);
 
 				return vh;
 			}
@@ -277,14 +277,14 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 		final int dbPos = translateGalleryPosToDbPos(rawPosition);
 
-		if(holderObj instanceof FolderVH) {
-			FolderVH holder = (FolderVH)holderObj;
+		if(holderObj instanceof AlbumVH) {
+			AlbumVH holder = (AlbumVH)holderObj;
 			int size = Helpers.convertDpToPixels(context, 2);
 			holder.image.setPadding(size, size, size, size);
 			holder.checkbox.setVisibility(View.GONE);
 
 			holder.image.setImageBitmap(null);
-			holder.folderName.setText("");
+			holder.albumName.setText("");
 
 			final RequestCreator req = picasso.load("a" + dbPos);
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
@@ -297,21 +297,21 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 					if (pos == null) {
 						return;
 					}
-					FolderVH holder = (FolderVH) request.tag;
+					AlbumVH holder = (AlbumVH) request.tag;
 
-					FolderProps props = filePropsCache.get(pos);
+					AlbumProps props = filePropsCache.get(pos);
 					if (props == null) {
-						props = (FolderProps) result.getProperty("folderProps");
+						props = (AlbumProps) result.getProperty("albumProps");
 						if (props != null) {
 							filePropsCache.put(pos, props);
 						}
 						else{
-							props = new FolderProps();
+							props = new AlbumProps();
 						}
 					}
 
 					if(props.name != null){
-						holder.folderName.setText(props.name);
+						holder.albumName.setText(props.name);
 					}
 				}
 
@@ -321,14 +321,14 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				}
 			});
 		}
-		else if(holderObj instanceof FolderAddVH) {
-			FolderAddVH holder = (FolderAddVH)holderObj;
-			holder.folderName.setText(context.getString(R.string.new_album));
+		else if(holderObj instanceof AlbumAddVH) {
+			AlbumAddVH holder = (AlbumAddVH)holderObj;
+			holder.albumName.setText(context.getString(R.string.new_album));
 			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_add_circle_outline));
 		}
-		else if(holderObj instanceof FolderAddGalleryVH) {
-			FolderAddGalleryVH holder = (FolderAddGalleryVH)holderObj;
-			holder.folderName.setText(context.getString(R.string.main_gallery));
+		else if(holderObj instanceof AlbumAddGalleryVH) {
+			AlbumAddGalleryVH holder = (AlbumAddGalleryVH)holderObj;
+			holder.albumName.setText(context.getString(R.string.main_gallery));
 			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_image_red));
 		}
 	}
@@ -352,18 +352,18 @@ public class FoldersAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return TYPE_ITEM;
 	}
 
-	public StingleDbFolder getFolderAtPosition(int position){
-		return db.getFolderAtPosition(translateGalleryPosToDbPos(position), StingleDb.SORT_ASC);
+	public StingleDbAlbum getAlbumAtPosition(int position){
+		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), StingleDb.SORT_ASC);
 	}
 
 	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
-		return (int)db.getTotalFoldersCount() + otherItemsCount;
+		return (int)db.getTotalAlbumsCount() + otherItemsCount;
 	}
 
 
-	public static class FolderProps {
+	public static class AlbumProps {
 		public String name;
 		public boolean isUploaded = true;
 	}

@@ -23,7 +23,7 @@ import java.util.List;
 
 public class ShareManager {
 
-	public static void shareDbFiles(final Context context, List<StingleDbFile> dbFiles, int folder, String folderId){
+	public static void shareDbFiles(final Context context, List<StingleDbFile> dbFiles, int set, String albumId){
 
 
 		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(context, new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
@@ -33,8 +33,8 @@ public class ShareManager {
 				shareFiles(context, files);
 			}
 		});
-		decFilesJob.setFolder(folder);
-		decFilesJob.setFolderId(folderId);
+		decFilesJob.setSet(set);
+		decFilesJob.setAlbumId(albumId);
 		decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, dbFiles);
 	}
 
@@ -84,7 +84,7 @@ public class ShareManager {
 		}
 	}
 
-	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleDbFile> selectedFiles, int folder) {
+	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleDbFile> selectedFiles, int set) {
 		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new File(activity.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish(ArrayList<File> files) {
@@ -117,7 +117,7 @@ public class ShareManager {
 				activity.finish();
 			}
 		});
-		decFilesJob.setFolder(folder);
+		decFilesJob.setSet(set);
 		decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, selectedFiles);
 	}
 
