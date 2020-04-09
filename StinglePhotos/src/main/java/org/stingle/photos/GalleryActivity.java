@@ -113,6 +113,8 @@ public class GalleryActivity extends AppCompatActivity
 	private SharedPreferences sharedPreferences;
 	private boolean isSyncEnabled;
 	private SyncBarHandler syncBarHandler;
+	private FloatingActionButton fab;
+	private BottomNavigationView bottomNavigationView;
 
 
 	@Override
@@ -128,8 +130,9 @@ public class GalleryActivity extends AppCompatActivity
 		toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		setSupportActionBar(toolbar);
-		FloatingActionButton fab = findViewById(R.id.import_fab);
+		fab = findViewById(R.id.import_fab);
 		fab.setOnClickListener(getImportOnClickListener());
+		bottomNavigationView = findViewById(R.id.bottom_navigation);
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -156,6 +159,15 @@ public class GalleryActivity extends AppCompatActivity
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		syncBarHandler = new SyncBarHandler(this);
+
+		if(savedInstanceState != null){
+			if(savedInstanceState.containsKey("set")) {
+				currentSet = savedInstanceState.getInt("set");
+			}
+			if(savedInstanceState.containsKey("albumId")) {
+				currentAlbumId = savedInstanceState.getString("albumId");
+			}
+		}
 	}
 
 	@Override
@@ -206,6 +218,14 @@ public class GalleryActivity extends AppCompatActivity
 			isBound = false;
 		}
 		findViewById(R.id.contentHolder).setVisibility(View.INVISIBLE);
+	}
+
+	@Override
+	public void onSaveInstanceState(@NonNull Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		outState.putInt("set", currentSet);
+		outState.putString("albumId", currentAlbumId);
 	}
 
 	public void showMainGallery(){
@@ -311,7 +331,7 @@ public class GalleryActivity extends AppCompatActivity
 			}
 			invalidateOptionsMenu();
 		}
-
+		fab.setVisibility(View.VISIBLE);
 	}
 
 	private void initAlbumsFragment(){
@@ -333,6 +353,7 @@ public class GalleryActivity extends AppCompatActivity
 			ft.replace(R.id.galleryContainer, albumsFragment);
 		}
 		ft.commit();
+		fab.setVisibility(View.GONE);
 	}
 
 	public void updateGalleryFragmentData(){
@@ -449,7 +470,7 @@ public class GalleryActivity extends AppCompatActivity
 
 		if(urisToImport.size() > 0){
 			isImporting = true;
-			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
+			(new ImportFilesAsyncTask(this, urisToImport, SyncManager.GALLERY, null, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
 					if(galleryFragment != null) {
@@ -594,27 +615,23 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void setupBottomNavigationView() {
-		BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-		if (bottomNavigationView != null) {
+		// Set action to perform when any menu-item is selected.
+		bottomNavigationView.setOnNavigationItemSelectedListener(
+				item -> {
+					item.setChecked(true);
 
-			// Set action to perform when any menu-item is selected.
-			bottomNavigationView.setOnNavigationItemSelectedListener(
-					item -> {
-						item.setChecked(true);
-
-						switch (item.getItemId()) {
-							case R.id.action_gallery:
-								showMainGallery();
-								break;
-							case R.id.action_albums:
-								showAlbumsList();
-								break;
-							case R.id.action_sharing:
-								break;
-						}
-						return false;
-					});
-		}
+					switch (item.getItemId()) {
+						case R.id.action_gallery:
+							showMainGallery();
+							break;
+						case R.id.action_albums:
+							showAlbumsList();
+							break;
+						case R.id.action_sharing:
+							break;
+					}
+					return false;
+				});
 	}
 
 	@Override
@@ -625,10 +642,12 @@ public class GalleryActivity extends AppCompatActivity
 		if (id == R.id.nav_gallery) {
 			showMainGallery();
 			invalidateOptionsMenu();
+			bottomNavigationView.getMenu().getItem(0).setChecked(true);
 		}
 		else if (id == R.id.nav_trash) {
 			showTrash();
 			invalidateOptionsMenu();
+			bottomNavigationView.getMenu().getItem(0).setChecked(true);
 		}
 		else if (id == R.id.nav_storage) {
 			Intent intent = new Intent();
@@ -800,10 +819,7 @@ public class GalleryActivity extends AppCompatActivity
 			intent.setType("*/*");
 			String[] mimetypes = {"image/*", "video/*"};
 			intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-			//intent.addCategory(Intent.CATEGORY_DEFAULT);
 			intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-			// Note: This is not documented, but works: Show the Internal Storage menu item in the drawer!
-			//intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
 			startActivityForResult(Intent.createChooser(intent, "Select photos and videos"), INTENT_IMPORT);
 		};
 	}
@@ -817,7 +833,9 @@ public class GalleryActivity extends AppCompatActivity
 		if(requestCode == INTENT_IMPORT){
 			dontStartSyncYet = true;
 
-			galleryFragment.scrollToTop();
+			if(galleryFragment != null) {
+				galleryFragment.scrollToTop();
+			}
 			ArrayList<Uri> urisToImport = new ArrayList<>();
 			ClipData clipData = data.getClipData();
 			if (clipData != null && clipData.getItemCount() > 0) {
@@ -826,34 +844,22 @@ public class GalleryActivity extends AppCompatActivity
 				}
 			}
 			else {
-
 				Uri uri = data.getData();
 				if (uri != null) {
 					urisToImport.add(uri);
 				}
 			}
 
-			(new ImportFilesAsyncTask(this, urisToImport, new FileManager.OnFinish() {
+			(new ImportFilesAsyncTask(this, urisToImport, currentSet, currentAlbumId, new FileManager.OnFinish() {
 				@Override
 				public void onFinish() {
-					galleryFragment.updateDataSet();
+					if(galleryFragment != null) {
+						galleryFragment.updateDataSet();
+					}
 					dontStartSyncYet = false;
 					sendMessageToSyncService(SyncService.MSG_START_SYNC);
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
-		/*else if(requestCode == 7){
-			Log.e("result", data.toString());
-			Uri uri = data.getData();
-
-			grantUriPermission(getPackageName(), uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
-					Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-			final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
-					Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-			getContentResolver().takePersistableUriPermission(uri, takeFlags);
-		}*/
 	}
-
 }

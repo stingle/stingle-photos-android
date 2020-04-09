@@ -193,7 +193,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			}
 
 			if(progress != null){
-				progress.fileUploadFinished(filename, set);
+				progress.fileUploadFinished(filename, set, albumId);
 			}
 		}
 
@@ -229,7 +229,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			this.set = set;
 			this.albumId = albumId;
 		}
-		public void fileUploadFinished(String filename, int set){
+		public void fileUploadFinished(String filename, int set, String albumId){
 
 		}
 		public void uploadProgress(int uploadedFilesCount){

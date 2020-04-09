@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
@@ -190,6 +191,19 @@ public class AlbumFilesDb implements FilesDb {
 				limit
 		);
 
+	}
+
+	public int getFilePositionByFilename(String filename, String albumId, int sort){
+		String sign = (sort == StingleDb.SORT_DESC ? "<=" : ">=");
+
+		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created "+sign+" b.date_created AND album_id='"+albumId+"') AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"' AND album_id='"+albumId+"'";
+		Log.d("query-albumf", query);
+		Cursor cursor = db.openReadDb().rawQuery(query, null);
+		if(cursor.getCount() == 1){
+			cursor.moveToNext();
+			return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
+		}
+		return 0;
 	}
 
 	public Cursor getReuploadFilesList(){

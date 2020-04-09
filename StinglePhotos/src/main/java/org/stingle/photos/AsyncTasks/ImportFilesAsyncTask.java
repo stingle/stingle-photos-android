@@ -1,6 +1,5 @@
 package org.stingle.photos.AsyncTasks;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,8 +11,13 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
@@ -26,45 +30,58 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
-	protected Context context;
-	protected ArrayList<Uri> uris;
-	protected FileManager.OnFinish onFinish;
-	protected ProgressDialog progress;
+	private WeakReference<AppCompatActivity> activity;
+	private ArrayList<Uri> uris;
+	private int set;
+	private String albumId;
+	private FileManager.OnFinish onFinish;
+	private ProgressDialog progress;
 
-	public ImportFilesAsyncTask(Context context, ArrayList<Uri> uris, FileManager.OnFinish onFinish){
-		this.context = context;
+
+	public ImportFilesAsyncTask(AppCompatActivity activity, ArrayList<Uri> uris, int set, String albumId, FileManager.OnFinish onFinish){
+		this.activity = new WeakReference<>(activity);
 		this.uris = uris;
+		this.set = set;
+		this.albumId = albumId;
 		this.onFinish = onFinish;
 	}
 
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-
-		progress = Helpers.showProgressDialogWithBar(context, context.getString(R.string.importing_files), uris.size(), new DialogInterface.OnCancelListener() {
+		AppCompatActivity myActivity = activity.get();
+		if(myActivity == null){
+			return;
+		}
+		progress = Helpers.showProgressDialogWithBar(myActivity, myActivity.getString(R.string.importing_files), uris.size(), new DialogInterface.OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialogInterface) {
-				Helpers.releaseWakeLock((Activity)context);
+				Helpers.releaseWakeLock(myActivity);
 				ImportFilesAsyncTask.this.cancel(false);
 				onFinish.onFinish();
 			}
 		});
-		Helpers.acquireWakeLock((Activity)context);
+		Helpers.acquireWakeLock(myActivity);
 	}
 
 	@Override
 	protected Void doInBackground(Void... params) {
+		AppCompatActivity myActivity = activity.get();
+		if(myActivity == null){
+			return null;
+		}
 		int index = 0;
 		for (Uri uri : uris) {
 			try {
-				int fileType = FileManager.getFileTypeFromUri(context, uri);
-				InputStream in = context.getContentResolver().openInputStream(uri);
+				int fileType = FileManager.getFileTypeFromUri(myActivity, uri);
+				InputStream in = myActivity.getContentResolver().openInputStream(uri);
 
-				Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
+				Cursor returnCursor = myActivity.getContentResolver().query(uri, null, null, null, null);
 				String filename = null;
 				long fileSize = 0;
 				if(returnCursor != null) {
@@ -90,18 +107,18 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 
 				String encFilename = Helpers.getNewEncFilename();
-				String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;
+				String encFilePath = FileManager.getHomeDir(myActivity) + "/" + encFilename;
 
 				int videoDuration = 0;
 				if(fileType == Crypto.FILE_TYPE_VIDEO) {
-					videoDuration = FileManager.getVideoDurationFromUri(context, uri);
+					videoDuration = FileManager.getVideoDurationFromUri(myActivity, uri);
 				}
 
 				byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
 
 				if(fileType == Crypto.FILE_TYPE_PHOTO) {
 
-					InputStream thumbIn = context.getContentResolver().openInputStream(uri);
+					InputStream thumbIn = myActivity.getContentResolver().openInputStream(uri);
 					ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 					int numRead = 0;
 					byte[] buf = new byte[1024];
@@ -110,40 +127,40 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 					}
 					thumbIn.close();
 
-					//System.gc();
-
-					Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
+					Helpers.generateThumbnail(myActivity, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
 				}
 				else if(fileType == Crypto.FILE_TYPE_VIDEO){
-
-					/*String[] filePathColumn = {MediaStore.Images.Media.DATA};
-					Cursor cursor = activity.getContentResolver().query(uri, filePathColumn, null, null, null);
-					cursor.moveToFirst();
-					int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-					String picturePath = cursor.getString(columnIndex);
-					cursor.close();
-
-					Bitmap thumb = ThumbnailUtils.createVideoThumbnail(picturePath, MediaStore.Video.Thumbnails.MINI_KIND);
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);*/
-					Bitmap thumb = getVideoThumbnail(context, uri);
+					Bitmap thumb = getVideoThumbnail(myActivity, uri);
 					if(thumb != null) {
 						ByteArrayOutputStream bos = new ByteArrayOutputStream();
 						thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
-						Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+						Helpers.generateThumbnail(myActivity, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 					}
 				}
 
 				FileOutputStream outputStream = new FileOutputStream(encFilePath);
 				StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, this);
 				long nowDate = System.currentTimeMillis();
-				GalleryTrashDb db = new GalleryTrashDb(context, SyncManager.GALLERY);
+				String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(myActivity) + "/" + encFilename);
 
-				String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
-
-				db.insertFile(encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
-				db.close();
+				if(set == SyncManager.GALLERY) {
+					GalleryTrashDb db = new GalleryTrashDb(myActivity, SyncManager.GALLERY);
+					db.insertFile(encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
+					db.close();
+				}
+				else if(set == SyncManager.ALBUM){
+					Crypto crypto = StinglePhotosApplication.getCrypto();
+					AlbumsDb albumsDb = new AlbumsDb(myActivity);
+					AlbumFilesDb albumFilesDb = new AlbumFilesDb(myActivity);
+					StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+					if(album != null) {
+						String newHeaders = crypto.reencryptFileHeaders(headers, Crypto.base64ToByteArray(album.albumPK), null, null);
+						albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, nowDate, nowDate);
+					}
+					albumsDb.close();
+					albumFilesDb.close();
+				}
 			} catch (IOException | CryptoException e) {
 				e.printStackTrace();
 			}
@@ -182,6 +199,10 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 		if(onFinish != null){
 			onFinish.onFinish();
 		}
-		Helpers.releaseWakeLock((Activity)context);
+		AppCompatActivity myActivity = activity.get();
+		if(myActivity != null){
+			Helpers.releaseWakeLock(myActivity);
+		}
+
 	}
 }

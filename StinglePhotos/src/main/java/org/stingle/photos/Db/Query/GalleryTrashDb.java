@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
@@ -307,14 +308,16 @@ public class GalleryTrashDb implements FilesDb{
 		return null;
 	}
 
-	public Integer getFilePositionByFilename(String filename){
-		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created <= b.date_created) AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"'";
+	public int getFilePositionByFilename(String filename, String albumId, int sort){
+		String sign = (sort == StingleDb.SORT_DESC ? "<=" : ">=");
+		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created "+sign+" b.date_created) AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"'";
+		Log.d("query-gallery", query);
 		Cursor cursor = db.openReadDb().rawQuery(query, null);
 		if(cursor.getCount() == 1){
 			cursor.moveToNext();
 			return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
 		}
-		return null;
+		return 0;
 	}
 
 	public Cursor getAvailableDates(String albumId, int sort){

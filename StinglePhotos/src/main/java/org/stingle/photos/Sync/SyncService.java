@@ -25,7 +25,10 @@ import android.util.Log;
 import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.Util.Helpers;
@@ -91,17 +94,26 @@ public class SyncService extends Service {
 			}
 
 			@Override
-			public void fileUploadFinished(String filename, int set) {
-				GalleryTrashDb db = new GalleryTrashDb(SyncService.this, set);
-
-				Integer filePos = db.getFilePositionByFilename(filename);
-				db.close();
-
-				if(filePos != null) {
-					HashMap<String, Integer> values = new HashMap<String, Integer>();
-					values.put("position", filePos);
-					sendIntToUi(MSG_REFRESH_GALLERY_ITEM, values);
+			public void fileUploadFinished(String filename, int set, String albumId) {
+				FilesDb db;
+				int sort = StingleDb.SORT_DESC;
+				if(set == SyncManager.GALLERY || set == SyncManager.TRASH) {
+					db = new GalleryTrashDb(SyncService.this, set);
 				}
+				else if(set == SyncManager.ALBUM){
+					db = new AlbumFilesDb(SyncService.this);
+					sort = StingleDb.SORT_ASC;
+				}
+				else{
+					return;
+				}
+
+				Integer filePos = db.getFilePositionByFilename(filename, albumId, sort);
+				db.close();
+				Log.d("updateItem number", String.valueOf(filePos));
+				HashMap<String, Integer> values = new HashMap<String, Integer>();
+				values.put("position", filePos);
+				sendIntToUi(MSG_REFRESH_GALLERY_ITEM, values);
 			}
 
 			@Override

@@ -288,7 +288,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 
 		filePropsCache.remove(dbPosition);
-		picasso.invalidate("p" + set + String.valueOf(dbPosition));
+		picasso.invalidate("p" + set + dbPosition);
 		//picasso.evictAll();
 		notifyItemChanged(galleryPos);
 	}
@@ -361,7 +361,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				set = "a";
 			}
 
-			final RequestCreator req = picasso.load("p" + set + String.valueOf(position));
+			final RequestCreator req = picasso.load("p" + set + position);
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
 			req.tag(holder);
 			req.addProp("pos", String.valueOf(position));

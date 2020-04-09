@@ -26,5 +26,6 @@ public interface FilesDb {
 	public Cursor getReuploadFilesList();
 	public int markFileAsRemote(String filename);
 	public int markFileAsReuploaded(String filename);
+	public int getFilePositionByFilename(String filename, String albumId, int sort);
 	public void close();
 }
