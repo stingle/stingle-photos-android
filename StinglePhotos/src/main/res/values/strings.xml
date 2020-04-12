@@ -275,6 +275,8 @@
     <string name="main_gallery">Main gallery</string>
     <string name="add_or_move">Add or move</string>
     <string name="delete_album">Delete album</string>
+    <string name="create_new_album">Create new album</string>
+    <string name="album_items_count">%d items</string>
 
 
 </resources>

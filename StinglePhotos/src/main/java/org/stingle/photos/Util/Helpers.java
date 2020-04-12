@@ -465,6 +465,16 @@ public class Helpers {
 		}
 	}
 
+	public static boolean isStringsEqual(String string1, String string2){
+		if(string1 == string2){
+			return true;
+		}
 
+		if(string1 != null && string1.equals(string2)){
+			return true;
+		}
+
+		return false;
+	}
 
 }

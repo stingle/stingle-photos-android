@@ -1,6 +1,7 @@
 package org.stingle.photos.Gallery.Helpers;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +43,7 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 				totalSpace = getHeight() - getPaddingTop() - getPaddingBottom();
 			}
 			int spanCount = Math.max(1, totalSpace / columnWidth);
+			Log.d("spanCount", spanCount + "");
 			setSpanCount(spanCount);
 			currentCalcSpanCount = spanCount;
 			columnWidthChanged = false;

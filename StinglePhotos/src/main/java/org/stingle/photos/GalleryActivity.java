@@ -21,6 +21,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,6 +75,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	private LocalBroadcastManager lbm;
 	protected GalleryFragment galleryFragment;
+	protected AlbumsFragment albumsFragment;
 	protected ActionMode actionMode;
 	protected Toolbar toolbar;
 	protected int currentSet = SyncManager.GALLERY;
@@ -340,7 +342,7 @@ public class GalleryActivity extends AppCompatActivity
 
 		Bundle bundle = new Bundle();
 
-		AlbumsFragment albumsFragment = new AlbumsFragment();
+		albumsFragment = new AlbumsFragment();
 		albumsFragment.setArguments(bundle);
 
 		Fragment fragment = fm.findFragmentById(R.id.galleryContainer);
@@ -357,10 +359,21 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	public void updateGalleryFragmentData(){
-		galleryFragment.updateDataSet();
+		if(galleryFragment != null) {
+			galleryFragment.updateDataSet();
+		}
+		if(albumsFragment != null) {
+			albumsFragment.updateDataSet();
+		}
 	}
-	public void updateGalleryFragmentItem(int position){
-		galleryFragment.updateItem(position);
+	public void updateGalleryFragmentItem(int position, int set, String albumId){
+		if(albumId != null && albumId.length() == 0){
+			albumId = null;
+		}
+		Log.e("finish", currentSet + " - " + set + " ;;;;; " + currentAlbumId + " - " + albumId);
+		if(currentSet == set && Helpers.isStringsEqual(currentAlbumId, albumId)) {
+			galleryFragment.updateItem(position);
+		}
 	}
 
 	private void checkLoginAndInit(){
@@ -381,7 +394,6 @@ public class GalleryActivity extends AppCompatActivity
 	private void initGallery(){
 
 		initCurrentFragment();
-
 
 		findViewById(R.id.contentHolder).setVisibility(View.VISIBLE);
 		startAndBindService();
@@ -536,6 +548,9 @@ public class GalleryActivity extends AppCompatActivity
 		super.onConfigurationChanged(newConfig);
 		if(galleryFragment != null) {
 			galleryFragment.updateAutoFit();
+		}
+		if(albumsFragment != null){
+			albumsFragment.updateAutoFit();
 		}
 	}
 

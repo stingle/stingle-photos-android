@@ -97,7 +97,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 				AlbumsAdapterPisasso.AlbumProps props = new AlbumsAdapterPisasso.AlbumProps();
 
 				props.name = albumData.name;
-
+				props.itemsCount = filesDb.getTotalFilesCount(album.albumId);
 				result.addProperty("albumProps", props);
 
 				callback.onSuccess(result);

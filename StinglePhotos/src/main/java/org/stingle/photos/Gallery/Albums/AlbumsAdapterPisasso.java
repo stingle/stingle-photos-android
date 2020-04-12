@@ -96,6 +96,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		public ImageView image;
 		public CheckBox checkbox;
 		public TextView albumName;
+		public TextView albumItemsCount;
 		public int currentPos = -1;
 
 		public AlbumVH(View v) {
@@ -104,11 +105,14 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			image = v.findViewById(R.id.thumbImage);
 			checkbox = v.findViewById(R.id.checkBox);
 			albumName = v.findViewById(R.id.albumName);
+			albumItemsCount = v.findViewById(R.id.albumItemsCount);
 			checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
-			image.setOnLongClickListener(this);
+			//image.setOnLongClickListener(this);
 			albumName.setOnClickListener(this);
-			albumName.setOnLongClickListener(this);
+			//albumName.setOnLongClickListener(this);
+			albumItemsCount.setOnClickListener(this);
+			//albumItemsCount.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -139,9 +143,9 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			image = v.findViewById(R.id.thumbImage);
 			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
-			image.setOnLongClickListener(this);
+			//image.setOnLongClickListener(this);
 			albumName.setOnClickListener(this);
-			albumName.setOnLongClickListener(this);
+			//albumName.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -180,9 +184,9 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			image = v.findViewById(R.id.thumbImage);
 			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
-			image.setOnLongClickListener(this);
+			//image.setOnLongClickListener(this);
 			albumName.setOnClickListener(this);
-			albumName.setOnLongClickListener(this);
+			//albumName.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -313,6 +317,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 					if(props.name != null){
 						holder.albumName.setText(props.name);
 					}
+					holder.albumItemsCount.setText(context.getString(R.string.album_items_count, props.itemsCount));
 				}
 
 				@Override
@@ -323,8 +328,17 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		}
 		else if(holderObj instanceof AlbumAddVH) {
 			AlbumAddVH holder = (AlbumAddVH)holderObj;
-			holder.albumName.setText(context.getString(R.string.new_album));
+			holder.albumName.setText(context.getString(R.string.create_new_album));
 			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_add_circle_outline));
+
+			if(layoutStyle == LAYOUT_GRID) {
+				int margin = Helpers.convertDpToPixels(context, 10);
+				int size = Helpers.getThumbSize(context, 2) - margin;
+				ViewGroup.LayoutParams params = holder.layout.getLayoutParams();
+				params.height = size - margin;
+				holder.layout.setLayoutParams(params);
+			}
+
 		}
 		else if(holderObj instanceof AlbumAddGalleryVH) {
 			AlbumAddGalleryVH holder = (AlbumAddGalleryVH)holderObj;
@@ -365,6 +379,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 	public static class AlbumProps {
 		public String name;
+		public long itemsCount = 0;
 		public boolean isUploaded = true;
 	}
 

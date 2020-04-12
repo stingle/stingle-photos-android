@@ -301,6 +301,12 @@ public class SettingsActivity extends AppCompatActivity implements
 					}
 				})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_LAST_SEEN_TIME);
+				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_TRASH_LAST_SEEN_TIME);
+				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_ALBUMS_LAST_SEEN_TIME);
+				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
+				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_LAST_DEL_SEEN_TIME);
+
 				return true;
 			});
 		}

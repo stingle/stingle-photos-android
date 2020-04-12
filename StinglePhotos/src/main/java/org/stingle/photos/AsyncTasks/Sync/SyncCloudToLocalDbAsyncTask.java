@@ -35,6 +35,10 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	private final AlbumsDb albumsDb;
 	private final AlbumFilesDb albumFilesDb;
 	private long lastSeenTime = 0;
+	private long lastTrashSeenTime = 0;
+	private long lastAlbumsSeenTime = 0;
+	private long lastAlbumFilesSeenTime = 0;
+	private long lastDelSeenTime = 0;
 
 	public SyncCloudToLocalDbAsyncTask(Context context, SyncManager.OnFinish onFinish){
 		this.context = new WeakReference<>(context);
@@ -51,12 +55,23 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		if(myContext == null){
 			return false;
 		}
+
 		lastSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, (long)0);
+		lastTrashSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_TRASH_LAST_SEEN_TIME, (long)0);
+		lastAlbumsSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME, (long)0);
+		lastAlbumFilesSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, (long)0);
+		lastDelSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, (long)0);
+
 		boolean needToUpdateUI = false;
 
 		try{
 			needToUpdateUI = getFileList(myContext);
+
 			Helpers.storePreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, lastSeenTime);
+			Helpers.storePreference(myContext, SyncManager.PREF_TRASH_LAST_SEEN_TIME, lastTrashSeenTime);
+			Helpers.storePreference(myContext, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME, lastAlbumsSeenTime);
+			Helpers.storePreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, lastAlbumFilesSeenTime);
+			Helpers.storePreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, lastDelSeenTime);
 		}
 		catch (JSONException e){
 			e.printStackTrace();
@@ -65,12 +80,17 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		return needToUpdateUI;
 	}
 
-	protected boolean getFileList(Context context) throws JSONException {
+	private boolean getFileList(Context context) throws JSONException {
 		boolean needToUpdateUI = false;
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
-		postParams.put("lastSeenTime", String.valueOf(lastSeenTime));
+
+		postParams.put("filesST", String.valueOf(lastSeenTime));
+		postParams.put("trashST", String.valueOf(lastTrashSeenTime));
+		postParams.put("albumsST", String.valueOf(lastAlbumsSeenTime));
+		postParams.put("albumFilesST", String.valueOf(lastAlbumFilesSeenTime));
+		postParams.put("delST", String.valueOf(lastDelSeenTime));
 
 		JSONObject resp = HttpsClient.postFunc(
 				StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_updates_path),
@@ -235,8 +255,20 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			}
 		}
 
-		if(remoteFile.dateModified > lastSeenTime) {
-			lastSeenTime = remoteFile.dateModified;
+		if(set == SyncManager.GALLERY) {
+			if (remoteFile.dateModified > lastSeenTime) {
+				lastSeenTime = remoteFile.dateModified;
+			}
+		}
+		else if(set == SyncManager.TRASH) {
+			if (remoteFile.dateModified > lastTrashSeenTime) {
+				lastTrashSeenTime = remoteFile.dateModified;
+			}
+		}
+		else if(set == SyncManager.ALBUM) {
+			if (remoteFile.dateModified > lastAlbumFilesSeenTime) {
+				lastAlbumFilesSeenTime = remoteFile.dateModified;
+			}
 		}
 
 		return true;
@@ -256,8 +288,8 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			}
 		}
 
-		if(remoteAlbum.dateModified > lastSeenTime) {
-			lastSeenTime = remoteAlbum.dateModified;
+		if(remoteAlbum.dateModified > lastAlbumsSeenTime) {
+			lastAlbumsSeenTime = remoteAlbum.dateModified;
 		}
 
 		return true;
@@ -321,8 +353,8 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			}
 		}
 
-		if(date > lastSeenTime) {
-			lastSeenTime = date;
+		if(date > lastDelSeenTime) {
+			lastDelSeenTime = date;
 		}
 	}
 

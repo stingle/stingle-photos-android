@@ -92,8 +92,10 @@ public class SyncBarHandler {
 		} else if (msg.what == SyncService.MSG_REFRESH_GALLERY_ITEM) {
 			Bundle bundle = msg.getData();
 			int position = bundle.getInt("position");
+			int set = bundle.getInt("set");
+			String albumId = bundle.getString("albumId");
 
-			activity.updateGalleryFragmentItem(position);
+			activity.updateGalleryFragmentItem(position, set, albumId);
 		}
 	}
 

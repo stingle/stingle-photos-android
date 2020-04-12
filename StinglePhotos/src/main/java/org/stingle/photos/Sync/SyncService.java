@@ -110,10 +110,13 @@ public class SyncService extends Service {
 
 				Integer filePos = db.getFilePositionByFilename(filename, albumId, sort);
 				db.close();
+
 				Log.d("updateItem number", String.valueOf(filePos));
-				HashMap<String, Integer> values = new HashMap<String, Integer>();
-				values.put("position", filePos);
-				sendIntToUi(MSG_REFRESH_GALLERY_ITEM, values);
+				Bundle values = new Bundle();
+				values.putInt("position", filePos);
+				values.putInt("set", set);
+				values.putString("albumId", albumId);
+				sendBundleToUi(MSG_REFRESH_GALLERY_ITEM, values);
 			}
 
 			@Override
@@ -184,6 +187,9 @@ public class SyncService extends Service {
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
 							Helpers.storePreference(SyncService.this, SyncManager.PREF_FIRST_SYNC_DONE, true);
+							if (needToUpdateUI){
+								sendMessageToUI(MSG_REFRESH_GALLERY);
+							}
 							startUpload();
 						}
 					})).executeOnExecutor(cachedThreadPool);

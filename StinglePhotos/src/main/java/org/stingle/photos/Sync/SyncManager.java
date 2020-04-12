@@ -33,8 +33,13 @@ public class SyncManager {
 
 	protected Context context;
 	protected SQLiteDatabase db;
+
 	public static final String PREF_LAST_SEEN_TIME = "file_last_seen_time";
+	public static final String PREF_TRASH_LAST_SEEN_TIME = "trash_last_seen_time";
+	public static final String PREF_ALBUMS_LAST_SEEN_TIME = "albums_last_seen_time";
+	public static final String PREF_ALBUM_FILES_LAST_SEEN_TIME = "album_files_last_seen_time";
 	public static final String PREF_LAST_DEL_SEEN_TIME = "file_last_del_seen_time";
+
 	public static final String PREF_LAST_SPACE_USED = "last_space_used";
 	public static final String PREF_LAST_SPACE_QUOTA = "last_space_quota";
 	public static final String PREF_SUSPEND_UPLOAD = "suspend_upload";

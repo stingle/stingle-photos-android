@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="10dp">
 
     <ImageView
         android:id="@+id/thumbImage"
@@ -12,25 +13,32 @@
         android:src="@drawable/ic_no_image_24"
         android:scaleType="centerCrop" />
 
-    <TextView
-        android:id="@+id/albumName"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="24dp"
-        android:textColor="#000"
-        android:text="@string/enter_album_name" />
+        android:orientation="vertical"
+        android:background="@drawable/album_bottom_gradient"
+        android:paddingTop="18dp"
+        android:paddingBottom="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp">
 
-    <ImageView
-        android:id="@+id/noCloudIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_cloud_off" />
+        <TextView
+            android:id="@+id/albumName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/enter_album_name"
+            android:textColor="#FFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/albumItemsCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFF" />
+    </LinearLayout>
 
     <CheckBox
         android:id="@+id/checkBox"

@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/layout_border">
+    android:background="@drawable/layout_border"
+    android:layout_margin="10dp">
 
     <ImageView
         android:id="@+id/thumbImage"
@@ -17,10 +18,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="24dp"
         android:textColor="#000"
-        android:text="@string/new_album" />
-
+        android:padding="12dp"
+        android:text="@string/create_new_album"/>
 
 </RelativeLayout>
