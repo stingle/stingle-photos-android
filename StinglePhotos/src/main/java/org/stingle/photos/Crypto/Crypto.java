@@ -1018,58 +1018,69 @@ public class Crypto {
         return overallHeaderSize;
     }
 
-    public HashMap<String, String> generateEncryptedAlbumData(byte[] userPK, String albumName) throws IOException {
+    public AlbumEncData generateEncryptedAlbumData(byte[] userPK, String albumName) throws IOException {
 
-        byte[] privateKey = new byte[Box.SECRETKEYBYTES];
-        byte[] publicKey = new byte[Box.PUBLICKEYBYTES];
+        byte[] albumSK = new byte[Box.SECRETKEYBYTES];
+        byte[] albumPK = new byte[Box.PUBLICKEYBYTES];
 
-        so.crypto_box_keypair(publicKey, privateKey);
+        so.crypto_box_keypair(albumPK, albumSK);
 
-        ByteArrayOutputStream dataByteStream = new ByteArrayOutputStream();
-
-        // Album private key
-        dataByteStream.write(privateKey);
-
+        // Encrypt metadata
+        ByteArrayOutputStream metadataByteStream = new ByteArrayOutputStream();
         byte[] albumNameBytes = albumName.getBytes();
-
         // name length
-        dataByteStream.write(intToByteArray(albumName.length()));
-
+        metadataByteStream.write(intToByteArray(albumName.length()));
         // name itself
-        dataByteStream.write(albumNameBytes);
+        metadataByteStream.write(albumNameBytes);
+        byte[] metadataBytes = metadataByteStream.toByteArray();
 
-        byte[] dataBytes = dataByteStream.toByteArray();
+        int encMetadataLength = metadataBytes.length + Box.SEALBYTES;
+        byte[] encryptedMetadata = new byte[encMetadataLength];
+        so.crypto_box_seal(encryptedMetadata, metadataBytes, metadataBytes.length, albumPK);
 
-        int encDataLength = dataBytes.length + Box.SEALBYTES;
+        // Encrypt albumSK
+        int encSKLength = albumSK.length + Box.SEALBYTES;
+        byte[] encryptedSK = new byte[encSKLength];
+        so.crypto_box_seal(encryptedSK, albumSK, albumSK.length, userPK);
 
-        byte[] encryptedData = new byte[encDataLength];
-        so.crypto_box_seal(encryptedData, dataBytes, dataBytes.length, userPK);
+        AlbumEncData encData = new AlbumEncData();
+        encData.encPrivateKey = byteArrayToBase64(encryptedSK);
+        encData.publicKey = byteArrayToBase64(albumPK);
+        encData.metadata = byteArrayToBase64(encryptedMetadata);
 
-        HashMap<String, String> result = new HashMap<String, String>();
-        result.put("data", byteArrayToBase64(encryptedData));
-        result.put("pk", byteArrayToBase64(publicKey));
-
-        return result;
+        return encData;
     }
 
-    public AlbumData parseAlbumData(String encDataStr) throws IOException, CryptoException {
+    public AlbumData parseAlbumData(String albumPKStr, String encAlbumSKStr, String metadataStr) throws IOException, CryptoException {
 
-        byte[] encData = base64ToByteArray(encDataStr);
+        byte[] albumPK = base64ToByteArray(albumPKStr);
+
+        byte[] encAlbumSK = base64ToByteArray(encAlbumSKStr);
 
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
         byte[] privateKey = StinglePhotosApplication.getKey();
 
-        byte[] dataBytes = new byte[encData.length - Box.SEALBYTES];
+        byte[] albumSK = new byte[encAlbumSK.length - Box.SEALBYTES];
 
-        if(so.crypto_box_seal_open(dataBytes, encData, encData.length, publicKey, privateKey) != 0){
+        if(so.crypto_box_seal_open(albumSK, encAlbumSK, encAlbumSK.length, publicKey, privateKey) != 0){
+            throw new CryptoException("Unable to decrypt albumSK");
+        }
+
+
+        byte[] encMetadata = base64ToByteArray(metadataStr);
+
+        byte[] metadataBytes = new byte[encMetadata.length - Box.SEALBYTES];
+
+        if(so.crypto_box_seal_open(metadataBytes, encMetadata, encMetadata.length, albumPK, albumSK) != 0){
             throw new CryptoException("Unable to decrypt album data");
         }
 
-        ByteArrayInputStream in = new ByteArrayInputStream(dataBytes);
         AlbumData albumData = new AlbumData();
 
-        albumData.privateKey = new byte[Box.SECRETKEYBYTES];
-        in.read(albumData.privateKey);
+        albumData.publicKey = albumPK;
+        albumData.privateKey = albumSK;
+
+        ByteArrayInputStream in = new ByteArrayInputStream(metadataBytes);
 
         // Read album name size
         byte[] albumNameSizeBytes = new byte[4];
@@ -1139,8 +1150,14 @@ public class Crypto {
     }
 
     public static class AlbumData {
+        public byte[] publicKey;
         public byte[] privateKey;
         public String name;
+    }
+    public static class AlbumEncData {
+        public String publicKey;
+        public String encPrivateKey;
+        public String metadata;
     }
 
     public static class FileThumbHeaders{

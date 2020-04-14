@@ -19,6 +19,19 @@ public class AlbumFilesDb implements FilesDb {
 
 	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUM_FILES;
 
+	private String[] projection = {
+			StingleDbContract.Columns._ID,
+			StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+			StingleDbContract.Columns.COLUMN_NAME_FILENAME,
+			StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
+			StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
+			StingleDbContract.Columns.COLUMN_NAME_VERSION,
+			StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
+			StingleDbContract.Columns.COLUMN_NAME_HEADERS,
+			StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+			StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
+	};
+
 	public AlbumFilesDb(Context context) {
 		db = new StingleDb(context);
 	}
@@ -88,19 +101,6 @@ public class AlbumFilesDb implements FilesDb {
 
 	public Cursor getFilesList1(int mode, int sort, String limit, String albumId){
 
-		String[] projection = {
-				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
-				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Columns.COLUMN_NAME_VERSION,
-				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Columns.COLUMN_NAME_HEADERS,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
-		};
-
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = { albumId };
 
@@ -121,19 +121,6 @@ public class AlbumFilesDb implements FilesDb {
 	}
 
 	public Cursor getFilesList(int mode, int sort, String limit, String albumId){
-
-		String[] projection = {
-				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
-				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Columns.COLUMN_NAME_VERSION,
-				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Columns.COLUMN_NAME_HEADERS,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
-		};
 
 		String selection = "";
 
@@ -208,19 +195,6 @@ public class AlbumFilesDb implements FilesDb {
 
 	public Cursor getReuploadFilesList(){
 
-		String[] projection = {
-				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
-				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Columns.COLUMN_NAME_VERSION,
-				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
-				StingleDbContract.Columns.COLUMN_NAME_HEADERS
-		};
-
 		String selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_REUPLOAD + " = ?";
 
 		String[] selectionArgs = {"1", "1"};
@@ -276,18 +250,6 @@ public class AlbumFilesDb implements FilesDb {
 	}
 
 	public StingleDbFile getFileIfExists(String filename, String albumId){
-		String[] projection = {
-				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
-				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Columns.COLUMN_NAME_VERSION,
-				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED,
-				StingleDbContract.Columns.COLUMN_NAME_HEADERS
-		};
 
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		if(albumId != null) {
@@ -325,18 +287,6 @@ public class AlbumFilesDb implements FilesDb {
 	}
 
 	public StingleDbFile getFileAtPosition(int pos, String albumId, int sort){
-		String[] projection = {
-				StingleDbContract.Columns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_FILENAME,
-				StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL,
-				StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE,
-				StingleDbContract.Columns.COLUMN_NAME_VERSION,
-				StingleDbContract.Columns.COLUMN_NAME_REUPLOAD,
-				StingleDbContract.Columns.COLUMN_NAME_HEADERS,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
-		};
 
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = { albumId };

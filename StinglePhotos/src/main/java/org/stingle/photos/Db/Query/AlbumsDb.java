@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
@@ -24,38 +23,67 @@ public class AlbumsDb {
 		db = new StingleDb(context);
 	}
 
+	private String[] projection = {
+			StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
+			StingleDbContract.Columns.COLUMN_NAME_ALBUM_SK,
+			StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
+			StingleDbContract.Columns.COLUMN_NAME_METADATA,
+			StingleDbContract.Columns.COLUMN_NAME_IS_SHARED,
+			StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN,
+			StingleDbContract.Columns.COLUMN_NAME_IS_ORIGIN,
+			StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS,
+			StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED,
+			StingleDbContract.Columns.COLUMN_NAME_COVER,
+			StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
+			StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
+	};
 
-	public String insertAlbum(StingleDbAlbum album){
-		return insertAlbum(album.albumId, album.data, album.albumPK, album.dateCreated, album.dateModified);
-	}
 
-	public String insertAlbum(String albumId, String data, String albumPK, long dateCreated, long dateModified){
-		if(albumId == null){
-			albumId = CryptoHelpers.getRandomString(ALBUM_ID_LEN);
+	public String insertAlbum(StingleDbAlbum album) {
+		if (album.albumId == null) {
+			album.albumId = CryptoHelpers.getRandomString(ALBUM_ID_LEN);
 		}
 
 		ContentValues values = new ContentValues();
-		values.put(StingleDbContract.Columns.COLUMN_NAME_DATA, data);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, albumId);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, albumPK);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, dateCreated);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, dateModified);
-
-		db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
-
-		return albumId;
-	}
-
-	public int updateAlbum(StingleDbAlbum album){
-		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, album.albumId);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_DATA, album.data);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, album.albumPK);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_SK, album.encPrivateKey);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, album.publicKey);
+
+		values.put(StingleDbContract.Columns.COLUMN_NAME_METADATA, album.metadata);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_SHARED, album.isShared);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN, album.isHidden);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_ORIGIN, album.isOrigin);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS, album.permissions);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED, album.isLocked);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_COVER, album.cover);
+
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, album.dateCreated);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, album.dateModified);
 
-		String selection = StingleDbContract.Columns._ID + " = ?";
-		String[] selectionArgs = { String.valueOf(album.id) };
+		db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+
+		return album.albumId;
+	}
+
+	public int updateAlbum(StingleDbAlbum album) {
+		ContentValues values = new ContentValues();
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID, album.albumId);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_SK, album.encPrivateKey);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK, album.publicKey);
+
+		values.put(StingleDbContract.Columns.COLUMN_NAME_METADATA, album.metadata);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_SHARED, album.isShared);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN, album.isHidden);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_ORIGIN, album.isOrigin);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS, album.permissions);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED, album.isLocked);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_COVER, album.cover);
+
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, album.dateCreated);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, album.dateModified);
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = {String.valueOf(album.albumId)};
 
 		return db.openWriteDb().update(
 				tableName,
@@ -65,31 +93,19 @@ public class AlbumsDb {
 	}
 
 
-
-	public int deleteAlbum(String albumId){
+	public int deleteAlbum(String albumId) {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { String.valueOf(albumId) };
+		String[] selectionArgs = {String.valueOf(albumId)};
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
 
-	public int truncateTable(){
+	public int truncateTable() {
 		return db.openWriteDb().delete(tableName, null, null);
 	}
 
 
-
-	public Cursor getAlbumsList(int sort){
-
-		String[] projection = {
-				BaseColumns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_DATA,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
-		};
-
+	public Cursor getAlbumsList(int sort) {
 		String selection = null;
 
 		String sortOrder =
@@ -107,16 +123,7 @@ public class AlbumsDb {
 
 	}
 
-	public StingleDbAlbum getAlbumAtPosition(int pos, int sort){
-		String[] projection = {
-				BaseColumns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_DATA,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
-		};
-
+	public StingleDbAlbum getAlbumAtPosition(int pos, int sort) {
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
@@ -132,25 +139,16 @@ public class AlbumsDb {
 				String.valueOf(pos) + ", 1"
 		);
 
-		if(result.getCount() > 0){
+		if (result.getCount() > 0) {
 			result.moveToNext();
 			return new StingleDbAlbum(result);
 		}
 		return null;
 	}
 
-	public StingleDbAlbum getAlbumById(String albumId){
-		String[] projection = {
-				BaseColumns._ID,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
-				StingleDbContract.Columns.COLUMN_NAME_DATA,
-				StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
-				StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
-		};
-
+	public StingleDbAlbum getAlbumById(String albumId) {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { albumId };
+		String[] selectionArgs = {albumId};
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -164,18 +162,18 @@ public class AlbumsDb {
 				null
 		);
 
-		if(result.getCount() > 0){
+		if (result.getCount() > 0) {
 			result.moveToNext();
 			return new StingleDbAlbum(result);
 		}
 		return null;
 	}
 
-	public long getTotalAlbumsCount(){
+	public long getTotalAlbumsCount() {
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
 
-	public void close(){
+	public void close() {
 		db.close();
 	}
 }

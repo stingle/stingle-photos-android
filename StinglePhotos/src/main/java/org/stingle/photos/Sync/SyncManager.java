@@ -151,7 +151,7 @@ public class SyncManager {
 
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
-					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.albumPK), null, null));
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.publicKey), null, null));
 				}
 
 				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, newHeaders)) {
@@ -175,11 +175,11 @@ public class SyncManager {
 				GalleryTrashDb galleryTrashDb = new GalleryTrashDb(context, toSet);
 
 				StingleDbAlbum album = albumsDb.getAlbumById(fromAlbumId);
-				Crypto.AlbumData albumData = crypto.parseAlbumData(album.data);
+				Crypto.AlbumData albumData = crypto.parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
 
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
-					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, crypto.getPublicKey(), albumData.privateKey, Crypto.base64ToByteArray(album.albumPK)));
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, crypto.getPublicKey(), albumData.privateKey, albumData.publicKey));
 				}
 
 				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, newHeaders)) {
@@ -201,12 +201,12 @@ public class SyncManager {
 				}
 
 				StingleDbAlbum fromDbAlbum = albumsDb.getAlbumById(fromAlbumId);
-				Crypto.AlbumData fromAlbumData = crypto.parseAlbumData(fromDbAlbum.data);
+				Crypto.AlbumData fromAlbumData = crypto.parseAlbumData(fromDbAlbum.publicKey, fromDbAlbum.encPrivateKey, fromDbAlbum.metadata);
 				StingleDbAlbum toDbAlbum = albumsDb.getAlbumById(toAlbumId);
 
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
-					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(toDbAlbum.albumPK), fromAlbumData.privateKey, Crypto.base64ToByteArray(fromDbAlbum.albumPK)));
+					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(toDbAlbum.publicKey), fromAlbumData.privateKey, fromAlbumData.publicKey));
 				}
 
 				if (!SyncManager.notifyCloudAboutFileMove(context, files, fromSet, toSet, fromAlbumId, toAlbumId, isMoving, newHeaders)) {
@@ -264,14 +264,15 @@ public class SyncManager {
 		return true;
 	}
 
-	public static boolean notifyCloudAboutAlbumAdd(Context context, String albumId, String data, String albumPK, long dateCreated, long dateModified) {
+	public static boolean notifyCloudAboutAlbumAdd(Context context, StingleDbAlbum album) {
 		HashMap<String, String> params = new HashMap<>();
 
-		params.put("albumId", albumId);
-		params.put("data", data);
-		params.put("albumPK", albumPK);
-		params.put("dateCreated", String.valueOf(dateCreated));
-		params.put("dateModified", String.valueOf(dateModified));
+		params.put("albumId", album.albumId);
+		params.put("encPrivateKey", album.encPrivateKey);
+		params.put("publicKey", album.publicKey);
+		params.put("metadata", album.metadata);
+		params.put("dateCreated", String.valueOf(album.dateCreated));
+		params.put("dateModified", String.valueOf(album.dateModified));
 
 		try {
 			HashMap<String, String> postParams = new HashMap<>();

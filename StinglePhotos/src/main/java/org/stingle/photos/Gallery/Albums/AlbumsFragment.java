@@ -59,7 +59,7 @@ public class AlbumsFragment extends Fragment{
 				StingleDbAlbum album = adapter.getAlbumAtPosition(index);
 				String albumName = "";
 				try {
-					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.data);
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
 					albumName = albumData.name;
 					albumData = null;
 				} catch (IOException | CryptoException e) {

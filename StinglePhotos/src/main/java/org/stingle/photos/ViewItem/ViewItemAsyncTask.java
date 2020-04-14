@@ -193,8 +193,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				if (set == SyncManager.ALBUM) {
 					AlbumsDb albumsDb = new AlbumsDb(context);
 					StingleDbAlbum dbAlbum = albumsDb.getAlbumById(albumId);
-					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(dbAlbum.data);
-					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, Crypto.base64ToByteArray(dbAlbum.albumPK));
+					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(dbAlbum.publicKey, dbAlbum.encPrivateKey, dbAlbum.metadata);
+					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers, albumData.privateKey, albumData.publicKey);
 
 				} else {
 					this.videoFileHeader = crypto.getFileHeaderFromHeadersStr(dbFile.headers);

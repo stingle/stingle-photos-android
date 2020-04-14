@@ -155,7 +155,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 					AlbumFilesDb albumFilesDb = new AlbumFilesDb(myActivity);
 					StingleDbAlbum album = albumsDb.getAlbumById(albumId);
 					if(album != null) {
-						String newHeaders = crypto.reencryptFileHeaders(headers, Crypto.base64ToByteArray(album.albumPK), null, null);
+						String newHeaders = crypto.reencryptFileHeaders(headers, Crypto.base64ToByteArray(album.publicKey), null, null);
 						albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, nowDate, nowDate);
 					}
 					albumsDb.close();

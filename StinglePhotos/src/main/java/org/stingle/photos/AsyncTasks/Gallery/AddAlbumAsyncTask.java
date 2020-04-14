@@ -5,15 +5,13 @@ import android.os.AsyncTask;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 
 public class AddAlbumAsyncTask extends AsyncTask<Void, Void, StingleDbAlbum> {
 
@@ -36,18 +34,24 @@ public class AddAlbumAsyncTask extends AsyncTask<Void, Void, StingleDbAlbum> {
 			if(myContext == null){
 				return null;
 			}
-			HashMap<String, String> albumInfo = crypto.generateEncryptedAlbumData(crypto.getPublicKey(), albumName);
+			Crypto.AlbumEncData encData = crypto.generateEncryptedAlbumData(crypto.getPublicKey(), albumName);
 
 			AlbumsDb db = new AlbumsDb(myContext);
 			long now = System.currentTimeMillis();
-			String newAbumId = CryptoHelpers.getRandomString(AlbumsDb.ALBUM_ID_LEN);
 
-			if(!SyncManager.notifyCloudAboutAlbumAdd(myContext, newAbumId, albumInfo.get("data"), albumInfo.get("pk"), now,  now)){
+			StingleDbAlbum album = new StingleDbAlbum();
+			album.encPrivateKey = encData.encPrivateKey;
+			album.publicKey = encData.publicKey;
+			album.metadata = encData.metadata;
+			album.dateCreated = now;
+			album.dateModified = now;
+
+			if(!SyncManager.notifyCloudAboutAlbumAdd(myContext, album)){
 				return null;
 			}
 
-			db.insertAlbum(newAbumId, albumInfo.get("data"), albumInfo.get("pk"), now, now);
-			StingleDbAlbum newAlbum = db.getAlbumById(newAbumId);
+			db.insertAlbum(album);
+			StingleDbAlbum newAlbum = db.getAlbumById(album.albumId);
 			db.close();
 
 			return newAlbum;

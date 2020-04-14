@@ -27,7 +27,6 @@ public class StingleDb extends SQLiteOpenHelper {
 		if(oldVersion == 1 && newVersion ==2){
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
-			db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
 
 			db.execSQL(StingleDbContract.SQL_FILES_FN_INDEX);
 			db.execSQL(StingleDbContract.SQL_FILES_LR_INDEX);
@@ -37,7 +36,6 @@ public class StingleDb extends SQLiteOpenHelper {
 
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
-			db.execSQL(StingleDbContract.SQL_CREATE_SHARES_AID_INDEX);
 		}
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -49,7 +47,6 @@ public class StingleDb extends SQLiteOpenHelper {
 		db.execSQL(StingleDbContract.SQL_CREATE_TRASH);
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
-		db.execSQL(StingleDbContract.SQL_CREATE_SHARES);
 
 		db.execSQL(StingleDbContract.SQL_FILES_FN_INDEX);
 		db.execSQL(StingleDbContract.SQL_FILES_LR_INDEX);
@@ -59,7 +56,6 @@ public class StingleDb extends SQLiteOpenHelper {
 
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
-		db.execSQL(StingleDbContract.SQL_CREATE_SHARES_AID_INDEX);
 	}
 
 	private void deleteTables(SQLiteDatabase db){
@@ -67,7 +63,6 @@ public class StingleDb extends SQLiteOpenHelper {
 		db.execSQL(StingleDbContract.SQL_DELETE_TRASH);
 		db.execSQL(StingleDbContract.SQL_DELETE_ALBUMS);
 		db.execSQL(StingleDbContract.SQL_DELETE_ALBUM_FILES);
-		db.execSQL(StingleDbContract.SQL_DELETE_SHARES);
 	}
 
 	public void recreate(){

@@ -4,36 +4,55 @@ import android.database.Cursor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stingle.photos.Crypto.CryptoHelpers;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDbContract;
 
 public class StingleDbAlbum {
-	public Integer id;
 	public String albumId;
-	public String data;
-	public String albumPK;
+	public String encPrivateKey;
+	public String publicKey;
+	public String metadata;
+	public Boolean isShared = false;
+	public Boolean isHidden = false;
+	public Boolean isOrigin = true;
+	public String permissions = null;
+	public Boolean isLocked = false;
+	public String cover = null;
 	public Long dateCreated;
 	public Long dateModified;
 
+	public StingleDbAlbum(){
+		this.albumId = CryptoHelpers.getRandomString(AlbumsDb.ALBUM_ID_LEN);
+	}
+
 	public StingleDbAlbum(Cursor cursor){
-		this.id = cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns._ID));
 		this.albumId = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
-		this.data = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATA));
-		this.albumPK = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK));
+		this.encPrivateKey = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_SK));
+		this.publicKey = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK));
+		this.metadata = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_METADATA));
+		this.isShared = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_SHARED)) == 1);
+		this.isHidden = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN)) == 1);
+		this.isOrigin = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_ORIGIN)) == 1);
+		this.permissions = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS));
+		this.isLocked = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED)) == 1);
+		this.cover = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_COVER));
+		this.dateCreated = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
+		this.dateModified = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
 
-		int index;
-
-		if((index = cursor.getColumnIndex(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED)) != -1) {
-			this.dateCreated = cursor.getLong(index);
-		}
-		if((index = cursor.getColumnIndex(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED)) != -1) {
-			this.dateModified = cursor.getLong(index);
-		}
 	}
 
 	public StingleDbAlbum(JSONObject json) throws JSONException {
 		this.albumId = json.getString("albumId");
-		this.data = json.getString("data");
-		this.albumPK = json.getString("albumPK");
+		this.encPrivateKey = json.getString("encPrivateKey");
+		this.publicKey = json.getString("publicKey");
+		this.metadata = json.getString("metadata");
+		this.isShared = (json.getInt("isShared") == 1);
+		this.isHidden = (json.getInt("isHidden") == 1);
+		this.isOrigin = (json.getInt("isOrigin") == 1);
+		this.permissions = json.getString("permissions");
+		this.isLocked = (json.getInt("isLocked") == 1);
+		this.cover = json.getString("cover");
 		this.dateCreated = json.getLong("dateCreated");
 		this.dateModified = json.getLong("dateModified");
 	}

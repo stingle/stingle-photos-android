@@ -74,13 +74,13 @@ public class CryptoHelpers {
 		if(set == SyncManager.ALBUM){
 			AlbumsDb albumsDb = new AlbumsDb(context);
 			StingleDbAlbum dbAlbum = albumsDb.getAlbumById(albumId);
-			Crypto.AlbumData albumData = crypto.parseAlbumData(dbAlbum.data);
+			Crypto.AlbumData albumData = crypto.parseAlbumData(dbAlbum.publicKey, dbAlbum.encPrivateKey, dbAlbum.metadata);
 
 			if(isThumb) {
-				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(dbAlbum.albumPK));
+				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, albumData.publicKey);
 			}
 			else{
-				header = crypto.getFileHeaderFromHeadersStr(headers, albumData.privateKey, Crypto.base64ToByteArray(dbAlbum.albumPK));
+				header = crypto.getFileHeaderFromHeadersStr(headers, albumData.privateKey, albumData.publicKey);
 			}
 		}
 		else {

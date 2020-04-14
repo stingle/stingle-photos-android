@@ -12,7 +12,6 @@ public class StingleDbContract {
 		public static final String TABLE_NAME_TRASH = "trash";
 		public static final String TABLE_NAME_ALBUMS = "albums";
 		public static final String TABLE_NAME_ALBUM_FILES = "album_files";
-		public static final String TABLE_NAME_SHARES = "shares";
 
 		public static final String COLUMN_NAME_FILENAME = "filename";
 		public static final String COLUMN_NAME_IS_LOCAL = "is_local";
@@ -22,13 +21,18 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_DATE_CREATED = "date_created";
 		public static final String COLUMN_NAME_DATE_MODIFIED = "date_modified";
 		public static final String COLUMN_NAME_HEADERS = "headers";
-		public static final String COLUMN_NAME_DATA = "data";
-		public static final String COLUMN_NAME_ALBUM_PK = "album_pk";
+
 		public static final String COLUMN_NAME_ALBUM_ID = "album_id";
-		public static final String COLUMN_NAME_TO_USER_ID = "to_user_id";
-		public static final String COLUMN_NAME_FROM_USER_ID = "from_user_id";
-		public static final String COLUMN_NAME_TO_DATA = "to_data";
-		public static final String COLUMN_NAME_FROM_DATA = "from_data";
+		public static final String COLUMN_NAME_ALBUM_SK = "album_sk";
+		public static final String COLUMN_NAME_ALBUM_PK = "album_pk";
+		public static final String COLUMN_NAME_METADATA = "metadata";
+		public static final String COLUMN_NAME_IS_SHARED = "is_shared";
+		public static final String COLUMN_NAME_IS_HIDDEN = "is_hidden";
+		public static final String COLUMN_NAME_IS_ORIGIN = "is_origin";
+		public static final String COLUMN_NAME_PERMISSIONS = "permissions";
+		public static final String COLUMN_NAME_IS_LOCKED = "is_locked";
+		public static final String COLUMN_NAME_COVER = "cover";
+
 	}
 
 	public static final String SQL_CREATE_FILES =
@@ -79,8 +83,15 @@ public class StingleDbContract {
 			"CREATE TABLE " + Columns.TABLE_NAME_ALBUMS + " (" +
 					Columns._ID + " INTEGER PRIMARY KEY," +
 					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL UNIQUE," +
-					Columns.COLUMN_NAME_DATA + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_ALBUM_SK + " TEXT NOT NULL," +
 					Columns.COLUMN_NAME_ALBUM_PK + " TEXT NOT NULL, " +
+					Columns.COLUMN_NAME_METADATA + " TEXT, " +
+					Columns.COLUMN_NAME_IS_SHARED + " INTEGER, " +
+					Columns.COLUMN_NAME_IS_HIDDEN + " INTEGER, " +
+					Columns.COLUMN_NAME_IS_ORIGIN + " INTEGER, " +
+					Columns.COLUMN_NAME_PERMISSIONS + " TEXT, " +
+					Columns.COLUMN_NAME_IS_LOCKED + " INTEGER, " +
+					Columns.COLUMN_NAME_COVER + " TEXT, " +
 					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +
 					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
@@ -109,20 +120,5 @@ public class StingleDbContract {
 	public static final String SQL_DELETE_ALBUM_FILES =
 			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_ALBUM_FILES;
 
-	public static final String SQL_CREATE_SHARES =
-			"CREATE TABLE " + Columns.TABLE_NAME_SHARES + " (" +
-					Columns._ID + " INTEGER PRIMARY KEY," +
-					Columns.COLUMN_NAME_ALBUM_ID + " TEXT NOT NULL," +
-					Columns.COLUMN_NAME_TO_USER_ID + " INTEGER," +
-					Columns.COLUMN_NAME_FROM_USER_ID + " INTEGER," +
-					Columns.COLUMN_NAME_TO_DATA + " TEXT NOT NULL," +
-					Columns.COLUMN_NAME_FROM_DATA + " TEXT NOT NULL," +
-					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +
-					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
-					")";
-	public static final String SQL_CREATE_SHARES_AID_INDEX =
-			"CREATE INDEX s_album_id ON "+ Columns.TABLE_NAME_SHARES+" ("+ Columns.COLUMN_NAME_ALBUM_ID +")";
 
-	public static final String SQL_DELETE_SHARES =
-			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_SHARES;
 }
