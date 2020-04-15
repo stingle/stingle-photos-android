@@ -36,6 +36,9 @@ public class StingleDb extends SQLiteOpenHelper {
 
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
+
+			db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS);
+			db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS_UID_INDEX);
 		}
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -56,6 +59,9 @@ public class StingleDb extends SQLiteOpenHelper {
 
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_AID_INDEX);
 		db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES_AID_INDEX);
+
+		db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS);
+		db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS_UID_INDEX);
 	}
 
 	private void deleteTables(SQLiteDatabase db){

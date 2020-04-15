@@ -12,6 +12,7 @@ public class StingleDbContract {
 		public static final String TABLE_NAME_TRASH = "trash";
 		public static final String TABLE_NAME_ALBUMS = "albums";
 		public static final String TABLE_NAME_ALBUM_FILES = "album_files";
+		public static final String TABLE_NAME_CONTACTS = "contacts";
 
 		public static final String COLUMN_NAME_FILENAME = "filename";
 		public static final String COLUMN_NAME_IS_LOCAL = "is_local";
@@ -28,10 +29,15 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_METADATA = "metadata";
 		public static final String COLUMN_NAME_IS_SHARED = "is_shared";
 		public static final String COLUMN_NAME_IS_HIDDEN = "is_hidden";
-		public static final String COLUMN_NAME_IS_ORIGIN = "is_origin";
+		public static final String COLUMN_NAME_IS_OWNER = "is_owner";
+		public static final String COLUMN_NAME_MEMBERS = "members";
 		public static final String COLUMN_NAME_PERMISSIONS = "permissions";
 		public static final String COLUMN_NAME_IS_LOCKED = "is_locked";
 		public static final String COLUMN_NAME_COVER = "cover";
+
+		public static final String COLUMN_NAME_USER_ID = "user_id";
+		public static final String COLUMN_NAME_EMAIL = "email";
+		public static final String COLUMN_NAME_PUBLIC_KEY = "pk";
 
 	}
 
@@ -88,7 +94,8 @@ public class StingleDbContract {
 					Columns.COLUMN_NAME_METADATA + " TEXT, " +
 					Columns.COLUMN_NAME_IS_SHARED + " INTEGER, " +
 					Columns.COLUMN_NAME_IS_HIDDEN + " INTEGER, " +
-					Columns.COLUMN_NAME_IS_ORIGIN + " INTEGER, " +
+					Columns.COLUMN_NAME_IS_OWNER + " INTEGER, " +
+					Columns.COLUMN_NAME_MEMBERS + " TEXT, " +
 					Columns.COLUMN_NAME_PERMISSIONS + " TEXT, " +
 					Columns.COLUMN_NAME_IS_LOCKED + " INTEGER, " +
 					Columns.COLUMN_NAME_COVER + " TEXT, " +
@@ -121,4 +128,13 @@ public class StingleDbContract {
 			"DROP TABLE IF EXISTS " + Columns.TABLE_NAME_ALBUM_FILES;
 
 
+	public static final String SQL_CREATE_CONTACTS =
+			"CREATE TABLE " + Columns.TABLE_NAME_CONTACTS + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_USER_ID + " INTEGER NOT NULL UNIQUE," +
+					Columns.COLUMN_NAME_EMAIL + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_PUBLIC_KEY + " TEXT NOT NULL" +
+					")";
+	public static final String SQL_CREATE_CONTACTS_UID_INDEX =
+			"CREATE UNIQUE INDEX c_user_id ON "+ Columns.TABLE_NAME_CONTACTS +" ("+ Columns.COLUMN_NAME_USER_ID +")";
 }

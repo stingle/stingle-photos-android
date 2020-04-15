@@ -30,8 +30,9 @@ public class AlbumsDb {
 			StingleDbContract.Columns.COLUMN_NAME_METADATA,
 			StingleDbContract.Columns.COLUMN_NAME_IS_SHARED,
 			StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN,
-			StingleDbContract.Columns.COLUMN_NAME_IS_ORIGIN,
+			StingleDbContract.Columns.COLUMN_NAME_IS_OWNER,
 			StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS,
+			StingleDbContract.Columns.COLUMN_NAME_MEMBERS,
 			StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED,
 			StingleDbContract.Columns.COLUMN_NAME_COVER,
 			StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
@@ -52,8 +53,9 @@ public class AlbumsDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_METADATA, album.metadata);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_SHARED, album.isShared);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN, album.isHidden);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_ORIGIN, album.isOrigin);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_OWNER, album.isOwner);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS, album.permissions);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_MEMBERS, album.getMembersAsString());
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED, album.isLocked);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_COVER, album.cover);
 
@@ -74,8 +76,9 @@ public class AlbumsDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_METADATA, album.metadata);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_SHARED, album.isShared);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN, album.isHidden);
-		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_ORIGIN, album.isOrigin);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_OWNER, album.isOwner);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS, album.permissions);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_MEMBERS, album.getMembersAsString());
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED, album.isLocked);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_COVER, album.cover);
 

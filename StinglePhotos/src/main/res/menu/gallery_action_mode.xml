@@ -5,10 +5,11 @@
         android:id="@+id/share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
-        app:showAsAction="always|withText" />
+        app:showAsAction="always|withText" >
+    </item>
     <item
         android:id="@+id/add_to_album"
-        android:icon="@drawable/ic_action_add"
+        android:icon="@drawable/ic_action_move"
         android:title="@string/add_to_album"
         app:showAsAction="always|withText" />
     <item

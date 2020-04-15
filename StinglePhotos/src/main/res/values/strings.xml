@@ -277,6 +277,8 @@
     <string name="delete_album">Delete album</string>
     <string name="create_new_album">Create new album</string>
     <string name="album_items_count">%d items</string>
+    <string name="share_in_stingle">Share securely via Stingle Photos</string>
+    <string name="share_to_apps">Share to other apps</string>
 
 
 </resources>
