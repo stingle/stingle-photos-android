@@ -2,7 +2,6 @@ package org.stingle.photos;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -43,6 +42,8 @@ import androidx.camera.core.FlashMode;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.VideoCapture;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.AsyncTasks.GetThumbFromPlainFile;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -228,7 +229,7 @@ public class CameraXActivity extends AppCompatActivity {
 
 			if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
 
-				new AlertDialog.Builder(this)
+				new MaterialAlertDialogBuilder(this)
 						.setMessage(getString(R.string.camera_perm_explain))
 						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {
@@ -256,7 +257,7 @@ public class CameraXActivity extends AppCompatActivity {
 
 			if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
 
-				new AlertDialog.Builder(this)
+				new MaterialAlertDialogBuilder(this)
 						.setMessage(getString(R.string.camera_perm_explain))
 						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {

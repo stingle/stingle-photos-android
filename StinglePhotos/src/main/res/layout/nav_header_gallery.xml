@@ -28,7 +28,7 @@
             android:fontFamily="sans-serif"
             android:paddingStart="10dp"
             android:text="@string/app_name"
-            android:textColor="@color/primaryColor"
+            android:textColor="?attr/colorPrimary"
             android:textSize="24sp"
             android:textStyle="normal|bold" />
     </LinearLayout>
@@ -54,13 +54,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:textColor="#8A000000"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="14sp"/>
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="2dp"
         android:layout_marginTop="20dp"
-        android:background="#1F707070" />
+        android:background="@color/hr_color" />
 
 </LinearLayout>

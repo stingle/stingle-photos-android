@@ -2,7 +2,6 @@ package org.stingle.photos.Files;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -15,6 +14,10 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
+
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
@@ -220,7 +223,7 @@ public class FileManager {
         File homeDirFile = new File(homeDir);
 
         if(!homeDirFile.exists() || !homeDirFile.canWrite()){
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
             builder.setTitle(activity.getString(R.string.home_folder_problem_title));
 
             builder.setMessage(activity.getString(R.string.home_folder_problem));
@@ -259,7 +262,7 @@ public class FileManager {
 		if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
 			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-				new AlertDialog.Builder(activity)
+				new MaterialAlertDialogBuilder(activity)
 						.setMessage(activity.getString(R.string.sdcard_perm_explain))
 						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {

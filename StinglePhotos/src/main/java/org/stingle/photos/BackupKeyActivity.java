@@ -1,6 +1,5 @@
 package org.stingle.photos;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +10,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Crypto.MnemonicUtils;
@@ -88,7 +90,7 @@ public class BackupKeyActivity extends AppCompatActivity {
 			LoginManager.showEnterPasswordToUnlock(this, loginConfig, new LoginManager.UserLogedinCallback() {
 				@Override
 				public void onUserAuthSuccess() {
-					AlertDialog.Builder builder = new AlertDialog.Builder(BackupKeyActivity.this);
+					MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(BackupKeyActivity.this);
 					builder.setView(R.layout.backup_phrase_popup);
 					builder.setCancelable(true);
 					AlertDialog dialog = builder.create();

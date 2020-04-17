@@ -31,7 +31,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -41,6 +40,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -77,7 +77,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected GalleryFragment galleryFragment;
 	protected AlbumsFragment albumsFragment;
 	protected ActionMode actionMode;
-	protected Toolbar toolbar;
+	protected MaterialToolbar toolbar;
 	protected int currentSet = SyncManager.GALLERY;
 	private int currentFragment = FRAGMENT_GALLERY;
 	private String currentAlbumId = null;
@@ -371,7 +371,7 @@ public class GalleryActivity extends AppCompatActivity
 			albumId = null;
 		}
 		Log.e("finish", currentSet + " - " + set + " ;;;;; " + currentAlbumId + " - " + albumId);
-		if(currentSet == set && Helpers.isStringsEqual(currentAlbumId, albumId)) {
+		if(galleryFragment != null && currentSet == set && Helpers.isStringsEqual(currentAlbumId, albumId)) {
 			galleryFragment.updateItem(position);
 		}
 	}
@@ -619,6 +619,9 @@ public class GalleryActivity extends AppCompatActivity
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 		}
+		else if (id == R.id.share_album) {
+			GalleryActions.showSharingSheet(this);
+		}
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);
 		}
@@ -707,7 +710,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public boolean onLongClick(int index) {
-		if(!galleryFragment.isSelectionModeActive()){
+		if(galleryFragment != null && !galleryFragment.isSelectionModeActive()){
 			actionMode = startSupportActionMode(getActionModeCallback());
 		}
 		return true;

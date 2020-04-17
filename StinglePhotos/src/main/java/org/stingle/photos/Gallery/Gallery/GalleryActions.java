@@ -1,21 +1,30 @@
 package org.stingle.photos.Gallery.Gallery;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.Switch;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
-import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
-import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
@@ -37,7 +46,7 @@ public class GalleryActions {
 	}
 
 	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 		builder.setTitle(R.string.add_move_to_album);
 		builder.setView(R.layout.add_to_album_dialog);
 		builder.setCancelable(true);
@@ -274,4 +283,37 @@ public class GalleryActions {
 				null);
 	}
 
+	public static void showSharingSheet(GalleryActivity activity) {
+		View dialogView = activity.getLayoutInflater().inflate(R.layout.sharing_bottom_sheet, null);
+		BottomSheetDialog dialog = new BottomSheetDialog(activity);
+		dialog.setContentView(dialogView);
+		//dialog.getBehavior().setFitToContents(false);
+
+
+		dialog.findViewById(R.id.close_bottom_sheet).setOnClickListener(v -> dialog.dismiss());
+
+		Switch allowEdit = dialog.findViewById(R.id.allow_edit);
+		Switch allowInvite = dialog.findViewById(R.id.allow_invite);
+		Switch allowCopy = dialog.findViewById(R.id.allow_copy);
+
+		dialog.findViewById(R.id.allow_edit_text).setOnClickListener(v -> allowEdit.toggle());
+		dialog.findViewById(R.id.allow_invite_text).setOnClickListener(v -> allowInvite.toggle());
+		dialog.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());
+
+		EditText recipient = dialog.findViewById(R.id.recipient);
+		LinearLayout chipsContainer = dialog.findViewById(R.id.chipsContainer);
+
+		recipient.setOnEditorActionListener((v, actionId, event) -> {
+			if (actionId == EditorInfo.IME_ACTION_GO) {
+				Chip chip = new Chip(activity);
+				chip.setText(((EditText)v).getText());
+				chip.setChipIcon(activity.getDrawable(R.drawable.ic_close));
+				chipsContainer.addView(chip);
+				return true;
+			}
+			return false;
+		});
+
+		dialog.show();
+	}
 }

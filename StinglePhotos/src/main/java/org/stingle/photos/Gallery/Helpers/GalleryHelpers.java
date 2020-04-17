@@ -1,11 +1,14 @@
 package org.stingle.photos.Gallery.Helpers;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -13,7 +16,7 @@ import org.stingle.photos.R;
 
 public class GalleryHelpers {
 	public static void addAlbum(Context context, OnAsyncTaskFinish onFinish){
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
 		builder.setView(R.layout.add_album_dialog);
 		builder.setCancelable(true);
 		AlertDialog addAlbumDialog = builder.create();

@@ -1,6 +1,7 @@
 package org.stingle.photos.Auth;
 
-import android.app.AlertDialog;
+
+import androidx.appcompat.app.AlertDialog;
 
 public abstract class PasswordReturnListener {
     public abstract void passwordReceived(String password, AlertDialog dialog);

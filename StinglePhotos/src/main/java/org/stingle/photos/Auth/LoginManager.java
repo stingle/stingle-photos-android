@@ -1,7 +1,6 @@
 package org.stingle.photos.Auth;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,8 +15,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Net.HttpsClient;
@@ -62,7 +64,7 @@ public class LoginManager {
         if(loginConfig == null){
             loginConfig = new LoginConfig();
         }
-        loginConfig.okButtonText = activity.getString(R.string.login);
+        loginConfig.okButtonText = activity.getString(R.string.unlock);
         loginConfig.cancelButtonText = activity.getString(R.string.exit);
         loginConfig.showCancel = true;
 
@@ -187,7 +189,7 @@ public class LoginManager {
             loginDialogRef.get().dismiss();
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
         builder.setView(R.layout.password);
         builder.setCancelable(config.cancellable);
         AlertDialog loginDialog = builder.create();
@@ -200,7 +202,9 @@ public class LoginManager {
         Button cancelButton = loginDialog.findViewById(R.id.cancelButton);
 
         final InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+        if(imm != null) {
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        }
 
         if(config.okButtonText != null) {
             okButton.setText(config.okButtonText);
@@ -220,7 +224,9 @@ public class LoginManager {
 
 
         okButton.setOnClickListener(v -> {
-            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            if(imm != null) {
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            }
             listener.passwordReceived(passwordField.getText().toString(), loginDialog);
         });
 
@@ -236,7 +242,9 @@ public class LoginManager {
 
         passwordField.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                if(imm != null) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
                 listener.passwordReceived(passwordField.getText().toString(), loginDialog);
                 if(loginDialog != null){
                     loginDialog.dismiss();
@@ -249,7 +257,9 @@ public class LoginManager {
 
         if(config.showLogout) {
             logoutButton.setOnClickListener(v -> {
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                if(imm != null) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
                 if(loginDialog != null){
                     loginDialog.dismiss();
                 }
@@ -267,7 +277,9 @@ public class LoginManager {
 
         if(config.showCancel) {
             cancelButton.setOnClickListener(v -> {
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                if(imm != null) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
                 if(loginDialog != null){
                     loginDialog.dismiss();
                 }

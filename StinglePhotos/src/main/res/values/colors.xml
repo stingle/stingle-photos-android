@@ -22,4 +22,7 @@
     <color name="simpletooltip_background">#FFF</color>
     <color name="simpletooltip_text">@color/textColor</color>
     <color name="simpletooltip_arrow">@color/colorAccent</color>
+
+
+    <color name="hr_color">#36B6B6B6</color>
 </resources>

@@ -11,14 +11,14 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:src="@drawable/ic_no_image_24"
-        app:civ_border_color="#EEEEEE"
+        app:civ_border_color="?attr/colorOnSurface"
         app:civ_border_width="0dp"/>
 
     <TextView
         android:id="@+id/albumName"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textColor="#000"
+        android:textColor="?android:attr/textColorPrimary"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:textSize="15sp"

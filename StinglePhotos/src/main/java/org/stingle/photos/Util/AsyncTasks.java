@@ -2,36 +2,27 @@ package org.stingle.photos.Util;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Video.Thumbnails;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.SecureRandom;
@@ -79,8 +70,8 @@ public class AsyncTasks {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			
-			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+			MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 			builder.setTitle(activity.getString(R.string.deleting_files));
 
 			View deleteProgressView = View.inflate(activity, R.layout.dialog_delete_originals_progress, null);

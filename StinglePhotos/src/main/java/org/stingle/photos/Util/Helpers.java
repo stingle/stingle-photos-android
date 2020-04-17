@@ -1,7 +1,6 @@
 package org.stingle.photos.Util;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,7 +20,10 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.exifinterface.media.ExifInterface;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.CameraX.CameraImageSize;
 import org.stingle.photos.Crypto.Crypto;
@@ -102,7 +104,7 @@ public class Helpers {
 	}
 
 	public static void showAlertDialog(Context context, String message) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
 		builder.setMessage(message);
 		builder.setNegativeButton(context.getString(R.string.ok), null);
 		builder.setIcon(android.R.drawable.ic_dialog_alert);
@@ -116,7 +118,7 @@ public class Helpers {
 	}
 
 	public static void showInfoDialog(Context context, String message, DialogInterface.OnClickListener onClick) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
 		builder.setMessage(message);
 		if(onClick != null){
 			builder.setNegativeButton(context.getString(R.string.ok), onClick);
@@ -130,7 +132,7 @@ public class Helpers {
 	}
 
 	public static void showConfirmDialog(Context context, String message, DialogInterface.OnClickListener yes, DialogInterface.OnClickListener no) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
 		builder.setMessage(message);
 		builder.setPositiveButton(context.getString(R.string.yes), yes);
 		builder.setNegativeButton(context.getString(R.string.no), no);

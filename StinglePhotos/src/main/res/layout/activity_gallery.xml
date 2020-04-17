@@ -11,18 +11,18 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="org.stingle.photos.GalleryActivity"
-        android:theme="@style/AppBarOverlay">
+        tools:context="org.stingle.photos.GalleryActivity">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
+                android:theme="@style/AppBarOverlay"
                 app:popupTheme="@style/PopupOverlay" />
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -53,7 +53,7 @@
                     android:id="@+id/syncText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#000"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_margin="10dp"
                     android:layout_centerVertical="true" />
 
@@ -111,6 +111,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
+            app:tint="?attr/colorOnPrimarySurface"
+            app:backgroundTint="?attr/colorPrimary"
             app:srcCompat="@drawable/ic_dialog_add" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -118,7 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/bottom_nav_height"
             android:layout_gravity="bottom"
-            android:background="#FFF"
+            android:background="?attr/colorBackgroundFloating"
             app:itemIconTint="@color/bottom_nav_colors"
             app:itemTextColor="@color/bottom_nav_colors"
             app:layout_insetEdge="bottom"
