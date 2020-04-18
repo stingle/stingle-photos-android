@@ -21,6 +21,7 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -477,6 +478,18 @@ public class Helpers {
 		}
 
 		return false;
+	}
+
+	public static void applyTheme(String theme){
+		if(theme.equals("auto")) {
+			AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+		}
+		else if(theme.equals("dark")) {
+			AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+		}
+		else if(theme.equals("light")) {
+			AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+		}
 	}
 
 }

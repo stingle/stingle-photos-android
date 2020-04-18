@@ -35,6 +35,12 @@
         app:title="@string/pref_header_sync" />
 
     <Preference
+        app:fragment="org.stingle.photos.SettingsActivity$AppearancePreferenceFragment"
+        app:icon="@drawable/ic_image_red"
+        app:key="appearance"
+        app:title="@string/pref_header_appearance" />
+
+    <Preference
         app:fragment="org.stingle.photos.SettingsActivity$AdvancedPreferenceFragment"
         app:icon="@drawable/ic_settings"
         app:key="advanced_header"

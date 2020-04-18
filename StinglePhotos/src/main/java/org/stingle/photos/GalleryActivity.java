@@ -181,7 +181,8 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onStop() {
 		super.onStop();
-
+		galleryFragment = null;
+		albumsFragment = null;
 	}
 
 	@Override
@@ -322,13 +323,15 @@ public class GalleryActivity extends AppCompatActivity
 
 			if(galleryFragment != null && fragment.getClass() != galleryFragment.getClass() ||
 					fragmentCurrentSet != set ||
-					!albumIdsMatch
+					!albumIdsMatch ||
+					!(fragment instanceof GalleryFragment)
 			) {
 				galleryFragment = newGalleryFragment;
 				ft.replace(R.id.galleryContainer, galleryFragment);
 				ft.commit();
 			}
 			else{
+				galleryFragment = (GalleryFragment)fragment;
 				((GalleryFragment)fragment).init();
 			}
 			invalidateOptionsMenu();

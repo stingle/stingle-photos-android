@@ -45,4 +45,17 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+
+    <string-array name="themes">
+        <item name="auto">@string/auto</item>
+        <item name="light">@string/light</item>
+        <item name="dark">@string/dark</item>
+    </string-array>
+
+    <string-array name="themesValues">
+        <item name="auto">auto</item>
+        <item name="light">light</item>
+        <item name="dark">dark</item>
+    </string-array>
+
 </resources>

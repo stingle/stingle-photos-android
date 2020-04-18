@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SeekBarPreference;
@@ -275,6 +276,24 @@ public class SettingsActivity extends AppCompatActivity implements
 			pref.setOnPreferenceChangeListener((preference, newValue) -> {
 				final int progress = Integer.valueOf(String.valueOf(newValue));
 				preference.setSummary(getString(R.string.upload_battery_summary, String.valueOf(progress)));
+				return true;
+			});
+		}
+	}
+
+	public static class AppearancePreferenceFragment extends PreferenceFragmentCompat {
+
+		@Override
+		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+			setPreferencesFromResource(R.xml.appearance_preferences, rootKey);
+
+			initThemePref();
+		}
+
+		private void initThemePref(){
+			ListPreference pref = findPreference("theme");
+			pref.setOnPreferenceChangeListener((preference, newValue) -> {
+				Helpers.applyTheme((String)newValue);
 				return true;
 			});
 		}

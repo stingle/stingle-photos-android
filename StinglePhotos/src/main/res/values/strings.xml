@@ -285,6 +285,11 @@
     <string name="allow_copying">Allow copying to own library and taking screenshots and some other shit that I dont know</string>
     <string name="or">or</string>
     <string name="unlock">Unlock</string>
+    <string name="pref_header_appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="auto">Follow system</string>
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
 
 
 </resources>

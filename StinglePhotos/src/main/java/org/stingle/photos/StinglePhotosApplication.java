@@ -2,8 +2,12 @@ package org.stingle.photos;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
+
+import androidx.preference.PreferenceManager;
 
 import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
 
 import java.util.HashMap;
@@ -44,6 +48,9 @@ public class StinglePhotosApplication extends Application{
         StinglePhotosApplication.context = getApplicationContext();
         StinglePhotosApplication.cache = new MemoryCache();
         StinglePhotosApplication.crypto = new Crypto(this);
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		Helpers.applyTheme(prefs.getString("theme", "auto"));
     }
 
     public static Crypto getCrypto() {
