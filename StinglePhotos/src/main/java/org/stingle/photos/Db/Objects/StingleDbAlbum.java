@@ -73,6 +73,10 @@ public class StingleDbAlbum {
 		members = new ArrayList<>(Arrays.asList(membersStr.split(MEMBERS_SEPARATOR)));
 	}
 
+	public void setMembers(ArrayList<String> members){
+		this.members = members;
+	}
+
 	public String getMembersAsString(){
 		if(members.size() == 0){
 			return "";

@@ -1039,9 +1039,7 @@ public class Crypto {
         so.crypto_box_seal(encryptedMetadata, metadataBytes, metadataBytes.length, albumPK);
 
         // Encrypt albumSK
-        int encSKLength = albumSK.length + Box.SEALBYTES;
-        byte[] encryptedSK = new byte[encSKLength];
-        so.crypto_box_seal(encryptedSK, albumSK, albumSK.length, userPK);
+        byte[] encryptedSK = encryptAlbumSK(albumSK, userPK);
 
         AlbumEncData encData = new AlbumEncData();
         encData.encPrivateKey = byteArrayToBase64(encryptedSK);
@@ -1049,6 +1047,14 @@ public class Crypto {
         encData.metadata = byteArrayToBase64(encryptedMetadata);
 
         return encData;
+    }
+
+    public byte[] encryptAlbumSK(byte[] albumSK, byte[] userPK){
+        int encSKLength = albumSK.length + Box.SEALBYTES;
+        byte[] encryptedSK = new byte[encSKLength];
+        so.crypto_box_seal(encryptedSK, albumSK, albumSK.length, userPK);
+
+        return encryptedSK;
     }
 
     public AlbumData parseAlbumData(String albumPKStr, String encAlbumSKStr, String metadataStr) throws IOException, CryptoException {

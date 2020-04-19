@@ -3,7 +3,9 @@ package org.stingle.photos.Sync;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.AsyncTasks.Sync.SyncCloudToLocalDbAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
@@ -11,14 +13,16 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
+import org.stingle.photos.Sharing.SharingPermissions;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
@@ -396,6 +400,60 @@ public class SyncManager {
 		catch (CryptoException e){
 			return false;
 		}
+	}
+
+	public static StingleDbAlbum addAlbum(Context context, String albumName) throws IOException {
+		Crypto crypto = StinglePhotosApplication.getCrypto();
+		Crypto.AlbumEncData encData = crypto.generateEncryptedAlbumData(crypto.getPublicKey(), albumName);
+
+		AlbumsDb db = new AlbumsDb(context);
+		long now = System.currentTimeMillis();
+
+		StingleDbAlbum album = new StingleDbAlbum();
+		album.encPrivateKey = encData.encPrivateKey;
+		album.publicKey = encData.publicKey;
+		album.metadata = encData.metadata;
+		album.dateCreated = now;
+		album.dateModified = now;
+
+		if(!SyncManager.notifyCloudAboutAlbumAdd(context, album)){
+			return null;
+		}
+
+		db.insertAlbum(album);
+		StingleDbAlbum newAlbum = db.getAlbumById(album.albumId);
+		db.close();
+
+		return newAlbum;
+	}
+
+	public static StingleContact getContactData(Context context, String email) {
+		HashMap<String, String> params = new HashMap<>();
+		params.put("email", email);
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_contact), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				Log.e("contact", response.get("contact"));
+				return new StingleContact(new JSONObject(response.get("contact")));
+			}
+			return null;
+		}
+		catch (CryptoException | JSONException e){
+			return null;
+		}
+
+	}
+
+	public static boolean notifyCloudAboutShare(Context context, StingleDbAlbum album, HashMap<Long, String> sharingKeys, SharingPermissions permissions) {
+		// to be implemented
+		return false;
 	}
 
 }

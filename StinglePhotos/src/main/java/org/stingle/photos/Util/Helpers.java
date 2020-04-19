@@ -492,4 +492,7 @@ public class Helpers {
 		}
 	}
 
+	public static String generateAlbumName() {
+		return new SimpleDateFormat("dd MM yyyy", Locale.getDefault()).format(new Date());
+	}
 }

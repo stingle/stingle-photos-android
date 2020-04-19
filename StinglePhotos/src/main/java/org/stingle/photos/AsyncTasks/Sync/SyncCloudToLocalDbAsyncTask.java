@@ -283,8 +283,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		}
 		else {
 			if (album.dateModified != remoteAlbum.dateModified) {
-				album.dateModified = remoteAlbum.dateModified;
-				albumsDb.updateAlbum(album);
+				albumsDb.updateAlbum(remoteAlbum);
 			}
 		}
 

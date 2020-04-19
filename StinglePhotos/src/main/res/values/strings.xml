@@ -290,6 +290,9 @@
     <string name="auto">Follow system</string>
     <string name="dark">Dark</string>
     <string name="light">Light</string>
+    <string name="close">Close</string>
+    <string name="not_on_stingle">This email is not registered on Stingle Photos</string>
+    <string name="cant_share_to_self">Sorry you can\'t share to yourself</string>
 
 
 </resources>

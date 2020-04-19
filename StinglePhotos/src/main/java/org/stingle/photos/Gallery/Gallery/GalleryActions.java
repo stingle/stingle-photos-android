@@ -10,11 +10,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -25,6 +27,8 @@ import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.Sync.GetContactAsyncTask;
+import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
@@ -33,6 +37,7 @@ import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -283,12 +288,27 @@ public class GalleryActions {
 				null);
 	}
 
-	public static void showSharingSheet(GalleryActivity activity) {
+	public static void showSharingSheet(GalleryActivity activity, boolean isAlbum, ArrayList<StingleDbFile> files) {
 		View dialogView = activity.getLayoutInflater().inflate(R.layout.sharing_bottom_sheet, null);
 		BottomSheetDialog dialog = new BottomSheetDialog(activity);
 		dialog.setContentView(dialogView);
-		//dialog.getBehavior().setFitToContents(false);
+		BottomSheetBehavior mBehavior = dialog.getBehavior();
 
+		dialog.setOnShowListener(dialogInterface -> {
+			mBehavior.setPeekHeight(dialogView.getHeight());
+		});
+
+		/*mBehavior.setFitToContents(false);
+		mBehavior.setHalfExpandedRatio((float) 0.6);
+		mBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+
+		View bottomSheet = dialog.findViewById(R.id.design_bottom_sheet);
+		bottomSheet.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;*/
+
+
+		if(isAlbum){
+			dialog.findViewById(R.id.otherAppsShareContainer).setVisibility(View.GONE);
+		}
 
 		dialog.findViewById(R.id.close_bottom_sheet).setOnClickListener(v -> dialog.dismiss());
 
@@ -299,19 +319,63 @@ public class GalleryActions {
 		dialog.findViewById(R.id.allow_edit_text).setOnClickListener(v -> allowEdit.toggle());
 		dialog.findViewById(R.id.allow_invite_text).setOnClickListener(v -> allowInvite.toggle());
 		dialog.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());
+		dialog.findViewById(R.id.shareToOtherApps).setOnClickListener(v -> {
+			shareSelected(activity, files);
+			dialog.dismiss();
+		});
 
 		EditText recipient = dialog.findViewById(R.id.recipient);
 		LinearLayout chipsContainer = dialog.findViewById(R.id.chipsContainer);
 
+		String ownEmail = Helpers.getPreference(activity, StinglePhotosApplication.USER_EMAIL, "");
+
+		ArrayList<StingleContact> recipients = new ArrayList<>();
+
 		recipient.setOnEditorActionListener((v, actionId, event) -> {
 			if (actionId == EditorInfo.IME_ACTION_GO) {
-				Chip chip = new Chip(activity);
-				chip.setText(((EditText)v).getText());
-				chip.setChipIcon(activity.getDrawable(R.drawable.ic_close));
-				chipsContainer.addView(chip);
+				EditText textBox = ((EditText)v);
+				String text = textBox.getText().toString();
+				if(Helpers.isValidEmail(text)) {
+					if(text.equals(ownEmail)){
+						Toast.makeText(activity, activity.getString(R.string.cant_share_to_self), Toast.LENGTH_SHORT).show();
+						return true;
+					}
+					(new GetContactAsyncTask(activity, text, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish(Object contact) {
+							super.onFinish(contact);
+							Chip chip = new Chip(activity);
+							chip.setText(text);
+							chip.setCloseIconVisible(true);
+							chip.setCloseIcon(activity.getDrawable(R.drawable.ic_close));
+							chip.setOnCloseIconClickListener(v1 -> {
+								chipsContainer.removeView(chip);
+							});
+							chipsContainer.addView(chip);
+							textBox.setText("");
+
+							recipients.add((StingleContact) contact);
+						}
+
+						@Override
+						public void onFail() {
+							super.onFail();
+							Toast.makeText(activity, activity.getString(R.string.not_on_stingle), Toast.LENGTH_SHORT).show();
+						}
+					})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+				}
+				else{
+					Toast.makeText(activity, activity.getString(R.string.invalid_email), Toast.LENGTH_SHORT).show();
+				}
 				return true;
 			}
 			return false;
+		});
+
+		dialog.findViewById(R.id.share).setOnClickListener(v -> {
+			shareSelected(activity, files);
+			dialog.dismiss();
 		});
 
 		dialog.show();

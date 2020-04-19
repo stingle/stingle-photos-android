@@ -623,7 +623,7 @@ public class GalleryActivity extends AppCompatActivity
 			startActivity(intent);
 		}
 		else if (id == R.id.share_album) {
-			GalleryActions.showSharingSheet(this);
+			GalleryActions.showSharingSheet(this, true, null);
 		}
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);
@@ -781,7 +781,7 @@ public class GalleryActivity extends AppCompatActivity
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch(item.getItemId()){
 					case R.id.share:
-						GalleryActions.shareSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
+						GalleryActions.showSharingSheet(GalleryActivity.this, false, galleryFragment.getSelectedFiles());
 						break;
 					case R.id.add_to_album:
 						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentSet == SyncManager.ALBUM);
