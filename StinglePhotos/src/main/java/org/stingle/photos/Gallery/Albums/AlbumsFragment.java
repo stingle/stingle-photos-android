@@ -29,6 +29,9 @@ import java.util.Objects;
 
 public class AlbumsFragment extends Fragment{
 
+	public static int VIEW_ALBUMS = 0;
+	public static int VIEW_SHARES = 1;
+
 	private RecyclerView recyclerView;
 	private AlbumsAdapterPisasso adapter;
 	private AutoFitGridLayoutManager layoutManager;
@@ -111,12 +114,17 @@ public class AlbumsFragment extends Fragment{
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+		int view = VIEW_ALBUMS;
+		Bundle bundle = getArguments();
+		if (bundle != null) {
+			view = bundle.getInt("view", VIEW_ALBUMS);
+		}
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
 		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext(), 2));
 		recyclerView.setLayoutManager(layoutManager);
-		adapter = new AlbumsAdapterPisasso(getContext(), layoutManager, false);
+		adapter = new AlbumsAdapterPisasso(getContext(), layoutManager, view, false);
 		adapter.setListener(adaptorListener);
 
 		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){

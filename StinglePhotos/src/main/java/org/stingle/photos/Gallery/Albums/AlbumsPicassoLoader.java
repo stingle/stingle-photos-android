@@ -32,14 +32,16 @@ public class AlbumsPicassoLoader extends RequestHandler {
 	private Context context;
 	private AlbumsDb db;
 	private AlbumFilesDb filesDb;
+	private int view;
 	private int thumbSize;
 	private Crypto crypto;
 
-	public AlbumsPicassoLoader(Context context, AlbumsDb db, AlbumFilesDb filesDb, int thumbSize){
+	public AlbumsPicassoLoader(Context context, AlbumsDb db, AlbumFilesDb filesDb, int view, int thumbSize){
 		this.context = context;
 		this.db = db;
 		this.filesDb = filesDb;
 		this.thumbSize = thumbSize;
+		this.view = view;
 		this.crypto = StinglePhotosApplication.getCrypto();
 	}
 

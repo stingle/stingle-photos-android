@@ -58,7 +58,6 @@ public class SyncManager {
 	public static final int GALLERY = 0;
 	public static final int TRASH = 1;
 	public static final int ALBUM = 2;
-	public static final int SHARE = 3;
 
 	public static final int DELETE_EVENT_MAIN = 1;
 	public static final int DELETE_EVENT_TRASH = 2;

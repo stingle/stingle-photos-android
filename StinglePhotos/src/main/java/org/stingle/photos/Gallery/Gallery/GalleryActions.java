@@ -36,6 +36,7 @@ import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
+import org.stingle.photos.Gallery.Albums.AlbumsFragment;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
@@ -68,7 +69,7 @@ public class GalleryActions {
 		LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
 		recyclerView.setLayoutManager(layoutManager);
 
-		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, isFromAlbum);
+		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, AlbumsFragment.VIEW_ALBUMS, isFromAlbum);
 
 		adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
 		adapter.setListener(new AlbumsAdapterPisasso.Listener() {

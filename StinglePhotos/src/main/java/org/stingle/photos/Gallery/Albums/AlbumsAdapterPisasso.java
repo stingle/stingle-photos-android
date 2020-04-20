@@ -34,6 +34,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	private Context context;
 	private AlbumsDb db;
 	private AlbumFilesDb filesDb;
+	private int view;
 	private boolean showGalleryOption;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private Listener listener;
@@ -51,15 +52,16 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	private int layoutStyle = LAYOUT_GRID;
 	private int otherItemsCount = 1;
 
-	public AlbumsAdapterPisasso(Context context, RecyclerView.LayoutManager lm, boolean showGalleryOption) {
+	public AlbumsAdapterPisasso(Context context, RecyclerView.LayoutManager lm, int view, boolean showGalleryOption) {
 		this.context = context;
 		this.db = new AlbumsDb(context);
 		this.filesDb = new AlbumFilesDb(context);
 		this.thumbSize = Helpers.getThumbSize(context,2);
 		this.lm = lm;
+		this.view = view;
 		this.showGalleryOption = showGalleryOption;
 
-		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, filesDb, thumbSize)).build();
+		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, filesDb, view, thumbSize)).build();
 
 		if(showGalleryOption){
 			otherItemsCount = 2;

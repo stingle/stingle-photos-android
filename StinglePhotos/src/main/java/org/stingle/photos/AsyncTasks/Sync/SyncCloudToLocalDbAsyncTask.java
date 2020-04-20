@@ -8,12 +8,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -24,6 +24,7 @@ import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> {
@@ -39,6 +40,8 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	private long lastAlbumsSeenTime = 0;
 	private long lastAlbumFilesSeenTime = 0;
 	private long lastDelSeenTime = 0;
+
+	private ArrayList<HashMap<String, Object>> deleteLog = new ArrayList<>();
 
 	public SyncCloudToLocalDbAsyncTask(Context context, SyncManager.OnFinish onFinish){
 		this.context = new WeakReference<>(context);
@@ -168,7 +171,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 				if(album != null){
 					StingleDbAlbum dbAlbum = new StingleDbAlbum(album);
 					Log.d("receivedAlbum", dbAlbum.albumId);
-					processAlbum(context, dbAlbum);
+					processAlbum(dbAlbum);
 					result = true;
 				}
 			}
@@ -193,6 +196,13 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	}
 
 	private boolean processFile(Context context, StingleDbFile remoteFile, int set){
+
+		if(isFileInDeleteLog(remoteFile, set)){
+			Log.d("fileIsInDeleteLog", remoteFile.filename);
+			moveForwardFileSeenTime(remoteFile, set);
+			return true;
+		}
+
 		FilesDb myDb;
 		if (set == SyncManager.GALLERY){
 			myDb = galleryDb;
@@ -255,6 +265,12 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			}
 		}
 
+		moveForwardFileSeenTime(remoteFile, set);
+
+		return true;
+	}
+
+	private void moveForwardFileSeenTime(StingleDbFile remoteFile, int set){
 		if(set == SyncManager.GALLERY) {
 			if (remoteFile.dateModified > lastSeenTime) {
 				lastSeenTime = remoteFile.dateModified;
@@ -270,11 +286,15 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 				lastAlbumFilesSeenTime = remoteFile.dateModified;
 			}
 		}
-
-		return true;
 	}
 
-	private boolean processAlbum(Context context, StingleDbAlbum remoteAlbum){
+	private boolean processAlbum(StingleDbAlbum remoteAlbum){
+
+		if(isAlbumInDeleteLog(remoteAlbum)){
+			Log.d("AlbumIsInDeleteLog", remoteAlbum.albumId);
+			moveForwardAlbumSeenTime(remoteAlbum);
+			return true;
+		}
 
 		StingleDbAlbum album = albumsDb.getAlbumById(remoteAlbum.albumId);
 
@@ -287,11 +307,15 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			}
 		}
 
+		moveForwardAlbumSeenTime(remoteAlbum);
+
+		return true;
+	}
+
+	private void moveForwardAlbumSeenTime(StingleDbAlbum remoteAlbum){
 		if(remoteAlbum.dateModified > lastAlbumsSeenTime) {
 			lastAlbumsSeenTime = remoteAlbum.dateModified;
 		}
-
-		return true;
 	}
 
 	protected void processDeleteEvent(Context context, JSONObject event) throws JSONException {
@@ -300,6 +324,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		String albumId = event.getString("albumId");
 		Integer type = event.getInt("type");
 		Long date = event.getLong("date");
+		addToDeleteLog(type, filename, albumId, date);
 
 		if(type == SyncManager.DELETE_EVENT_MAIN) {
 			StingleDbFile file = galleryDb.getFileIfExists(filename);
@@ -311,6 +336,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			StingleDbFile file = trashDb.getFileIfExists(filename);
 			if(file != null) {
 				trashDb.deleteFile(file.filename);
+
 			}
 		}
 		else if(type == SyncManager.DELETE_EVENT_ALBUM) {
@@ -355,6 +381,61 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		if(date > lastDelSeenTime) {
 			lastDelSeenTime = date;
 		}
+	}
+
+	private void addToDeleteLog(int type, String filename, String albumId, Long date){
+		HashMap<String, Object> log = new HashMap<>();
+		log.put("type", type);
+		log.put("filename", filename);
+		log.put("albumId", albumId);
+		log.put("date", date);
+		deleteLog.add(log);
+	}
+
+	private boolean isFileInDeleteLog(StingleDbFile file, int set){
+		boolean found = false;
+		for(HashMap<String, Object> log : deleteLog){
+			if(isMyType(set, (Integer)log.get("type"))){
+				if(set == SyncManager.ALBUM){
+					if(file.albumId.equals(log.get("albumId")) && file.dateModified < (Long)log.get("date")){
+						found = true;
+					}
+				}
+				else{
+					if(file.dateModified < (Long)log.get("date")){
+						found = true;
+					}
+				}
+			}
+		}
+
+		return found;
+	}
+	private boolean isAlbumInDeleteLog(StingleDbAlbum album){
+		boolean found = false;
+		for(HashMap<String, Object> log : deleteLog){
+			if((Integer)log.get("type") == SyncManager.DELETE_EVENT_ALBUM){
+				if(album.albumId.equals((String)log.get("albumId")) && album.dateModified < (Long)log.get("date")){
+					found = true;
+				}
+			}
+		}
+
+		return found;
+	}
+
+	private boolean isMyType(int set, int type){
+		if(set == SyncManager.GALLERY && type == SyncManager.DELETE_EVENT_MAIN){
+			return true;
+		}
+		if(set == SyncManager.TRASH && (type == SyncManager.DELETE_EVENT_TRASH || type == SyncManager.DELETE_EVENT_DELETE)){
+			return true;
+		}
+		if(set == SyncManager.ALBUM && type == SyncManager.DELETE_EVENT_ALBUM_FILE){
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
