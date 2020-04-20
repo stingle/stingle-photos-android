@@ -22,7 +22,6 @@ import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
-import org.stingle.photos.Sharing.SharingPermissions;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
@@ -116,6 +115,9 @@ public class SyncManager {
 	public static void resetAndStopSync(Context context) {
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_DEL_SEEN_TIME);
+		Helpers.deletePreference(context, SyncManager.PREF_TRASH_LAST_SEEN_TIME);
+		Helpers.deletePreference(context, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME);
+		Helpers.deletePreference(context, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
 
 		GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 		galleryDb.truncateTable();
@@ -451,9 +453,28 @@ public class SyncManager {
 
 	}
 
-	public static boolean notifyCloudAboutShare(Context context, StingleDbAlbum album, HashMap<Long, String> sharingKeys, SharingPermissions permissions) {
-		// to be implemented
-		return false;
+	public static boolean notifyCloudAboutShare(Context context, StingleDbAlbum album, HashMap<String, String> sharingKeys) {
+		HashMap<String, String> params = new HashMap<>();
+
+		params.put("album", album.toJSON());
+		params.put("sharingKeys", (new JSONObject(sharingKeys)).toString());
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.share_url), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
 	}
 
 }

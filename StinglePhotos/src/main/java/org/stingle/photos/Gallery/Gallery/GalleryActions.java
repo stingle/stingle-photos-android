@@ -20,12 +20,14 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.ShareAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Sync.GetContactAsyncTask;
 import org.stingle.photos.Db.Objects.StingleContact;
@@ -37,6 +39,7 @@ import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.Sharing.SharingPermissions;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -374,8 +377,44 @@ public class GalleryActions {
 		});
 
 		dialog.findViewById(R.id.share).setOnClickListener(v -> {
-			shareSelected(activity, files);
-			dialog.dismiss();
+			final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.spinner_sharing), null);
+			ShareAlbumAsyncTask shareTask = new ShareAlbumAsyncTask(activity, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					spinner.dismiss();
+					dialog.dismiss();
+					activity.exitActionMode();
+				}
+
+				@Override
+				public void onFail() {
+					super.onFail();
+					spinner.dismiss();
+					dialog.dismiss();
+					Snackbar mySnackbar = Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.failed_to_share), Snackbar.LENGTH_SHORT);
+					mySnackbar.show();
+				}
+			});
+
+			if(isAlbum) {
+				shareTask.setAlbumId(activity.getCurrentAlbumId());
+			}
+			else{
+				shareTask.setFiles(files);
+				shareTask.setSourceAlbumId(activity.getCurrentAlbumId());
+				shareTask.setSourceSet(activity.getCurrentSet());
+			}
+			shareTask.setRecipients(recipients);
+
+			SharingPermissions permissions = new SharingPermissions();
+			permissions.allowEditing = ((Switch)dialog.findViewById(R.id.allow_edit)).isChecked();
+			permissions.allowResharing = ((Switch)dialog.findViewById(R.id.allow_invite)).isChecked();
+			permissions.allowCopying = ((Switch)dialog.findViewById(R.id.allow_copy)).isChecked();
+
+			shareTask.setPermissions(permissions);
+
+			shareTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		});
 
 		dialog.show();

@@ -93,13 +93,17 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		try {
 			if (files != null) {
-				if(sourceSet == -1 || sourceAlbumId == null){
+				if(sourceSet == -1){
+					return false;
+				}
+				if(sourceSet == SyncManager.ALBUM && sourceAlbumId == null){
 					return false;
 				}
 				StingleDbAlbum newAlbum = SyncManager.addAlbum(myContext, Helpers.generateAlbumName());
 				if(newAlbum == null){
 					return false;
 				}
+				newAlbum.isHidden = true;
 				SyncManager.moveFiles(myContext, files, sourceSet, SyncManager.ALBUM, sourceAlbumId, newAlbum.albumId, false);
 				albumId = newAlbum.albumId;
 			}
@@ -110,21 +114,20 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			StingleDbAlbum album = db.getAlbumById(albumId);
 			Crypto.AlbumData albumData = crypto.parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
 
-			HashMap<Long, String> sharingKeys = new HashMap<>();
-			ArrayList<String> members = new ArrayList<>();
+			HashMap<String, String> sharingKeys = new HashMap<>();
 
 			if(album.members.size() == 0){
 				String myUserId = Helpers.getPreference(myContext, StinglePhotosApplication.USER_ID, "");
 				if(myUserId.length() > 0) {
-					album.members.add(myUserId);
+					album.addMember(Long.parseLong(myUserId));
 				}
 			}
 
 			for (StingleContact recp : recipients){
 				byte[] userPK = Crypto.base64ToByteArray(recp.publicKey);
 				byte[] albumSKForRecp = crypto.encryptAlbumSK(albumData.privateKey, userPK);
-				sharingKeys.put(recp.userId, Crypto.byteArrayToBase64(albumSKForRecp));
-				album.members.add(String.valueOf(recp.userId));
+				sharingKeys.put(String.valueOf(recp.userId), Crypto.byteArrayToBase64(albumSKForRecp));
+				album.addMember(recp.userId);
 			}
 
 			album.dateModified = now;
@@ -133,8 +136,9 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			if (files != null) {
 				album.isHidden = true;
 			}
+			album.permissions = permissions.toString();
 
-			boolean notifyResult = SyncManager.notifyCloudAboutShare(myContext, album, sharingKeys, permissions);
+			boolean notifyResult = SyncManager.notifyCloudAboutShare(myContext, album, sharingKeys);
 			if(notifyResult){
 				db.updateAlbum(album);
 			}

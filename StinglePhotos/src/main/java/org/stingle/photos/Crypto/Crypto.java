@@ -42,6 +42,7 @@ public class Crypto {
     protected static final int CURRENT_FILE_VERSION = 1;
     protected static final int CURRENT_HEADER_VERSION = 1;
     protected static final int CURRENT_KEY_FILE_VERSION = 1;
+    protected static final int CURRENT_ALBUM_METADATA_VERSION = 1;
 
     protected static final String PWD_SALT_FILENAME = "pwdSalt";
     protected static final String SK_NONCE_FILENAME = "skNonce";
@@ -1027,6 +1028,9 @@ public class Crypto {
 
         // Encrypt metadata
         ByteArrayOutputStream metadataByteStream = new ByteArrayOutputStream();
+        // Current metadata version - 1 byte
+        metadataByteStream.write(CURRENT_ALBUM_METADATA_VERSION);
+
         byte[] albumNameBytes = albumName.getBytes();
         // name length
         metadataByteStream.write(intToByteArray(albumName.length()));
@@ -1088,12 +1092,18 @@ public class Crypto {
 
         ByteArrayInputStream in = new ByteArrayInputStream(metadataBytes);
 
+        // Read and validate metadata version
+        int metadataVersion = in.read();
+        if (metadataVersion != CURRENT_ALBUM_METADATA_VERSION) {
+            throw new CryptoException("Unsupported album metadata version number: " + String.valueOf(metadataVersion));
+        }
+
         // Read album name size
         byte[] albumNameSizeBytes = new byte[4];
         in.read(albumNameSizeBytes);
         int albumNameSize = byteArrayToInt(albumNameSizeBytes);
 
-        if(albumNameSize > 0) {
+        if(albumNameSize > 0 || albumNameSize > MAX_BUFFER_LENGTH) {
             // Read filename
             byte[] albumNameBytes = new byte[albumNameSize];
             in.read(albumNameBytes);

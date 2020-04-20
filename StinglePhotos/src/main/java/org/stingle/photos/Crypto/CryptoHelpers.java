@@ -95,6 +95,33 @@ public class CryptoHelpers {
 		crypto.decryptFile(in, out, progress, task, header);
 	}
 
+	public static Crypto.Header decryptFileHeaders(Context context, int set, String albumId, String headers, boolean isThumb) throws IOException, CryptoException {
+		Crypto crypto = StinglePhotosApplication.getCrypto();
+		Crypto.Header header = null;
+		if(set == SyncManager.ALBUM){
+			AlbumsDb albumsDb = new AlbumsDb(context);
+			StingleDbAlbum dbAlbum = albumsDb.getAlbumById(albumId);
+			Crypto.AlbumData albumData = crypto.parseAlbumData(dbAlbum.publicKey, dbAlbum.encPrivateKey, dbAlbum.metadata);
+
+			if(isThumb) {
+				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, albumData.publicKey);
+			}
+			else{
+				header = crypto.getFileHeaderFromHeadersStr(headers, albumData.privateKey, albumData.publicKey);
+			}
+		}
+		else {
+			if(isThumb) {
+				header = crypto.getThumbHeaderFromHeadersStr(headers);
+			}
+			else{
+				header = crypto.getFileHeaderFromHeadersStr(headers);
+			}
+		}
+
+		return header;
+	}
+
 	public static String getRandomString(int length){
 		Crypto crypto = StinglePhotosApplication.getCrypto();
 		return crypto.getRandomString(length);

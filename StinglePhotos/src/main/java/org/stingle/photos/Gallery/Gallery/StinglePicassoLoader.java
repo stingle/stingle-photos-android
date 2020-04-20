@@ -23,7 +23,6 @@ import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 
@@ -81,13 +80,11 @@ public class StinglePicassoLoader extends RequestHandler {
 
 				byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, file.headers, true, input);
 
-				if (decryptedData != null) {
+				if (decryptedData.length > 0) {
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
 					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
 
-					FileInputStream streamForHeader = new FileInputStream(fileToDec);
-					Crypto.Header header = crypto.getFileHeader(streamForHeader);
-					streamForHeader.close();
+					Crypto.Header header = CryptoHelpers.decryptFileHeaders(context, set, albumId, file.headers, true);
 
 					Result result = new Result(bitmap, Picasso.LoadedFrom.DISK);
 
@@ -101,11 +98,7 @@ public class StinglePicassoLoader extends RequestHandler {
 
 					callback.onSuccess(result);
 				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (CryptoException e) {
+			} catch (IOException | CryptoException e) {
 				e.printStackTrace();
 			}
 
@@ -121,11 +114,11 @@ public class StinglePicassoLoader extends RequestHandler {
 
 				byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, file.headers, true, encFile);
 
-				if (decryptedData != null) {
+				if (decryptedData.length > 0) {
 
 					Bitmap bitmap = Helpers.decodeBitmap(decryptedData, thumbSize);
 					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
-					Crypto.Header header = crypto.getFileHeader(encFile);
+					Crypto.Header header = CryptoHelpers.decryptFileHeaders(context, set, albumId, file.headers, true);
 
 					if(bitmap == null) {
 						bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.file);

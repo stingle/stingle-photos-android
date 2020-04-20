@@ -55,7 +55,6 @@ import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.ImageHolderLayout;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -128,7 +127,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			if (dbFile.isLocal) {
 				File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
 
-				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new FileInputStream(file));
+				Crypto.Header fileHeader = CryptoHelpers.decryptFileHeaders(context, set, albumId, dbFile.headers, false);
 				fileType = fileHeader.fileType;
 				result.fileType = fileType;
 
@@ -141,7 +140,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, false, input);
 
-					if (decryptedData != null) {
+					if (decryptedData.length > 0) {
 						if (isGif) {
 							result.bitmapBytes = decryptedData;
 						} else {
@@ -154,7 +153,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				if (encThumb == null) {
 					return result;
 				}
-				Crypto.Header fileHeader = StinglePhotosApplication.getCrypto().getFileHeader(new ByteArrayInputStream(encThumb));
+				Crypto.Header fileHeader = CryptoHelpers.decryptFileHeaders(context, set, albumId, dbFile.headers, true);
 				fileType = fileHeader.fileType;
 				result.fileType = fileType;
 				result.isRemote = true;
@@ -166,7 +165,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				if (fileType == Crypto.FILE_TYPE_PHOTO) {
 					byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, true, encThumb);
 
-					if (decryptedData != null) {
+					if (decryptedData.length > 0) {
 						result.bitmap = Helpers.decodeBitmap(decryptedData, getSize(context));
 					}
 				} else if (fileType == Crypto.FILE_TYPE_VIDEO) {

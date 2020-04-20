@@ -10,6 +10,7 @@ import org.stingle.photos.Db.StingleDbContract;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class StingleDbAlbum {
 	public static String MEMBERS_SEPARATOR = ",";
@@ -67,10 +68,16 @@ public class StingleDbAlbum {
 	}
 
 	public void setMembers(String membersStr){
-		if(membersStr == null || membersStr.length() == 0){
+		if(membersStr == null || membersStr.length() == 0 || membersStr.equals("null")){
 			return;
 		}
 		members = new ArrayList<>(Arrays.asList(membersStr.split(MEMBERS_SEPARATOR)));
+	}
+
+	public void addMember(Long userId){
+		if(!members.contains(String.valueOf(userId))){
+			members.add(String.valueOf(userId));
+		}
 	}
 
 	public void setMembers(ArrayList<String> members){
@@ -88,5 +95,24 @@ public class StingleDbAlbum {
 		}
 		sb.append(members.get(members.size() - 1).trim());
 		return sb.toString();
+	}
+
+	public String toJSON(){
+		HashMap<String,String> map = new HashMap<>();
+		map.put("albumId", albumId);
+		map.put("encPrivateKey", encPrivateKey);
+		map.put("publicKey", publicKey);
+		map.put("metadata", metadata);
+		map.put("isShared", (isShared ? "1" : "0"));
+		map.put("isHidden", (isHidden ? "1" : "0"));
+		map.put("isOwner", (isOwner ? "1" : "0"));
+		map.put("permissions", permissions);
+		map.put("members", getMembersAsString());
+		map.put("isLocked", (isLocked ? "1" : "0"));
+		map.put("cover", cover);
+		map.put("dateCreated", String.valueOf(dateCreated));
+		map.put("dateModified", String.valueOf(dateModified));
+
+		return (new JSONObject(map)).toString();
 	}
 }

@@ -293,6 +293,8 @@
     <string name="close">Close</string>
     <string name="not_on_stingle">This email is not registered on Stingle Photos</string>
     <string name="cant_share_to_self">Sorry you can\'t share to yourself</string>
+    <string name="spinner_sharing">Sharing...</string>
+    <string name="failed_to_share">Failed to share, please try again</string>
 
 
 </resources>
