@@ -42,6 +42,7 @@ public class SyncManager {
 	public static final String PREF_ALBUMS_LAST_SEEN_TIME = "albums_last_seen_time";
 	public static final String PREF_ALBUM_FILES_LAST_SEEN_TIME = "album_files_last_seen_time";
 	public static final String PREF_LAST_DEL_SEEN_TIME = "file_last_del_seen_time";
+	public static final String PREF_LAST_CONTACTS_SEEN_TIME = "contacts_last_seen_time";
 
 	public static final String PREF_LAST_SPACE_USED = "last_space_used";
 	public static final String PREF_LAST_SPACE_QUOTA = "last_space_quota";
@@ -117,6 +118,7 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_TRASH_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
+		Helpers.deletePreference(context, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
 
 		GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 		galleryDb.truncateTable();

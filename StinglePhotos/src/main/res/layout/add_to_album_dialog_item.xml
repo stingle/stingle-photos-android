@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:layout_marginTop="10dp">
 
     <org.stingle.photos.Widget.CircleImageView
@@ -12,37 +11,48 @@
         android:layout_height="56dp"
         android:src="@drawable/ic_no_image_24"
         app:civ_border_color="?attr/colorOnSurface"
-        app:civ_border_width="0dp"/>
+        app:civ_border_width="0dp"
+        android:layout_alignParentStart="true" />
 
-    <TextView
-        android:id="@+id/albumName"
+
+    <LinearLayout
+        android:id="@+id/texts"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textColor="?android:attr/textColorPrimary"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:textSize="15sp"
-        android:gravity="center_vertical"
-        android:layout_gravity="center_vertical" />
-    <TextView
-        android:id="@+id/albumItemsCount"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#FFF"
-        android:visibility="gone"/>
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@+id/thumbImage"
+        android:layout_marginEnd="60dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/albumName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/albumSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+            android:maxLines="2"
+            android:visibility="visible" />
+
+    </LinearLayout>
 
     <ImageView
-        android:id="@+id/noCloudIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_cloud_off" />
+        android:id="@+id/rightIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:visibility="visible"
+        android:tint="?attr/colorControlNormal"
+        android:alpha="0.5"
+        android:layout_marginEnd="10dp"
+        android:layout_centerVertical="true" />
 
-    <CheckBox
-        android:id="@+id/checkBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:visibility="gone" />
 
-</LinearLayout>
+</RelativeLayout>

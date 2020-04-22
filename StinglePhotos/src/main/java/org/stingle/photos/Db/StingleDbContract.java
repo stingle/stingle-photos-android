@@ -133,7 +133,8 @@ public class StingleDbContract {
 					Columns._ID + " INTEGER PRIMARY KEY," +
 					Columns.COLUMN_NAME_USER_ID + " INTEGER NOT NULL UNIQUE," +
 					Columns.COLUMN_NAME_EMAIL + " TEXT NOT NULL," +
-					Columns.COLUMN_NAME_PUBLIC_KEY + " TEXT NOT NULL" +
+					Columns.COLUMN_NAME_PUBLIC_KEY + " TEXT NOT NULL, " +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
 	public static final String SQL_CREATE_CONTACTS_UID_INDEX =
 			"CREATE UNIQUE INDEX c_user_id ON "+ Columns.TABLE_NAME_CONTACTS +" ("+ Columns.COLUMN_NAME_USER_ID +")";

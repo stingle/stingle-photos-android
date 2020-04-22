@@ -325,6 +325,7 @@ public class SettingsActivity extends AppCompatActivity implements
 				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_ALBUMS_LAST_SEEN_TIME);
 				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
 				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_LAST_DEL_SEEN_TIME);
+				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
 
 				return true;
 			});

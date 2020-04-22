@@ -5,11 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
+
+import java.util.ArrayList;
 
 public class AlbumsDb {
 
@@ -126,16 +129,36 @@ public class AlbumsDb {
 
 	}
 
-	public StingleDbAlbum getAlbumAtPosition(int pos, int sort) {
+	public StingleDbAlbum getAlbumAtPosition(int pos, int sort, Boolean isHidden, Boolean isShared) {
+		String selection = "";
+		ArrayList<String> selectionArgs = new ArrayList<>();
+		if(isHidden != null) {
+			selection = StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN + " = ?";
+			selectionArgs.add((isHidden ? "1" : "0"));
+		}
+		if(isShared != null) {
+			if(selection.length() > 0){
+				selection += " OR ";
+			}
+			selection += StingleDbContract.Columns.COLUMN_NAME_IS_SHARED + " = ?";
+			selectionArgs.add((isShared ? "1" : "0"));
+		}
+
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+
+		String[] selArgs = new String[selectionArgs.size()];
+		for (int i = 0;i <selectionArgs.size(); i++){
+			selArgs[i] = selectionArgs.get(i);
+		}
+		Log.d("selection", selection);
 
 		Cursor result = db.openReadDb().query(
 				false,
 				tableName,
 				projection,
-				null,
-				null,
+				selection,
+				selArgs,
 				null,
 				null,
 				sortOrder,
@@ -172,8 +195,20 @@ public class AlbumsDb {
 		return null;
 	}
 
-	public long getTotalAlbumsCount() {
-		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
+	public long getTotalAlbumsCount(Boolean isHidden, Boolean isShared) {
+		if(isHidden != null && isShared != null) {
+			String selection = StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN + " = ? OR " + StingleDbContract.Columns.COLUMN_NAME_IS_SHARED + " = ?";
+			String[] selectionArgs = {(isHidden ? "1" : "0"), (isShared ? "1" : "0")};
+			return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+		}
+		else if(isHidden != null) {
+			String selection = StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN + " = ?";
+			String[] selectionArgs = {(isHidden ? "1" : "0")};
+			return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+		}
+		else {
+			return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
+		}
 	}
 
 	public void close() {

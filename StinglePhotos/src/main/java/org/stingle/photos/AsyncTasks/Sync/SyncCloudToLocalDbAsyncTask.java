@@ -8,10 +8,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
@@ -35,11 +37,13 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	private final GalleryTrashDb trashDb;
 	private final AlbumsDb albumsDb;
 	private final AlbumFilesDb albumFilesDb;
+	private final ContactsDb contactsDb;
 	private long lastSeenTime = 0;
 	private long lastTrashSeenTime = 0;
 	private long lastAlbumsSeenTime = 0;
 	private long lastAlbumFilesSeenTime = 0;
 	private long lastDelSeenTime = 0;
+	private long lastContactsSeenTime = 0;
 
 	private ArrayList<HashMap<String, Object>> deleteLog = new ArrayList<>();
 
@@ -50,6 +54,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		trashDb = new GalleryTrashDb(context, SyncManager.TRASH);
 		albumsDb = new AlbumsDb(context);
 		albumFilesDb = new AlbumFilesDb(context);
+		contactsDb = new ContactsDb(context);
 	}
 
 	@Override
@@ -64,6 +69,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		lastAlbumsSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME, (long)0);
 		lastAlbumFilesSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, (long)0);
 		lastDelSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, (long)0);
+		lastContactsSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME, (long)0);
 
 		boolean needToUpdateUI = false;
 
@@ -75,6 +81,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			Helpers.storePreference(myContext, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME, lastAlbumsSeenTime);
 			Helpers.storePreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, lastAlbumFilesSeenTime);
 			Helpers.storePreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, lastDelSeenTime);
+			Helpers.storePreference(myContext, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME, lastContactsSeenTime);
 		}
 		catch (JSONException e){
 			e.printStackTrace();
@@ -94,6 +101,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		postParams.put("albumsST", String.valueOf(lastAlbumsSeenTime));
 		postParams.put("albumFilesST", String.valueOf(lastAlbumFilesSeenTime));
 		postParams.put("delST", String.valueOf(lastDelSeenTime));
+		postParams.put("cntST", String.valueOf(lastContactsSeenTime));
 
 		JSONObject resp = HttpsClient.postFunc(
 				StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_updates_path),
@@ -114,6 +122,9 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 				needToUpdateUI = true;
 			}
 			if (processFilesInSet(context, response.get("albumFiles"), SyncManager.ALBUM)) {
+				needToUpdateUI = true;
+			}
+			if (processContacts(context, response.get("contacts"))) {
 				needToUpdateUI = true;
 			}
 
@@ -172,6 +183,23 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 					StingleDbAlbum dbAlbum = new StingleDbAlbum(album);
 					Log.d("receivedAlbum", dbAlbum.albumId);
 					processAlbum(dbAlbum);
+					result = true;
+				}
+			}
+		}
+		return result;
+	}
+
+	private boolean processContacts(Context context, String contactsStr) throws JSONException {
+		boolean result = false;
+		if(contactsStr != null && contactsStr.length() > 0){
+			JSONArray contacts = new JSONArray(contactsStr);
+			for(int i=0; i<contacts.length(); i++){
+				JSONObject contact = contacts.optJSONObject(i);
+				if(contact != null){
+					StingleContact dbContact = new StingleContact(contact);
+					Log.d("receivedContact", dbContact.email);
+					processContact(dbContact);
 					result = true;
 				}
 			}
@@ -308,6 +336,17 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		}
 
 		moveForwardAlbumSeenTime(remoteAlbum);
+
+		return true;
+	}
+
+	private boolean processContact(StingleContact remoteContact){
+
+		contactsDb.insertContact(remoteContact);
+
+		if(remoteContact.dateModified > lastContactsSeenTime) {
+			lastContactsSeenTime = remoteContact.dateModified;
+		}
 
 		return true;
 	}

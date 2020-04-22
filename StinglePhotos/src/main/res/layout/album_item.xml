@@ -34,7 +34,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/albumItemsCount"
+            android:id="@+id/albumSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFF" />

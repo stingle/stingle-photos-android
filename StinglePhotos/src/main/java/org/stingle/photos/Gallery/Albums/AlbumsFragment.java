@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
@@ -29,21 +30,23 @@ import java.util.Objects;
 
 public class AlbumsFragment extends Fragment{
 
-	public static int VIEW_ALBUMS = 0;
-	public static int VIEW_SHARES = 1;
+	public static int VIEW_ALL = 0;
+	public static int VIEW_ALBUMS = 1;
+	public static int VIEW_SHARES = 2;
 
 	private RecyclerView recyclerView;
 	private AlbumsAdapterPisasso adapter;
-	private AutoFitGridLayoutManager layoutManager;
+	private LinearLayoutManager layoutManager;
+	private Integer view = VIEW_ALBUMS;;
 
 	private int lastScrollPosition = 0;
 
 	private GalleryActivity parentActivity;
 
-	private AlbumsAdapterPisasso.Listener adaptorListener = new AlbumsAdapterPisasso.Listener() {
+	private AlbumsAdapterPisasso.Listener adapterListener = new AlbumsAdapterPisasso.Listener() {
 		@Override
-		public void onClick(int index) {
-			if(index == 0){
+		public void onClick(int index, int type) {
+			if(type == AlbumsAdapterPisasso.TYPE_ADD){
 				GalleryHelpers.addAlbum(getContext(), new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish(Object set) {
@@ -70,25 +73,10 @@ public class AlbumsFragment extends Fragment{
 				}
 				parentActivity.showAlbum(album.albumId, albumName);
 			}
-		/*StingleDbFile file = adapter.getStingleFileAtPosition(index);
-		if(!parentActivity.onClick(file)){
-			return;
-		}
-
-		if (adapter.isSelectionModeActive()){
-			adapter.toggleSelected(index);
-		}
-		else {
-			Intent intent = new Intent();
-			intent.setClass(getContext(), ViewItemActivity.class);
-			intent.putExtra("EXTRA_ITEM_POSITION", adapter.getDbPositionFromRaw(index));
-			intent.putExtra("EXTRA_ITEM_SET", currentSet);
-			startActivity(intent);
-		}*/
 		}
 
 		@Override
-		public void onLongClick(int index) {
+		public void onLongClick(int index, int type) {
 
 		}
 
@@ -114,7 +102,6 @@ public class AlbumsFragment extends Fragment{
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		int view = VIEW_ALBUMS;
 		Bundle bundle = getArguments();
 		if (bundle != null) {
 			view = bundle.getInt("view", VIEW_ALBUMS);
@@ -122,10 +109,22 @@ public class AlbumsFragment extends Fragment{
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
-		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext(), 2));
+		if(view == VIEW_ALBUMS) {
+			layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext(), 2));
+		}
+		else if(view == VIEW_SHARES){
+			layoutManager = new LinearLayoutManager(getContext());
+		}
 		recyclerView.setLayoutManager(layoutManager);
-		adapter = new AlbumsAdapterPisasso(getContext(), layoutManager, view, false);
-		adapter.setListener(adaptorListener);
+		if(view == VIEW_ALBUMS) {
+			adapter = new AlbumsAdapterPisasso(getContext(), layoutManager, view, true, false);
+			adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_GRID);
+		}
+		else if(view == VIEW_SHARES){
+			adapter = new AlbumsAdapterPisasso(getContext(), layoutManager, view, false, false);
+			adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
+		}
+		adapter.setListener(adapterListener);
 
 		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){
 			lastScrollPosition = savedInstanceState.getInt("scroll");
@@ -188,7 +187,28 @@ public class AlbumsFragment extends Fragment{
 	}
 
 	public void updateAutoFit(){
-		layoutManager.updateAutoFit();
+		if(view == VIEW_ALBUMS) {
+			((AutoFitGridLayoutManager)layoutManager).updateAutoFit();
+		}
+	}
+
+	public static Boolean getAlbumIsHiddenByView(Integer view){
+		Boolean isHidden = null;
+		if(view == AlbumsFragment.VIEW_ALBUMS){
+			isHidden = false;
+		}
+		else if(view == AlbumsFragment.VIEW_SHARES){
+			isHidden = true;
+		}
+		return isHidden;
+	}
+
+	public static Boolean getAlbumIsSharedByView(Integer view){
+		Boolean isShared = null;
+		if(view == AlbumsFragment.VIEW_SHARES){
+			isShared = true;
+		}
+		return isShared;
 	}
 
 }

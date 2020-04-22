@@ -80,6 +80,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected MaterialToolbar toolbar;
 	protected int currentSet = SyncManager.GALLERY;
 	private int currentFragment = FRAGMENT_GALLERY;
+	private Integer currentAlbumsView = AlbumsFragment.VIEW_ALBUMS;
 	private String currentAlbumId = null;
 	private String currentAlbumName = "";
 
@@ -249,11 +250,22 @@ public class GalleryActivity extends AppCompatActivity
 		currentAlbumName = "";
 		initCurrentFragment();
 	}
+
 	public void showAlbumsList(){
+		showAlbumsList(currentAlbumsView);
+	}
+
+	public void showAlbumsList(Integer view){
 		currentFragment = FRAGMENT_ALBUMS_LIST;
 		currentSet = -1;
 		currentAlbumId = null;
-		toolbar.setTitle(getString(R.string.albums));
+		currentAlbumsView = view;
+		if(view == AlbumsFragment.VIEW_ALBUMS) {
+			toolbar.setTitle(getString(R.string.albums));
+		}
+		else if(view == AlbumsFragment.VIEW_SHARES) {
+			toolbar.setTitle(getString(R.string.sharing));
+		}
 		disableSyncBar();
 		currentAlbumName = "";
 		initCurrentFragment();
@@ -344,6 +356,7 @@ public class GalleryActivity extends AppCompatActivity
 		FragmentManager fm = getSupportFragmentManager();
 
 		Bundle bundle = new Bundle();
+		bundle.putInt("view", currentAlbumsView);
 
 		albumsFragment = new AlbumsFragment();
 		albumsFragment.setArguments(bundle);
@@ -359,6 +372,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		ft.commit();
 		fab.setVisibility(View.GONE);
+		invalidateOptionsMenu();
 	}
 
 	public void updateGalleryFragmentData(){
@@ -567,7 +581,7 @@ public class GalleryActivity extends AppCompatActivity
 			exitActionMode();
 		}
 		else if(currentSet == SyncManager.ALBUM){
-			showAlbumsList();
+			showAlbumsList(currentAlbumsView);
 		}
 		else if(currentSet == SyncManager.TRASH){
 			showMainGallery();
@@ -646,9 +660,10 @@ public class GalleryActivity extends AppCompatActivity
 							showMainGallery();
 							break;
 						case R.id.action_albums:
-							showAlbumsList();
+							showAlbumsList(AlbumsFragment.VIEW_ALBUMS);
 							break;
 						case R.id.action_sharing:
+							showAlbumsList(AlbumsFragment.VIEW_SHARES);
 							break;
 					}
 					return false;

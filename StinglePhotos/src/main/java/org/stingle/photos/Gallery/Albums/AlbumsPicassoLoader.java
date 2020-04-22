@@ -11,11 +11,13 @@ import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.Objects.StingleContact;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -29,9 +31,12 @@ import java.io.IOException;
 
 public class AlbumsPicassoLoader extends RequestHandler {
 
+	public static int MEMBERS_IN_SUBTITLE = 3;
+
 	private Context context;
 	private AlbumsDb db;
 	private AlbumFilesDb filesDb;
+	private ContactsDb contactsDb;
 	private int view;
 	private int thumbSize;
 	private Crypto crypto;
@@ -42,6 +47,8 @@ public class AlbumsPicassoLoader extends RequestHandler {
 		this.filesDb = filesDb;
 		this.thumbSize = thumbSize;
 		this.view = view;
+
+		this.contactsDb = new ContactsDb(context);
 		this.crypto = StinglePhotosApplication.getCrypto();
 	}
 
@@ -60,7 +67,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 
 			try {
-				StingleDbAlbum album = db.getAlbumAtPosition(Integer.parseInt(position), StingleDb.SORT_ASC);
+				StingleDbAlbum album = db.getAlbumAtPosition(Integer.parseInt(position), StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
 				Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
 
 				Result result = null;
@@ -99,7 +106,21 @@ public class AlbumsPicassoLoader extends RequestHandler {
 				AlbumsAdapterPisasso.AlbumProps props = new AlbumsAdapterPisasso.AlbumProps();
 
 				props.name = albumData.name;
-				props.itemsCount = filesDb.getTotalFilesCount(album.albumId);
+				if(view == AlbumsFragment.VIEW_SHARES){
+					props.subtitle = getMembersString(album);
+					if(album.isOwner){
+						props.rightIcon = AlbumsAdapterPisasso.AlbumProps.ICON_SENT;
+					}
+					else{
+						props.rightIcon = AlbumsAdapterPisasso.AlbumProps.ICON_RECEIVED;
+					}
+				}
+				else if(view == AlbumsFragment.VIEW_ALL && album.isShared && album.isHidden){
+					props.subtitle = getMembersString(album);
+				}
+				else{
+					props.subtitle = context.getString(R.string.album_items_count, filesDb.getTotalFilesCount(album.albumId));
+				}
 				result.addProperty("albumProps", props);
 
 				callback.onSuccess(result);
@@ -108,5 +129,38 @@ public class AlbumsPicassoLoader extends RequestHandler {
 				e.printStackTrace();
 			}
 
+	}
+
+	private String getMembersString(StingleDbAlbum album){
+		String myUserId = Helpers.getPreference(context, StinglePhotosApplication.USER_ID, "");
+		StringBuilder membersStr = new StringBuilder();
+		int count = 0;
+		boolean addOthers = false;
+		for(String userId : album.members){
+			if(userId.equals(myUserId)){
+				continue;
+			}
+			if(count >= MEMBERS_IN_SUBTITLE){
+				addOthers = true;
+				break;
+			}
+			StingleContact contact = contactsDb.getContactByUserId(Long.parseLong(userId));
+			if(contact != null){
+				if(membersStr.length() > 0){
+					membersStr.append(", ");
+				}
+				membersStr.append(contact.email);
+			}
+			count++;
+		}
+
+		if(addOthers){
+			int othersCount = album.members.size() - count;
+			if(othersCount > 0){
+				membersStr.append(" " + context.getString(R.string.count_others, othersCount));
+			}
+		}
+
+		return membersStr.toString();
 	}
 }

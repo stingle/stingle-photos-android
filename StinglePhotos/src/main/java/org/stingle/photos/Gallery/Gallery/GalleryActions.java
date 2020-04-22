@@ -69,12 +69,12 @@ public class GalleryActions {
 		LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
 		recyclerView.setLayoutManager(layoutManager);
 
-		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, AlbumsFragment.VIEW_ALBUMS, isFromAlbum);
+		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, AlbumsFragment.VIEW_ALL, true, isFromAlbum);
 
 		adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
 		adapter.setListener(new AlbumsAdapterPisasso.Listener() {
 			@Override
-			public void onClick(int index) {
+			public void onClick(int index, int type) {
 
 				OnAsyncTaskFinish onAddFinish = new OnAsyncTaskFinish() {
 					@Override
@@ -97,13 +97,13 @@ public class GalleryActions {
 				boolean isMoving = ((RadioButton)addAlbumDialog.findViewById(R.id.move_to_album)).isChecked();
 				addSyncTask.setIsMoving(isMoving);
 
-				if (isFromAlbum && index == 0) {
+				if (type == AlbumsAdapterPisasso.TYPE_GALLERY) {
 					addSyncTask.setFromSet(SyncManager.ALBUM);
 					addSyncTask.setToSet(SyncManager.GALLERY);
 					addSyncTask.setFromAlbumId(activity.getCurrentAlbumId());
 					addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
-				else if ((isFromAlbum && index == 1) || (!isFromAlbum && index == 0)){
+				else if (type == AlbumsAdapterPisasso.TYPE_ADD){
 					GalleryHelpers.addAlbum(activity, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish(Object albumObj) {
@@ -140,7 +140,7 @@ public class GalleryActions {
 
 
 			@Override
-			public void onLongClick(int index) {
+			public void onLongClick(int index, int type) {
 
 			}
 
