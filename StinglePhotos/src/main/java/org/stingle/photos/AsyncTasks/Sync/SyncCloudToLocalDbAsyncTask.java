@@ -109,9 +109,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		);
 		StingleResponse response = new StingleResponse(context, resp, false);
 		if(response.isStatusOk()){
-			if (processDeleteEvents(context, response.get("deletes"))) {
-				needToUpdateUI = true;
-			}
+
 			if (processFilesInSet(context, response.get("files"), SyncManager.GALLERY)) {
 				needToUpdateUI = true;
 			}
@@ -125,6 +123,9 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 				needToUpdateUI = true;
 			}
 			if (processContacts(context, response.get("contacts"))) {
+				needToUpdateUI = true;
+			}
+			if (processDeleteEvents(context, response.get("deletes"))) {
 				needToUpdateUI = true;
 			}
 
@@ -225,12 +226,6 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private boolean processFile(Context context, StingleDbFile remoteFile, int set){
 
-		if(isFileInDeleteLog(remoteFile, set)){
-			Log.d("fileIsInDeleteLog", remoteFile.filename);
-			moveForwardFileSeenTime(remoteFile, set);
-			return true;
-		}
-
 		FilesDb myDb;
 		if (set == SyncManager.GALLERY){
 			myDb = galleryDb;
@@ -318,12 +313,6 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private boolean processAlbum(StingleDbAlbum remoteAlbum){
 
-		if(isAlbumInDeleteLog(remoteAlbum)){
-			Log.d("AlbumIsInDeleteLog", remoteAlbum.albumId);
-			moveForwardAlbumSeenTime(remoteAlbum);
-			return true;
-		}
-
 		StingleDbAlbum album = albumsDb.getAlbumById(remoteAlbum.albumId);
 
 		if(album == null){
@@ -363,56 +352,55 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		String albumId = event.getString("albumId");
 		Integer type = event.getInt("type");
 		Long date = event.getLong("date");
-		addToDeleteLog(type, filename, albumId, date);
 
 		if(type == SyncManager.DELETE_EVENT_MAIN) {
 			StingleDbFile file = galleryDb.getFileIfExists(filename);
-			if(file != null) {
+			if(file != null && file.dateModified < date) {
 				galleryDb.deleteFile(file.filename);
 			}
 		}
 		else if(type == SyncManager.DELETE_EVENT_TRASH) {
 			StingleDbFile file = trashDb.getFileIfExists(filename);
-			if(file != null) {
+			if(file != null && file.dateModified < date) {
 				trashDb.deleteFile(file.filename);
 
 			}
 		}
 		else if(type == SyncManager.DELETE_EVENT_ALBUM) {
 			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
-			if(album != null) {
+			if(album != null && album.dateModified < date) {
 				albumsDb.deleteAlbum(albumId);
 			}
 		}
 		else if(type == SyncManager.DELETE_EVENT_ALBUM_FILE) {
 			StingleDbFile file = albumFilesDb.getFileIfExists(filename);
-			if(file != null) {
+			if(file != null && file.dateModified < date) {
 				albumFilesDb.deleteAlbumFile(file.filename, albumId);
 			}
 		}
 		else if(type == SyncManager.DELETE_EVENT_DELETE) {
 			StingleDbFile file = trashDb.getFileIfExists(filename);
-			if(file != null) {
+			if(file != null && file.dateModified < date) {
 				trashDb.deleteFile(file.filename);
-			}
 
-			boolean needToDeleteFiles = true;
+				boolean needToDeleteFiles = true;
 
-			if (galleryDb.getFileIfExists(filename) != null || albumFilesDb.getFileIfExists(filename) != null){
-				needToDeleteFiles = false;
-			}
-
-			if(needToDeleteFiles) {
-				String homeDir = FileManager.getHomeDir(context);
-				String thumbDir = FileManager.getThumbsDir(context);
-				File mainFile = new File(homeDir + "/" + filename);
-				File thumbFile = new File(thumbDir + "/" + filename);
-
-				if (mainFile.exists()) {
-					mainFile.delete();
+				if (galleryDb.getFileIfExists(filename) != null || albumFilesDb.getFileIfExists(filename) != null) {
+					needToDeleteFiles = false;
 				}
-				if (thumbFile.exists()) {
-					thumbFile.delete();
+
+				if (needToDeleteFiles) {
+					String homeDir = FileManager.getHomeDir(context);
+					String thumbDir = FileManager.getThumbsDir(context);
+					File mainFile = new File(homeDir + "/" + filename);
+					File thumbFile = new File(thumbDir + "/" + filename);
+
+					if (mainFile.exists()) {
+						mainFile.delete();
+					}
+					if (thumbFile.exists()) {
+						thumbFile.delete();
+					}
 				}
 			}
 		}
@@ -422,60 +410,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		}
 	}
 
-	private void addToDeleteLog(int type, String filename, String albumId, Long date){
-		HashMap<String, Object> log = new HashMap<>();
-		log.put("type", type);
-		log.put("filename", filename);
-		log.put("albumId", albumId);
-		log.put("date", date);
-		deleteLog.add(log);
-	}
 
-	private boolean isFileInDeleteLog(StingleDbFile file, int set){
-		boolean found = false;
-		for(HashMap<String, Object> log : deleteLog){
-			if(isMyType(set, (Integer)log.get("type"))){
-				if(set == SyncManager.ALBUM){
-					if(file.albumId.equals(log.get("albumId")) && file.dateModified < (Long)log.get("date")){
-						found = true;
-					}
-				}
-				else{
-					if(file.dateModified < (Long)log.get("date")){
-						found = true;
-					}
-				}
-			}
-		}
-
-		return found;
-	}
-	private boolean isAlbumInDeleteLog(StingleDbAlbum album){
-		boolean found = false;
-		for(HashMap<String, Object> log : deleteLog){
-			if((Integer)log.get("type") == SyncManager.DELETE_EVENT_ALBUM){
-				if(album.albumId.equals((String)log.get("albumId")) && album.dateModified < (Long)log.get("date")){
-					found = true;
-				}
-			}
-		}
-
-		return found;
-	}
-
-	private boolean isMyType(int set, int type){
-		if(set == SyncManager.GALLERY && type == SyncManager.DELETE_EVENT_MAIN){
-			return true;
-		}
-		if(set == SyncManager.TRASH && (type == SyncManager.DELETE_EVENT_TRASH || type == SyncManager.DELETE_EVENT_DELETE)){
-			return true;
-		}
-		if(set == SyncManager.ALBUM && type == SyncManager.DELETE_EVENT_ALBUM_FILE){
-			return true;
-		}
-
-		return false;
-	}
 
 	@Override
 	protected void onPostExecute(Boolean needToUpdateUI) {
