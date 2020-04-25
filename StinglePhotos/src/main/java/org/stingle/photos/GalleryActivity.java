@@ -48,6 +48,7 @@ import com.google.android.material.navigation.NavigationView;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
@@ -56,6 +57,7 @@ import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
 import org.stingle.photos.Gallery.Gallery.SyncBarHandler;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
@@ -605,6 +607,19 @@ public class GalleryActivity extends AppCompatActivity
 					break;
 				case SyncManager.ALBUM:
 					getMenuInflater().inflate(R.menu.album, menu);
+					StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(this);
+					if(album != null && album.permissionsObj != null && !album.isOwner) {
+						menu.findItem(R.id.action_delete_album).setVisible(false);
+						if (!album.permissionsObj.allowResharing) {
+							menu.findItem(R.id.share_album).setVisible(false);
+						}
+						if(!album.permissionsObj.allowEditing){
+							fab.setVisibility(View.GONE);
+						}
+						else{
+							fab.setVisibility(View.VISIBLE);
+						}
+					}
 					break;
 			}
 		}
@@ -777,6 +792,22 @@ public class GalleryActivity extends AppCompatActivity
 							break;
 						case SyncManager.ALBUM:
 							mode.getMenuInflater().inflate(R.menu.gallery_album_action_mode, menu);
+
+							StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(GalleryActivity.this);
+							if(album != null && album.permissionsObj != null && !album.isOwner) {
+								if (!album.permissionsObj.allowEditing) {
+									menu.findItem(R.id.add_to_album).setVisible(false);
+								}
+								if (!album.permissionsObj.allowResharing) {
+									menu.findItem(R.id.share).setVisible(false);
+								}
+								if (!album.permissionsObj.allowCopying) {
+									menu.findItem(R.id.decrypt).setVisible(false);
+								}
+								if (!album.permissionsObj.allowEditing || !album.permissionsObj.allowCopying) {
+									menu.findItem(R.id.trash).setVisible(false);
+								}
+							}
 							break;
 					}
 				}

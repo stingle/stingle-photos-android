@@ -2,6 +2,12 @@ package org.stingle.photos.Sharing;
 
 public class SharingPermissions {
 	public static int PERMISSIONS_VERSION = 1;
+	public static int PERMISSIONS_LENGTH = 4;
+
+
+	public static int PERM_ALLOW_EDITING = 0;
+	public static int PERM_ALLOW_RESHARING = 1;
+	public static int PERM_ALLOW_COPYING = 2;
 
 	public boolean allowEditing = true;
 	public boolean allowResharing = true;
@@ -12,20 +18,23 @@ public class SharingPermissions {
 	}
 
 	public SharingPermissions(String str){
-		StringBuffer buf = new StringBuffer(str);
-		String version = buf.substring(0,1);
+		if(str.length() != PERMISSIONS_LENGTH){
+			return;
+		}
 
-		if(PERMISSIONS_VERSION != Integer.parseInt(version)){
+		String version = str.substring(0,1);
+
+		if(!version.equals(String.valueOf(PERMISSIONS_VERSION))){
 			throw new RuntimeException("Invalid permissions version");
 		}
 
-		String editing = buf.substring(1,1);
+		String editing = str.substring(1,2);
 		allowEditing = editing.equals("1");
 
-		String resharing = buf.substring(2,1);
+		String resharing = str.substring(2,3);
 		allowResharing = resharing.equals("1");
 
-		String copying = buf.substring(3,1);
+		String copying = str.substring(3,4);
 		allowCopying = copying.equals("1");
 	}
 

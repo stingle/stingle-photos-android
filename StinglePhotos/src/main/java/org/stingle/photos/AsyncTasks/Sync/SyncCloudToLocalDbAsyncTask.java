@@ -215,7 +215,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			for(int i=0; i<deletes.length(); i++){
 				JSONObject deleteEvent = deletes.optJSONObject(i);
 				if(deleteEvent != null){
-					Log.d("receivedDelete", deleteEvent.getString("file"));
+					Log.d("receivedDelete", deleteEvent.optString("file") + " - " + deleteEvent.optString("albumId"));
 					processDeleteEvent(context, deleteEvent);
 					result = true;
 				}

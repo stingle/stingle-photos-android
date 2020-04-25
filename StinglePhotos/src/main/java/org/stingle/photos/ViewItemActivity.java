@@ -25,10 +25,12 @@ import com.google.android.material.snackbar.Snackbar;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Sync.SyncManager;
@@ -218,6 +220,29 @@ public class ViewItemActivity extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.view_item_menu, menu);
+
+
+		if(set == SyncManager.ALBUM && albumId != null) {
+
+			AlbumsDb albumsDb = new AlbumsDb(this);
+			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+			albumsDb.close();
+
+			if (album != null && album.permissionsObj != null && !album.isOwner) {
+				/*if (!album.permissionsObj.allowEditing) {
+					menu.findItem(R.id.add_to_album).setVisible(false);
+				}*/
+				if (!album.permissionsObj.allowResharing) {
+					menu.findItem(R.id.share).setVisible(false);
+				}
+				/*if (!album.permissionsObj.allowCopying) {
+					menu.findItem(R.id.decrypt).setVisible(false);
+				}*/
+				if (!album.permissionsObj.allowEditing || !album.permissionsObj.allowCopying) {
+					menu.findItem(R.id.trash).setVisible(false);
+				}
+			}
+		}
 		return true;
 	}
 

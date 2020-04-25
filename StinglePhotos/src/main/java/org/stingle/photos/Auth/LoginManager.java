@@ -230,6 +230,20 @@ public class LoginManager {
             listener.passwordReceived(passwordField.getText().toString(), loginDialog);
         });
 
+        passwordField.setOnKeyListener(new View.OnKeyListener() {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                // If the event is a key-down event on the "enter" button
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    if(imm != null) {
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+                    listener.passwordReceived(passwordField.getText().toString(), loginDialog);
+                    return true;
+                }
+                return false;
+            }
+        });
+
         loginDialog.setOnCancelListener(dialog1 -> listener.passwordReceiveFailed(loginDialog));
         loginDialog.setOnKeyListener((mDialog, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK){

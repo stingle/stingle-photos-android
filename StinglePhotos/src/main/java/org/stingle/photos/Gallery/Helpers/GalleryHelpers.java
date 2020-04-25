@@ -12,7 +12,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.Sync.SyncManager;
 
 public class GalleryHelpers {
 	public static void addAlbum(Context context, OnAsyncTaskFinish onFinish){
@@ -53,5 +57,19 @@ public class GalleryHelpers {
 			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			addAlbumDialog.dismiss();
 		});
+	}
+
+	public static StingleDbAlbum getCurrentAlbum(GalleryActivity activity){
+		String albumId = activity.getCurrentAlbumId();
+		if(activity.getCurrentSet() == SyncManager.ALBUM && albumId != null){
+
+			AlbumsDb albumsDb = new AlbumsDb(activity);
+			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+			albumsDb.close();
+
+			return album;
+		}
+
+		return null;
 	}
 }

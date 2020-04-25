@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Sharing.SharingPermissions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +30,8 @@ public class StingleDbAlbum {
 	public Long dateCreated;
 	public Long dateModified;
 
+	public SharingPermissions permissionsObj = null;
+
 	public StingleDbAlbum(){
 		this.albumId = CryptoHelpers.getRandomString(AlbumsDb.ALBUM_ID_LEN);
 	}
@@ -48,6 +51,7 @@ public class StingleDbAlbum {
 		this.dateModified = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
 
 		setMembers(cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_MEMBERS)));
+		initPermissionsObj();
 	}
 
 	public StingleDbAlbum(JSONObject json) throws JSONException {
@@ -65,6 +69,7 @@ public class StingleDbAlbum {
 		this.dateModified = json.getLong("dateModified");
 
 		setMembers(json.getString("members"));
+		initPermissionsObj();
 	}
 
 	public void setMembers(String membersStr){
@@ -95,6 +100,17 @@ public class StingleDbAlbum {
 		}
 		sb.append(members.get(members.size() - 1).trim());
 		return sb.toString();
+	}
+
+	private void initPermissionsObj(){
+		if(permissions != null && permissions.length() == SharingPermissions.PERMISSIONS_LENGTH){
+			try {
+				this.permissionsObj = new SharingPermissions(permissions);
+			}
+			catch (RuntimeException e){
+				this.permissionsObj = null;
+			}
+		}
 	}
 
 	public String toJSON(){

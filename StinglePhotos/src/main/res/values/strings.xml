@@ -283,7 +283,7 @@
     <string name="type_an_email">Type an email address</string>
     <string name="allow_album_edit">Allow adding/deleting photos</string>
     <string name="allow_inviting_others">Allow inviting others</string>
-    <string name="allow_copying">Allow copying to own library and taking screenshots and some other shit that I dont know</string>
+    <string name="allow_copying">Allow copying to own library and taking screenshots</string>
     <string name="or">or</string>
     <string name="unlock">Unlock</string>
     <string name="pref_header_appearance">Appearance</string>
