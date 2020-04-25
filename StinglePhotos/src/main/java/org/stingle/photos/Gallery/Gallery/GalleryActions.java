@@ -316,12 +316,12 @@ public class GalleryActions {
 
 		dialog.findViewById(R.id.close_bottom_sheet).setOnClickListener(v -> dialog.dismiss());
 
-		Switch allowEdit = dialog.findViewById(R.id.allow_edit);
-		Switch allowInvite = dialog.findViewById(R.id.allow_invite);
+		Switch allowEdit = dialog.findViewById(R.id.allow_add);
+		Switch allowInvite = dialog.findViewById(R.id.allow_share);
 		Switch allowCopy = dialog.findViewById(R.id.allow_copy);
 
-		dialog.findViewById(R.id.allow_edit_text).setOnClickListener(v -> allowEdit.toggle());
-		dialog.findViewById(R.id.allow_invite_text).setOnClickListener(v -> allowInvite.toggle());
+		dialog.findViewById(R.id.allow_add_text).setOnClickListener(v -> allowEdit.toggle());
+		dialog.findViewById(R.id.allow_share_text).setOnClickListener(v -> allowInvite.toggle());
 		dialog.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());
 		dialog.findViewById(R.id.shareToOtherApps).setOnClickListener(v -> {
 			shareSelected(activity, files);
@@ -409,9 +409,9 @@ public class GalleryActions {
 			shareTask.setRecipients(recipients);
 
 			SharingPermissions permissions = new SharingPermissions();
-			permissions.allowEditing = ((Switch)dialog.findViewById(R.id.allow_edit)).isChecked();
-			permissions.allowResharing = ((Switch)dialog.findViewById(R.id.allow_invite)).isChecked();
-			permissions.allowCopying = ((Switch)dialog.findViewById(R.id.allow_copy)).isChecked();
+			permissions.allowAdd = ((Switch)dialog.findViewById(R.id.allow_add)).isChecked();
+			permissions.allowShare = ((Switch)dialog.findViewById(R.id.allow_share)).isChecked();
+			permissions.allowCopy = ((Switch)dialog.findViewById(R.id.allow_copy)).isChecked();
 
 			shareTask.setPermissions(permissions);
 

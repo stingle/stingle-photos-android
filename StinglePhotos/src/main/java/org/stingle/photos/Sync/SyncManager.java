@@ -416,6 +416,7 @@ public class SyncManager {
 		album.encPrivateKey = encData.encPrivateKey;
 		album.publicKey = encData.publicKey;
 		album.metadata = encData.metadata;
+		album.isOwner = true;
 		album.dateCreated = now;
 		album.dateModified = now;
 

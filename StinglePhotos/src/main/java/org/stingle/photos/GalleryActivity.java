@@ -610,10 +610,10 @@ public class GalleryActivity extends AppCompatActivity
 					StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(this);
 					if(album != null && album.permissionsObj != null && !album.isOwner) {
 						menu.findItem(R.id.action_delete_album).setVisible(false);
-						if (!album.permissionsObj.allowResharing) {
+						if (!album.permissionsObj.allowShare) {
 							menu.findItem(R.id.share_album).setVisible(false);
 						}
-						if(!album.permissionsObj.allowEditing){
+						if(!album.permissionsObj.allowAdd){
 							fab.setVisibility(View.GONE);
 						}
 						else{
@@ -794,19 +794,16 @@ public class GalleryActivity extends AppCompatActivity
 							mode.getMenuInflater().inflate(R.menu.gallery_album_action_mode, menu);
 
 							StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(GalleryActivity.this);
-							if(album != null && album.permissionsObj != null && !album.isOwner) {
-								if (!album.permissionsObj.allowEditing) {
-									menu.findItem(R.id.add_to_album).setVisible(false);
-								}
-								if (!album.permissionsObj.allowResharing) {
+							if(album != null && album.permissionsObj != null && !album.isOwner && album.isShared) {
+								if (!album.permissionsObj.allowShare) {
 									menu.findItem(R.id.share).setVisible(false);
 								}
-								if (!album.permissionsObj.allowCopying) {
+								if (!album.permissionsObj.allowCopy) {
 									menu.findItem(R.id.decrypt).setVisible(false);
+									menu.findItem(R.id.add_to_album).setVisible(false);
 								}
-								if (!album.permissionsObj.allowEditing || !album.permissionsObj.allowCopying) {
-									menu.findItem(R.id.trash).setVisible(false);
-								}
+
+								menu.findItem(R.id.trash).setVisible(false);
 							}
 							break;
 					}

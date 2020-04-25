@@ -125,6 +125,18 @@ public class ViewItemActivity extends AppCompatActivity {
 				adapter = new ViewPagerAdapter(ViewItemActivity.this, set, albumId, gestureTouchListener);
 				viewPager.setAdapter(adapter);
 				viewPager.setCurrentItem(itemPosition);
+
+				if(set == SyncManager.ALBUM) {
+					AlbumsDb albumsDb = new AlbumsDb(ViewItemActivity.this);
+					StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+					albumsDb.close();
+
+					if (album != null && album.permissionsObj != null && !album.isOwner) {
+						if (!album.permissionsObj.allowCopy) {
+							ViewItemActivity.this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+						}
+					}
+				}
 			}
 		});
 	}
@@ -232,13 +244,13 @@ public class ViewItemActivity extends AppCompatActivity {
 				/*if (!album.permissionsObj.allowEditing) {
 					menu.findItem(R.id.add_to_album).setVisible(false);
 				}*/
-				if (!album.permissionsObj.allowResharing) {
+				if (!album.permissionsObj.allowShare) {
 					menu.findItem(R.id.share).setVisible(false);
 				}
 				/*if (!album.permissionsObj.allowCopying) {
 					menu.findItem(R.id.decrypt).setVisible(false);
 				}*/
-				if (!album.permissionsObj.allowEditing || !album.permissionsObj.allowCopying) {
+				if (album.isShared && !album.isOwner) {
 					menu.findItem(R.id.trash).setVisible(false);
 				}
 			}
