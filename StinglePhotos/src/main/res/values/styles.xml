@@ -12,13 +12,14 @@
         <item name="android:windowActionBarOverlay">true</item>
     </style>
 
-    <style name="AppThemeCompatWithActionBar" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="AppThemeCompatWithActionBar" parent="Theme.MaterialComponents.DayNight">
         <item name="android:colorPrimary">@color/primaryColor</item>
         <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="android:colorAccent">@color/colorAccent</item>
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="toolbarStyle">@style/ToolbarStyle</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
@@ -31,18 +32,8 @@
         <item name="android:windowActionBarOverlay">true</item>
     </style>
 
-
-    <style name="AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
-        <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="actionModeStyle">@style/ActionModeStyle</item>
-    </style>
-
-    <style name="PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
-
-    <style name="ActionModeStyle" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">@color/primaryColor</item>
+    <style name="ToolbarStyle" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">?colorSurface</item>
     </style>
 
     <style name="WhiteLoading">
@@ -60,12 +51,16 @@
         <item name="android:shadowRadius">1</item>
     </style>
 
-    <style name="AppTheme.Launcher">
-     <item name="android:windowBackground">@drawable/launch_screen</item>
-        <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
-    </style>
-
     <style name="simpletooltip_default" parent="@android:style/TextAppearance.Medium">
 
+    </style>
+
+    <style name="FullScreenDialogStyle" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowIsFloating">false</item>
+
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
     </style>
 </resources>

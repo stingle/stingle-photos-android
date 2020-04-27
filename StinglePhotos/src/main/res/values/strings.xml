@@ -296,6 +296,8 @@
     <string name="cant_share_to_self">Sorry you can\'t share to yourself</string>
     <string name="spinner_sharing">Sharing...</string>
     <string name="failed_to_share">Failed to share, please try again</string>
+    <string name="share_in_sp">Share in Stingle Photos</string>
+    <string name="share_securely">Share securely</string>
 
 
 </resources>

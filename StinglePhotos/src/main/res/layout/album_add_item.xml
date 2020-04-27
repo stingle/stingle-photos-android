@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/layout_border"
-    android:layout_margin="10dp">
+    android:layout_margin="10dp"
+    android:elevation="4dp">
 
     <ImageView
         android:id="@+id/thumbImage"

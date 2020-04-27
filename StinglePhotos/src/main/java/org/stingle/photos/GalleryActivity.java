@@ -125,7 +125,6 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setTheme(R.style.AppTheme);
 		setContentView(R.layout.activity_gallery);
 
 		Helpers.blockScreenshotsIfEnabled(this);
@@ -823,8 +822,11 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch(item.getItemId()){
-					case R.id.share:
+					case R.id.share_stingle:
 						GalleryActions.showSharingSheet(GalleryActivity.this, false, galleryFragment.getSelectedFiles());
+						break;
+					case R.id.share_to_apps:
+						GalleryActions.shareSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
 						break;
 					case R.id.add_to_album:
 						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentSet == SyncManager.ALBUM);

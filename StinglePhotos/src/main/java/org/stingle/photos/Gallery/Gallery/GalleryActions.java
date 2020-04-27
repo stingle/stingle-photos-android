@@ -5,31 +5,26 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.Switch;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
-import org.stingle.photos.AsyncTasks.Gallery.ShareAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.Sync.GetContactAsyncTask;
 import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -40,7 +35,6 @@ import org.stingle.photos.Gallery.Albums.AlbumsFragment;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
-import org.stingle.photos.Sharing.SharingPermissions;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -314,28 +308,34 @@ public class GalleryActions {
 			dialog.findViewById(R.id.otherAppsShareContainer).setVisibility(View.GONE);
 		}
 
-		dialog.findViewById(R.id.close_bottom_sheet).setOnClickListener(v -> dialog.dismiss());
 
-		Switch allowEdit = dialog.findViewById(R.id.allow_add);
+		/*Switch allowEdit = dialog.findViewById(R.id.allow_add);
 		Switch allowInvite = dialog.findViewById(R.id.allow_share);
 		Switch allowCopy = dialog.findViewById(R.id.allow_copy);
 
 		dialog.findViewById(R.id.allow_add_text).setOnClickListener(v -> allowEdit.toggle());
 		dialog.findViewById(R.id.allow_share_text).setOnClickListener(v -> allowInvite.toggle());
-		dialog.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());
+		dialog.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());*/
 		dialog.findViewById(R.id.shareToOtherApps).setOnClickListener(v -> {
 			shareSelected(activity, files);
 			dialog.dismiss();
 		});
 
 		EditText recipient = dialog.findViewById(R.id.recipient);
-		LinearLayout chipsContainer = dialog.findViewById(R.id.chipsContainer);
+		//LinearLayout chipsContainer = dialog.findViewById(R.id.chipsContainer);
 
 		String ownEmail = Helpers.getPreference(activity, StinglePhotosApplication.USER_EMAIL, "");
 
 		ArrayList<StingleContact> recipients = new ArrayList<>();
 
-		recipient.setOnEditorActionListener((v, actionId, event) -> {
+		recipient.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(activity);
+			}
+		});
+
+		/*recipient.setOnEditorActionListener((v, actionId, event) -> {
 			if (actionId == EditorInfo.IME_ACTION_GO) {
 				EditText textBox = ((EditText)v);
 				String text = textBox.getText().toString();
@@ -416,8 +416,14 @@ public class GalleryActions {
 			shareTask.setPermissions(permissions);
 
 			shareTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		});
+		});*/
 
 		dialog.show();
+	}
+
+	public static void showDialog(AppCompatActivity activity) {
+		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+		DialogFragment newFragment = new SharingDialogFragment();
+		newFragment.show(ft, "dialog");
 	}
 }

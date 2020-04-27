@@ -1,4 +1,5 @@
 <resources>
 
+    <color name="primaryColor">#F44336</color>
     <color name="hr_color">#84B6B6B6</color>
 </resources>
