@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -116,12 +118,25 @@ public class SignUpActivity extends AppCompatActivity {
 
 	private OnClickListener backupKeysInfo() {
 		return v -> {
+			int bgColor = 0;
+			TypedValue typedValue = new TypedValue();
+			if (getTheme().resolveAttribute(android.R.attr.windowBackground, typedValue, true)){
+				bgColor= typedValue.data;
+			}
+
+			int txtColor = getResources().getColor (R.color.textColor, getTheme());
+
+
+			Log.d("bgColor", String.valueOf(bgColor));
+			Log.d("txtColor", String.valueOf(txtColor));
 			new SimpleTooltip.Builder(this)
 					.anchorView(v)
 					.text(getString(R.string.backup_key_desc))
 					.gravity(Gravity.TOP)
 					.transparentOverlay(false)
 					.overlayWindowBackgroundColor(Color.BLACK)
+					.backgroundColor(bgColor)
+					.textColor(txtColor)
 					.build()
 					.show();
 

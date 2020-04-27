@@ -354,6 +354,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			AlbumAddVH holder = (AlbumAddVH)holderObj;
 			holder.albumName.setText(context.getString(R.string.create_new_album));
 			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_add_circle_outline));
+			holder.image.setColorFilter(context.getColor(R.color.primaryColor), android.graphics.PorterDuff.Mode.SRC_IN);
 
 			if(layoutStyle == LAYOUT_GRID) {
 				int margin = Helpers.convertDpToPixels(context, 10);

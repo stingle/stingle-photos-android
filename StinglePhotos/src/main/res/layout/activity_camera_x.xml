@@ -39,6 +39,7 @@
             android:contentDescription="@string/options"
             android:layout_marginStart="16dp"
             android:scaleType="fitCenter"
+            android:tint="#FFF"
             android:src="@drawable/ic_settings_white" />
     </RelativeLayout>
 

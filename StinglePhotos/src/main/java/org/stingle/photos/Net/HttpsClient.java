@@ -72,7 +72,7 @@ public class HttpsClient {
 			// Create the SSL connection
 			SSLContext sc;
 			sc = SSLContext.getInstance("TLS");
-			if(BuildConfig.DEBUG) {
+			if(BuildConfig.ALLOW_INSECURE_TLS) {
 				sc.init(null, getTrustingManager(), new java.security.SecureRandom());
 				conn.setHostnameVerifier((s, sslSession) -> true);
 			}
@@ -147,7 +147,7 @@ public class HttpsClient {
 		// Create the SSL connection
 		SSLContext sc;
 		sc = SSLContext.getInstance("TLS");
-		if(BuildConfig.DEBUG) {
+		if(BuildConfig.ALLOW_INSECURE_TLS) {
 			sc.init(null, getTrustingManager(), new java.security.SecureRandom());
 			conn.setHostnameVerifier((s, sslSession) -> true);
 		}
@@ -231,7 +231,7 @@ public class HttpsClient {
 		// Create the SSL connection
 		SSLContext sc;
 		sc = SSLContext.getInstance("TLS");
-		if(BuildConfig.DEBUG) {
+		if(BuildConfig.ALLOW_INSECURE_TLS) {
 			sc.init(null, getTrustingManager(), new java.security.SecureRandom());
 			conn.setHostnameVerifier((s, sslSession) -> true);
 		}
@@ -335,7 +335,7 @@ public class HttpsClient {
 			// Create the SSL connection
 			SSLContext sc;
 			sc = SSLContext.getInstance("TLS");
-			if(BuildConfig.DEBUG) {
+			if(BuildConfig.ALLOW_INSECURE_TLS) {
 				sc.init(null, getTrustingManager(), new java.security.SecureRandom());
 				connection.setHostnameVerifier((s, sslSession) -> true);
 			}

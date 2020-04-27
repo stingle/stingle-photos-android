@@ -13,19 +13,19 @@
         android:layout_height="match_parent"
         tools:context="org.stingle.photos.GalleryActivity">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:context="org.stingle.photos.GalleryActivity">
 
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/pullToRefresh"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                tools:context="org.stingle.photos.GalleryActivity">
-                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                    android:id="@+id/pullToRefresh"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
                 <ScrollView
                     android:id="@+id/scrollView1"
                     android:layout_width="fill_parent"
@@ -45,7 +45,6 @@
                             android:layout_marginTop="10dp"
                             android:layout_marginBottom="10dp"
                             android:text="@string/current_storage"
-                            android:textColor="#000"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -55,7 +54,6 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
                             android:layout_marginBottom="5dp"
-                            android:textColor="#000"
                             android:textSize="15sp" />
 
                         <androidx.core.widget.ContentLoadingProgressBar
@@ -75,8 +73,8 @@
                     </LinearLayout>
 
                 </ScrollView>
-                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
         <com.google.android.material.appbar.AppBarLayout

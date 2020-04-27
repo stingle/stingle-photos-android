@@ -243,7 +243,6 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 			box.setBackground(getDrawable(R.drawable.rectangle_selected));
 			payButton.setText(getString(R.string.current_plan));
 			payButton.setEnabled(false);
-			payButton.setTextColor(getColor(R.color.disabledText));
 
 			String topPrice = "";
 			if(isFreePlan){

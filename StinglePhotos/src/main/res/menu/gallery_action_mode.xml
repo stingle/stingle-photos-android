@@ -9,11 +9,9 @@
         <menu>
             <item
                 android:id="@+id/share_stingle"
-                android:icon="@drawable/ic_action_share"
                 android:title="@string/share_via_stingle" />
             <item
                 android:id="@+id/share_to_apps"
-                android:icon="@drawable/ic_action_share"
                 android:title="@string/share_to_apps" />
         </menu>
     </item>

@@ -12,7 +12,6 @@
             android:id="@+id/email"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="40dp"
             android:layout_margin="10dp"
             android:hint="@string/email"
             android:inputType="textEmailAddress">
@@ -34,14 +33,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:textColor="@color/primaryColor"
+            android:textColor="?colorPrimary"
             android:layout_marginRight="10dp"
             android:textSize="14sp"
             android:text="@string/forgot_password" />
 
         <Button
             android:id="@+id/login"
-            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -65,7 +63,7 @@
                 android:textSize="16sp" />
             <Button
                 android:id="@+id/register"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/sign_up" />

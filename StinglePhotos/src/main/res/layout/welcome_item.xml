@@ -28,7 +28,6 @@
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
         android:paddingTop="16dp"
-        android:textColor="#DE000000"
         android:textSize="22sp" />
 
     <TextView
@@ -40,7 +39,6 @@
         android:gravity="center_horizontal"
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
-        android:textColor="#DE000000"
         android:textSize="16sp" />
 
 </LinearLayout>

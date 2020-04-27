@@ -18,7 +18,7 @@
             android:title="@string/menu_storage" />
         <item
             android:id="@+id/nav_backup"
-            android:icon="@drawable/ic_lock"
+            android:icon="@drawable/ic_lock_solid"
             android:title="@string/backup_phrase" />
         <item
             android:id="@+id/nav_settings"

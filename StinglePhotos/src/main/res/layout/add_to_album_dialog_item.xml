@@ -45,8 +45,8 @@
 
     <ImageView
         android:id="@+id/rightIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_alignParentEnd="true"
         android:visibility="visible"
         android:tint="?attr/colorControlNormal"

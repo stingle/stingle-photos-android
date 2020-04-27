@@ -4,22 +4,26 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorPrimaryDark">?attr/colorBackgroundFloating</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
         <item name="android:windowActionBarOverlay">true</item>
+        <item name="materialButtonStyle">@style/ButtonStyle</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="AppThemeCompatWithActionBar" parent="Theme.MaterialComponents.DayNight">
         <item name="android:colorPrimary">@color/primaryColor</item>
-        <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="android:colorPrimaryDark">?attr/colorBackgroundFloating</item>
         <item name="android:colorAccent">@color/colorAccent</item>
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="toolbarStyle">@style/ToolbarStyle</item>
+        <item name="materialButtonStyle">@style/ButtonStyle</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
@@ -34,6 +38,9 @@
 
     <style name="ToolbarStyle" parent="Widget.MaterialComponents.Toolbar">
         <item name="android:background">?colorSurface</item>
+    </style>
+    <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/buttonTextColor</item>
     </style>
 
     <style name="WhiteLoading">

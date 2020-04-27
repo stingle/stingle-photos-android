@@ -50,7 +50,7 @@ public class StinglePhotosApplication extends Application{
         StinglePhotosApplication.crypto = new Crypto(this);
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		Helpers.applyTheme(prefs.getString("theme", "light"));
+		Helpers.applyTheme(prefs.getString("theme", "auto"));
     }
 
     public static Crypto getCrypto() {
