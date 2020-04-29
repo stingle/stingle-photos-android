@@ -9,7 +9,6 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -328,13 +327,6 @@ public class GalleryActions {
 
 		ArrayList<StingleContact> recipients = new ArrayList<>();
 
-		recipient.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showDialog(activity);
-			}
-		});
-
 		/*recipient.setOnEditorActionListener((v, actionId, event) -> {
 			if (actionId == EditorInfo.IME_ACTION_GO) {
 				EditText textBox = ((EditText)v);
@@ -421,9 +413,11 @@ public class GalleryActions {
 		dialog.show();
 	}
 
-	public static void showDialog(AppCompatActivity activity) {
+
+	public static void shareSelectedStingle(GalleryActivity activity, boolean isAlbum, ArrayList<StingleDbFile> files) {
 		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
 		DialogFragment newFragment = new SharingDialogFragment();
 		newFragment.show(ft, "dialog");
 	}
+
 }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -17,16 +16,40 @@
             android:background="?attr/colorSurface" />
 
     </com.google.android.material.appbar.AppBarLayout>
-    <FrameLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:layout_margin="20dp"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/searchContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Test" />
+            android:orientation="horizontal"
+            android:layout_margin="12dp"
+            android:layout_alignParentTop="true">
 
-    </FrameLayout>
+            <EditText
+                android:id="@+id/searchField"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:layout_weight="1"/>
+            <ImageButton
+                android:id="@+id/addButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:tint="?attr/colorPrimary"
+                android:src="@drawable/ic_add" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/contactsList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/searchContainer" />
+
+    </RelativeLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

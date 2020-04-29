@@ -2,9 +2,13 @@ package org.stingle.photos.Db.Objects;
 
 import android.database.Cursor;
 
+import androidx.annotation.Nullable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Db.StingleDbContract;
+
+import java.util.Objects;
 
 public class StingleContact {
 	public long userId;
@@ -31,5 +35,18 @@ public class StingleContact {
 		if(json.has("dateModified")) {
 			this.dateModified = json.getLong("dateModified");
 		}
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		// self check
+		if (this == obj) return true;
+		// null check
+		if (obj == null) return false;
+		// type check and cast
+		if (getClass() != obj.getClass()) return false;
+		// field comparison
+		StingleContact contact = (StingleContact) obj;
+		return Objects.equals(userId, contact.userId);
 	}
 }

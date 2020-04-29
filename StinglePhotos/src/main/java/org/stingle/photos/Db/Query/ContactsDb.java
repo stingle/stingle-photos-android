@@ -88,7 +88,7 @@ public class ContactsDb {
 	}
 
 	public StingleContact getContactAtPosition(int pos, int sort) {
-		//String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -98,7 +98,7 @@ public class ContactsDb {
 				null,
 				null,
 				null,
-				null,
+				sortOrder,
 				String.valueOf(pos) + ", 1"
 		);
 

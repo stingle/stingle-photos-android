@@ -823,7 +823,7 @@ public class GalleryActivity extends AppCompatActivity
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch(item.getItemId()){
 					case R.id.share_stingle:
-						GalleryActions.showSharingSheet(GalleryActivity.this, false, galleryFragment.getSelectedFiles());
+						GalleryActions.shareSelectedStingle(GalleryActivity.this, false, galleryFragment.getSelectedFiles());
 						break;
 					case R.id.share_to_apps:
 						GalleryActions.shareSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
