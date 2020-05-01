@@ -7,27 +7,27 @@
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginBottom="12dp"
+        android:text="@string/album_name" />
+
     <EditText
         android:id="@+id/albumName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="36dp"
         android:inputType="textCapWords"
         android:hint="@string/shared_album_name" />
-
-    <!--<View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="@color/hr_color" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_marginBottom="12dp"
-        android:text="@string/permissions" />-->
+        android:text="@string/permissions" />
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -28,6 +28,10 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 	private static int TYPE_DB = 0;
 	private static int TYPE_ADDED = 1;
 
+	private String filter = "";
+
+	private RecipientSelectionChangeListener changeListener;
+
 	public SharingContactsAdapter(Context context) {
 		this.context = context;
 		this.db = new ContactsDb(context);
@@ -37,6 +41,15 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 	public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
 		super.onDetachedFromRecyclerView(recyclerView);
 		db.close();
+	}
+
+	public void setFilter(String str){
+		filter = str;
+		notifyDataSetChanged();
+	}
+
+	public void setRecipientSelectionChangeListener(RecipientSelectionChangeListener changeListener){
+		this.changeListener = changeListener;
 	}
 
 
@@ -53,8 +66,8 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 			checbox = v.findViewById(R.id.checkbox);
 			label = v.findViewById(R.id.label);
 
-			checbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-				if(isChecked){
+			checbox.setOnClickListener(checkbox -> {
+				if(((CheckBox)checkbox).isChecked()){
 					addToSelection(getAdapterPosition());
 				}
 				else{
@@ -64,11 +77,11 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 		}
 	}
 
-	public int translateDbPosToGalleryPos(int dbPos){
-		return dbPos + addedRecipients.size();
-	}
 	public int translateGalleryPosToDbPos(int pos){
-		return pos - addedRecipients.size();
+		if(filter.length() == 0){
+			return pos - addedRecipients.size();
+		}
+		return pos;
 	}
 
 
@@ -88,45 +101,81 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 	public void onBindViewHolder(RecyclerView.ViewHolder holderObj, final int rawPosition) {
 		ContactVH holder = (ContactVH)holderObj;
 
-		if(rawPosition < addedRecipients.size()){
+		if(filter.length() == 0 && rawPosition < addedRecipients.size()){
 			StingleContact contact = addedRecipients.get(rawPosition);
 			holder.label.setText(contact.email);
 			if(selectedRecipients.contains(contact)){
 				holder.checbox.setChecked(true);
 			}
+			else{
+				holder.checbox.setChecked(false);
+			}
 		}
 		else {
 			final int dbPos = translateGalleryPosToDbPos(rawPosition);
-			StingleContact contact = db.getContactAtPosition(dbPos, StingleDb.SORT_DESC);
+			StingleContact contact = db.getContactAtPosition(dbPos, StingleDb.SORT_DESC, filter);
 			holder.label.setText(contact.email);
 			if(selectedRecipients.contains(contact)){
 				holder.checbox.setChecked(true);
+			}
+			else{
+				holder.checbox.setChecked(false);
 			}
 		}
 	}
 
 	private void addToSelection(int pos) {
-		if(pos < addedRecipients.size()){
-			selectedRecipients.add(addedRecipients.get(pos));
+		StingleContact recp;
+		if(filter.length() == 0 && pos < addedRecipients.size()){
+			recp = addedRecipients.get(pos);
 		}
 		else{
-			final int dbPos = translateGalleryPosToDbPos(pos);
-			selectedRecipients.add(db.getContactAtPosition(dbPos, StingleDb.SORT_DESC));
+			recp = db.getContactAtPosition(translateGalleryPosToDbPos(pos), StingleDb.SORT_DESC, filter);
+		}
+
+		if(recp != null) {
+			selectedRecipients.add(recp);
+			if(changeListener != null){
+				changeListener.onAdd(recp);
+			}
 		}
 	}
 
+	public void addToSelection(StingleContact contact){
+		if(!selectedRecipients.contains(contact)) {
+			selectedRecipients.add(contact);
+			if(changeListener != null){
+				changeListener.onAdd(contact);
+			}
+		}
+		notifyDataSetChanged();
+	}
+
 	private void removeFromSelection(int pos) {
-		if(pos < addedRecipients.size()){
-			selectedRecipients.remove(addedRecipients.get(pos));
+		StingleContact recp;
+		if(filter.length() == 0 && pos < addedRecipients.size()){
+			recp = addedRecipients.get(pos);
 		}
 		else{
-			selectedRecipients.remove(db.getContactAtPosition(translateGalleryPosToDbPos(pos), StingleDb.SORT_DESC));
+			recp = db.getContactAtPosition(translateGalleryPosToDbPos(pos), StingleDb.SORT_DESC, filter);
 		}
+
+		if(recp != null) {
+			selectedRecipients.remove(recp);
+			if(changeListener != null){
+				changeListener.onRemove(recp);
+			}
+		}
+	}
+
+	public void removeFromSelection(StingleContact contact) {
+		selectedRecipients.remove(contact);
+		notifyDataSetChanged();
 	}
 
 	@Override
 	public int getItemViewType(int position) {
-		if(position < addedRecipients.size()){
+		if(filter.length() == 0 && position < addedRecipients.size()){
 			return TYPE_ADDED;
 		}
 		else {
@@ -150,17 +199,12 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 	public void addRecipient(StingleContact contact){
 		if(!addedRecipients.contains(contact)) {
 			addedRecipients.add(contact);
-			selectedRecipients.add(contact);
+			addToSelection(contact);
 		}
 		notifyDataSetChanged();
 	}
 
-	public void addToSelection(StingleContact contact){
-		if(!selectedRecipients.contains(contact)) {
-			selectedRecipients.add(contact);
-		}
-		notifyDataSetChanged();
-	}
+
 
 	public ArrayList<StingleContact> getSelectedRecipients(){
 		return selectedRecipients;
@@ -168,7 +212,15 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
 	@Override
 	public int getItemCount() {
-		return (int)db.getTotalContactsCount() + addedRecipients.size();
+		if(filter.length() == 0){
+			return (int)db.getTotalContactsCount(filter) + addedRecipients.size();
+		}
+		return (int)db.getTotalContactsCount(filter);
+	}
+
+	public abstract static class RecipientSelectionChangeListener {
+		public abstract void onAdd(StingleContact contact);
+		public abstract void onRemove(StingleContact contact);
 	}
 
 }

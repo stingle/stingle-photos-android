@@ -303,6 +303,7 @@
     <string name="permissions">Permissions</string>
     <string name="next">Next</string>
     <string name="select_recp">Please select at least one recipient</string>
+    <string name="album_name">Shared album name</string>
 
 
 </resources>

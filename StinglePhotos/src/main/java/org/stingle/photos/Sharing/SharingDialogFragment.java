@@ -125,13 +125,19 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 			int id = item.getItemId();
 
 			if (id == R.id.nextButton) {
-				if(step1Fragment.getSelectedRecipients().size() > 0) {
-					viewPager.setCurrentItem(1, true);
-					step2Fragment.setAlbumName(albumName);
-				}
-				else{
-					Toast.makeText(getContext(), requireContext().getString(R.string.select_recp), Toast.LENGTH_LONG).show();
-				}
+				step1Fragment.addRecipient(new OnAsyncTaskFinish(){
+					@Override
+					public void onFinish() {
+						super.onFinish();
+						if(step1Fragment.getSelectedRecipients().size() > 0) {
+							viewPager.setCurrentItem(1, true);
+							step2Fragment.setAlbumName(albumName);
+						}
+						else{
+							Toast.makeText(getContext(), requireContext().getString(R.string.select_recp), Toast.LENGTH_LONG).show();
+						}
+					}
+				});
 			}
 			else if (id == R.id.shareButton) {
 				share();

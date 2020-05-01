@@ -18,6 +18,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:hint="@string/type_an_email"
             android:inputType="textEmailAddress" />
 
         <ImageButton
@@ -29,10 +30,19 @@
             android:tint="?attr/colorPrimary" />
     </LinearLayout>
 
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/chipsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/searchContainer"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        app:flexWrap="wrap" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contactsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/searchContainer" />
+        android:layout_below="@+id/chipsContainer" />
 
 </RelativeLayout>
