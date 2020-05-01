@@ -24,6 +24,7 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	private WeakReference<Context> context;
 	private String albumId;
+	private String albumName;
 	private final OnAsyncTaskFinish onFinishListener;
 	private ArrayList<StingleDbFile> files;
 	private Crypto crypto;
@@ -41,6 +42,11 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	public ShareAlbumAsyncTask setAlbumId(String albumId){
 		this.albumId = albumId;
+		return this;
+	}
+
+	public ShareAlbumAsyncTask setAlbumName(String albumName){
+		this.albumName = albumName;
 		return this;
 	}
 
@@ -99,7 +105,11 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				if(sourceSet == SyncManager.ALBUM && sourceAlbumId == null){
 					return false;
 				}
-				StingleDbAlbum newAlbum = SyncManager.addAlbum(myContext, Helpers.generateAlbumName());
+				if(albumName == null || albumName.length() == 0){
+					albumName = Helpers.generateAlbumName();
+				}
+
+				StingleDbAlbum newAlbum = SyncManager.addAlbum(myContext, albumName);
 				if(newAlbum == null){
 					return false;
 				}

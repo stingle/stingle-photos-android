@@ -1,4 +1,4 @@
-package org.stingle.photos.Gallery.Gallery;
+package org.stingle.photos.Sharing;
 
 
 import android.os.AsyncTask;
@@ -12,8 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDialogFragment;
-import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,33 +20,23 @@ import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Sync.GetContactAsyncTask;
 import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.R;
-import org.stingle.photos.Sharing.SharingContactsAdapter;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
+import java.util.ArrayList;
 
-public class SharingDialogFragment extends AppCompatDialogFragment {
+
+public class SharingDialogStep1Fragment extends Fragment {
 
 	private EditText searchField;
 	private SharingContactsAdapter adapter;
-
-	@Override
-	public void onCreate(@Nullable Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setStyle(AppCompatDialogFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
-	}
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.sharing_fragment, container, false);
-
-		Toolbar toolbar = view.findViewById(R.id.toolbar);
-		toolbar.setNavigationIcon(R.drawable.ic_close);
-		toolbar.setNavigationOnClickListener(view1 -> dismiss());
-		toolbar.setTitle(getString(R.string.share_via_sp));
+		View view = inflater.inflate(R.layout.sharing_step1_fragment, container, false);
 
 		RecyclerView contactsList = view.findViewById(R.id.contactsList);
 		LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -67,6 +56,13 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		});
 
 		return view;
+	}
+
+	public ArrayList<StingleContact> getSelectedRecipients(){
+		if(adapter != null){
+			return adapter.getSelectedRecipients();
+		}
+		return null;
 	}
 
 
@@ -102,16 +98,5 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		} else {
 			Toast.makeText(getContext(), getContext().getString(R.string.invalid_email), Toast.LENGTH_LONG).show();
 		}
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		/*Dialog dialog = getDialog();
-		if (dialog != null) {
-			int width = ViewGroup.LayoutParams.MATCH_PARENT;
-			int height = ViewGroup.LayoutParams.MATCH_PARENT;
-			dialog.getWindow().setLayout(width, height);
-		}*/
 	}
 }

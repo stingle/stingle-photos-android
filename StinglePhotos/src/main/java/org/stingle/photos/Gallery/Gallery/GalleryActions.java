@@ -9,7 +9,6 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,6 +33,7 @@ import org.stingle.photos.Gallery.Albums.AlbumsFragment;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.Sharing.SharingDialogFragment;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -414,9 +414,15 @@ public class GalleryActions {
 	}
 
 
-	public static void shareSelectedStingle(GalleryActivity activity, boolean isAlbum, ArrayList<StingleDbFile> files) {
+	public static void shareStingle(GalleryActivity activity, ArrayList<StingleDbFile> files) {
 		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-		DialogFragment newFragment = new SharingDialogFragment();
+		SharingDialogFragment newFragment = new SharingDialogFragment();
+
+		newFragment.setSourceSet(activity.getCurrentSet());
+		newFragment.setAlbumId(activity.getCurrentAlbumId());
+		newFragment.setFiles(files);
+		newFragment.setAlbumName(activity.getCurrentAlbumName());
+
 		newFragment.show(ft, "dialog");
 	}
 

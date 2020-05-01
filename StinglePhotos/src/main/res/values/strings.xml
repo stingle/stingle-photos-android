@@ -299,6 +299,10 @@
     <string name="share_via_sp">Share via Stingle Photos</string>
     <string name="share_securely">Share securely</string>
     <string name="already_added">Already added</string>
+    <string name="shared_album_name">Shared album name</string>
+    <string name="permissions">Permissions</string>
+    <string name="next">Next</string>
+    <string name="select_recp">Please select at least one recipient</string>
 
 
 </resources>
