@@ -32,6 +32,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:orientation="horizontal">
 
         <TextView
@@ -39,9 +40,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_margin="8dp"
             android:layout_toStartOf="@id/allow_add"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/allow_album_add" />
+
+        <TextView
+            android:id="@+id/allow_add_text_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_toStartOf="@id/allow_add"
+            android:layout_below="@+id/allow_add_text"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/allow_album_add_desc" />
 
         <Switch
             android:id="@+id/allow_add"
@@ -57,6 +68,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:orientation="horizontal">
 
         <TextView
@@ -64,9 +76,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_margin="8dp"
             android:layout_toStartOf="@id/allow_share"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/allow_share" />
+
+        <TextView
+            android:id="@+id/allow_share_text_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_toStartOf="@id/allow_share"
+            android:layout_below="@+id/allow_share_text"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/allow_share_desc" />
 
         <Switch
             android:id="@+id/allow_share"
@@ -82,6 +104,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:orientation="horizontal">
 
         <TextView
@@ -89,9 +112,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_margin="8dp"
             android:layout_toStartOf="@id/allow_copy"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/allow_copy" />
+
+        <TextView
+            android:id="@+id/allow_copy_text_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_toStartOf="@id/allow_copy"
+            android:layout_below="@+id/allow_copy_text"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/allow_copy_desc" />
 
         <Switch
             android:id="@+id/allow_copy"

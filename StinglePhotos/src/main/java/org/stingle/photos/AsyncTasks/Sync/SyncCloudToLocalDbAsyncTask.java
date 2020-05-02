@@ -330,8 +330,30 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	}
 
 	private boolean processContact(StingleContact remoteContact){
+		StingleContact contact = contactsDb.getContactByUserId(remoteContact.userId);
 
-		contactsDb.insertContact(remoteContact);
+		if(contact == null) {
+			contactsDb.insertContact(remoteContact);
+		}
+		else{
+			boolean needUpdate = false;
+			if(contact.dateUsed != remoteContact.dateUsed) {
+				contact.dateUsed = remoteContact.dateUsed;
+				needUpdate = true;
+			}
+			if(contact.dateModified != remoteContact.dateModified) {
+				contact.dateModified = remoteContact.dateModified;
+				needUpdate = true;
+			}
+			if(!contact.email.equals(remoteContact.email)) {
+				contact.email = remoteContact.email;
+				needUpdate = true;
+			}
+
+			if(needUpdate){
+				contactsDb.updateContact(contact);
+			}
+		}
 
 		if(remoteContact.dateModified > lastContactsSeenTime) {
 			lastContactsSeenTime = remoteContact.dateModified;

@@ -21,6 +21,7 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_REUPLOAD = "reupload";
 		public static final String COLUMN_NAME_DATE_CREATED = "date_created";
 		public static final String COLUMN_NAME_DATE_MODIFIED = "date_modified";
+		public static final String COLUMN_NAME_DATE_USED = "date_used";
 		public static final String COLUMN_NAME_HEADERS = "headers";
 
 		public static final String COLUMN_NAME_ALBUM_ID = "album_id";
@@ -134,6 +135,7 @@ public class StingleDbContract {
 					Columns.COLUMN_NAME_USER_ID + " INTEGER NOT NULL UNIQUE," +
 					Columns.COLUMN_NAME_EMAIL + " TEXT NOT NULL," +
 					Columns.COLUMN_NAME_PUBLIC_KEY + " TEXT NOT NULL, " +
+					Columns.COLUMN_NAME_DATE_USED + " INTEGER, " +
 					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
 					")";
 	public static final String SQL_CREATE_CONTACTS_UID_INDEX =

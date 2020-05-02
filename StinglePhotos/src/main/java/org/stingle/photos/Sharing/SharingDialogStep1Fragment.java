@@ -49,18 +49,6 @@ public class SharingDialogStep1Fragment extends Fragment {
 		contactsList.setLayoutManager(layoutManager);
 		adapter = new SharingContactsAdapter(getContext());
 
-		adapter.setRecipientSelectionChangeListener(new SharingContactsAdapter.RecipientSelectionChangeListener() {
-			@Override
-			public void onAdd(StingleContact contact) {
-				addChip(contact);
-			}
-
-			@Override
-			public void onRemove(StingleContact contact) {
-				removeChip(contact);
-			}
-		});
-
 		contactsList.setAdapter(adapter);
 
 		view.findViewById(R.id.addButton).setOnClickListener(v -> addRecipient());
@@ -75,6 +63,19 @@ public class SharingDialogStep1Fragment extends Fragment {
 			return false;
 		});
 		searchField.addTextChangedListener(searchKeyListener());
+
+		adapter.setRecipientSelectionChangeListener(new SharingContactsAdapter.RecipientSelectionChangeListener() {
+			@Override
+			public void onAdd(StingleContact contact) {
+				addChip(contact);
+				searchField.setText("");
+			}
+
+			@Override
+			public void onRemove(StingleContact contact) {
+				removeChip(contact);
+			}
+		});
 
 		return view;
 	}

@@ -24,6 +24,7 @@ public class ContactsDb {
 			StingleDbContract.Columns.COLUMN_NAME_USER_ID,
 			StingleDbContract.Columns.COLUMN_NAME_EMAIL,
 			StingleDbContract.Columns.COLUMN_NAME_PUBLIC_KEY,
+			StingleDbContract.Columns.COLUMN_NAME_DATE_USED,
 			StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED
 	};
 
@@ -33,6 +34,7 @@ public class ContactsDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_USER_ID, contact.userId);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_EMAIL, contact.email);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_PUBLIC_KEY, contact.publicKey);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_USED, contact.dateUsed);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, contact.dateModified);
 
 		db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
@@ -45,6 +47,7 @@ public class ContactsDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_USER_ID, contact.userId);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_EMAIL, contact.email);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_PUBLIC_KEY, contact.publicKey);
+		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_USED, contact.dateUsed);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, contact.dateModified);
 
 		String selection = StingleDbContract.Columns.COLUMN_NAME_USER_ID + " = ?";
@@ -88,7 +91,7 @@ public class ContactsDb {
 	}
 
 	public StingleContact getContactAtPosition(int pos, int sort) {
-		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_USED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		Cursor result = db.openReadDb().query(
 				false,
@@ -113,7 +116,7 @@ public class ContactsDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_EMAIL + " LIKE ?";
 		String[] selectionArgs = {"%" + filter + "%"};
 
-		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_USED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		Cursor result = db.openReadDb().query(
 				false,

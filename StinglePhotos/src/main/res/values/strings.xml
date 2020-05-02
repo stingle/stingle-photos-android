@@ -281,9 +281,11 @@
     <string name="share_via_stingle">Share via Stingle Photos</string>
     <string name="share_to_apps">Share to other apps</string>
     <string name="type_an_email">Type an email address</string>
-    <string name="allow_album_add">Members can add photos to this shared album</string>
-    <string name="allow_share">Members can invite other users to this shared album</string>
-    <string name="allow_copy">Members can copy photos and videos to their own library and take screenshots</string>
+    <string name="allow_album_add_desc">Members can add photos to this shared album</string>
+    <string name="allow_share">Sharing</string>
+    <string name="allow_share_desc">Members can invite other users to this shared album</string>
+    <string name="allow_copy">Copying</string>
+    <string name="allow_copy_desc">Members can copy photos and videos to their own library and take screenshots</string>
     <string name="or">or</string>
     <string name="unlock">Unlock</string>
     <string name="pref_header_appearance">Appearance</string>
@@ -304,6 +306,7 @@
     <string name="next">Next</string>
     <string name="select_recp">Please select at least one recipient</string>
     <string name="album_name">Shared album name</string>
+    <string name="allow_album_add">Add new photos</string>
 
 
 </resources>

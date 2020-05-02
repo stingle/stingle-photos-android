@@ -48,6 +48,13 @@ public class SharingDialogStep2Fragment extends Fragment {
 			albumName.setEnabled(false);
 		}
 
+		view.findViewById(R.id.allow_add_text).setOnClickListener(v -> allowAdd.toggle());
+		view.findViewById(R.id.allow_add_text_desc).setOnClickListener(v -> allowAdd.toggle());
+		view.findViewById(R.id.allow_share_text).setOnClickListener(v -> allowShare.toggle());
+		view.findViewById(R.id.allow_share_text_desc).setOnClickListener(v -> allowShare.toggle());
+		view.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());
+		view.findViewById(R.id.allow_copy_text_desc).setOnClickListener(v -> allowCopy.toggle());
+
 		return view;
 	}
 
