@@ -43,5 +43,6 @@
     <string name="move_file">sync/moveFile</string>
     <string name="get_contact">sync/getContact</string>
     <string name="share_url">sync/share</string>
+    <string name="album_edit_perms_url">sync/editPerms</string>
 
 </resources>

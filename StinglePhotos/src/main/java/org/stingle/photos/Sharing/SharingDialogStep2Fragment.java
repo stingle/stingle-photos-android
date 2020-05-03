@@ -25,6 +25,8 @@ public class SharingDialogStep2Fragment extends Fragment {
 	private String albumNameStr = "";
 	private SharingPermissions permissions = new SharingPermissions();
 	private boolean disableAlbumName = false;
+	private boolean hideAlbumName = false;
+	private boolean hidePermissionsTitle = false;
 
 	@Nullable
 	@Override
@@ -46,6 +48,13 @@ public class SharingDialogStep2Fragment extends Fragment {
 
 		if(disableAlbumName) {
 			albumName.setEnabled(false);
+		}
+		if(hideAlbumName) {
+			albumName.setVisibility(View.GONE);
+			view.findViewById(R.id.albumNameTitle).setVisibility(View.GONE);
+		}
+		if(hidePermissionsTitle) {
+			view.findViewById(R.id.permissionsTitle).setVisibility(View.GONE);
 		}
 
 		view.findViewById(R.id.allow_add_text).setOnClickListener(v -> allowAdd.toggle());
@@ -81,5 +90,11 @@ public class SharingDialogStep2Fragment extends Fragment {
 
 	public void disableAlbumName(){
 		disableAlbumName = true;
+	}
+	public void hideAlbumName(){
+		hideAlbumName = true;
+	}
+	public void hidePermissionsTitle(){
+		hidePermissionsTitle = true;
 	}
 }

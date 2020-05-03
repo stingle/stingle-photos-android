@@ -608,6 +608,7 @@ public class GalleryActivity extends AppCompatActivity
 					getMenuInflater().inflate(R.menu.album, menu);
 					StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(this);
 					if(album != null && album.permissionsObj != null && !album.isOwner) {
+						menu.findItem(R.id.action_album_permissions).setVisible(false);
 						menu.findItem(R.id.action_delete_album).setVisible(false);
 						if (!album.permissionsObj.allowShare) {
 							menu.findItem(R.id.share_album).setVisible(false);
@@ -627,12 +628,8 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 
-		//noinspection SimplifiableIfStatement
 		if (id == R.id.action_lock) {
 			LoginManager.lock(this);
 			Intent intent = new Intent();
@@ -652,6 +649,9 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.share_album) {
 			GalleryActions.shareStingle(this, null);
+		}
+		else if (id == R.id.action_album_permissions) {
+			GalleryActions.albumPermissions(this);
 		}
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);

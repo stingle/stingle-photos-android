@@ -10,6 +10,13 @@
     </item>
 
     <item
+        android:id="@+id/action_album_permissions"
+        android:orderInCategory="100"
+        android:title="@string/permissions"
+        android:icon="@drawable/ic_key"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_delete_album"
         android:orderInCategory="100"
         android:title="@string/delete_album"

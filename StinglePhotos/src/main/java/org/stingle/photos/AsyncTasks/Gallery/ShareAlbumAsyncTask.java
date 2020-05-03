@@ -148,12 +148,17 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			}
 			album.permissions = permissions.toString();
 
+			db.close();
+
 			boolean notifyResult = SyncManager.notifyCloudAboutShare(myContext, album, sharingKeys);
 			if(notifyResult){
 				db.updateAlbum(album);
 			}
+			else{
+				return false;
+			}
 
-			db.close();
+
 		}
 		catch (IOException | CryptoException e){
 			return false;

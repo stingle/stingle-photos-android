@@ -479,4 +479,27 @@ public class SyncManager {
 		}
 	}
 
+	public static boolean notifyCloudAboutAlbumEditPerms(Context context, StingleDbAlbum album) {
+		HashMap<String, String> params = new HashMap<>();
+
+		params.put("album", album.toJSON());
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_edit_perms_url), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
+	}
+
 }

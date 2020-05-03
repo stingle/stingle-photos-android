@@ -8,7 +8,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,7 +30,6 @@ import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 public class SharingDialogFragment extends AppCompatDialogFragment {
@@ -90,7 +88,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		viewPager.setAdapter(pagerAdapter);
 		viewPager.registerOnPageChangeCallback(onPageChange());
 
-		Objects.requireNonNull(getDialog()).setOnKeyListener((dialog, keyCode, event) -> {
+		requireDialog().setOnKeyListener((dialog, keyCode, event) -> {
 			if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
 				if (viewPager.getCurrentItem() == 1) {
 					viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
@@ -134,7 +132,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 							step2Fragment.setAlbumName(albumName);
 						}
 						else{
-							Toast.makeText(getContext(), requireContext().getString(R.string.select_recp), Toast.LENGTH_LONG).show();
+							Snackbar.make(requireDialog().findViewById(R.id.drawer_layout), requireContext().getString(R.string.select_recp), Snackbar.LENGTH_LONG).show();
 						}
 					}
 				});
@@ -153,20 +151,19 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 			public void onFinish() {
 				super.onFinish();
 				spinner.dismiss();
-				SharingDialogFragment.this.dismiss();
+				requireDialog().dismiss();
 				Object activity = getActivity();
 				if(activity instanceof GalleryActivity) {
 					((GalleryActivity)activity).exitActionMode();
 				}
+				Snackbar.make(requireActivity().findViewById(R.id.drawer_layout), requireContext().getString(R.string.share_success), Snackbar.LENGTH_LONG).show();
 			}
 
 			@Override
 			public void onFail() {
 				super.onFail();
 				spinner.dismiss();
-				SharingDialogFragment.this.dismiss();
-				Snackbar mySnackbar = Snackbar.make(requireActivity().findViewById(R.id.drawer_layout), requireContext().getString(R.string.failed_to_share), Snackbar.LENGTH_SHORT);
-				mySnackbar.show();
+				Snackbar.make(requireDialog().findViewById(R.id.drawer_layout), requireContext().getString(R.string.failed_to_share), Snackbar.LENGTH_LONG).show();
 			}
 		});
 

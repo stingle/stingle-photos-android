@@ -307,6 +307,10 @@
     <string name="select_recp">Please select at least one recipient</string>
     <string name="album_name">Shared album name</string>
     <string name="allow_album_add">Add new photos</string>
+    <string name="save">Save</string>
+    <string name="spinner_saving">Saving...</string>
+    <string name="share_success">Successfully shared</string>
+    <string name="save_success">Saved</string>
 
 
 </resources>

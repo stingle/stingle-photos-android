@@ -33,6 +33,7 @@ import org.stingle.photos.Gallery.Albums.AlbumsFragment;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.Sharing.AlbumPermissionsDialogFragment;
 import org.stingle.photos.Sharing.SharingDialogFragment;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
@@ -422,6 +423,15 @@ public class GalleryActions {
 		newFragment.setAlbumId(activity.getCurrentAlbumId());
 		newFragment.setFiles(files);
 		newFragment.setAlbumName(activity.getCurrentAlbumName());
+
+		newFragment.show(ft, "dialog");
+	}
+
+	public static void albumPermissions(GalleryActivity activity) {
+		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+		AlbumPermissionsDialogFragment newFragment = new AlbumPermissionsDialogFragment();
+
+		newFragment.setAlbumId(activity.getCurrentAlbumId());
 
 		newFragment.show(ft, "dialog");
 	}
