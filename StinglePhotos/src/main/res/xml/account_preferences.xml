@@ -8,7 +8,7 @@
         app:enabled="false"/>
 
     <Preference
-        app:icon="@drawable/ic_key_red"
+        app:icon="@drawable/ic_key"
         app:key="change_password"
         app:title="@string/change_password" />
 

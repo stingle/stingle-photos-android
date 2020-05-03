@@ -4,34 +4,34 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Query.AlbumsDb;
-import org.stingle.photos.Sharing.SharingPermissions;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.lang.ref.WeakReference;
 
-public class EditAlbumPermissionsAsyncTask extends AsyncTask<Void, Void, Boolean> {
+public class RemoveMemberAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	private WeakReference<Context> context;
 	private String albumId;
 	private final OnAsyncTaskFinish onFinishListener;
-	private SharingPermissions permissions;
+	private StingleContact member;
 	private int sourceSet = -1;
 
-	public EditAlbumPermissionsAsyncTask(Context context, OnAsyncTaskFinish onFinishListener) {
+	public RemoveMemberAsyncTask(Context context, OnAsyncTaskFinish onFinishListener) {
 		this.context = new WeakReference<>(context);;
 
 		this.onFinishListener = onFinishListener;
 	}
 
-	public EditAlbumPermissionsAsyncTask setAlbumId(String albumId){
+	public RemoveMemberAsyncTask setAlbumId(String albumId){
 		this.albumId = albumId;
 		return this;
 	}
 
-	public EditAlbumPermissionsAsyncTask setPermissions(SharingPermissions permissions){
-		this.permissions = permissions;
+	public RemoveMemberAsyncTask setMember(StingleContact member){
+		this.member = member;
 		return this;
 	}
 
@@ -42,7 +42,7 @@ public class EditAlbumPermissionsAsyncTask extends AsyncTask<Void, Void, Boolean
 			return false;
 		}
 
-		if(permissions == null){
+		if(member == null){
 			return false;
 		}
 
@@ -54,10 +54,14 @@ public class EditAlbumPermissionsAsyncTask extends AsyncTask<Void, Void, Boolean
 			return false;
 		}
 
-		album.permissions = permissions.toString();
+		if(!album.members.contains(String.valueOf(member.userId))){
+			return false;
+		}
+
+		album.members.remove(String.valueOf(member.userId));
 		db.close();
 
-		boolean notifyResult = SyncManager.notifyCloudAboutAlbumEditPerms(myContext, album);
+		boolean notifyResult = SyncManager.notifyCloudAboutMemberRemove(myContext, album, member.userId);
 		if(notifyResult){
 			db.updateAlbum(album);
 		}

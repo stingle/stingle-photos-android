@@ -391,6 +391,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		else if(type == SyncManager.DELETE_EVENT_ALBUM) {
 			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
 			if(album != null && album.dateModified < date) {
+				albumFilesDb.deleteAllFilesInAlbum(albumId);
 				albumsDb.deleteAlbum(albumId);
 			}
 		}

@@ -311,6 +311,13 @@
     <string name="spinner_saving">Saving...</string>
     <string name="share_success">Successfully shared</string>
     <string name="save_success">Saved</string>
+    <string name="album_settings">Album settings</string>
+    <string name="shared_album">Shared album</string>
+    <string name="unshare">Unshare</string>
+    <string name="loading">Loading...</string>
+    <string name="members">Members</string>
+    <string name="remove">Remove</string>
+    <string name="unshare_member">Are you sure you want to remove %s?</string>
 
 
 </resources>

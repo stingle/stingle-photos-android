@@ -44,5 +44,6 @@
     <string name="get_contact">sync/getContact</string>
     <string name="share_url">sync/share</string>
     <string name="album_edit_perms_url">sync/editPerms</string>
+    <string name="album_remove_member_url">sync/removeAlbumMember</string>
 
 </resources>

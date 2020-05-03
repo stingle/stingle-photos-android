@@ -608,7 +608,7 @@ public class GalleryActivity extends AppCompatActivity
 					getMenuInflater().inflate(R.menu.album, menu);
 					StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(this);
 					if(album != null && album.permissionsObj != null && !album.isOwner) {
-						menu.findItem(R.id.action_album_permissions).setVisible(false);
+						menu.findItem(R.id.action_album_settings).setVisible(false);
 						menu.findItem(R.id.action_delete_album).setVisible(false);
 						if (!album.permissionsObj.allowShare) {
 							menu.findItem(R.id.share_album).setVisible(false);
@@ -650,8 +650,8 @@ public class GalleryActivity extends AppCompatActivity
 		else if (id == R.id.share_album) {
 			GalleryActions.shareStingle(this, null);
 		}
-		else if (id == R.id.action_album_permissions) {
-			GalleryActions.albumPermissions(this);
+		else if (id == R.id.action_album_settings) {
+			GalleryActions.albumSettings(this);
 		}
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);

@@ -93,6 +93,13 @@ public class AlbumFilesDb implements FilesDb {
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
 	}
 
+	public int deleteAllFilesInAlbum(String albumId){
+		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
+		String[] selectionArgs = { albumId };
+
+		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+	}
+
 	public int truncateTable(){
 		return db.openWriteDb().delete(tableName, null, null);
 	}

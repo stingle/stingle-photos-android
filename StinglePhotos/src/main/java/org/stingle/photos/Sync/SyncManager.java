@@ -502,4 +502,28 @@ public class SyncManager {
 		}
 	}
 
+	public static boolean notifyCloudAboutMemberRemove(Context context, StingleDbAlbum album, Long memberUserId) {
+		HashMap<String, String> params = new HashMap<>();
+
+		params.put("album", album.toJSON());
+		params.put("memberUserId", String.valueOf(memberUserId));
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_remove_member_url), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
+	}
+
 }

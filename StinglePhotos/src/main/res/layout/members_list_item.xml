@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="12dp">
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginEnd="8dp"
+        android:layout_toStartOf="@+id/unshare"
+        android:layout_centerVertical="true"/>
+
+    <Button
+        android:id="@+id/unshare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:text="@string/remove"/>
+
+</RelativeLayout>

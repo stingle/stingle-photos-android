@@ -22,6 +22,8 @@ public class SharingDialogStep2Fragment extends Fragment {
 	private Switch allowShare;
 	private Switch allowCopy;
 
+	private PermissionChangeListener changeListener;
+
 	private String albumNameStr = "";
 	private SharingPermissions permissions = new SharingPermissions();
 	private boolean disableAlbumName = false;
@@ -40,9 +42,7 @@ public class SharingDialogStep2Fragment extends Fragment {
 		allowShare = view.findViewById(R.id.allow_share);
 		allowCopy = view.findViewById(R.id.allow_copy);
 
-		allowAdd.setChecked(permissions.allowAdd);
-		allowShare.setChecked(permissions.allowShare);
-		allowCopy.setChecked(permissions.allowCopy);
+		updatePermissionsView();
 
 		albumName.setText(albumNameStr);
 
@@ -64,6 +64,12 @@ public class SharingDialogStep2Fragment extends Fragment {
 		view.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());
 		view.findViewById(R.id.allow_copy_text_desc).setOnClickListener(v -> allowCopy.toggle());
 
+		if(changeListener != null){
+			allowAdd.setOnClickListener(v -> changeListener.onChange());
+			allowShare.setOnClickListener(v -> changeListener.onChange());
+			allowCopy.setOnClickListener(v -> changeListener.onChange());
+		}
+
 		return view;
 	}
 
@@ -78,6 +84,11 @@ public class SharingDialogStep2Fragment extends Fragment {
 
 	public void setPermissions(SharingPermissions permissions){
 		this.permissions = permissions;
+		updatePermissionsView();
+	}
+
+	public void setChangeListener(PermissionChangeListener changeListener){
+		this.changeListener = changeListener;
 	}
 
 	public String getAlbumName(){
@@ -96,5 +107,17 @@ public class SharingDialogStep2Fragment extends Fragment {
 	}
 	public void hidePermissionsTitle(){
 		hidePermissionsTitle = true;
+	}
+
+	private void updatePermissionsView(){
+		if(allowAdd != null && allowShare != null && allowCopy != null) {
+			allowAdd.setChecked(permissions.allowAdd);
+			allowShare.setChecked(permissions.allowShare);
+			allowCopy.setChecked(permissions.allowCopy);
+		}
+	}
+
+	public abstract static class PermissionChangeListener{
+		public abstract void onChange();
 	}
 }
