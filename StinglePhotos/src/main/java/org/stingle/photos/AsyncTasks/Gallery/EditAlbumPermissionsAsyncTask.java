@@ -50,22 +50,21 @@ public class EditAlbumPermissionsAsyncTask extends AsyncTask<Void, Void, Boolean
 
 		StingleDbAlbum album = db.getAlbumById(albumId);
 
-		if(!album.isOwner || !album.isShared){
+		if(album == null || !album.isOwner || !album.isShared){
 			return false;
 		}
 
 		album.permissions = permissions.toString();
-		db.close();
 
 		boolean notifyResult = SyncManager.notifyCloudAboutAlbumEditPerms(myContext, album);
 		if(notifyResult){
 			db.updateAlbum(album);
-		}
-		else{
-			return false;
+			db.close();
+			return true;
 		}
 
-		return true;
+		db.close();
+		return false;
 	}
 
 	@Override

@@ -9,6 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Util.Helpers;
+
+import java.util.ArrayList;
 
 public class ContactsDb {
 
@@ -136,6 +139,35 @@ public class ContactsDb {
 		}
 		return null;
 	}
+	public StingleContact getContactAtPosition(int pos, int sort, String filter, ArrayList<String> excludedIds) {
+		if(excludedIds == null || excludedIds.size() == 0){
+			return getContactAtPosition(pos, sort, filter);
+		}
+		String excludedIdsStr = Helpers.impode(",", excludedIds);
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_EMAIL + " LIKE ? AND " + StingleDbContract.Columns.COLUMN_NAME_USER_ID + " NOT IN ("+excludedIdsStr+")";
+		String[] selectionArgs = {"%" + filter + "%"};
+
+		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_USED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+
+		Cursor result = db.openReadDb().query(
+				false,
+				tableName,
+				projection,
+				selection,
+				selectionArgs,
+				null,
+				null,
+				sortOrder,
+				String.valueOf(pos) + ", 1"
+		);
+
+		if (result.getCount() > 0) {
+			result.moveToNext();
+			return new StingleContact(result);
+		}
+		return null;
+	}
 
 	public StingleContact getContactByUserId(Long userId) {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_USER_ID + " = ?";
@@ -186,8 +218,20 @@ public class ContactsDb {
 	public long getTotalContactsCount() {
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
 	}
+
 	public long getTotalContactsCount(String filter) {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_EMAIL + " LIKE ?";
+		String[] selectionArgs = {"%" + filter + "%"};
+		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+	}
+
+	public long getTotalContactsCount(String filter, ArrayList<String> excludedIds) {
+		if(excludedIds == null || excludedIds.size() == 0){
+			return getTotalContactsCount(filter);
+		}
+		String excludedIdsStr = Helpers.impode(",", excludedIds);
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_EMAIL + " LIKE ? AND " + StingleDbContract.Columns.COLUMN_NAME_USER_ID + " NOT IN ("+excludedIdsStr+")";
 		String[] selectionArgs = {"%" + filter + "%"};
 		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
 	}

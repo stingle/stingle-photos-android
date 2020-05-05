@@ -105,7 +105,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 				AlbumsAdapterPisasso.AlbumProps props = new AlbumsAdapterPisasso.AlbumProps();
 
-				props.name = albumData.name;
+				props.name = albumData.metadata.name;
 				if(view == AlbumsFragment.VIEW_SHARES){
 					props.subtitle = getMembersString(album);
 					if(album.isOwner){
@@ -155,7 +155,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 		}
 
 		if(addOthers){
-			int othersCount = album.members.size() - count;
+			int othersCount = album.members.size() - count - 1;
 			if(othersCount > 0){
 				membersStr.append(" " + context.getString(R.string.count_others, othersCount));
 			}

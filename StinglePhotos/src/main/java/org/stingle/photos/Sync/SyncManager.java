@@ -407,7 +407,7 @@ public class SyncManager {
 
 	public static StingleDbAlbum addAlbum(Context context, String albumName) throws IOException {
 		Crypto crypto = StinglePhotosApplication.getCrypto();
-		Crypto.AlbumEncData encData = crypto.generateEncryptedAlbumData(crypto.getPublicKey(), albumName);
+		Crypto.AlbumEncData encData = crypto.generateEncryptedAlbumData(crypto.getPublicKey(), new Crypto.AlbumMetadata(albumName));
 
 		AlbumsDb db = new AlbumsDb(context);
 		long now = System.currentTimeMillis();
@@ -514,6 +514,51 @@ public class SyncManager {
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
 			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_remove_member_url), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
+	}
+	public static boolean notifyCloudAboutAlbumUnshare(Context context, StingleDbAlbum album) {
+		HashMap<String, String> params = new HashMap<>();
+
+		params.put("albumId", album.albumId);
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_unshare_url), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
+	}
+	public static boolean notifyCloudAboutAlbumRename(Context context, StingleDbAlbum album) {
+		HashMap<String, String> params = new HashMap<>();
+
+		params.put("albumId", album.albumId);
+		params.put("metadata", album.metadata);
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_rename_url), postParams);
 			StingleResponse response = new StingleResponse(context, json, false);
 
 			if (response.isStatusOk()) {

@@ -1,13 +1,16 @@
 package org.stingle.photos.Sharing;
 
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,25 +21,26 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.AsyncTasks.Gallery.EditAlbumPermissionsAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.UnshareAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Gallery.Albums.AlbumsFragment;
+import org.stingle.photos.Gallery.Gallery.GalleryActions;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
-
-import java.io.IOException;
 
 
 public class AlbumSettingsDialogFragment extends AppCompatDialogFragment {
 
 	private SharingDialogStep2Fragment step2fragment;
 	private String albumId;
+	private String albumName;
 	private StingleDbAlbum album;
 	private AlbumMembersFragment membersFragment;
-	private TextView albumName;
+	private TextView albumNameText;
 
 
 	@Override
@@ -58,7 +62,7 @@ public class AlbumSettingsDialogFragment extends AppCompatDialogFragment {
 		toolbar.setNavigationOnClickListener(view1 -> dismiss());
 		toolbar.setTitle(getString(R.string.album_settings));
 
-		albumName = view.findViewById(R.id.albumName);
+		albumNameText = view.findViewById(R.id.albumName);
 
 		step2fragment = new SharingDialogStep2Fragment();
 
@@ -75,18 +79,13 @@ public class AlbumSettingsDialogFragment extends AppCompatDialogFragment {
 		});
 
 		initAlbum();
-		Crypto crypto = StinglePhotosApplication.getCrypto();
-		Crypto.AlbumData albumData = null;
-		try {
-			albumData = crypto.parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
-		} catch (IOException | CryptoException e) {
-			e.printStackTrace();
-		}
+		albumName = GalleryHelpers.getAlbumName(album);
 
-		if (albumData != null && album.isShared && album.permissionsObj != null) {
+		if (album.isShared && album.permissionsObj != null) {
 			step2fragment.setPermissions(album.permissionsObj);
-			albumName.setText(albumData.name);
+			albumNameText.setText(albumName);
 			membersFragment = new AlbumMembersFragment(album);
+			albumNameText.setOnClickListener(renameAlbum());
 
 			FragmentTransaction ft = getChildFragmentManager().beginTransaction();
 			ft.replace(R.id.permissionsContainer, step2fragment);
@@ -94,7 +93,67 @@ public class AlbumSettingsDialogFragment extends AppCompatDialogFragment {
 			ft.commit();
 		}
 
+		view.findViewById(R.id.unshare).setOnClickListener(unshare());
+
 		return view;
+	}
+
+	private View.OnClickListener renameAlbum() {
+		return v -> {
+			GalleryActions.renameAlbum(requireContext(), albumId, albumName, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish(Object newAlbumName) {
+					super.onFinish();
+					if(newAlbumName != null && newAlbumName instanceof String){
+						albumName = (String)newAlbumName;
+						albumNameText.setText(albumName);
+						Activity activity = requireActivity();
+						if(activity instanceof GalleryActivity){
+							((GalleryActivity)activity).initCurrentFragment();
+						}
+					}
+				}
+
+				@Override
+				public void onFail() {
+					super.onFail();
+					Toast.makeText(requireContext(), R.string.something_went_wrong, Toast.LENGTH_LONG).show();
+				}
+			});
+		};
+	}
+
+	private View.OnClickListener unshare() {
+		return v -> {
+			Helpers.showConfirmDialog(requireContext(), requireContext().getString(R.string.unshare_confirm, albumName), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					final ProgressDialog spinner = Helpers.showProgressDialog(getActivity(), requireContext().getString(R.string.spinner_unsharing), null);
+					UnshareAlbumAsyncTask task = new UnshareAlbumAsyncTask(requireContext(), new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							spinner.dismiss();
+							Snackbar.make(requireActivity().findViewById(R.id.drawer_layout), requireContext().getString(R.string.unshare_success, albumName), Snackbar.LENGTH_LONG).show();
+							requireDialog().dismiss();
+							Activity activity = requireActivity();
+							if(activity instanceof GalleryActivity){
+								((GalleryActivity)activity).showAlbumsList(AlbumsFragment.VIEW_ALBUMS);
+							}
+						}
+
+						@Override
+						public void onFail() {
+							super.onFail();
+							spinner.dismiss();
+							Toast.makeText(requireContext(), R.string.something_went_wrong, Toast.LENGTH_LONG).show();
+						}
+					});
+					task.setAlbumId(album.albumId);
+					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
+			}, null);
+		};
 	}
 
 

@@ -495,4 +495,17 @@ public class Helpers {
 	public static String generateAlbumName() {
 		return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(new Date());
 	}
+
+	public static String impode(String glue, ArrayList<String> items){
+		if(items.size() == 0){
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < items.size() - 1; i++) {
+			sb.append(items.get(i));
+			sb.append(glue);
+		}
+		sb.append(items.get(items.size() - 1).trim());
+		return sb.toString();
+	}
 }

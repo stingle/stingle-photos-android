@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class OnAsyncTaskFinish {
-	public void onFinish(){}
+	public void onFinish(){ }
 	public void onFinish(ArrayList<File> files){
 		onFinish();
 	}

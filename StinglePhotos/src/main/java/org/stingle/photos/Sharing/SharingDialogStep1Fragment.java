@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,6 +35,13 @@ public class SharingDialogStep1Fragment extends Fragment {
 	private EditText searchField;
 	private FlexboxLayout chipsContainer;
 	private SharingContactsAdapter adapter;
+	private SharingDialogFragment parentDialog;
+
+	ArrayList<String> excludedIds = new ArrayList<>();
+
+	public SharingDialogStep1Fragment(SharingDialogFragment parentDialog){
+		this.parentDialog = parentDialog;
+	}
 
 	@Nullable
 	@Override
@@ -77,7 +83,13 @@ public class SharingDialogStep1Fragment extends Fragment {
 			}
 		});
 
+		adapter.setExcludedIds(excludedIds);
+
 		return view;
+	}
+
+	public void setExcludedIds(ArrayList<String> excludedIds) {
+		this.excludedIds = excludedIds;
 	}
 
 	public ArrayList<StingleContact> getSelectedRecipients(){
@@ -149,7 +161,7 @@ public class SharingDialogStep1Fragment extends Fragment {
 
 		if (Helpers.isValidEmail(text)) {
 			if (text.equals(ownEmail)) {
-				Toast.makeText(getContext(), requireContext().getString(R.string.cant_share_to_self), Toast.LENGTH_SHORT).show();
+				parentDialog.showSnack(requireContext().getString(R.string.cant_share_to_self));
 				return;
 			}
 			(new GetContactAsyncTask(getContext(), text, new OnAsyncTaskFinish() {
@@ -164,9 +176,8 @@ public class SharingDialogStep1Fragment extends Fragment {
 					}
 					else{
 						adapter.addToSelection((StingleContact) contact);
-						Toast.makeText(getContext(), requireContext().getString(R.string.already_added), Toast.LENGTH_SHORT).show();
 						if(onFinish != null){
-							onFinish.onFail();
+							onFinish.onFinish();
 						}
 					}
 					searchField.setText("");
@@ -175,7 +186,7 @@ public class SharingDialogStep1Fragment extends Fragment {
 				@Override
 				public void onFail() {
 					super.onFail();
-					Toast.makeText(getContext(), requireContext().getString(R.string.not_on_stingle), Toast.LENGTH_LONG).show();
+					parentDialog.showSnack(requireContext().getString(R.string.not_on_stingle));
 					if(onFinish != null){
 						onFinish.onFail();
 					}
@@ -183,7 +194,7 @@ public class SharingDialogStep1Fragment extends Fragment {
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		} else {
-			Toast.makeText(getContext(), requireContext().getString(R.string.invalid_email), Toast.LENGTH_LONG).show();
+			parentDialog.showSnack(requireContext().getString(R.string.invalid_email));
 			if(onFinish != null){
 				onFinish.onFail();
 			}

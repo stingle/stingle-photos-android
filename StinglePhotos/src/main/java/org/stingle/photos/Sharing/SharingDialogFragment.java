@@ -23,7 +23,7 @@ import org.stingle.photos.AsyncTasks.Gallery.ShareAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
@@ -44,7 +44,10 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 	private ArrayList<StingleDbFile> files;
 	private int set;
 	private String albumId;
+	private StingleDbAlbum album;
 	private String albumName;
+	private boolean onlyAdd = false;
+	private OnAsyncTaskFinish onFinish;
 
 
 	@Override
@@ -67,17 +70,22 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		toolbar.setTitle(getString(R.string.share_via_sp));
 		toolbar.setOnMenuItemClickListener(onMenuClicked());
 
-		step1Fragment = new SharingDialogStep1Fragment();
+		step1Fragment = new SharingDialogStep1Fragment(this);
 		step2Fragment = new SharingDialogStep2Fragment();
+
+		if(onlyAdd && (albumId == null || albumId.length() == 0)){
+			requireDialog().dismiss();
+			return null;
+		}
 
 		if(albumName == null || albumName.length() == 0){
 			albumName = Helpers.generateAlbumName();
 		}
 		if(albumId != null && albumId.length() > 0){
 			step2Fragment.disableAlbumName();
-			AlbumsDb db = new AlbumsDb(requireContext());
-			StingleDbAlbum album = db.getAlbumById(albumId);
+			album = GalleryHelpers.getAlbum(requireContext(), albumId);
 			if(album.isShared && album.permissionsObj != null) {
+				step1Fragment.setExcludedIds(album.members);
 				step2Fragment.setPermissions(album.permissionsObj);
 			}
 		}
@@ -108,10 +116,14 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 				super.onPageSelected(position);
 
 				toolbar.getMenu().clear();
-				if(position == 0) {
-					toolbar.inflateMenu(R.menu.sharing_dialog_step1);
+				if(!onlyAdd) {
+					if (position == 0) {
+						toolbar.inflateMenu(R.menu.sharing_dialog_step1);
+					} else if (position == 1) {
+						toolbar.inflateMenu(R.menu.sharing_dialog_step2);
+					}
 				}
-				else if(position == 1){
+				else{
 					toolbar.inflateMenu(R.menu.sharing_dialog_step2);
 				}
 			}
@@ -132,16 +144,41 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 							step2Fragment.setAlbumName(albumName);
 						}
 						else{
-							Snackbar.make(requireDialog().findViewById(R.id.drawer_layout), requireContext().getString(R.string.select_recp), Snackbar.LENGTH_LONG).show();
+							showSnack(requireContext().getString(R.string.select_recp));
 						}
+					}
+
+					@Override
+					public void onFail() {
+						super.onFail();
 					}
 				});
 			}
 			else if (id == R.id.shareButton) {
-				share();
+				if(onlyAdd){
+					step1Fragment.addRecipient(new OnAsyncTaskFinish(){
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							if(step1Fragment.getSelectedRecipients().size() > 0) {
+								share();
+							}
+							else{
+								showSnack(requireContext().getString(R.string.select_recp));
+							}
+						}
+					});
+				}
+				else {
+					share();
+				}
 			}
 			return false;
 		};
+	}
+
+	private void validateStep1(){
+
 	}
 
 	private void share() {
@@ -157,17 +194,23 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 					((GalleryActivity)activity).exitActionMode();
 				}
 				Snackbar.make(requireActivity().findViewById(R.id.drawer_layout), requireContext().getString(R.string.share_success), Snackbar.LENGTH_LONG).show();
+				if(onFinish != null){
+					onFinish.onFinish();
+				}
 			}
 
 			@Override
 			public void onFail() {
 				super.onFail();
 				spinner.dismiss();
-				Snackbar.make(requireDialog().findViewById(R.id.drawer_layout), requireContext().getString(R.string.failed_to_share), Snackbar.LENGTH_LONG).show();
+				showSnack(requireContext().getString(R.string.failed_to_share));
+				if(onFinish != null){
+					onFinish.onFail();
+				}
 			}
 		});
 
-		if(set == SyncManager.ALBUM) {
+		if(albumId != null && (onlyAdd || set == SyncManager.ALBUM)) {
 			shareTask.setAlbumId(albumId);
 		}
 		else{
@@ -178,7 +221,12 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		}
 		shareTask.setRecipients(step1Fragment.getSelectedRecipients());
 
-		shareTask.setPermissions(step2Fragment.getPermissions());
+		if(onlyAdd){
+			shareTask.setPermissions(album.permissionsObj);
+		}
+		else {
+			shareTask.setPermissions(step2Fragment.getPermissions());
+		}
 
 		shareTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
@@ -194,6 +242,12 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 	}
 	public void setAlbumName(String albumName){
 		this.albumName = albumName;
+	}
+	public void setOnlyAdd(boolean onlyAdd){
+		this.onlyAdd = onlyAdd;
+	}
+	public void setOnFinish(OnAsyncTaskFinish onFinish){
+		this.onFinish = onFinish;
 	}
 
 	private class ScreenSlidePagerAdapter extends FragmentStateAdapter {
@@ -221,5 +275,8 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		}
 	}
 
+	public void showSnack(String message){
+		Snackbar.make(requireDialog().findViewById(R.id.drawer_layout), message, Snackbar.LENGTH_LONG).show();
+	}
 
 }

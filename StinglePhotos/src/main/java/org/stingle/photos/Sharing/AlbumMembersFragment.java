@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,7 +21,9 @@ import org.stingle.photos.AsyncTasks.Gallery.RemoveMemberAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.R;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 
@@ -47,7 +50,27 @@ public class AlbumMembersFragment extends Fragment {
 		adapter.setUnshareListener(unshare());
 		membersList.setAdapter(adapter);
 
+		if(album.isOwner || (album.permissionsObj != null && album.permissionsObj.allowShare)) {
+			view.findViewById(R.id.addMemberContainer).setOnClickListener(addMembers());
+		}
+		else{
+			view.findViewById(R.id.addMemberContainer).setVisibility(View.GONE);
+		}
+
 		return view;
+	}
+
+	private View.OnClickListener addMembers() {
+		return v -> {
+			GalleryActions.shareStingle((AppCompatActivity) requireActivity(), SyncManager.ALBUM, album.albumId, null, null, true, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					adapter.initMembersList();
+					adapter.notifyDataSetChanged();
+				}
+			});
+		};
 	}
 
 	private MembersAdapter.UnshareListener unshare() {
@@ -63,7 +86,7 @@ public class AlbumMembersFragment extends Fragment {
 							public void onFinish() {
 								super.onFinish();
 								spinner.dismiss();
-								Toast.makeText(requireContext(), R.string.save_success, Toast.LENGTH_LONG);
+								Toast.makeText(requireContext(), R.string.save_success, Toast.LENGTH_LONG).show();
 								adapter.initMembersList();
 								adapter.notifyDataSetChanged();
 							}
@@ -72,7 +95,7 @@ public class AlbumMembersFragment extends Fragment {
 							public void onFail() {
 								super.onFail();
 								spinner.dismiss();
-								Toast.makeText(requireContext(), R.string.something_went_wrong, Toast.LENGTH_LONG);
+								Toast.makeText(requireContext(), R.string.something_went_wrong, Toast.LENGTH_LONG).show();
 								adapter.initMembersList();
 								adapter.notifyDataSetChanged();
 							}

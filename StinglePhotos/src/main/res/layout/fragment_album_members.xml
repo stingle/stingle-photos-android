@@ -15,10 +15,39 @@
         android:layout_alignParentTop="true"
         android:text="@string/members" />
 
+    <RelativeLayout
+        android:id="@+id/addMemberContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/membersTitle"
+        android:layout_marginStart="8dp">
+
+        <ImageView
+            android:id="@+id/addMemberIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_add_circle_outline"
+            android:tint="?attr/colorPrimary"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_toEndOf="@id/addMemberIcon"
+            android:layout_centerVertical="true"
+            android:layout_margin="8dp"
+            android:text="@string/add_member" />
+
+
+    </RelativeLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/membersList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/membersTitle" />
+        android:layout_below="@+id/addMemberContainer" />
 
 </RelativeLayout>

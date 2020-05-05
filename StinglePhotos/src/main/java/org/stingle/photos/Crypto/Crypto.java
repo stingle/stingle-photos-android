@@ -1019,28 +1019,14 @@ public class Crypto {
         return overallHeaderSize;
     }
 
-    public AlbumEncData generateEncryptedAlbumData(byte[] userPK, String albumName) throws IOException {
+    public AlbumEncData generateEncryptedAlbumData(byte[] userPK, AlbumMetadata metadata) throws IOException {
 
         byte[] albumSK = new byte[Box.SECRETKEYBYTES];
         byte[] albumPK = new byte[Box.PUBLICKEYBYTES];
 
         so.crypto_box_keypair(albumPK, albumSK);
 
-        // Encrypt metadata
-        ByteArrayOutputStream metadataByteStream = new ByteArrayOutputStream();
-        // Current metadata version - 1 byte
-        metadataByteStream.write(CURRENT_ALBUM_METADATA_VERSION);
-
-        byte[] albumNameBytes = albumName.getBytes();
-        // name length
-        metadataByteStream.write(intToByteArray(albumName.length()));
-        // name itself
-        metadataByteStream.write(albumNameBytes);
-        byte[] metadataBytes = metadataByteStream.toByteArray();
-
-        int encMetadataLength = metadataBytes.length + Box.SEALBYTES;
-        byte[] encryptedMetadata = new byte[encMetadataLength];
-        so.crypto_box_seal(encryptedMetadata, metadataBytes, metadataBytes.length, albumPK);
+        byte[] encryptedMetadata = encryptAlbumMetadata(metadata, albumPK);
 
         // Encrypt albumSK
         byte[] encryptedSK = encryptAlbumSK(albumSK, userPK);
@@ -1051,6 +1037,26 @@ public class Crypto {
         encData.metadata = byteArrayToBase64(encryptedMetadata);
 
         return encData;
+    }
+
+    public byte[] encryptAlbumMetadata(AlbumMetadata metadata, byte[] albumPK) throws IOException {
+        // Encrypt metadata
+        ByteArrayOutputStream metadataByteStream = new ByteArrayOutputStream();
+        // Current metadata version - 1 byte
+        metadataByteStream.write(CURRENT_ALBUM_METADATA_VERSION);
+
+        byte[] albumNameBytes = metadata.name.getBytes();
+        // name length
+        metadataByteStream.write(intToByteArray(metadata.name.length()));
+        // name itself
+        metadataByteStream.write(albumNameBytes);
+        byte[] metadataBytes = metadataByteStream.toByteArray();
+
+        int encMetadataLength = metadataBytes.length + Box.SEALBYTES;
+        byte[] encryptedMetadata = new byte[encMetadataLength];
+        so.crypto_box_seal(encryptedMetadata, metadataBytes, metadataBytes.length, albumPK);
+
+        return encryptedMetadata;
     }
 
     public byte[] encryptAlbumSK(byte[] albumSK, byte[] userPK){
@@ -1076,7 +1082,18 @@ public class Crypto {
             throw new CryptoException("Unable to decrypt albumSK");
         }
 
+        AlbumMetadata metadata = parseAlbumMetadata(metadataStr, albumSK, albumPK);
 
+        AlbumData albumData = new AlbumData();
+
+        albumData.publicKey = albumPK;
+        albumData.privateKey = albumSK;
+        albumData.metadata = metadata;
+
+        return albumData;
+    }
+
+    public AlbumMetadata parseAlbumMetadata(String metadataStr, byte[] albumSK, byte[] albumPK) throws CryptoException, IOException {
         byte[] encMetadata = base64ToByteArray(metadataStr);
 
         byte[] metadataBytes = new byte[encMetadata.length - Box.SEALBYTES];
@@ -1084,12 +1101,6 @@ public class Crypto {
         if(so.crypto_box_seal_open(metadataBytes, encMetadata, encMetadata.length, albumPK, albumSK) != 0){
             throw new CryptoException("Unable to decrypt album data");
         }
-
-        AlbumData albumData = new AlbumData();
-
-        albumData.publicKey = albumPK;
-        albumData.privateKey = albumSK;
-
         ByteArrayInputStream in = new ByteArrayInputStream(metadataBytes);
 
         // Read and validate metadata version
@@ -1097,6 +1108,8 @@ public class Crypto {
         if (metadataVersion != CURRENT_ALBUM_METADATA_VERSION) {
             throw new CryptoException("Unsupported album metadata version number: " + String.valueOf(metadataVersion));
         }
+
+        AlbumMetadata metadata = new AlbumMetadata();
 
         // Read album name size
         byte[] albumNameSizeBytes = new byte[4];
@@ -1107,13 +1120,13 @@ public class Crypto {
             // Read filename
             byte[] albumNameBytes = new byte[albumNameSize];
             in.read(albumNameBytes);
-            albumData.name = new String(albumNameBytes);
+            metadata.name = new String(albumNameBytes);
         }
         else{
-            albumData.name = "";
+            metadata.name = "";
         }
 
-        return albumData;
+        return metadata;
     }
 
     public String reencryptFileHeaders(String headersStr, byte[] publicKeyTo, byte[] privateKeyFrom, byte[] publicKeyFrom) throws IOException, CryptoException {
@@ -1168,7 +1181,16 @@ public class Crypto {
     public static class AlbumData {
         public byte[] publicKey;
         public byte[] privateKey;
+        public AlbumMetadata metadata;
+    }
+    public static class AlbumMetadata {
         public String name;
+
+        public AlbumMetadata(){}
+
+        public AlbumMetadata(String name){
+            this.name = name;
+        }
     }
     public static class AlbumEncData {
         public String publicKey;

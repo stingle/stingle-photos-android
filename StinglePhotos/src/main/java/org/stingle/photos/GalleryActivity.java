@@ -44,9 +44,11 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -261,33 +263,17 @@ public class GalleryActivity extends AppCompatActivity
 		currentSet = -1;
 		currentAlbumId = null;
 		currentAlbumsView = view;
-		if(view == AlbumsFragment.VIEW_ALBUMS) {
-			toolbar.setTitle(getString(R.string.albums));
-		}
-		else if(view == AlbumsFragment.VIEW_SHARES) {
-			toolbar.setTitle(getString(R.string.sharing));
-		}
-		disableSyncBar();
 		currentAlbumName = "";
 		initCurrentFragment();
 	}
-	public void showAlbum(String albumId, String albumName){
+	public void showAlbum(String albumId){
 		currentFragment = FRAGMENT_GALLERY;
 		currentSet = SyncManager.ALBUM;
 		currentAlbumId = albumId;
-		if(albumName != null && albumName.length() > 0){
-			currentAlbumName = albumName;
-			toolbar.setTitle(albumName);
-		}
-		else{
-			toolbar.setTitle(getString(R.string.album));
-			currentAlbumName = "";
-		}
-		disableSyncBar();
 		initCurrentFragment();
 	}
 
-	private void initCurrentFragment(){
+	public void initCurrentFragment(){
 		switch (currentFragment){
 			case FRAGMENT_GALLERY:
 				initGalleryFragment(currentSet, currentAlbumId, true);
@@ -350,6 +336,28 @@ public class GalleryActivity extends AppCompatActivity
 			invalidateOptionsMenu();
 		}
 		fab.setVisibility(View.VISIBLE);
+
+		if(currentSet == SyncManager.ALBUM){
+			String albumName = GalleryHelpers.getAlbumName(this, currentAlbumId);
+			if(albumName != null && albumName.length() > 0){
+				currentAlbumName = albumName;
+				toolbar.setTitle(albumName);
+				toolbar.setOnClickListener(v -> {
+					GalleryActions.renameAlbum(this, currentAlbumId, currentAlbumName, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							initCurrentFragment();
+						}
+					});
+				});
+			}
+			else{
+				toolbar.setTitle(getString(R.string.album));
+				currentAlbumName = "";
+			}
+			disableSyncBar();
+		}
 	}
 
 	private void initAlbumsFragment(){
@@ -374,6 +382,16 @@ public class GalleryActivity extends AppCompatActivity
 		ft.commit();
 		fab.setVisibility(View.GONE);
 		invalidateOptionsMenu();
+
+		if(currentAlbumsView == AlbumsFragment.VIEW_ALBUMS) {
+			toolbar.setTitle(getString(R.string.albums));
+			bottomNavigationView.getMenu().getItem(1).setChecked(true);
+		}
+		else if(currentAlbumsView == AlbumsFragment.VIEW_SHARES) {
+			toolbar.setTitle(getString(R.string.sharing));
+			bottomNavigationView.getMenu().getItem(2).setChecked(true);
+		}
+		disableSyncBar();
 	}
 
 	public void updateGalleryFragmentData(){
@@ -607,17 +625,29 @@ public class GalleryActivity extends AppCompatActivity
 				case SyncManager.ALBUM:
 					getMenuInflater().inflate(R.menu.album, menu);
 					StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(this);
-					if(album != null && album.permissionsObj != null && !album.isOwner) {
-						menu.findItem(R.id.action_album_settings).setVisible(false);
-						menu.findItem(R.id.action_delete_album).setVisible(false);
-						if (!album.permissionsObj.allowShare) {
+					if(album != null) {
+						if(album.isShared) {
 							menu.findItem(R.id.share_album).setVisible(false);
 						}
-						if(!album.permissionsObj.allowAdd){
-							fab.setVisibility(View.GONE);
-						}
 						else{
-							fab.setVisibility(View.VISIBLE);
+							menu.findItem(R.id.action_album_settings).setVisible(false);
+						}
+
+						if(!album.isOwner){
+							menu.findItem(R.id.action_rename_album).setVisible(false);
+							menu.findItem(R.id.action_album_settings).setVisible(false);
+							menu.findItem(R.id.action_delete_album).setVisible(false);
+
+							if(album.permissionsObj != null) {
+								if (!album.permissionsObj.allowShare) {
+									menu.findItem(R.id.share_album).setVisible(false);
+								}
+								if (!album.permissionsObj.allowAdd) {
+									fab.setVisibility(View.GONE);
+								} else {
+									fab.setVisibility(View.VISIBLE);
+								}
+							}
 						}
 					}
 					break;
@@ -648,10 +678,26 @@ public class GalleryActivity extends AppCompatActivity
 			startActivity(intent);
 		}
 		else if (id == R.id.share_album) {
-			GalleryActions.shareStingle(this, null);
+			GalleryActions.shareStingle(this, currentSet, currentAlbumId, currentAlbumName, null, false, null);
 		}
 		else if (id == R.id.action_album_settings) {
 			GalleryActions.albumSettings(this);
+		}
+		else if (id == R.id.action_rename_album) {
+			GalleryActions.renameAlbum(this, currentAlbumId, currentAlbumName, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					initCurrentFragment();
+					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.save_success), Snackbar.LENGTH_LONG).show();
+				}
+
+				@Override
+				public void onFail() {
+					super.onFail();
+					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.something_went_wrong), Snackbar.LENGTH_LONG).show();
+				}
+			});
 		}
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);
@@ -823,7 +869,7 @@ public class GalleryActivity extends AppCompatActivity
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch(item.getItemId()){
 					case R.id.share_stingle:
-						GalleryActions.shareStingle(GalleryActivity.this, galleryFragment.getSelectedFiles());
+						GalleryActions.shareStingle(GalleryActivity.this, currentSet, currentAlbumId, currentAlbumName, galleryFragment.getSelectedFiles(), false, null);
 						break;
 					case R.id.share_to_apps:
 						GalleryActions.shareSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());

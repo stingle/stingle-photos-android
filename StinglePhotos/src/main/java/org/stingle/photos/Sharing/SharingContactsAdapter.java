@@ -24,6 +24,7 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
 	ArrayList<StingleContact> addedRecipients = new ArrayList<>();
 	ArrayList<StingleContact> selectedRecipients = new ArrayList<>();
+	ArrayList<String> excludedIds = new ArrayList<>();
 
 	private static int TYPE_DB = 0;
 	private static int TYPE_ADDED = 1;
@@ -50,6 +51,10 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
 	public void setRecipientSelectionChangeListener(RecipientSelectionChangeListener changeListener){
 		this.changeListener = changeListener;
+	}
+
+	public void setExcludedIds(ArrayList<String> excludedIds){
+		this.excludedIds = excludedIds;
 	}
 
 
@@ -113,7 +118,7 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 		}
 		else {
 			final int dbPos = translateGalleryPosToDbPos(rawPosition);
-			StingleContact contact = db.getContactAtPosition(dbPos, StingleDb.SORT_DESC, filter);
+			StingleContact contact = db.getContactAtPosition(dbPos, StingleDb.SORT_DESC, filter, excludedIds);
 			holder.label.setText(contact.email);
 			if(selectedRecipients.contains(contact)){
 				holder.checbox.setChecked(true);
@@ -130,7 +135,7 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 			recp = addedRecipients.get(pos);
 		}
 		else{
-			recp = db.getContactAtPosition(translateGalleryPosToDbPos(pos), StingleDb.SORT_DESC, filter);
+			recp = db.getContactAtPosition(translateGalleryPosToDbPos(pos), StingleDb.SORT_DESC, filter, excludedIds);
 		}
 
 		if(recp != null) {
@@ -157,7 +162,7 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 			recp = addedRecipients.get(pos);
 		}
 		else{
-			recp = db.getContactAtPosition(translateGalleryPosToDbPos(pos), StingleDb.SORT_DESC, filter);
+			recp = db.getContactAtPosition(translateGalleryPosToDbPos(pos), StingleDb.SORT_DESC, filter, excludedIds);
 		}
 
 		if(recp != null) {
@@ -213,9 +218,9 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 	@Override
 	public int getItemCount() {
 		if(filter.length() == 0){
-			return (int)db.getTotalContactsCount(filter) + addedRecipients.size();
+			return (int)db.getTotalContactsCount(filter, excludedIds) + addedRecipients.size();
 		}
-		return (int)db.getTotalContactsCount(filter);
+		return (int)db.getTotalContactsCount(filter, excludedIds);
 	}
 
 	public abstract static class RecipientSelectionChangeListener {

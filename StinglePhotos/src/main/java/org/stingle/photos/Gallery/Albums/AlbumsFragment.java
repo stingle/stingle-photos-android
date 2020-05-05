@@ -15,17 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Helpers.AutoFitGridLayoutManager;
-import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public class AlbumsFragment extends Fragment{
@@ -47,7 +43,7 @@ public class AlbumsFragment extends Fragment{
 		@Override
 		public void onClick(int index, int type) {
 			if(type == AlbumsAdapterPisasso.TYPE_ADD){
-				GalleryHelpers.addAlbum(getContext(), new OnAsyncTaskFinish() {
+				GalleryActions.addAlbum(getContext(), new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish(Object set) {
 						super.onFinish();
@@ -63,15 +59,7 @@ public class AlbumsFragment extends Fragment{
 			}
 			else{
 				StingleDbAlbum album = adapter.getAlbumAtPosition(index);
-				String albumName = "";
-				try {
-					Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
-					albumName = albumData.name;
-					albumData = null;
-				} catch (IOException | CryptoException e) {
-					e.printStackTrace();
-				}
-				parentActivity.showAlbum(album.albumId, albumName);
+				parentActivity.showAlbum(album.albumId);
 			}
 		}
 

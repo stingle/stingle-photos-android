@@ -318,6 +318,11 @@
     <string name="members">Members</string>
     <string name="remove">Remove</string>
     <string name="unshare_member">Are you sure you want to remove %s?</string>
+    <string name="unshare_confirm">Are you you sure you want to stop sharing album %s with everyone?</string>
+    <string name="spinner_unsharing">Unsharing...</string>
+    <string name="unshare_success">Successfully unshared album %s</string>
+    <string name="rename_album">Rename album</string>
+    <string name="add_member">Add member</string>
 
 
 </resources>

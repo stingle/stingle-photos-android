@@ -8,6 +8,7 @@ import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Sharing.SharingPermissions;
+import org.stingle.photos.Util.Helpers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,16 +91,7 @@ public class StingleDbAlbum {
 	}
 
 	public String getMembersAsString(){
-		if(members.size() == 0){
-			return "";
-		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < members.size() - 1; i++) {
-			sb.append(members.get(i));
-			sb.append(MEMBERS_SEPARATOR);
-		}
-		sb.append(members.get(members.size() - 1).trim());
-		return sb.toString();
+		return Helpers.impode(MEMBERS_SEPARATOR, members);
 	}
 
 	private void initPermissionsObj(){

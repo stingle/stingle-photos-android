@@ -31,6 +31,8 @@
             android:text="@string/enter_album_name"
             android:textColor="#FFF"
             android:textSize="18sp"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textStyle="bold" />
 
         <TextView
