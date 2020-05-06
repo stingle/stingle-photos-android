@@ -26,4 +26,5 @@
 
 
     <color name="hr_color">#36B6B6B6</color>
+    <color name="loading_paceholder">#51B6B6B6</color>
 </resources>

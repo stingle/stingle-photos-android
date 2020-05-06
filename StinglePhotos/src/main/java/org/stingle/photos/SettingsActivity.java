@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -19,6 +20,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SeekBarPreference;
 import androidx.preference.SwitchPreference;
 
+import org.stingle.photos.AsyncTasks.GenericAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ReuploadKeysAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
@@ -27,6 +29,8 @@ import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Auth.PasswordReturnListener;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
+
+import java.io.File;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
@@ -102,8 +106,7 @@ public class SettingsActivity extends AppCompatActivity implements
 	public boolean onSupportNavigateUp() {
 		if (getSupportFragmentManager().popBackStackImmediate()) {
 			return true;
-		}
-		else{
+		} else {
 			finish();
 		}
 		return super.onSupportNavigateUp();
@@ -146,16 +149,16 @@ public class SettingsActivity extends AppCompatActivity implements
 			initChangePassword();
 		}
 
-		private void initEmail(){
+		private void initEmail() {
 			Preference email = findPreference("email");
 			email.setSummary(Helpers.getPreference(AccountPreferenceFragment.this.getActivity(), StinglePhotosApplication.USER_EMAIL, ""));
 		}
 
-		private void initKeyBackupSettings(){
+		private void initKeyBackupSettings() {
 			SwitchPreference keyBackupPref = findPreference("is_key_backed_up");
 			keyBackupPref.setOnPreferenceChangeListener((preference, newValue) -> {
-				final Context context = AccountPreferenceFragment.this.getContext();
-				if((Boolean)newValue == false){
+				final Context context = getContext();
+				if ((Boolean) newValue == false) {
 					Helpers.showConfirmDialog(context, getString(R.string.key_backup_delete_confirm), (dialogInterface, i) -> {
 						(new ReuploadKeysAsyncTask(AccountPreferenceFragment.this.getActivity(), null, true, new OnAsyncTaskFinish() {
 							@Override
@@ -165,8 +168,7 @@ public class SettingsActivity extends AppCompatActivity implements
 						})).execute();
 
 					}, null);
-				}
-				else{
+				} else {
 					LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
 						showCancel = true;
 						showLogout = false;
@@ -201,7 +203,7 @@ public class SettingsActivity extends AppCompatActivity implements
 			});
 		}
 
-		private void initChangePassword(){
+		private void initChangePassword() {
 			Preference changePassPref = findPreference("change_password");
 			changePassPref.setOnPreferenceClickListener(preference -> {
 				Intent intent = new Intent();
@@ -224,15 +226,15 @@ public class SettingsActivity extends AppCompatActivity implements
 			initBlockScreenshotsSettings();
 		}
 
-		private void initBiometricsSettings(){
+		private void initBiometricsSettings() {
 			SwitchPreference biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
 
 			BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper((AppCompatActivity) getActivity());
-			if(!biometricsManagerWrapper.isBiometricsAvailable()){
+			if (!biometricsManagerWrapper.isBiometricsAvailable()) {
 				biometricSetting.setEnabled(false);
 			}
 			biometricSetting.setOnPreferenceChangeListener((preference, newValue) -> {
-				boolean isEnabled = (boolean)newValue;
+				boolean isEnabled = (boolean) newValue;
 				if (isEnabled) {
 					biometricsManagerWrapper.setupBiometrics(biometricSetting, null);
 					return false;
@@ -242,11 +244,10 @@ public class SettingsActivity extends AppCompatActivity implements
 		}
 
 
-
-		private void initBlockScreenshotsSettings(){
+		private void initBlockScreenshotsSettings() {
 			SwitchPreference blockScreenshotsSetting = findPreference("block_screenshots");
 			blockScreenshotsSetting.setOnPreferenceChangeListener((preference, newValue) -> {
-				final Context context = SecurityPreferenceFragment.this.getContext();
+				final Context context = getContext();
 				Helpers.showConfirmDialog(context, getString(R.string.need_restart), (dialogInterface, i) -> {
 
 					Intent intent = new Intent(context, GalleryActivity.class);
@@ -270,7 +271,7 @@ public class SettingsActivity extends AppCompatActivity implements
 			initBatteryPref();
 		}
 
-		private void initBatteryPref(){
+		private void initBatteryPref() {
 			SeekBarPreference pref = findPreference("upload_battery_level");
 			pref.setSummary(getString(R.string.upload_battery_summary, String.valueOf(pref.getValue())));
 			pref.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -290,10 +291,10 @@ public class SettingsActivity extends AppCompatActivity implements
 			initThemePref();
 		}
 
-		private void initThemePref(){
+		private void initThemePref() {
 			ListPreference pref = findPreference("theme");
 			pref.setOnPreferenceChangeListener((preference, newValue) -> {
-				Helpers.applyTheme((String)newValue);
+				Helpers.applyTheme((String) newValue);
 				return true;
 			});
 		}
@@ -306,26 +307,62 @@ public class SettingsActivity extends AppCompatActivity implements
 			setPreferencesFromResource(R.xml.advanced_preferences, rootKey);
 
 			initResyncDBButton();
+			initDeleteCacheButton();
 		}
 
-		protected void initResyncDBButton() {
+		private void initResyncDBButton() {
 			Preference resyncDBPref = findPreference("resync_db");
+			assert resyncDBPref != null;
 			resyncDBPref.setOnPreferenceClickListener(preference -> {
-				final ProgressDialog spinner = Helpers.showProgressDialog(AdvancedPreferenceFragment.this.getContext(), getString(R.string.syncing_db), null);
+				final ProgressDialog spinner = Helpers.showProgressDialog(getContext(), getString(R.string.syncing_db), null);
 
-				(new FsSyncAsyncTask(AdvancedPreferenceFragment.this.getContext(), new SyncManager.OnFinish() {
+				(new FsSyncAsyncTask(getContext(), new SyncManager.OnFinish() {
 					@Override
 					public void onFinish(Boolean needToUpdateUI) {
 						spinner.dismiss();
 					}
 				})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_LAST_SEEN_TIME);
-				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_TRASH_LAST_SEEN_TIME);
-				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_ALBUMS_LAST_SEEN_TIME);
-				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
-				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_LAST_DEL_SEEN_TIME);
-				Helpers.deletePreference(AdvancedPreferenceFragment.this.getContext(), SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
+				Helpers.deletePreference(getContext(), SyncManager.PREF_LAST_SEEN_TIME);
+				Helpers.deletePreference(getContext(), SyncManager.PREF_TRASH_LAST_SEEN_TIME);
+				Helpers.deletePreference(getContext(), SyncManager.PREF_ALBUMS_LAST_SEEN_TIME);
+				Helpers.deletePreference(getContext(), SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
+				Helpers.deletePreference(getContext(), SyncManager.PREF_LAST_DEL_SEEN_TIME);
+				Helpers.deletePreference(getContext(), SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
+
+				return true;
+			});
+		}
+
+		private void initDeleteCacheButton() {
+			Preference deleteCachePref = findPreference("delete_cache");
+			assert deleteCachePref != null;
+			deleteCachePref.setOnPreferenceClickListener(preference -> {
+				Helpers.showConfirmDialog(getContext(), getString(R.string.confirm_delete_cache), (dialog, which) -> {
+
+							GenericAsyncTask task = new GenericAsyncTask(getContext());
+							task.setWork(new GenericAsyncTask.GenericTaskWork() {
+								@Override
+								public Object execute(Context context) {
+									File cacheDir = new File(context.getCacheDir().getPath() + "/thumbCache");
+									Helpers.deleteFolderRecursive(cacheDir);
+									return true;
+								}
+							});
+
+							task.setOnFinish(new OnAsyncTaskFinish() {
+								@Override
+								public void onFinish() {
+									super.onFinish();
+									Toast.makeText(getContext(), R.string.success_deleted, Toast.LENGTH_LONG).show();
+								}
+
+							});
+
+							task.showSpinner(getString(R.string.deleting_cache));
+							task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						},
+						null);
 
 				return true;
 			});

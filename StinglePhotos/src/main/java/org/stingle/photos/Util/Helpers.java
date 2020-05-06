@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +19,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
@@ -507,5 +509,28 @@ public class Helpers {
 		}
 		sb.append(items.get(items.size() - 1).trim());
 		return sb.toString();
+	}
+
+	public static void deleteFolderRecursive(File fileOrDirectory) {
+		if(fileOrDirectory == null){
+			return;
+		}
+		if (fileOrDirectory.isDirectory()) {
+			for (File child : fileOrDirectory.listFiles()) {
+				deleteFolderRecursive(child);
+			}
+		}
+		fileOrDirectory.delete();
+	}
+
+	public static int getAttrColor(Context context, int attr){
+		TypedValue typedValue = new TypedValue();
+
+		TypedArray a = context.obtainStyledAttributes(typedValue.data, new int[] { attr });
+		int color = a.getColor(0, 0);
+
+		a.recycle();
+
+		return color;
 	}
 }

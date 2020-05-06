@@ -53,7 +53,7 @@
     <string name="bottom_text">https://stingle.org</string>
     <string name="clear_cache">Clear cache</string>
     <string name="clear_cache_desc">Clear thumbnail cache</string>
-    <string name="confirm_delete_cache">Are you sure you want to delete whole thumbnail cache?</string>
+    <string name="confirm_delete_cache">Are you sure you want to delete cache?</string>
     <string name="title_gallery_for_app">Gallery</string>
     <string name="title_setup">Set Up</string>
     <string name="title_change_password">Change Password</string>
@@ -327,6 +327,10 @@
     <string name="leave_album">Leave album</string>
     <string name="confirm_leave_album">Are you sure you want to leave this shared album?</string>
     <string name="leaving_album">Leaving album…</string>
+    <string name="delete_cache">Delete cache</string>
+    <string name="delete_cache_desc">Clears cache of thumbnails and other temporary data</string>
+    <string name="deleting_cache">Deleting cache...</string>
+    <string name="success_deleted">Successfully deleted</string>
 
 
 </resources>

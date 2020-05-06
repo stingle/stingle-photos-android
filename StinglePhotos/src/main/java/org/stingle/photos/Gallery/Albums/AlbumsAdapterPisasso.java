@@ -19,14 +19,20 @@ import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
 import com.squareup.picasso3.RequestHandler;
 
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
+
+import java.io.IOException;
 
 public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private Context context;
@@ -40,11 +46,14 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	private int thumbSize;
 	private RecyclerView.LayoutManager lm;
 	private Picasso picasso;
-	private LruCache<Integer, AlbumProps> filePropsCache = new LruCache<Integer, AlbumProps>(512);
+	private LruCache<Integer, StingleDbAlbum> albumsCache = new LruCache<Integer, StingleDbAlbum>(512);
+	private LruCache<Integer, Crypto.AlbumData> albumsDataCache = new LruCache<Integer, Crypto.AlbumData>(512);
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_ADD = 1;
 	public static final int TYPE_GALLERY = 2;
+
+	public static int MEMBERS_IN_SUBTITLE = 3;
 
 	public static final int LAYOUT_GRID = 0;
 	public static final int LAYOUT_LIST = 1;
@@ -61,7 +70,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		this.showGalleryOption = showGalleryOption;
 		this.showAddOption = showAddOption;
 
-		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, filesDb, view, thumbSize)).build();
+		this.picasso = new Picasso.Builder(context).addRequestHandler(new AlbumsPicassoLoader(context, db, filesDb, view, thumbSize, albumsCache, albumsDataCache)).build();
 
 		if(showAddOption){
 			otherItemsCount++;
@@ -82,7 +91,8 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	}
 
 	public void updateDataSet(){
-		filePropsCache.evictAll();
+		albumsCache.evictAll();
+		albumsDataCache.evictAll();
 		picasso.evictAll();
 		notifyDataSetChanged();
 	}
@@ -92,15 +102,10 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	}
 
 
-	// Provide a reference to the views for each data item
-	// Complex data items may need more than one view per item, and
-	// you provide access to all the views for a data item in a view holder
 	public class AlbumVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-		// each data item is just a string in this case
 		public View layout;
 		public ImageView image;
 		public ImageView rightIcon;
-		//public CheckBox checkbox;
 		public TextView albumName;
 		public TextView albumSubtitle;
 		public int currentPos = -1;
@@ -109,20 +114,15 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			super(v);
 			layout = v;
 			image = v.findViewById(R.id.thumbImage);
-			//checkbox = v.findViewById(R.id.checkBox);
 			albumName = v.findViewById(R.id.albumName);
 			albumSubtitle = v.findViewById(R.id.albumSubtitle);
 			rightIcon = v.findViewById(R.id.rightIcon);
-			//checkbox.setOnClickListener(this);
 			image.setOnClickListener(this);
-			//image.setOnLongClickListener(this);
 			albumName.setOnClickListener(this);
-			//albumName.setOnLongClickListener(this);
 			albumSubtitle.setOnClickListener(this);
 			if(rightIcon != null) {
 				rightIcon.setOnClickListener(this);
 			}
-			//albumItemsCount.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -142,7 +142,6 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	}
 
 	public class AlbumAddVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-		// each data item is just a string in this case
 		public View layout;
 		public ImageView image;
 		public TextView albumName;
@@ -153,9 +152,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			image = v.findViewById(R.id.thumbImage);
 			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
-			//image.setOnLongClickListener(this);
 			albumName.setOnClickListener(this);
-			//albumName.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -176,14 +173,11 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 	public interface Listener {
 		void onClick(int index, int type);
-
 		void onLongClick(int index, int type);
-
 		void onSelectionChanged(int count);
 	}
 
 	public class AlbumAddGalleryVH extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-		// each data item is just a string in this case
 		public View layout;
 		public ImageView image;
 		public TextView albumName;
@@ -194,9 +188,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			image = v.findViewById(R.id.thumbImage);
 			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
-			//image.setOnLongClickListener(this);
 			albumName.setOnClickListener(this);
-			//albumName.setOnLongClickListener(this);
 		}
 
 		@Override
@@ -226,13 +218,12 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	public void updateItem(int dbPosition){
 		int galleryPos = translateDbPosToGalleryPos(dbPosition);
 
-		filePropsCache.remove(dbPosition);
+		albumsCache.remove(dbPosition);
+		albumsDataCache.remove(dbPosition);
 		picasso.invalidate("a" + String.valueOf(dbPosition));
-		//picasso.evictAll();
 		notifyItemChanged(galleryPos);
 	}
 
-	// Create new views (invoked by the layout manager)
 	@Override
 	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		if(layoutStyle == LAYOUT_GRID) {
@@ -285,61 +276,69 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		return null;
 	}
 
-	// Replace the contents of a view (invoked by the layout manager)
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holderObj, final int rawPosition) {
 
 		final int dbPos = translateGalleryPosToDbPos(rawPosition);
 
 		if(holderObj instanceof AlbumVH) {
+
 			AlbumVH holder = (AlbumVH)holderObj;
 			int size = Helpers.convertDpToPixels(context, 2);
 			holder.image.setPadding(size, size, size, size);
-			//holder.checkbox.setVisibility(View.GONE);
 
 			holder.image.setImageBitmap(null);
 			holder.albumName.setText("");
+			//holder.image.setBackgroundColor(Helpers.getAttrColor(context, R.attr.colorBackgroundFloating));
+
+			try{
+				StingleDbAlbum album;
+				album = albumsCache.get(dbPos);
+				if(album == null) {
+					album = db.getAlbumAtPosition(dbPos, StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
+					albumsCache.put(dbPos, album);
+				}
+				Crypto.AlbumData albumData;
+				albumData = albumsDataCache.get(dbPos);
+				if(albumData == null) {
+					albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
+					albumsDataCache.put(dbPos, albumData);
+				}
+
+				if(album != null && albumData != null) {
+					holder.albumName.setText(albumData.metadata.name);
+
+					if(view == AlbumsFragment.VIEW_SHARES){
+						holder.albumSubtitle.setText(getMembersString(album));
+						if(album.isOwner){
+							holder.rightIcon.setImageDrawable(context.getDrawable(R.drawable.ic_sent));
+						}
+						else{
+							holder.rightIcon.setImageDrawable(context.getDrawable(R.drawable.ic_received));
+						}
+						holder.rightIcon.setVisibility(View.VISIBLE);
+					}
+					else if(view == AlbumsFragment.VIEW_ALL && album.isShared && album.isHidden){
+						holder.albumSubtitle.setText(getMembersString(album));
+					}
+					else{
+						holder.albumSubtitle.setText(context.getString(R.string.album_items_count, filesDb.getTotalFilesCount(album.albumId)));
+					}
+
+				}
+
+			} catch (IOException | CryptoException e) {
+				e.printStackTrace();
+			}
 
 			final RequestCreator req = picasso.load("a" + dbPos);
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
-			req.tag(holder);
+			req.noFade();
 			req.addProp("pos", String.valueOf(dbPos));
 			req.into(holder.image, new Callback() {
 				@Override
 				public void onSuccess(RequestHandler.Result result, Request request) {
-					Integer pos = Integer.valueOf(request.getProp("pos"));
-					if (pos == null) {
-						return;
-					}
-					AlbumVH holder = (AlbumVH) request.tag;
-
-					AlbumProps props = filePropsCache.get(pos);
-					if (props == null) {
-						props = (AlbumProps) result.getProperty("albumProps");
-						if (props != null) {
-							filePropsCache.put(pos, props);
-						}
-						else{
-							props = new AlbumProps();
-						}
-					}
-
-					if(props.name != null){
-						holder.albumName.setText(props.name);
-					}
-					if(props.subtitle != null) {
-						holder.albumSubtitle.setText(props.subtitle);
-					}
-
-					if(props.rightIcon != AlbumProps.ICON_NONE){
-						if(props.rightIcon == AlbumProps.ICON_RECEIVED) {
-							holder.rightIcon.setImageDrawable(context.getDrawable(R.drawable.ic_received));
-						}
-						else if(props.rightIcon == AlbumProps.ICON_SENT) {
-							holder.rightIcon.setImageDrawable(context.getDrawable(R.drawable.ic_sent));
-						}
-						holder.rightIcon.setVisibility(View.VISIBLE);
-					}
+					//holder.image.setBackground(null);
 				}
 
 				@Override
@@ -396,21 +395,44 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
 	}
 
-	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
 		return (int)db.getTotalAlbumsCount(AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view)) + otherItemsCount;
 	}
 
 
-	public static class AlbumProps {
-		public static int ICON_NONE = 0;
-		public static int ICON_SENT = 1;
-		public static int ICON_RECEIVED = 2;
+	private String getMembersString(StingleDbAlbum album){
+		ContactsDb contactsDb = new ContactsDb(context);
+		String myUserId = Helpers.getPreference(context, StinglePhotosApplication.USER_ID, "");
+		StringBuilder membersStr = new StringBuilder();
+		int count = 0;
+		boolean addOthers = false;
+		for(String userId : album.members){
+			if(userId.equals(myUserId)){
+				continue;
+			}
+			if(count >= MEMBERS_IN_SUBTITLE){
+				addOthers = true;
+				break;
+			}
+			StingleContact contact = contactsDb.getContactByUserId(Long.parseLong(userId));
+			if(contact != null){
+				if(membersStr.length() > 0){
+					membersStr.append(", ");
+				}
+				membersStr.append(contact.email);
+			}
+			count++;
+		}
 
-		public String name;
-		public String subtitle;
-		public Integer rightIcon = ICON_NONE;
+		if(addOthers){
+			int othersCount = album.members.size() - count - 1;
+			if(othersCount > 0){
+				membersStr.append(" " + context.getString(R.string.count_others, othersCount));
+			}
+		}
+
+		return membersStr.toString();
 	}
 
 }

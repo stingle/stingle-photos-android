@@ -6,6 +6,12 @@
         app:summary="@string/resync_db_desc"
         app:title="@string/resync_db" />
 
+    <Preference
+        app:icon="@drawable/ic_action_delete"
+        app:key="delete_cache"
+        app:summary="@string/delete_cache_desc"
+        app:title="@string/delete_cache" />
+
     <!--<Preference
         app:key="clear_cache"
         app:summary="@string/clear_cache_desc"

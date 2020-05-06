@@ -113,7 +113,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		public ImageView noCloudIcon;
 		public TextView videoDuration;
 		public CheckBox checkbox;
-		public int currentPos = -1;
 
 		public GalleryVH(RelativeLayout v) {
 			super(v);
@@ -133,7 +132,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			if (callback != null) {
 				callback.onClick(getAdapterPosition());
 			}
-			//Log.d("calcPos", String.valueOf(translatePos(getAdapterPosition()).dbPosition));
 		}
 
 		@Override
@@ -145,10 +143,8 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 	}
 	public class GalleryDate extends RecyclerView.ViewHolder {
-		// each data item is just a string in this case
 		public RelativeLayout layout;
 		public TextView text;
-		public int currentPos = -1;
 
 		public GalleryDate(RelativeLayout v) {
 			super(v);
@@ -160,9 +156,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	public interface Listener {
 		void onClick(int index);
-
 		void onLongClick(int index);
-
 		void onSelectionChanged(int count);
 	}
 
@@ -218,7 +212,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		int totalItems = 0;
 		for(DateGroup group : dates){
 			datePositions.add(new DatePosition(totalItems, group.date));
-			//Log.d("datepos", String.valueOf(totalItems) + " - " + group.date);
 
 			totalItems += group.itemCount + 1;
 		}
@@ -289,7 +282,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 		filePropsCache.remove(dbPosition);
 		picasso.invalidate("p" + set + dbPosition);
-		//picasso.evictAll();
 		notifyItemChanged(galleryPos);
 	}
 
@@ -320,12 +312,8 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return null;
 	}
 
-	// Replace the contents of a view (invoked by the layout manager)
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holderObj, final int rawPosition) {
-		// - get element from your dataset at this position
-		// - replace the contents of the view with that element
-		//image.setImageDrawable(null);
 		PosTranslate transPos = translatePos(rawPosition);
 
 		if(holderObj instanceof GalleryVH) {
@@ -351,7 +339,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			holder.videoIcon.setVisibility(View.GONE);
 			holder.videoDuration.setVisibility(View.GONE);
 			holder.noCloudIcon.setVisibility(View.GONE);
-			//holder.image.setBackgroundColor(activity.getResources().getColor(R.color.galery_item_bg));
+			//holder.image.setBackgroundColor(Helpers.getAttrColor(context, R.attr.colorBackgroundFloating));
 
 			String set = "m";
 			if(this.set == SyncManager.TRASH){
@@ -364,15 +352,18 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			final RequestCreator req = picasso.load("p" + set + position);
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
 			req.tag(holder);
+			req.noFade();
 			req.addProp("pos", String.valueOf(position));
 			req.into(holder.image, new Callback() {
 				@Override
 				public void onSuccess(RequestHandler.Result result, Request request) {
+					//holder.image.setBackground(null);
 					Integer pos = Integer.valueOf(request.getProp("pos"));
-					if (pos == null) {
+					GalleryVH holder = (GalleryVH) request.tag;
+
+					if(holder == null){
 						return;
 					}
-					GalleryVH holder = (GalleryVH) request.tag;
 
 					FileProps props = filePropsCache.get(pos);
 					if (props == null) {
@@ -403,6 +394,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 					} else {
 						holder.noCloudIcon.setVisibility(View.GONE);
 					}
+
 				}
 
 				@Override
@@ -487,7 +479,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		setSelectionModeActive(false);
 	}
 
-	// Return the size of your dataset (invoked by the layout manager)
 	@Override
 	public int getItemCount() {
 		int totalItems = 0;
