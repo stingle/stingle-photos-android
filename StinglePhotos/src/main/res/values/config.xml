@@ -47,5 +47,6 @@
     <string name="album_remove_member_url">sync/removeAlbumMember</string>
     <string name="album_unshare_url">sync/unshareAlbum</string>
     <string name="album_rename_url">sync/renameAlbum</string>
+    <string name="album_leave_url">sync/leaveAlbum</string>
 
 </resources>

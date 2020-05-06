@@ -27,6 +27,7 @@ import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.LeaveAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.RenameAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -543,5 +544,30 @@ public class GalleryActions {
 		});
 	}
 
+	public static void leaveAlbum(GalleryActivity activity) {
+
+		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_leave_album)), (dialog, which) -> {
+					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.leaving_album), null);
+
+					new LeaveAlbumAsyncTask(activity, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							activity.exitActionMode();
+							spinner.dismiss();
+							activity.showAlbumsList();
+						}
+
+						@Override
+						public void onFail() {
+							super.onFail();
+							activity.updateGalleryFragmentData();
+							activity.exitActionMode();
+							spinner.dismiss();
+						}
+					}).setAlbumId(activity.getCurrentAlbumId()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				},
+				null);
+	}
 
 }

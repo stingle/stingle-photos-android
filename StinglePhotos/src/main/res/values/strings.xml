@@ -114,7 +114,7 @@
     <string name="email">Email</string>
     <string name="invalid_email">Invalid email address specified</string>
     <string name="fail_reg">Something went wrong, please try again.</string>
-    <string name="creating_account">Creating account...</string>
+    <string name="creating_account">Creating account…</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -129,13 +129,13 @@
     <string name="restoring_files">Restoring file(s)</string>
     <string name="move_to_trash">Move to Trash</string>
     <string name="sign_in">Sign In</string>
-    <string name="signing_in">Signing in...</string>
+    <string name="signing_in">Signing in…</string>
     <string name="fail_login">Something went wrong during login, please try again.</string>
     <string name="create_account">Create an account</string>
     <string name="uploading_file">"Uploading file %1$s out of %2$s"</string>
-    <string name="refreshing">Refreshing...</string>
+    <string name="refreshing">Refreshing…</string>
     <string name="backup_complete">Backup/Sync complete</string>
-    <string name="logging_out">Logging out...</string>
+    <string name="logging_out">Logging out…</string>
     <string name="confirm_logout">Are you sure you want to log out?</string>
     <string name="lock">Lock</string>
     <string name="title_activity_view_item">ViewItemActivity</string>
@@ -156,16 +156,16 @@
     <string name="free">Free</string>
     <string name="upgrade">Upgrade</string>
     <string name="current_plan">Current plan</string>
-    <string name="confirming_purchase">Confirming purchase...</string>
+    <string name="confirming_purchase">Confirming purchase…</string>
     <string name="envideo_service_started">envideo string</string>
     <string name="sync_service_started">sync_service</string>
     <string name="confirm_decrypt_files">Are you sure you want to decrypt selected files? They will become accessible to other applications on this device.</string>
     <string name="empty_trash">Empty trash</string>
     <string name="confirm_empty_trash">Are you sure you want to empty trash? This action cannot be undone!</string>
-    <string name="emptying_trash">Emptying trash...</string>
+    <string name="emptying_trash">Emptying trash…</string>
     <string name="resync_db_desc">Resync database with filesystem</string>
     <string name="resync_db">Resync database</string>
-    <string name="syncing_db">Syncing database...</string>
+    <string name="syncing_db">Syncing database…</string>
     <string name="immediately">Immediately</string>
     <string name="website_link">Official Website</string>
     <string name="block_screenshots">Disallow screenshots of this app</string>
@@ -248,8 +248,8 @@
     <string name="enter_backup_phrase_desc">Because you have chosen not to backup your provate key, you have to enter your backup phrase to reconstruct your private key locally. Without one it\'s impossible to decrypt your photos and videos.</string>
     <string name="backup_key_desc_pref">Backup my keys to allow login without entering backup phrase</string>
     <string name="key_backup_delete_confirm">ATTENTION!!!\n\nAre you sure you want to delete backup of your keys?\n\nTo login again you will need to enter your backup phrase!</string>
-    <string name="deleting_keys">Deleting keys...</string>
-    <string name="uploading_keys">Uploading keys...</string>
+    <string name="deleting_keys">Deleting keys…</string>
+    <string name="uploading_keys">Uploading keys…</string>
     <string name="success_delete_keys">Your key backup is successfully deleted. From now on you will need to enter your backup phrase after login along side with your email and password.</string>
     <string name="success_backup_keys">Your keys have been successfully backed up.</string>
     <string name="pref_header_account">Account</string>
@@ -296,7 +296,7 @@
     <string name="close">Close</string>
     <string name="not_on_stingle">This email is not registered on Stingle Photos</string>
     <string name="cant_share_to_self">Sorry you can\'t share to yourself</string>
-    <string name="spinner_sharing">Sharing...</string>
+    <string name="spinner_sharing">Sharing…</string>
     <string name="failed_to_share">Failed to share, please try again</string>
     <string name="share_via_sp">Share via Stingle Photos</string>
     <string name="share_securely">Share securely</string>
@@ -308,22 +308,25 @@
     <string name="album_name">Shared album name</string>
     <string name="allow_album_add">Add new photos</string>
     <string name="save">Save</string>
-    <string name="spinner_saving">Saving...</string>
+    <string name="spinner_saving">Saving…</string>
     <string name="share_success">Successfully shared</string>
     <string name="save_success">Saved</string>
     <string name="album_settings">Album settings</string>
     <string name="shared_album">Shared album</string>
     <string name="unshare">Unshare</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
     <string name="members">Members</string>
     <string name="remove">Remove</string>
     <string name="unshare_member">Are you sure you want to remove %s?</string>
-    <string name="unshare_confirm">Are you you sure you want to stop sharing album %s with everyone?</string>
-    <string name="spinner_unsharing">Unsharing...</string>
+    <string name="unshare_confirm">Are you sure you want to stop sharing album %s with everyone?</string>
+    <string name="spinner_unsharing">Unsharing…</string>
     <string name="unshare_success">Successfully unshared album %s</string>
     <string name="rename_album">Rename album</string>
     <string name="add_member">Add member</string>
     <string name="album_info">Album info</string>
+    <string name="leave_album">Leave album</string>
+    <string name="confirm_leave_album">Are you sure you want to leave this shared album?</string>
+    <string name="leaving_album">Leaving album…</string>
 
 
 </resources>

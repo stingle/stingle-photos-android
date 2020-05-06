@@ -338,6 +338,7 @@ public class GalleryActivity extends AppCompatActivity
 		fab.setVisibility(View.VISIBLE);
 
 		if(currentSet == SyncManager.ALBUM){
+			Log.d("albumId", currentAlbumId);
 			StingleDbAlbum album = GalleryHelpers.getAlbum(this, currentAlbumId);
 			String albumName = GalleryHelpers.getAlbumName(this, currentAlbumId);
 			if(albumName != null && albumName.length() > 0){
@@ -631,32 +632,34 @@ public class GalleryActivity extends AppCompatActivity
 					if(album != null) {
 						if(album.isShared) {
 							if(album.isOwner){
+								// Owner of shared album
 								menu.findItem(R.id.action_album_info).setVisible(false);
+								menu.findItem(R.id.action_leave_album).setVisible(false);
 							}
 							else{
+								// Not owner of shared album
 								menu.findItem(R.id.action_album_settings).setVisible(false);
+								menu.findItem(R.id.action_rename_album).setVisible(false);
+								menu.findItem(R.id.action_album_settings).setVisible(false);
+								menu.findItem(R.id.action_delete_album).setVisible(false);
+
+								if(album.permissionsObj != null) {
+									if (!album.permissionsObj.allowShare) {
+										menu.findItem(R.id.share_album).setVisible(false);
+									}
+									if (!album.permissionsObj.allowAdd) {
+										fab.setVisibility(View.GONE);
+									}
+									else {
+										fab.setVisibility(View.VISIBLE);
+									}
+								}
 							}
 							menu.findItem(R.id.share_album).setVisible(false);
 						}
 						else{
+							// Album is not shared
 							menu.findItem(R.id.action_album_settings).setVisible(false);
-						}
-
-						if(!album.isOwner){
-							menu.findItem(R.id.action_rename_album).setVisible(false);
-							menu.findItem(R.id.action_album_settings).setVisible(false);
-							menu.findItem(R.id.action_delete_album).setVisible(false);
-
-							if(album.permissionsObj != null) {
-								if (!album.permissionsObj.allowShare) {
-									menu.findItem(R.id.share_album).setVisible(false);
-								}
-								if (!album.permissionsObj.allowAdd) {
-									fab.setVisibility(View.GONE);
-								} else {
-									fab.setVisibility(View.VISIBLE);
-								}
-							}
 						}
 					}
 					break;
@@ -713,6 +716,9 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_empty_trash) {
 			GalleryActions.emptyTrash(this);
+		}
+		else if (id == R.id.action_leave_album) {
+			GalleryActions.leaveAlbum(this);
 		}
 		else if (id == R.id.action_delete_album) {
 			GalleryActions.deleteAlbum(this);
