@@ -289,7 +289,6 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 			holder.image.setImageBitmap(null);
 			holder.albumName.setText("");
-			//holder.image.setBackgroundColor(Helpers.getAttrColor(context, R.attr.colorBackgroundFloating));
 
 			try{
 				StingleDbAlbum album;
@@ -335,17 +334,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
 			req.noFade();
 			req.addProp("pos", String.valueOf(dbPos));
-			req.into(holder.image, new Callback() {
-				@Override
-				public void onSuccess(RequestHandler.Result result, Request request) {
-					//holder.image.setBackground(null);
-				}
-
-				@Override
-				public void onError(@NonNull Throwable t) {
-
-				}
-			});
+			req.into(holder.image);
 		}
 		else if(holderObj instanceof AlbumAddVH) {
 			AlbumAddVH holder = (AlbumAddVH)holderObj;

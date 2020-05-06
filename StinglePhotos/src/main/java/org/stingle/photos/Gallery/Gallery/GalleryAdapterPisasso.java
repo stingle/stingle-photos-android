@@ -339,7 +339,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			holder.videoIcon.setVisibility(View.GONE);
 			holder.videoDuration.setVisibility(View.GONE);
 			holder.noCloudIcon.setVisibility(View.GONE);
-			//holder.image.setBackgroundColor(Helpers.getAttrColor(context, R.attr.colorBackgroundFloating));
 
 			String set = "m";
 			if(this.set == SyncManager.TRASH){
@@ -357,7 +356,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			req.into(holder.image, new Callback() {
 				@Override
 				public void onSuccess(RequestHandler.Result result, Request request) {
-					//holder.image.setBackground(null);
 					Integer pos = Integer.valueOf(request.getProp("pos"));
 					GalleryVH holder = (GalleryVH) request.tag;
 
