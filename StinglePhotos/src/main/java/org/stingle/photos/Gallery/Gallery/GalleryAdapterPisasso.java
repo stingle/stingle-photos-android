@@ -299,7 +299,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		if(viewType == TYPE_ITEM) {
 			// create a new view
 			RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-					.inflate(R.layout.gallery_item, parent, false);
+					.inflate(R.layout.item_gallery, parent, false);
 
 			GalleryVH vh = new GalleryVH(v);
 
@@ -310,7 +310,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 		else if(viewType == TYPE_DATE){
 			RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-					.inflate(R.layout.gallery_item_date, parent, false);
+					.inflate(R.layout.item_gallery_date, parent, false);
 
 			GalleryDate vh = new GalleryDate(v);
 

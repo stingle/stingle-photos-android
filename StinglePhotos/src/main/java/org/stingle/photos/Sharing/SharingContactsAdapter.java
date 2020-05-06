@@ -94,7 +94,7 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 	@Override
 	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-				.inflate(R.layout.contact_item, parent, false);
+				.inflate(R.layout.item_contact, parent, false);
 
 		ContactVH vh = new ContactVH(v);
 		vh.type = viewType;

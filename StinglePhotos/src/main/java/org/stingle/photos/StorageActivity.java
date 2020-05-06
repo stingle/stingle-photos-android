@@ -217,7 +217,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	}
 
 	private void createPaymentBox(String title, SkuDetails monthly, SkuDetails yearly){
-		LinearLayout box = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.payment_box, boxesParent, false);
+		LinearLayout box = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.item_payment_box, boxesParent, false);
 		((TextView) box.findViewById(R.id.storage_type)).setText(title);
 
 		boolean isPurchasedMonthly = false;

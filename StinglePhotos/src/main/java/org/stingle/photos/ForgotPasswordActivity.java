@@ -72,7 +72,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 	private void showPasswordChangeDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.please_set_new_password);
-		builder.setView(R.layout.new_password);
+		builder.setView(R.layout.dialog_new_password);
 		builder.setCancelable(true);
 		AlertDialog dialog = builder.create();
 		dialog.show();

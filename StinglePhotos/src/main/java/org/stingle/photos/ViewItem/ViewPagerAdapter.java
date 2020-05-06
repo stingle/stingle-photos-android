@@ -76,7 +76,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 	@NonNull
 	@Override
 	public Object instantiateItem(@NonNull ViewGroup container, int position) {
-		ViewGroup layout = (ViewGroup) layoutInflater.inflate(R.layout.view_item_item, container, false);
+		ViewGroup layout = (ViewGroup) layoutInflater.inflate(R.layout.item_view_item, container, false);
 		ImageHolderLayout parent = layout.findViewById(R.id.parent_layout);
 		ContentLoadingProgressBar loading = layout.findViewById(R.id.loading_spinner);
 

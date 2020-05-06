@@ -36,7 +36,7 @@ public class WelcomePagerAdapter extends PagerAdapter {
 
 	@Override
 	public Object instantiateItem(ViewGroup container, int position) {
-		View itemView = LayoutInflater.from(mContext).inflate(R.layout.welcome_item, container, false);
+		View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_welcome, container, false);
 
 		WelcomeItem item = welcomeItems.get(position);
 

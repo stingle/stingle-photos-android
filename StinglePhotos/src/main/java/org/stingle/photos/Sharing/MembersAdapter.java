@@ -93,7 +93,7 @@ public class MembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	@Override
 	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-				.inflate(R.layout.members_list_item, parent, false);
+				.inflate(R.layout.item_members_list, parent, false);
 
 		return new MemberVH(v);
 	}

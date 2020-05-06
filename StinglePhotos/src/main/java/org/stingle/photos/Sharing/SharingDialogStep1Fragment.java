@@ -48,7 +48,7 @@ public class SharingDialogStep1Fragment extends Fragment {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.sharing_step1_fragment, container, false);
+		View view = inflater.inflate(R.layout.fragment_sharing_step1, container, false);
 
 		RecyclerView contactsList = view.findViewById(R.id.contactsList);
 		LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());

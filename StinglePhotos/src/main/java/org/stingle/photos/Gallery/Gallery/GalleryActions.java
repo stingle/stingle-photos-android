@@ -59,7 +59,7 @@ public class GalleryActions {
 	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 		builder.setTitle(R.string.add_move_to_album);
-		builder.setView(R.layout.add_to_album_dialog);
+		builder.setView(R.layout.dialog_move_items);
 		builder.setCancelable(true);
 		final AlertDialog addAlbumDialog = builder.create();
 		addAlbumDialog.show();
@@ -270,7 +270,7 @@ public class GalleryActions {
 
 	public static void addAlbum(Context context, OnAsyncTaskFinish onFinish){
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
-		builder.setView(R.layout.add_album_dialog);
+		builder.setView(R.layout.dialog_new_album);
 		builder.setCancelable(true);
 		AlertDialog addAlbumDialog = builder.create();
 		addAlbumDialog.show();
@@ -335,7 +335,7 @@ public class GalleryActions {
 	}
 
 	public static void showSharingSheet(GalleryActivity activity, boolean isAlbum, ArrayList<StingleDbFile> files) {
-		View dialogView = activity.getLayoutInflater().inflate(R.layout.sharing_bottom_sheet, null);
+		View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_sharing_bottom_sheet, null);
 		BottomSheetDialog dialog = new BottomSheetDialog(activity);
 		dialog.setContentView(dialogView);
 		BottomSheetBehavior mBehavior = dialog.getBehavior();
@@ -497,7 +497,7 @@ public class GalleryActions {
 
 	public static void renameAlbum(Context context, String albumId, String currentAlbumName, OnAsyncTaskFinish onFinish) {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
-		builder.setView(R.layout.add_album_dialog);
+		builder.setView(R.layout.dialog_new_album);
 		builder.setCancelable(true);
 		AlertDialog renameAlbumDialog = builder.create();
 		renameAlbumDialog.show();

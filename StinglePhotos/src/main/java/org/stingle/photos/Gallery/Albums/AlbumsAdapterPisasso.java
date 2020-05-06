@@ -5,9 +5,7 @@ import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -241,7 +239,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			if (viewType == TYPE_ITEM) {
 				// create a new view
 				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.album_item, parent, false);
+						.inflate(R.layout.item_albums_grid, parent, false);
 
 				AlbumVH vh = new AlbumVH(v);
 
@@ -251,7 +249,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 				return vh;
 			} else if (viewType == TYPE_ADD) {
 				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.album_add_item, parent, false);
+						.inflate(R.layout.item_album_add_grid, parent, false);
 
 				AlbumAddVH vh = new AlbumAddVH(v);
 
@@ -262,21 +260,21 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			if (viewType == TYPE_ITEM) {
 				// create a new view
 				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.add_to_album_dialog_item, parent, false);
+						.inflate(R.layout.item_albums_list, parent, false);
 
 				AlbumVH vh = new AlbumVH(v);
 
 				return vh;
 			} else if (viewType == TYPE_ADD) {
 				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.add_to_album_dialog_item, parent, false);
+						.inflate(R.layout.item_albums_list, parent, false);
 
 				AlbumAddVH vh = new AlbumAddVH(v);
 
 				return vh;
 			} else if (viewType == TYPE_GALLERY) {
 				RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
-						.inflate(R.layout.add_to_album_dialog_item, parent, false);
+						.inflate(R.layout.item_albums_list, parent, false);
 
 				AlbumAddGalleryVH vh = new AlbumAddGalleryVH(v);
 

@@ -190,7 +190,7 @@ public class LoginManager {
         }
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
-        builder.setView(R.layout.password);
+        builder.setView(R.layout.dialog_unlock_password);
         builder.setCancelable(config.cancellable);
         AlertDialog loginDialog = builder.create();
         loginDialogRef = new WeakReference<>(loginDialog);

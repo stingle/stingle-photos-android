@@ -43,7 +43,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.gallery_fragment,	container, false);
+		View view = inflater.inflate(R.layout.fragment_gallery,	container, false);
 
 		recyclerView = view.findViewById(R.id.recycler_view);
 		parentActivity = (GalleryFragmentParent)getActivity();

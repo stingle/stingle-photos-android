@@ -147,7 +147,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 			if(!isKeyBackedUp && !privateKeyIsAlreadySaved){
 				MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
-				builder.setView(R.layout.enter_phrase_dialog);
+				builder.setView(R.layout.dialog_enter_phrase);
 				builder.setCancelable(false);
 				AlertDialog dialog = builder.create();
 				dialog.show();

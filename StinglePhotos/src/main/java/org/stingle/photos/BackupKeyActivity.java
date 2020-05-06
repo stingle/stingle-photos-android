@@ -91,7 +91,7 @@ public class BackupKeyActivity extends AppCompatActivity {
 				@Override
 				public void onUserAuthSuccess() {
 					MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(BackupKeyActivity.this);
-					builder.setView(R.layout.backup_phrase_popup);
+					builder.setView(R.layout.dialog_backup_phrase);
 					builder.setCancelable(true);
 					AlertDialog dialog = builder.create();
 					dialog.show();

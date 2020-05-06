@@ -62,7 +62,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.sharing_parent_fragment, container, false);
+		View view = inflater.inflate(R.layout.fragment_sharing_parent, container, false);
 
 		toolbar = view.findViewById(R.id.toolbar);
 		toolbar.setNavigationIcon(R.drawable.ic_close);

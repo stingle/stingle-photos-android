@@ -41,7 +41,7 @@ public class SharingDialogStep2Fragment extends Fragment {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.sharing_step2_fragment, container, false);
+		View view = inflater.inflate(R.layout.fragment_sharing_step2, container, false);
 
 		albumName = view.findViewById(R.id.albumName);
 		allowAdd = view.findViewById(R.id.allow_add);
