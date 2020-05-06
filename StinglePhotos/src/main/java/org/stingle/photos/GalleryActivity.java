@@ -338,19 +338,22 @@ public class GalleryActivity extends AppCompatActivity
 		fab.setVisibility(View.VISIBLE);
 
 		if(currentSet == SyncManager.ALBUM){
+			StingleDbAlbum album = GalleryHelpers.getAlbum(this, currentAlbumId);
 			String albumName = GalleryHelpers.getAlbumName(this, currentAlbumId);
 			if(albumName != null && albumName.length() > 0){
 				currentAlbumName = albumName;
 				toolbar.setTitle(albumName);
-				toolbar.setOnClickListener(v -> {
-					GalleryActions.renameAlbum(this, currentAlbumId, currentAlbumName, new OnAsyncTaskFinish() {
-						@Override
-						public void onFinish() {
-							super.onFinish();
-							initCurrentFragment();
-						}
+				if(album.isOwner) {
+					toolbar.setOnClickListener(v -> {
+						GalleryActions.renameAlbum(this, currentAlbumId, currentAlbumName, new OnAsyncTaskFinish() {
+							@Override
+							public void onFinish() {
+								super.onFinish();
+								initCurrentFragment();
+							}
+						});
 					});
-				});
+				}
 			}
 			else{
 				toolbar.setTitle(getString(R.string.album));
@@ -627,6 +630,12 @@ public class GalleryActivity extends AppCompatActivity
 					StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(this);
 					if(album != null) {
 						if(album.isShared) {
+							if(album.isOwner){
+								menu.findItem(R.id.action_album_info).setVisible(false);
+							}
+							else{
+								menu.findItem(R.id.action_album_settings).setVisible(false);
+							}
 							menu.findItem(R.id.share_album).setVisible(false);
 						}
 						else{
@@ -682,6 +691,9 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_album_settings) {
 			GalleryActions.albumSettings(this);
+		}
+		else if (id == R.id.action_album_info) {
+			GalleryActions.albumInfo(this);
 		}
 		else if (id == R.id.action_rename_album) {
 			GalleryActions.renameAlbum(this, currentAlbumId, currentAlbumName, new OnAsyncTaskFinish() {

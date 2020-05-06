@@ -24,7 +24,6 @@ import org.stingle.photos.AsyncTasks.Gallery.EditAlbumPermissionsAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.UnshareAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
-import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
@@ -188,9 +187,7 @@ public class AlbumSettingsDialogFragment extends AppCompatDialogFragment {
 	}
 
 	private void initAlbum(){
-		AlbumsDb db = new AlbumsDb(requireContext());
-		album = db.getAlbumById(albumId);
-		db.close();
+		album = GalleryHelpers.getAlbum(requireContext(), albumId);
 	}
 
 }

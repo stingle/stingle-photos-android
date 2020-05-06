@@ -39,6 +39,7 @@ import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
+import org.stingle.photos.Sharing.AlbumInfoDialogFragment;
 import org.stingle.photos.Sharing.AlbumSettingsDialogFragment;
 import org.stingle.photos.Sharing.SharingDialogFragment;
 import org.stingle.photos.StinglePhotosApplication;
@@ -478,6 +479,15 @@ public class GalleryActions {
 	public static void albumSettings(GalleryActivity activity) {
 		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
 		AlbumSettingsDialogFragment newFragment = new AlbumSettingsDialogFragment();
+
+		newFragment.setAlbumId(activity.getCurrentAlbumId());
+
+		newFragment.show(ft, "dialog");
+	}
+
+	public static void albumInfo(GalleryActivity activity) {
+		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+		AlbumInfoDialogFragment newFragment = new AlbumInfoDialogFragment();
 
 		newFragment.setAlbumId(activity.getCurrentAlbumId());
 

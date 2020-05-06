@@ -53,6 +53,7 @@
             android:layout_gravity="center_vertical"
             android:layout_toStartOf="@id/allow_add"
             android:layout_below="@+id/allow_add_text"
+            android:layout_marginEnd="24dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/allow_album_add_desc" />
 
@@ -64,6 +65,15 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:checked="true" />
+
+        <TextView
+            android:id="@+id/allow_add_ro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"/>
 
     </RelativeLayout>
 
@@ -89,6 +99,7 @@
             android:layout_gravity="center_vertical"
             android:layout_toStartOf="@id/allow_share"
             android:layout_below="@+id/allow_share_text"
+            android:layout_marginEnd="24dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/allow_share_desc" />
 
@@ -100,6 +111,15 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:checked="true" />
+
+        <TextView
+            android:id="@+id/allow_share_ro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
 
     </RelativeLayout>
 
@@ -126,6 +146,7 @@
             android:layout_toStartOf="@id/allow_copy"
             android:layout_below="@+id/allow_copy_text"
             android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_marginEnd="24dp"
             android:text="@string/allow_copy_desc" />
 
         <Switch
@@ -136,6 +157,15 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:checked="true" />
+
+        <TextView
+            android:id="@+id/allow_copy_ro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
     </RelativeLayout>
 
 

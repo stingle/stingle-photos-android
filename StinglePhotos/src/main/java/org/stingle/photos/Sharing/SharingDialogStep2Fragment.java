@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +23,10 @@ public class SharingDialogStep2Fragment extends Fragment {
 	private Switch allowShare;
 	private Switch allowCopy;
 
+	private TextView allowAddRO;
+	private TextView allowShareRO;
+	private TextView allowCopyRO;
+
 	private PermissionChangeListener changeListener;
 
 	private String albumNameStr = "";
@@ -29,6 +34,7 @@ public class SharingDialogStep2Fragment extends Fragment {
 	private boolean disableAlbumName = false;
 	private boolean hideAlbumName = false;
 	private boolean hidePermissionsTitle = false;
+	private boolean isRO = false;
 
 	@Nullable
 	@Override
@@ -41,6 +47,10 @@ public class SharingDialogStep2Fragment extends Fragment {
 		allowAdd = view.findViewById(R.id.allow_add);
 		allowShare = view.findViewById(R.id.allow_share);
 		allowCopy = view.findViewById(R.id.allow_copy);
+
+		allowAddRO = view.findViewById(R.id.allow_add_ro);
+		allowShareRO = view.findViewById(R.id.allow_share_ro);
+		allowCopyRO = view.findViewById(R.id.allow_copy_ro);
 
 		updatePermissionsView();
 
@@ -64,10 +74,20 @@ public class SharingDialogStep2Fragment extends Fragment {
 		view.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());
 		view.findViewById(R.id.allow_copy_text_desc).setOnClickListener(v -> allowCopy.toggle());
 
-		if(changeListener != null){
+		if(!isRO && changeListener != null){
 			allowAdd.setOnClickListener(v -> changeListener.onChange());
 			allowShare.setOnClickListener(v -> changeListener.onChange());
 			allowCopy.setOnClickListener(v -> changeListener.onChange());
+		}
+
+		if(isRO){
+			allowAdd.setVisibility(View.GONE);
+			allowShare.setVisibility(View.GONE);
+			allowCopy.setVisibility(View.GONE);
+
+			allowAddRO.setVisibility(View.VISIBLE);
+			allowShareRO.setVisibility(View.VISIBLE);
+			allowCopyRO.setVisibility(View.VISIBLE);
 		}
 
 		return view;
@@ -91,6 +111,10 @@ public class SharingDialogStep2Fragment extends Fragment {
 		this.changeListener = changeListener;
 	}
 
+	public void setIsRO(boolean ro){
+		this.isRO = ro;
+	}
+
 	public String getAlbumName(){
 		return albumName.getText().toString();
 	}
@@ -110,10 +134,19 @@ public class SharingDialogStep2Fragment extends Fragment {
 	}
 
 	private void updatePermissionsView(){
-		if(allowAdd != null && allowShare != null && allowCopy != null) {
-			allowAdd.setChecked(permissions.allowAdd);
-			allowShare.setChecked(permissions.allowShare);
-			allowCopy.setChecked(permissions.allowCopy);
+		if(!isRO) {
+			if (allowAdd != null && allowShare != null && allowCopy != null) {
+				allowAdd.setChecked(permissions.allowAdd);
+				allowShare.setChecked(permissions.allowShare);
+				allowCopy.setChecked(permissions.allowCopy);
+			}
+		}
+		else{
+			if (allowAddRO != null && allowShareRO != null && allowCopyRO != null) {
+				allowAddRO.setText((permissions.allowAdd ? requireContext().getString(R.string.yes) : requireContext().getString(R.string.no)));
+				allowShareRO.setText((permissions.allowShare ? requireContext().getString(R.string.yes) : requireContext().getString(R.string.no)));
+				allowCopyRO.setText((permissions.allowCopy ? requireContext().getString(R.string.yes) : requireContext().getString(R.string.no)));
+			}
 		}
 	}
 

@@ -28,6 +28,7 @@ public class MembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	private ArrayList<Long> memberIds = new ArrayList<>();
 
 	private UnshareListener unshareListener;
+	private boolean hideUnshareButtons = false;
 
 	public MembersAdapter(Context context, String albumId) {
 		this.context = context;
@@ -40,6 +41,10 @@ public class MembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
 		super.onDetachedFromRecyclerView(recyclerView);
 		db.close();
+	}
+
+	public void setHideUnshareButtons(boolean hideUnshareButtons) {
+		this.hideUnshareButtons = hideUnshareButtons;
 	}
 
 	public void initMembersList(){
@@ -101,6 +106,9 @@ public class MembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 		StingleContact contact = getContactAtPosition(position);
 		if(contact != null) {
 			holder.label.setText(contact.email);
+		}
+		if(hideUnshareButtons){
+			holder.unshare.setVisibility(View.GONE);
 		}
 	}
 

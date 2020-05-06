@@ -323,6 +323,7 @@
     <string name="unshare_success">Successfully unshared album %s</string>
     <string name="rename_album">Rename album</string>
     <string name="add_member">Add member</string>
+    <string name="album_info">Album info</string>
 
 
 </resources>

@@ -31,6 +31,8 @@ public class AlbumMembersFragment extends Fragment {
 
 	private MembersAdapter adapter;
 	private StingleDbAlbum album;
+	private boolean hideRemoveButtons = false;
+	private boolean hideAddMember = false;
 
 	public AlbumMembersFragment(StingleDbAlbum album){
 		this.album = album;
@@ -48,6 +50,7 @@ public class AlbumMembersFragment extends Fragment {
 		membersList.setLayoutManager(layoutManager);
 		adapter = new MembersAdapter(getContext(), album.albumId);
 		adapter.setUnshareListener(unshare());
+		adapter.setHideUnshareButtons(hideRemoveButtons);
 		membersList.setAdapter(adapter);
 
 		if(album.isOwner || (album.permissionsObj != null && album.permissionsObj.allowShare)) {
@@ -57,7 +60,18 @@ public class AlbumMembersFragment extends Fragment {
 			view.findViewById(R.id.addMemberContainer).setVisibility(View.GONE);
 		}
 
+		if(hideAddMember){
+			view.findViewById(R.id.addMemberContainer).setVisibility(View.GONE);
+		}
+
 		return view;
+	}
+
+	public void setHideRemoveButtons(boolean hideRemoveButtons) {
+		this.hideRemoveButtons = hideRemoveButtons;
+	}
+	public void setHideAddMember(boolean hideAddMember) {
+		this.hideAddMember = hideAddMember;
 	}
 
 	private View.OnClickListener addMembers() {
