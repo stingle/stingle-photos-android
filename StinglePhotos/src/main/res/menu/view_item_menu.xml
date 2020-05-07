@@ -6,8 +6,21 @@
         android:id="@+id/share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
+        app:showAsAction="always|withText">
+        <menu>
+            <item
+                android:id="@+id/share_stingle"
+                android:title="@string/share_via_stingle" />
+            <item
+                android:id="@+id/share_to_apps"
+                android:title="@string/share_to_apps" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/decrypt"
+        android:icon="@drawable/ic_action_unlock"
+        android:title="@string/save_to_gallery"
         app:showAsAction="always|withText" />
-
     <item
         android:id="@+id/trash"
         android:icon="@drawable/ic_action_delete"

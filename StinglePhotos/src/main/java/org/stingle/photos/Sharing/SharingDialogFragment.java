@@ -2,6 +2,7 @@ package org.stingle.photos.Sharing;
 
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -54,7 +56,6 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setStyle(AppCompatDialogFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
-
 	}
 
 	@Nullable
@@ -62,7 +63,11 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.fragment_sharing_parent, container, false);
+		Context contextThemeWrapper = new ContextThemeWrapper(getActivity(), R.style.AppTheme);
+		LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
+		View view = localInflater.inflate(R.layout.fragment_sharing_parent, container, false);
+
+		//View view = inflater.inflate(R.layout.fragment_sharing_parent, container, false);
 
 		toolbar = view.findViewById(R.id.toolbar);
 		toolbar.setNavigationIcon(R.drawable.ic_close);
@@ -200,10 +205,15 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 			}
 
 			@Override
-			public void onFail() {
+			public void onFail(String msg) {
 				super.onFail();
 				spinner.dismiss();
-				showSnack(requireContext().getString(R.string.failed_to_share));
+				if(msg != null){
+					showSnack(msg);
+				}
+				else {
+					showSnack(requireContext().getString(R.string.failed_to_share));
+				}
 				if(onFinish != null){
 					onFinish.onFail();
 				}

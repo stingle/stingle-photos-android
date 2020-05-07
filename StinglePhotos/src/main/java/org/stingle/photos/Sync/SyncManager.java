@@ -1,6 +1,7 @@
 package org.stingle.photos.Sync;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -18,7 +19,9 @@ import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
@@ -592,6 +595,30 @@ public class SyncManager {
 		catch (CryptoException e){
 			return false;
 		}
+	}
+
+	public static boolean areFilesAlreadyUploaded(Context context, String albumId){
+		AlbumFilesDb albumFilesDb = new AlbumFilesDb(context);
+
+		Cursor result = albumFilesDb.getFilesList(FilesDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, albumId);
+		while(result.moveToNext()) {
+			StingleDbFile file = new StingleDbFile(result);
+			if(!file.isRemote){
+				albumFilesDb.close();
+				return false;
+			}
+		}
+		albumFilesDb.close();
+		return true;
+	}
+
+	public static boolean areFilesAlreadyUploaded(ArrayList<StingleDbFile> files){
+		for(StingleDbFile file : files){
+			if(!file.isRemote){
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

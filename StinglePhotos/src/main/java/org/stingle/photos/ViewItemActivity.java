@@ -33,6 +33,8 @@ import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.ShareManager;
+import org.stingle.photos.Gallery.Gallery.GalleryActions;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.ViewItem.ViewPagerAdapter;
@@ -235,25 +237,22 @@ public class ViewItemActivity extends AppCompatActivity {
 
 
 		if(set == SyncManager.ALBUM && albumId != null) {
-
-			AlbumsDb albumsDb = new AlbumsDb(this);
-			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
-			albumsDb.close();
-
-			if (album != null && album.permissionsObj != null && !album.isOwner) {
-				/*if (!album.permissionsObj.allowEditing) {
-					menu.findItem(R.id.add_to_album).setVisible(false);
-				}*/
+			StingleDbAlbum album = GalleryHelpers.getAlbum(this, albumId);
+			if(album != null && album.permissionsObj != null && !album.isOwner && album.isShared) {
 				if (!album.permissionsObj.allowShare) {
 					menu.findItem(R.id.share).setVisible(false);
 				}
-				/*if (!album.permissionsObj.allowCopying) {
+				if (!album.permissionsObj.allowCopy) {
 					menu.findItem(R.id.decrypt).setVisible(false);
-				}*/
-				if (album.isShared && !album.isOwner) {
-					menu.findItem(R.id.trash).setVisible(false);
 				}
+
+				menu.findItem(R.id.trash).setVisible(false);
 			}
+		}
+		else if (set == SyncManager.TRASH){
+			menu.findItem(R.id.share).setVisible(false);
+			menu.findItem(R.id.decrypt).setVisible(false);
+			menu.findItem(R.id.trash).setVisible(false);
 		}
 		return true;
 	}
@@ -275,17 +274,26 @@ public class ViewItemActivity extends AppCompatActivity {
 			return false;
 		}
 
-		if (id == R.id.share) {
-			ArrayList<StingleDbFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort));
+		ArrayList<StingleDbFile> files = new ArrayList<>();
+		files.add(db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort));
 
+		if (id == R.id.share_stingle) {
+			GalleryActions.shareStingle(this, set, albumId, null, files, false, null);
+		}
+		else if (id == R.id.share_to_apps) {
 			ShareManager.shareDbFiles(this, files, set, albumId);
-
+		}
+		else if (id == R.id.decrypt) {
+			GalleryActions.decryptSelected(this, files, set, albumId, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.success_decrypted), Snackbar.LENGTH_SHORT).show();
+				}
+			});
 		}
 		else if (id == R.id.trash) {
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
-			ArrayList<StingleDbFile> files = new ArrayList<>();
-			files.add(db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort));
 
 			MoveFileAsyncTask moveTask = new MoveFileAsyncTask(this, files, new OnAsyncTaskFinish() {
 				@Override
@@ -295,8 +303,7 @@ public class ViewItemActivity extends AppCompatActivity {
 						adapter.notifyDataSetChanged();
 					}
 					spinner.dismiss();
-					Snackbar mySnackbar = Snackbar.make(findViewById(R.id.view_item_layout), getString(R.string.moved_to_trash), Snackbar.LENGTH_SHORT);
-					mySnackbar.show();
+					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.moved_to_trash), Snackbar.LENGTH_SHORT).show();
 				}
 
 				@Override
@@ -306,8 +313,7 @@ public class ViewItemActivity extends AppCompatActivity {
 						adapter.notifyDataSetChanged();
 					}
 					spinner.dismiss();
-					Snackbar mySnackbar = Snackbar.make(findViewById(R.id.view_item_layout), getString(R.string.default_error_msg), Snackbar.LENGTH_SHORT);
-					mySnackbar.show();
+					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.default_error_msg), Snackbar.LENGTH_SHORT).show();
 				}
 			});
 			moveTask.setFromSet(set);

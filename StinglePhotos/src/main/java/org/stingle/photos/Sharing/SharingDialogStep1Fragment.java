@@ -1,6 +1,7 @@
 package org.stingle.photos.Sharing;
 
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,6 +14,7 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,6 +38,7 @@ public class SharingDialogStep1Fragment extends Fragment {
 	private FlexboxLayout chipsContainer;
 	private SharingContactsAdapter adapter;
 	private SharingDialogFragment parentDialog;
+	private Context contextThemeWrapper;
 
 	ArrayList<String> excludedIds = new ArrayList<>();
 
@@ -48,7 +51,10 @@ public class SharingDialogStep1Fragment extends Fragment {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.fragment_sharing_step1, container, false);
+		contextThemeWrapper = new ContextThemeWrapper(getActivity(), R.style.AppTheme);
+		LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
+		View view = localInflater.inflate(R.layout.fragment_sharing_step1, container, false);
+		//View view = inflater.inflate(R.layout.fragment_sharing_step1, container, false);
 
 		RecyclerView contactsList = view.findViewById(R.id.contactsList);
 		LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -119,7 +125,7 @@ public class SharingDialogStep1Fragment extends Fragment {
 	}
 
 	public void addChip(StingleContact contact){
-		Chip chip = new Chip(requireContext());
+		Chip chip = new Chip(contextThemeWrapper);
 		chip.setText(contact.email);
 		chip.setCloseIconVisible(true);
 		chip.setCloseIcon(requireContext().getDrawable(R.drawable.ic_close));

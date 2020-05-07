@@ -61,18 +61,28 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 	public class ContactVH extends RecyclerView.ViewHolder {
 		// each data item is just a string in this case
 		public View layout;
-		public CheckBox checbox;
+		public CheckBox checkbox;
 		public TextView label;
 		public int type;
 
 		public ContactVH(View v) {
 			super(v);
 			layout = v;
-			checbox = v.findViewById(R.id.checkbox);
+			checkbox = v.findViewById(R.id.checkbox);
 			label = v.findViewById(R.id.label);
 
-			checbox.setOnClickListener(checkbox -> {
-				if(((CheckBox)checkbox).isChecked()){
+			checkbox.setOnClickListener(c -> {
+				if(((CheckBox)c).isChecked()){
+					addToSelection(getAdapterPosition());
+				}
+				else{
+					removeFromSelection(getAdapterPosition());
+				}
+			});
+
+			label.setOnClickListener(view -> {
+				checkbox.toggle();
+				if(checkbox.isChecked()){
 					addToSelection(getAdapterPosition());
 				}
 				else{
@@ -110,10 +120,10 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 			StingleContact contact = addedRecipients.get(rawPosition);
 			holder.label.setText(contact.email);
 			if(selectedRecipients.contains(contact)){
-				holder.checbox.setChecked(true);
+				holder.checkbox.setChecked(true);
 			}
 			else{
-				holder.checbox.setChecked(false);
+				holder.checkbox.setChecked(false);
 			}
 		}
 		else {
@@ -121,10 +131,10 @@ public class SharingContactsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 			StingleContact contact = db.getContactAtPosition(dbPos, StingleDb.SORT_DESC, filter, excludedIds);
 			holder.label.setText(contact.email);
 			if(selectedRecipients.contains(contact)){
-				holder.checbox.setChecked(true);
+				holder.checkbox.setChecked(true);
 			}
 			else{
-				holder.checbox.setChecked(false);
+				holder.checkbox.setChecked(false);
 			}
 		}
 	}

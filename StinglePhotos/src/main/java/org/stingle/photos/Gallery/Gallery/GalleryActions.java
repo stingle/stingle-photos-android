@@ -1,5 +1,6 @@
 package org.stingle.photos.Gallery.Gallery;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
@@ -46,6 +48,7 @@ import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GalleryActions {
 
@@ -54,6 +57,12 @@ public class GalleryActions {
 	}
 
 	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
+
+		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+			return;
+		}
+
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 		builder.setView(R.layout.dialog_move_items);
 		builder.setCancelable(true);
@@ -67,11 +76,13 @@ public class GalleryActions {
 		Switch deleteOriginal = addAlbumDialog.findViewById(R.id.delete_original);
 		deleteOriginal.setChecked(Helpers.getPreference(activity, "delete_original", true));
 
+		final HashMap<String, Boolean> props = new HashMap<>();
 		if(isFromAlbum) {
 			StingleDbAlbum album = GalleryHelpers.getAlbum(activity, activity.getCurrentAlbumId());
 			if(album.isShared && !album.isOwner){
 				deleteOriginal.setVisibility(View.GONE);
 				deleteOriginal.setChecked(false);
+				props.put("dontSaveState", true);
 			}
 		}
 
@@ -86,11 +97,12 @@ public class GalleryActions {
 		adapter.setListener(new AlbumsAdapterPisasso.Listener() {
 			@Override
 			public void onClick(int index, int type) {
-
+				final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
 				OnAsyncTaskFinish onAddFinish = new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
+						spinner.dismiss();
 						addAlbumDialog.dismiss();
 						activity.exitActionMode();
 						activity.updateGalleryFragmentData();
@@ -99,6 +111,7 @@ public class GalleryActions {
 					@Override
 					public void onFail() {
 						super.onFail();
+						spinner.dismiss();
 						Helpers.showAlertDialog(activity, activity.getString(R.string.cant_move_to_this_album));
 					}
 				};
@@ -106,7 +119,9 @@ public class GalleryActions {
 				MoveFileAsyncTask addSyncTask = new MoveFileAsyncTask(activity, files, onAddFinish);
 
 				boolean isMoving = ((Switch)addAlbumDialog.findViewById(R.id.delete_original)).isChecked();
-				Helpers.storePreference(activity, "delete_original", isMoving);
+				if(!(props.containsKey("dontSaveState") && props.get("dontSaveState"))) {
+					Helpers.storePreference(activity, "delete_original", isMoving);
+				}
 				addSyncTask.setIsMoving(isMoving);
 
 				if (type == AlbumsAdapterPisasso.TYPE_GALLERY) {
@@ -165,7 +180,7 @@ public class GalleryActions {
 		recyclerView.setAdapter(adapter);
 	}
 
-	public static void decryptSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
+	public static void decryptSelected(Activity activity, final ArrayList<StingleDbFile> files, int set, String albumId, OnAsyncTaskFinish onFinish) {
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_decrypt_files)), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -176,12 +191,17 @@ public class GalleryActions {
 							@Override
 							public void onFinish(ArrayList<File> files) {
 								super.onFinish(files);
-								activity.exitActionMode();
+								if(activity instanceof GalleryActivity) {
+									((GalleryActivity)activity).exitActionMode();
+								}
+								if(onFinish != null){
+									onFinish.onFinish();
+								}
 								spinner.dismiss();
 							}
 						});
-						decFilesJob.setSet(activity.getCurrentSet());
-						decFilesJob.setAlbumId(activity.getCurrentAlbumId());
+						decFilesJob.setSet(set);
+						decFilesJob.setAlbumId(albumId);
 						decFilesJob.setPerformMediaScan(true);
 						decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, files);
 					}
@@ -345,6 +365,15 @@ public class GalleryActions {
 	}
 
 	public static void shareStingle(AppCompatActivity activity, int set, String albumId, String albumName, ArrayList<StingleDbFile> files, boolean onlyAdd, OnAsyncTaskFinish onFinish) {
+		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+			return;
+		}
+		if(albumId != null && !SyncManager.areFilesAlreadyUploaded(activity, albumId)){
+			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+			return;
+		}
+
 		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
 		SharingDialogFragment newFragment = new SharingDialogFragment();
 

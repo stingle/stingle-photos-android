@@ -896,7 +896,7 @@ public class GalleryActivity extends AppCompatActivity
 						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentSet == SyncManager.ALBUM);
 						break;
 					case R.id.decrypt:
-						GalleryActions.decryptSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
+						GalleryActions.decryptSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentSet, currentAlbumId, null);
 						break;
 					case R.id.trash :
 						GalleryActions.trashSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());

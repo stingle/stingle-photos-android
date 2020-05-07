@@ -18,4 +18,5 @@ public abstract class OnAsyncTaskFinish {
 	public void onFinish(Object object){ onFinish(); };
 	public void onFinish(HashMap<String, Object> params){ onFinish(); };
 	public void onFail(){};
+	public void onFail(String msg){ onFail(); };
 }

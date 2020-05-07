@@ -26,7 +26,7 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppThemeDark" parent="Theme.MaterialComponents.NoActionBar">
         <item name="colorPrimary">@color/lightAccent</item>
         <item name="colorPrimaryDark">@color/lightAccent</item>
         <item name="colorAccent">@color/lightAccent</item>

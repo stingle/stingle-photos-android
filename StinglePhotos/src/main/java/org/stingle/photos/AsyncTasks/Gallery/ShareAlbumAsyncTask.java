@@ -10,6 +10,7 @@ import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.R;
 import org.stingle.photos.Sharing.SharingPermissions;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
@@ -32,6 +33,7 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private ArrayList<StingleContact> recipients;
 	private int sourceSet = -1;
 	private String sourceAlbumId;
+	private String errorMessage = null;
 
 	public ShareAlbumAsyncTask(Context context, OnAsyncTaskFinish onFinishListener) {
 		this.context = new WeakReference<>(context);;
@@ -105,6 +107,12 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				if(sourceSet == SyncManager.ALBUM && sourceAlbumId == null){
 					return false;
 				}
+
+				if(!SyncManager.areFilesAlreadyUploaded(files)){
+					errorMessage = myContext.getString(R.string.wait_for_upload);
+					return false;
+				}
+
 				if(albumName == null || albumName.length() == 0){
 					albumName = Helpers.generateAlbumName();
 				}
@@ -120,6 +128,11 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 			AlbumsDb db = new AlbumsDb(myContext);
 			long now = System.currentTimeMillis();
+
+			if(!SyncManager.areFilesAlreadyUploaded(myContext, albumId)){
+				errorMessage = myContext.getString(R.string.wait_for_upload);
+				return false;
+			}
 
 			StingleDbAlbum album = db.getAlbumById(albumId);
 			Crypto.AlbumData albumData = crypto.parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
@@ -175,8 +188,7 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			onFinishListener.onFinish();
 		}
 		else{
-			onFinishListener.onFail();
+			onFinishListener.onFail(errorMessage);
 		}
-
 	}
 }
