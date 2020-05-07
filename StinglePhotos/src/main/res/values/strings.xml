@@ -331,6 +331,8 @@
     <string name="delete_cache_desc">Clears cache of thumbnails and other temporary data</string>
     <string name="deleting_cache">Deleting cache...</string>
     <string name="success_deleted">Successfully deleted</string>
+    <string name="delete_original">Delete original files after adding</string>
+    <string name="cant_move_to_this_album">Can\'t add to this album</string>
 
 
 </resources>

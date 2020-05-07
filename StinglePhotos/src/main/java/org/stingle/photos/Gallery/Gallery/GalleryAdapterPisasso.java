@@ -329,10 +329,12 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				} else {
 					holder.checkbox.setChecked(false);
 				}
+				holder.layout.setElevation(0);
 			} else {
 				int size = Helpers.convertDpToPixels(context, 2);
 				holder.image.setPadding(size, size, size, size);
 				holder.checkbox.setVisibility(View.GONE);
+				holder.layout.setElevation(3);
 			}
 
 			holder.image.setImageBitmap(null);

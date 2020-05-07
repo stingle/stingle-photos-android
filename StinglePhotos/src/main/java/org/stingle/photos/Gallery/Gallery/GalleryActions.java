@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -18,8 +18,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
@@ -31,19 +29,18 @@ import org.stingle.photos.AsyncTasks.Gallery.LeaveAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.RenameAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.Sharing.AlbumInfoDialogFragment;
 import org.stingle.photos.Sharing.AlbumSettingsDialogFragment;
 import org.stingle.photos.Sharing.SharingDialogFragment;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -58,7 +55,6 @@ public class GalleryActions {
 
 	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
-		builder.setTitle(R.string.add_move_to_album);
 		builder.setView(R.layout.dialog_move_items);
 		builder.setCancelable(true);
 		final AlertDialog addAlbumDialog = builder.create();
@@ -68,11 +64,24 @@ public class GalleryActions {
 
 		recyclerView.setHasFixedSize(true);
 
+		Switch deleteOriginal = addAlbumDialog.findViewById(R.id.delete_original);
+		deleteOriginal.setChecked(Helpers.getPreference(activity, "delete_original", true));
+
+		if(isFromAlbum) {
+			StingleDbAlbum album = GalleryHelpers.getAlbum(activity, activity.getCurrentAlbumId());
+			if(album.isShared && !album.isOwner){
+				deleteOriginal.setVisibility(View.GONE);
+				deleteOriginal.setChecked(false);
+			}
+		}
+
 		LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
 		recyclerView.setLayoutManager(layoutManager);
 
 		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, AlbumsFragment.VIEW_ALL, true, isFromAlbum);
 
+		adapter.setTextSize(18);
+		adapter.setSubTextSize(12);
 		adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
 		adapter.setListener(new AlbumsAdapterPisasso.Listener() {
 			@Override
@@ -90,13 +99,14 @@ public class GalleryActions {
 					@Override
 					public void onFail() {
 						super.onFail();
-						Helpers.showAlertDialog(activity, activity.getString(R.string.something_went_wrong));
+						Helpers.showAlertDialog(activity, activity.getString(R.string.cant_move_to_this_album));
 					}
 				};
 
 				MoveFileAsyncTask addSyncTask = new MoveFileAsyncTask(activity, files, onAddFinish);
 
-				boolean isMoving = ((RadioButton)addAlbumDialog.findViewById(R.id.move_to_album)).isChecked();
+				boolean isMoving = ((Switch)addAlbumDialog.findViewById(R.id.delete_original)).isChecked();
+				Helpers.storePreference(activity, "delete_original", isMoving);
 				addSyncTask.setIsMoving(isMoving);
 
 				if (type == AlbumsAdapterPisasso.TYPE_GALLERY) {
@@ -333,135 +343,6 @@ public class GalleryActions {
 				},
 				null);
 	}
-
-	public static void showSharingSheet(GalleryActivity activity, boolean isAlbum, ArrayList<StingleDbFile> files) {
-		View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_sharing_bottom_sheet, null);
-		BottomSheetDialog dialog = new BottomSheetDialog(activity);
-		dialog.setContentView(dialogView);
-		BottomSheetBehavior mBehavior = dialog.getBehavior();
-
-		dialog.setOnShowListener(dialogInterface -> {
-			mBehavior.setPeekHeight(dialogView.getHeight());
-		});
-
-		/*mBehavior.setFitToContents(false);
-		mBehavior.setHalfExpandedRatio((float) 0.6);
-		mBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-
-		View bottomSheet = dialog.findViewById(R.id.design_bottom_sheet);
-		bottomSheet.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;*/
-
-
-		if(isAlbum){
-			dialog.findViewById(R.id.otherAppsShareContainer).setVisibility(View.GONE);
-		}
-
-
-		/*Switch allowEdit = dialog.findViewById(R.id.allow_add);
-		Switch allowInvite = dialog.findViewById(R.id.allow_share);
-		Switch allowCopy = dialog.findViewById(R.id.allow_copy);
-
-		dialog.findViewById(R.id.allow_add_text).setOnClickListener(v -> allowEdit.toggle());
-		dialog.findViewById(R.id.allow_share_text).setOnClickListener(v -> allowInvite.toggle());
-		dialog.findViewById(R.id.allow_copy_text).setOnClickListener(v -> allowCopy.toggle());*/
-		dialog.findViewById(R.id.shareToOtherApps).setOnClickListener(v -> {
-			shareSelected(activity, files);
-			dialog.dismiss();
-		});
-
-		EditText recipient = dialog.findViewById(R.id.recipient);
-		//LinearLayout chipsContainer = dialog.findViewById(R.id.chipsContainer);
-
-		String ownEmail = Helpers.getPreference(activity, StinglePhotosApplication.USER_EMAIL, "");
-
-		ArrayList<StingleContact> recipients = new ArrayList<>();
-
-		/*recipient.setOnEditorActionListener((v, actionId, event) -> {
-			if (actionId == EditorInfo.IME_ACTION_GO) {
-				EditText textBox = ((EditText)v);
-				String text = textBox.getText().toString();
-				if(Helpers.isValidEmail(text)) {
-					if(text.equals(ownEmail)){
-						Toast.makeText(activity, activity.getString(R.string.cant_share_to_self), Toast.LENGTH_SHORT).show();
-						return true;
-					}
-					(new GetContactAsyncTask(activity, text, new OnAsyncTaskFinish() {
-						@Override
-						public void onFinish(Object contact) {
-							super.onFinish(contact);
-							Chip chip = new Chip(activity);
-							chip.setText(text);
-							chip.setCloseIconVisible(true);
-							chip.setCloseIcon(activity.getDrawable(R.drawable.ic_close));
-							chip.setOnCloseIconClickListener(v1 -> {
-								chipsContainer.removeView(chip);
-							});
-							chipsContainer.addView(chip);
-							textBox.setText("");
-
-							recipients.add((StingleContact) contact);
-						}
-
-						@Override
-						public void onFail() {
-							super.onFail();
-							Toast.makeText(activity, activity.getString(R.string.not_on_stingle), Toast.LENGTH_SHORT).show();
-						}
-					})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-				}
-				else{
-					Toast.makeText(activity, activity.getString(R.string.invalid_email), Toast.LENGTH_SHORT).show();
-				}
-				return true;
-			}
-			return false;
-		});
-
-		dialog.findViewById(R.id.share).setOnClickListener(v -> {
-			final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.spinner_sharing), null);
-			ShareAlbumAsyncTask shareTask = new ShareAlbumAsyncTask(activity, new OnAsyncTaskFinish() {
-				@Override
-				public void onFinish() {
-					super.onFinish();
-					spinner.dismiss();
-					dialog.dismiss();
-					activity.exitActionMode();
-				}
-
-				@Override
-				public void onFail() {
-					super.onFail();
-					spinner.dismiss();
-					dialog.dismiss();
-					Snackbar mySnackbar = Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.failed_to_share), Snackbar.LENGTH_SHORT);
-					mySnackbar.show();
-				}
-			});
-
-			if(isAlbum) {
-				shareTask.setAlbumId(activity.getCurrentAlbumId());
-			}
-			else{
-				shareTask.setFiles(files);
-				shareTask.setSourceAlbumId(activity.getCurrentAlbumId());
-				shareTask.setSourceSet(activity.getCurrentSet());
-			}
-			shareTask.setRecipients(recipients);
-
-			SharingPermissions permissions = new SharingPermissions();
-			permissions.allowAdd = ((Switch)dialog.findViewById(R.id.allow_add)).isChecked();
-			permissions.allowShare = ((Switch)dialog.findViewById(R.id.allow_share)).isChecked();
-			permissions.allowCopy = ((Switch)dialog.findViewById(R.id.allow_copy)).isChecked();
-
-			shareTask.setPermissions(permissions);
-
-			shareTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		});*/
-
-		dialog.show();
-	}
-
 
 	public static void shareStingle(AppCompatActivity activity, int set, String albumId, String albumName, ArrayList<StingleDbFile> files, boolean onlyAdd, OnAsyncTaskFinish onFinish) {
 		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();

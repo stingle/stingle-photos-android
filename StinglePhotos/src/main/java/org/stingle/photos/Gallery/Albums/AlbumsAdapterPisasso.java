@@ -1,6 +1,8 @@
 package org.stingle.photos.Gallery.Albums;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,14 +12,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso3.Callback;
 import com.squareup.picasso3.NetworkPolicy;
 import com.squareup.picasso3.Picasso;
-import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
-import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -60,6 +60,9 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	private int layoutStyle = LAYOUT_GRID;
 	private int otherItemsCount = 0;
 
+	private Integer textSize;
+	private Integer subTextSize;
+
 	public AlbumsAdapterPisasso(Context context, RecyclerView.LayoutManager lm, Integer view, boolean showAddOption, boolean showGalleryOption) {
 		this.context = context;
 		this.db = new AlbumsDb(context);
@@ -99,6 +102,14 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 	public void setLayoutStyle(int layoutStyle){
 		this.layoutStyle = layoutStyle;
+	}
+
+	public void setTextSize(Integer textSize) {
+		this.textSize = textSize;
+	}
+
+	public void setSubTextSize(Integer subTextSize) {
+		this.subTextSize = subTextSize;
 	}
 
 
@@ -153,6 +164,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
 			albumName.setOnClickListener(this);
+			image.setElevation(0);
 		}
 
 		@Override
@@ -189,6 +201,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			albumName = v.findViewById(R.id.albumName);
 			image.setOnClickListener(this);
 			albumName.setOnClickListener(this);
+			image.setElevation(0);
 		}
 
 		@Override
@@ -290,6 +303,13 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			holder.image.setImageBitmap(null);
 			holder.albumName.setText("");
 
+			if(textSize != null){
+				holder.albumName.setTextSize(textSize);
+			}
+			if(subTextSize != null){
+				holder.albumSubtitle.setTextSize(subTextSize);
+			}
+
 			try{
 				StingleDbAlbum album;
 				album = albumsCache.get(dbPos);
@@ -349,12 +369,21 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 				params.height = size - margin;
 				holder.layout.setLayoutParams(params);
 			}
-
+			if(textSize != null){
+				holder.albumName.setTextSize(textSize);
+			}
 		}
 		else if(holderObj instanceof AlbumAddGalleryVH) {
 			AlbumAddGalleryVH holder = (AlbumAddGalleryVH)holderObj;
 			holder.albumName.setText(context.getString(R.string.main_gallery));
 			holder.image.setImageDrawable(context.getDrawable(R.drawable.ic_image_red));
+			holder.image.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
+			ColorStateList csl = AppCompatResources.getColorStateList(context, R.color.primaryColor);
+			holder.image.setImageTintList(csl);
+
+			if(textSize != null){
+				holder.albumName.setTextSize(textSize);
+			}
 		}
 	}
 
