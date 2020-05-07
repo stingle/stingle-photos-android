@@ -469,12 +469,6 @@ public class GalleryActivity extends AppCompatActivity
 		} catch (IllegalStateException ignored) { }
 	}
 
-	private void startSync(){
-		Intent serviceIntent = new Intent(this, SyncService.class);
-		serviceIntent.putExtra("START_SYNC", true);
-		startService(serviceIntent);
-	}
-
 	public class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(@NonNull Message msg) {
@@ -528,7 +522,7 @@ public class GalleryActivity extends AppCompatActivity
 					if(galleryFragment != null) {
 						galleryFragment.updateDataSet();
 					}
-					startSync();
+					SyncManager.startSync(GalleryActivity.this);
 					isImporting = false;
 					checkLoginAndInit();
 				}

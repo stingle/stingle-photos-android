@@ -1,6 +1,7 @@
 package org.stingle.photos.Sync;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -73,6 +74,12 @@ public class SyncManager {
 		this.context = context;
 	}
 
+
+	public static void startSync(Context context){
+		Intent serviceIntent = new Intent(context, SyncService.class);
+		serviceIntent.putExtra("START_SYNC", true);
+		context.startService(serviceIntent);
+	}
 
 	public static UploadToCloudAsyncTask uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish, Executor executor) {
 		if (executor == null) {

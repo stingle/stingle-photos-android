@@ -202,6 +202,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 				if(onFinish != null){
 					onFinish.onFinish();
 				}
+				SyncManager.startSync(requireContext());
 			}
 
 			@Override
