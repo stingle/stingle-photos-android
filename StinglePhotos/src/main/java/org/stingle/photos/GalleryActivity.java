@@ -174,6 +174,19 @@ public class GalleryActivity extends AppCompatActivity
 				currentAlbumId = savedInstanceState.getString("albumId");
 			}
 		}
+
+		Intent intent = getIntent();
+		if(intent.hasExtra("set")){
+			currentSet = intent.getIntExtra("set", currentSet);
+		}
+		if(intent.hasExtra("albumId")){
+			currentAlbumId = intent.getStringExtra("albumId");
+		}
+		if(intent.hasExtra("view")){
+			currentAlbumsView = intent.getIntExtra("view", currentAlbumsView);
+		}
+
+		updateBottomNavigationMenu();
 	}
 
 	@Override
@@ -209,6 +222,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		if(!isImporting){
+			SyncManager.startPeriodicWork(this);
 			checkLoginAndInit();
 		}
 	}
@@ -396,6 +410,19 @@ public class GalleryActivity extends AppCompatActivity
 			bottomNavigationView.getMenu().getItem(2).setChecked(true);
 		}
 		disableSyncBar();
+	}
+
+	private void updateBottomNavigationMenu(){
+		if(currentSet == SyncManager.GALLERY || currentSet == SyncManager.TRASH){
+			bottomNavigationView.getMenu().getItem(0).setChecked(true);
+		}
+		else if(currentSet == SyncManager.ALBUM) {
+			if (currentAlbumsView == AlbumsFragment.VIEW_ALBUMS) {
+				bottomNavigationView.getMenu().getItem(1).setChecked(true);
+			} else if (currentAlbumsView == AlbumsFragment.VIEW_SHARES) {
+				bottomNavigationView.getMenu().getItem(2).setChecked(true);
+			}
+		}
 	}
 
 	public void updateGalleryFragmentData(){

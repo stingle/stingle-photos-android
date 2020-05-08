@@ -436,8 +436,7 @@ public class SyncService extends Service {
 		isNotificationActive = true;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			String NOTIFICATION_CHANNEL_ID = "org.stingle.photos.sync";
-			String channelName = "Sync Service";
-			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.sync_channel_name), NotificationManager.IMPORTANCE_NONE);
 			chan.setLightColor(getColor(R.color.primaryLightColor));
 			chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
 			NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

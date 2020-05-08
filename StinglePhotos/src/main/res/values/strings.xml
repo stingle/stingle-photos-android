@@ -336,6 +336,10 @@
     <string name="wait_for_upload">Please wait for backup to finish before sharing</string>
     <string name="processing">Processing...</string>
     <string name="success_decrypted">Successfully decrypted</string>
+    <string name="sync_channel_name">Sync notifications</string>
+    <string name="sharing_channel_name">Sharing notifications</string>
+    <string name="new_shared_album">New shared album \"%s\"</string>
+    <string name="tap_to_view">Tap to view</string>
 
 
 </resources>

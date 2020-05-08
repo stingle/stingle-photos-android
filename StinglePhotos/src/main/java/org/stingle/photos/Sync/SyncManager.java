@@ -7,6 +7,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.AsyncTasks.Sync.SyncCloudToLocalDbAsyncTask;
@@ -35,6 +42,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 public class SyncManager {
 
@@ -626,6 +634,28 @@ public class SyncManager {
 			}
 		}
 		return true;
+	}
+
+	public static void startPeriodicWork(Context context){
+		Constraints constraints = new Constraints.Builder()
+				.setRequiredNetworkType(NetworkType.CONNECTED)
+				.build();
+
+
+		PeriodicWorkRequest periodicSyncDataWork =
+				new PeriodicWorkRequest.Builder(SyncWorker.class, 15, TimeUnit.MINUTES)
+						.addTag("sync")
+						.setConstraints(constraints)
+						// setting a backoff on case the work needs to retry
+						.setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+						.build();
+		WorkManager workManager = WorkManager.getInstance(context);
+		workManager.enqueueUniquePeriodicWork(
+				"SPSYnc",
+				ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+				periodicSyncDataWork //work request
+		);
+
 	}
 
 }

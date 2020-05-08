@@ -1,7 +1,14 @@
 package org.stingle.photos.AsyncTasks.Sync;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.SystemClock;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -17,6 +24,9 @@ import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.Gallery.Albums.AlbumsFragment;
+import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
@@ -47,7 +57,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private ArrayList<HashMap<String, Object>> deleteLog = new ArrayList<>();
 
-	public SyncCloudToLocalDbAsyncTask(Context context, SyncManager.OnFinish onFinish){
+	public SyncCloudToLocalDbAsyncTask(Context context, SyncManager.OnFinish onFinish) {
 		this.context = new WeakReference<>(context);
 		this.onFinish = onFinish;
 		galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
@@ -60,20 +70,20 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	@Override
 	protected Boolean doInBackground(Void... params) {
 		Context myContext = context.get();
-		if(myContext == null){
+		if (myContext == null) {
 			return false;
 		}
 
-		lastSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, (long)0);
-		lastTrashSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_TRASH_LAST_SEEN_TIME, (long)0);
-		lastAlbumsSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME, (long)0);
-		lastAlbumFilesSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, (long)0);
-		lastDelSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, (long)0);
-		lastContactsSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME, (long)0);
+		lastSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, (long) 0);
+		lastTrashSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_TRASH_LAST_SEEN_TIME, (long) 0);
+		lastAlbumsSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME, (long) 0);
+		lastAlbumFilesSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, (long) 0);
+		lastDelSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, (long) 0);
+		lastContactsSeenTime = Helpers.getPreference(myContext, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME, (long) 0);
 
 		boolean needToUpdateUI = false;
 
-		try{
+		try {
 			needToUpdateUI = getFileList(myContext);
 
 			Helpers.storePreference(myContext, SyncManager.PREF_LAST_SEEN_TIME, lastSeenTime);
@@ -82,8 +92,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			Helpers.storePreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, lastAlbumFilesSeenTime);
 			Helpers.storePreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, lastDelSeenTime);
 			Helpers.storePreference(myContext, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME, lastContactsSeenTime);
-		}
-		catch (JSONException e){
+		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 
@@ -108,7 +117,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 				postParams
 		);
 		StingleResponse response = new StingleResponse(context, resp, false);
-		if(response.isStatusOk()){
+		if (response.isStatusOk()) {
 
 			if (processFilesInSet(context, response.get("files"), SyncManager.GALLERY)) {
 				needToUpdateUI = true;
@@ -159,11 +168,11 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private boolean processFilesInSet(Context context, String filesStr, int set) throws JSONException {
 		boolean result = false;
-		if(filesStr != null && filesStr.length() > 0){
+		if (filesStr != null && filesStr.length() > 0) {
 			JSONArray files = new JSONArray(filesStr);
-			for(int i=0; i<files.length(); i++){
+			for (int i = 0; i < files.length(); i++) {
 				JSONObject file = files.optJSONObject(i);
-				if(file != null){
+				if (file != null) {
 					StingleDbFile dbFile = new StingleDbFile(file);
 					Log.d("receivedFile", set + " - " + dbFile.filename);
 					processFile(context, dbFile, set);
@@ -176,11 +185,11 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private boolean processAlbums(Context context, String albumsStr) throws JSONException {
 		boolean result = false;
-		if(albumsStr != null && albumsStr.length() > 0){
+		if (albumsStr != null && albumsStr.length() > 0) {
 			JSONArray albums = new JSONArray(albumsStr);
-			for(int i=0; i<albums.length(); i++){
+			for (int i = 0; i < albums.length(); i++) {
 				JSONObject album = albums.optJSONObject(i);
-				if(album != null){
+				if (album != null) {
 					StingleDbAlbum dbAlbum = new StingleDbAlbum(album);
 					Log.d("receivedAlbum", dbAlbum.albumId);
 					processAlbum(dbAlbum);
@@ -193,11 +202,11 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private boolean processContacts(Context context, String contactsStr) throws JSONException {
 		boolean result = false;
-		if(contactsStr != null && contactsStr.length() > 0){
+		if (contactsStr != null && contactsStr.length() > 0) {
 			JSONArray contacts = new JSONArray(contactsStr);
-			for(int i=0; i<contacts.length(); i++){
+			for (int i = 0; i < contacts.length(); i++) {
 				JSONObject contact = contacts.optJSONObject(i);
-				if(contact != null){
+				if (contact != null) {
 					StingleContact dbContact = new StingleContact(contact);
 					Log.d("receivedContact", dbContact.email);
 					processContact(dbContact);
@@ -210,11 +219,11 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 
 	private boolean processDeleteEvents(Context context, String delsStr) throws JSONException {
 		boolean result = false;
-		if(delsStr != null && delsStr.length() > 0){
+		if (delsStr != null && delsStr.length() > 0) {
 			JSONArray deletes = new JSONArray(delsStr);
-			for(int i=0; i<deletes.length(); i++){
+			for (int i = 0; i < deletes.length(); i++) {
 				JSONObject deleteEvent = deletes.optJSONObject(i);
-				if(deleteEvent != null){
+				if (deleteEvent != null) {
 					Log.d("receivedDelete", deleteEvent.optString("file") + " - " + deleteEvent.optString("albumId"));
 					processDeleteEvent(context, deleteEvent);
 					result = true;
@@ -224,19 +233,16 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		return result;
 	}
 
-	private boolean processFile(Context context, StingleDbFile remoteFile, int set){
+	private boolean processFile(Context context, StingleDbFile remoteFile, int set) {
 
 		FilesDb myDb;
-		if (set == SyncManager.GALLERY){
+		if (set == SyncManager.GALLERY) {
 			myDb = galleryDb;
-		}
-		else if (set == SyncManager.TRASH){
+		} else if (set == SyncManager.TRASH) {
 			myDb = trashDb;
-		}
-		else if (set == SyncManager.ALBUM){
+		} else if (set == SyncManager.ALBUM) {
 			myDb = albumFilesDb;
-		}
-		else{
+		} else {
 			return false;
 		}
 
@@ -246,26 +252,25 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		File fsFile = new File(dir.getPath() + "/" + remoteFile.filename);
 
 		remoteFile.isLocal = false;
-		if(fsFile.exists()) {
+		if (fsFile.exists()) {
 			remoteFile.isLocal = true;
 		}
 
-		if(file == null){
+		if (file == null) {
 			remoteFile.isRemote = true;
 			myDb.insertFile(remoteFile);
-		}
-		else {
+		} else {
 			boolean needUpdate = false;
 			boolean needDownload = false;
 			if (file.dateModified != remoteFile.dateModified) {
 				file.dateModified = remoteFile.dateModified;
 				needUpdate = true;
 			}
-			if(!file.isRemote) {
+			if (!file.isRemote) {
 				file.isRemote = true;
 				needUpdate = true;
 			}
-			if(file.isLocal != remoteFile.isLocal) {
+			if (file.isLocal != remoteFile.isLocal) {
 				file.isLocal = remoteFile.isLocal;
 				needUpdate = true;
 			}
@@ -274,10 +279,10 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 				needUpdate = true;
 				needDownload = true;
 			}
-			if(needUpdate) {
+			if (needUpdate) {
 				myDb.updateFile(file);
 			}
-			if(needDownload){
+			if (needDownload) {
 				String homeDir = FileManager.getHomeDir(context);
 				String thumbDir = FileManager.getThumbsDir(context);
 				String mainFilePath = homeDir + "/" + file.filename;
@@ -293,32 +298,32 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		return true;
 	}
 
-	private void moveForwardFileSeenTime(StingleDbFile remoteFile, int set){
-		if(set == SyncManager.GALLERY) {
+	private void moveForwardFileSeenTime(StingleDbFile remoteFile, int set) {
+		if (set == SyncManager.GALLERY) {
 			if (remoteFile.dateModified > lastSeenTime) {
 				lastSeenTime = remoteFile.dateModified;
 			}
-		}
-		else if(set == SyncManager.TRASH) {
+		} else if (set == SyncManager.TRASH) {
 			if (remoteFile.dateModified > lastTrashSeenTime) {
 				lastTrashSeenTime = remoteFile.dateModified;
 			}
-		}
-		else if(set == SyncManager.ALBUM) {
+		} else if (set == SyncManager.ALBUM) {
 			if (remoteFile.dateModified > lastAlbumFilesSeenTime) {
 				lastAlbumFilesSeenTime = remoteFile.dateModified;
 			}
 		}
 	}
 
-	private boolean processAlbum(StingleDbAlbum remoteAlbum){
+	private boolean processAlbum(StingleDbAlbum remoteAlbum) {
 
 		StingleDbAlbum album = albumsDb.getAlbumById(remoteAlbum.albumId);
 
-		if(album == null){
+		if (album == null) {
 			albumsDb.insertAlbum(remoteAlbum);
-		}
-		else {
+			if(remoteAlbum.isShared && !remoteAlbum.isOwner){
+				showSharingNotification(remoteAlbum);
+			}
+		} else {
 			if (album.dateModified != remoteAlbum.dateModified) {
 				albumsDb.updateAlbum(remoteAlbum);
 			}
@@ -329,41 +334,40 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		return true;
 	}
 
-	private boolean processContact(StingleContact remoteContact){
+	private boolean processContact(StingleContact remoteContact) {
 		StingleContact contact = contactsDb.getContactByUserId(remoteContact.userId);
 
-		if(contact == null) {
+		if (contact == null) {
 			contactsDb.insertContact(remoteContact);
-		}
-		else{
+		} else {
 			boolean needUpdate = false;
-			if(contact.dateUsed != remoteContact.dateUsed) {
+			if (contact.dateUsed != remoteContact.dateUsed) {
 				contact.dateUsed = remoteContact.dateUsed;
 				needUpdate = true;
 			}
-			if(contact.dateModified != remoteContact.dateModified) {
+			if (contact.dateModified != remoteContact.dateModified) {
 				contact.dateModified = remoteContact.dateModified;
 				needUpdate = true;
 			}
-			if(!contact.email.equals(remoteContact.email)) {
+			if (!contact.email.equals(remoteContact.email)) {
 				contact.email = remoteContact.email;
 				needUpdate = true;
 			}
 
-			if(needUpdate){
+			if (needUpdate) {
 				contactsDb.updateContact(contact);
 			}
 		}
 
-		if(remoteContact.dateModified > lastContactsSeenTime) {
+		if (remoteContact.dateModified > lastContactsSeenTime) {
 			lastContactsSeenTime = remoteContact.dateModified;
 		}
 
 		return true;
 	}
 
-	private void moveForwardAlbumSeenTime(StingleDbAlbum remoteAlbum){
-		if(remoteAlbum.dateModified > lastAlbumsSeenTime) {
+	private void moveForwardAlbumSeenTime(StingleDbAlbum remoteAlbum) {
+		if (remoteAlbum.dateModified > lastAlbumsSeenTime) {
 			lastAlbumsSeenTime = remoteAlbum.dateModified;
 		}
 	}
@@ -375,35 +379,31 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		Integer type = event.getInt("type");
 		Long date = event.getLong("date");
 
-		if(type == SyncManager.DELETE_EVENT_MAIN) {
+		if (type == SyncManager.DELETE_EVENT_MAIN) {
 			StingleDbFile file = galleryDb.getFileIfExists(filename);
-			if(file != null && file.dateModified < date) {
+			if (file != null && file.dateModified < date) {
 				galleryDb.deleteFile(file.filename);
 			}
-		}
-		else if(type == SyncManager.DELETE_EVENT_TRASH) {
+		} else if (type == SyncManager.DELETE_EVENT_TRASH) {
 			StingleDbFile file = trashDb.getFileIfExists(filename);
-			if(file != null && file.dateModified < date) {
+			if (file != null && file.dateModified < date) {
 				trashDb.deleteFile(file.filename);
 
 			}
-		}
-		else if(type == SyncManager.DELETE_EVENT_ALBUM) {
+		} else if (type == SyncManager.DELETE_EVENT_ALBUM) {
 			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
-			if(album != null && album.dateModified < date) {
+			if (album != null && album.dateModified < date) {
 				albumFilesDb.deleteAllFilesInAlbum(albumId);
 				albumsDb.deleteAlbum(albumId);
 			}
-		}
-		else if(type == SyncManager.DELETE_EVENT_ALBUM_FILE) {
+		} else if (type == SyncManager.DELETE_EVENT_ALBUM_FILE) {
 			StingleDbFile file = albumFilesDb.getFileIfExists(filename);
-			if(file != null && file.dateModified < date) {
+			if (file != null && file.dateModified < date) {
 				albumFilesDb.deleteAlbumFile(file.filename, albumId);
 			}
-		}
-		else if(type == SyncManager.DELETE_EVENT_DELETE) {
+		} else if (type == SyncManager.DELETE_EVENT_DELETE) {
 			StingleDbFile file = trashDb.getFileIfExists(filename);
-			if(file != null && file.dateModified < date) {
+			if (file != null && file.dateModified < date) {
 				trashDb.deleteFile(file.filename);
 
 				boolean needToDeleteFiles = true;
@@ -428,11 +428,57 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			}
 		}
 
-		if(date > lastDelSeenTime) {
+		if (date > lastDelSeenTime) {
 			lastDelSeenTime = date;
 		}
 	}
 
+
+	private void showSharingNotification(StingleDbAlbum album) {
+		Context myContext = context.get();
+		if (myContext == null) {
+			return;
+		}
+		NotificationManager manager = (NotificationManager) myContext.getSystemService(Context.NOTIFICATION_SERVICE);
+		Notification.Builder notificationBuilder;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			String NOTIFICATION_CHANNEL_ID = "org.stingle.photos.sharing";
+			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, myContext.getString(R.string.sharing_channel_name), NotificationManager.IMPORTANCE_NONE);
+			chan.setLightColor(myContext.getColor(R.color.primaryLightColor));
+			chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+			chan.setImportance(NotificationManager.IMPORTANCE_DEFAULT);
+			assert manager != null;
+			manager.createNotificationChannel(chan);
+			notificationBuilder = new Notification.Builder(myContext, NOTIFICATION_CHANNEL_ID);
+		} else {
+			notificationBuilder = new Notification.Builder(myContext);
+		}
+
+		Intent intent = new Intent(myContext, GalleryActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		intent.putExtra("set", SyncManager.ALBUM);
+		intent.putExtra("view", AlbumsFragment.VIEW_SHARES);
+		intent.putExtra("albumId", album.albumId);
+		PendingIntent contentIntent = PendingIntent.getActivity(myContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		String albumName = GalleryHelpers.getAlbumName(album);
+		String message = myContext.getString(R.string.new_shared_album, albumName);
+
+		Notification notification = notificationBuilder
+				.setSmallIcon(R.drawable.ic_sp)  // the status icon
+				.setContentTitle(message)
+				.setContentText(myContext.getString(R.string.tap_to_view))
+				.setWhen(System.currentTimeMillis())  // the time stamp
+				.setPriority(Notification.PRIORITY_DEFAULT)
+				.setContentIntent(contentIntent)  // The intent to send when the entry is clicked
+				.setAutoCancel(true)
+				.build();
+
+		assert manager != null;
+		int oneTimeID = (int) SystemClock.uptimeMillis();
+		manager.notify(oneTimeID, notification);
+	}
 
 
 	@Override
@@ -443,7 +489,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		albumsDb.close();
 		albumFilesDb.close();
 
-		if(onFinish != null){
+		if (onFinish != null) {
 			onFinish.onFinish(needToUpdateUI);
 		}
 	}

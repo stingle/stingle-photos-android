@@ -209,6 +209,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/share_provider_paths" />
         </provider>
+        <receiver android:name=".Sync.SyncWorkStartReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
