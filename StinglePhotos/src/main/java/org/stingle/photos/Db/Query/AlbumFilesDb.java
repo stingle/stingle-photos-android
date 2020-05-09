@@ -10,6 +10,7 @@ import android.util.Log;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Files.FileManager;
 
 import java.util.ArrayList;
 
@@ -98,6 +99,16 @@ public class AlbumFilesDb implements FilesDb {
 		String[] selectionArgs = { albumId };
 
 		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+	}
+
+	public void deleteAlbumFilesIfNotNeeded(Context context, String albumId){
+		Cursor result = getFilesList(AlbumFilesDb.GET_MODE_REMOTE, StingleDb.SORT_ASC, null, albumId);
+		while(result.moveToNext()) {
+			StingleDbFile file = new StingleDbFile(result);
+			if(!isFileExistsInOtherAlbums(file.filename, albumId)){
+				FileManager.deleteLocalFile(context, file.filename);
+			}
+		}
 	}
 
 	public int truncateTable(){
@@ -291,6 +302,19 @@ public class AlbumFilesDb implements FilesDb {
 		}
 		result.close();
 		return null;
+	}
+
+	public boolean isFileExistsInOtherAlbums(String filename, String albumId){
+
+		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " <> ?";
+		String[] selectionArgs = {filename, albumId};
+
+		long count = DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+
+		if(count > 0){
+			return true;
+		}
+		return false;
 	}
 
 	public StingleDbFile getFileAtPosition(int pos, String albumId, int sort){

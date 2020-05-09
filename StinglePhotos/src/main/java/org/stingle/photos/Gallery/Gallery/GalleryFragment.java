@@ -219,7 +219,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	}
 
 	public void updateAutoFit(){
-		layoutManager.updateAutoFit();
+		if(layoutManager != null) {
+			layoutManager.updateAutoFit();
+		}
 	}
 
 	public boolean isSelectionModeActive(){

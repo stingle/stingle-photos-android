@@ -35,6 +35,7 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_PERMISSIONS = "permissions";
 		public static final String COLUMN_NAME_IS_LOCKED = "is_locked";
 		public static final String COLUMN_NAME_COVER = "cover";
+		public static final String COLUMN_NAME_SYNC_LOCAL = "sync_local";
 
 		public static final String COLUMN_NAME_USER_ID = "user_id";
 		public static final String COLUMN_NAME_EMAIL = "email";
@@ -98,6 +99,7 @@ public class StingleDbContract {
 					Columns.COLUMN_NAME_IS_OWNER + " INTEGER, " +
 					Columns.COLUMN_NAME_MEMBERS + " TEXT, " +
 					Columns.COLUMN_NAME_PERMISSIONS + " TEXT, " +
+					Columns.COLUMN_NAME_SYNC_LOCAL + " INTEGER, " +
 					Columns.COLUMN_NAME_IS_LOCKED + " INTEGER, " +
 					Columns.COLUMN_NAME_COVER + " TEXT, " +
 					Columns.COLUMN_NAME_DATE_CREATED + " INTEGER," +

@@ -11,12 +11,13 @@ import org.json.JSONObject;
 
 public class StingleResponse{
 
-	Context context;
-	JSONObject result = null;
-	String status = "ok";
-	JSONObject parts = null;
-	JSONArray infos = null;
-	JSONArray errors = null;
+	private Context context;
+	private JSONObject result = null;
+	private String status = "ok";
+	private JSONObject parts = null;
+	private JSONArray infos = null;
+	private JSONArray errors = null;
+	private boolean isLoggedOut = false;
 
 	public StingleResponse(Context context, JSONObject result){
 		this(context, result, true);
@@ -56,6 +57,7 @@ public class StingleResponse{
 			if(logout != null && logout.length() > 0){
 				LoginManager.logoutLocally(context);
 				this.status = "nok";
+				isLoggedOut = true;
 			}
 		}
 		catch (JSONException e) {
@@ -64,7 +66,7 @@ public class StingleResponse{
 	}
 
 	public boolean isStatusOk(){
-		return (this.status.equals("ok") ? true : false);
+		return this.status.equals("ok");
 	}
 
 	public String get(String name){
@@ -122,5 +124,9 @@ public class StingleResponse{
 			return true;
 		}
 		return false;
+	}
+
+	public boolean isLoggedOut() {
+		return isLoggedOut;
 	}
 }

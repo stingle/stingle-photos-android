@@ -36,6 +36,7 @@ public class AlbumsDb {
 			StingleDbContract.Columns.COLUMN_NAME_IS_OWNER,
 			StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS,
 			StingleDbContract.Columns.COLUMN_NAME_MEMBERS,
+			StingleDbContract.Columns.COLUMN_NAME_SYNC_LOCAL,
 			StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED,
 			StingleDbContract.Columns.COLUMN_NAME_COVER,
 			StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED,
@@ -59,6 +60,7 @@ public class AlbumsDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_OWNER, album.isOwner);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS, album.permissions);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_MEMBERS, album.getMembersAsString());
+		values.put(StingleDbContract.Columns.COLUMN_NAME_SYNC_LOCAL, album.syncLocal);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED, album.isLocked);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_COVER, album.cover);
 
@@ -82,6 +84,7 @@ public class AlbumsDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_OWNER, album.isOwner);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS, album.permissions);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_MEMBERS, album.getMembersAsString());
+		values.put(StingleDbContract.Columns.COLUMN_NAME_SYNC_LOCAL, album.syncLocal);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED, album.isLocked);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_COVER, album.cover);
 

@@ -24,8 +24,9 @@ public class StingleDbAlbum {
 	public Boolean isShared = false;
 	public Boolean isHidden = false;
 	public Boolean isOwner = true;
-	public String permissions = null;
 	public ArrayList<String> members = new ArrayList<>();
+	public String permissions = null;
+	public Boolean syncLocal = false;
 	public Boolean isLocked = false;
 	public String cover = null;
 	public Long dateCreated;
@@ -46,6 +47,7 @@ public class StingleDbAlbum {
 		this.isHidden = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN)) == 1);
 		this.isOwner = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_OWNER)) == 1);
 		this.permissions = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_PERMISSIONS));
+		this.syncLocal = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_SYNC_LOCAL)) == 1);
 		this.isLocked = (cursor.getInt(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_IS_LOCKED)) == 1);
 		this.cover = cursor.getString(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_COVER));
 		this.dateCreated = cursor.getLong(cursor.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
@@ -116,6 +118,7 @@ public class StingleDbAlbum {
 		map.put("isOwner", (isOwner ? "1" : "0"));
 		map.put("permissions", permissions);
 		map.put("members", getMembersAsString());
+		map.put("syncLocal", (syncLocal ? "1" : "0"));
 		map.put("isLocked", (isLocked ? "1" : "0"));
 		map.put("cover", cover);
 		map.put("dateCreated", String.valueOf(dateCreated));

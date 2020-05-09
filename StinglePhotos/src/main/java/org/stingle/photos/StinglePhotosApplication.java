@@ -47,9 +47,9 @@ public class StinglePhotosApplication extends Application{
         super.onCreate();
         StinglePhotosApplication.context = getApplicationContext();
         StinglePhotosApplication.cache = new MemoryCache();
-        StinglePhotosApplication.crypto = new Crypto(this);
+        StinglePhotosApplication.crypto = new Crypto(getApplicationContext());
 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		Helpers.applyTheme(prefs.getString("theme", "auto"));
     }
 

@@ -175,7 +175,7 @@ public class AlbumsFragment extends Fragment{
 	}
 
 	public void updateAutoFit(){
-		if(view == VIEW_ALBUMS) {
+		if(view == VIEW_ALBUMS && layoutManager != null) {
 			((AutoFitGridLayoutManager)layoutManager).updateAutoFit();
 		}
 	}

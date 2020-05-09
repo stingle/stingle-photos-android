@@ -27,6 +27,7 @@ import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -137,6 +138,7 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
+		Helpers.deletePreference(context, SyncManager.PREF_FIRST_SYNC_DONE);
 
 		GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 		galleryDb.truncateTable();
@@ -153,6 +155,10 @@ public class SyncManager {
 		AlbumsDb albumsDb = new AlbumsDb(context);
 		albumsDb.truncateTable();
 		albumsDb.close();
+
+		ContactsDb contactsDb = new ContactsDb(context);
+		contactsDb.truncateTable();
+		contactsDb.close();
 	}
 
 	public static boolean moveFiles(Context context, ArrayList<StingleDbFile> files, int fromSet, int toSet, String fromAlbumId, String toAlbumId, boolean isMoving) {

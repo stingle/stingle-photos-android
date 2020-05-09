@@ -46,6 +46,7 @@ public class LeaveAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		boolean notifyResult = SyncManager.notifyCloudAboutAlbumLeave(myContext, album);
 		if(notifyResult){
+			filesDb.deleteAlbumFilesIfNotNeeded(myContext, albumId);
 			filesDb.deleteAllFilesInAlbum(albumId);
 			db.deleteAlbum(albumId);
 			filesDb.close();

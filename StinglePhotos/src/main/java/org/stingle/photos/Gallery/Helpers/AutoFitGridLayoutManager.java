@@ -14,7 +14,7 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 
 	public AutoFitGridLayoutManager(Context context, int columnWidth) {
 		super(context, 1);
-
+		Log.d("columnWidth", String.valueOf(columnWidth));
 		setColumnWidth(columnWidth);
 	}
 

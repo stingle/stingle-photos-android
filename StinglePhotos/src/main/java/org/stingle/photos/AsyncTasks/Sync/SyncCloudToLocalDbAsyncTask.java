@@ -54,6 +54,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	private long lastAlbumFilesSeenTime = 0;
 	private long lastDelSeenTime = 0;
 	private long lastContactsSeenTime = 0;
+	private boolean isFirstSyncDone;
 
 	private ArrayList<HashMap<String, Object>> deleteLog = new ArrayList<>();
 
@@ -65,6 +66,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		albumsDb = new AlbumsDb(context);
 		albumFilesDb = new AlbumFilesDb(context);
 		contactsDb = new ContactsDb(context);
+		isFirstSyncDone = Helpers.getPreference(context, SyncManager.PREF_FIRST_SYNC_DONE, false);
 	}
 
 	@Override
@@ -92,14 +94,14 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			Helpers.storePreference(myContext, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME, lastAlbumFilesSeenTime);
 			Helpers.storePreference(myContext, SyncManager.PREF_LAST_DEL_SEEN_TIME, lastDelSeenTime);
 			Helpers.storePreference(myContext, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME, lastContactsSeenTime);
-		} catch (JSONException e) {
+		} catch (JSONException | RuntimeException e) {
 			e.printStackTrace();
 		}
 
 		return needToUpdateUI;
 	}
 
-	private boolean getFileList(Context context) throws JSONException {
+	private boolean getFileList(Context context) throws JSONException, RuntimeException {
 		boolean needToUpdateUI = false;
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
@@ -117,6 +119,9 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 				postParams
 		);
 		StingleResponse response = new StingleResponse(context, resp, false);
+		if(response.isLoggedOut()){
+			throw new RuntimeException("Logged out");
+		}
 		if (response.isStatusOk()) {
 
 			if (processFilesInSet(context, response.get("files"), SyncManager.GALLERY)) {
@@ -317,10 +322,9 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	private boolean processAlbum(StingleDbAlbum remoteAlbum) {
 
 		StingleDbAlbum album = albumsDb.getAlbumById(remoteAlbum.albumId);
-
 		if (album == null) {
 			albumsDb.insertAlbum(remoteAlbum);
-			if(remoteAlbum.isShared && !remoteAlbum.isOwner){
+			if(isFirstSyncDone && remoteAlbum.isShared && !remoteAlbum.isOwner){
 				showSharingNotification(remoteAlbum);
 			}
 		} else {
@@ -393,6 +397,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		} else if (type == SyncManager.DELETE_EVENT_ALBUM) {
 			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
 			if (album != null && album.dateModified < date) {
+				albumFilesDb.deleteAlbumFilesIfNotNeeded(context, albumId);
 				albumFilesDb.deleteAllFilesInAlbum(albumId);
 				albumsDb.deleteAlbum(albumId);
 			}
@@ -406,25 +411,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 			if (file != null && file.dateModified < date) {
 				trashDb.deleteFile(file.filename);
 
-				boolean needToDeleteFiles = true;
-
-				if (galleryDb.getFileIfExists(filename) != null || albumFilesDb.getFileIfExists(filename) != null) {
-					needToDeleteFiles = false;
-				}
-
-				if (needToDeleteFiles) {
-					String homeDir = FileManager.getHomeDir(context);
-					String thumbDir = FileManager.getThumbsDir(context);
-					File mainFile = new File(homeDir + "/" + filename);
-					File thumbFile = new File(thumbDir + "/" + filename);
-
-					if (mainFile.exists()) {
-						mainFile.delete();
-					}
-					if (thumbFile.exists()) {
-						thumbFile.delete();
-					}
-				}
+				deleteFileIfNotUsed(context, file.filename);
 			}
 		}
 
@@ -433,6 +420,18 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 		}
 	}
 
+
+	private void deleteFileIfNotUsed(Context context, String filename){
+		boolean needToDeleteFile = true;
+
+		if (galleryDb.getFileIfExists(filename) != null || albumFilesDb.getFileIfExists(filename) != null) {
+			needToDeleteFile = false;
+		}
+
+		if (needToDeleteFile) {
+			FileManager.deleteLocalFile(context, filename);
+		}
+	}
 
 	private void showSharingNotification(StingleDbAlbum album) {
 		Context myContext = context.get();

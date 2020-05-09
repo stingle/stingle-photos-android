@@ -98,10 +98,10 @@ public class SyncService extends Service {
 				FilesDb db;
 				int sort = StingleDb.SORT_DESC;
 				if(set == SyncManager.GALLERY || set == SyncManager.TRASH) {
-					db = new GalleryTrashDb(SyncService.this, set);
+					db = new GalleryTrashDb(getApplicationContext(), set);
 				}
 				else if(set == SyncManager.ALBUM){
-					db = new AlbumFilesDb(SyncService.this);
+					db = new AlbumFilesDb(getApplicationContext());
 					sort = StingleDb.SORT_ASC;
 				}
 				else{
@@ -173,7 +173,7 @@ public class SyncService extends Service {
 	}
 
 	private void startCloudToLocalSync(){
-		SyncManager.syncCloudToLocalDb(this, new SyncManager.OnFinish() {
+		SyncManager.syncCloudToLocalDb(getApplicationContext(), new SyncManager.OnFinish() {
 			@Override
 			public void onFinish(Boolean needToUpdateUI) {
 				if (needToUpdateUI){
@@ -181,12 +181,12 @@ public class SyncService extends Service {
 				}
 
 
-				boolean isFirstSyncDone = Helpers.getPreference(SyncService.this, SyncManager.PREF_FIRST_SYNC_DONE, false);
-				if(!isFirstSyncDone){
-					(new FsSyncAsyncTask(SyncService.this, new SyncManager.OnFinish() {
+				boolean isFirstSyncDone = Helpers.getPreference(getApplicationContext(), SyncManager.PREF_FIRST_SYNC_DONE, false);
+				if(LoginManager.isLoggedIn(getApplicationContext()) && !isFirstSyncDone){
+					(new FsSyncAsyncTask(getApplicationContext(), new SyncManager.OnFinish() {
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
-							Helpers.storePreference(SyncService.this, SyncManager.PREF_FIRST_SYNC_DONE, true);
+							Helpers.storePreference(getApplicationContext(), SyncManager.PREF_FIRST_SYNC_DONE, true);
 							if (needToUpdateUI){
 								sendMessageToUI(MSG_REFRESH_GALLERY);
 							}
@@ -205,19 +205,19 @@ public class SyncService extends Service {
 		currentStatus = STATUS_UPLOADING;
 		sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 
-		boolean isUploadSuspended = Helpers.getPreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
+		boolean isUploadSuspended = Helpers.getPreference(getApplicationContext(), SyncManager.PREF_SUSPEND_UPLOAD, false);
 		if(isUploadSuspended){
-			int lastAvailableSpace = Helpers.getPreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
-			int availableSpace = Helpers.getAvailableUploadSpace(SyncService.this);
+			int lastAvailableSpace = Helpers.getPreference(getApplicationContext(), SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
+			int availableSpace = Helpers.getAvailableUploadSpace(getApplicationContext());
 			if(availableSpace > lastAvailableSpace || availableSpace > 0){
-				Helpers.storePreference(SyncService.this, SyncManager.PREF_SUSPEND_UPLOAD, false);
-				Helpers.deletePreference(SyncService.this, SyncManager.PREF_LAST_AVAILABLE_SPACE);
+				Helpers.storePreference(getApplicationContext(), SyncManager.PREF_SUSPEND_UPLOAD, false);
+				Helpers.deletePreference(getApplicationContext(), SyncManager.PREF_LAST_AVAILABLE_SPACE);
 				isUploadSuspended = false;
 				Log.d("upload", "resuming upload");
 			}
 		}
 
-		int allowedStatus = isUploadAllowed(SyncService.this);
+		int allowedStatus = isUploadAllowed(getApplicationContext());
 		if(isUploadSuspended) {
 			Log.d("upload", "upload is disabled, no space");
 			currentStatus = STATUS_IDLE;
@@ -229,7 +229,7 @@ public class SyncService extends Service {
 			sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", allowedStatus);
 		}
 		else{
-			uploadTask = SyncManager.uploadToCloud(SyncService.this, progress, new SyncManager.OnFinish() {
+			uploadTask = SyncManager.uploadToCloud(getApplicationContext(), progress, new SyncManager.OnFinish() {
 				@Override
 				public void onFinish(Boolean needUpdateUI) {
 					currentStatus = STATUS_IDLE;

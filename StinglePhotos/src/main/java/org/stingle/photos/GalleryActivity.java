@@ -461,7 +461,12 @@ public class GalleryActivity extends AppCompatActivity
 	private void initGallery(){
 
 		initCurrentFragment();
-
+		if(galleryFragment != null) {
+			galleryFragment.updateAutoFit();
+		}
+		if(albumsFragment != null) {
+			albumsFragment.updateAutoFit();
+		}
 		findViewById(R.id.contentHolder).setVisibility(View.VISIBLE);
 		startAndBindService();
 		updateQuotaInfo();

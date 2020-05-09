@@ -377,4 +377,18 @@ public class FileManager {
 	public static abstract class OnFinish{
 		public abstract void onFinish();
 	}
+
+	public static void deleteLocalFile(Context context, String filename){
+		String homeDir = getHomeDir(context);
+		String thumbDir = getThumbsDir(context);
+		File mainFile = new File(homeDir + "/" + filename);
+		File thumbFile = new File(thumbDir + "/" + filename);
+
+		if (mainFile.exists()) {
+			mainFile.delete();
+		}
+		if (thumbFile.exists()) {
+			thumbFile.delete();
+		}
+	}
 }

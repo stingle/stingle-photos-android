@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -374,40 +373,34 @@ public class Helpers {
 	}
 
 	public static void storePreference(Context context, String key, String value){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		preferences.edit().putString(key, value).commit();
+		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putString(key, value).apply();
 	}
 	public static void storePreference(Context context, String key, int value){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		preferences.edit().putInt(key, value).commit();
+		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putInt(key, value).apply();
 	}
 	public static void storePreference(Context context, String key, long value){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		preferences.edit().putLong(key, value).commit();
+		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putLong(key, value).apply();
 	}
 	public static void storePreference(Context context, String key, boolean value){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		preferences.edit().putBoolean(key, value).commit();
+		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putBoolean(key, value).apply();
 	}
 	public static String getPreference(Context context, String key, String defaultValue){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		return preferences.getString(key, defaultValue);
+		return context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getString(key, defaultValue);
 	}
 	public static int getPreference(Context context, String key, int defaultValue){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		return preferences.getInt(key, defaultValue);
+		return context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getInt(key, defaultValue);
 	}
 	public static long getPreference(Context context, String key, long defaultValue){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		return preferences.getLong(key, defaultValue);
+		return context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(key, defaultValue);
 	}
 	public static boolean getPreference(Context context, String key, boolean defaultValue){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		return preferences.getBoolean(key, defaultValue);
+		return context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getBoolean(key, defaultValue);
 	}
-	public static void deletePreference(Context context, String key){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE);
-		preferences.edit().remove(key).commit();
+	public static boolean deletePreference(Context context, String key){
+		return context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().remove(key).commit();
+	}
+	public static void deleteAllPreferences(Context context){
+		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().clear().apply();
 	}
 
 	public static String formatVideoDuration(int duration){
