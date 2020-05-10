@@ -29,15 +29,13 @@ android {
     }
     buildTypes {
         release {
-            //minifyEnabled true
-            //proguardFiles 'proguard.cfg'
-            //debuggable true
             signingConfig signingConfigs.release
             resValue "string", "app_name", "Stingle Photos"
             resValue "string", "camera", "Camera"
             resValue "string", "content_provider", "org.stingle.photos.share"
             resValue "string", "api_server_url", "https://api.stingle.org/"
             buildConfigField "Boolean", "ALLOW_INSECURE_TLS", 'false'
+            debuggable false
         }
         debug {
             applicationIdSuffix '.debug'

@@ -126,6 +126,10 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	}
 
 	private void initSkus() {
+		skus.add("100gb_monthly");
+		skus.add("100gb_yearly");
+		skus.add("300gb_monthly");
+		skus.add("300gb_yearly");
 		skus.add("1tb_monthly");
 		skus.add("1tb_yearly");
 		skus.add("3tb_monthly");
@@ -137,6 +141,8 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 
 	private void initPaymentBoxDetails(){
 		paymentBoxDetails.clear();
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "100 GB"); put("monthly", "100gb_monthly"); put("yearly", "100gb_yearly");}});
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "300 GB"); put("monthly", "300gb_monthly"); put("yearly", "300gb_yearly");}});
 		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "1 TB"); put("monthly", "1tb_monthly"); put("yearly", "1tb_yearly");}});
 		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "3 TB"); put("monthly", "3tb_monthly"); put("yearly", "3tb_yearly");}});
 		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "5 TB"); put("monthly", "5tb_monthly"); put("yearly", null);}});

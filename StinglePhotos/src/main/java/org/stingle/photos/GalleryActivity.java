@@ -100,6 +100,9 @@ public class GalleryActivity extends AppCompatActivity
 	private boolean dontStartSyncYet = false;
 	private View headerView;
 
+	public int albumsLastScrollPos = 0;
+	public int sharingLastScrollPos = 0;
+
 
 	private BroadcastReceiver onLogout = new BroadcastReceiver() {
 		@Override

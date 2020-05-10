@@ -114,18 +114,7 @@ public class AlbumsFragment extends Fragment{
 		}
 		adapter.setListener(adapterListener);
 
-		if(savedInstanceState != null && savedInstanceState.containsKey("scroll")){
-			lastScrollPosition = savedInstanceState.getInt("scroll");
-		}
-
 		recyclerView.setAdapter(adapter);
-	}
-
-	@Override
-	public void onSaveInstanceState(@NonNull Bundle outState) {
-		super.onSaveInstanceState(outState);
-
-		outState.putInt("scroll", layoutManager.findFirstVisibleItemPosition());
 	}
 
 	@Override
@@ -136,14 +125,26 @@ public class AlbumsFragment extends Fragment{
 			adapter.updateDataSet();
 		}
 
-		layoutManager.scrollToPosition(lastScrollPosition);
+		Log.d("scrollResume", String.valueOf(lastScrollPosition));
+		if(view == VIEW_ALBUMS) {
+			layoutManager.scrollToPosition(parentActivity.albumsLastScrollPos);
+		}
+		else if(view == VIEW_SHARES) {
+			layoutManager.scrollToPosition(parentActivity.sharingLastScrollPos);
+		}
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		Log.e("function", "onPause");
-		lastScrollPosition = layoutManager.findFirstVisibleItemPosition();
+		if(view == VIEW_ALBUMS) {
+			parentActivity.albumsLastScrollPos = layoutManager.findFirstVisibleItemPosition();
+		}
+		else if(view == VIEW_SHARES) {
+			parentActivity.sharingLastScrollPos = layoutManager.findFirstVisibleItemPosition();
+		}
+		Log.d("scrollSave", String.valueOf(lastScrollPosition));
 		recyclerView.setAdapter(null);
 	}
 
@@ -159,10 +160,13 @@ public class AlbumsFragment extends Fragment{
 		Log.e("function", "onDetach");
 	}
 
+
 	public void updateDataSet(){
-		int lastScrollPos = recyclerView.getScrollY();
-		adapter.updateDataSet();
-		recyclerView.setScrollY(lastScrollPos);
+		if(recyclerView != null && adapter != null) {
+			int lastScrollPos = recyclerView.getScrollY();
+			adapter.updateDataSet();
+			recyclerView.setScrollY(lastScrollPos);
+		}
 	}
 
 	public void updateItem(int position){

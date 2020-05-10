@@ -15,9 +15,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso3.Callback;
 import com.squareup.picasso3.NetworkPolicy;
 import com.squareup.picasso3.Picasso;
+import com.squareup.picasso3.Request;
 import com.squareup.picasso3.RequestCreator;
+import com.squareup.picasso3.RequestHandler;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -27,6 +30,7 @@ import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Gallery.Gallery.GalleryAdapterPisasso;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
@@ -87,6 +91,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
 		super.onDetachedFromRecyclerView(recyclerView);
 		db.close();
+		filesDb.close();
 	}
 
 	public void setListener(Listener listener){
@@ -352,9 +357,21 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 			final RequestCreator req = picasso.load("a" + dbPos);
 			req.networkPolicy(NetworkPolicy.NO_CACHE);
+			req.tag(holder);
 			req.noFade();
 			req.addProp("pos", String.valueOf(dbPos));
-			req.into(holder.image);
+			req.into(holder.image, new Callback() {
+				@Override
+				public void onSuccess(RequestHandler.Result result, Request request) {
+					AlbumVH holder = (AlbumVH) request.tag;
+					holder.image.setElevation(0);
+				}
+
+				@Override
+				public void onError(@NonNull Throwable t) {
+
+				}
+			});
 		}
 		else if(holderObj instanceof AlbumAddVH) {
 			AlbumAddVH holder = (AlbumAddVH)holderObj;
