@@ -1,13 +1,14 @@
 package org.stingle.photos.Net;
 
 import android.content.Context;
-
-import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Util.Helpers;
+import android.os.Handler;
+import android.os.Looper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Util.Helpers;
 
 public class StingleResponse{
 
@@ -89,20 +90,28 @@ public class StingleResponse{
 	}
 
 	public void showErrors(){
+		StringBuilder errorsBuilder = new StringBuilder();
 		for (int i = 0; i < this.errors.length(); i++) {
 			String error = this.errors.optString(i);
 			if(error != null){
-				Helpers.showAlertDialog(this.context, error);
+				errorsBuilder.append(error + "\n");
 			}
+		}
+		if(errorsBuilder.length() > 0) {
+			new Handler(Looper.getMainLooper()).post(() -> Helpers.showInfoDialog(context, errorsBuilder.toString()));
 		}
 	}
 
 	public void showInfos(){
+		StringBuilder infoBuilder = new StringBuilder();
 		for (int i = 0; i < this.infos.length(); i++) {
 			String info = this.infos.optString(i);
 			if(info != null){
-				Helpers.showInfoDialog(this.context, info);
+				infoBuilder.append(info + "\n");
 			}
+		}
+		if(infoBuilder.length() > 0) {
+			new Handler(Looper.getMainLooper()).post(() -> Helpers.showInfoDialog(context, infoBuilder.toString()));
 		}
 	}
 

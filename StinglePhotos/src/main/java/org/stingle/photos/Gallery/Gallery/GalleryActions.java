@@ -70,6 +70,8 @@ public class GalleryActions {
 		addAlbumDialog.show();
 
 		RecyclerView recyclerView = addAlbumDialog.findViewById(R.id.recycler_view);
+		LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
+		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, AlbumsFragment.VIEW_SELECTOR, true, isFromAlbum);
 
 		recyclerView.setHasFixedSize(true);
 
@@ -83,13 +85,12 @@ public class GalleryActions {
 				deleteOriginal.setVisibility(View.GONE);
 				deleteOriginal.setChecked(false);
 				props.put("dontSaveState", true);
+				adapter.setDisableOthersAlbums(true);
 			}
 		}
 
-		LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
 		recyclerView.setLayoutManager(layoutManager);
 
-		final AlbumsAdapterPisasso adapter = new AlbumsAdapterPisasso(activity, layoutManager, AlbumsFragment.VIEW_ALL, true, isFromAlbum);
 
 		adapter.setTextSize(18);
 		adapter.setSubTextSize(12);
@@ -112,7 +113,7 @@ public class GalleryActions {
 					public void onFail() {
 						super.onFail();
 						spinner.dismiss();
-						Helpers.showAlertDialog(activity, activity.getString(R.string.cant_move_to_this_album));
+						//Helpers.showAlertDialog(activity, activity.getString(R.string.cant_move_to_this_album));
 					}
 				};
 
@@ -315,10 +316,12 @@ public class GalleryActions {
 		okButton.setOnClickListener(v -> {
 			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			String albumName = albumNameText.getText().toString();
+			final ProgressDialog spinner = Helpers.showProgressDialog(context, context.getString(R.string.processing), null);
 			(new AddAlbumAsyncTask(context, albumName, new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish(Object album) {
 					super.onFinish(album);
+					spinner.dismiss();
 					addAlbumDialog.dismiss();
 					onFinish.onFinish(album);
 				}
@@ -326,6 +329,7 @@ public class GalleryActions {
 				@Override
 				public void onFail() {
 					super.onFail();
+					spinner.dismiss();
 					addAlbumDialog.dismiss();
 					onFinish.onFail();
 				}
@@ -427,10 +431,12 @@ public class GalleryActions {
 		okButton.setOnClickListener(v -> {
 			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			String albumName = albumNameText.getText().toString();
+			final ProgressDialog spinner = Helpers.showProgressDialog(context, context.getString(R.string.processing), null);
 			(new RenameAlbumAsyncTask(context, new OnAsyncTaskFinish() {
 				@Override
 				public void onFinish() {
 					super.onFinish();
+					spinner.dismiss();
 					renameAlbumDialog.dismiss();
 					if(onFinish != null){
 						onFinish.onFinish(albumName);
@@ -440,6 +446,7 @@ public class GalleryActions {
 				@Override
 				public void onFail() {
 					super.onFail();
+					spinner.dismiss();
 					renameAlbumDialog.dismiss();
 					if(onFinish != null){
 						onFinish.onFail();

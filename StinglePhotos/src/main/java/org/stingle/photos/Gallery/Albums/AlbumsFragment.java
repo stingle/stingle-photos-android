@@ -26,9 +26,9 @@ import java.util.Objects;
 
 public class AlbumsFragment extends Fragment{
 
-	public static int VIEW_ALL = 0;
-	public static int VIEW_ALBUMS = 1;
-	public static int VIEW_SHARES = 2;
+	public static int VIEW_ALBUMS = 0;
+	public static int VIEW_SHARES = 1;
+	public static int VIEW_SELECTOR = 2;
 
 	private RecyclerView recyclerView;
 	private AlbumsAdapterPisasso adapter;

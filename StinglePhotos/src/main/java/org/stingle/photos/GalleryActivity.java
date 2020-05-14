@@ -447,6 +447,8 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void checkLoginAndInit(){
+		LoginManager.disableLockTimer(GalleryActivity.this);
+
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
@@ -458,7 +460,6 @@ public class GalleryActivity extends AppCompatActivity
 				}
 			}
 		});
-		LoginManager.disableLockTimer(GalleryActivity.this);
 	}
 
 	private void initGallery(){

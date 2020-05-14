@@ -5,7 +5,16 @@
         android:id="@+id/share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
-        app:showAsAction="always|withText" />
+        app:showAsAction="always|withText">
+        <menu>
+            <item
+                android:id="@+id/share_stingle"
+                android:title="@string/share_via_stingle" />
+            <item
+                android:id="@+id/share_to_apps"
+                android:title="@string/share_to_apps" />
+        </menu>
+    </item>
     <!--<item
         android:id="@+id/add_to_this_album"
         android:icon="@drawable/ic_action_add"

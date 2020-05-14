@@ -368,7 +368,7 @@ public class SyncManager {
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
 			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.move_file), postParams);
-			StingleResponse response = new StingleResponse(context, json, false);
+			StingleResponse response = new StingleResponse(context, json, true);
 
 			if (response.isStatusOk()) {
 				return true;

@@ -45,6 +45,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	private Integer view;
 	private boolean showGalleryOption;
 	private boolean showAddOption;
+	private boolean disableOthersAlbums = false;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private Listener listener;
 	private int thumbSize;
@@ -115,6 +116,9 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 	public void setSubTextSize(Integer subTextSize) {
 		this.subTextSize = subTextSize;
+	}
+	public void setDisableOthersAlbums(boolean disableOthersAlbums) {
+		this.disableOthersAlbums = disableOthersAlbums;
 	}
 
 
@@ -342,11 +346,26 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 						}
 						holder.rightIcon.setVisibility(View.VISIBLE);
 					}
-					else if(view == AlbumsFragment.VIEW_ALL && album.isShared && album.isHidden){
+					else if(view == AlbumsFragment.VIEW_SELECTOR && album.isShared && album.isHidden){
 						holder.albumSubtitle.setText(getMembersString(album));
 					}
 					else{
 						holder.albumSubtitle.setText(context.getString(R.string.album_items_count, filesDb.getTotalFilesCount(album.albumId)));
+					}
+
+					if(view == AlbumsFragment.VIEW_SELECTOR && album.isShared && !album.isOwner && (!album.permissionsObj.allowAdd || disableOthersAlbums)){
+						holder.albumName.setEnabled(false);
+						holder.albumSubtitle.setEnabled(false);
+						holder.image.setEnabled(false);
+
+						holder.albumSubtitle.setText(context.getString(R.string.cant_add_to_album));
+
+						holder.image.setOnClickListener(null);
+						holder.albumName.setOnClickListener(null);
+						holder.albumSubtitle.setOnClickListener(null);
+						if(holder.rightIcon != null) {
+							holder.rightIcon.setOnClickListener(null);
+						}
 					}
 
 				}
