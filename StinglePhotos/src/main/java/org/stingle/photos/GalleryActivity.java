@@ -690,6 +690,8 @@ public class GalleryActivity extends AppCompatActivity
 						else{
 							// Album is not shared
 							menu.findItem(R.id.action_album_settings).setVisible(false);
+							menu.findItem(R.id.action_album_info).setVisible(false);
+							menu.findItem(R.id.action_leave_album).setVisible(false);
 						}
 					}
 					break;
