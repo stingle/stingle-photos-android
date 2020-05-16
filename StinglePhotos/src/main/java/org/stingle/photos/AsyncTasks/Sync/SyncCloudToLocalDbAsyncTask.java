@@ -379,7 +379,7 @@ public class SyncCloudToLocalDbAsyncTask extends AsyncTask<Void, Void, Boolean> 
 	protected void processDeleteEvent(Context context, JSONObject event) throws JSONException {
 
 		String filename = event.getString("file");
-		String albumId = event.getString("albumId");
+		String albumId = event.optString("albumId");
 		Integer type = event.getInt("type");
 		Long date = event.getLong("date");
 
