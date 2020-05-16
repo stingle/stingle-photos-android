@@ -329,18 +329,24 @@
     <string name="leaving_album">Leaving album…</string>
     <string name="delete_cache">Delete cache</string>
     <string name="delete_cache_desc">Clears cache of thumbnails and other temporary data</string>
-    <string name="deleting_cache">Deleting cache...</string>
+    <string name="deleting_cache">Deleting cache…</string>
     <string name="success_deleted">Successfully deleted</string>
     <string name="delete_original">Delete original files after adding</string>
-    <string name="cant_move_to_this_album">Can\'t add to this album</string>
     <string name="wait_for_upload">Please wait for backup to finish before sharing</string>
-    <string name="processing">Processing...</string>
+    <string name="processing">Processing…</string>
     <string name="success_decrypted">Successfully decrypted</string>
     <string name="sync_channel_name">Sync notifications</string>
     <string name="sharing_channel_name">Sharing notifications</string>
     <string name="new_shared_album">New shared album \"%s\"</string>
     <string name="tap_to_view">Tap to view</string>
-    <string name="cant_add_to_album" type="id">Can\'t add to this album</string>
+    <string name="album_add_no_perm">No permission to add here</string>
+    <string name="album_add_others">Can\'t add directly to received album</string>
+    <string name="no_photos">You don\'t have anything here yet</string>
+    <string name="no_photos_desc">Imported photos and videos will appear here</string>
+    <string name="no_sharing">You don\'t have any shared albums yet</string>
+    <string name="no_sharing_desc">Shared albums will appear here</string>
+    <string name="no_photos_trash">Trash is empty</string>
+    <string name="no_photos_trash_desc">Deleted photos and videos will appear here</string>
 
 
 </resources>

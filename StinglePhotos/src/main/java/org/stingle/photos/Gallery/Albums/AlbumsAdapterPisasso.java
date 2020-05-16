@@ -30,7 +30,6 @@ import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Gallery.Gallery.GalleryAdapterPisasso;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
@@ -311,6 +310,10 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 			holder.image.setImageBitmap(null);
 			holder.albumName.setText("");
+			holder.albumSubtitle.setText("");
+			holder.albumName.setEnabled(true);
+			holder.albumSubtitle.setEnabled(true);
+			holder.image.setEnabled(true);
 
 			if(textSize != null){
 				holder.albumName.setTextSize(textSize);
@@ -358,7 +361,12 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 						holder.albumSubtitle.setEnabled(false);
 						holder.image.setEnabled(false);
 
-						holder.albumSubtitle.setText(context.getString(R.string.cant_add_to_album));
+						if(disableOthersAlbums){
+							holder.albumSubtitle.setText(context.getString(R.string.album_add_others));
+						}
+						else if(!album.permissionsObj.allowAdd) {
+							holder.albumSubtitle.setText(context.getString(R.string.album_add_no_perm));
+						}
 
 						holder.image.setOnClickListener(null);
 						holder.albumName.setOnClickListener(null);

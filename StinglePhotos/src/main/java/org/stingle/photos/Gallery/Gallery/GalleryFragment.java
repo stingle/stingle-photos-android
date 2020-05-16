@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +33,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	private DragSelectRecyclerView recyclerView;
 	private GalleryAdapterPisasso adapter;
 	private AutoFitGridLayoutManager layoutManager;
+	private LinearLayout noPhotosHolder;
 
 	private int lastScrollPosition = 0;
 
@@ -46,6 +49,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		View view = inflater.inflate(R.layout.fragment_gallery,	container, false);
 
 		recyclerView = view.findViewById(R.id.recycler_view);
+		noPhotosHolder = view.findViewById(R.id.no_photos_holder);
 		parentActivity = (GalleryFragmentParent)getActivity();
 
 		return view;
@@ -68,6 +72,11 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		}
 		else{
 			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+		}
+
+		if(currentSet == SyncManager.TRASH){
+			((TextView)noPhotosHolder.findViewById(R.id.no_photos_text)).setText(R.string.no_photos_trash);
+			((TextView)noPhotosHolder.findViewById(R.id.no_photos_text_desc)).setText(R.string.no_photos_trash_desc);
 		}
 
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
@@ -119,6 +128,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		Log.e("function", "onResume");
 		if (adapter != null) {
 			adapter.updateDataSet();
+			handleNoPhotos();
 		}
 		Log.d("lastScrollPosition", lastScrollPosition + "");
 		layoutManager.scrollToPosition(lastScrollPosition);
@@ -149,6 +159,18 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	public void init(){
 		Log.e("function", "init");
 		recyclerView.setAdapter(adapter);
+		handleNoPhotos();
+	}
+
+	private void handleNoPhotos(){
+		if(adapter.getItemCount() == 0){
+			recyclerView.setVisibility(View.GONE);
+			noPhotosHolder.setVisibility(View.VISIBLE);
+		}
+		else{
+			recyclerView.setVisibility(View.VISIBLE);
+			noPhotosHolder.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
@@ -194,6 +216,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		int lastScrollPos = recyclerView.getScrollY();
 		if(adapter != null) {
 			adapter.updateDataSet();
+			handleNoPhotos();
 		}
 		if(recyclerView != null) {
 			recyclerView.setScrollY(lastScrollPos);

@@ -7,7 +7,6 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.BuildConfig;
-import org.stingle.photos.StinglePhotosApplication;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -96,7 +95,6 @@ public class HttpsClient {
 			if(params == null){
 				params = new HashMap<>();
 			}
-			params.put("api", String.valueOf(StinglePhotosApplication.API_VERSION));
 
 			// Add any data you wish to post here
 			String data = "";
@@ -172,7 +170,6 @@ public class HttpsClient {
 		if(params == null){
 			params = new HashMap<>();
 		}
-		params.put("api", String.valueOf(StinglePhotosApplication.API_VERSION));
 
 		// Add any data you wish to post here
 		String data = "";
@@ -256,7 +253,6 @@ public class HttpsClient {
 		if(params == null){
 			params = new HashMap<>();
 		}
-		params.put("api", String.valueOf(StinglePhotosApplication.API_VERSION));
 
 		// Add any data you wish to post here
 		String data = "";
@@ -389,7 +385,6 @@ public class HttpsClient {
 			if(params == null){
 				params = new HashMap<>();
 			}
-			params.put("api", String.valueOf(StinglePhotosApplication.API_VERSION));
 
 			// Upload POST Data
 			Iterator<String> keys = params.keySet().iterator();

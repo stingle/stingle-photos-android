@@ -12,4 +12,9 @@
         android:paddingBottom="@dimen/bottom_nav_height"
         android:clipToPadding="false"/>
 
+    <include
+        android:id="@+id/no_sharing_holder"
+        android:visibility="gone"
+        layout="@layout/part_no_sharing"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

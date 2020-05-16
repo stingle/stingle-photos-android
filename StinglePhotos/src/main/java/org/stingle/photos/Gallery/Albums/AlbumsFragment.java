@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +34,7 @@ public class AlbumsFragment extends Fragment{
 	private RecyclerView recyclerView;
 	private AlbumsAdapterPisasso adapter;
 	private LinearLayoutManager layoutManager;
+	private LinearLayout noSharingHolder;
 	private Integer view = VIEW_ALBUMS;;
 
 	private int lastScrollPosition = 0;
@@ -81,6 +83,7 @@ public class AlbumsFragment extends Fragment{
 		View view = inflater.inflate(R.layout.fragment_albums,	container, false);
 
 		recyclerView = view.findViewById(R.id.recycler_view);
+		noSharingHolder = view.findViewById(R.id.no_sharing_holder);
 		parentActivity = (GalleryActivity)getActivity();
 
 		return view;
@@ -115,6 +118,7 @@ public class AlbumsFragment extends Fragment{
 		adapter.setListener(adapterListener);
 
 		recyclerView.setAdapter(adapter);
+		handleNoSharing();
 	}
 
 	@Override
@@ -166,6 +170,18 @@ public class AlbumsFragment extends Fragment{
 			int lastScrollPos = recyclerView.getScrollY();
 			adapter.updateDataSet();
 			recyclerView.setScrollY(lastScrollPos);
+			handleNoSharing();
+		}
+	}
+
+	private void handleNoSharing(){
+		if(adapter.getItemCount() == 0){
+			recyclerView.setVisibility(View.GONE);
+			noSharingHolder.setVisibility(View.VISIBLE);
+		}
+		else{
+			recyclerView.setVisibility(View.VISIBLE);
+			noSharingHolder.setVisibility(View.GONE);
 		}
 	}
 

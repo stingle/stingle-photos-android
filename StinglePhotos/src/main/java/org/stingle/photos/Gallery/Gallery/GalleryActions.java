@@ -57,7 +57,6 @@ public class GalleryActions {
 	}
 
 	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
-
 		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
@@ -211,6 +210,10 @@ public class GalleryActions {
 	}
 
 	public static void trashSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
+		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+			return;
+		}
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_trash_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
@@ -241,6 +244,10 @@ public class GalleryActions {
 	}
 
 	public static void restoreSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
+		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+			return;
+		}
 		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.restoring_files), null);
 
 		MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
@@ -269,6 +276,10 @@ public class GalleryActions {
 	}
 
 	public static void deleteSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
+		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+			return;
+		}
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_files), null);
 
@@ -343,7 +354,10 @@ public class GalleryActions {
 	}
 
 	public static void deleteAlbum(GalleryActivity activity) {
-
+		if(activity.getCurrentAlbumId() != null && !SyncManager.areFilesAlreadyUploaded(activity, activity.getCurrentAlbumId())){
+			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+			return;
+		}
 		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_album), activity.getCurrentAlbumName()), (dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_album), null);
 

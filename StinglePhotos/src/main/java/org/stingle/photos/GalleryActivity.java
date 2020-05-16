@@ -73,9 +73,6 @@ public class GalleryActivity extends AppCompatActivity
 
 	public static final int FRAGMENT_GALLERY = 1;
 	public static final int FRAGMENT_ALBUMS_LIST = 2;
-	public static final int FRAGMENT_ALBUM = 3;
-	public static final int FRAGMENT_SHARES = 4;
-	public static final int FRAGMENT_SHARED_ALBUM = 5;
 
 	private LocalBroadcastManager lbm;
 	protected GalleryFragment galleryFragment;
@@ -176,6 +173,21 @@ public class GalleryActivity extends AppCompatActivity
 			if(savedInstanceState.containsKey("albumId")) {
 				currentAlbumId = savedInstanceState.getString("albumId");
 			}
+			if(savedInstanceState.containsKey("view")) {
+				currentAlbumsView = savedInstanceState.getInt("view");
+			}
+			if(savedInstanceState.containsKey("fragment")) {
+				currentFragment = savedInstanceState.getInt("fragment");
+			}
+			if(savedInstanceState.containsKey("isSyncBarDisabled")) {
+				isSyncBarDisabled = savedInstanceState.getBoolean("isSyncBarDisabled");
+			}
+			if(savedInstanceState.containsKey("albumsLastScrollPos")) {
+				albumsLastScrollPos = savedInstanceState.getInt("albumsLastScrollPos");
+			}
+			if(savedInstanceState.containsKey("sharingLastScrollPos")) {
+				sharingLastScrollPos = savedInstanceState.getInt("sharingLastScrollPos");
+			}
 		}
 
 		Intent intent = getIntent();
@@ -249,15 +261,18 @@ public class GalleryActivity extends AppCompatActivity
 		super.onSaveInstanceState(outState);
 
 		outState.putInt("set", currentSet);
+		outState.putInt("view", currentAlbumsView);
+		outState.putInt("fragment", currentFragment);
 		outState.putString("albumId", currentAlbumId);
+		outState.putBoolean("isSyncBarDisabled", isSyncBarDisabled);
+		outState.putInt("albumsLastScrollPos", albumsLastScrollPos);
+		outState.putInt("sharingLastScrollPos", sharingLastScrollPos);
 	}
 
 	public void showMainGallery(){
 		currentFragment = FRAGMENT_GALLERY;
 		currentSet = SyncManager.GALLERY;
 		currentAlbumId = null;
-		toolbar.setTitle(getString(R.string.title_gallery_for_app));
-		enableSyncBar();
 		initCurrentFragment();
 		currentAlbumName = "";
 	}
@@ -265,8 +280,6 @@ public class GalleryActivity extends AppCompatActivity
 		currentFragment = FRAGMENT_GALLERY;
 		currentSet = SyncManager.TRASH;
 		currentAlbumId = null;
-		toolbar.setTitle(getString(R.string.title_trash));
-		disableSyncBar();
 		currentAlbumName = "";
 		initCurrentFragment();
 	}
@@ -354,7 +367,15 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		fab.setVisibility(View.VISIBLE);
 
-		if(currentSet == SyncManager.ALBUM){
+		if(currentSet == SyncManager.GALLERY){
+			toolbar.setTitle(getString(R.string.title_gallery_for_app));
+			enableSyncBar();
+		}
+		if(currentSet == SyncManager.TRASH){
+			toolbar.setTitle(getString(R.string.title_trash));
+			disableSyncBar();
+		}
+		else if(currentSet == SyncManager.ALBUM){
 			Log.d("albumId", currentAlbumId);
 			StingleDbAlbum album = GalleryHelpers.getAlbum(this, currentAlbumId);
 			String albumName = GalleryHelpers.getAlbumName(this, currentAlbumId);
@@ -440,7 +461,7 @@ public class GalleryActivity extends AppCompatActivity
 		if(albumId != null && albumId.length() == 0){
 			albumId = null;
 		}
-		Log.e("finish", currentSet + " - " + set + " ;;;;; " + currentAlbumId + " - " + albumId);
+		//Log.e("finish", currentSet + " - " + set + " ;;;;; " + currentAlbumId + " - " + albumId);
 		if(galleryFragment != null && currentSet == set && Helpers.isStringsEqual(currentAlbumId, albumId)) {
 			galleryFragment.updateItem(position);
 		}
@@ -472,6 +493,10 @@ public class GalleryActivity extends AppCompatActivity
 			albumsFragment.updateAutoFit();
 		}
 		findViewById(R.id.contentHolder).setVisibility(View.VISIBLE);
+		findViewById(R.id.bottom_navigation).setVisibility(View.VISIBLE);
+		if(currentFragment != FRAGMENT_ALBUMS_LIST) {
+			findViewById(R.id.import_fab).setVisibility(View.VISIBLE);
+		}
 		startAndBindService();
 		updateQuotaInfo();
 

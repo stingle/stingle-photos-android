@@ -109,6 +109,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
+            android:visibility="invisible"
             app:tint="?attr/colorOnPrimarySurface"
             app:backgroundTint="?attr/colorPrimary"
             app:srcCompat="@drawable/ic_dialog_add" />
@@ -119,6 +120,7 @@
             android:layout_height="@dimen/bottom_nav_height"
             android:layout_gravity="bottom"
             android:background="?attr/colorBackgroundFloating"
+            android:visibility="invisible"
             app:itemIconTint="@color/bottom_nav_colors"
             app:itemTextColor="@color/bottom_nav_colors"
             app:layout_insetEdge="bottom"
