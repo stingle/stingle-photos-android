@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import androidx.collection.ArraySet;
 import androidx.core.content.FileProvider;
 
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
@@ -84,21 +85,32 @@ public class ShareManager {
 		}
 	}
 
-	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleDbFile> selectedFiles, int set) {
+	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleDbFile> selectedFiles, int set, String albumId) {
 		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new File(activity.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish(ArrayList<File> files) {
 				super.onFinish(files);
 				if(files != null) {
 					if (originalIntent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)) {
-						Uri fileUri = FileProvider.getUriForFile(activity, activity.getString(R.string.content_provider), files.get(0));
 						originalIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-						ClipData clipData = ClipData.newRawUri(null, fileUri);
-						for(int i=1; i< files.size(); i++) {
-							clipData.addItem(new ClipData.Item(FileProvider.getUriForFile(activity, activity.getString(R.string.content_provider), files.get(i))));
+
+						ArraySet<String> mimeTypesSet = new ArraySet<>();
+						for(File file : files){
+							mimeTypesSet.add(getMimeType(file.getPath()));
+						}
+						String[] mimeTypes = new String[mimeTypesSet.size()];
+						for(int i=0; i < mimeTypesSet.size(); i ++){
+							mimeTypes[i] = mimeTypesSet.valueAt(i);
+						}
+
+						ClipData.Item firstItem = new ClipData.Item(FileProvider.getUriForFile(activity, activity.getString(R.string.content_provider), files.get(0)));
+						ClipData clipData = new ClipData("files", mimeTypes, firstItem);
+						if(files.size() > 1) {
+							for (int i = 1; i < files.size(); i++) {
+								clipData.addItem(new ClipData.Item(FileProvider.getUriForFile(activity, activity.getString(R.string.content_provider), files.get(i))));
+							}
 						}
 						originalIntent.setClipData(clipData);
-						originalIntent.setDataAndType(fileUri, activity.getContentResolver().getType(fileUri));
 						activity.setResult(Activity.RESULT_OK, originalIntent);
 						activity.finish();
 						return;
@@ -118,6 +130,7 @@ public class ShareManager {
 			}
 		});
 		decFilesJob.setSet(set);
+		decFilesJob.setAlbumId(albumId);
 		decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, selectedFiles);
 	}
 

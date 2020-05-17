@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 
 import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -93,7 +94,8 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 
 			if (dbFile.isLocal) {
 				file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
-			} else {
+			}
+			else {
 				HashMap<String, String> postParams = new HashMap<String, String>();
 
 				postParams.put("token", KeyManagement.getApiToken(context));
@@ -112,12 +114,11 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 			}
 
 			if (file != null && file.exists() && file.isFile()) {
-				String destFileName = Helpers.decryptFilename(file.getPath());
-
 				try {
+					Crypto.Header headers = CryptoHelpers.decryptFileHeaders(context, set, albumId, dbFile.headers, false);
 					FileInputStream inputStream = new FileInputStream(file);
 
-					String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), destFileName);
+					String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), headers.filename);
 					FileOutputStream outputStream = new FileOutputStream(new File(finalWritePath));
 
 					CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, false, inputStream, outputStream, null, this);
@@ -128,6 +129,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 						ShareManager.scanFile(context, decryptedFile);
 					}
 					decryptedFiles.add(decryptedFile);
+					file.delete();
 				} catch (IOException | CryptoException e) {
 					e.printStackTrace();
 				}

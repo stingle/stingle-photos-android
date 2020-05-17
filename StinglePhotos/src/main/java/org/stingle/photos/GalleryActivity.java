@@ -854,7 +854,7 @@ public class GalleryActivity extends AppCompatActivity
 		if (!galleryFragment.isSelectionModeActive() && sendBackDecryptedFile){
 			ArrayList<StingleDbFile> selectedFiles = new ArrayList<>();
 			selectedFiles.add(file);
-			ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentSet);
+			ShareManager.sendBackSelection(this, originalIntent, selectedFiles, currentSet, currentAlbumId);
 			return false;
 		}
 
@@ -965,7 +965,7 @@ public class GalleryActivity extends AppCompatActivity
 						GalleryActions.deleteSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
 						break;
 					case R.id.send_back :
-						ShareManager.sendBackSelection(GalleryActivity.this, originalIntent, galleryFragment.getSelectedFiles(), currentSet);
+						ShareManager.sendBackSelection(GalleryActivity.this, originalIntent, galleryFragment.getSelectedFiles(), currentSet, currentAlbumId);
 						break;
 				}
 				return true;

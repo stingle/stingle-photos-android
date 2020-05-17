@@ -293,6 +293,10 @@ public class ViewItemActivity extends AppCompatActivity {
 			});
 		}
 		else if (id == R.id.trash) {
+			if(!SyncManager.areFilesAlreadyUploaded(files)){
+				Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+				return false;
+			}
 			final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.trashing_files), null);
 
 			MoveFileAsyncTask moveTask = new MoveFileAsyncTask(this, files, new OnAsyncTaskFinish() {
