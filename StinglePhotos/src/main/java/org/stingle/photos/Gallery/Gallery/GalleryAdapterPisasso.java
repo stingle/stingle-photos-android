@@ -417,6 +417,9 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	public StingleDbFile getStingleFileAtPosition(int position){
+		if(db == null){
+			return null;
+		}
 		return db.getFileAtPosition(translatePos(position).dbPosition, albumId, DB_SORT);
 	}
 

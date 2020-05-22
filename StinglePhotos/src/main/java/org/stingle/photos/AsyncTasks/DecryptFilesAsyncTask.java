@@ -90,6 +90,10 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		for (int i = 0; i < filesToDecrypt.size(); i++) {
 			StingleDbFile dbFile = filesToDecrypt.get(i);
 
+			if(dbFile == null){
+				continue;
+			}
+
 			File file = null;
 
 			if (dbFile.isLocal) {
@@ -129,7 +133,10 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 						ShareManager.scanFile(context, decryptedFile);
 					}
 					decryptedFiles.add(decryptedFile);
-					file.delete();
+
+					if (!dbFile.isLocal) {
+						file.delete();
+					}
 				} catch (IOException | CryptoException e) {
 					e.printStackTrace();
 				}
