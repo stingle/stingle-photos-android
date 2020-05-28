@@ -382,7 +382,7 @@ public class GalleryActions {
 				null);
 	}
 
-	public static void shareStingle(AppCompatActivity activity, int set, String albumId, String albumName, ArrayList<StingleDbFile> files, boolean onlyAdd, OnAsyncTaskFinish onFinish) {
+	public static void shareStingle(AppCompatActivity activity, int set, String albumId, String albumName, ArrayList<StingleDbFile> files, boolean onlyAddMembers, OnAsyncTaskFinish onFinish) {
 		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
@@ -392,14 +392,24 @@ public class GalleryActions {
 			return;
 		}
 
+		if(files != null) {
+			StingleDbAlbum album = GalleryHelpers.getAlbum(activity, albumId);
+			if (!album.isOwner) {
+				Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.cant_share_others_album), Snackbar.LENGTH_LONG).show();
+				return;
+			}
+		}
+
 		FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
 		SharingDialogFragment newFragment = new SharingDialogFragment();
 
 		newFragment.setSourceSet(set);
 		newFragment.setAlbumId(albumId);
 		newFragment.setFiles(files);
-		newFragment.setAlbumName(albumName);
-		newFragment.setOnlyAdd(onlyAdd);
+		if(files == null) {
+			newFragment.setAlbumName(albumName);
+		}
+		newFragment.setOnlyAddMembers(onlyAddMembers);
 		newFragment.setOnFinish(onFinish);
 
 		newFragment.show(ft, "dialog");

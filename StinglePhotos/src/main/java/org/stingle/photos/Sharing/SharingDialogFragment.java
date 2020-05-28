@@ -48,7 +48,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 	private String albumId;
 	private StingleDbAlbum album;
 	private String albumName;
-	private boolean onlyAdd = false;
+	private boolean onlyAddMembers = false;
 	private OnAsyncTaskFinish onFinish;
 
 
@@ -78,20 +78,23 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		step1Fragment = new SharingDialogStep1Fragment(this);
 		step2Fragment = new SharingDialogStep2Fragment();
 
-		if(onlyAdd && (albumId == null || albumId.length() == 0)){
+		if(onlyAddMembers && (albumId == null || albumId.length() == 0)){
 			requireDialog().dismiss();
 			return null;
 		}
 
-		if(albumName == null || albumName.length() == 0){
+		if (albumName == null || albumName.length() == 0) {
 			albumName = Helpers.generateAlbumName();
 		}
-		if(albumId != null && albumId.length() > 0){
-			step2Fragment.disableAlbumName();
-			album = GalleryHelpers.getAlbum(requireContext(), albumId);
-			if(album.isShared && album.permissionsObj != null) {
-				step1Fragment.setExcludedIds(album.members);
-				step2Fragment.setPermissions(album.permissionsObj);
+
+		if(files == null) {
+			if (albumId != null && albumId.length() > 0) {
+				step2Fragment.disableAlbumName();
+				album = GalleryHelpers.getAlbum(requireContext(), albumId);
+				if (album.isShared && album.permissionsObj != null) {
+					step1Fragment.setExcludedIds(album.members);
+					step2Fragment.setPermissions(album.permissionsObj);
+				}
 			}
 		}
 
@@ -121,7 +124,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 				super.onPageSelected(position);
 
 				toolbar.getMenu().clear();
-				if(!onlyAdd) {
+				if(!onlyAddMembers) {
 					if (position == 0) {
 						toolbar.inflateMenu(R.menu.sharing_dialog_step1);
 					} else if (position == 1) {
@@ -160,7 +163,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 				});
 			}
 			else if (id == R.id.shareButton) {
-				if(onlyAdd){
+				if(onlyAddMembers){
 					step1Fragment.addRecipient(new OnAsyncTaskFinish(){
 						@Override
 						public void onFinish() {
@@ -221,7 +224,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 			}
 		});
 
-		if(albumId != null && (onlyAdd || set == SyncManager.ALBUM)) {
+		if(albumId != null && (onlyAddMembers || set == SyncManager.ALBUM) && files == null) {
 			shareTask.setAlbumId(albumId);
 		}
 		else{
@@ -232,7 +235,7 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 		}
 		shareTask.setRecipients(step1Fragment.getSelectedRecipients());
 
-		if(onlyAdd){
+		if(onlyAddMembers){
 			shareTask.setPermissions(album.permissionsObj);
 		}
 		else {
@@ -254,8 +257,8 @@ public class SharingDialogFragment extends AppCompatDialogFragment {
 	public void setAlbumName(String albumName){
 		this.albumName = albumName;
 	}
-	public void setOnlyAdd(boolean onlyAdd){
-		this.onlyAdd = onlyAdd;
+	public void setOnlyAddMembers(boolean onlyAddMembers){
+		this.onlyAddMembers = onlyAddMembers;
 	}
 	public void setOnFinish(OnAsyncTaskFinish onFinish){
 		this.onFinish = onFinish;

@@ -126,6 +126,11 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				albumId = newAlbum.albumId;
 			}
 
+			if(albumId == null){
+				errorMessage = myContext.getString(R.string.default_error_msg);
+				return false;
+			}
+
 			AlbumsDb db = new AlbumsDb(myContext);
 			long now = System.currentTimeMillis();
 

@@ -347,6 +347,7 @@
     <string name="no_sharing_desc">Shared albums will appear here</string>
     <string name="no_photos_trash">Trash is empty</string>
     <string name="no_photos_trash_desc">Deleted photos and videos will appear here</string>
+    <string name="cant_share_others_album">You can\'t share files from received album right away. Please copy to your gallery or own album first.</string>
 
 
 </resources>
