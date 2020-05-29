@@ -23,10 +23,15 @@ public class GalleryHelpers {
 		return null;
 	}
 	public static StingleDbAlbum getAlbum(Context context, String albumId){
-		AlbumsDb albumsDb = new AlbumsDb(context);
-		StingleDbAlbum album = albumsDb.getAlbumById(albumId);
-		albumsDb.close();
-		return album;
+		try {
+			AlbumsDb albumsDb = new AlbumsDb(context);
+			StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+			albumsDb.close();
+			return album;
+		}
+		catch (IllegalArgumentException e){
+			return null;
+		}
 	}
 
 	public static String getAlbumName(StingleDbAlbum album){
@@ -35,7 +40,7 @@ public class GalleryHelpers {
 			Crypto.AlbumData albumData = StinglePhotosApplication.getCrypto().parseAlbumData(album.publicKey, album.encPrivateKey, album.metadata);
 			albumName = albumData.metadata.name;
 			albumData = null;
-		} catch (IOException | CryptoException e) {
+		} catch (IOException | CryptoException | IllegalArgumentException e) {
 			e.printStackTrace();
 		}
 

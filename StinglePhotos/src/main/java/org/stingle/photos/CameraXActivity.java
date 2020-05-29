@@ -105,7 +105,11 @@ public class CameraXActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
+				| WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+				| WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+				| WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+				| WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 
 		setContentView(R.layout.activity_camera_x);
 

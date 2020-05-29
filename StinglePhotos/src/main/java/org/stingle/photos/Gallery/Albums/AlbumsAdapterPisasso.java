@@ -314,6 +314,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 			holder.albumName.setEnabled(true);
 			holder.albumSubtitle.setEnabled(true);
 			holder.image.setEnabled(true);
+			holder.image.setClipToOutline(true);
 
 			if(textSize != null){
 				holder.albumName.setTextSize(textSize);

@@ -1,13 +1,16 @@
 package org.stingle.photos.AsyncTasks.Sync;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
@@ -66,6 +69,32 @@ public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				}
 			}
 		}
+
+		Cursor result = galleryDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null);
+		while(result.moveToNext()) {
+			StingleDbFile dbFile = new StingleDbFile(result);
+			File file = new File(FileManager.getHomeDir(myContext) + "/" + dbFile.filename);
+			File thumb = new File(FileManager.getThumbsDir(myContext) + "/" + dbFile.filename);
+			if(!file.exists() || !thumb.exists()){
+				dbFile.isLocal = false;
+				galleryDb.updateFile(dbFile);
+			}
+		}
+		result.close();
+
+		Cursor albumsResult = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null);
+		while(albumsResult.moveToNext()) {
+			StingleDbFile dbFile = new StingleDbFile(albumsResult);
+			File file = new File(FileManager.getHomeDir(myContext) + "/" + dbFile.filename);
+			File thumb = new File(FileManager.getThumbsDir(myContext) + "/" + dbFile.filename);
+			if(!file.exists() || !thumb.exists()){
+				dbFile.isLocal = false;
+				albumFilesDb.updateFile(dbFile);
+			}
+		}
+		albumsResult.close();
+
+
 		galleryDb.close();
 		trashDb.close();
 		albumFilesDb.close();

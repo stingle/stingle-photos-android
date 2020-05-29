@@ -283,6 +283,9 @@ public class ViewItemActivity extends AppCompatActivity {
 		else if (id == R.id.share_to_apps) {
 			ShareManager.shareDbFiles(this, files, set, albumId);
 		}
+		else if(id == R.id.add_to_album) {
+			GalleryActions.addToAlbumSelected(this, files, albumId,set == SyncManager.ALBUM);
+		}
 		else if (id == R.id.decrypt) {
 			GalleryActions.decryptSelected(this, files, set, albumId, new OnAsyncTaskFinish() {
 				@Override

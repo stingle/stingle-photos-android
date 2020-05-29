@@ -88,8 +88,8 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 			if (albumDbFile != null) {
 				byte[] decryptedData;
-				if (albumDbFile.isLocal) {
-					File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + albumDbFile.filename);
+				File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + albumDbFile.filename);
+				if (albumDbFile.isLocal && fileToDec.exists()) {
 					FileInputStream input = new FileInputStream(fileToDec);
 					decryptedData = crypto.decryptFile(input, crypto.getThumbHeaderFromHeadersStr(albumDbFile.headers, albumData.privateKey, albumData.publicKey));
 				} else {
@@ -107,20 +107,26 @@ public class AlbumsPicassoLoader extends RequestHandler {
 			}
 
 			if (result == null) {
-				Drawable drawable = context.getDrawable(R.drawable.ic_no_image);
-				if (drawable == null) {
-					return;
-				}
-
-				result = new Result(drawable, Picasso.LoadedFrom.DISK);
+				returnNoImage(callback);
+				return;
 			}
 
 			callback.onSuccess(result);
 
 		} catch (IOException | CryptoException e) {
 			e.printStackTrace();
+			returnNoImage(callback);
 		}
 	}
 
+	private void returnNoImage(Callback callback){
+		Drawable drawable = context.getDrawable(R.drawable.ic_no_image);
+		if (drawable == null) {
+			return;
+		}
+
+		Result result = new Result(drawable, Picasso.LoadedFrom.DISK);
+		callback.onSuccess(result);
+	}
 
 }

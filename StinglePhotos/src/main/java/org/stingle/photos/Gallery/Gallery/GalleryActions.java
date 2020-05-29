@@ -56,7 +56,7 @@ public class GalleryActions {
 		ShareManager.shareDbFiles(activity, files, activity.getCurrentSet(), activity.getCurrentAlbumId());
 	}
 
-	public static void addToAlbumSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files, boolean isFromAlbum) {
+	public static void addToAlbumSelected(AppCompatActivity activity, final ArrayList<StingleDbFile> files, String albumId, boolean isFromAlbum) {
 		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
@@ -79,7 +79,7 @@ public class GalleryActions {
 
 		final HashMap<String, Boolean> props = new HashMap<>();
 		if(isFromAlbum) {
-			StingleDbAlbum album = GalleryHelpers.getAlbum(activity, activity.getCurrentAlbumId());
+			StingleDbAlbum album = GalleryHelpers.getAlbum(activity, albumId);
 			if(album.isShared && !album.isOwner){
 				deleteOriginal.setVisibility(View.GONE);
 				deleteOriginal.setChecked(false);
@@ -104,8 +104,10 @@ public class GalleryActions {
 						super.onFinish();
 						spinner.dismiss();
 						addAlbumDialog.dismiss();
-						activity.exitActionMode();
-						activity.updateGalleryFragmentData();
+						if(activity instanceof GalleryActivity) {
+							((GalleryActivity)activity).exitActionMode();
+							((GalleryActivity)activity).updateGalleryFragmentData();
+						}
 					}
 
 					@Override
@@ -127,7 +129,7 @@ public class GalleryActions {
 				if (type == AlbumsAdapterPisasso.TYPE_GALLERY) {
 					addSyncTask.setFromSet(SyncManager.ALBUM);
 					addSyncTask.setToSet(SyncManager.GALLERY);
-					addSyncTask.setFromAlbumId(activity.getCurrentAlbumId());
+					addSyncTask.setFromAlbumId(albumId);
 					addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 				else if (type == AlbumsAdapterPisasso.TYPE_ADD){
@@ -152,16 +154,16 @@ public class GalleryActions {
 
 			}
 
-			private void addToAlbum(MoveFileAsyncTask addSyncTask, String albumId){
+			private void addToAlbum(MoveFileAsyncTask addSyncTask, String thisAlbumId){
 				if(isFromAlbum) {
 					addSyncTask.setFromSet(SyncManager.ALBUM);
-					addSyncTask.setFromAlbumId(activity.getCurrentAlbumId());
+					addSyncTask.setFromAlbumId(albumId);
 				}
 				else{
 					addSyncTask.setFromSet(SyncManager.GALLERY);
 				}
 				addSyncTask.setToSet(SyncManager.ALBUM);
-				addSyncTask.setToAlbumId(albumId);
+				addSyncTask.setToAlbumId(thisAlbumId);
 				addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 
@@ -392,9 +394,9 @@ public class GalleryActions {
 			return;
 		}
 
-		if(files != null) {
+		if(files != null && albumId != null) {
 			StingleDbAlbum album = GalleryHelpers.getAlbum(activity, albumId);
-			if (!album.isOwner) {
+			if (album != null && !album.isOwner) {
 				Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.cant_share_others_album), Snackbar.LENGTH_LONG).show();
 				return;
 			}

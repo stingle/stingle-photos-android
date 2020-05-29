@@ -3,6 +3,7 @@ package org.stingle.photos.Gallery.Gallery;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
 
@@ -73,9 +74,9 @@ public class StinglePicassoLoader extends RequestHandler {
 
 		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position), albumId, sort);
 
-		if(file.isLocal) {
+		File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
+		if(file.isLocal && fileToDec.exists()) {
 			try {
-				File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
 				FileInputStream input = new FileInputStream(fileToDec);
 
 				byte[] decryptedData = CryptoHelpers.decryptDbFile(context, set, albumId, file.headers, true, input);
@@ -100,6 +101,7 @@ public class StinglePicassoLoader extends RequestHandler {
 				}
 			} catch (IOException | CryptoException e) {
 				e.printStackTrace();
+				returnNoImage(callback);
 			}
 
 		}
@@ -140,9 +142,19 @@ public class StinglePicassoLoader extends RequestHandler {
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));
 				}
 			} catch (IOException | CryptoException e) {
-				callback.onError(e);
+				returnNoImage(callback);
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void returnNoImage(Callback callback){
+		Drawable drawable = context.getDrawable(R.drawable.ic_no_image);
+		if (drawable == null) {
+			return;
+		}
+
+		Result result = new Result(drawable, Picasso.LoadedFrom.DISK);
+		callback.onSuccess(result);
 	}
 }

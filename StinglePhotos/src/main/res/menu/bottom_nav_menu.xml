@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_gallery"
         android:title="@string/gallery"
-        android:icon="@drawable/ic_image_black" />
+        android:icon="@drawable/ic_image_bottom" />
     <item android:id="@+id/action_albums"
         android:title="@string/albums"
-        android:icon="@drawable/ic_menu_gallery" />
+        android:icon="@drawable/ic_menu_gallery_bottom" />
     <item android:id="@+id/action_sharing"
         android:title="@string/sharing"
-        android:icon="@drawable/ic_action_share" />
+        android:icon="@drawable/ic_action_share_bottom" />
 </menu>

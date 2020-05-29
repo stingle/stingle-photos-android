@@ -122,6 +122,9 @@ public class GalleryActivity extends AppCompatActivity
 	private SyncBarHandler syncBarHandler;
 	private FloatingActionButton fab;
 	private BottomNavigationView bottomNavigationView;
+	private ActionBarDrawerToggle toggle;
+	private DrawerLayout drawer;
+	private NavigationView navigationView;
 
 
 	@Override
@@ -136,15 +139,14 @@ public class GalleryActivity extends AppCompatActivity
 		toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitle(getString(R.string.title_gallery_for_app));
 		setSupportActionBar(toolbar);
+
 		fab = findViewById(R.id.import_fab);
 		fab.setOnClickListener(getImportOnClickListener());
 		bottomNavigationView = findViewById(R.id.bottom_navigation);
-		DrawerLayout drawer = findViewById(R.id.drawer_layout);
-		NavigationView navigationView = findViewById(R.id.nav_view);
-		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-		drawer.addDrawerListener(toggle);
-		toggle.syncState();
-		navigationView.setNavigationItemSelectedListener(this);
+
+		drawer = findViewById(R.id.drawer_layout);
+		navigationView = findViewById(R.id.nav_view);
+		showBurgerMenu();
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
@@ -365,23 +367,29 @@ public class GalleryActivity extends AppCompatActivity
 			}
 			invalidateOptionsMenu();
 		}
-		fab.setVisibility(View.VISIBLE);
 
 		if(currentSet == SyncManager.GALLERY){
 			toolbar.setTitle(getString(R.string.title_gallery_for_app));
 			enableSyncBar();
+			fab.setVisibility(View.VISIBLE);
+			showBurgerMenu();
 		}
 		if(currentSet == SyncManager.TRASH){
 			toolbar.setTitle(getString(R.string.title_trash));
 			disableSyncBar();
+			fab.setVisibility(View.GONE);
+			showBurgerMenu();
 		}
 		else if(currentSet == SyncManager.ALBUM){
+			fab.setVisibility(View.VISIBLE);
 			Log.d("albumId", currentAlbumId);
 			StingleDbAlbum album = GalleryHelpers.getAlbum(this, currentAlbumId);
 			String albumName = GalleryHelpers.getAlbumName(this, currentAlbumId);
 			if(albumName != null && albumName.length() > 0){
 				currentAlbumName = albumName;
 				toolbar.setTitle(albumName);
+				showBackButton();
+
 				if(album.isOwner) {
 					toolbar.setOnClickListener(v -> {
 						GalleryActions.renameAlbum(this, currentAlbumId, currentAlbumName, new OnAsyncTaskFinish() {
@@ -424,6 +432,7 @@ public class GalleryActivity extends AppCompatActivity
 		ft.commit();
 		fab.setVisibility(View.GONE);
 		invalidateOptionsMenu();
+		showBurgerMenu();
 
 		if(currentAlbumsView == AlbumsFragment.VIEW_ALBUMS) {
 			toolbar.setTitle(getString(R.string.albums));
@@ -434,6 +443,20 @@ public class GalleryActivity extends AppCompatActivity
 			bottomNavigationView.getMenu().getItem(2).setChecked(true);
 		}
 		disableSyncBar();
+	}
+
+	private void showBurgerMenu(){
+		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+		toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+		drawer.addDrawerListener(toggle);
+		toggle.syncState();
+		navigationView.setNavigationItemSelectedListener(this);
+		toggle.syncState();
+	}
+
+	private void showBackButton(){
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		toolbar.setNavigationOnClickListener(view -> onBackPressed());
 	}
 
 	private void updateBottomNavigationMenu(){
@@ -950,7 +973,7 @@ public class GalleryActivity extends AppCompatActivity
 						GalleryActions.shareSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
 						break;
 					case R.id.add_to_album:
-						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentSet == SyncManager.ALBUM);
+						GalleryActions.addToAlbumSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentAlbumId,currentSet == SyncManager.ALBUM);
 						break;
 					case R.id.decrypt:
 						GalleryActions.decryptSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), currentSet, currentAlbumId, null);
