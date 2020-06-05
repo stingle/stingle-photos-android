@@ -6,7 +6,7 @@
         android:id="@+id/share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
-        app:showAsAction="always|withText">
+        app:showAsAction="always">
         <menu>
             <item
                 android:id="@+id/share_stingle"
@@ -20,15 +20,15 @@
         android:id="@+id/add_to_album"
         android:icon="@drawable/ic_action_move"
         android:title="@string/add_to_album"
-        app:showAsAction="always|withText" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/decrypt"
         android:icon="@drawable/ic_action_unlock"
         android:title="@string/save_to_gallery"
-        app:showAsAction="always|withText" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/trash"
         android:icon="@drawable/ic_action_delete"
         android:title="@string/move_to_trash"
-        app:showAsAction="always|withText" />
+        app:showAsAction="always" />
 </menu>
