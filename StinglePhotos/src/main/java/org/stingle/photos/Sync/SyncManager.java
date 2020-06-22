@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.work.BackoffPolicy;
@@ -640,6 +641,10 @@ public class SyncManager {
 			}
 		}
 		return true;
+	}
+
+	public static boolean isBackupEnabled(Context context){
+		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SyncManager.PREF_BACKUP_ENABLED, true);
 	}
 
 	public static void startPeriodicWork(Context context){

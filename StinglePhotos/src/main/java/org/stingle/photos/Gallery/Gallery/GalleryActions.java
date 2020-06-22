@@ -133,6 +133,7 @@ public class GalleryActions {
 					addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 				else if (type == AlbumsAdapterPisasso.TYPE_ADD){
+					spinner.dismiss();
 					addAlbum(activity, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish(Object albumObj) {

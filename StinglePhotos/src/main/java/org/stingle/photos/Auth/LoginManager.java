@@ -139,7 +139,9 @@ public class LoginManager {
                     @Override
                     public void onUserAuthSuccess() {
                         dismissLoginDialog(dialog);
-                        loginCallback.onUserAuthSuccess();
+                        if(loginCallback != null) {
+                            loginCallback.onUserAuthSuccess();
+                        }
                     }
 
                     @Override
@@ -147,7 +149,9 @@ public class LoginManager {
                         if(dialog != null) {
                             ((EditText) dialog.findViewById(R.id.password)).setText("");
                         }
-                        loginCallback.onUserAuthFail();
+                        if(loginCallback != null) {
+                            loginCallback.onUserAuthFail();
+                        }
                     }
                 });
             }
@@ -155,7 +159,9 @@ public class LoginManager {
             @Override
             public void passwordReceiveFailed(AlertDialog dialog) {
                 dismissLoginDialog(dialog);
-                loginCallback.onLoginCancelled();
+                if(loginCallback != null) {
+                    loginCallback.onLoginCancelled();
+                }
                 if(config.quitActivityOnCancel) {
                     activity.finish();
                 }

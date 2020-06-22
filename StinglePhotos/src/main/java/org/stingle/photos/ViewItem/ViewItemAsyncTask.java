@@ -51,6 +51,7 @@ import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
 import org.stingle.photos.Video.StingleDataSourceFactory;
 import org.stingle.photos.Video.StingleHttpDataSource;
+import org.stingle.photos.ViewItemActivity;
 import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.ImageHolderLayout;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
@@ -307,9 +308,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			if (touchListener != null) {
 				parent.setOnTouchListener(touchListener);
 			}
-			if (onClickListener != null) {
-				parent.setOnClickListener(onClickListener);
-			}
+
 
 			SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(
 					new DefaultRenderersFactory(context),
@@ -348,6 +347,21 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					player.setPlayWhenReady(false);
 				}*/
 				playerView.setShowShuffleButton(false);
+				playerView.setControllerHideOnTouch(false);
+				if(context instanceof ViewItemActivity) {
+					ViewItemActivity activity = (ViewItemActivity)context;
+					playerView.getVideoSurfaceView().setOnClickListener(v -> {
+						if (activity.getSupportActionBar().isShowing()){
+							playerView.hideController();
+						}
+						else{
+							playerView.showController();
+						}
+						if (onClickListener != null) {
+							onClickListener.onClick(v);
+						}
+					});
+				}
 				player.prepare(mediaSource, true, false);
 				loading.setVisibility(View.INVISIBLE);
 			}

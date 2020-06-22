@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -58,6 +59,7 @@ public class ViewItemActivity extends AppCompatActivity {
 	private static final int SWIPE_MIN_DISTANCE = 100;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+	private View.OnClickListener onSingleClickListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,12 +79,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setTitle("");
 
-		toolbar.setNavigationOnClickListener(new View.OnClickListener(){
-			@Override
-			public void onClick(View view){
-				finish();
-			}
-		});
+		toolbar.setNavigationOnClickListener(view -> finish());
 
 		Intent intent = getIntent();
 		itemPosition = intent.getIntExtra("EXTRA_ITEM_POSITION", 0);
@@ -93,11 +90,8 @@ public class ViewItemActivity extends AppCompatActivity {
 
 		viewPager.addOnPageChangeListener(getOnPageChangeListener());
 		gestureDetector = new GestureDetector(this, new SwipeGestureDetector());
-		gestureTouchListener = new View.OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				return gestureDetector.onTouchEvent(event);
-			}
-		};
+		gestureTouchListener = (v, event) -> gestureDetector.onTouchEvent(event);
+		onSingleClickListener = v -> toggleActionBar();
 
 		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
@@ -124,7 +118,7 @@ public class ViewItemActivity extends AppCompatActivity {
 				if (adapter != null) {
 					adapter.releasePlayers();
 				}
-				adapter = new ViewPagerAdapter(ViewItemActivity.this, set, albumId, gestureTouchListener);
+				adapter = new ViewPagerAdapter(ViewItemActivity.this, set, albumId, onSingleClickListener, gestureTouchListener);
 				viewPager.setAdapter(adapter);
 				viewPager.setCurrentItem(itemPosition);
 
@@ -160,6 +154,16 @@ public class ViewItemActivity extends AppCompatActivity {
 		lbm.unregisterReceiver(onLogout);
 		lbm.unregisterReceiver(onEncFinish);
 		lbm.unregisterReceiver(onCameraClosed);
+	}
+
+	private void toggleActionBar(){
+		ActionBar actionBar = getSupportActionBar();
+		if(actionBar.isShowing()){
+			actionBar.hide();
+		}
+		else{
+			actionBar.show();
+		}
 	}
 
 	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
@@ -228,7 +232,6 @@ public class ViewItemActivity extends AppCompatActivity {
 			} catch (Exception e) { }
 			return false;
 		}
-
 	}
 
 	@Override
@@ -271,6 +274,10 @@ public class ViewItemActivity extends AppCompatActivity {
 			sort = StingleDb.SORT_ASC;
 		}
 		else{
+			return false;
+		}
+
+		if(adapter == null){
 			return false;
 		}
 

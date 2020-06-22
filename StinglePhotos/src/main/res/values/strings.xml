@@ -332,7 +332,7 @@
     <string name="deleting_cache">Deleting cache…</string>
     <string name="success_deleted">Successfully deleted</string>
     <string name="delete_original">Delete original files after adding</string>
-    <string name="wait_for_upload">Please wait for backup to finish before sharing</string>
+    <string name="wait_for_upload">Please wait for backup to finish before you can proceed</string>
     <string name="processing">Processing…</string>
     <string name="success_decrypted">Successfully decrypted</string>
     <string name="sync_channel_name">Sync notifications</string>

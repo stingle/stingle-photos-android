@@ -678,7 +678,7 @@ public class GalleryActivity extends AppCompatActivity
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
 			drawer.closeDrawer(GravityCompat.START);
 		}
-		else if (galleryFragment.isSelectionModeActive()) {
+		else if (galleryFragment != null && galleryFragment.isSelectionModeActive()) {
 			exitActionMode();
 		}
 		else if(currentSet == SyncManager.ALBUM){

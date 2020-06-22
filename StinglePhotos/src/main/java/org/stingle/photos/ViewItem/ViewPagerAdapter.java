@@ -13,9 +13,9 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
+import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Widget.ImageHolderLayout;
@@ -33,12 +33,14 @@ public class ViewPagerAdapter extends PagerAdapter {
 	private String albumId = null;
 	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
 	private View.OnTouchListener gestureTouchListener;
+	private View.OnClickListener onSingleClickListener;
 
-	public ViewPagerAdapter(Context context, int set, String albumId, View.OnTouchListener gestureTouchListener) {
+	public ViewPagerAdapter(Context context, int set, String albumId, View.OnClickListener onSingleClickListener, View.OnTouchListener gestureTouchListener) {
 		this.context = context;
 		this.set = set;
 		this.albumId = albumId;
 		this.gestureTouchListener = gestureTouchListener;
+		this.onSingleClickListener = onSingleClickListener;
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		switch (set) {
@@ -80,7 +82,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		ImageHolderLayout parent = layout.findViewById(R.id.parent_layout);
 		ContentLoadingProgressBar loading = layout.findViewById(R.id.loading_spinner);
 
-		(new ViewItemAsyncTask(context, this, position, parent, loading, db, set, albumId, null, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		(new ViewItemAsyncTask(context, this, position, parent, loading, db, set, albumId, onSingleClickListener, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		container.addView(layout);
 		return layout;
