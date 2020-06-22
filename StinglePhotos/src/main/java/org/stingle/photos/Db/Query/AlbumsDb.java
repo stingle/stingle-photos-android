@@ -21,6 +21,8 @@ public class AlbumsDb {
 	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUMS;
 
 	public static final int ALBUM_ID_LEN = 32;
+	public static final int SORT_BY_CREATION_DATE = 0;
+	public static final int SORT_BY_MODIFIED_DATE = 1;
 
 	public AlbumsDb(Context context) {
 		db = new StingleDb(context);
@@ -132,7 +134,12 @@ public class AlbumsDb {
 
 	}
 
+
 	public StingleDbAlbum getAlbumAtPosition(int pos, int sort, Boolean isHidden, Boolean isShared) {
+		return getAlbumAtPosition(pos, SORT_BY_CREATION_DATE, sort, isHidden, isShared);
+	}
+
+	public StingleDbAlbum getAlbumAtPosition(int pos, int sortBy, int sort, Boolean isHidden, Boolean isShared) {
 		String selection = "";
 		ArrayList<String> selectionArgs = new ArrayList<>();
 		if(isHidden != null) {
@@ -147,8 +154,9 @@ public class AlbumsDb {
 			selectionArgs.add((isShared ? "1" : "0"));
 		}
 
-		String sortOrder =
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
+		String sortColumn = (sortBy == SORT_BY_CREATION_DATE ? StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED : StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED);
+
+		String sortOrder = sortColumn + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
 		String[] selArgs = new String[selectionArgs.size()];
 		for (int i = 0;i <selectionArgs.size(); i++){

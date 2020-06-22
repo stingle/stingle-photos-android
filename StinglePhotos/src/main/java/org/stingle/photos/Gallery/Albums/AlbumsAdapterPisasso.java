@@ -327,7 +327,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 				StingleDbAlbum album;
 				album = albumsCache.get(dbPos);
 				if(album == null) {
-					album = db.getAlbumAtPosition(dbPos, StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
+					album = getAlbumAtPosition(rawPosition);
 					albumsCache.put(dbPos, album);
 				}
 				Crypto.AlbumData albumData;
@@ -455,7 +455,8 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	}
 
 	public StingleDbAlbum getAlbumAtPosition(int position){
-		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
+		int sortBy = (view == AlbumsFragment.VIEW_SHARES ? AlbumsDb.SORT_BY_MODIFIED_DATE : AlbumsDb.SORT_BY_CREATION_DATE);
+		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), sortBy, StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
 	}
 
 	@Override
