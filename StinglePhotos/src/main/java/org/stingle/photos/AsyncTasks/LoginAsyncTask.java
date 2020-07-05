@@ -191,7 +191,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				response.showErrorsInfos();
 			}
 			else {
-				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_login));
+				Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.fail_login));
 			}
 		}
 	}
@@ -208,7 +208,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		progressDialog.dismiss();
 		BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper(activity);
 		if(biometricsManagerWrapper.isBiometricsAvailable()) {
-			Helpers.showConfirmDialog(activity, activity.getString(R.string.enable_biometrics),
+			Helpers.showConfirmDialog(activity, activity.getString(R.string.biometric_auth), activity.getString(R.string.enable_biometrics), R.drawable.ic_fingerprint,
 					(dialog, which) -> {
 						biometricsManagerWrapper.setupBiometrics(null, password, new BiometricsManagerWrapper.BiometricsSetupCallback() {
 							@Override

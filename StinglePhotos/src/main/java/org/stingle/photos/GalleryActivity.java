@@ -19,8 +19,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +31,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.view.GravityCompat;
@@ -42,6 +45,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -269,6 +273,26 @@ public class GalleryActivity extends AppCompatActivity
 		outState.putBoolean("isSyncBarDisabled", isSyncBarDisabled);
 		outState.putInt("albumsLastScrollPos", albumsLastScrollPos);
 		outState.putInt("sharingLastScrollPos", sharingLastScrollPos);
+	}
+
+	private void requestToDisableBatteryOptimization(){
+		Intent intent = new Intent();
+		String packageName = getPackageName();
+		PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+		if (pm != null && !pm.isIgnoringBatteryOptimizations(packageName)) {
+			MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+			builder.setTitle(getString(R.string.disable_battery_optimization));
+			builder.setMessage(getString(R.string.disable_battery_optimization_desc));
+			builder.setPositiveButton(getString(R.string.ok), (dialog, which) -> {
+				intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+				intent.setData(Uri.parse("package:" + packageName));
+				startActivity(intent);
+			});
+			builder.setCancelable(false);
+			builder.setIcon(getDrawable(R.drawable.ic_battery_alert));
+			AlertDialog dialog = builder.create();
+			dialog.show();
+		}
 	}
 
 	public void showMainGallery(){
@@ -502,6 +526,7 @@ public class GalleryActivity extends AppCompatActivity
 				else{
 					FileManager.requestSDCardPermission(GalleryActivity.this);
 				}
+				requestToDisableBatteryOptimization();
 			}
 		});
 	}

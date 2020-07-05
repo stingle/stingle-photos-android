@@ -79,12 +79,12 @@ public class LoginActivity extends AppCompatActivity {
 		String password = ((EditText) findViewById(R.id.password)).getText().toString();
 
 		if(!Helpers.isValidEmail(email)){
-			Helpers.showAlertDialog(this, getString(R.string.invalid_email));
+			Helpers.showAlertDialog(this, getString(R.string.error), getString(R.string.invalid_email));
 			return;
 		}
 
 		if(password.length() < Integer.valueOf(getString(R.string.min_pass_length))){
-			Helpers.showAlertDialog(this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
+			Helpers.showAlertDialog(this, getString(R.string.error), String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
 			return;
 		}
 

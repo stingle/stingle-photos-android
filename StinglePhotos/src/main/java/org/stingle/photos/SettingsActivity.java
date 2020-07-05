@@ -159,7 +159,12 @@ public class SettingsActivity extends AppCompatActivity implements
 			keyBackupPref.setOnPreferenceChangeListener((preference, newValue) -> {
 				final Context context = getContext();
 				if ((Boolean) newValue == false) {
-					Helpers.showConfirmDialog(context, getString(R.string.key_backup_delete_confirm), (dialogInterface, i) -> {
+					Helpers.showConfirmDialog(
+							context,
+							getString(R.string.delete_key_backup_question),
+							getString(R.string.key_backup_delete_confirm),
+							R.drawable.ic_action_delete,
+							(dialogInterface, i) -> {
 						(new ReuploadKeysAsyncTask(AccountPreferenceFragment.this.getActivity(), null, true, new OnAsyncTaskFinish() {
 							@Override
 							public void onFinish() {
@@ -248,7 +253,12 @@ public class SettingsActivity extends AppCompatActivity implements
 			SwitchPreference blockScreenshotsSetting = findPreference("block_screenshots");
 			blockScreenshotsSetting.setOnPreferenceChangeListener((preference, newValue) -> {
 				final Context context = getContext();
-				Helpers.showConfirmDialog(context, getString(R.string.need_restart), (dialogInterface, i) -> {
+				Helpers.showConfirmDialog(
+						context,
+						getString(R.string.app_restart_question),
+						getString(R.string.need_restart),
+						null,
+						(dialogInterface, i) -> {
 
 					Intent intent = new Intent(context, GalleryActivity.class);
 					intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
@@ -338,7 +348,12 @@ public class SettingsActivity extends AppCompatActivity implements
 			Preference deleteCachePref = findPreference("delete_cache");
 			assert deleteCachePref != null;
 			deleteCachePref.setOnPreferenceClickListener(preference -> {
-				Helpers.showConfirmDialog(getContext(), getString(R.string.confirm_delete_cache), (dialog, which) -> {
+				Helpers.showConfirmDialog(
+						getContext(),
+						getString(R.string.delete_question),
+						getString(R.string.confirm_delete_cache),
+						R.drawable.ic_action_delete,
+						(dialog, which) -> {
 
 							GenericAsyncTask task = new GenericAsyncTask(getContext());
 							task.setWork(new GenericAsyncTask.GenericTaskWork() {

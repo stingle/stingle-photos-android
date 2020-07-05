@@ -91,7 +91,12 @@ public class AlbumMembersFragment extends Fragment {
 		return new MembersAdapter.UnshareListener() {
 			@Override
 			public void onUnshare(StingleContact contact) {
-				Helpers.showConfirmDialog(requireContext(), requireContext().getString(R.string.unshare_member, contact.email), new DialogInterface.OnClickListener() {
+				Helpers.showConfirmDialog(
+						requireContext(),
+						requireContext().getString(R.string.remove_member_question),
+						requireContext().getString(R.string.unshare_member, contact.email),
+						null,
+						new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(getActivity(), requireContext().getString(R.string.spinner_saving), null);

@@ -105,39 +105,55 @@ public class Helpers {
 		return imageFileName + extension;
 	}
 
-	public static void showAlertDialog(Context context, String message) {
+	public static void showAlertDialog(Context context, String title, String message) {
+		showAlertDialog(context, title, message, null, null);
+	}
+
+	public static void showAlertDialog(Context context, String title, String message, Integer icon, DialogInterface.OnClickListener onclick) {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+		builder.setMessage(title);
 		builder.setMessage(message);
-		builder.setNegativeButton(context.getString(R.string.ok), null);
-		builder.setIcon(android.R.drawable.ic_dialog_alert);
+		builder.setNegativeButton(context.getString(R.string.ok), onclick);
+		if(icon == null){
+			icon = R.drawable.ic_warning;
+		}
+		builder.setIcon(icon);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
 
 
-	public static void showInfoDialog(Context context, String message) {
-		showInfoDialog(context, message, null);
+	public static void showInfoDialog(Context context, String title, String message) {
+		showInfoDialog(context, title, message, null, null);
 	}
 
-	public static void showInfoDialog(Context context, String message, DialogInterface.OnClickListener onClick) {
+	public static void showInfoDialog(Context context, String title, String message, Integer icon, DialogInterface.OnClickListener onClick) {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+		builder.setTitle(title);
 		builder.setMessage(message);
 		if(onClick != null){
-			builder.setNegativeButton(context.getString(R.string.ok), onClick);
+			builder.setPositiveButton(context.getString(R.string.ok), onClick);
 		}
 		else {
 			builder.setNegativeButton(context.getString(R.string.ok), null);
 		}
-		builder.setIcon(android.R.drawable.ic_dialog_info);
+		if(icon == null){
+			icon = R.drawable.ic_info;
+		}
+		builder.setIcon(icon);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
 
-	public static void showConfirmDialog(Context context, String message, DialogInterface.OnClickListener yes, DialogInterface.OnClickListener no) {
+	public static void showConfirmDialog(Context context, String title, String message, Integer icon, DialogInterface.OnClickListener yes, DialogInterface.OnClickListener no) {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+		builder.setTitle(title);
 		builder.setMessage(message);
 		builder.setPositiveButton(context.getString(R.string.yes), yes);
 		builder.setNegativeButton(context.getString(R.string.no), no);
+		if(icon != null){
+			builder.setIcon(icon);
+		}
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}

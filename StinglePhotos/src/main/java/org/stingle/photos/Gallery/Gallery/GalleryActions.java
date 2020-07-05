@@ -184,7 +184,7 @@ public class GalleryActions {
 	}
 
 	public static void decryptSelected(Activity activity, final ArrayList<StingleDbFile> files, int set, String albumId, OnAsyncTaskFinish onFinish) {
-		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_decrypt_files)), new DialogInterface.OnClickListener() {
+		Helpers.showConfirmDialog(activity, activity.getString(R.string.decrypt_files), String.format(activity.getString(R.string.confirm_decrypt_files)), R.drawable.ic_action_unlock, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.decrypting_files), null);
@@ -217,7 +217,12 @@ public class GalleryActions {
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
 		}
-		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_trash_files), String.valueOf(files.size())), (dialog, which) -> {
+		Helpers.showConfirmDialog(
+				activity,
+				activity.getString(R.string.move_to_trash_question),
+				String.format(activity.getString(R.string.confirm_trash_files), String.valueOf(files.size())),
+				R.drawable.ic_action_delete,
+				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
 					MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
@@ -283,7 +288,12 @@ public class GalleryActions {
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
 		}
-		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())), (dialog, which) -> {
+		Helpers.showConfirmDialog(
+				activity,
+				activity.getString(R.string.delete_question),
+				String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())),
+				R.drawable.ic_action_delete,
+				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_files), null);
 
 					new DeleteFilesAsyncTask(activity, files, new SyncManager.OnFinish() {
@@ -299,7 +309,12 @@ public class GalleryActions {
 	}
 
 	public static void emptyTrash(GalleryActivity activity){
-		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_empty_trash)), (dialog, which) -> {
+		Helpers.showConfirmDialog(
+				activity,
+				activity.getString(R.string.empty_trash_question),
+				String.format(activity.getString(R.string.confirm_empty_trash)),
+				R.drawable.ic_action_delete,
+				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.emptying_trash), null);
 
 					new EmptyTrashAsyncTask(activity, new SyncManager.OnFinish(){
@@ -361,7 +376,12 @@ public class GalleryActions {
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
 		}
-		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_delete_album), activity.getCurrentAlbumName()), (dialog, which) -> {
+		Helpers.showConfirmDialog(
+				activity,
+				activity.getString(R.string.delete_question),
+				String.format(activity.getString(R.string.confirm_delete_album), activity.getCurrentAlbumName()),
+				R.drawable.ic_action_delete,
+				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_album), null);
 
 					new DeleteAlbumAsyncTask(activity, activity.getCurrentAlbumId(), new OnAsyncTaskFinish() {
@@ -490,7 +510,12 @@ public class GalleryActions {
 
 	public static void leaveAlbum(GalleryActivity activity) {
 
-		Helpers.showConfirmDialog(activity, String.format(activity.getString(R.string.confirm_leave_album)), (dialog, which) -> {
+		Helpers.showConfirmDialog(
+				activity,
+				activity.getString(R.string.leave_question),
+				String.format(activity.getString(R.string.confirm_leave_album)),
+				R.drawable.ic_arrow_back,
+				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.leaving_album), null);
 
 					new LeaveAlbumAsyncTask(activity, new OnAsyncTaskFinish() {

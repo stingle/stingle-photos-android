@@ -87,7 +87,7 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				response.showErrorsInfos();
 			}
 			else {
-				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_reg));
+				Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.fail_reg));
 			}
 		}
 

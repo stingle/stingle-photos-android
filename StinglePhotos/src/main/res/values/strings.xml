@@ -319,6 +319,7 @@
     <string name="remove">Remove</string>
     <string name="unshare_member">Are you sure you want to remove %s?</string>
     <string name="unshare_confirm">Are you sure you want to stop sharing album %s with everyone?</string>
+    <string name="stop_sharing_question">Stop sharing?</string>
     <string name="spinner_unsharing">Unsharing…</string>
     <string name="unshare_success">Successfully unshared album %s</string>
     <string name="rename_album">Rename album</string>
@@ -348,6 +349,18 @@
     <string name="no_photos_trash">Trash is empty</string>
     <string name="no_photos_trash_desc">Deleted photos and videos will appear here</string>
     <string name="cant_share_others_album">You can\'t share files from received album right away. Please copy to your gallery or own album first.</string>
+    <string name="disable_battery_optimization">Battery optimization</string>
+    <string name="disable_battery_optimization_desc">Because Stingle Photos doesn\'t use any closed source libraries, we need to disable battery optimizations to be able to deliver notifications and do auto import of your photos and videos.\n\nPlease click allow on the next screen.</string>
+    <string name="error">Error!</string>
+    <string name="success">Success!</string>
+    <string name="decrypt_files">Decrypt?</string>
+    <string name="move_to_trash_question">Move to trash?</string>
+    <string name="delete_question">Delete?</string>
+    <string name="empty_trash_question">Empty trash?</string>
+    <string name="leave_question">Leave?</string>
+    <string name="delete_key_backup_question">Delete backup of keys?</string>
+    <string name="app_restart_question">Restart app?</string>
+    <string name="remove_member_question">Remove member?</string>
 
 
 </resources>

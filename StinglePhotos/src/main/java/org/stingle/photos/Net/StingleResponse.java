@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.R;
 import org.stingle.photos.Util.Helpers;
 
 public class StingleResponse{
@@ -98,7 +99,7 @@ public class StingleResponse{
 			}
 		}
 		if(errorsBuilder.length() > 0) {
-			new Handler(Looper.getMainLooper()).post(() -> Helpers.showInfoDialog(context, errorsBuilder.toString()));
+			new Handler(Looper.getMainLooper()).post(() -> Helpers.showAlertDialog(context, context.getString(R.string.error), errorsBuilder.toString()));
 		}
 	}
 
@@ -111,7 +112,7 @@ public class StingleResponse{
 			}
 		}
 		if(infoBuilder.length() > 0) {
-			new Handler(Looper.getMainLooper()).post(() -> Helpers.showInfoDialog(context, infoBuilder.toString()));
+			new Handler(Looper.getMainLooper()).post(() -> Helpers.showInfoDialog(context, null, infoBuilder.toString()));
 		}
 	}
 

@@ -80,10 +80,10 @@ public class ReuploadKeysAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		progressDialog.dismiss();
 		if (result) {
 			if(isDeleteing) {
-				Helpers.showInfoDialog(activity, activity.getString(R.string.success_delete_keys));
+				Helpers.showInfoDialog(activity, activity.getString(R.string.success), activity.getString(R.string.success_delete_keys));
 			}
 			else{
-				Helpers.showInfoDialog(activity, activity.getString(R.string.success_backup_keys));
+				Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.success_backup_keys));
 			}
 			onFinish.onFinish();
 		} else {
@@ -91,7 +91,7 @@ public class ReuploadKeysAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			if (response!= null && response.areThereErrorInfos()) {
 				response.showErrorsInfos();
 			} else {
-				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_reg));
+				Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.fail_reg));
 			}
 		}
 

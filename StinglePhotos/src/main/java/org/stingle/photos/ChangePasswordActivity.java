@@ -81,7 +81,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 			try {
 				StinglePhotosApplication.getCrypto().getPrivateKey(currentPassword);
 			} catch (CryptoException e) {
-				Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.incorrect_password));
+				Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.error), getString(R.string.incorrect_password));
 				return;
 			}
 
@@ -90,12 +90,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
 			String confirm_password = ((EditText)findViewById(R.id.confirm_password)).getText().toString();
 
 			if(!newPassword.equals(confirm_password)){
-				Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.password_not_match));
+				Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.error), getString(R.string.password_not_match));
 				return;
 			}
 
 			if(newPassword.length() < Integer.valueOf(getString(R.string.min_pass_length))){
-				Helpers.showAlertDialog(ChangePasswordActivity.this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
+				Helpers.showAlertDialog(ChangePasswordActivity.this, getString(R.string.error), String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
 				return;
 			}
 

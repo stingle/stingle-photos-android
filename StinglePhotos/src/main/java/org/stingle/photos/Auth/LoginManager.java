@@ -180,7 +180,7 @@ public class LoginManager {
             if(loginCallback != null) {
                 loginCallback.onUserAuthFail();
             }
-            Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
+            Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.incorrect_password));
         }
     }
 
@@ -350,25 +350,22 @@ public class LoginManager {
     }
 
     public static void logout(final Activity activity, DialogInterface.OnClickListener yes, DialogInterface.OnClickListener no){
-        Helpers.showConfirmDialog(activity, activity.getString(R.string.confirm_logout), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface mDialog, int which) {
-                final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.logging_out), null);
-                HashMap<String, String> postParams = new HashMap<String, String>();
-                postParams.put("token", KeyManagement.getApiToken(activity));
-                HttpsClient.post(activity, StinglePhotosApplication.getApiUrl() + activity.getString(R.string.logout_path), postParams, new HttpsClient.OnNetworkFinish() {
-                    @Override
-                    public void onFinish(StingleResponse response) {
-                        if (response.isStatusOk()) {
-                            spinner.dismiss();
-                            logoutLocally(activity);
-                        }
-                        if(yes != null) {
-                            yes.onClick(mDialog, which);
-                        }
+        Helpers.showConfirmDialog(activity, activity.getString(R.string.log_out), activity.getString(R.string.confirm_logout), R.drawable.ic_logout, (mDialog, which) -> {
+            final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.logging_out), null);
+            HashMap<String, String> postParams = new HashMap<String, String>();
+            postParams.put("token", KeyManagement.getApiToken(activity));
+            HttpsClient.post(activity, StinglePhotosApplication.getApiUrl() + activity.getString(R.string.logout_path), postParams, new HttpsClient.OnNetworkFinish() {
+                @Override
+                public void onFinish(StingleResponse response) {
+                    if (response.isStatusOk()) {
+                        spinner.dismiss();
+                        logoutLocally(activity);
                     }
-                });
-            }
+                    if(yes != null) {
+                        yes.onClick(mDialog, which);
+                    }
+                }
+            });
         }, no);
     }
 

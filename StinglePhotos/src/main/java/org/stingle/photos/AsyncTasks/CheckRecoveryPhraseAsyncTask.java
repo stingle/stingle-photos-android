@@ -106,7 +106,7 @@ public class CheckRecoveryPhraseAsyncTask extends AsyncTask<Void, Void, Boolean>
 				response.showErrorsInfos();
 			}
 			else {
-				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_phrase_check));
+				Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.fail_phrase_check));
 			}
 		}
 	}

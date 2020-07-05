@@ -198,7 +198,7 @@ public class BiometricsManagerWrapper {
             return true;
         }
         catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | IOException | CertificateException | UnrecoverableKeyException | InvalidKeyException | NoSuchPaddingException | KeyStoreException e) {
-            Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_setup));
+            Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.failed_biometrics_setup));
             callback.onFailed();
         }
 
@@ -211,7 +211,7 @@ public class BiometricsManagerWrapper {
                 StinglePhotosApplication.getCrypto().getPrivateKey(password);
             }
             catch (CryptoException e) {
-                Helpers.showAlertDialog(activity, activity.getString(R.string.incorrect_password));
+                Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.incorrect_password));
                 return false;
             }
 
@@ -226,7 +226,7 @@ public class BiometricsManagerWrapper {
 
             return true;
         } catch (BadPaddingException | IllegalBlockSizeException e) {
-            Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_setup));
+            Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.failed_biometrics_setup));
         }
         return false;
     }
@@ -271,7 +271,7 @@ public class BiometricsManagerWrapper {
                         biometricsCallback.onPasswordReceived(decPass);
 
                     } catch (BadPaddingException | IllegalBlockSizeException e) {
-                        Helpers.showAlertDialog(activity, activity.getString(R.string.failed_biometrics_auth));
+                        Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.failed_biometrics_auth));
                     }
                 }
 

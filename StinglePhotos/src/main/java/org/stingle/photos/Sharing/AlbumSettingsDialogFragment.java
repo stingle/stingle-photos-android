@@ -124,7 +124,12 @@ public class AlbumSettingsDialogFragment extends AppCompatDialogFragment {
 
 	private View.OnClickListener unshare() {
 		return v -> {
-			Helpers.showConfirmDialog(requireContext(), requireContext().getString(R.string.unshare_confirm, albumName), new DialogInterface.OnClickListener() {
+			Helpers.showConfirmDialog(
+					requireContext(),
+					requireContext().getString(R.string.stop_sharing_question),
+					requireContext().getString(R.string.unshare_confirm, albumName),
+					null,
+					new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					final ProgressDialog spinner = Helpers.showProgressDialog(getActivity(), requireContext().getString(R.string.spinner_unsharing), null);

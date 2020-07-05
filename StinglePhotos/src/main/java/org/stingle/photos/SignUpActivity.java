@@ -150,22 +150,22 @@ public class SignUpActivity extends AppCompatActivity {
 			String password2 = ((EditText)findViewById(R.id.password2)).getText().toString();
 
 			if(!Helpers.isValidEmail(email)){
-				Helpers.showAlertDialog(SignUpActivity.this, getString(R.string.invalid_email));
+				Helpers.showAlertDialog(SignUpActivity.this, getString(R.string.error), getString(R.string.invalid_email));
 				return;
 			}
 
 			if(password1.equals("")){
-				Helpers.showAlertDialog(SignUpActivity.this, getString(R.string.password_empty));
+				Helpers.showAlertDialog(SignUpActivity.this, getString(R.string.error), getString(R.string.password_empty));
 				return;
 			}
 
 			if(!password1.equals(password2)){
-				Helpers.showAlertDialog(SignUpActivity.this, getString(R.string.password_not_match));
+				Helpers.showAlertDialog(SignUpActivity.this, getString(R.string.error), getString(R.string.password_not_match));
 				return;
 			}
 
 			if(password1.length() < Integer.valueOf(getString(R.string.min_pass_length))){
-				Helpers.showAlertDialog(SignUpActivity.this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
+				Helpers.showAlertDialog(SignUpActivity.this, getString(R.string.error), String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
 				return;
 			}
 

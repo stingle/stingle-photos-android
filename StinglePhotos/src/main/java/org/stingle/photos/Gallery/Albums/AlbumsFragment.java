@@ -55,7 +55,7 @@ public class AlbumsFragment extends Fragment{
 					@Override
 					public void onFail() {
 						super.onFail();
-						Helpers.showAlertDialog(getContext(), getString(R.string.add_album_failed));
+						Helpers.showAlertDialog(getContext(), getString(R.string.error), getString(R.string.add_album_failed));
 					}
 				});
 			}

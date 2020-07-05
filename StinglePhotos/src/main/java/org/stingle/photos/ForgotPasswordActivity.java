@@ -92,17 +92,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 			String password2 = password2Field.getText().toString();
 
 			if(password1.equals("")){
-				Helpers.showAlertDialog(ForgotPasswordActivity.this, getString(R.string.password_empty));
+				Helpers.showAlertDialog(ForgotPasswordActivity.this, getString(R.string.error), getString(R.string.password_empty));
 				return;
 			}
 
 			if(!password1.equals(password2)){
-				Helpers.showAlertDialog(ForgotPasswordActivity.this, getString(R.string.password_not_match));
+				Helpers.showAlertDialog(ForgotPasswordActivity.this, getString(R.string.error), getString(R.string.password_not_match));
 				return;
 			}
 
 			if(password1.length() < Integer.valueOf(getString(R.string.min_pass_length))){
-				Helpers.showAlertDialog(ForgotPasswordActivity.this, String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
+				Helpers.showAlertDialog(ForgotPasswordActivity.this, getString(R.string.error), String.format(getString(R.string.password_short), getString(R.string.min_pass_length)));
 				return;
 			}
 

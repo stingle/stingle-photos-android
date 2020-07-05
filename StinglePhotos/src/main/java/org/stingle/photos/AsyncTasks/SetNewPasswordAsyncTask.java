@@ -139,7 +139,7 @@ public class SetNewPasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		else{
 			StinglePhotosApplication.getCrypto().deleteKeys();
 			onFinish.onFail();
-			Helpers.showAlertDialog(activity, activity.getString(R.string.something_went_wrong));
+			Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.something_went_wrong));
 		}
 	}
 }

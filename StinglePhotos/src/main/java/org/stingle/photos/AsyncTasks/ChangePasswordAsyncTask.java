@@ -96,7 +96,7 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		progressDialog.dismiss();
 		if (result) {
-			Helpers.showInfoDialog(activity, activity.getString(R.string.success_change_pass), new DialogInterface.OnClickListener() {
+			Helpers.showInfoDialog(activity, activity.getString(R.string.success), activity.getString(R.string.success_change_pass), null, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					activity.finish();
@@ -106,7 +106,7 @@ public class ChangePasswordAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			if (response!= null && response.areThereErrorInfos()) {
 				response.showErrorsInfos();
 			} else {
-				Helpers.showAlertDialog(activity, activity.getString(R.string.fail_reg));
+				Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.fail_reg));
 			}
 		}
 
