@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -53,6 +54,7 @@ import com.google.android.material.snackbar.Snackbar;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.Sync.ImportMediaAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -64,6 +66,7 @@ import org.stingle.photos.Gallery.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
 import org.stingle.photos.Gallery.Gallery.SyncBarHandler;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
+import org.stingle.photos.Sync.JobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
@@ -260,6 +263,9 @@ public class GalleryActivity extends AppCompatActivity
 			isBound = false;
 		}
 		findViewById(R.id.contentHolder).setVisibility(View.INVISIBLE);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			JobSchedulerService.scheduleJob(this);
+		}
 	}
 
 	@Override
@@ -827,6 +833,17 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_delete_album) {
 			GalleryActions.deleteAlbum(this);
+		}
+		else if (id == R.id.action_autoimport) {
+			(new ImportMediaAsyncTask(this, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish(Boolean result) {
+					super.onFinish();
+					if(result) {
+						updateGalleryFragmentData();
+					}
+				}
+			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 
 		return super.onOptionsItemSelected(item);
