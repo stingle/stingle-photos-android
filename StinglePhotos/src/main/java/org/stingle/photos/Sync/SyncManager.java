@@ -68,6 +68,10 @@ public class SyncManager {
 	public static final String PREF_BACKUP_ONLY_WIFI = "upload_only_on_wifi";
 	public static final String PREF_BACKUP_BATTERY_LEVEL = "upload_battery_level";
 
+	public static final String PREF_IMPORT_ENABLED = "enable_import";
+	public static final String PREF_IMPORT_DELETE = "auto_import_delete";
+	public static final String PREF_IMPORT_FROM = "import_from";
+
 	public static final String SP_FILE_MIME_TYPE = "application/stinglephoto";
 
 	public static final int GALLERY = 0;
@@ -86,9 +90,36 @@ public class SyncManager {
 
 
 	public static void startSync(Context context){
-		Intent serviceIntent = new Intent(context, SyncService.class);
-		serviceIntent.putExtra("START_SYNC", true);
-		context.startService(serviceIntent);
+		if(SyncService.isInstanceCreated()){
+			SyncService.getInstance().startSync();
+		}
+		else {
+			Intent serviceIntent = new Intent(context, SyncService.class);
+			serviceIntent.putExtra("START_SYNC", true);
+			context.startService(serviceIntent);
+		}
+	}
+
+	public static void stopSync(Context context){
+		if(SyncService.isInstanceCreated()){
+			SyncService.getInstance().stopSync();
+		}
+		else {
+			Intent serviceIntent = new Intent(context, SyncService.class);
+			serviceIntent.putExtra("STOP_SYNC", true);
+			context.startService(serviceIntent);
+		}
+	}
+
+	public static void restartSync(Context context){
+		if(SyncService.isInstanceCreated()){
+			SyncService.getInstance().restartSync();
+		}
+		else {
+			Intent serviceIntent = new Intent(context, SyncService.class);
+			serviceIntent.putExtra("RESTART_SYNC", true);
+			context.startService(serviceIntent);
+		}
 	}
 
 	public static UploadToCloudAsyncTask uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish, Executor executor) {
@@ -356,11 +387,20 @@ public class SyncManager {
 		params.put("albumIdTo", albumIdTo);
 		params.put("isMoving", (isMoving ? "1" : "0"));
 		params.put("count", String.valueOf(files.size()));
+
+		boolean atLeastOneFileAdded = false;
 		for (int i = 0; i < files.size(); i++) {
-			params.put("filename" + i, files.get(i).filename);
-			if (headers != null) {
-				params.put("headers" + i, headers.get(files.get(i).filename));
+			if(files.get(i).isRemote) {
+				atLeastOneFileAdded = true;
+				params.put("filename" + i, files.get(i).filename);
+				if (headers != null) {
+					params.put("headers" + i, headers.get(files.get(i).filename));
+				}
 			}
+		}
+
+		if(!atLeastOneFileAdded){
+			return true;
 		}
 
 		try {
@@ -645,6 +685,15 @@ public class SyncManager {
 
 	public static boolean isBackupEnabled(Context context){
 		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SyncManager.PREF_BACKUP_ENABLED, true);
+	}
+	public static boolean isImportEnabled(Context context){
+		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SyncManager.PREF_IMPORT_ENABLED, false);
+	}
+	public static boolean isImportDeleteEnabled(Context context){
+		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SyncManager.PREF_IMPORT_DELETE, false);
+	}
+	public static String getImportFrom(Context context){
+		return PreferenceManager.getDefaultSharedPreferences(context).getString(SyncManager.PREF_IMPORT_FROM, "camera_folder");
 	}
 
 	public static void startPeriodicWork(Context context){

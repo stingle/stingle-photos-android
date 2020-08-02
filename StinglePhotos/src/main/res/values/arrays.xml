@@ -58,4 +58,14 @@
         <item name="dark">dark</item>
     </string-array>
 
+    <string-array name="import_from">
+        <item name="camera_folder">@string/camera_folder</item>
+        <item name="all_folders">@string/all_folders</item>
+    </string-array>
+
+    <string-array name="import_from_values">
+        <item name="camera_folder">camera_folder</item>
+        <item name="all_folders">all_folders</item>
+    </string-array>
+
 </resources>

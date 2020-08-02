@@ -22,7 +22,9 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
+import org.stingle.photos.AsyncTasks.Sync.ImportMediaAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
@@ -53,6 +55,8 @@ public class SyncService extends Service {
 	static final public int MSG_SYNC_STATUS_CHANGE = 9;
 	static final public int MSG_REFRESH_GALLERY = 10;
 	static final public int MSG_REFRESH_GALLERY_ITEM = 11;
+	static final public int MSG_STOP_SYNC = 12;
+	static final public int MSG_RESTART_SYNC = 13;
 
 	static final public int STATUS_IDLE = 0;
 	static final public int STATUS_REFRESHING = 1;
@@ -71,12 +75,27 @@ public class SyncService extends Service {
 	private boolean isNotificationActive = false;
 	private UploadToCloudAsyncTask uploadTask;
 
+
+	private static SyncService instance = null;
+
+	public static boolean isInstanceCreated() {
+		return instance != null;
+	}
+
+	public static SyncService getInstance() {
+		return instance;
+	}
+
+	private static ImportMediaAsyncTask importMediaTask = null;
+
 	public SyncService() {
 	}
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
+
+		instance = this;
 
 		cachedThreadPool = Executors.newCachedThreadPool();
 		mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -140,21 +159,26 @@ public class SyncService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 
-		if(uploadTask != null){
-			uploadTask.cancel(true);
-			stopForeground(true);
-		}
+		stopSync();
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if(intent != null && intent.hasExtra("START_SYNC")){
-			startSync();
+		if(intent != null){
+			if(intent.hasExtra("START_SYNC")) {
+				startSync();
+			}
+			else if(intent.hasExtra("STOP_SYNC")) {
+				stopSync();
+			}
+			else if(intent.hasExtra("RESTART_SYNC")) {
+				restartSync();
+			}
 		}
 		return START_STICKY;
 	}
 
-	protected void startSync(){
+	public void startSync(){
 
 		if(!LoginManager.isLoggedIn(this)){
 			return;
@@ -172,7 +196,22 @@ public class SyncService extends Service {
 
 	}
 
-	private void startCloudToLocalSync(){
+	public void stopSync(){
+		if(uploadTask != null){
+			uploadTask.cancel(true);
+			isNotificationActive = false;
+			stopForeground(true);
+			currentStatus = STATUS_IDLE;
+			sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
+		}
+	}
+
+	public void restartSync(){
+		stopSync();
+		startSync();
+	}
+
+	public void startCloudToLocalSync(){
 		SyncManager.syncCloudToLocalDb(getApplicationContext(), new SyncManager.OnFinish() {
 			@Override
 			public void onFinish(Boolean needToUpdateUI) {
@@ -195,13 +234,25 @@ public class SyncService extends Service {
 					})).executeOnExecutor(cachedThreadPool);
 				}
 				else{
-					startUpload();
+					if(SyncManager.isImportEnabled(getApplicationContext()) && ImportMediaAsyncTask.getInstance() == null) {
+						importMediaTask = new ImportMediaAsyncTask(getApplicationContext(), new OnAsyncTaskFinish() {
+							@Override
+							public void onFinish() {
+								super.onFinish();
+								startUpload();
+							}
+						});
+						importMediaTask.executeOnExecutor(cachedThreadPool);
+					}
+					else {
+						startUpload();
+					}
 				}
 			}
 		}, cachedThreadPool);
 	}
 
-	private void startUpload(){
+	public void startUpload(){
 		currentStatus = STATUS_UPLOADING;
 		sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
 
@@ -253,9 +304,8 @@ public class SyncService extends Service {
 
 	private int isUploadAllowed(Context context){
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		boolean isEnabled = prefs.getBoolean(SyncManager.PREF_BACKUP_ENABLED, true);
 
-		if(!isEnabled){
+		if(!SyncManager.isBackupEnabled(context)){
 			return STATUS_DISABLED;
 		}
 
@@ -390,6 +440,12 @@ public class SyncService extends Service {
 					break;
 				case MSG_START_SYNC:
 					startSync();
+					break;
+				case MSG_STOP_SYNC:
+					stopSync();
+					break;
+				case MSG_RESTART_SYNC:
+					restartSync();
 					break;
 				case MSG_GET_SYNC_STATUS:
 					if(progress != null) {

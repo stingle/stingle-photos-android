@@ -292,6 +292,14 @@ public class SettingsActivity extends AppCompatActivity implements
 		}
 	}
 
+	public static class AutoImportPreferenceFragment extends PreferenceFragmentCompat {
+
+		@Override
+		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+			setPreferencesFromResource(R.xml.import_preferences, rootKey);
+		}
+	}
+
 	public static class AppearancePreferenceFragment extends PreferenceFragmentCompat {
 
 		@Override

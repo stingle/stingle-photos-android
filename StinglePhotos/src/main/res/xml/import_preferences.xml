@@ -1,0 +1,27 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreference
+        app:icon="@drawable/ic_save_alt"
+        app:defaultValue="false"
+        app:key="enable_import"
+        app:title="@string/enable_import"
+        app:summary="@string/enable_import_desc" />
+
+    <SwitchPreference
+        app:icon="@drawable/ic_action_delete"
+        app:defaultValue="false"
+        app:key="auto_import_delete"
+        app:dependency="enable_import"
+        app:title="@string/import_autodelete"
+        app:summary="@string/import_autodelete_desc" />
+
+    <ListPreference
+        app:icon="@drawable/ic_folder"
+        app:key="import_from"
+        app:title="@string/import_from"
+        app:defaultValue="camera_folder"
+        app:entries="@array/import_from"
+        app:entryValues="@array/import_from_values"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>

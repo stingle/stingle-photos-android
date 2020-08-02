@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class StingleDb extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 	public static final String DATABASE_NAME = "stingleFiles.db";
 
 	public static final int SORT_ASC = 0;
@@ -39,6 +39,10 @@ public class StingleDb extends SQLiteOpenHelper {
 
 			db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS);
 			db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS_UID_INDEX);
+		}
+		if(oldVersion == 2 && newVersion == 3){
+			db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS);
+			db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS_MID_INDEX);
 		}
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {

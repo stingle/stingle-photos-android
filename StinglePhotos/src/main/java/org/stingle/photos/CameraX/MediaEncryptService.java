@@ -28,7 +28,7 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
-import org.stingle.photos.Sync.SyncService;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.ByteArrayOutputStream;
@@ -163,9 +163,7 @@ public class MediaEncryptService extends Service {
 
 
 	private void triggerSyncAndStop(){
-		Intent serviceIntent = new Intent(this, SyncService.class);
-		serviceIntent.putExtra("START_SYNC", true);
-		startService(serviceIntent);
+		SyncManager.startSync(this);
 		stopSelf();
 	}
 

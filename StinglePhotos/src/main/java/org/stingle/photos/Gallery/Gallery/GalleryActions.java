@@ -57,7 +57,8 @@ public class GalleryActions {
 	}
 
 	public static void addToAlbumSelected(AppCompatActivity activity, final ArrayList<StingleDbFile> files, String albumId, boolean isFromAlbum) {
-		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+		StingleDbAlbum album = GalleryHelpers.getAlbum(activity, albumId);
+		if(files != null && album != null && !album.isOwner && !SyncManager.areFilesAlreadyUploaded(files)){
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
 		}
@@ -78,8 +79,8 @@ public class GalleryActions {
 		deleteOriginal.setChecked(Helpers.getPreference(activity, "delete_original", true));
 
 		final HashMap<String, Boolean> props = new HashMap<>();
+
 		if(isFromAlbum) {
-			StingleDbAlbum album = GalleryHelpers.getAlbum(activity, albumId);
 			if(album.isShared && !album.isOwner){
 				deleteOriginal.setVisibility(View.GONE);
 				deleteOriginal.setChecked(false);
@@ -89,7 +90,6 @@ public class GalleryActions {
 		}
 
 		recyclerView.setLayoutManager(layoutManager);
-
 
 		adapter.setTextSize(18);
 		adapter.setSubTextSize(12);
@@ -213,10 +213,10 @@ public class GalleryActions {
 	}
 
 	public static void trashSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
-		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+		/*if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
-		}
+		}*/
 		Helpers.showConfirmDialog(
 				activity,
 				activity.getString(R.string.move_to_trash_question),
@@ -225,6 +225,7 @@ public class GalleryActions {
 				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
+					SyncManager.stopSync(activity);
 					MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
@@ -232,6 +233,7 @@ public class GalleryActions {
 							activity.updateGalleryFragmentData();
 							activity.exitActionMode();
 							spinner.dismiss();
+							SyncManager.startSync(activity);
 						}
 
 						@Override
@@ -240,6 +242,7 @@ public class GalleryActions {
 							activity.updateGalleryFragmentData();
 							activity.exitActionMode();
 							spinner.dismiss();
+							SyncManager.startSync(activity);
 						}
 					});
 					moveTask.setFromSet(activity.getCurrentSet());
@@ -252,12 +255,12 @@ public class GalleryActions {
 	}
 
 	public static void restoreSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
-		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+		/*if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
-		}
+		}*/
 		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.restoring_files), null);
-
+		SyncManager.stopSync(activity);
 		MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {
@@ -265,6 +268,7 @@ public class GalleryActions {
 				activity.updateGalleryFragmentData();
 				activity.exitActionMode();
 				spinner.dismiss();
+				SyncManager.startSync(activity);
 			}
 
 			@Override
@@ -273,6 +277,7 @@ public class GalleryActions {
 				activity.updateGalleryFragmentData();
 				activity.exitActionMode();
 				spinner.dismiss();
+				SyncManager.startSync(activity);
 			}
 		});
 
@@ -284,16 +289,17 @@ public class GalleryActions {
 	}
 
 	public static void deleteSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
-		if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
+		/*if(files != null && !SyncManager.areFilesAlreadyUploaded(files)){
 			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
 			return;
-		}
+		}*/
 		Helpers.showConfirmDialog(
 				activity,
 				activity.getString(R.string.delete_question),
 				String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())),
 				R.drawable.ic_action_delete,
 				(dialog, which) -> {
+					SyncManager.stopSync(activity);
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_files), null);
 
 					new DeleteFilesAsyncTask(activity, files, new SyncManager.OnFinish() {
@@ -302,6 +308,7 @@ public class GalleryActions {
 							activity.updateGalleryFragmentData();
 							activity.exitActionMode();
 							spinner.dismiss();
+							SyncManager.startSync(activity);
 						}
 					}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				},
@@ -316,12 +323,13 @@ public class GalleryActions {
 				R.drawable.ic_action_delete,
 				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.emptying_trash), null);
-
+					SyncManager.stopSync(activity);
 					new EmptyTrashAsyncTask(activity, new SyncManager.OnFinish(){
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
 							activity.updateGalleryFragmentData();
 							spinner.dismiss();
+							SyncManager.startSync(activity);
 						}
 					}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				},

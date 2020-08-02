@@ -13,6 +13,7 @@ public class StingleDbContract {
 		public static final String TABLE_NAME_ALBUMS = "albums";
 		public static final String TABLE_NAME_ALBUM_FILES = "album_files";
 		public static final String TABLE_NAME_CONTACTS = "contacts";
+		public static final String TABLE_NAME_IMPORTED_IDS = "imported_ids";
 
 		public static final String COLUMN_NAME_FILENAME = "filename";
 		public static final String COLUMN_NAME_IS_LOCAL = "is_local";
@@ -40,6 +41,8 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_USER_ID = "user_id";
 		public static final String COLUMN_NAME_EMAIL = "email";
 		public static final String COLUMN_NAME_PUBLIC_KEY = "pk";
+
+		public static final String COLUMN_NAME_MEDIA_ID = "media_id";
 
 	}
 
@@ -142,4 +145,12 @@ public class StingleDbContract {
 					")";
 	public static final String SQL_CREATE_CONTACTS_UID_INDEX =
 			"CREATE UNIQUE INDEX c_user_id ON "+ Columns.TABLE_NAME_CONTACTS +" ("+ Columns.COLUMN_NAME_USER_ID +")";
+
+	public static final String SQL_CREATE_IMPORTED_IDS =
+			"CREATE TABLE " + Columns.TABLE_NAME_IMPORTED_IDS + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_MEDIA_ID + " INTEGER NOT NULL UNIQUE" +
+					")";
+	public static final String SQL_CREATE_IMPORTED_IDS_MID_INDEX =
+			"CREATE UNIQUE INDEX c_m_id ON "+ Columns.TABLE_NAME_IMPORTED_IDS +" ("+ Columns.COLUMN_NAME_MEDIA_ID +")";
 }

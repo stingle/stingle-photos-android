@@ -20,10 +20,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,7 +30,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.view.GravityCompat;
@@ -46,7 +43,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -237,7 +233,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected void onResume() {
 		super.onResume();
 
-		isSyncEnabled = sharedPreferences.getBoolean(SyncManager.PREF_BACKUP_ENABLED, true);
+		isSyncEnabled = SyncManager.isBackupEnabled(this);
 		if(!isSyncEnabled){
 			disableSyncBar();
 		}
@@ -248,6 +244,9 @@ public class GalleryActivity extends AppCompatActivity
 		if(!isImporting){
 			SyncManager.startPeriodicWork(this);
 			checkLoginAndInit();
+		}
+		if (SyncManager.isImportEnabled(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			JobSchedulerService.scheduleJob(this);
 		}
 	}
 
@@ -263,9 +262,6 @@ public class GalleryActivity extends AppCompatActivity
 			isBound = false;
 		}
 		findViewById(R.id.contentHolder).setVisibility(View.INVISIBLE);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			JobSchedulerService.scheduleJob(this);
-		}
 	}
 
 	@Override
@@ -281,7 +277,7 @@ public class GalleryActivity extends AppCompatActivity
 		outState.putInt("sharingLastScrollPos", sharingLastScrollPos);
 	}
 
-	private void requestToDisableBatteryOptimization(){
+	/*private void requestToDisableBatteryOptimization(){
 		Intent intent = new Intent();
 		String packageName = getPackageName();
 		PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
@@ -299,7 +295,7 @@ public class GalleryActivity extends AppCompatActivity
 			AlertDialog dialog = builder.create();
 			dialog.show();
 		}
-	}
+	}*/
 
 	public void showMainGallery(){
 		currentFragment = FRAGMENT_GALLERY;
@@ -521,18 +517,16 @@ public class GalleryActivity extends AppCompatActivity
 	}
 
 	private void checkLoginAndInit(){
-		LoginManager.disableLockTimer(GalleryActivity.this);
-
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
+				LoginManager.disableLockTimer(GalleryActivity.this);
 				if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 					initGallery();
 				}
 				else{
 					FileManager.requestSDCardPermission(GalleryActivity.this);
 				}
-				requestToDisableBatteryOptimization();
 			}
 		});
 	}

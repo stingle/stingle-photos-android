@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.util.Log;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -28,19 +29,38 @@ import java.io.InputStream;
 public class ImportFile {
 
 	public static boolean importFile(Context context, Uri uri, int set, String albumId, AsyncTask<?,?,?> task) {
+		return importFile(context, uri, set, albumId, null, task);
+	}
+
+	public static boolean importFile(Context context, Uri uri, int set, String albumId, Long date, AsyncTask<?,?,?> task) {
 		try {
 			int fileType = FileManager.getFileTypeFromUri(context, uri);
-			InputStream in = context.getContentResolver().openInputStream(uri);
+
 
 			Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
 			String filename = null;
 			long fileSize = 0;
 			if (returnCursor != null) {
-				int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-				int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-				returnCursor.moveToFirst();
-				filename = returnCursor.getString(nameIndex);
-				fileSize = returnCursor.getLong(sizeIndex);
+				try {
+					int nameIndex = returnCursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
+					int sizeIndex = returnCursor.getColumnIndexOrThrow(OpenableColumns.SIZE);
+					returnCursor.moveToFirst();
+					filename = returnCursor.getString(nameIndex);
+					fileSize = returnCursor.getLong(sizeIndex);
+
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+						int pendingIndex = returnCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_PENDING);
+						String isPending = returnCursor.getString(pendingIndex);
+						Log.e("isPending", isPending);
+						if (!isPending.equals("0")) {
+							return false;
+						}
+					}
+
+				}
+				catch (Exception e){
+					return false;
+				}
 			} else {
 				String path = uri.getPath();
 				if(path != null) {
@@ -101,14 +121,18 @@ public class ImportFile {
 				}
 			}
 
+			InputStream in = context.getContentResolver().openInputStream(uri);
 			FileOutputStream outputStream = new FileOutputStream(encFilePath);
 			StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, task);
 			long nowDate = System.currentTimeMillis();
+			if(date == null) {
+				date = nowDate;
+			}
 			String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
 
 			if (set == SyncManager.GALLERY) {
 				GalleryTrashDb db = new GalleryTrashDb(context, SyncManager.GALLERY);
-				db.insertFile(encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, nowDate, nowDate, headers);
+				db.insertFile(encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, date, nowDate, headers);
 				db.close();
 			} else if (set == SyncManager.ALBUM) {
 				Crypto crypto = StinglePhotosApplication.getCrypto();
@@ -117,7 +141,7 @@ public class ImportFile {
 				StingleDbAlbum album = albumsDb.getAlbumById(albumId);
 				if (album != null) {
 					String newHeaders = crypto.reencryptFileHeaders(headers, Crypto.base64ToByteArray(album.publicKey), null, null);
-					albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, nowDate, nowDate);
+					albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, date, nowDate);
 				}
 				else{
 					albumsDb.close();

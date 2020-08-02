@@ -363,4 +363,14 @@
     <string name="remove_member_question">Remove member?</string>
 
 
+    <string name="pref_header_import">Auto import</string>
+    <string name="enable_import">Enable auto import</string>
+    <string name="enable_import_desc">Automatically import photos and videos from your device</string>
+    <string name="import_autodelete">Delete original files</string>
+    <string name="import_autodelete_desc">Delete original files from the device after successful import</string>
+    <string name="import_from">Import from</string>
+    <string name="camera_folder">Camera folder</string>
+    <string name="all_folders">All folders</string>
+
+
 </resources>

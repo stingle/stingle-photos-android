@@ -48,7 +48,7 @@ public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 			}
 		}
 
-		if (filenamesToNotify.size() > 0 && SyncManager.notifyCloudAboutDelete(myContext, filenamesToNotify)) {
+		if (filenamesToNotify.size() == 0 || (filenamesToNotify.size() > 0 && SyncManager.notifyCloudAboutDelete(myContext, filenamesToNotify))) {
 
 			for (StingleDbFile file : files) {
 				boolean existsInGallery = galleryDb.getFileIfExists(file.filename) != null;

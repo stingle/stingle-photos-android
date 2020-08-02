@@ -69,7 +69,7 @@ public class LoginManager {
         loginConfig.showCancel = true;
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        int lockTimeout = Integer.valueOf(sharedPrefs.getString(LAST_LOCK_TIME, "60")) * 1000;
+        int lockTimeout = Integer.parseInt(sharedPrefs.getString(LAST_LOCK_TIME, "60")) * 1000;
 
         long currentTimestamp = System.currentTimeMillis();
         long lockedTime = activity.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).getLong(LAST_LOCK_TIME, 0);

@@ -35,6 +35,12 @@
         app:title="@string/pref_header_sync" />
 
     <Preference
+        app:fragment="org.stingle.photos.SettingsActivity$AutoImportPreferenceFragment"
+        app:icon="@drawable/ic_save_alt"
+        app:key="import_header"
+        app:title="@string/pref_header_import" />
+
+    <Preference
         app:fragment="org.stingle.photos.SettingsActivity$AppearancePreferenceFragment"
         app:icon="@drawable/ic_image_red"
         app:key="appearance"
