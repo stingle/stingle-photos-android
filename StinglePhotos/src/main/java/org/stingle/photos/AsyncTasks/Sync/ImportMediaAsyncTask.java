@@ -63,7 +63,8 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 					MediaStore.MediaColumns.DISPLAY_NAME,
 					MediaStore.Files.FileColumns.MEDIA_TYPE,
 					MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-					MediaStore.MediaColumns.DATE_TAKEN
+					MediaStore.MediaColumns.DATE_TAKEN,
+					MediaStore.MediaColumns.DATE_ADDED
 			};
 		}
 		else{
@@ -75,29 +76,19 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 					MediaStore.MediaColumns.DATE_ADDED
 			};
 		}
-		//String selection = MediaStore.Video.Media.DATE_ADDED + " >= ?";
-		//String[] selectionArgs = new String[] { String.valueOf(TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES))};
-		String selection = "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-				+ MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-				+ " OR "
-				+ MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-				+ MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")";
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-			selection += " AND " + MediaStore.MediaColumns.DATE_TAKEN + " > ?";
-		}
-		else {
-			selection += " AND " + MediaStore.MediaColumns.DATE_ADDED + " >= ?";
-		}
+
+		String selection =
+				"("
+						+ MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+						+ MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+						+ " OR "
+						+ MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+						+ MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")"
+				+ " AND " + MediaStore.MediaColumns.DATE_ADDED + " > ?";
 
 		String[] selectionArgs = new String[] { String.valueOf(lastImportedFileDate) };
 
-		String sortOrder;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-			sortOrder = MediaStore.MediaColumns.DATE_TAKEN + " ASC";
-		}
-		else{
-			sortOrder = MediaStore.MediaColumns.DATE_ADDED + " ASC";
-		}
+		String sortOrder = MediaStore.MediaColumns.DATE_ADDED + " ASC";
 
 		try (Cursor cursor = myContext.getApplicationContext().getContentResolver().query(
 				MediaStore.Files.getContentUri("external"),
@@ -112,14 +103,14 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			int typeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE);
 
 
-			int dateAddedColumn;
+			int dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);;
+			int dateTakenColumn = -1;
 			int parentColumn;
 			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-				dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN);
+				dateTakenColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN);
 				parentColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME);
 			}
 			else{
-				dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);
 				parentColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
 			}
 
@@ -155,14 +146,18 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 				if (contentUri != null && isParentFolderIsOk && !db.isIdExists(id)) {
 					db.insertImportedId(id);
-					Log.e("uri", name + " - " + dateAdded + " - " + type + " - " + contentUri.toString());
+
 
 					long dateAddedMillis;
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-						dateAddedMillis = dateAdded;
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && dateTakenColumn >= 0) {
+						dateAddedMillis = cursor.getLong(dateTakenColumn);
+						if(dateAddedMillis == 0){
+							dateAddedMillis = dateAdded * 1000;
+						}
 					} else {
 						dateAddedMillis = dateAdded * 1000;
 					}
+					Log.e("uri", name + " - " + dateAddedMillis + " - " + type + " - " + contentUri.toString());
 
 					if (ImportFile.importFile(myContext, contentUri, SyncManager.GALLERY, null, dateAddedMillis, this)) {
 						isSomethingImported = true;
