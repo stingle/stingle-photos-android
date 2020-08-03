@@ -29,8 +29,6 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	protected File thumbDir;
 	protected OnAsyncTaskFinish onFinish = null;
 
-	public static final String LAST_IMPORTED_FILE_DATE = "last_imported_date";
-
 	private static ImportMediaAsyncTask instance;
 
 	public static ImportMediaAsyncTask getInstance(){
@@ -54,9 +52,9 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		Log.e("EnteredImportMedia", "1");
 		boolean isSomethingImported = false;
 
-		long lastImportedFileDate = Helpers.getPreference(myContext, LAST_IMPORTED_FILE_DATE, (long)0);
+		long lastImportedFileDate = Helpers.getPreference(myContext, SyncManager.LAST_IMPORTED_FILE_DATE, 0L);
 
-		String[] projection = new String[0];
+		String[] projection;
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
 			projection = new String[] {
 					MediaStore.MediaColumns._ID,
@@ -173,7 +171,7 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				}
 			}
 
-			Helpers.storePreference(myContext, LAST_IMPORTED_FILE_DATE, lastImportedFileDate);
+			Helpers.storePreference(myContext, SyncManager.LAST_IMPORTED_FILE_DATE, lastImportedFileDate);
 
 			db.close();
 		}

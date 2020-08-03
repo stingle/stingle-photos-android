@@ -31,6 +31,7 @@ import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.Query.ImportedIdsDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
@@ -47,6 +48,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 public class SyncManager {
+
 
 	protected Context context;
 	protected SQLiteDatabase db;
@@ -71,6 +73,9 @@ public class SyncManager {
 	public static final String PREF_IMPORT_ENABLED = "enable_import";
 	public static final String PREF_IMPORT_DELETE = "auto_import_delete";
 	public static final String PREF_IMPORT_FROM = "import_from";
+	public static final String PREF_IMPORT_SETUP = "import_setup";
+
+	public static final String LAST_IMPORTED_FILE_DATE = "last_imported_date";
 
 	public static final String SP_FILE_MIME_TYPE = "application/stinglephoto";
 
@@ -191,6 +196,18 @@ public class SyncManager {
 		ContactsDb contactsDb = new ContactsDb(context);
 		contactsDb.truncateTable();
 		contactsDb.close();
+
+		// Auto import reset
+		PreferenceManager.getDefaultSharedPreferences(context).edit()
+				.remove(SyncManager.PREF_IMPORT_ENABLED)
+				.remove(SyncManager.PREF_IMPORT_DELETE)
+				.remove(SyncManager.PREF_IMPORT_FROM)
+				.apply();
+
+		ImportedIdsDb importedIdsDb = new ImportedIdsDb(context);
+		importedIdsDb.truncateTable();
+		importedIdsDb.close();
+		Helpers.deletePreference(context, SyncManager.PREF_IMPORT_SETUP);
 	}
 
 	public static boolean moveFiles(Context context, ArrayList<StingleDbFile> files, int fromSet, int toSet, String fromAlbumId, String toAlbumId, boolean isMoving) {

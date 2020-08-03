@@ -366,11 +366,18 @@
     <string name="pref_header_import">Auto import</string>
     <string name="enable_import">Enable auto import</string>
     <string name="enable_import_desc">Automatically import photos and videos from your device</string>
-    <string name="import_autodelete">Delete original files</string>
+    <string name="import_autodelete">Delete original files after import</string>
     <string name="import_autodelete_desc">Delete original files from the device after successful import</string>
     <string name="import_from">Import from</string>
+    <string name="import_from_desc">Location to search for new photos and videos</string>
     <string name="camera_folder">Camera folder</string>
     <string name="all_folders">All folders</string>
+    <string name="auto_import_title">Keep your media safe</string>
+    <string name="auto_import_title_desc">Photos and videos from your device will be automatically imported, encrypted and backed up via Stingle Photos</string>
+    <string name="import_notenable">Skip for now</string>
+    <string name="import_enable">Turn on auto import</string>
+    <string name="import_existing">Import existing items</string>
+    <string name="auto_import_notice">You can turn on or off auto import anytime in settings</string>
 
 
 </resources>

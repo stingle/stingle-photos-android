@@ -19,6 +19,7 @@
         app:icon="@drawable/ic_folder"
         app:key="import_from"
         app:title="@string/import_from"
+        app:dependency="enable_import"
         app:defaultValue="camera_folder"
         app:entries="@array/import_from"
         app:entryValues="@array/import_from_values"

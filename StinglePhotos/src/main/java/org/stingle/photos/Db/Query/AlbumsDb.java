@@ -135,10 +135,6 @@ public class AlbumsDb {
 	}
 
 
-	public StingleDbAlbum getAlbumAtPosition(int pos, int sort, Boolean isHidden, Boolean isShared) {
-		return getAlbumAtPosition(pos, SORT_BY_CREATION_DATE, sort, isHidden, isShared);
-	}
-
 	public StingleDbAlbum getAlbumAtPosition(int pos, int sortBy, int sort, Boolean isHidden, Boolean isShared) {
 		String selection = "";
 		ArrayList<String> selectionArgs = new ArrayList<>();

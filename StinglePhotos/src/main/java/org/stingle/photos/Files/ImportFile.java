@@ -49,12 +49,15 @@ public class ImportFile {
 					fileSize = returnCursor.getLong(sizeIndex);
 
 					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-						int pendingIndex = returnCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_PENDING);
-						String isPending = returnCursor.getString(pendingIndex);
-						Log.e("isPending", isPending);
-						if (!isPending.equals("0")) {
-							return false;
+						try {
+							int pendingIndex = returnCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_PENDING);
+							String isPending = returnCursor.getString(pendingIndex);
+							Log.e("isPending", isPending);
+							if (!isPending.equals("0")) {
+								return false;
+							}
 						}
+						catch (Exception ignored){}
 					}
 
 				}
@@ -142,6 +145,8 @@ public class ImportFile {
 				if (album != null) {
 					String newHeaders = crypto.reencryptFileHeaders(headers, Crypto.base64ToByteArray(album.publicKey), null, null);
 					albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, date, nowDate);
+					album.dateModified = System.currentTimeMillis();
+					albumsDb.updateAlbum(album);
 				}
 				else{
 					albumsDb.close();

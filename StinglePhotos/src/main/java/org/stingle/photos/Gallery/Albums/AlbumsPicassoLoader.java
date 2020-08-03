@@ -72,7 +72,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 			StingleDbAlbum album;
 			album = albumsCache.get(dbPos);
 			if (album == null) {
-				album = db.getAlbumAtPosition(dbPos, StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
+				album = db.getAlbumAtPosition(dbPos, AlbumsDb.SORT_BY_MODIFIED_DATE, StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
 				albumsCache.put(dbPos, album);
 			}
 			Crypto.AlbumData albumData;

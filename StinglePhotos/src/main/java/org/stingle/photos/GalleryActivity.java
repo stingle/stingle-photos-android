@@ -57,6 +57,7 @@ import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
+import org.stingle.photos.Gallery.Gallery.AutoImportSetup;
 import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
@@ -552,6 +553,8 @@ public class GalleryActivity extends AppCompatActivity
 		if(serverPK == null){
 			(new GetServerPKAsyncTask(this)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
+
+		AutoImportSetup.showAutoImportSetup(this);
 	}
 
 	public boolean isSyncBarDisabled(){

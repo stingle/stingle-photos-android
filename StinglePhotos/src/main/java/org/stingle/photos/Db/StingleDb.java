@@ -66,6 +66,9 @@ public class StingleDb extends SQLiteOpenHelper {
 
 		db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS);
 		db.execSQL(StingleDbContract.SQL_CREATE_CONTACTS_UID_INDEX);
+
+		db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS);
+		db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS_MID_INDEX);
 	}
 
 	private void deleteTables(SQLiteDatabase db){
