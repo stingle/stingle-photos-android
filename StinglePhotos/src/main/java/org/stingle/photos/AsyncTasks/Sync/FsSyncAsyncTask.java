@@ -1,22 +1,11 @@
 package org.stingle.photos.AsyncTasks.Sync;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Crypto.CryptoException;
-import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
-import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.FSSync;
 import org.stingle.photos.Sync.SyncManager;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
@@ -36,70 +25,7 @@ public class FsSyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			return false;
 		}
 
-		Log.d("fsSync", "START");
-
-		boolean needToUpdateUI = false;
-
-		GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
-		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
-		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
-
-
-		File dir = new File(FileManager.getHomeDir(myContext));
-
-		File[] currentFSFiles = dir.listFiles();
-
-		if(currentFSFiles != null) {
-			for (File file : currentFSFiles) {
-				boolean isOurFile = file.isFile() && file.getName().endsWith(StinglePhotosApplication.FILE_EXTENSION);
-				boolean existsInGallery = galleryDb.getFileIfExists(file.getName()) != null;
-				boolean existsInTrash = trashDb.getFileIfExists(file.getName()) != null;
-				boolean existsInAlbums = albumFilesDb.getFileIfExists(file.getName()) != null;
-
-				if (isOurFile && !existsInGallery && !existsInTrash && !existsInAlbums) {
-					try {
-						String headers = Crypto.getFileHeadersFromFile(file.getAbsolutePath(), FileManager.getThumbsDir(myContext) + "/" + file.getName());
-						galleryDb.insertFile(file.getName(), true, false, GalleryTrashDb.INITIAL_VERSION, file.lastModified(), System.currentTimeMillis(), headers);
-						Log.d("fsSync-add", file.getName());
-						needToUpdateUI = true;
-					} catch (IOException | CryptoException e) {
-						e.printStackTrace();
-					}
-
-				}
-			}
-		}
-
-		Cursor result = galleryDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null);
-		while(result.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(result);
-			File file = new File(FileManager.getHomeDir(myContext) + "/" + dbFile.filename);
-			File thumb = new File(FileManager.getThumbsDir(myContext) + "/" + dbFile.filename);
-			if(!file.exists() || !thumb.exists()){
-				dbFile.isLocal = false;
-				galleryDb.updateFile(dbFile);
-			}
-		}
-		result.close();
-
-		Cursor albumsResult = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null);
-		while(albumsResult.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(albumsResult);
-			File file = new File(FileManager.getHomeDir(myContext) + "/" + dbFile.filename);
-			File thumb = new File(FileManager.getThumbsDir(myContext) + "/" + dbFile.filename);
-			if(!file.exists() || !thumb.exists()){
-				dbFile.isLocal = false;
-				albumFilesDb.updateFile(dbFile);
-			}
-		}
-		albumsResult.close();
-
-
-		galleryDb.close();
-		trashDb.close();
-		albumFilesDb.close();
-
-		return needToUpdateUI;
+		return FSSync.sync(myContext);
 	}
 
 

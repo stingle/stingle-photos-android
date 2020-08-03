@@ -33,15 +33,17 @@ public class JobSchedulerService extends JobService {
 	}
 
 	// Schedule this job, replace any existing one.
-	@RequiresApi(api = Build.VERSION_CODES.N)
 	public static void scheduleJob(Context context) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+			return;
+		}
+
 		if (JOB_INFO != null) {
 			getJobInfo(context);
 		}
 		else {
 			JobScheduler js = context.getSystemService(JobScheduler.class);
 			JobInfo.Builder builder = new JobInfo.Builder(ASJOBSERVICE_JOB_ID, new ComponentName(BuildConfig.APPLICATION_ID, JobSchedulerService.class.getName()));
-
 			builder.addTriggerContentUri(new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
 			builder.addTriggerContentUri(new JobInfo.TriggerContentUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
 			builder.setTriggerContentMaxDelay(500);

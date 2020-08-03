@@ -51,6 +51,7 @@ import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Sync.ImportMediaAsyncTask;
+import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -154,7 +155,8 @@ public class GalleryActivity extends AppCompatActivity
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
-			sendMessageToSyncService(SyncService.MSG_START_SYNC);
+			//sendMessageToSyncService(SyncService.MSG_START_SYNC);
+			(new SyncAsyncTask(this, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			pullToRefresh.setRefreshing(false);
 		});
 

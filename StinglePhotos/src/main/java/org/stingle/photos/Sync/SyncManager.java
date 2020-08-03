@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -53,6 +55,14 @@ public class SyncManager {
 	protected Context context;
 	protected SQLiteDatabase db;
 
+	static final public int STATUS_IDLE = 0;
+	static final public int STATUS_REFRESHING = 1;
+	static final public int STATUS_UPLOADING = 2;
+	static final public int STATUS_NO_SPACE_LEFT = 3;
+	static final public int STATUS_DISABLED = 4;
+	static final public int STATUS_NOT_WIFI = 5;
+	static final public int STATUS_BATTERY_LOW = 6;
+
 	public static final String PREF_LAST_SEEN_TIME = "file_last_seen_time";
 	public static final String PREF_TRASH_LAST_SEEN_TIME = "trash_last_seen_time";
 	public static final String PREF_ALBUMS_LAST_SEEN_TIME = "albums_last_seen_time";
@@ -94,6 +104,19 @@ public class SyncManager {
 	}
 
 
+	public static void setSyncStatus(Context context, int status){
+		setSyncStatus(context, status, null);
+	}
+	public static void setSyncStatus(Context context, int status, Bundle params){
+		StinglePhotosApplication.syncStatus = status;
+		StinglePhotosApplication.syncStatusParams = params;
+		Intent intent = new Intent("SYNC_STATUS");
+		if(params != null) {
+			intent.putExtras(params);
+		}
+		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+	}
+
 	public static void startSync(Context context){
 		if(SyncService.isInstanceCreated()){
 			SyncService.getInstance().startSync();
@@ -127,7 +150,7 @@ public class SyncManager {
 		}
 	}
 
-	public static UploadToCloudAsyncTask uploadToCloud(Context context, UploadToCloudAsyncTask.UploadProgress progress, OnFinish onFinish, Executor executor) {
+	public static UploadToCloudAsyncTask uploadToCloud(Context context, UploadToCloud.UploadProgress progress, OnFinish onFinish, Executor executor) {
 		if (executor == null) {
 			executor = AsyncTask.THREAD_POOL_EXECUTOR;
 		}

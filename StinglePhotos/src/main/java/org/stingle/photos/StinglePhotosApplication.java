@@ -3,10 +3,12 @@ package org.stingle.photos;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 
 import androidx.preference.PreferenceManager;
 
 import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
 
@@ -41,6 +43,10 @@ public class StinglePhotosApplication extends Application{
     public static final String USER_EMAIL = "user_email";
     public static final String USER_HOME_FOLDER = "user_home_folder";
     public static final String IS_KEY_BACKED_UP = "is_key_backed_up";
+
+    public static int syncStatus = SyncManager.STATUS_IDLE;
+    public static Bundle syncStatusParams = null;
+    public static boolean syncRestartAfterFinish = false;
 
     @Override
 	public void onCreate(){

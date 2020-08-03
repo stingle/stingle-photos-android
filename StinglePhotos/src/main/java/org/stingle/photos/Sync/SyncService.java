@@ -1,39 +1,16 @@
 package org.stingle.photos.Sync;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.BatteryManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
-import org.stingle.photos.AsyncTasks.Sync.ImportMediaAsyncTask;
-import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
-import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
-import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.StingleDb;
-import org.stingle.photos.GalleryActivity;
-import org.stingle.photos.R;
-import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,16 +44,10 @@ public class SyncService extends Service {
 	static final public int STATUS_BATTERY_LOW = 6;
 
 	protected int currentStatus = STATUS_IDLE;
-	protected UploadToCloudAsyncTask.UploadProgress progress;
-	private boolean restartSyncAfterComplete = false;
-	private ExecutorService cachedThreadPool;
-	private NotificationManager mNotifyManager;
-	private Notification.Builder notificationBuilder;
-	private boolean isNotificationActive = false;
-	private UploadToCloudAsyncTask uploadTask;
 
 
 	private static SyncService instance = null;
+	private ExecutorService cachedThreadPool;
 
 	public static boolean isInstanceCreated() {
 		return instance != null;
@@ -86,7 +57,7 @@ public class SyncService extends Service {
 		return instance;
 	}
 
-	private static ImportMediaAsyncTask importMediaTask = null;
+	private static SyncAsyncTask syncTask = null;
 
 	public SyncService() {
 	}
@@ -96,63 +67,7 @@ public class SyncService extends Service {
 		super.onCreate();
 
 		instance = this;
-
 		cachedThreadPool = Executors.newCachedThreadPool();
-		mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-		progress = new UploadToCloudAsyncTask.UploadProgress() {
-			@Override
-			public void currentFile(String filename, String headers, int set, String albumId) {
-				super.currentFile(filename, headers, set, albumId);
-				Bundle b = new Bundle();
-				b.putString("currentFile", filename);
-				b.putString("headers", headers);
-				b.putInt("set", set);
-				b.putString("albumId", albumId);
-				sendBundleToUi(MSG_SYNC_CURRENT_FILE, b);
-			}
-
-			@Override
-			public void fileUploadFinished(String filename, int set, String albumId) {
-				FilesDb db;
-				int sort = StingleDb.SORT_DESC;
-				if(set == SyncManager.GALLERY || set == SyncManager.TRASH) {
-					db = new GalleryTrashDb(getApplicationContext(), set);
-				}
-				else if(set == SyncManager.ALBUM){
-					db = new AlbumFilesDb(getApplicationContext());
-					sort = StingleDb.SORT_ASC;
-				}
-				else{
-					return;
-				}
-
-				Integer filePos = db.getFilePositionByFilename(filename, albumId, sort);
-				db.close();
-
-				Log.d("updateItem number", String.valueOf(filePos));
-				Bundle values = new Bundle();
-				values.putInt("position", filePos);
-				values.putInt("set", set);
-				values.putString("albumId", albumId);
-				sendBundleToUi(MSG_REFRESH_GALLERY_ITEM, values);
-			}
-
-			@Override
-			public void uploadProgress(int uploadedFilesCount) {
-				super.uploadProgress(uploadedFilesCount);
-				showNotification();
-				HashMap<String, Integer> values = new HashMap<String, Integer>();
-				values.put("uploadedFilesCount", uploadedFilesCount);
-				values.put("totalItemsNumber", progress.totalItemsNumber);
-				sendIntToUi(MSG_SYNC_UPLOAD_PROGRESS, values);
-				notificationBuilder.setProgress(progress.totalItemsNumber, uploadedFilesCount, false);
-				notificationBuilder.setContentTitle(getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(progress.totalItemsNumber)));
-				mNotifyManager.notify(R.string.sync_service_started, notificationBuilder.build());
-			}
-		};
-
-		//startSync();
 	}
 
 	@Override
@@ -180,29 +95,19 @@ public class SyncService extends Service {
 
 	public void startSync(){
 
-		if(!LoginManager.isLoggedIn(this)){
-			return;
-		}
-
-		if(currentStatus != STATUS_IDLE){
-			restartSyncAfterComplete = true;
-			return;
-		}
-		currentStatus = STATUS_REFRESHING;
-		sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
-
-
-		startCloudToLocalSync();
-
+		syncTask = new SyncAsyncTask(this, new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish() {
+				super.onFinish();
+				syncTask = null;
+			}
+		});
+		syncTask.executeOnExecutor(cachedThreadPool);
 	}
 
 	public void stopSync(){
-		if(uploadTask != null){
-			uploadTask.cancel(true);
-			isNotificationActive = false;
-			stopForeground(true);
-			currentStatus = STATUS_IDLE;
-			sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
+		if(syncTask != null){
+			syncTask.cancel(true);
 		}
 	}
 
@@ -211,145 +116,16 @@ public class SyncService extends Service {
 		startSync();
 	}
 
-	public void startCloudToLocalSync(){
-		SyncManager.syncCloudToLocalDb(getApplicationContext(), new SyncManager.OnFinish() {
-			@Override
-			public void onFinish(Boolean needToUpdateUI) {
-				if (needToUpdateUI){
-					sendMessageToUI(MSG_REFRESH_GALLERY);
-				}
 
 
-				boolean isFirstSyncDone = Helpers.getPreference(getApplicationContext(), SyncManager.PREF_FIRST_SYNC_DONE, false);
-				if(LoginManager.isLoggedIn(getApplicationContext()) && !isFirstSyncDone){
-					(new FsSyncAsyncTask(getApplicationContext(), new SyncManager.OnFinish() {
-						@Override
-						public void onFinish(Boolean needToUpdateUI) {
-							Helpers.storePreference(getApplicationContext(), SyncManager.PREF_FIRST_SYNC_DONE, true);
-							if (needToUpdateUI){
-								sendMessageToUI(MSG_REFRESH_GALLERY);
-							}
-							startUpload();
-						}
-					})).executeOnExecutor(cachedThreadPool);
-				}
-				else{
-					if(SyncManager.isImportEnabled(getApplicationContext()) && ImportMediaAsyncTask.getInstance() == null) {
-						importMediaTask = new ImportMediaAsyncTask(getApplicationContext(), new OnAsyncTaskFinish() {
-							@Override
-							public void onFinish() {
-								super.onFinish();
-								startUpload();
-							}
-						});
-						importMediaTask.executeOnExecutor(cachedThreadPool);
-					}
-					else {
-						startUpload();
-					}
-				}
-			}
-		}, cachedThreadPool);
-	}
 
-	public void startUpload(){
-		currentStatus = STATUS_UPLOADING;
-		sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
-
-		boolean isUploadSuspended = Helpers.getPreference(getApplicationContext(), SyncManager.PREF_SUSPEND_UPLOAD, false);
-		if(isUploadSuspended){
-			int lastAvailableSpace = Helpers.getPreference(getApplicationContext(), SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
-			int availableSpace = Helpers.getAvailableUploadSpace(getApplicationContext());
-			if(availableSpace > lastAvailableSpace || availableSpace > 0){
-				Helpers.storePreference(getApplicationContext(), SyncManager.PREF_SUSPEND_UPLOAD, false);
-				Helpers.deletePreference(getApplicationContext(), SyncManager.PREF_LAST_AVAILABLE_SPACE);
-				isUploadSuspended = false;
-				Log.d("upload", "resuming upload");
-			}
-		}
-
-		int allowedStatus = isUploadAllowed(getApplicationContext());
-		if(isUploadSuspended) {
-			Log.d("upload", "upload is disabled, no space");
-			currentStatus = STATUS_IDLE;
-			sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", STATUS_NO_SPACE_LEFT);
-		}
-		else if(allowedStatus != 0) {
-			Log.d("upload", "upload is disabled, not allowed");
-			currentStatus = STATUS_IDLE;
-			sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", allowedStatus);
-		}
-		else{
-			uploadTask = SyncManager.uploadToCloud(getApplicationContext(), progress, new SyncManager.OnFinish() {
-				@Override
-				public void onFinish(Boolean needUpdateUI) {
-					currentStatus = STATUS_IDLE;
-					sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
-					//sendMessageToUI(MSG_SYNC_FINISHED);
-					if(restartSyncAfterComplete){
-						restartSyncAfterComplete = false;
-						startSync();
-					}
-					isNotificationActive = false;
-					stopForeground(true);
-				}
-			}, cachedThreadPool);
-		}
-	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mMessenger.getBinder();
 	}
 
-	private int isUploadAllowed(Context context){
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-		if(!SyncManager.isBackupEnabled(context)){
-			return STATUS_DISABLED;
-		}
-
-		boolean isOnlyOnWifi = prefs.getBoolean(SyncManager.PREF_BACKUP_ONLY_WIFI, false);
-		int uploadBatteryLevel = prefs.getInt(SyncManager.PREF_BACKUP_BATTERY_LEVEL, 30);
-
-		if(isOnlyOnWifi) {
-			ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-			if(cm != null) {
-				NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-				if (activeNetwork != null) {
-					// connected to the internet
-					if (activeNetwork.getType() != ConnectivityManager.TYPE_WIFI) {
-						return STATUS_NOT_WIFI;
-					}
-				} else {
-					return STATUS_NOT_WIFI;
-				}
-			}
-		}
-
-		if(uploadBatteryLevel > 0){
-			IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-			Intent batteryStatus = context.registerReceiver(null, iFilter);
-			if(batteryStatus != null) {
-				int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-				boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-						status == BatteryManager.BATTERY_STATUS_FULL;
-
-				BatteryManager bm = (BatteryManager) getSystemService(BATTERY_SERVICE);
-				if(bm != null) {
-					int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-
-					Log.d("battery level", String.valueOf(batLevel));
-
-					if (!isCharging && batLevel < uploadBatteryLevel) {
-						return STATUS_BATTERY_LOW;
-					}
-				}
-			}
-		}
-
-		return 0;
-	}
 
 	private void sendStringToUi(int type, String key, String value) {
 		for (int i=mClients.size()-1; i>=0; i--) {
@@ -448,7 +224,7 @@ public class SyncService extends Service {
 					restartSync();
 					break;
 				case MSG_GET_SYNC_STATUS:
-					if(progress != null) {
+					/*if(progress != null) {
 						for (int i = mClients.size() - 1; i >= 0; i--) {
 							try {
 								Bundle b = new Bundle();
@@ -466,54 +242,14 @@ public class SyncService extends Service {
 								mClients.remove(i);
 							}
 						}
-					}
+					}*/
 					break;
-				/*case MSG_SET_VALUE:
-					mValue = msg.arg1;
-					for (int i = mClients.size() - 1; i >= 0; i--) {
-						try {
-							mClients.get(i).send(Message.obtain(null, MSG_SET_VALUE, mValue, 0));
-						} catch (RemoteException e) {
-							mClients.remove(i);
-						}
-					}
-					break;*/
+
 				default:
 					super.handleMessage(msg);
 			}
 		}
 	}
 
-	private void showNotification() {
-		if(isNotificationActive){
-			return;
-		}
 
-		isNotificationActive = true;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			String NOTIFICATION_CHANNEL_ID = "org.stingle.photos.sync";
-			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.sync_channel_name), NotificationManager.IMPORTANCE_NONE);
-			chan.setLightColor(getColor(R.color.primaryLightColor));
-			chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-			NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			assert manager != null;
-			manager.createNotificationChannel(chan);
-			notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
-		}
-		else{
-			notificationBuilder = new Notification.Builder(this);
-		}
-
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				new Intent(this, GalleryActivity.class), 0);
-
-		Notification notification = notificationBuilder
-				.setSmallIcon(R.drawable.ic_sp)  // the status icon
-				.setWhen(System.currentTimeMillis())  // the time stamp
-				.setContentIntent(contentIntent)  // The intent to send when the entry is clicked
-				.build();
-
-		mNotifyManager.notify(R.string.sync_service_started, notification);
-		startForeground(R.string.sync_service_started, notification);
-	}
 }

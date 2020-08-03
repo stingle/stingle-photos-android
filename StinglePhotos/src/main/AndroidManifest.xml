@@ -53,6 +53,11 @@
             android:enabled="true"
             android:exported="false" />
         <service
+            android:name=".Sync.SyncServiceNew"
+            android:enabled="true"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true" />
+        <service
             android:name=".CameraX.MediaEncryptService"
             android:enabled="true"
             android:exported="false" />
