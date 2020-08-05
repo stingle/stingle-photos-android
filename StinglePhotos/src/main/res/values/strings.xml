@@ -372,8 +372,8 @@
     <string name="import_from_desc">Location to search for new photos and videos</string>
     <string name="camera_folder">Camera folder</string>
     <string name="all_folders">All folders</string>
-    <string name="auto_import_title">Keep your media safe</string>
-    <string name="auto_import_title_desc">Photos and videos from your device will be automatically imported, encrypted and backed up via Stingle Photos</string>
+    <string name="auto_import_title">Auto import settings</string>
+    <string name="auto_import_title_desc">Photos and videos from your device will be automatically imported, encrypted and backed up to your Stingle Photos account</string>
     <string name="import_notenable">Skip for now</string>
     <string name="import_enable">Turn on auto import</string>
     <string name="import_existing">Import existing items</string>
