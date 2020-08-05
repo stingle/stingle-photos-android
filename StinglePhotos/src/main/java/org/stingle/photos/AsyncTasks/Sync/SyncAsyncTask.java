@@ -8,97 +8,55 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.Db.Query.AlbumFilesDb;
-import org.stingle.photos.Db.Query.FilesDb;
-import org.stingle.photos.Db.Query.GalleryTrashDb;
-import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.FSSync;
 import org.stingle.photos.Sync.ImportMedia;
 import org.stingle.photos.Sync.SyncCloudToLocalDb;
-import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Sync.UploadToCloud;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
 
 public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
+	public static SyncAsyncTask instance;
 	private WeakReference<Context> context;
 	private final OnAsyncTaskFinish onFinishListener;
+	private int mode;
 
-	private ExecutorService cachedThreadPool;
-	private NotificationManager mNotifyManager;
-	private Notification.Builder notificationBuilder;
-	private boolean isNotificationActive = false;
+	public static NotificationManager mNotifyManager;
+	public static Notification.Builder notificationBuilder;
+	public static boolean isNotificationActive = false;
 
-	protected UploadToCloud.UploadProgress progress;
+	static final public int MODE_FULL = 0;
+	static final public int MODE_IMPORT_AND_UPLOAD = 1;
+	static final public int MODE_CLOUD_TO_LOCAL = 2;
+
+	public SyncAsyncTask(Context context) {
+		this(context, MODE_FULL, null);
+	}
+
+	public SyncAsyncTask(Context context, int mode) {
+		this(context, mode, null);
+	}
 
 	public SyncAsyncTask(Context context, OnAsyncTaskFinish onFinishListener) {
+		this(context, MODE_FULL, onFinishListener);
+	}
+
+	public SyncAsyncTask(Context context, int mode, OnAsyncTaskFinish onFinishListener) {
+		instance = this;
 		this.context = new WeakReference<>(context);;
+		this.mode = mode;
 		this.onFinishListener = onFinishListener;
 
 		mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-		progress = new UploadToCloud.UploadProgress() {
-			@Override
-			public void currentFile(String filename, String headers, int set, String albumId) {
-				super.currentFile(filename, headers, set, albumId);
-				Bundle b = new Bundle();
-				b.putString("currentFile", filename);
-				b.putString("headers", headers);
-				b.putInt("set", set);
-				b.putString("albumId", albumId);
-				//sendBundleToUi(MSG_SYNC_CURRENT_FILE, b);
-			}
-
-			@Override
-			public void fileUploadFinished(String filename, int set, String albumId) {
-				FilesDb db;
-				int sort = StingleDb.SORT_DESC;
-				if(set == SyncManager.GALLERY || set == SyncManager.TRASH) {
-					db = new GalleryTrashDb(context, set);
-				}
-				else if(set == SyncManager.ALBUM){
-					db = new AlbumFilesDb(context);
-					sort = StingleDb.SORT_ASC;
-				}
-				else{
-					return;
-				}
-
-				Integer filePos = db.getFilePositionByFilename(filename, albumId, sort);
-				db.close();
-
-				Log.d("updateItem number", String.valueOf(filePos));
-				Bundle values = new Bundle();
-				values.putInt("position", filePos);
-				values.putInt("set", set);
-				values.putString("albumId", albumId);
-				//sendBundleToUi(MSG_REFRESH_GALLERY_ITEM, values);
-			}
-
-			@Override
-			public void uploadProgress(int uploadedFilesCount) {
-				super.uploadProgress(uploadedFilesCount);
-				showNotification(context);
-				HashMap<String, Integer> values = new HashMap<String, Integer>();
-				values.put("uploadedFilesCount", uploadedFilesCount);
-				values.put("totalItemsNumber", progress.totalItemsNumber);
-				//sendIntToUi(MSG_SYNC_UPLOAD_PROGRESS, values);
-				notificationBuilder.setProgress(progress.totalItemsNumber, uploadedFilesCount, false);
-				notificationBuilder.setContentTitle(context.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(progress.totalItemsNumber)));
-				mNotifyManager.notify(R.string.sync_service_started, notificationBuilder.build());
-			}
-		};
 	}
 
 	@Override
@@ -118,20 +76,28 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		return true;
 	}
 
-	public void startSync(Context context){
-		if(StinglePhotosApplication.syncStatus != SyncManager.STATUS_IDLE){
-			StinglePhotosApplication.syncRestartAfterFinish = true;
-			return;
+	private void startSync(Context context){
+		switch (mode){
+			case MODE_FULL:
+				syncCloudToLocalDb(context);
+				FSSync(context);
+				autoImport(context);
+				upload(context);
+				break;
+			case MODE_IMPORT_AND_UPLOAD:
+				autoImport(context);
+				upload(context);
+				break;
+			case MODE_CLOUD_TO_LOCAL:
+				syncCloudToLocalDb(context);
+				break;
 		}
-		SyncManager.setSyncStatus(context, SyncManager.STATUS_REFRESHING);
 
-		syncCloudToLocalDb(context);
-		FSSync(context);
-		autoImport(context);
-		upload(context);
 
 		if(StinglePhotosApplication.syncRestartAfterFinish){
 			StinglePhotosApplication.syncRestartAfterFinish = false;
+			mode = StinglePhotosApplication.syncRestartAfterFinishMode;
+			StinglePhotosApplication.syncRestartAfterFinishMode = MODE_FULL;
 			startSync(context);
 		}
 		isNotificationActive = false;
@@ -151,17 +117,16 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	public void syncCloudToLocalDb(Context context){
 		boolean needToUpdateUI = (new SyncCloudToLocalDb(context)).sync();
 		if (needToUpdateUI){
-			//sendMessageToUI(MSG_REFRESH_GALLERY);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("REFRESH_GALLERY"));
 		}
 	}
 
 	public void upload(Context context){
-		//sendIntToUi(MSG_SYNC_STATUS_CHANGE, "newStatus", currentStatus);
-		(new UploadToCloud(context, progress, this)).upload();
+		(new UploadToCloud(context,  this)).upload();
 
 	}
 
-	private void showNotification(Context context) {
+	public static void showNotification(Context context) {
 		if(isNotificationActive){
 			return;
 		}
@@ -193,6 +158,13 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		mNotifyManager.notify(R.string.sync_service_started, notification);
 	}
 
+	public static void updateNotification(Context context, int totalItemsNumber, int uploadedFilesCount){
+		showNotification(context);
+		notificationBuilder.setProgress(totalItemsNumber, uploadedFilesCount, false);
+		notificationBuilder.setContentTitle(context.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
+		mNotifyManager.notify(R.string.sync_service_started, notificationBuilder.build());
+	}
+
 	@Override
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
@@ -204,6 +176,7 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				onFinishListener.onFail();
 			}
 		}
+		instance = null;
 
 	}
 

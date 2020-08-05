@@ -4,11 +4,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -16,11 +14,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -55,6 +48,10 @@ import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FilesDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
@@ -66,7 +63,6 @@ import org.stingle.photos.Gallery.Gallery.SyncBarHandler;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.JobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 
 import java.util.ArrayList;
@@ -89,10 +85,6 @@ public class GalleryActivity extends AppCompatActivity
 	private Integer currentAlbumsView = AlbumsFragment.VIEW_ALBUMS;
 	private String currentAlbumId = null;
 	private String currentAlbumName = "";
-
-	protected Messenger mService = null;
-	protected boolean isBound = false;
-	final Messenger mMessenger = new Messenger(new IncomingHandler());
 
 	private boolean sendBackDecryptedFile = false;
 	private Intent originalIntent = null;
@@ -118,6 +110,48 @@ public class GalleryActivity extends AppCompatActivity
 			if(galleryFragment != null) {
 				galleryFragment.updateDataSet();
 			}
+		}
+	};
+	private BroadcastReceiver refreshGallery = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(galleryFragment != null) {
+				galleryFragment.updateDataSet();
+			}
+		}
+	};
+	private BroadcastReceiver refreshGalleryItem = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Bundle bundle = intent.getExtras();
+
+			if(bundle == null){
+				return;
+			}
+
+			String filename = bundle.getString("filename");
+			int set = bundle.getInt("set");
+			String albumId = bundle.getString("albumId");
+
+			FilesDb db;
+			int sort = StingleDb.SORT_DESC;
+			if(set == SyncManager.GALLERY || set == SyncManager.TRASH) {
+				db = new GalleryTrashDb(context, set);
+			}
+			else if(set == SyncManager.ALBUM){
+				db = new AlbumFilesDb(context);
+				sort = StingleDb.SORT_ASC;
+			}
+			else{
+				return;
+			}
+
+			int position = db.getFilePositionByFilename(filename, albumId, sort);
+			db.close();
+
+			Log.d("updateItem number", String.valueOf(position));
+
+			updateGalleryFragmentItem(position, set, albumId);
 		}
 	};
 	private boolean isImporting = false;
@@ -163,6 +197,8 @@ public class GalleryActivity extends AppCompatActivity
 
 		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
+		lbm.registerReceiver(refreshGallery, new IntentFilter("REFRESH_GALLERY"));
+		lbm.registerReceiver(refreshGalleryItem, new IntentFilter("REFRESH_GALLERY_ITEM"));
 
 		handleIncomingIntent(getIntent());
 
@@ -173,6 +209,7 @@ public class GalleryActivity extends AppCompatActivity
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		syncBarHandler = new SyncBarHandler(this);
+		syncBarHandler.updateSyncBar();
 
 		if(savedInstanceState != null){
 			if(savedInstanceState.containsKey("set")) {
@@ -259,11 +296,6 @@ public class GalleryActivity extends AppCompatActivity
 
 
 		LoginManager.setLockedTime(this);
-
-		if (isBound) {
-			unbindService(mConnection);
-			isBound = false;
-		}
 		findViewById(R.id.contentHolder).setVisibility(View.INVISIBLE);
 	}
 
@@ -548,7 +580,9 @@ public class GalleryActivity extends AppCompatActivity
 		if(currentFragment != FRAGMENT_ALBUMS_LIST) {
 			findViewById(R.id.import_fab).setVisibility(View.VISIBLE);
 		}
-		startAndBindService();
+		if(!dontStartSyncYet){
+			SyncManager.startSync(this);
+		}
 		updateQuotaInfo();
 
 		byte[] serverPK = StinglePhotosApplication.getCrypto().getServerPublicKey();
@@ -572,24 +606,9 @@ public class GalleryActivity extends AppCompatActivity
 			isSyncBarDisabled = false;
 			syncBarHandler.showSyncBar();
 			syncBarHandler.showSyncBarAnimated();
+			syncBarHandler.updateSyncBar();
 		}
 	}
-
-	private void startAndBindService(){
-		Intent serviceIntent = new Intent(GalleryActivity.this, SyncService.class);
-		try {
-			startService(serviceIntent);
-			bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
-		} catch (IllegalStateException ignored) { }
-	}
-
-	public class IncomingHandler extends Handler {
-		@Override
-		public void handleMessage(@NonNull Message msg) {
-			syncBarHandler.handleMessage(msg);
-		}
-	}
-
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -659,37 +678,6 @@ public class GalleryActivity extends AppCompatActivity
 		progressBar.setProgress(percent);
 
 	}
-
-	private void sendMessageToSyncService(int type) {
-		if (isBound) {
-			if (mService != null) {
-				try {
-					Message msg = Message.obtain(null, type);
-					msg.replyTo = mMessenger;
-					mService.send(msg);
-				}
-				catch (RemoteException ignored) { }
-			}
-		}
-	}
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			isBound = true;
-			mService = new Messenger(service);
-			sendMessageToSyncService(SyncService.MSG_REGISTER_CLIENT);
-			sendMessageToSyncService(SyncService.MSG_GET_SYNC_STATUS);
-			if(!dontStartSyncYet){
-				sendMessageToSyncService(SyncService.MSG_START_SYNC);
-			}
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			// This is called when the connection with the service has been unexpectedly disconnected - process crashed.
-			mService = null;
-			isBound = false;
-		}
-	};
 
 	@Override
 	public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -1108,7 +1096,7 @@ public class GalleryActivity extends AppCompatActivity
 						galleryFragment.updateDataSet();
 					}
 					dontStartSyncYet = false;
-					sendMessageToSyncService(SyncService.MSG_START_SYNC);
+					SyncManager.startSync(GalleryActivity.this);
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}

@@ -19,6 +19,7 @@ import androidx.work.WorkManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.SyncCloudToLocalDbAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
@@ -118,24 +119,21 @@ public class SyncManager {
 	}
 
 	public static void startSync(Context context){
-		if(SyncService.isInstanceCreated()){
-			SyncService.getInstance().startSync();
-		}
-		else {
-			Intent serviceIntent = new Intent(context, SyncService.class);
-			serviceIntent.putExtra("START_SYNC", true);
-			context.startService(serviceIntent);
-		}
+		startSync(context, SyncAsyncTask.MODE_FULL);
 	}
 
-	public static void stopSync(Context context){
-		if(SyncService.isInstanceCreated()){
-			SyncService.getInstance().stopSync();
+	public static void startSync(Context context, int mode){
+		if(StinglePhotosApplication.syncStatus != SyncManager.STATUS_IDLE){
+			StinglePhotosApplication.syncRestartAfterFinish = true;
+			StinglePhotosApplication.syncRestartAfterFinishMode = mode;
+			return;
 		}
-		else {
-			Intent serviceIntent = new Intent(context, SyncService.class);
-			serviceIntent.putExtra("STOP_SYNC", true);
-			context.startService(serviceIntent);
+		(new SyncAsyncTask(context, mode)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
+	public static void stopSync(){
+		if(SyncAsyncTask.instance != null){
+			SyncAsyncTask.instance.cancel(true);
 		}
 	}
 
@@ -150,11 +148,11 @@ public class SyncManager {
 		}
 	}
 
-	public static UploadToCloudAsyncTask uploadToCloud(Context context, UploadToCloud.UploadProgress progress, OnFinish onFinish, Executor executor) {
+	public static UploadToCloudAsyncTask uploadToCloud(Context context, OnFinish onFinish, Executor executor) {
 		if (executor == null) {
 			executor = AsyncTask.THREAD_POOL_EXECUTOR;
 		}
-		UploadToCloudAsyncTask uploadTask = new UploadToCloudAsyncTask(context, progress, onFinish);
+		UploadToCloudAsyncTask uploadTask = new UploadToCloudAsyncTask(context, onFinish);
 		uploadTask.executeOnExecutor(executor);
 		return uploadTask;
 

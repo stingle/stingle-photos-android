@@ -62,6 +62,8 @@ public class SyncCloudToLocalDb {
 	}
 
 	public boolean sync(){
+		SyncManager.setSyncStatus(context, SyncManager.STATUS_REFRESHING);
+
 		lastSeenTime = Helpers.getPreference(context, SyncManager.PREF_LAST_SEEN_TIME, (long) 0);
 		lastTrashSeenTime = Helpers.getPreference(context, SyncManager.PREF_TRASH_LAST_SEEN_TIME, (long) 0);
 		lastAlbumsSeenTime = Helpers.getPreference(context, SyncManager.PREF_ALBUMS_LAST_SEEN_TIME, (long) 0);

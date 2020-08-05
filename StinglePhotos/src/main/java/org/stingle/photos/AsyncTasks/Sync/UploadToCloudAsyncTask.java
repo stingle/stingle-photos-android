@@ -11,12 +11,10 @@ import java.lang.ref.WeakReference;
 public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 
 	private WeakReference<Context> context;
-	private UploadToCloud.UploadProgress progress;
 	private SyncManager.OnFinish onFinish;
 
-	public UploadToCloudAsyncTask(Context context, UploadToCloud.UploadProgress progress, SyncManager.OnFinish onFinish){
+	public UploadToCloudAsyncTask(Context context, SyncManager.OnFinish onFinish){
 		this.context = new WeakReference<>(context);
-		this.progress = progress;
 		this.onFinish = onFinish;
 	}
 
@@ -27,7 +25,7 @@ public class UploadToCloudAsyncTask extends AsyncTask<Void, Void, Void> {
 			return null;
 		}
 
-		(new UploadToCloud(myContext, progress, this)).upload();
+		(new UploadToCloud(myContext, this)).upload();
 		return null;
 	}
 

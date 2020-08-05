@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,6 +54,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GalleryActions {
+
+	public static void refreshGallery(Context context){
+		LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("REFRESH_GALLERY"));
+	}
+
+	public static void refreshGalleryItem(Context context, String filename, int set, String albumId){
+		Intent intent = new Intent("REFRESH_GALLERY_ITEM");
+
+		Bundle params = new Bundle();
+		params.putString("filename", filename);
+		params.putInt("set", set);
+		params.putString("albumId", albumId);
+		intent.putExtras(params);
+
+		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+	}
 
 	public static void shareSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
 		ShareManager.shareDbFiles(activity, files, activity.getCurrentSet(), activity.getCurrentAlbumId());
@@ -225,7 +244,7 @@ public class GalleryActions {
 				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
-					SyncManager.stopSync(activity);
+					SyncManager.stopSync();
 					MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
@@ -260,7 +279,7 @@ public class GalleryActions {
 			return;
 		}*/
 		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.restoring_files), null);
-		SyncManager.stopSync(activity);
+		SyncManager.stopSync();
 		MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {
@@ -299,7 +318,7 @@ public class GalleryActions {
 				String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())),
 				R.drawable.ic_action_delete,
 				(dialog, which) -> {
-					SyncManager.stopSync(activity);
+					SyncManager.stopSync();
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_files), null);
 
 					new DeleteFilesAsyncTask(activity, files, new SyncManager.OnFinish() {
@@ -323,7 +342,7 @@ public class GalleryActions {
 				R.drawable.ic_action_delete,
 				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.emptying_trash), null);
-					SyncManager.stopSync(activity);
+					SyncManager.stopSync();
 					new EmptyTrashAsyncTask(activity, new SyncManager.OnFinish(){
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {

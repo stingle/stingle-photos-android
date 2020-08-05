@@ -9,10 +9,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONObject;
+import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
@@ -20,6 +22,7 @@ import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
@@ -37,13 +40,12 @@ public class UploadToCloud {
 	private Context context;
 	private File dir;
 	private File thumbDir;
-	private UploadProgress progress = null;
 	private AsyncTask<?,?,?> task;
 	private int uploadedFilesCount = 0;
+	private int totalFilesCount = 0;
 
-	public UploadToCloud(Context context, UploadProgress progress, AsyncTask<?,?,?> task){
+	public UploadToCloud(Context context, AsyncTask<?,?,?> task){
 		this.context = context;
-		this.progress = progress;
 		this.task = task;
 		dir = new File(FileManager.getHomeDir(context));
 		thumbDir = new File(FileManager.getThumbsDir(context));
@@ -74,9 +76,7 @@ public class UploadToCloud {
 			return;
 		}
 
-		if(progress != null){
-			progress.setTotalItemsNumber(getFilesCountToUpload(SyncManager.GALLERY) + getFilesCountToUpload(SyncManager.TRASH) + getFilesCountToUpload(SyncManager.ALBUM));
-		}
+		totalFilesCount = getFilesCountToUpload(SyncManager.GALLERY) + getFilesCountToUpload(SyncManager.TRASH) + getFilesCountToUpload(SyncManager.ALBUM);
 
 		SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING);
 
@@ -178,9 +178,6 @@ public class UploadToCloud {
 				break;
 			}
 			uploadedFilesCount++;
-			if(progress != null){
-				progress.uploadProgress(uploadedFilesCount);
-			}
 			uploadFile(set, db, result, false);
 		}
 		result.close();
@@ -191,9 +188,6 @@ public class UploadToCloud {
 				break;
 			}
 			uploadedFilesCount++;
-			if(progress != null){
-				progress.uploadProgress(uploadedFilesCount);
-			}
 			uploadFile(set, db, reuploadResult, true);
 		}
 		reuploadResult.close();
@@ -213,9 +207,7 @@ public class UploadToCloud {
 		}
 		catch (IllegalArgumentException ignored) {}
 
-		if(progress != null){
-			progress.currentFile(filename, headers, set, albumId);
-		}
+		notifyGalleryAboutProgress(filename, headers, set, albumId);
 
 		Log.d("uploadingFile", filename);
 		File file = new File(dir.getPath() + "/" + filename);
@@ -272,9 +264,7 @@ public class UploadToCloud {
 				}
 			}
 
-			if(progress != null){
-				progress.fileUploadFinished(filename, set, albumId);
-			}
+			GalleryActions.refreshGalleryItem(context, filename, set, albumId);
 		}
 
 		if(isReupload){
@@ -282,29 +272,19 @@ public class UploadToCloud {
 		}
 	}
 
-	public abstract static class UploadProgress{
-		public int totalItemsNumber = 0;
-		public String currentFile;
-		public String headers;
-		public int set;
-		public String albumId;
-		public int uploadedFilesCount;
+	private void notifyGalleryAboutProgress(String filename, String headers, int set, String albumId){
+		Bundle params = new Bundle();
+		params.putInt("totalFilesCount", totalFilesCount);
+		params.putInt("uploadedFilesCount", uploadedFilesCount);
+		params.putString("filename", filename);
+		params.putString("headers", headers);
+		params.putInt("set", set);
+		params.putString("albumId", albumId);
 
-		public void setTotalItemsNumber(int number){
-			totalItemsNumber = number;
-		}
-
-		public void currentFile(String filename, String headers, int set, String albumId){
-			this.currentFile = filename;
-			this.headers = headers;
-			this.set = set;
-			this.albumId = albumId;
-		}
-		public void fileUploadFinished(String filename, int set, String albumId){
-
-		}
-		public void uploadProgress(int uploadedFilesCount){
-			this.uploadedFilesCount = uploadedFilesCount;
-		}
+		SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING, params);
+		SyncAsyncTask.updateNotification(context, totalFilesCount, uploadedFilesCount);
 	}
+
+
+
 }

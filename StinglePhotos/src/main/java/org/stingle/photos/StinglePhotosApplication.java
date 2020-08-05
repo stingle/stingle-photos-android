@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.preference.PreferenceManager;
 
+import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -47,6 +48,7 @@ public class StinglePhotosApplication extends Application{
     public static int syncStatus = SyncManager.STATUS_IDLE;
     public static Bundle syncStatusParams = null;
     public static boolean syncRestartAfterFinish = false;
+    public static int syncRestartAfterFinishMode = SyncAsyncTask.MODE_FULL;
 
     @Override
 	public void onCreate(){

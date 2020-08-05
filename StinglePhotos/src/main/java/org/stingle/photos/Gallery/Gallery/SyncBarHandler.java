@@ -1,8 +1,11 @@
 package org.stingle.photos.Gallery.Gallery;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Message;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -11,10 +14,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import org.stingle.photos.AsyncTasks.ShowEncThumbInImageView;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
-import org.stingle.photos.Sync.SyncService;
+import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 public class SyncBarHandler {
@@ -37,121 +43,94 @@ public class SyncBarHandler {
 		syncPhoto = activity.findViewById(R.id.syncPhoto);
 		syncText = activity.findViewById(R.id.syncText);
 		backupCompleteIcon = activity.findViewById(R.id.backupComplete);
+
+		LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(activity);
+		lbm.registerReceiver(syncStatusReceiver, new IntentFilter("SYNC_STATUS"));
 	}
 
-	public void handleMessage(Message msg) {
-		if (msg.what == SyncService.MSG_RESP_SYNC_STATUS) {
-			Bundle bundle = msg.getData();
-			int syncStatus = bundle.getInt("syncStatus");
-			int totalItemsNumber = bundle.getInt("totalItemsNumber");
-			int uploadedFilesCount = bundle.getInt("uploadedFilesCount");
-			String currentFile = bundle.getString("currentFile");
-			int set = bundle.getInt("set");
-			String albumId = bundle.getString("albumId");
-			String headers = bundle.getString("headers");
-
-			if (syncStatus == SyncService.STATUS_UPLOADING) {
-				syncProgress.setMax(totalItemsNumber);
-				syncProgress.setProgress(uploadedFilesCount);
-				syncText.setText(activity.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
-				if(currentFile != null && headers != null) {
-					(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setSet(set).setAlbumId(albumId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-				}
-				setSyncStatus(SyncService.STATUS_UPLOADING);
-			} else if (syncStatus == SyncService.STATUS_REFRESHING) {
-				setSyncStatus(SyncService.STATUS_REFRESHING);
-			} else if (syncStatus == SyncService.STATUS_IDLE) {
-				setSyncStatus(SyncService.STATUS_IDLE);
-			}
-
-		} else if (msg.what == SyncService.MSG_SYNC_CURRENT_FILE) {
-			Bundle bundle = msg.getData();
-			String currentFile = bundle.getString("currentFile");
-			String headers = bundle.getString("headers");
-			int set = bundle.getInt("set");
-			String albumId = bundle.getString("albumId");
-			(new ShowEncThumbInImageView(activity, currentFile, syncPhoto)).setHeaders(headers).setSet(set).setAlbumId(albumId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-			setSyncStatus(SyncService.STATUS_UPLOADING);
-		} else if (msg.what == SyncService.MSG_SYNC_UPLOAD_PROGRESS) {
-			Bundle bundle = msg.getData();
-			int totalItemsNumber = bundle.getInt("totalItemsNumber");
-			int uploadedFilesCount = bundle.getInt("uploadedFilesCount");
-
-			syncProgress.setMax(totalItemsNumber);
-			syncProgress.setProgress(uploadedFilesCount);
-			syncText.setText(activity.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
-
-			setSyncStatus(SyncService.STATUS_UPLOADING);
-		} else if (msg.what == SyncService.MSG_SYNC_STATUS_CHANGE) {
-			Bundle bundle = msg.getData();
-			int newStatus = bundle.getInt("newStatus");
-			setSyncStatus(newStatus);
-		} else if (msg.what == SyncService.MSG_REFRESH_GALLERY) {
-			activity.updateGalleryFragmentData();
-		} else if (msg.what == SyncService.MSG_REFRESH_GALLERY_ITEM) {
-			Bundle bundle = msg.getData();
-			int position = bundle.getInt("position");
-			int set = bundle.getInt("set");
-			String albumId = bundle.getString("albumId");
-
-			activity.updateGalleryFragmentItem(position, set, albumId);
+	private BroadcastReceiver syncStatusReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			updateSyncBar();
 		}
-	}
+	};
 
-	private void setSyncStatus(int syncStatus) {
-		if (syncStatus == SyncService.STATUS_UPLOADING) {
-			refreshCProgress.setVisibility(View.GONE);
-			syncPhoto.setVisibility(View.VISIBLE);
-			syncProgress.setVisibility(View.VISIBLE);
-			backupCompleteIcon.setVisibility(View.GONE);
-		} else if (syncStatus == SyncService.STATUS_REFRESHING) {
-			refreshCProgress.setVisibility(View.VISIBLE);
-			syncPhoto.setVisibility(View.GONE);
-			syncPhoto.setImageDrawable(null);
-			syncProgress.setVisibility(View.INVISIBLE);
-			syncText.setText(activity.getString(R.string.refreshing));
-			backupCompleteIcon.setVisibility(View.GONE);
-		} else if (syncStatus == SyncService.STATUS_NO_SPACE_LEFT) {
-			refreshCProgress.setVisibility(View.GONE);
-			syncPhoto.setVisibility(View.GONE);
-			syncPhoto.setImageDrawable(null);
-			syncProgress.setVisibility(View.INVISIBLE);
-			syncText.setText(activity.getString(R.string.no_space_left));
-			backupCompleteIcon.setVisibility(View.GONE);
-			activity.updateQuotaInfo();
-		} else if (syncStatus == SyncService.STATUS_DISABLED) {
-			refreshCProgress.setVisibility(View.GONE);
-			syncPhoto.setVisibility(View.GONE);
-			syncPhoto.setImageDrawable(null);
-			syncProgress.setVisibility(View.INVISIBLE);
-			syncText.setText(activity.getString(R.string.sync_disabled));
-			backupCompleteIcon.setVisibility(View.GONE);
-			activity.updateQuotaInfo();
-		} else if (syncStatus == SyncService.STATUS_NOT_WIFI) {
-			refreshCProgress.setVisibility(View.GONE);
-			syncPhoto.setVisibility(View.GONE);
-			syncPhoto.setImageDrawable(null);
-			syncProgress.setVisibility(View.INVISIBLE);
-			syncText.setText(activity.getString(R.string.sync_not_on_wifi));
-			backupCompleteIcon.setVisibility(View.GONE);
-			activity.updateQuotaInfo();
-		} else if (syncStatus == SyncService.STATUS_BATTERY_LOW) {
-			refreshCProgress.setVisibility(View.GONE);
-			syncPhoto.setVisibility(View.GONE);
-			syncPhoto.setImageDrawable(null);
-			syncProgress.setVisibility(View.INVISIBLE);
-			syncText.setText(activity.getString(R.string.sync_battery_low));
-			backupCompleteIcon.setVisibility(View.GONE);
-			activity.updateQuotaInfo();
-		} else if (syncStatus == SyncService.STATUS_IDLE) {
-			syncText.setText(activity.getString(R.string.backup_complete));
-			syncPhoto.setVisibility(View.GONE);
-			syncPhoto.setImageDrawable(null);
-			syncProgress.setVisibility(View.INVISIBLE);
-			refreshCProgress.setVisibility(View.GONE);
-			backupCompleteIcon.setVisibility(View.VISIBLE);
-			activity.updateQuotaInfo();
+	public void updateSyncBar(){
+		switch (StinglePhotosApplication.syncStatus){
+			case SyncManager.STATUS_IDLE:
+				syncText.setText(activity.getString(R.string.backup_complete));
+				syncPhoto.setVisibility(View.GONE);
+				syncPhoto.setImageDrawable(null);
+				syncProgress.setVisibility(View.INVISIBLE);
+				refreshCProgress.setVisibility(View.GONE);
+				backupCompleteIcon.setVisibility(View.VISIBLE);
+				activity.updateQuotaInfo();
+				break;
+			case SyncManager.STATUS_REFRESHING:
+				refreshCProgress.setVisibility(View.VISIBLE);
+				syncPhoto.setVisibility(View.GONE);
+				syncPhoto.setImageDrawable(null);
+				syncProgress.setVisibility(View.INVISIBLE);
+				syncText.setText(activity.getString(R.string.refreshing));
+				backupCompleteIcon.setVisibility(View.GONE);
+				break;
+			case SyncManager.STATUS_UPLOADING:
+				refreshCProgress.setVisibility(View.GONE);
+				syncPhoto.setVisibility(View.VISIBLE);
+				syncProgress.setVisibility(View.VISIBLE);
+				backupCompleteIcon.setVisibility(View.GONE);
+
+				if(StinglePhotosApplication.syncStatusParams != null) {
+					Bundle params = StinglePhotosApplication.syncStatusParams;
+					syncProgress.setMax(params.getInt("totalFilesCount"));
+					syncProgress.setProgress(params.getInt("uploadedFilesCount"));
+					syncText.setText(activity.getString(R.string.uploading_file, String.valueOf(params.getInt("uploadedFilesCount")), String.valueOf(params.getInt("totalFilesCount"))));
+					if (params.getString("filename") != null && params.getString("headers") != null) {
+						(new ShowEncThumbInImageView(activity, params.getString("filename"), syncPhoto))
+								.setHeaders(params.getString("headers"))
+								.setSet(params.getInt("set"))
+								.setAlbumId(params.getString("albumId"))
+								.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+				}
+
+				break;
+			case SyncManager.STATUS_NO_SPACE_LEFT:
+				refreshCProgress.setVisibility(View.GONE);
+				syncPhoto.setVisibility(View.GONE);
+				syncPhoto.setImageDrawable(null);
+				syncProgress.setVisibility(View.INVISIBLE);
+				syncText.setText(activity.getString(R.string.no_space_left));
+				backupCompleteIcon.setVisibility(View.GONE);
+				activity.updateQuotaInfo();
+				break;
+			case SyncManager.STATUS_DISABLED:
+				refreshCProgress.setVisibility(View.GONE);
+				syncPhoto.setVisibility(View.GONE);
+				syncPhoto.setImageDrawable(null);
+				syncProgress.setVisibility(View.INVISIBLE);
+				syncText.setText(activity.getString(R.string.sync_disabled));
+				backupCompleteIcon.setVisibility(View.GONE);
+				activity.updateQuotaInfo();
+				break;
+			case SyncManager.STATUS_NOT_WIFI:
+				refreshCProgress.setVisibility(View.GONE);
+				syncPhoto.setVisibility(View.GONE);
+				syncPhoto.setImageDrawable(null);
+				syncProgress.setVisibility(View.INVISIBLE);
+				syncText.setText(activity.getString(R.string.sync_not_on_wifi));
+				backupCompleteIcon.setVisibility(View.GONE);
+				activity.updateQuotaInfo();
+				break;
+			case SyncManager.STATUS_BATTERY_LOW:
+				refreshCProgress.setVisibility(View.GONE);
+				syncPhoto.setVisibility(View.GONE);
+				syncPhoto.setImageDrawable(null);
+				syncProgress.setVisibility(View.INVISIBLE);
+				syncText.setText(activity.getString(R.string.sync_battery_low));
+				backupCompleteIcon.setVisibility(View.GONE);
+				activity.updateQuotaInfo();
+				break;
 		}
 	}
 
