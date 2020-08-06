@@ -2,27 +2,25 @@ package org.stingle.photos.Sync;
 
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 
 public class SyncWorker extends Worker {
 
-
+	Context context;
 	public SyncWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
 		super(context, workerParams);
+		this.context = context;
 	}
 
 	@NonNull
 	@Override
 	public Result doWork() {
-		if(LoginManager.isLoggedIn(getApplicationContext())) {
-			SyncManager.syncCloudToLocalDb(getApplicationContext(), null, AsyncTask.THREAD_POOL_EXECUTOR);
-		}
+		SyncManager.startSync(context, SyncAsyncTask.MODE_CLOUD_TO_LOCAL);
 		return Result.success();
 	}
 }

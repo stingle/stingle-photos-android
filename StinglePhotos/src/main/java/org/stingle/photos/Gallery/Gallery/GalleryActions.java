@@ -244,7 +244,7 @@ public class GalleryActions {
 				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.trashing_files), null);
 
-					SyncManager.stopSync();
+					SyncManager.stopSync(activity);
 					MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish() {
@@ -279,7 +279,7 @@ public class GalleryActions {
 			return;
 		}*/
 		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.restoring_files), null);
-		SyncManager.stopSync();
+		SyncManager.stopSync(activity);
 		MoveFileAsyncTask moveTask = new MoveFileAsyncTask(activity, files, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {
@@ -318,7 +318,7 @@ public class GalleryActions {
 				String.format(activity.getString(R.string.confirm_delete_files), String.valueOf(files.size())),
 				R.drawable.ic_action_delete,
 				(dialog, which) -> {
-					SyncManager.stopSync();
+					SyncManager.stopSync(activity);
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.deleting_files), null);
 
 					new DeleteFilesAsyncTask(activity, files, new SyncManager.OnFinish() {
@@ -342,7 +342,7 @@ public class GalleryActions {
 				R.drawable.ic_action_delete,
 				(dialog, which) -> {
 					final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.emptying_trash), null);
-					SyncManager.stopSync();
+					SyncManager.stopSync(activity);
 					new EmptyTrashAsyncTask(activity, new SyncManager.OnFinish(){
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {

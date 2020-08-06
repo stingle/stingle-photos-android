@@ -1,9 +1,10 @@
-package org.stingle.photos.Sync;
+package org.stingle.photos.Sync.SyncSteps;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
+import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -12,6 +13,7 @@ import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
@@ -19,6 +21,9 @@ import java.io.IOException;
 
 public class FSSync {
 	public static boolean sync(Context context){
+		if(!LoginManager.isLoggedIn(context)) {
+			return false;
+		}
 		boolean isFirstSyncDone = Helpers.getPreference(context, SyncManager.PREF_FIRST_SYNC_DONE, false);
 		if(isFirstSyncDone){
 			return false;

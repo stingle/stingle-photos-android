@@ -8,7 +8,7 @@ import android.provider.OpenableColumns;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.Sync.ImportMedia;
+import org.stingle.photos.Sync.SyncSteps.ImportMedia;
 
 import java.io.File;
 import java.lang.ref.WeakReference;

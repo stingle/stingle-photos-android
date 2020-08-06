@@ -1,4 +1,4 @@
-package org.stingle.photos.Sync;
+package org.stingle.photos.Sync.SyncSteps;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleContact;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -30,6 +31,7 @@ import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
@@ -62,6 +64,9 @@ public class SyncCloudToLocalDb {
 	}
 
 	public boolean sync(){
+		if(!LoginManager.isLoggedIn(context)) {
+			return false;
+		}
 		SyncManager.setSyncStatus(context, SyncManager.STATUS_REFRESHING);
 
 		lastSeenTime = Helpers.getPreference(context, SyncManager.PREF_LAST_SEEN_TIME, (long) 0);

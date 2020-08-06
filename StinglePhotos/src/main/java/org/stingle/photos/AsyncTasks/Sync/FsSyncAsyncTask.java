@@ -3,7 +3,7 @@ package org.stingle.photos.AsyncTasks.Sync;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import org.stingle.photos.Sync.FSSync;
+import org.stingle.photos.Sync.SyncSteps.FSSync;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.lang.ref.WeakReference;

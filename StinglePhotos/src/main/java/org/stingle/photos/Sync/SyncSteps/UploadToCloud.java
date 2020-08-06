@@ -1,5 +1,9 @@
-package org.stingle.photos.Sync;
+package org.stingle.photos.Sync.SyncSteps;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -9,13 +13,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONObject;
-import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
+import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -23,10 +28,12 @@ import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Gallery.Gallery.GalleryActions;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
@@ -44,14 +51,23 @@ public class UploadToCloud {
 	private int uploadedFilesCount = 0;
 	private int totalFilesCount = 0;
 
+	public static NotificationManager mNotifyManager;
+	public static Notification.Builder notificationBuilder;
+	public static boolean isNotificationActive = false;
+
 	public UploadToCloud(Context context, AsyncTask<?,?,?> task){
 		this.context = context;
 		this.task = task;
 		dir = new File(FileManager.getHomeDir(context));
 		thumbDir = new File(FileManager.getThumbsDir(context));
+		mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 	public void upload(){
+		if(!LoginManager.isLoggedIn(context)) {
+			return;
+		}
+		showNotification();
 		boolean isUploadSuspended = Helpers.getPreference(context, SyncManager.PREF_SUSPEND_UPLOAD, false);
 		if(isUploadSuspended){
 			int lastAvailableSpace = Helpers.getPreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
@@ -84,6 +100,8 @@ public class UploadToCloud {
 		uploadSet(SyncManager.TRASH);
 		uploadSet(SyncManager.ALBUM);
 		SyncManager.setSyncStatus(context, SyncManager.STATUS_IDLE);
+		isNotificationActive = false;
+		removeNotification();
 	}
 
 	private int isUploadAllowed(Context context){
@@ -282,9 +300,50 @@ public class UploadToCloud {
 		params.putString("albumId", albumId);
 
 		SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING, params);
-		SyncAsyncTask.updateNotification(context, totalFilesCount, uploadedFilesCount);
+		updateNotification(totalFilesCount, uploadedFilesCount);
 	}
 
+	private void showNotification() {
+		if(isNotificationActive){
+			return;
+		}
 
+		isNotificationActive = true;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			String NOTIFICATION_CHANNEL_ID = "org.stingle.photos.sync";
+			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, context.getString(R.string.sync_channel_name), NotificationManager.IMPORTANCE_NONE);
+			chan.setLightColor(context.getColor(R.color.primaryLightColor));
+			chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+			NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+			assert manager != null;
+			manager.createNotificationChannel(chan);
+			notificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL_ID);
+		}
+		else{
+			notificationBuilder = new Notification.Builder(context);
+		}
+
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+				new Intent(context, GalleryActivity.class), 0);
+
+		Notification notification = notificationBuilder
+				.setSmallIcon(R.drawable.ic_sp)  // the status icon
+				.setWhen(System.currentTimeMillis())  // the time stamp
+				.setContentIntent(contentIntent)  // The intent to send when the entry is clicked
+				.build();
+
+		mNotifyManager.notify(R.string.sync_service_started, notification);
+	}
+
+	private void updateNotification(int totalItemsNumber, int uploadedFilesCount){
+		showNotification();
+		notificationBuilder.setProgress(totalItemsNumber, uploadedFilesCount, false);
+		notificationBuilder.setContentTitle(context.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
+		mNotifyManager.notify(R.string.sync_service_started, notificationBuilder.build());
+	}
+
+	private void removeNotification(){
+		mNotifyManager.cancel(R.string.sync_service_started);
+	}
 
 }

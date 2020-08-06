@@ -43,8 +43,6 @@ import com.google.android.material.snackbar.Snackbar;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.Sync.ImportMediaAsyncTask;
-import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -61,7 +59,7 @@ import org.stingle.photos.Gallery.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
 import org.stingle.photos.Gallery.Gallery.SyncBarHandler;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
-import org.stingle.photos.Sync.JobSchedulerService;
+import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -190,7 +188,7 @@ public class GalleryActivity extends AppCompatActivity
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
 			//sendMessageToSyncService(SyncService.MSG_START_SYNC);
-			(new SyncAsyncTask(this, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			SyncManager.startSync(this);
 			pullToRefresh.setRefreshing(false);
 		});
 
@@ -286,7 +284,7 @@ public class GalleryActivity extends AppCompatActivity
 			checkLoginAndInit();
 		}
 		if (SyncManager.isImportEnabled(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			JobSchedulerService.scheduleJob(this);
+			ImportJobSchedulerService.scheduleJob(this);
 		}
 	}
 
@@ -820,17 +818,6 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_delete_album) {
 			GalleryActions.deleteAlbum(this);
-		}
-		else if (id == R.id.action_autoimport) {
-			(new ImportMediaAsyncTask(this, new OnAsyncTaskFinish() {
-				@Override
-				public void onFinish(Boolean result) {
-					super.onFinish();
-					if(result) {
-						updateGalleryFragmentData();
-					}
-				}
-			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 
 		return super.onOptionsItemSelected(item);

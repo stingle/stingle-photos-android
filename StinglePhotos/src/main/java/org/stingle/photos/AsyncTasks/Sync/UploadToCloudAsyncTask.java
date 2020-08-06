@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Sync.UploadToCloud;
+import org.stingle.photos.Sync.SyncSteps.UploadToCloud;
 
 import java.lang.ref.WeakReference;
 

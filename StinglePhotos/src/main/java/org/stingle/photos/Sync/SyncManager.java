@@ -19,9 +19,8 @@ import androidx.work.WorkManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
-import org.stingle.photos.AsyncTasks.Sync.SyncCloudToLocalDbAsyncTask;
-import org.stingle.photos.AsyncTasks.Sync.UploadToCloudAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -47,7 +46,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 public class SyncManager {
@@ -119,21 +117,33 @@ public class SyncManager {
 	}
 
 	public static void startSync(Context context){
-		startSync(context, SyncAsyncTask.MODE_FULL);
+		startSync(context, SyncAsyncTask.MODE_FULL, null);
 	}
 
 	public static void startSync(Context context, int mode){
-		if(StinglePhotosApplication.syncStatus != SyncManager.STATUS_IDLE){
-			StinglePhotosApplication.syncRestartAfterFinish = true;
-			StinglePhotosApplication.syncRestartAfterFinishMode = mode;
-			return;
-		}
-		(new SyncAsyncTask(context, mode)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		startSync(context, mode, null);
 	}
 
-	public static void stopSync(){
+	public static void startSync(Context context, int mode, OnAsyncTaskFinish onFinishListener){
+		Log.e("SYNC_STATUS", StinglePhotosApplication.syncStatus + "");
+		if(StinglePhotosApplication.syncStatus != SyncManager.STATUS_IDLE || (SyncAsyncTask.instance != null && !SyncAsyncTask.instance.isCancelled())){
+			Log.e("SYNC_ACTIONS", "Schedule restart");
+			StinglePhotosApplication.syncRestartAfterFinish = true;
+			StinglePhotosApplication.syncRestartAfterFinishMode = mode;
+			if(SyncAsyncTask.instance == null || SyncAsyncTask.instance.isCancelled()){
+				Log.e("SYNC_ACTIONS", "Actually started sync async task");
+				(new SyncAsyncTask(context, mode)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			}
+			return;
+		}
+		Log.e("SYNC_ACTIONS", "Normal start of sync");
+		(new SyncAsyncTask(context, mode, onFinishListener)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
+	public static void stopSync(Context context){
 		if(SyncAsyncTask.instance != null){
 			SyncAsyncTask.instance.cancel(true);
+			SyncManager.setSyncStatus(context, SyncManager.STATUS_IDLE);
 		}
 	}
 
@@ -146,23 +156,6 @@ public class SyncManager {
 			serviceIntent.putExtra("RESTART_SYNC", true);
 			context.startService(serviceIntent);
 		}
-	}
-
-	public static UploadToCloudAsyncTask uploadToCloud(Context context, OnFinish onFinish, Executor executor) {
-		if (executor == null) {
-			executor = AsyncTask.THREAD_POOL_EXECUTOR;
-		}
-		UploadToCloudAsyncTask uploadTask = new UploadToCloudAsyncTask(context, onFinish);
-		uploadTask.executeOnExecutor(executor);
-		return uploadTask;
-
-	}
-
-	public static void syncCloudToLocalDb(Context context, OnFinish onFinish, Executor executor) {
-		if (executor == null) {
-			executor = AsyncTask.THREAD_POOL_EXECUTOR;
-		}
-		(new SyncCloudToLocalDbAsyncTask(context, onFinish)).executeOnExecutor(executor);
 	}
 
 

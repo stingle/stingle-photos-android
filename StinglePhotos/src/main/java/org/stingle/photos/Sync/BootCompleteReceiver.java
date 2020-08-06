@@ -6,14 +6,16 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-public class SyncWorkStartReceiver extends BroadcastReceiver {
+import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
+
+public class BootCompleteReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.e("stingleStarted", "started");
-		SyncManager.startPeriodicWork(context);
 		if (SyncManager.isImportEnabled(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			JobSchedulerService.scheduleJob(context);
+			ImportJobSchedulerService.scheduleJob(context);
+			SyncManager.startPeriodicWork(context);
 		}
 	}
 }

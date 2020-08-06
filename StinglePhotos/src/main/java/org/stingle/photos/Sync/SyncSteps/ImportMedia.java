@@ -1,4 +1,4 @@
-package org.stingle.photos.Sync;
+package org.stingle.photos.Sync.SyncSteps;
 
 import android.content.ContentUris;
 import android.content.Context;
@@ -10,8 +10,10 @@ import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Query.ImportedIdsDb;
 import org.stingle.photos.Files.ImportFile;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
@@ -20,6 +22,9 @@ public class ImportMedia {
 
 
 	public static boolean importMedia(Context context){
+		if(!LoginManager.isLoggedIn(context)) {
+			return false;
+		}
 		Log.e("EnteredImportMedia", "1");
 		boolean isSomethingImported = false;
 
