@@ -31,7 +31,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		Helpers.setLocale(this);
 		setContentView(R.layout.activity_change_password);
 
 		setTitle(getString(R.string.change_password));

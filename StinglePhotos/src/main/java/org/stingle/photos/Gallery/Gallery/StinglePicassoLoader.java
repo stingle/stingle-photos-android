@@ -69,7 +69,7 @@ public class StinglePicassoLoader extends RequestHandler {
 		}
 		else if(setStr.equals("a")){
 			set = SyncManager.ALBUM;
-			sort = StingleDb.SORT_ASC;
+			//sort = StingleDb.SORT_ASC;
 		}
 
 		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position), albumId, sort);

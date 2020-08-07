@@ -330,6 +330,7 @@ public class UploadToCloud {
 				.setSmallIcon(R.drawable.ic_sp)  // the status icon
 				.setWhen(System.currentTimeMillis())  // the time stamp
 				.setContentIntent(contentIntent)  // The intent to send when the entry is clicked
+				.setOngoing(true)
 				.build();
 
 		mNotifyManager.notify(R.string.sync_service_started, notification);

@@ -84,7 +84,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 			Result result = null;
 
-			StingleDbFile albumDbFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_ASC);
+			StingleDbFile albumDbFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_DESC);
 
 			if (albumDbFile != null) {
 				byte[] decryptedData;

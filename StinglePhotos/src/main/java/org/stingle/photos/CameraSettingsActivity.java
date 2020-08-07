@@ -21,6 +21,7 @@ public class CameraSettingsActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Helpers.setLocale(this);
 		setContentView(R.layout.activity_camera_settings);
 		getSupportFragmentManager()
 				.beginTransaction()

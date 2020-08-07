@@ -378,6 +378,9 @@
     <string name="import_enable">Turn on auto import</string>
     <string name="import_existing">Import existing items</string>
     <string name="auto_import_notice">You can turn on or off auto import anytime in settings</string>
+    <string name="language">Language</string>
+    <string name="english">English</string>
+    <string name="russian">Russian</string>
 
 
 </resources>

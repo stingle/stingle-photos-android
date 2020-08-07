@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -501,6 +504,23 @@ public class Helpers {
 		else if(theme.equals("light")) {
 			AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 		}
+	}
+
+	public static void setLocale(Context context){
+		SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
+		String localeCode = prefs.getString("locale", "auto");
+
+		if(localeCode.equals("auto")){
+			return;
+		}
+
+		Resources resources = context.getResources();
+		DisplayMetrics dm = resources.getDisplayMetrics();
+		Configuration config = resources.getConfiguration();
+		Locale locale = new Locale(localeCode.toLowerCase());
+		config.setLocale(locale);
+		config.setLayoutDirection(locale);
+		resources.updateConfiguration(config, dm);
 	}
 
 	public static String generateAlbumName() {

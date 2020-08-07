@@ -147,18 +147,6 @@ public class SyncManager {
 		}
 	}
 
-	public static void restartSync(Context context){
-		if(SyncService.isInstanceCreated()){
-			SyncService.getInstance().restartSync();
-		}
-		else {
-			Intent serviceIntent = new Intent(context, SyncService.class);
-			serviceIntent.putExtra("RESTART_SYNC", true);
-			context.startService(serviceIntent);
-		}
-	}
-
-
 	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int set) {
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
@@ -258,6 +246,8 @@ public class SyncManager {
 						galleryDb.deleteFile(file.filename);
 					}
 				}
+				album.dateModified = System.currentTimeMillis();
+				albumsDb.updateAlbum(album);
 
 				galleryDb.close();
 			} else if (fromSet == SyncManager.ALBUM && (toSet == SyncManager.GALLERY || toSet == SyncManager.TRASH)) {
@@ -313,6 +303,9 @@ public class SyncManager {
 						albumFilesDb.deleteAlbumFile(file.id);
 					}
 				}
+				toDbAlbum.dateModified = System.currentTimeMillis();
+				albumsDb.updateAlbum(toDbAlbum);
+
 			} else if (fromSet == SyncManager.GALLERY && toSet == SyncManager.TRASH) {
 				GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 				GalleryTrashDb trashDb = new GalleryTrashDb(context, SyncManager.TRASH);

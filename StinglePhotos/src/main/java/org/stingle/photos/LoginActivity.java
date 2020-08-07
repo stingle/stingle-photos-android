@@ -22,7 +22,7 @@ public class LoginActivity extends AppCompatActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		Helpers.setLocale(this);
 		Helpers.blockScreenshotsIfEnabled(this);
 
 		setContentView(R.layout.activity_login);

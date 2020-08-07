@@ -1,15 +1,16 @@
 package org.stingle.photos;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.viewpager.widget.ViewPager;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
+
+import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Welcome.WelcomeItem;
 import org.stingle.photos.Welcome.WelcomePagerAdapter;
 
@@ -28,6 +29,7 @@ public class WelcomeActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Helpers.setLocale(this);
 		setContentView(R.layout.activity_welcome);
 
 		viewPager = findViewById(R.id.viewPager);

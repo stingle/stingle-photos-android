@@ -25,6 +25,9 @@ public class ImportMedia {
 		if(!LoginManager.isLoggedIn(context)) {
 			return false;
 		}
+		if(!SyncManager.isImportEnabled(context)){
+			return false;
+		}
 		Log.e("EnteredImportMedia", "1");
 		boolean isSomethingImported = false;
 

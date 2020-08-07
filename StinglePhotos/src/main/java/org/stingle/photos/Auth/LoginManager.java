@@ -27,7 +27,6 @@ import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.Sync.SyncService;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.WelcomeActivity;
 
@@ -381,9 +380,7 @@ public class LoginManager {
         Helpers.deleteTmpDir(context);
 
         SyncManager.resetAndStopSync(context);
-
-        Intent intent = new Intent(context, SyncService.class);
-        context.stopService(intent);
+        SyncManager.stopSync(context);
 
         if(context instanceof Activity){
             redirectToLogin((Activity)context);

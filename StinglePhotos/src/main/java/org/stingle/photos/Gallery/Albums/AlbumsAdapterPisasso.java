@@ -455,8 +455,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 	}
 
 	public StingleDbAlbum getAlbumAtPosition(int position){
-		int sortBy = (view == AlbumsFragment.VIEW_SHARES ? AlbumsDb.SORT_BY_MODIFIED_DATE : AlbumsDb.SORT_BY_CREATION_DATE);
-		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), sortBy, StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
+		return db.getAlbumAtPosition(translateGalleryPosToDbPos(position), AlbumsDb.SORT_BY_MODIFIED_DATE, StingleDb.SORT_DESC, AlbumsFragment.getAlbumIsHiddenByView(view), AlbumsFragment.getAlbumIsSharedByView(view));
 	}
 
 	@Override

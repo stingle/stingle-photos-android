@@ -59,6 +59,7 @@ public class StinglePhotosApplication extends Application{
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		Helpers.applyTheme(prefs.getString("theme", "auto"));
+		Helpers.setLocale(getApplicationContext());
     }
 
     public static Crypto getCrypto() {
@@ -94,5 +95,4 @@ public class StinglePhotosApplication extends Application{
 	public static String getApiUrl(){
 		return context.getString(R.string.api_server_url) + "v" + StinglePhotosApplication.API_VERSION + "/";
 	}
-
 }

@@ -47,6 +47,7 @@ public class AutoImportSetup {
 
 		dialog.findViewById(R.id.import_skip).setOnClickListener(v -> {
 			sharedPrefs.edit().putBoolean(SyncManager.PREF_IMPORT_ENABLED, false).apply();
+			Helpers.storePreference(activity, SyncManager.LAST_IMPORTED_FILE_DATE, System.currentTimeMillis() / 1000);
 			Helpers.storePreference(activity, SyncManager.PREF_IMPORT_SETUP, true);
 			dialog.dismiss();
 		});

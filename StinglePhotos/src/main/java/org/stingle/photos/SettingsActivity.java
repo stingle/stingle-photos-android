@@ -49,6 +49,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Helpers.setLocale(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
 		if (savedInstanceState == null) {
@@ -252,21 +253,7 @@ public class SettingsActivity extends AppCompatActivity implements
 		private void initBlockScreenshotsSettings() {
 			SwitchPreference blockScreenshotsSetting = findPreference("block_screenshots");
 			blockScreenshotsSetting.setOnPreferenceChangeListener((preference, newValue) -> {
-				final Context context = getContext();
-				Helpers.showConfirmDialog(
-						context,
-						getString(R.string.app_restart_question),
-						getString(R.string.need_restart),
-						null,
-						(dialogInterface, i) -> {
-
-					Intent intent = new Intent(context, GalleryActivity.class);
-					intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-					//intent.putExtra(KEY_RESTART_INTENT, nextIntent);
-					context.startActivity(intent);
-
-					Runtime.getRuntime().exit(0);
-				}, null);
+				restartApp(getContext());
 				return true;
 			});
 		}
@@ -307,12 +294,21 @@ public class SettingsActivity extends AppCompatActivity implements
 			setPreferencesFromResource(R.xml.appearance_preferences, rootKey);
 
 			initThemePref();
+			initLanguagePref();
 		}
 
 		private void initThemePref() {
 			ListPreference pref = findPreference("theme");
 			pref.setOnPreferenceChangeListener((preference, newValue) -> {
 				Helpers.applyTheme((String) newValue);
+				return true;
+			});
+		}
+
+		private void initLanguagePref() {
+			ListPreference pref = findPreference("locale");
+			pref.setOnPreferenceChangeListener((preference, newValue) -> {
+				restartApp(getContext());
 				return true;
 			});
 		}
@@ -390,5 +386,22 @@ public class SettingsActivity extends AppCompatActivity implements
 				return true;
 			});
 		}
+	}
+
+	private static void restartApp(Context context){
+		Helpers.showConfirmDialog(
+				context,
+				context.getString(R.string.app_restart_question),
+				context.getString(R.string.need_restart),
+				null,
+				(dialogInterface, i) -> {
+
+					Intent intent = new Intent(context, GalleryActivity.class);
+					intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+					//intent.putExtra(KEY_RESTART_INTENT, nextIntent);
+					context.startActivity(intent);
+
+					Runtime.getRuntime().exit(0);
+				}, null);
 	}
 }

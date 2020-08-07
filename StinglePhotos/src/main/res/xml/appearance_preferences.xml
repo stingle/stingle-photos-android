@@ -9,4 +9,13 @@
         app:entryValues="@array/themesValues"
         app:useSimpleSummaryProvider="true" />
 
+    <ListPreference
+        app:icon="@drawable/ic_language"
+        app:key="locale"
+        app:title="@string/language"
+        app:defaultValue="auto"
+        app:entries="@array/locales"
+        app:entryValues="@array/localeValues"
+        app:useSimpleSummaryProvider="true" />
+
 </PreferenceScreen>

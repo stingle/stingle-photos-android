@@ -117,9 +117,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		result.albumId = albumId;
 
 		int sort = StingleDb.SORT_DESC;
-		if(set == SyncManager.ALBUM){
+		/*if(set == SyncManager.ALBUM){
 			sort = StingleDb.SORT_ASC;
-		}
+		}*/
 
 		StingleDbFile dbFile = db.getFileAtPosition(position, albumId, sort);
 		result.filename = dbFile.filename;

@@ -69,7 +69,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		Helpers.setLocale(this);
 		setContentView(R.layout.activity_storage);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);

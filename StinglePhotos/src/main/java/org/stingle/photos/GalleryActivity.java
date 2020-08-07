@@ -138,7 +138,7 @@ public class GalleryActivity extends AppCompatActivity
 			}
 			else if(set == SyncManager.ALBUM){
 				db = new AlbumFilesDb(context);
-				sort = StingleDb.SORT_ASC;
+				//sort = StingleDb.SORT_ASC;
 			}
 			else{
 				return;
@@ -167,6 +167,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Helpers.setLocale(this);
 		setContentView(R.layout.activity_gallery);
 
 		Helpers.blockScreenshotsIfEnabled(this);

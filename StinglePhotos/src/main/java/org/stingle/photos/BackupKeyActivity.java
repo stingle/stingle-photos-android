@@ -18,6 +18,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Crypto.MnemonicUtils;
+import org.stingle.photos.Util.Helpers;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -35,6 +36,7 @@ public class BackupKeyActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Helpers.setLocale(this);
 		setContentView(R.layout.activity_backup_key);
 
 		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);

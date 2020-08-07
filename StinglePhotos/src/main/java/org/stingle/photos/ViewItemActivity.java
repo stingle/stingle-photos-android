@@ -71,6 +71,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		lbm = LocalBroadcastManager.getInstance(this);
 
 		super.onCreate(savedInstanceState);
+		Helpers.setLocale(this);
 		setContentView(R.layout.activity_view_item);
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -255,6 +256,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		else if (set == SyncManager.TRASH){
 			menu.findItem(R.id.share).setVisible(false);
 			menu.findItem(R.id.decrypt).setVisible(false);
+			menu.findItem(R.id.add_to_album).setVisible(false);
 			menu.findItem(R.id.trash).setVisible(false);
 		}
 		return true;
@@ -271,7 +273,7 @@ public class ViewItemActivity extends AppCompatActivity {
 		}
 		else if (set == SyncManager.ALBUM){
 			db = new AlbumFilesDb(this);
-			sort = StingleDb.SORT_ASC;
+			//sort = StingleDb.SORT_ASC;
 		}
 		else{
 			return false;
