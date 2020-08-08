@@ -158,6 +158,11 @@ public class AlbumFilesDb implements FilesDb {
 				selectionArgs.add("0");
 				selectionArgs.add("1");
 				break;
+			case GET_MODE_LOCAL_AND_REMOTE:
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs.add("1");
+				selectionArgs.add("1");
+				break;
 			case GET_MODE_LOCAL:
 				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ?";
 				selectionArgs.add("1");

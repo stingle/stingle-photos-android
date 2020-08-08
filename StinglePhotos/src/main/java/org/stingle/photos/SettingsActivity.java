@@ -27,6 +27,7 @@ import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Auth.PasswordReturnListener;
+import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -363,7 +364,7 @@ public class SettingsActivity extends AppCompatActivity implements
 							task.setWork(new GenericAsyncTask.GenericTaskWork() {
 								@Override
 								public Object execute(Context context) {
-									File cacheDir = new File(context.getCacheDir().getPath() + "/thumbCache");
+									File cacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
 									Helpers.deleteFolderRecursive(cacheDir);
 									return true;
 								}

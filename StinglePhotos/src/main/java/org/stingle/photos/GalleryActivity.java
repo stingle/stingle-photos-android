@@ -870,6 +870,9 @@ public class GalleryActivity extends AppCompatActivity
 			intent.setClass(this, BackupKeyActivity.class);
 			startActivity(intent);
 		}
+		else if (id == R.id.nav_free_up_space) {
+			GalleryActions.freeUpSpace(this);
+		}
 		else if (id == R.id.nav_settings) {
 			Intent intent = new Intent();
 			intent.setClass(this, SettingsActivity.class);

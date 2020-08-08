@@ -202,6 +202,12 @@ public class GalleryTrashDb implements FilesDb{
 				selectionArgs[0] = "0";
 				selectionArgs[1] = "1";
 				break;
+			case GET_MODE_LOCAL_AND_REMOTE:
+				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_IS_REMOTE + " = ?";
+				selectionArgs = new String[2];
+				selectionArgs[0] = "1";
+				selectionArgs[1] = "1";
+				break;
 			case GET_MODE_LOCAL:
 				selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ?";
 				selectionArgs = new String[1];

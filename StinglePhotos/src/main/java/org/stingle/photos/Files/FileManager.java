@@ -45,6 +45,7 @@ public class FileManager {
 
 	static final public String SHARE_CACHE_DIR = "share";
 	static final public String DECRYPT_DIR = "StinglePhotosDecrypted";
+	static final public String THUMB_CACHE_DIR = "thumbCache";
 
 	public static byte[] getAndCacheThumb(Context context, String filename, int set) throws IOException {
 		return getAndCacheThumb(context,filename, set,null);
@@ -57,7 +58,7 @@ public class FileManager {
 			cacheDir = new File(cachePath);
 		}
 		else {
-			cacheDir = new File(context.getCacheDir().getPath() + "/thumbCache");
+			cacheDir = new File(context.getCacheDir().getPath() + "/" + THUMB_CACHE_DIR);
 
 		}
 		File cachedFile = new File(cacheDir.getPath() + "/" + filename);

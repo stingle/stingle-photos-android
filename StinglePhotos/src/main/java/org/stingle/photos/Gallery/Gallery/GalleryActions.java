@@ -25,7 +25,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.stingle.photos.AsyncTasks.CalculateFreeUpSpaceAsyncTask;
 import org.stingle.photos.AsyncTasks.DecryptFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.FreeUpSpaceAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
@@ -564,6 +566,55 @@ public class GalleryActions {
 					}).setAlbumId(activity.getCurrentAlbumId()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				},
 				null);
+	}
+
+	public static void freeUpSpace(GalleryActivity activity){
+		final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
+
+		new CalculateFreeUpSpaceAsyncTask(activity, new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish(Long totalSize) {
+				super.onFinish();
+				spinner.dismiss();
+
+				if(totalSize == 0){
+					Helpers.showInfoDialog(activity, activity.getString(R.string.free_up_space_nothing), activity.getString(R.string.free_up_space_nothing_desc));
+					return;
+				}
+
+				int sizeMb = (int)(totalSize / (1024 * 1024));
+
+				String size = Helpers.formatSpaceUnits(sizeMb);
+
+				Helpers.showConfirmDialog(
+						activity,
+						activity.getString(R.string.free_up_space_confirm, size),
+						activity.getString(R.string.free_up_space_confirm_desc, size),
+						null,
+						(dialog, which) -> {
+							final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
+
+							new FreeUpSpaceAsyncTask(activity, new OnAsyncTaskFinish() {
+								@Override
+								public void onFinish() {
+									super.onFinish();
+									activity.updateGalleryFragmentData();
+									spinner.dismiss();
+									Helpers.showInfoDialog(activity, activity.getString(R.string.success), activity.getString(R.string.free_up_space_success, size));
+								}
+
+								@Override
+								public void onFail() {
+									super.onFail();
+									activity.updateGalleryFragmentData();
+									spinner.dismiss();
+									Helpers.showAlertDialog(activity, activity.getString(R.string.success), activity.getString(R.string.free_up_space_fail));
+								}
+							}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						},
+						null);
+			}
+		}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 }

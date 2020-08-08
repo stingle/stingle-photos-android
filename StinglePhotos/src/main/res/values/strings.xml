@@ -170,9 +170,9 @@
     <string name="website_link">Official Website</string>
     <string name="block_screenshots">Disallow screenshots of this app</string>
     <string name="need_restart">For this setting to take effect application needs to be restarted. Do you want to restart it now?</string>
-    <string name="enable_backup">Enable backup and sync</string>
-    <string name="enable_backup_desc">Backup and sync your photos and videos to the cloud as soon as you take or import them</string>
-    <string name="pref_header_sync">Backup and Sync</string>
+    <string name="enable_backup">Enable backup</string>
+    <string name="enable_backup_desc">Backup your photos and videos to the cloud as soon as you take or import them</string>
+    <string name="pref_header_sync">Backup</string>
     <string name="upload_only_on_wifi">Backup only on Wifi</string>
     <string name="upload_only_on_wifi_desc">Backup only when you are connected to Wifi network</string>
     <string name="upload_battery">Don\'t backup if battery is below</string>
@@ -380,7 +380,14 @@
     <string name="auto_import_notice">You can turn on or off auto import anytime in settings</string>
     <string name="language">Language</string>
     <string name="english">English</string>
-    <string name="russian">Russian</string>
+    <string name="russian">Русский</string>
+    <string name="free_up_space">Free up space</string>
+    <string name="free_up_space_confirm">Free up %s?</string>
+    <string name="free_up_space_confirm_desc">This action will free up %s from your device by deleting backed files from your local storage. Continue?</string>
+    <string name="free_up_space_success">Successfully freed up %s of space</string>
+    <string name="free_up_space_fail">Free up space has failed!</string>
+    <string name="free_up_space_nothing">Nothing to delete</string>
+    <string name="free_up_space_nothing_desc">There are no backed up files that we can safely delete from your device at this point</string>
 
 
 </resources>

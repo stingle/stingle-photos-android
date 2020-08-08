@@ -8,8 +8,9 @@ public interface FilesDb {
 	public static final int GET_MODE_ALL = 0;
 	public static final int GET_MODE_ONLY_LOCAL = 1;
 	public static final int GET_MODE_ONLY_REMOTE = 2;
-	public static final int GET_MODE_LOCAL = 3;
-	public static final int GET_MODE_REMOTE = 4;
+	public static final int GET_MODE_LOCAL_AND_REMOTE = 3;
+	public static final int GET_MODE_LOCAL = 4;
+	public static final int GET_MODE_REMOTE = 5;
 
 	public static final int INITIAL_VERSION = 1;
 
