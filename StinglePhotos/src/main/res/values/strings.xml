@@ -187,7 +187,7 @@
 
 
     <string name="welcome">Welcome</string>
-    <string name="welcome_header1">Trust no one Encryption</string>
+    <string name="welcome_header1">Zero knowledge encryption</string>
     <string name="welcome_desc1">Your data yours and only yours. Nobody except you can see it. Even we as a provider, our cloud provider, government or any other entity can\'t see your data. It\'s always encrypted and secure!</string>
     <string name="welcome_header2">True privacy</string>
     <string name="welcome_desc2">Stingle Photos aims to keep you as anonymous as possible.  We don\'t collect any personal information, analytics, we don\'t serve any ads.</string>
@@ -374,7 +374,7 @@
     <string name="all_folders">All folders</string>
     <string name="auto_import_title">Auto import settings</string>
     <string name="auto_import_title_desc">Photos and videos from your device will be automatically imported, encrypted and backed up to your Stingle Photos account</string>
-    <string name="import_notenable">Skip for now</string>
+    <string name="import_notenable">Skip</string>
     <string name="import_enable">Turn on auto import</string>
     <string name="import_existing">Import existing items</string>
     <string name="auto_import_notice">You can turn on or off auto import anytime in settings</string>

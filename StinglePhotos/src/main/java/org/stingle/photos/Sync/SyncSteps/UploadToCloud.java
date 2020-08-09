@@ -67,7 +67,6 @@ public class UploadToCloud {
 		if(!LoginManager.isLoggedIn(context)) {
 			return;
 		}
-		showNotification();
 		boolean isUploadSuspended = Helpers.getPreference(context, SyncManager.PREF_SUSPEND_UPLOAD, false);
 		if(isUploadSuspended){
 			int lastAvailableSpace = Helpers.getPreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
@@ -91,7 +90,7 @@ public class UploadToCloud {
 			SyncManager.setSyncStatus(context, allowedStatus);
 			return;
 		}
-
+		showNotification();
 		totalFilesCount = getFilesCountToUpload(SyncManager.GALLERY) + getFilesCountToUpload(SyncManager.TRASH) + getFilesCountToUpload(SyncManager.ALBUM);
 
 		SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING);

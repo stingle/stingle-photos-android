@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -284,7 +283,7 @@ public class GalleryActivity extends AppCompatActivity
 			SyncManager.startPeriodicWork(this);
 			checkLoginAndInit();
 		}
-		if (SyncManager.isImportEnabled(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+		if (SyncManager.isImportEnabled(this)) {
 			ImportJobSchedulerService.scheduleJob(this);
 		}
 	}

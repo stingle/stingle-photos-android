@@ -11,9 +11,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.stingle.photos.R;
+import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -40,6 +42,12 @@ public class AutoImportSetup {
 		BottomSheetDialog dialog = new BottomSheetDialog(activity);
 		dialog.setContentView(dialogView);
 		dialog.setCancelable(false);
+		BottomSheetBehavior mBehavior = dialog.getBehavior();
+
+		dialog.setOnShowListener(dialogInterface -> {
+			//mBehavior.setPeekHeight(dialogView.getHeight());
+			mBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+		});
 
 		Switch importDelete = dialog.findViewById(R.id.import_delete);
 		TextView importFromValue = dialog.findViewById(R.id.import_from_value);
@@ -60,6 +68,7 @@ public class AutoImportSetup {
 			else{
 				Helpers.storePreference(activity, SyncManager.LAST_IMPORTED_FILE_DATE, 0L);
 			}
+			ImportJobSchedulerService.scheduleJob(activity);
 			SyncManager.startSync(activity);
 			Helpers.storePreference(activity, SyncManager.PREF_IMPORT_SETUP, true);
 			dialog.dismiss();

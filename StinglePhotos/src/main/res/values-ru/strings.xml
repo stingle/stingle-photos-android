@@ -186,8 +186,8 @@
 
 
     <string name="welcome">Добро пожаловать</string>
-    <string name="welcome_header1">Шифрование \"Не доверяй никому\"</string>
-    <string name="welcome_desc1">Ваши данные - ваши и только ваши. Никто, кроме вас, не может их увидеть. Даже мы как провайдер, наш облачный провайдер, правительство или любая другая организация не могут видеть ваши данные. Они всегда зашифрованы и в безопасности!</string>
+    <string name="welcome_header1">Шифрование с нулевым разглашением</string>
+    <string name="welcome_desc1">Ваши данные - ваши и только ваши! Никто, кроме вас, не может их увидеть. Даже мы как провайдер, наш облачный провайдер, правительство или любая другая организация не могут увидеть ваши данные. Они всегда зашифрованы и в безопасности!</string>
     <string name="welcome_header2">Настоящая конфиденциальность</string>
     <string name="welcome_desc2">Stingle Photos стремится сохранить вашу максимальную анонимность.  Мы не собираем личную информацию, аналитику и не размещаем рекламу.</string>
     <string name="welcome_header3">Резервное копирование и синхронизация</string>
@@ -259,9 +259,9 @@
     <string name="password_for_biometrics">Для настройки биометрической авторизации введите пароль</string>
     <string name="password_for_backup">Чтобы показать свою резервную фразу, введите пароль</string>
     <string name="password_for_key_backup">Для создания резервной копии ключей введите пароль</string>
-    <string name="exit">Выход</string>
+    <string name="exit">Отключить</string>
     <string name="albums">Альбомы</string>
-    <string name="sharing">Общий доступ</string>
+    <string name="sharing">Общие альбомы</string>
     <string name="enter_album_name">Введите название альбома</string>
     <string name="add_album_failed">Не удалось добавить альбом</string>
     <string name="add_to_album">Добавить в альбом</string>
@@ -285,7 +285,7 @@
     <string name="allow_copy">Копирование</string>
     <string name="allow_copy_desc">Участники могут копировать фотографии и видео в свою библиотеку и делать скриншоты</string>
     <string name="or">или</string>
-    <string name="unlock">Разблокировать</string>
+    <string name="unlock">ОК</string>
     <string name="pref_header_appearance">Внешний вид</string>
     <string name="theme">Тема</string>
     <string name="auto">Следовать за системой</string>
@@ -373,7 +373,7 @@
     <string name="auto_import_title">Настройки авто импортирования</string>
     <string name="auto_import_title_desc">Фото и видео с вашего устройства будут автоматически импортированы, зашифрованы и синхнизированы с вашим аккаунтом Stingle Photos</string>
     <string name="import_notenable">Не сейчас</string>
-    <string name="import_enable">Включить авто импорт</string>
+    <string name="import_enable">Включить\nавто импорт</string>
     <string name="import_existing">Импортировать существующие файлы</string>
     <string name="auto_import_notice">Вы можете включить или выключить авто импортирование в любой момент из настроек</string>
     <string name="language">Язык</string>

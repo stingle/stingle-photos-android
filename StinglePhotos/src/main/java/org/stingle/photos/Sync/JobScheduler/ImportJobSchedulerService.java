@@ -11,8 +11,6 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import androidx.annotation.RequiresApi;
-
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.BuildConfig;
@@ -21,7 +19,7 @@ import org.stingle.photos.Sync.SyncManager;
 @SuppressLint("SpecifyJobSchedulerIdRange")
 public class ImportJobSchedulerService extends JobService {
 
-	private static final int JOB_ID = 12;
+	private static final int JOB_ID = 12456453;
 
 	// A pre-built JobInfo we use for scheduling our job.
 	private static JobInfo JOB_INFO = null;
@@ -33,25 +31,26 @@ public class ImportJobSchedulerService extends JobService {
 	}
 
 	public static void scheduleJob(Context context) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-			return;
-		}
-
 		if (JOB_INFO != null) {
 			getJobInfo(context);
 		}
 		else {
 			JobScheduler js = context.getSystemService(JobScheduler.class);
 			JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, new ComponentName(BuildConfig.APPLICATION_ID, ImportJobSchedulerService.class.getName()));
-			builder.addTriggerContentUri(new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
-			builder.addTriggerContentUri(new JobInfo.TriggerContentUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
-			builder.setTriggerContentMaxDelay(500);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				builder.addTriggerContentUri(new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+				builder.addTriggerContentUri(new JobInfo.TriggerContentUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+				builder.setTriggerContentMaxDelay(1000);
+			}
+			else{
+				builder.setPeriodic(300000);
+			}
+
 			JOB_INFO = builder.build();
 			js.schedule(JOB_INFO);
 		}
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.N)
 	@Override
 	public boolean onStartJob(final JobParameters params) {
 		Context context = this;
@@ -60,26 +59,23 @@ public class ImportJobSchedulerService extends JobService {
 			return false;
 		}
 
-		if (params.getTriggeredContentAuthorities() != null) {
-			if (params.getTriggeredContentUris() != null) {
-				Log.e("ImportRequest", "received");
-				SyncManager.startSync(this, SyncAsyncTask.MODE_IMPORT_AND_UPLOAD, new OnAsyncTaskFinish() {
-					@Override
-					public void onFinish() {
-						super.onFinish();
-						jobFinished(params, true);
-					}
-
-					@Override
-					public void onFail() {
-						super.onFail();
-						jobFinished(params, true);
-					}
-				});
-
-				scheduleJob(this);
+		Log.e("ImportRequest", "received");
+		SyncManager.startSync(this, SyncAsyncTask.MODE_IMPORT_AND_UPLOAD, new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish() {
+				super.onFinish();
+				jobFinished(params, true);
 			}
-		}
+
+			@Override
+			public void onFail() {
+				super.onFail();
+				jobFinished(params, true);
+			}
+		});
+
+		scheduleJob(this);
+
 		return true;
 	}
 

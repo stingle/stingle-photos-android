@@ -67,13 +67,6 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			initNow = bundle.getBoolean("initNow", true);
 		}
 
-		if(!parentActivity.isSyncBarDisabled()){
-			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_with_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
-		}
-		else{
-			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
-		}
-
 		if(currentSet == SyncManager.TRASH){
 			((TextView)noPhotosHolder.findViewById(R.id.no_photos_text)).setText(R.string.no_photos_trash);
 			((TextView)noPhotosHolder.findViewById(R.id.no_photos_text_desc)).setText(R.string.no_photos_trash_desc);
@@ -132,6 +125,13 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		}
 		Log.d("lastScrollPosition", lastScrollPosition + "");
 		layoutManager.scrollToPosition(lastScrollPosition);
+
+		if(!parentActivity.isSyncBarDisabled()){
+			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_with_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+		}
+		else{
+			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+		}
 	}
 
 	@Override

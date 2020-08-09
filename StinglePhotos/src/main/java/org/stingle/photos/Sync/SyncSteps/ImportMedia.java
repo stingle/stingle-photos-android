@@ -20,6 +20,7 @@ import java.io.File;
 
 public class ImportMedia {
 
+	public static final int REFRESH_GALLERY_AFTER_N_IMPORT = 10;
 
 	public static boolean importMedia(Context context){
 		if(!LoginManager.isLoggedIn(context)) {
@@ -91,7 +92,7 @@ public class ImportMedia {
 				parentColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
 			}
 
-
+			int importCountForRefresh = 0;
 			ImportedIdsDb db = new ImportedIdsDb(context);
 			Log.e("cursorCount", "" + cursor.getCount());
 			while (cursor.moveToNext()) {
@@ -138,9 +139,13 @@ public class ImportMedia {
 
 					if (ImportFile.importFile(context, contentUri, SyncManager.GALLERY, null, dateAddedMillis, null)) {
 						isSomethingImported = true;
-						LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 						if(SyncManager.isImportDeleteEnabled(context)){
 							context.getApplicationContext().getContentResolver().delete(contentUri, null, null);
+						}
+						importCountForRefresh++;
+						if(importCountForRefresh > REFRESH_GALLERY_AFTER_N_IMPORT) {
+							LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
+							importCountForRefresh = 0;
 						}
 					}
 				}
@@ -150,6 +155,7 @@ public class ImportMedia {
 				}
 			}
 
+			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 			Helpers.storePreference(context, SyncManager.LAST_IMPORTED_FILE_DATE, lastImportedFileDate);
 
 			db.close();

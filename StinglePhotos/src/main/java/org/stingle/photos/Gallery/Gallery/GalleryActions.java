@@ -116,9 +116,10 @@ public class GalleryActions {
 		adapter.setSubTextSize(12);
 		adapter.setLayoutStyle(AlbumsAdapterPisasso.LAYOUT_LIST);
 		adapter.setListener(new AlbumsAdapterPisasso.Listener() {
+			ProgressDialog spinner;
 			@Override
 			public void onClick(int index, int type) {
-				final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
+				spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
 				OnAsyncTaskFinish onAddFinish = new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
@@ -177,6 +178,12 @@ public class GalleryActions {
 			}
 
 			private void addToAlbum(MoveFileAsyncTask addSyncTask, String thisAlbumId){
+				StingleDbAlbum album = GalleryHelpers.getAlbum(activity, thisAlbumId);
+				if(files != null && album != null && !album.isOwner && !SyncManager.areFilesAlreadyUploaded(files)){
+					Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
+					spinner.dismiss();
+					return;
+				}
 				if(isFromAlbum) {
 					addSyncTask.setFromSet(SyncManager.ALBUM);
 					addSyncTask.setFromAlbumId(albumId);

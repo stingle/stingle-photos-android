@@ -267,6 +267,7 @@ public class SettingsActivity extends AppCompatActivity implements
 			setPreferencesFromResource(R.xml.sync_preferences, rootKey);
 
 			initBatteryPref();
+			initDisableBackup();
 		}
 
 		private void initBatteryPref() {
@@ -278,6 +279,18 @@ public class SettingsActivity extends AppCompatActivity implements
 				return true;
 			});
 		}
+
+		private void initDisableBackup() {
+			SwitchPreference enableImportSetting = findPreference("enable_backup");
+
+			enableImportSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				boolean isEnabled = (boolean) newValue;
+				if (!isEnabled) {
+					SyncManager.stopSync(getContext());
+				}
+				return true;
+			});
+		}
 	}
 
 	public static class AutoImportPreferenceFragment extends PreferenceFragmentCompat {
@@ -285,6 +298,19 @@ public class SettingsActivity extends AppCompatActivity implements
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.import_preferences, rootKey);
+			initEnableAutoImport();
+		}
+
+		private void initEnableAutoImport() {
+			SwitchPreference enableImportSetting = findPreference(SyncManager.PREF_IMPORT_ENABLED);
+
+			enableImportSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				boolean isEnabled = (boolean) newValue;
+				if (isEnabled) {
+					Helpers.storePreference(getContext(), SyncManager.LAST_IMPORTED_FILE_DATE, System.currentTimeMillis() / 1000);
+				}
+				return true;
+			});
 		}
 	}
 
