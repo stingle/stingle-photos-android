@@ -20,7 +20,6 @@ import androidx.work.WorkManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -61,6 +60,7 @@ public class SyncManager {
 	static final public int STATUS_DISABLED = 4;
 	static final public int STATUS_NOT_WIFI = 5;
 	static final public int STATUS_BATTERY_LOW = 6;
+	static final public int STATUS_IMPORTING = 7;
 
 	public static final String PREF_LAST_SEEN_TIME = "file_last_seen_time";
 	public static final String PREF_TRASH_LAST_SEEN_TIME = "trash_last_seen_time";

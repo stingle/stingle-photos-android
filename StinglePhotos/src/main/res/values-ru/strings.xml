@@ -386,4 +386,6 @@
     <string name="free_up_space_fail">Освобождение места не удалось!</string>
     <string name="free_up_space_nothing">Нечего удалять</string>
     <string name="free_up_space_nothing_desc">На данный момент у вас на устройсве нет файлов которые мы можем безопасно удалить чтоб освободить место</string>
+
+    <string name="importing_file">"Импортируется файл %1$s из %2$s"</string>
 </resources>

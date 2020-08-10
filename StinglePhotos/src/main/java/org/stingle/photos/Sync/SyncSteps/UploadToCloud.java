@@ -310,7 +310,7 @@ public class UploadToCloud {
 		isNotificationActive = true;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			String NOTIFICATION_CHANNEL_ID = "org.stingle.photos.sync";
-			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, context.getString(R.string.sync_channel_name), NotificationManager.IMPORTANCE_NONE);
+			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, context.getString(R.string.sync_channel_name), NotificationManager.IMPORTANCE_LOW);
 			chan.setLightColor(context.getColor(R.color.primaryLightColor));
 			chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
 			NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -330,13 +330,14 @@ public class UploadToCloud {
 				.setWhen(System.currentTimeMillis())  // the time stamp
 				.setContentIntent(contentIntent)  // The intent to send when the entry is clicked
 				.setOngoing(true)
+				.setOnlyAlertOnce(true)
 				.build();
 
 		mNotifyManager.notify(R.string.sync_service_started, notification);
 	}
 
 	private void updateNotification(int totalItemsNumber, int uploadedFilesCount){
-		showNotification();
+		//showNotification();
 		notificationBuilder.setProgress(totalItemsNumber, uploadedFilesCount, false);
 		notificationBuilder.setContentTitle(context.getString(R.string.uploading_file, String.valueOf(uploadedFilesCount), String.valueOf(totalItemsNumber)));
 		mNotifyManager.notify(R.string.sync_service_started, notificationBuilder.build());

@@ -1,4 +1,4 @@
-package org.stingle.photos.AsyncTasks.Sync;
+package org.stingle.photos.Sync;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +26,7 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	static final public int MODE_FULL = 0;
 	static final public int MODE_IMPORT_AND_UPLOAD = 1;
 	static final public int MODE_CLOUD_TO_LOCAL = 2;
+	static final public int MODE_CLOUD_TO_LOCAL_AND_UPLOAD = 3;
 
 	public SyncAsyncTask(Context context) {
 		this(context, MODE_FULL, null);
@@ -77,6 +78,10 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			case MODE_CLOUD_TO_LOCAL:
 				syncCloudToLocalDb(context);
 				break;
+			case MODE_CLOUD_TO_LOCAL_AND_UPLOAD:
+				syncCloudToLocalDb(context);
+				upload(context);
+				break;
 		}
 
 
@@ -96,7 +101,7 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	public void autoImport(Context context){
-		ImportMedia.importMedia(context);
+		(new ImportMedia(context,  this)).importMedia();
 	}
 
 	public void syncCloudToLocalDb(Context context){

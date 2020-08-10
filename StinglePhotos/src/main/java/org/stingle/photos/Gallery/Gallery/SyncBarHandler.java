@@ -74,6 +74,21 @@ public class SyncBarHandler {
 				syncText.setText(activity.getString(R.string.refreshing));
 				backupCompleteIcon.setVisibility(View.GONE);
 				break;
+			case SyncManager.STATUS_IMPORTING:
+				refreshCProgress.setVisibility(View.VISIBLE);
+				syncPhoto.setVisibility(View.GONE);
+				syncPhoto.setImageDrawable(null);
+				syncProgress.setVisibility(View.INVISIBLE);
+				syncText.setText(activity.getString(R.string.importing_files));
+				backupCompleteIcon.setVisibility(View.GONE);
+
+				if(StinglePhotosApplication.syncStatusParams != null) {
+					Bundle params = StinglePhotosApplication.syncStatusParams;
+					syncProgress.setMax(params.getInt("totalFilesCount"));
+					syncProgress.setProgress(params.getInt("importedFilesCount"));
+					syncText.setText(activity.getString(R.string.importing_file, String.valueOf(params.getInt("importedFilesCount")), String.valueOf(params.getInt("totalFilesCount"))));
+				}
+				break;
 			case SyncManager.STATUS_UPLOADING:
 				refreshCProgress.setVisibility(View.GONE);
 				syncPhoto.setVisibility(View.VISIBLE);

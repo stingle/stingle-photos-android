@@ -437,7 +437,7 @@ public class SyncCloudToLocalDb {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			String NOTIFICATION_CHANNEL_ID = "org.stingle.photos.sharing";
-			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, context.getString(R.string.sharing_channel_name), NotificationManager.IMPORTANCE_NONE);
+			NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, context.getString(R.string.sharing_channel_name), NotificationManager.IMPORTANCE_DEFAULT);
 			chan.setLightColor(context.getColor(R.color.primaryLightColor));
 			chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
 			chan.setImportance(NotificationManager.IMPORTANCE_DEFAULT);

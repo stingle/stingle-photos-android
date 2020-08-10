@@ -41,7 +41,7 @@ public class ImportMediaAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			return null;
 		}
 
-		return ImportMedia.importMedia(myContext);
+		return (new ImportMedia(myContext, this)).importMedia();
 	}
 
 

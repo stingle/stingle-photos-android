@@ -299,6 +299,7 @@ public class SettingsActivity extends AppCompatActivity implements
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.import_preferences, rootKey);
 			initEnableAutoImport();
+			initAutoImportSource();
 		}
 
 		private void initEnableAutoImport() {
@@ -309,6 +310,15 @@ public class SettingsActivity extends AppCompatActivity implements
 				if (isEnabled) {
 					Helpers.storePreference(getContext(), SyncManager.LAST_IMPORTED_FILE_DATE, System.currentTimeMillis() / 1000);
 				}
+				return true;
+			});
+		}
+
+		private void initAutoImportSource() {
+			ListPreference importFromSetting = findPreference(SyncManager.PREF_IMPORT_FROM);
+
+			importFromSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				SyncManager.stopSync(getContext());
 				return true;
 			});
 		}

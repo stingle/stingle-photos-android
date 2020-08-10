@@ -12,7 +12,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
+import org.stingle.photos.Sync.SyncAsyncTask;
 import org.stingle.photos.BuildConfig;
 import org.stingle.photos.Sync.SyncManager;
 

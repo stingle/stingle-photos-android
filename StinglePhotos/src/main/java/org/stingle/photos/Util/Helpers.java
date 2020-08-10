@@ -14,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.PowerManager;
@@ -561,6 +562,18 @@ public class Helpers {
 		a.recycle();
 
 		return color;
+	}
+
+	public static Bitmap getVideoThumbnail(Context context, Uri uri) throws IllegalArgumentException,
+			SecurityException{
+		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+		if(uri == null){
+			return null;
+		}
+
+		retriever.setDataSource(context,uri);
+		return retriever.getFrameAtTime();
 	}
 
 }

@@ -3,7 +3,6 @@ package org.stingle.photos.Files;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
@@ -115,7 +114,7 @@ public class ImportFile {
 
 				Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
 			} else if (fileType == Crypto.FILE_TYPE_VIDEO) {
-				Bitmap thumb = getVideoThumbnail(context, uri);
+				Bitmap thumb = Helpers.getVideoThumbnail(context, uri);
 				if (thumb != null) {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
@@ -164,15 +163,4 @@ public class ImportFile {
 		return true;
 	}
 
-	private static Bitmap getVideoThumbnail(Context context, Uri uri) throws IllegalArgumentException,
-			SecurityException{
-		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-
-		if(uri == null){
-			return null;
-		}
-
-		retriever.setDataSource(context,uri);
-		return retriever.getFrameAtTime();
-	}
 }

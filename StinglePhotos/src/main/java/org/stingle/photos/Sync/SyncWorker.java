@@ -7,8 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import org.stingle.photos.AsyncTasks.Sync.SyncAsyncTask;
-
 public class SyncWorker extends Worker {
 
 	Context context;
@@ -20,7 +18,7 @@ public class SyncWorker extends Worker {
 	@NonNull
 	@Override
 	public Result doWork() {
-		SyncManager.startSync(context, SyncAsyncTask.MODE_CLOUD_TO_LOCAL);
+		SyncManager.startSync(context, SyncAsyncTask.MODE_CLOUD_TO_LOCAL_AND_UPLOAD);
 		return Result.success();
 	}
 }
