@@ -222,10 +222,6 @@ public class ImportMedia {
 		isNotificationActive = false;
 		removeNotification();
 
-		if(isSomethingImported){
-			SyncManager.startSync(context);
-		}
-
 		return isSomethingImported;
 	}
 

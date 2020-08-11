@@ -263,4 +263,11 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		return files;
 	}
 
+	public int getFirstVisibleItemNumber(){
+		if(layoutManager != null) {
+			return layoutManager.findFirstVisibleItemPosition();
+		}
+		return 0;
+	}
+
 }

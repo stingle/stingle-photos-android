@@ -64,30 +64,7 @@ public class UploadToCloud {
 	}
 
 	public void upload(){
-		if(!LoginManager.isLoggedIn(context)) {
-			return;
-		}
-		boolean isUploadSuspended = Helpers.getPreference(context, SyncManager.PREF_SUSPEND_UPLOAD, false);
-		if(isUploadSuspended){
-			int lastAvailableSpace = Helpers.getPreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
-			int availableSpace = Helpers.getAvailableUploadSpace(context);
-			if(availableSpace > lastAvailableSpace || availableSpace > 0){
-				Helpers.storePreference(context, SyncManager.PREF_SUSPEND_UPLOAD, false);
-				Helpers.deletePreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE);
-				isUploadSuspended = false;
-				Log.d("upload", "resuming upload");
-			}
-		}
-
-		int allowedStatus = isUploadAllowed(context);
-		if(isUploadSuspended) {
-			Log.d("upload", "upload is disabled, no space");
-			SyncManager.setSyncStatus(context, SyncManager.STATUS_NO_SPACE_LEFT);
-			return;
-		}
-		else if(allowedStatus != 0) {
-			Log.d("upload", "upload is disabled, not allowed");
-			SyncManager.setSyncStatus(context, allowedStatus);
+		if(!isUploadAllowed()){
 			return;
 		}
 		showNotification();
@@ -103,7 +80,38 @@ public class UploadToCloud {
 		removeNotification();
 	}
 
-	private int isUploadAllowed(Context context){
+	private boolean isUploadAllowed(){
+		if(!LoginManager.isLoggedIn(context)) {
+			return false;
+		}
+		boolean isUploadSuspended = Helpers.getPreference(context, SyncManager.PREF_SUSPEND_UPLOAD, false);
+		if(isUploadSuspended){
+			int lastAvailableSpace = Helpers.getPreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE, 0);
+			int availableSpace = Helpers.getAvailableUploadSpace(context);
+			if(availableSpace > lastAvailableSpace || availableSpace > 0){
+				Helpers.storePreference(context, SyncManager.PREF_SUSPEND_UPLOAD, false);
+				Helpers.deletePreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE);
+				isUploadSuspended = false;
+				Log.d("upload", "resuming upload");
+			}
+		}
+
+		int allowedStatus = isUploadAllowedInternal(context);
+		if(isUploadSuspended) {
+			Log.d("upload", "upload is disabled, no space");
+			SyncManager.setSyncStatus(context, SyncManager.STATUS_NO_SPACE_LEFT);
+			return false;
+		}
+		else if(allowedStatus != 0) {
+			Log.d("upload", "upload is disabled, not allowed");
+			SyncManager.setSyncStatus(context, allowedStatus);
+			return false;
+		}
+
+		return true;
+	}
+
+	private int isUploadAllowedInternal(Context context){
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
 		if(!SyncManager.isBackupEnabled(context)){
@@ -189,9 +197,12 @@ public class UploadToCloud {
 			return;
 		}
 
-		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, null, null);
+		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_DESC, null, null);
 		while(result.moveToNext()) {
 			if(task != null && task.isCancelled()){
+				break;
+			}
+			if(!isUploadAllowed()){
 				break;
 			}
 			uploadedFilesCount++;
@@ -202,6 +213,9 @@ public class UploadToCloud {
 		Cursor reuploadResult = db.getReuploadFilesList();
 		while(reuploadResult.moveToNext()) {
 			if(task != null && task.isCancelled()){
+				break;
+			}
+			if(!isUploadAllowed()){
 				break;
 			}
 			uploadedFilesCount++;

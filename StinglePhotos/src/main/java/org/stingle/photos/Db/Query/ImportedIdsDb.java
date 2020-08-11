@@ -14,7 +14,7 @@ public class ImportedIdsDb {
 
 	private String tableName = StingleDbContract.Columns.TABLE_NAME_IMPORTED_IDS;
 
-	private final static int cleanupLimit = 100;
+	private final static int cleanupLimit = 500;
 
 	public ImportedIdsDb(Context context) {
 		db = new StingleDb(context);

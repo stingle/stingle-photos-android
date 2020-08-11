@@ -188,6 +188,7 @@ public class GalleryActivity extends AppCompatActivity
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
 			//sendMessageToSyncService(SyncService.MSG_START_SYNC);
+			SyncManager.stopSync(this);
 			SyncManager.startSync(this);
 			pullToRefresh.setRefreshing(false);
 		});
@@ -569,6 +570,9 @@ public class GalleryActivity extends AppCompatActivity
 		initCurrentFragment();
 		if(galleryFragment != null) {
 			galleryFragment.updateAutoFit();
+			if(galleryFragment.isSelectionModeActive()){
+				actionMode = startSupportActionMode(getActionModeCallback());
+			}
 		}
 		if(albumsFragment != null) {
 			albumsFragment.updateAutoFit();
@@ -602,8 +606,10 @@ public class GalleryActivity extends AppCompatActivity
 	public void enableSyncBar(){
 		if(isSyncEnabled) {
 			isSyncBarDisabled = false;
-			syncBarHandler.showSyncBar();
-			syncBarHandler.showSyncBarAnimated();
+			if(galleryFragment == null || (galleryFragment != null && galleryFragment.getFirstVisibleItemNumber() == 0)) {
+				syncBarHandler.showSyncBar();
+				syncBarHandler.showSyncBarAnimated();
+			}
 			syncBarHandler.updateSyncBar();
 		}
 	}
