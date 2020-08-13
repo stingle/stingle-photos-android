@@ -310,6 +310,7 @@ public class SettingsActivity extends AppCompatActivity implements
 				if (isEnabled) {
 					Helpers.storePreference(getContext(), SyncManager.LAST_IMPORTED_FILE_DATE, System.currentTimeMillis() / 1000);
 				}
+				SyncManager.stopSync(getContext());
 				return true;
 			});
 		}

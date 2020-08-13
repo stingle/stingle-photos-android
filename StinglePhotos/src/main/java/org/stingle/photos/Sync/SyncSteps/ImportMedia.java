@@ -19,6 +19,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Query.ImportedIdsDb;
+import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ImportFile;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
@@ -174,6 +175,10 @@ public class ImportMedia {
 				Log.e("parentName", parentName);
 				boolean isParentFolderIsOk = true;
 				if(SyncManager.getImportFrom(context).equals("camera_folder") && !parentName.equalsIgnoreCase("Camera")){
+					isParentFolderIsOk = false;
+				}
+
+				if(parentName.equalsIgnoreCase(FileManager.DECRYPT_DIR)){
 					isParentFolderIsOk = false;
 				}
 

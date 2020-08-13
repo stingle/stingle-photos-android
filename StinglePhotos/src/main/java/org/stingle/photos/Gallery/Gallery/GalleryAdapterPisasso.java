@@ -54,7 +54,8 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private Picasso picasso;
 	private LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
 	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
-	private ArrayList<DatePosition> datePositions = new ArrayList<DatePosition>();
+	private ArrayList<DatePosition> datePositions = new ArrayList<>();
+	private ArrayList<Integer> datePositionsPlain = new ArrayList<>();
 	private int set = SyncManager.GALLERY;
 	private String albumId = null;
 	private int DB_SORT = StingleDb.SORT_DESC;
@@ -209,21 +210,17 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	private void calculateDatePositions(){
 		datePositions.clear();
+		datePositionsPlain.clear();
 		int totalItems = 0;
 		for(DateGroup group : dates){
 			datePositions.add(new DatePosition(totalItems, group.date));
-
+			datePositionsPlain.add(totalItems);
 			totalItems += group.itemCount + 1;
 		}
 	}
 
 	private boolean isPositionIsDate(int position){
-		for(DatePosition dp : datePositions){
-			if(dp.position == position){
-				return true;
-			}
-		}
-		return false;
+		return datePositionsPlain.contains(position);
 	}
 
 	private PosTranslate translatePos(int pos){
