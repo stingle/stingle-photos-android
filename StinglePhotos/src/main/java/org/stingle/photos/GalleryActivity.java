@@ -579,7 +579,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		findViewById(R.id.contentHolder).setVisibility(View.VISIBLE);
 		findViewById(R.id.bottom_navigation).setVisibility(View.VISIBLE);
-		if(currentFragment != FRAGMENT_ALBUMS_LIST) {
+		if(currentFragment != FRAGMENT_ALBUMS_LIST && !(currentFragment == FRAGMENT_GALLERY && currentSet == SyncManager.TRASH)) {
 			findViewById(R.id.import_fab).setVisibility(View.VISIBLE);
 		}
 		if(!dontStartSyncYet){
