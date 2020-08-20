@@ -16,5 +16,6 @@ public class BootCompleteReceiver extends BroadcastReceiver {
 			ImportJobSchedulerService.scheduleJob(context);
 		}
 		SyncManager.startPeriodicWork(context);
+		SyncManager.startSync(context);
 	}
 }
