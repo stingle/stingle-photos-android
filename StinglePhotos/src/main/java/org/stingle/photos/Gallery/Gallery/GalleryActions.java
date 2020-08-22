@@ -408,10 +408,6 @@ public class GalleryActions {
 	}
 
 	public static void deleteAlbum(GalleryActivity activity) {
-		if(activity.getCurrentAlbumId() != null && !SyncManager.areFilesAlreadyUploaded(activity, activity.getCurrentAlbumId())){
-			Snackbar.make(activity.findViewById(R.id.drawer_layout), activity.getString(R.string.wait_for_upload), Snackbar.LENGTH_LONG).show();
-			return;
-		}
 		Helpers.showConfirmDialog(
 				activity,
 				activity.getString(R.string.delete_question),
