@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -47,7 +48,7 @@ public class ImportFile {
 					filename = returnCursor.getString(nameIndex);
 					fileSize = returnCursor.getLong(sizeIndex);
 
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+					if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 						try {
 							int pendingIndex = returnCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_PENDING);
 							String isPending = returnCursor.getString(pendingIndex);

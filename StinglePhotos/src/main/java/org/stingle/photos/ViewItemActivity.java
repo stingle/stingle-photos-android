@@ -38,6 +38,7 @@ import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.ViewItem.ViewItemAsyncTask;
 import org.stingle.photos.ViewItem.ViewPagerAdapter;
 
 import java.util.ArrayList;
@@ -142,6 +143,7 @@ public class ViewItemActivity extends AppCompatActivity {
 	protected void onPause() {
 		super.onPause();
 		viewPager.setAdapter(null);
+		ViewItemAsyncTask.removeRemainingGetOriginalTasks();
 		if(adapter != null){
 			adapter.releasePlayers();
 			adapter = null;
