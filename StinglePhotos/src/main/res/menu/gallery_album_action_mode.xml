@@ -15,11 +15,6 @@
                 android:title="@string/share_to_apps" />
         </menu>
     </item>
-    <!--<item
-        android:id="@+id/add_to_this_album"
-        android:icon="@drawable/ic_action_add"
-        android:title="@string/add_to_this_album"
-        app:showAsAction="always|withText" />-->
     <item
         android:id="@+id/add_to_album"
         android:icon="@drawable/ic_action_move"
@@ -35,4 +30,10 @@
         android:icon="@drawable/ic_action_delete"
         android:title="@string/move_to_trash"
         app:showAsAction="always|withText" />
+    <item
+        android:id="@+id/set_as_album_cover"
+        android:icon="@drawable/ic_image"
+        android:title="@string/set_as_album_cover"
+        android:visible="false"
+        app:showAsAction="never" />
 </menu>

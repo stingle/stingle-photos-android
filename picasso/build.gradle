@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
 buildscript {
   ext.versions = [
-          'compileSdk': 30,
+          'compileSdk': 29,
           'minSdk': 14,
-          'targetSdk': 30,
+          'targetSdk': 29,
           'sourceCompatibility': JavaVersion.VERSION_1_8,
           'targetCompatibility': JavaVersion.VERSION_1_8,
           'okhttp': '4.9.0',

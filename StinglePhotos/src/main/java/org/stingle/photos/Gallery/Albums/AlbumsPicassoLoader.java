@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import com.squareup.picasso3.Picasso;
 import com.squareup.picasso3.RequestHandler;
 
+import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
@@ -84,7 +85,26 @@ public class AlbumsPicassoLoader extends RequestHandler {
 
 			Result result = null;
 
-			StingleDbFile albumDbFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_DESC);
+			StingleDbFile albumDbFile = null;
+			boolean isBlankCover = false;
+
+			if(album.cover != null) {
+				albumDbFile = filesDb.getFileIfExists(album.cover, album.albumId);
+			}
+
+			if(albumDbFile == null) {
+				if (album.cover.equals(SetAlbumCoverAsyncTask.ALBUM_COVER_BLANK_TEXT)) {
+					isBlankCover = true;
+				}
+				else {
+					albumDbFile = filesDb.getFileAtPosition(0, album.albumId, StingleDb.SORT_DESC);
+				}
+			}
+
+			if (isBlankCover) {
+				returnNoImage(callback);
+				return;
+			}
 
 			if (albumDbFile != null) {
 				byte[] decryptedData;

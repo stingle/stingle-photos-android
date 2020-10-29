@@ -35,6 +35,7 @@ import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.LeaveAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.RenameAlbumAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -623,4 +624,27 @@ public class GalleryActions {
 		}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
+
+
+	public static void setAsAlbumCover(GalleryActivity activity, String albumId, int mode, String filename) {
+			SyncManager.stopSync(activity);
+			final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.changing_album_cover), null);
+
+			new SetAlbumCoverAsyncTask(activity, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					activity.updateGalleryFragmentData();
+					activity.exitActionMode();
+					spinner.dismiss();
+					SyncManager.startSync(activity);
+				}
+			})
+					.setAlbumId(albumId)
+					.setMode(mode)
+					.setFilename(filename)
+					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+
+	}
 }

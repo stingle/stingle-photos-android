@@ -20,11 +20,11 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 30
+    compileSdkVersion 29
     defaultConfig {
         applicationId "org.stingle.photos"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 29
     }
     buildTypes {
         release {

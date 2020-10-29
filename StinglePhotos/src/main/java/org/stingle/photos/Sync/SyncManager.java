@@ -683,6 +683,30 @@ public class SyncManager {
 		}
 	}
 
+	public static boolean notifyCloudAboutCoverChange(Context context, StingleDbAlbum album) {
+		HashMap<String, String> params = new HashMap<>();
+
+		params.put("albumId", album.albumId);
+		params.put("cover", album.cover);
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_cover_change_url), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
+	}
+
 	public static boolean areFilesAlreadyUploaded(Context context, String albumId){
 		AlbumFilesDb albumFilesDb = new AlbumFilesDb(context);
 

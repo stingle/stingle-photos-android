@@ -388,4 +388,8 @@
     <string name="free_up_space_nothing_desc">На данный момент у вас на устройсве нет файлов которые мы можем безопасно удалить чтоб освободить место</string>
 
     <string name="importing_file">"Импортируется файл %1$s из %2$s"</string>
+    <string name="set_as_album_cover">Установить как абложку альбома</string>
+    <string name="changing_album_cover">Устанавливается абложка на альбом…</string>
+    <string name="set_album_blank_cover">Установить пустую абложку на альбом</string>
+    <string name="reset_album_cover">Абложка по умолчанию</string>
 </resources>
