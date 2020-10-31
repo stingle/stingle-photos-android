@@ -272,7 +272,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		Log.e("GalleryActivity", "onResume");
 		isSyncEnabled = SyncManager.isBackupEnabled(this);
 		if(!isSyncEnabled){
 			disableSyncBar();

@@ -24,6 +24,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
@@ -244,15 +245,20 @@ public class ViewItemActivity extends AppCompatActivity {
 
 		if(set == SyncManager.ALBUM && albumId != null) {
 			StingleDbAlbum album = GalleryHelpers.getAlbum(this, albumId);
-			if(album != null && album.permissionsObj != null && !album.isOwner && album.isShared) {
-				if (!album.permissionsObj.allowShare) {
-					menu.findItem(R.id.share).setVisible(false);
+			if(album != null) {
+				if(album.isOwner){
+					menu.findItem(R.id.set_as_album_cover).setVisible(true);
 				}
-				if (!album.permissionsObj.allowCopy) {
-					menu.findItem(R.id.decrypt).setVisible(false);
-				}
+				else if(album.permissionsObj != null && album.isShared && !album.isOwner){
+					if (!album.permissionsObj.allowShare) {
+						menu.findItem(R.id.share).setVisible(false);
+					}
+					if (!album.permissionsObj.allowCopy) {
+						menu.findItem(R.id.decrypt).setVisible(false);
+					}
 
-				menu.findItem(R.id.trash).setVisible(false);
+					menu.findItem(R.id.trash).setVisible(false);
+				}
 			}
 		}
 		else if (set == SyncManager.TRASH){
@@ -286,7 +292,8 @@ public class ViewItemActivity extends AppCompatActivity {
 		}
 
 		ArrayList<StingleDbFile> files = new ArrayList<>();
-		files.add(db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort));
+		StingleDbFile currentFile = db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort);
+		files.add(currentFile);
 
 		if (id == R.id.share_stingle) {
 			GalleryActions.shareStingle(this, set, albumId, null, files, false, null);
@@ -337,6 +344,11 @@ public class ViewItemActivity extends AppCompatActivity {
 			moveTask.setToSet(SyncManager.TRASH);
 			moveTask.setIsMoving(true);
 			moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+		else if (id == R.id.set_as_album_cover) {
+			if(albumId != null) {
+				GalleryActions.setAsAlbumCover(this, albumId, SetAlbumCoverAsyncTask.ALBUM_COVER_FILE, currentFile.filename);
+			}
 		}
 
 

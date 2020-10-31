@@ -31,4 +31,10 @@
         android:icon="@drawable/ic_action_delete"
         android:title="@string/move_to_trash"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/set_as_album_cover"
+        android:icon="@drawable/ic_image"
+        android:title="@string/set_as_album_cover"
+        android:visible="false"
+        app:showAsAction="never" />
 </menu>

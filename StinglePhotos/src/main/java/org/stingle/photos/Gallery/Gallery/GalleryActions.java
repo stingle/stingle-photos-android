@@ -626,7 +626,7 @@ public class GalleryActions {
 
 
 
-	public static void setAsAlbumCover(GalleryActivity activity, String albumId, int mode, String filename) {
+	public static void setAsAlbumCover(AppCompatActivity activity, String albumId, int mode, String filename) {
 			SyncManager.stopSync(activity);
 			final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.changing_album_cover), null);
 
@@ -634,8 +634,10 @@ public class GalleryActions {
 				@Override
 				public void onFinish() {
 					super.onFinish();
-					activity.updateGalleryFragmentData();
-					activity.exitActionMode();
+					if(activity instanceof GalleryActivity) {
+						((GalleryActivity)activity).updateGalleryFragmentData();
+						((GalleryActivity)activity).exitActionMode();
+					}
 					spinner.dismiss();
 					SyncManager.startSync(activity);
 				}
