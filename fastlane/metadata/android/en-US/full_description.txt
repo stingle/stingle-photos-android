@@ -1,15 +1,25 @@
-Stingle Photos is a secure, zero knowledge photo/video encryption and backup application. Formerly known as SafeCamera.
-Stingle Photos is a convenient, easy to use Gallery/Camera application with Backup and Sync functionality for your photos and videos which seamlessly provides strong security, privacy and encryption.
-All photos and videos are encrypted prior to being stored and backed up, so they are secure at rest, in transit and on cloud storage.
-Stingle photos aims to keep you as anonymous as possible. For registration you only need to provide email and password and that's it. All metadata of photos and videos are 100% encrypted. We do not collect any personal information, analytics, we don't serve any ads.
-Stingle Photos uses libsodium for encryption. Libsodium is well vetted cryptographic library created by world famous cryptographers.
-Key features:
-Solid crypto model (developed in collaboration with world famous cryptographers who are part of a crypto team for ZCoin). Stingle Photos uses XChacha20 with Poly-1305 as a main symmetric algorithm for encryption which gives nearly 10x performance in comparison to AES256 on mobile devices. it's so fast that you really can't feel that you are browsing through encrypted files.
-Full video support, recording and playback
-Fingerprint and face unlock support for fast unlocking
-Ability to take photos and videos without entering password or providing fingerprint. Password or fingerprint will be needed only for viewing your photos and videos
-Backup and sync functionality. All your photos and videos are backed up in the background to the cloud and synced to other devices using the same account
-Free up space. You can delete local copies of files that are already backed up to free up space on your device.
-As anonymous as possible. Registration just takes email and password and you can start using the app.
-App is completely free and includes free 1GB cloud storage space. You only pay for more cloud storage. Of course no ads or third party libraries is used in the app like analytics.
-We as a provider don't have any ability to see anything in your account. We just can see number of files and their size, that's it. Whole system is designed in such a way that in the unlikely case that servers are hacked and EVERYTHING is stolen, hackers will not get anything valuable. Of course the same applies to law enforcement if they come to us with a subpoena.
+Stingle Photos is a secure, open-source photo, video cloud storage and backup application that is safe, ad-free and easy to use. It provides strong encryption and privacy to keep you safe from data breaches and leaks. Easily sync and backup and share your photos and videos on our secure cloud storage.
+
+Why use Stingle Photos safe cloud storage app?
+
+Successor of wildly popular SafeCamera application, Stingle Photos is an open-source, secure, end-to-end encrypted media backup application with the state-of-the-art security technologies that ensure your privacy.
+
+* We put our users first by prioritizing your privacy 
+* All your photos & videos are secured with end-to-end encryption
+* Unlike other companies, we only store the bare minimum of metadata on our servers: your email, registration date, payment plan, number of active devices, number and size of encrypted files
+* We don’t collect big data or track our users in any way
+* No need to fear for your data privacy - ONLY you can have access to your photos & videos
+
+Key features
+
+* Full on the fly encryption of video support: recording and playback
+* Fingerprint and face id support for fast unlocking
+* Ability to take photos & videos without entering a password or providing a fingerprint. 
+* Backup and sync functionality. All your photos & videos are backed up in the background to the cloud and synced to other devices using the same account
+* Albums for better library organization
+* Secure sharing. You can share photos and videos with friends and family with strong end-to-end encryption.
+* As anonymous as possible. Registration just takes an email and password to start using the app
+* Stingle Photos is 100% free and open-source. It includes 1GB free cloud storage space. You only pay if you need more cloud storage. No ads or third-party libraries like that can track you.
+* We as a provider can’t see anything in your account. If the servers ever get hacked or law enforcement agencies request access to your data, they won’t get anything valuable. 
+
+If you have any questions or suggestions, drop us a message at support@stingle.org

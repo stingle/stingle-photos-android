@@ -1,0 +1,4 @@
+- Now you can change album covers and even set it to blank
+- Fixed problem with immediate app locking setting
+- Fixed bug that was causing random crashes
+- Lot's of other small bugfixes

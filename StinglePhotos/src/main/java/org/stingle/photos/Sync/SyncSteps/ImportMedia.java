@@ -172,13 +172,13 @@ public class ImportMedia {
 				else{
 					parentName = (new File(cursor.getString(parentColumn))).getParentFile().getName();
 				}
-				Log.e("parentName", parentName);
+
 				boolean isParentFolderIsOk = true;
-				if(SyncManager.getImportFrom(context).equals("camera_folder") && !parentName.equalsIgnoreCase("Camera")){
+				if(SyncManager.getImportFrom(context).equals("camera_folder") && parentName != null && !parentName.equalsIgnoreCase("Camera")){
 					isParentFolderIsOk = false;
 				}
 
-				if(parentName.equalsIgnoreCase(FileManager.DECRYPT_DIR)){
+				if(parentName != null && parentName.equalsIgnoreCase(FileManager.DECRYPT_DIR)){
 					isParentFolderIsOk = false;
 				}
 

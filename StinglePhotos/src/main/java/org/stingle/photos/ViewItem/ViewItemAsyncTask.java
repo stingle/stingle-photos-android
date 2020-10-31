@@ -127,6 +127,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		}*/
 
 		StingleDbFile dbFile = db.getFileAtPosition(position, albumId, sort);
+		if(dbFile == null){
+			return null;
+		}
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
 		try {

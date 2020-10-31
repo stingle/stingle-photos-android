@@ -213,6 +213,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	}
 
 	public void updateDataSet(){
+		if(recyclerView == null){
+			return;
+		}
 		int lastScrollPos = recyclerView.getScrollY();
 		if(adapter != null) {
 			adapter.updateDataSet();

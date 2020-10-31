@@ -231,6 +231,10 @@ public class SyncManager {
 
 				StingleDbAlbum album = albumsDb.getAlbumById(toAlbumId);
 
+				if(album == null){
+					return false;
+				}
+
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
 					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.publicKey), null, null));
@@ -403,6 +407,10 @@ public class SyncManager {
 	}
 
 	public static boolean notifyCloudAboutFileMove(Context context, ArrayList<StingleDbFile> files, int setFrom, int setTo, String albumIdFrom, String albumIdTo, boolean isMoving, HashMap<String, String> headers) {
+		if(files == null){
+			return false;
+		}
+
 		HashMap<String, String> params = new HashMap<>();
 
 		params.put("setFrom", String.valueOf(setFrom));
