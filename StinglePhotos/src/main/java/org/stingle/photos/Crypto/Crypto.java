@@ -356,7 +356,6 @@ public class Crypto {
     }
 
     protected byte[] encryptSymmetric(byte[] key, byte[] nonce, byte[] data){
-        Log.d("Crypto", "encryptSymmetric");
         if(key.length != SecretBox.KEYBYTES){
             throw new InvalidParameterException("Invalid size of the key");
         }
