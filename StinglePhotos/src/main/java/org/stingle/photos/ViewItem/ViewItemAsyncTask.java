@@ -32,6 +32,7 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.FileDataSource;
 
 import org.json.JSONObject;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -59,6 +60,7 @@ import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTask.ViewItemTaskResult> {
@@ -83,6 +85,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private Crypto crypto;
 	private Crypto.Header videoFileHeader = null;
 
+	private static ArrayList<GetOriginalRemotePhotoTask> getOriginalRemotePhotoTasks = new ArrayList<>();
+	private final static int GET_ORIGINAL_TASKS_LIMIT = 3;
+
 
 	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int set, String albumId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
@@ -99,8 +104,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		this.memCache = memCache;
 		this.crypto = StinglePhotosApplication.getCrypto();
 
-		if (position < 0) {
-			position = 0;
+		if (this.position < 0) {
+			this.position = 0;
 		}
 	}
 
@@ -122,6 +127,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		}*/
 
 		StingleDbFile dbFile = db.getFileAtPosition(position, albumId, sort);
+		if(dbFile == null){
+			return null;
+		}
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
 		try {
@@ -292,7 +300,26 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					getOriginalTask.setImage(image);
 					getOriginalTask.setAttacher(attacher);
 					getOriginalTask.setGif(false);
+					getOriginalTask.setOnFinish(new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							getOriginalRemotePhotoTasks.remove(getOriginalTask);
+							Log.e("getOrigTask", "removed myself");
+						}
+					});
 					getOriginalTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+					getOriginalRemotePhotoTasks.add(getOriginalTask);
+
+					if(getOriginalRemotePhotoTasks.size() > GET_ORIGINAL_TASKS_LIMIT){
+						Log.e("getOrigTask", "tasks exceeds limit, it's: " + getOriginalRemotePhotoTasks.size() + " will remove " + (getOriginalRemotePhotoTasks.size()-GET_ORIGINAL_TASKS_LIMIT));
+						for(int i=0; i < getOriginalRemotePhotoTasks.size()-GET_ORIGINAL_TASKS_LIMIT; i++){
+							getOriginalRemotePhotoTasks.get(0).cancel(true);
+							getOriginalRemotePhotoTasks.remove(0);
+							Log.e("getOrigTask", "removed 1 task");
+						}
+					}
 				}
 				loading.setVisibility(View.INVISIBLE);
 				parent.addView(image);
@@ -426,6 +453,14 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 			}
 		};
+	}
+
+	public static void removeRemainingGetOriginalTasks(){
+		for(int i=0; i < getOriginalRemotePhotoTasks.size(); i++){
+			getOriginalRemotePhotoTasks.get(0).cancel(true);
+			getOriginalRemotePhotoTasks.remove(0);
+			Log.e("getOrigTask", "removed all 1 task");
+		}
 	}
 
 	public class ViewItemTaskResult {

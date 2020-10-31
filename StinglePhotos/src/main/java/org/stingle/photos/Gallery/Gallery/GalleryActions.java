@@ -35,6 +35,7 @@ import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.LeaveAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.RenameAlbumAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -119,12 +120,13 @@ public class GalleryActions {
 			ProgressDialog spinner;
 			@Override
 			public void onClick(int index, int type) {
-				spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
 				OnAsyncTaskFinish onAddFinish = new OnAsyncTaskFinish() {
 					@Override
 					public void onFinish() {
 						super.onFinish();
-						spinner.dismiss();
+						if(spinner != null) {
+							spinner.dismiss();
+						}
 						addAlbumDialog.dismiss();
 						if(activity instanceof GalleryActivity) {
 							((GalleryActivity)activity).exitActionMode();
@@ -149,19 +151,20 @@ public class GalleryActions {
 				addSyncTask.setIsMoving(isMoving);
 
 				if (type == AlbumsAdapterPisasso.TYPE_GALLERY) {
+					spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
 					addSyncTask.setFromSet(SyncManager.ALBUM);
 					addSyncTask.setToSet(SyncManager.GALLERY);
 					addSyncTask.setFromAlbumId(albumId);
 					addSyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 				else if (type == AlbumsAdapterPisasso.TYPE_ADD){
-					spinner.dismiss();
 					addAlbum(activity, new OnAsyncTaskFinish() {
 						@Override
 						public void onFinish(Object albumObj) {
 							super.onFinish(albumObj);
 
 							StingleDbAlbum album = (StingleDbAlbum) albumObj;
+							spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
 							addToAlbum(addSyncTask, album.albumId);
 						}
 
@@ -172,6 +175,7 @@ public class GalleryActions {
 					});
 				}
 				else {
+					spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.processing), null);
 					addToAlbum(addSyncTask, adapter.getAlbumAtPosition(index).albumId);
 				}
 
@@ -620,4 +624,29 @@ public class GalleryActions {
 		}).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
+
+
+	public static void setAsAlbumCover(AppCompatActivity activity, String albumId, int mode, String filename) {
+			SyncManager.stopSync(activity);
+			final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.changing_album_cover), null);
+
+			new SetAlbumCoverAsyncTask(activity, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish() {
+					super.onFinish();
+					if(activity instanceof GalleryActivity) {
+						((GalleryActivity)activity).updateGalleryFragmentData();
+						((GalleryActivity)activity).exitActionMode();
+					}
+					spinner.dismiss();
+					SyncManager.startSync(activity);
+				}
+			})
+					.setAlbumId(albumId)
+					.setMode(mode)
+					.setFilename(filename)
+					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+
+	}
 }

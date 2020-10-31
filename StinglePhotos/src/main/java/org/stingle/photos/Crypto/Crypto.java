@@ -2,8 +2,9 @@ package org.stingle.photos.Crypto;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Base64;
+import android.util.Log;
 
-import org.stingle.photos.StinglePhotosApplication;
 import com.goterl.lazycode.lazysodium.SodiumAndroid;
 import com.goterl.lazycode.lazysodium.interfaces.AEAD;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
@@ -11,6 +12,9 @@ import com.goterl.lazycode.lazysodium.interfaces.KeyDerivation;
 import com.goterl.lazycode.lazysodium.interfaces.PwHash;
 import com.goterl.lazycode.lazysodium.interfaces.SecretBox;
 import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
+
+import org.stingle.photos.StinglePhotosApplication;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,8 +28,6 @@ import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import android.util.Base64;
-
 import java.util.HashMap;
 
 public class Crypto {
@@ -354,7 +356,6 @@ public class Crypto {
     }
 
     protected byte[] encryptSymmetric(byte[] key, byte[] nonce, byte[] data){
-
         if(key.length != SecretBox.KEYBYTES){
             throw new InvalidParameterException("Invalid size of the key");
         }
@@ -385,7 +386,7 @@ public class Crypto {
     }
 
 
-    protected Header getNewHeader(byte[] symmetricKey, long dataSize, String filename, int fileType, byte[] fileId, int videoDuration) throws CryptoException {
+    public Header getNewHeader(byte[] symmetricKey, long dataSize, String filename, int fileType, byte[] fileId, int videoDuration) throws CryptoException {
         if(symmetricKey.length != KeyDerivation.MASTER_KEY_BYTES){
             throw new CryptoException("Symmetric key length is incorrect");
         }
@@ -406,7 +407,6 @@ public class Crypto {
     }
 
     protected void writeHeader(OutputStream out, Header header, byte[] publicKey) throws IOException, CryptoException {
-
         // File beggining - 2 bytes
         out.write(FILE_BEGGINING.getBytes());
 
@@ -490,6 +490,9 @@ public class Crypto {
         }
         if(privateKey == null) {
             privateKey = StinglePhotosApplication.getKey();
+            if(privateKey == null){
+                throw new CryptoException("Failed to get private key");
+            }
         }
 
         // Read and validate file beginning
@@ -610,24 +613,24 @@ public class Crypto {
         return filename;
     }
 
-    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, int videoDuration) throws IOException, CryptoException {
+    public Header encryptFile(OutputStream out, byte[] data, String filename, int fileType, int videoDuration) throws IOException, CryptoException {
         return encryptFile(out, data, filename, fileType, null, videoDuration);
     }
 
-    public byte[] encryptFile(OutputStream out, byte[] data, String filename, int fileType, byte[] fileId, int videoDuration) throws IOException, CryptoException {
+    public Header encryptFile(OutputStream out, byte[] data, String filename, int fileType, byte[] fileId, int videoDuration) throws IOException, CryptoException {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         return encryptFile(in, out, filename, fileType, data.length, fileId, videoDuration);
     }
 
-    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, int videoDuration) throws IOException, CryptoException {
+    public Header encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, int videoDuration) throws IOException, CryptoException {
         return encryptFile(in, out, filename, fileType, dataLength, null, videoDuration, null, null);
     }
 
-    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration) throws IOException, CryptoException {
+    public Header encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration) throws IOException, CryptoException {
         return encryptFile(in, out, filename, fileType, dataLength, fileId, videoDuration, null, null);
     }
 
-    public byte[] encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+    public Header encryptFile(InputStream in, OutputStream out, String filename, int fileType, long dataLength, byte[] fileId, int videoDuration, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
 
         byte[] symmetricKey = new byte[KeyDerivation.MASTER_KEY_BYTES];
@@ -643,7 +646,7 @@ public class Crypto {
 
         encryptData(in, out, header, progress, task);
 
-        return fileId;
+        return header;
     }
 
     public byte[] getNewFileId(){
@@ -759,7 +762,6 @@ public class Crypto {
         return decryptData(in, out, header, null, null);
     }
     protected boolean decryptData(InputStream in, OutputStream out, Header header, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
-
         if(header.chunkSize < 1 || header.chunkSize > MAX_BUFFER_LENGTH){
             throw new CryptoException("Invalid chunk size");
         }
@@ -1068,13 +1070,16 @@ public class Crypto {
     }
 
     public AlbumData parseAlbumData(String albumPKStr, String encAlbumSKStr, String metadataStr) throws IOException, CryptoException {
-
         byte[] albumPK = base64ToByteArray(albumPKStr);
 
         byte[] encAlbumSK = base64ToByteArray(encAlbumSKStr);
 
         byte[] publicKey = readPrivateFile(PUBLIC_KEY_FILENAME);
         byte[] privateKey = StinglePhotosApplication.getKey();
+
+        if(privateKey == null){
+            throw new CryptoException("Failed to get private key from memory");
+        }
 
         byte[] albumSK = new byte[encAlbumSK.length - Box.SEALBYTES];
 
@@ -1138,6 +1143,19 @@ public class Crypto {
         byte[] fileNewHeader = fileOut.toByteArray();
 
         Header thumbHeader = getFileHeader(headers.thumb, privateKeyFrom, publicKeyFrom);
+        ByteArrayOutputStream thumbOut = new ByteArrayOutputStream();
+        writeHeader(thumbOut, thumbHeader, publicKeyTo);
+        byte[] thumbNewHeader = thumbOut.toByteArray();
+
+        return assembleHeadersString(fileNewHeader, thumbNewHeader);
+    }
+
+    public String encryptFileHeaders(Header fileHeader, Header thumbHeader, byte[] publicKeyTo) throws IOException, CryptoException {
+
+        ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+        writeHeader(fileOut, fileHeader, publicKeyTo);
+        byte[] fileNewHeader = fileOut.toByteArray();
+
         ByteArrayOutputStream thumbOut = new ByteArrayOutputStream();
         writeHeader(thumbOut, thumbHeader, publicKeyTo);
         byte[] thumbNewHeader = thumbOut.toByteArray();

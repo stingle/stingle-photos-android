@@ -39,6 +39,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -271,7 +272,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		Log.e("GalleryActivity", "onResume");
 		isSyncEnabled = SyncManager.isBackupEnabled(this);
 		if(!isSyncEnabled){
 			disableSyncBar();
@@ -740,6 +741,8 @@ public class GalleryActivity extends AppCompatActivity
 								// Not owner of shared album
 								menu.findItem(R.id.action_album_settings).setVisible(false);
 								menu.findItem(R.id.action_rename_album).setVisible(false);
+								menu.findItem(R.id.action_set_blank_cover).setVisible(false);
+								menu.findItem(R.id.action_reset_cover).setVisible(false);
 								menu.findItem(R.id.action_album_settings).setVisible(false);
 								menu.findItem(R.id.action_delete_album).setVisible(false);
 
@@ -825,6 +828,12 @@ public class GalleryActivity extends AppCompatActivity
 		else if (id == R.id.action_delete_album) {
 			GalleryActions.deleteAlbum(this);
 		}
+		else if (id == R.id.action_set_blank_cover) {
+			GalleryActions.setAsAlbumCover(GalleryActivity.this, currentAlbumId, SetAlbumCoverAsyncTask.ALBUM_COVER_BLANK, null);
+		}
+		else if (id == R.id.action_reset_cover) {
+			GalleryActions.setAsAlbumCover(GalleryActivity.this, currentAlbumId, SetAlbumCoverAsyncTask.ALBUM_COVER_DEFAULT, null);
+		}
 
 		return super.onOptionsItemSelected(item);
 	}
@@ -891,7 +900,6 @@ public class GalleryActivity extends AppCompatActivity
 			LoginManager.logout(this);
 		}
 
-
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
 		drawer.closeDrawer(GravityCompat.START);
 		return true;
@@ -921,12 +929,19 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	public boolean onSelectionChanged(int count) {
 		if(actionMode != null) {
-			if(count == 0){
-				actionMode.setTitle("");
+			if(currentSet == SyncManager.ALBUM){
+				StingleDbAlbum album = GalleryHelpers.getCurrentAlbum(GalleryActivity.this);
+				if(album != null && album.isOwner){
+					if(galleryFragment != null && galleryFragment.getSelectedFiles().size() == 1){
+						actionMode.getMenu().findItem(R.id.set_as_album_cover).setVisible(true);
+					}
+					else{
+						actionMode.getMenu().findItem(R.id.set_as_album_cover).setVisible(false);
+					}
+				}
+
 			}
-			else {
-				actionMode.setTitle(String.valueOf(count));
-			}
+			actionMode.setTitle(String.valueOf(count));
 		}
 		return true;
 	}
@@ -1014,6 +1029,9 @@ public class GalleryActivity extends AppCompatActivity
 						break;
 					case R.id.send_back :
 						ShareManager.sendBackSelection(GalleryActivity.this, originalIntent, galleryFragment.getSelectedFiles(), currentSet, currentAlbumId);
+						break;
+					case R.id.set_as_album_cover :
+						GalleryActions.setAsAlbumCover(GalleryActivity.this,currentAlbumId, SetAlbumCoverAsyncTask.ALBUM_COVER_FILE, galleryFragment.getSelectedFiles().get(0).filename);
 						break;
 				}
 				return true;

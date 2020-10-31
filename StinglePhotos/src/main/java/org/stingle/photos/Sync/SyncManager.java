@@ -231,6 +231,10 @@ public class SyncManager {
 
 				StingleDbAlbum album = albumsDb.getAlbumById(toAlbumId);
 
+				if(album == null){
+					return false;
+				}
+
 				HashMap<String, String> newHeaders = new HashMap<>();
 				for (StingleDbFile file : files) {
 					newHeaders.put(file.filename, crypto.reencryptFileHeaders(file.headers, Crypto.base64ToByteArray(album.publicKey), null, null));
@@ -403,6 +407,10 @@ public class SyncManager {
 	}
 
 	public static boolean notifyCloudAboutFileMove(Context context, ArrayList<StingleDbFile> files, int setFrom, int setTo, String albumIdFrom, String albumIdTo, boolean isMoving, HashMap<String, String> headers) {
+		if(files == null){
+			return false;
+		}
+
 		HashMap<String, String> params = new HashMap<>();
 
 		params.put("setFrom", String.valueOf(setFrom));
@@ -671,6 +679,30 @@ public class SyncManager {
 			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
 
 			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_leave_url), postParams);
+			StingleResponse response = new StingleResponse(context, json, false);
+
+			if (response.isStatusOk()) {
+				return true;
+			}
+			return false;
+		}
+		catch (CryptoException e){
+			return false;
+		}
+	}
+
+	public static boolean notifyCloudAboutCoverChange(Context context, StingleDbAlbum album) {
+		HashMap<String, String> params = new HashMap<>();
+
+		params.put("albumId", album.albumId);
+		params.put("cover", album.cover);
+
+		try {
+			HashMap<String, String> postParams = new HashMap<>();
+			postParams.put("token", KeyManagement.getApiToken(context));
+			postParams.put("params", CryptoHelpers.encryptParamsForServer(params));
+
+			JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.album_cover_change_url), postParams);
 			StingleResponse response = new StingleResponse(context, json, false);
 
 			if (response.isStatusOk()) {

@@ -33,6 +33,19 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_set_blank_cover"
+        android:orderInCategory="100"
+        android:title="@string/set_album_blank_cover"
+        android:icon="@drawable/ic_image"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_reset_cover"
+        android:orderInCategory="100"
+        android:title="@string/reset_album_cover"
+        android:icon="@drawable/ic_image"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_leave_album"
         android:orderInCategory="100"
         android:title="@string/leave_album"

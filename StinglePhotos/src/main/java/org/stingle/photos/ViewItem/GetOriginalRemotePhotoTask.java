@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import androidx.core.widget.ContentLoadingProgressBar;
 
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -33,6 +34,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 	private ImageView image;
 	private AnimatedGifImageView animatedImage;
 	private PhotoViewAttacher attacher;
+	private OnAsyncTaskFinish onFinish;
 
 	private ContentLoadingProgressBar loading;
 
@@ -62,6 +64,9 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 	public void setLoading(ContentLoadingProgressBar loading) {
 		this.loading = loading;
 	}
+	public void setOnFinish(OnAsyncTaskFinish onFinish) {
+		this.onFinish = onFinish;
+	}
 
 	@Override
 	protected void onPreExecute() {
@@ -88,7 +93,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				return null;
 			}
 
-			return CryptoHelpers.decryptDbFile(context, result.set, result.albumId, result.headers, false, encFile);
+			return CryptoHelpers.decryptDbFile(context, result.set, result.albumId, result.headers, false, encFile, this);
 		}
 		catch (NoSuchAlgorithmException | KeyManagementException | IOException | CryptoException e) {
 
@@ -123,6 +128,10 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				//attacher.setScale(scale);
 			}
 			Log.d("originalImageGet", "finished");
+		}
+
+		if(onFinish != null){
+			onFinish.onFinish();
 		}
 	}
 

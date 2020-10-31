@@ -1,1 +1,1 @@
-Stingle Photos is a privacy and security oriented alternative to Google Photos
+Stingle Photos is a secure, end-to-end encrypted, open-source gallery and sync app

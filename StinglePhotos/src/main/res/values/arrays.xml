@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="lockTimes">
-        <item name="0">@string/immediately</item>
+        <item name="1">@string/immediately</item>
         <item name="10">@string/seconds10</item>
         <item name="30">@string/seconds30</item>
         <item name="60">@string/minute1</item>
@@ -12,7 +12,7 @@
     </string-array>
 
     <string-array name="lockTimesValues">
-        <item name="0">0</item>
+        <item name="1">1</item>
         <item name="10">10</item>
         <item name="30">30</item>
         <item name="60">60</item>

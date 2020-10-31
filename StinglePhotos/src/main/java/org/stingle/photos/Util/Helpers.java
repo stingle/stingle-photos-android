@@ -194,23 +194,20 @@ public class Helpers {
 	}
 
 
-	public static Bitmap generateThumbnail(Context context, byte[] data, String encFilename, String realFileName, byte[] fileId, int type, int videoDuration) throws IOException, CryptoException {
+	public static Crypto.Header generateThumbnail(Context context, byte[] data, String encFilename, String realFileName, byte[] fileId, int type, int videoDuration) throws IOException, CryptoException {
 		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
 		
-		//Bitmap thumbBitmap = null;
 		if (bitmap != null) {
-			//thumbBitmap = Helpers.getThumbFromBitmap(bitmap, getThumbSize(activity));
-
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream);
 
 			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encFilename);
-			StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
+			Crypto.Header header = StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
 			out.close();
 
-			//Helpers.getAESCrypt(activity).encrypt(stream.toByteArray(), out);
+			return header;
 		}
-		return bitmap;
+		return null;
 	}
 
 	public static int convertDpToPixels(Context context, int dp){

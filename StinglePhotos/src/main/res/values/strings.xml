@@ -390,5 +390,9 @@
     <string name="free_up_space_nothing_desc">There are no backed up files that we can safely delete from your device at this point</string>
 
     <string name="importing_file">"Importing file %1$s out of %2$s"</string>
+    <string name="set_as_album_cover">Set as album cover</string>
+    <string name="changing_album_cover">Changing album cover…</string>
+    <string name="set_album_blank_cover">Set a blank album cover</string>
+    <string name="reset_album_cover">Reset album cover</string>
 
 </resources>

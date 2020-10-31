@@ -1,0 +1,1 @@
+- Fixed bug when deleting album which has not uploaded files, it was bringing up message saying wait for upload to finish

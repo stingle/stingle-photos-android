@@ -172,7 +172,7 @@ public class UploadToCloud {
 			return 0;
 		}
 
-		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, "", null);
+		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, null, null);
 		int uploadCount = result.getCount();
 		result.close();
 

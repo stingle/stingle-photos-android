@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -47,7 +48,7 @@ public class ImportFile {
 					filename = returnCursor.getString(nameIndex);
 					fileSize = returnCursor.getLong(sizeIndex);
 
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+					if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 						try {
 							int pendingIndex = returnCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_PENDING);
 							String isPending = returnCursor.getString(pendingIndex);
@@ -97,6 +98,8 @@ public class ImportFile {
 			}
 
 			byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
+			Crypto.Header thumbHeader = null;
+
 
 			if (fileType == Crypto.FILE_TYPE_PHOTO) {
 
@@ -112,20 +115,28 @@ public class ImportFile {
 				}
 				thumbIn.close();
 
-				Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
+				thumbHeader = Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
 			} else if (fileType == Crypto.FILE_TYPE_VIDEO) {
 				Bitmap thumb = Helpers.getVideoThumbnail(context, uri);
 				if (thumb != null) {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
-					Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+					thumbHeader = Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 				}
 			}
 
 			InputStream in = context.getContentResolver().openInputStream(uri);
 			FileOutputStream outputStream = new FileOutputStream(encFilePath);
-			StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, task);
+			Crypto.Header fileHeader =  StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, task);
+
+			if(fileHeader == null || thumbHeader == null){
+				return false;
+			}
+
+			in.close();
+			outputStream.close();
+
 			long nowDate = System.currentTimeMillis();
 			if(date == null) {
 				date = nowDate;
@@ -142,7 +153,7 @@ public class ImportFile {
 				AlbumFilesDb albumFilesDb = new AlbumFilesDb(context);
 				StingleDbAlbum album = albumsDb.getAlbumById(albumId);
 				if (album != null) {
-					String newHeaders = crypto.reencryptFileHeaders(headers, Crypto.base64ToByteArray(album.publicKey), null, null);
+					String newHeaders = crypto.encryptFileHeaders(fileHeader, thumbHeader, Crypto.base64ToByteArray(album.publicKey));
 					albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, date, nowDate);
 					album.dateModified = System.currentTimeMillis();
 					albumsDb.updateAlbum(album);
