@@ -1,5 +1,12 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <SwitchPreference
+        app:icon="@drawable/ic_save_alt"
+        app:defaultValue="false"
+        app:key="preserve_import_dates"
+        app:summary="@string/preserve_import_dates_desc"
+        app:title="@string/preserve_import_dates" />
+
     <Preference
         app:icon="@drawable/ic_refresh_red"
         app:key="resync_db"

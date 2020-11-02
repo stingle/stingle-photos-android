@@ -11,11 +11,14 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -31,12 +34,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -352,6 +359,88 @@ public class FileManager {
 		catch (RuntimeException e){ }
 
 		return duration;
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.Q)
+	public static long queryForDateTaken(Context context, Uri uri){
+		Cursor cursor = context.getContentResolver().query(uri,
+				new String[] {
+						MediaStore.MediaColumns.DATE_TAKEN
+				}, null, null, null);
+
+		if (null != cursor) {
+			try {
+				if (cursor.moveToFirst()) {
+					int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN);
+					return cursor.getLong(dateColumn);
+				}
+			}
+			catch (Exception ignored){
+
+			}
+			finally {
+				cursor.close();
+			}
+		}
+		return 0;
+	}
+
+	public static long getDateTakenFromUriMetadata(Context context, Uri uri, int fileType){
+		long dateTaken = 0;
+		if (fileType == Crypto.FILE_TYPE_PHOTO && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+			InputStream in = null;
+			try {
+				in = context.getContentResolver().openInputStream(uri);
+				ExifInterface exifInterface = new ExifInterface(in, ExifInterface.STREAM_TYPE_FULL_IMAGE_DATA);
+				String dateTakenStr = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
+				if(dateTakenStr != null){
+					dateTaken = formatMediaDate(dateTakenStr);
+				}
+			}
+			catch (IOException e) {
+
+			}
+			finally {
+				if (in != null) {
+					try {
+						in.close();
+					} catch (IOException ignored) {}
+				}
+			}
+		}
+		else if (fileType == Crypto.FILE_TYPE_VIDEO) {
+			MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+			try {
+				retriever.setDataSource(context, uri);
+				String date = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
+				dateTaken = formatMediaDate(date);
+
+				retriever.release();
+			} catch (RuntimeException e) {
+			}
+		}
+
+		return dateTaken;
+	}
+	public static long formatMediaDate(String date){
+		try {
+			Date inputDate = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.getDefault()).parse(date);
+			return inputDate.getTime();
+		}
+		catch (Exception e){
+			try {
+				Date inputDate = new SimpleDateFormat("yyyy MM dd", Locale.getDefault()).parse(date);
+				return inputDate.getTime();
+			} catch (Exception ex) {
+				try {
+					Date inputDate = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.getDefault()).parse(date);
+					return inputDate.getTime();
+				} catch (Exception ignored) { }
+			}
+		}
+
+		return 0;
 	}
 
 	public static void deleteTempFiles(Context context){

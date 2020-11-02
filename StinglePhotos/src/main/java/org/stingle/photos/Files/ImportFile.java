@@ -1,11 +1,13 @@
 package org.stingle.photos.Files;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -35,7 +37,6 @@ public class ImportFile {
 	public static boolean importFile(Context context, Uri uri, int set, String albumId, Long date, AsyncTask<?,?,?> task) {
 		try {
 			int fileType = FileManager.getFileTypeFromUri(context, uri);
-
 
 			Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
 			String filename = null;
@@ -140,7 +141,24 @@ public class ImportFile {
 			long nowDate = System.currentTimeMillis();
 			if(date == null) {
 				date = nowDate;
+
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+				if(settings.getBoolean("preserve_import_dates", false)){
+					long dateTaken = 0;
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+						dateTaken = FileManager.queryForDateTaken(context, uri);
+					}
+
+					if(dateTaken == 0){
+						dateTaken = FileManager.getDateTakenFromUriMetadata(context, uri, fileType);
+					}
+
+					if(dateTaken > 0){
+						date = dateTaken;
+					}
+				}
 			}
+
 			String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
 
 			if (set == SyncManager.GALLERY) {
