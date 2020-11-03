@@ -71,12 +71,14 @@
     <string-array name="locales">
         <item name="auto">@string/auto</item>
         <item name="en">@string/english</item>
+        <item name="de">@string/german</item>
         <item name="ru">@string/russian</item>
     </string-array>
 
     <string-array name="localeValues">
         <item name="auto">auto</item>
         <item name="en">en</item>
+        <item name="de">de</item>
         <item name="ru">ru</item>
     </string-array>
 </resources>
