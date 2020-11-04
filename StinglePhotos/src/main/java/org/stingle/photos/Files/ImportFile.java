@@ -34,7 +34,7 @@ public class ImportFile {
 		return importFile(context, uri, set, albumId, null, task);
 	}
 
-	public static Long importFile(Context context, Uri uri, int set, String albumId, Long date, AsyncTask<?,?,?> task) {
+	public static Long importFile(Context context, Uri uri, int set, String albumId, Long dateHint, AsyncTask<?,?,?> task) {
 		try {
 			int fileType = FileManager.getFileTypeFromUri(context, uri);
 
@@ -139,20 +139,27 @@ public class ImportFile {
 			outputStream.close();
 
 			long nowDate = System.currentTimeMillis();
-			if(date == null) {
-				date = nowDate;
+			long date = 0;
 
-				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-				if(settings.getBoolean("preserve_import_dates", true)){
-					long dateTaken = FileManager.getDateTakenFromUriMetadata(context, uri, fileType);
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+			if(settings.getBoolean("preserve_import_dates", true)){
+				long dateTaken = FileManager.getDateTakenFromUriMetadata(context, uri, fileType);
 
-					if (dateTaken == 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-						dateTaken = FileManager.queryForDateTaken(context, uri);
-					}
+				if (dateTaken == 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+					dateTaken = FileManager.queryForDateTaken(context, uri);
+				}
 
-					if(dateTaken > 0){
-						date = dateTaken;
-					}
+				if(dateTaken > 0){
+					date = dateTaken;
+				}
+			}
+
+			if(date == 0 ) {
+				if(dateHint != null) {
+					date = dateHint;
+				}
+				else{
+					date = nowDate;
 				}
 			}
 
