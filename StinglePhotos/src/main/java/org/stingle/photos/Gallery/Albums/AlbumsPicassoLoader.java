@@ -93,7 +93,7 @@ public class AlbumsPicassoLoader extends RequestHandler {
 			}
 
 			if(albumDbFile == null) {
-				if (album.cover.equals(SetAlbumCoverAsyncTask.ALBUM_COVER_BLANK_TEXT)) {
+				if (album.cover != null && album.cover.equals(SetAlbumCoverAsyncTask.ALBUM_COVER_BLANK_TEXT)) {
 					isBlankCover = true;
 				}
 				else {

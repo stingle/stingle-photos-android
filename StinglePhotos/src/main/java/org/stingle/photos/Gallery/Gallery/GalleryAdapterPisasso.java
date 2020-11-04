@@ -2,6 +2,7 @@ package org.stingle.photos.Gallery.Gallery;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.text.format.DateFormat;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,27 +39,31 @@ import org.stingle.photos.Util.MemoryCache;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IDragSelectAdapter {
-	private Context context;
+	private final Context context;
 	private FilesDb db;
 	private final MemoryCache memCache = StinglePhotosApplication.getCache();
 	private final Listener callback;
 	private final ArrayList<Integer> selectedIndices = new ArrayList<Integer>();
-	private int thumbSize;
+	private final int thumbSize;
 	private boolean isSelectModeActive = false;
-	private AutoFitGridLayoutManager lm;
-	private Picasso picasso;
-	private LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
-	private ArrayList<DateGroup> dates = new ArrayList<DateGroup>();
-	private ArrayList<DatePosition> datePositions = new ArrayList<>();
-	private ArrayList<Integer> datePositionsPlain = new ArrayList<>();
+	private final AutoFitGridLayoutManager lm;
+	private final Picasso picasso;
+	private final LruCache<Integer, FileProps> filePropsCache = new LruCache<Integer, FileProps>(512);
+	private final HashMap<Integer, String> datePositions = new HashMap<>();
+	private final ArrayList<Integer> datePositionsPlain = new ArrayList<>();
+	int totalItemCount = 0;
 	private int set = SyncManager.GALLERY;
 	private String albumId = null;
-	private int DB_SORT = StingleDb.SORT_DESC;
+	private final int DB_SORT = StingleDb.SORT_DESC;
 
 	public static final int TYPE_ITEM = 0;
 	public static final int TYPE_DATE = 1;
@@ -86,7 +91,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize, albumId)).build();
 
 		getAvailableDates();
-		calculateDatePositions();
 	}
 
 	@Override
@@ -99,7 +103,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		filePropsCache.evictAll();
 		picasso.evictAll();
 		getAvailableDates();
-		calculateDatePositions();
 		notifyDataSetChanged();
 	}
 
@@ -161,25 +164,6 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		void onSelectionChanged(int count);
 	}
 
-	protected class DateGroup{
-		public String date;
-		public int itemCount;
-
-		public DateGroup(String date, int itemCount){
-			this.date = date;
-			this.itemCount = itemCount;
-		}
-	}
-	protected class DatePosition{
-		public int position;
-		public String date;
-
-		public DatePosition(int position, String date){
-			this.position = position;
-			this.date = date;
-		}
-	}
-
 	protected class PosTranslate{
 		public int type;
 		public int dbPosition;
@@ -187,20 +171,23 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	}
 
 	protected void getAvailableDates(){
-		dates.clear();
+		datePositions.clear();
+		datePositionsPlain.clear();
+		totalItemCount = 0;
 		Cursor result = db.getAvailableDates(albumId, DB_SORT);
 		while(result.moveToNext()) {
-			DateGroup group = new DateGroup(convertDate(result.getString(0)), result.getInt(1));
-			dates.add(group);
+			datePositions.put(totalItemCount, convertDate(result.getString(0)));
+			datePositionsPlain.add(totalItemCount);
+			totalItemCount += result.getInt(1) + 1;
 		}
 	}
 
 	private String convertDate(String dateString){
 		try {
-			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 			Date date = fmt.parse(dateString);
 
-			SimpleDateFormat fmtOut = new SimpleDateFormat("MMMM d, y");
+			SimpleDateFormat fmtOut = new SimpleDateFormat("MMMM d, y", Locale.getDefault());
 			return fmtOut.format(date);
 		}
 		catch (ParseException ignored) {}
@@ -208,54 +195,39 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return dateString;
 	}
 
-	private void calculateDatePositions(){
-		datePositions.clear();
-		datePositionsPlain.clear();
-		int totalItems = 0;
-		for(DateGroup group : dates){
-			datePositions.add(new DatePosition(totalItems, group.date));
-			datePositionsPlain.add(totalItems);
-			totalItems += group.itemCount + 1;
-		}
+	public static String getDbDate(long time) {
+		Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+		cal.setTimeInMillis(time);
+		String date = DateFormat.format("yyyy-MM-dd", cal).toString();
+		return date;
 	}
 
 	private boolean isPositionIsDate(int position){
-		return datePositionsPlain.contains(position);
+		return datePositions.containsKey(position);
 	}
 
 	private PosTranslate translatePos(int pos){
-		int datesCount = 1;
-		for(int i=0;i<datePositions.size();i++){
-			DatePosition datePos = datePositions.get(i);
-			DatePosition nextDatePos = null;
-			if(i+1 < datePositions.size()){
-				nextDatePos = datePositions.get(i+1);
-			}
+		if(datePositions.containsKey(pos)){
+			PosTranslate posObj = new PosTranslate();
+			posObj.type = TYPE_DATE;
+			posObj.date = datePositions.get(pos);
 
-			if(pos > datePos.position && (nextDatePos == null || pos < nextDatePos.position)){
-				PosTranslate posObj = new PosTranslate();
-				posObj.type = TYPE_ITEM;
-				posObj.dbPosition = pos - datesCount;
-
-				return posObj;
-			}
-			else if(pos == datePos.position){
-				PosTranslate posObj = new PosTranslate();
-				posObj.type = TYPE_DATE;
-				posObj.date = datePos.date;
-
-				return posObj;
-			}
-
-			datesCount++;
+			return posObj;
 		}
-		return null;
+
+		int leftIndex = (-Collections.binarySearch(datePositionsPlain, pos) - 2);
+
+		PosTranslate posObj = new PosTranslate();
+		posObj.type = TYPE_ITEM;
+		posObj.dbPosition = pos - (leftIndex + 1);
+
+		return posObj;
 	}
 
 	private int translateDbPosToGalleryPos(int pos){
-		for(int i=0;i<datePositions.size();i++){
-			DatePosition datePos = datePositions.get(i);
-			if(datePos.position <= pos){
+		for(int i=0;i<datePositionsPlain.size();i++){
+			int datePos = datePositionsPlain.get(i);
+			if(datePos <= pos){
 				pos++;
 			}
 			else{
@@ -263,6 +235,19 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			}
 		}
 		return pos;
+	}
+
+	public int getPositionFromDate(Long date){
+		return getPositionFromDate(convertDate(getDbDate(date)));
+	}
+	public int getPositionFromDate(String date){
+		if(datePositions != null) {
+			Integer result = Helpers.getKeyByValue(datePositions, date);
+			if(result != null){
+				return result;
+			}
+		}
+		return 0;
 	}
 
 	public int getDbPositionFromRaw(int pos){
@@ -481,12 +466,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 	@Override
 	public int getItemCount() {
-		int totalItems = 0;
-		for(DateGroup group : dates){
-			totalItems += group.itemCount + 1;
-		}
-
-		return totalItems;
+		return totalItemCount;
 	}
 
 

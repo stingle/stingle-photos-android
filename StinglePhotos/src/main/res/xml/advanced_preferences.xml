@@ -2,7 +2,7 @@
 
     <SwitchPreference
         app:icon="@drawable/ic_save_alt"
-        app:defaultValue="false"
+        app:defaultValue="true"
         app:key="preserve_import_dates"
         app:summary="@string/preserve_import_dates_desc"
         app:title="@string/preserve_import_dates" />

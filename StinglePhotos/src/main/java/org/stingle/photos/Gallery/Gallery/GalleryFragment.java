@@ -237,6 +237,13 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		recyclerView.scrollToPosition(0);
 	}
 
+	public void scrollToDate(Long date){
+		if(adapter != null && layoutManager != null) {
+			lastScrollPosition = adapter.getPositionFromDate(date);
+			layoutManager.scrollToPositionWithOffset(lastScrollPosition, 0);
+		}
+	}
+
 	public void clearSelected(){
 		if(adapter != null) {
 			adapter.clearSelected();

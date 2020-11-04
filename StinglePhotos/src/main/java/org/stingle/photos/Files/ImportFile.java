@@ -30,11 +30,11 @@ import java.io.InputStream;
 
 public class ImportFile {
 
-	public static boolean importFile(Context context, Uri uri, int set, String albumId, AsyncTask<?,?,?> task) {
+	public static Long importFile(Context context, Uri uri, int set, String albumId, AsyncTask<?,?,?> task) {
 		return importFile(context, uri, set, albumId, null, task);
 	}
 
-	public static boolean importFile(Context context, Uri uri, int set, String albumId, Long date, AsyncTask<?,?,?> task) {
+	public static Long importFile(Context context, Uri uri, int set, String albumId, Long date, AsyncTask<?,?,?> task) {
 		try {
 			int fileType = FileManager.getFileTypeFromUri(context, uri);
 
@@ -55,7 +55,7 @@ public class ImportFile {
 							String isPending = returnCursor.getString(pendingIndex);
 							Log.e("isPending", isPending);
 							if (!isPending.equals("0")) {
-								return false;
+								return null;
 							}
 						}
 						catch (Exception ignored){}
@@ -63,7 +63,7 @@ public class ImportFile {
 
 				}
 				catch (Exception e){
-					return false;
+					return null;
 				}
 			} else {
 				String path = uri.getPath();
@@ -106,7 +106,7 @@ public class ImportFile {
 
 				InputStream thumbIn = context.getContentResolver().openInputStream(uri);
 				if(thumbIn == null){
-					return false;
+					return null;
 				}
 				ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 				int numRead = 0;
@@ -132,7 +132,7 @@ public class ImportFile {
 			Crypto.Header fileHeader =  StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, task);
 
 			if(fileHeader == null || thumbHeader == null){
-				return false;
+				return null;
 			}
 
 			in.close();
@@ -143,14 +143,11 @@ public class ImportFile {
 				date = nowDate;
 
 				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-				if(settings.getBoolean("preserve_import_dates", false)){
-					long dateTaken = 0;
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-						dateTaken = FileManager.queryForDateTaken(context, uri);
-					}
+				if(settings.getBoolean("preserve_import_dates", true)){
+					long dateTaken = FileManager.getDateTakenFromUriMetadata(context, uri, fileType);
 
-					if(dateTaken == 0){
-						dateTaken = FileManager.getDateTakenFromUriMetadata(context, uri, fileType);
+					if (dateTaken == 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+						dateTaken = FileManager.queryForDateTaken(context, uri);
 					}
 
 					if(dateTaken > 0){
@@ -179,17 +176,16 @@ public class ImportFile {
 				else{
 					albumsDb.close();
 					albumFilesDb.close();
-					return false;
+					return null;
 				}
 				albumsDb.close();
 				albumFilesDb.close();
 			}
+			return date;
 		} catch (IOException | CryptoException e) {
 			e.printStackTrace();
-			return false;
+			return null;
 		}
-
-		return true;
 	}
 
 }

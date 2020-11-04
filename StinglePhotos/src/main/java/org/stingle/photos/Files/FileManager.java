@@ -365,13 +365,13 @@ public class FileManager {
 	public static long queryForDateTaken(Context context, Uri uri){
 		Cursor cursor = context.getContentResolver().query(uri,
 				new String[] {
-						MediaStore.MediaColumns.DATE_TAKEN
+						MediaStore.Images.ImageColumns.DATE_TAKEN
 				}, null, null, null);
 
 		if (null != cursor) {
 			try {
 				if (cursor.moveToFirst()) {
-					int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN);
+					int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN);
 					return cursor.getLong(dateColumn);
 				}
 			}
@@ -465,7 +465,13 @@ public class FileManager {
 	}
 
 	public static abstract class OnFinish{
-		public abstract void onFinish();
+		public void onFinish(){}
+		public void onFinish(int integer){
+			onFinish();
+		}
+		public void onFinish(Long longNumber){
+			onFinish();
+		}
 	}
 
 	public static void deleteLocalFile(Context context, String filename){
