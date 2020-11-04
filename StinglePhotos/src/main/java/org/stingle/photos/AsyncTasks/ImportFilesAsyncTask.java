@@ -23,6 +23,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 	private String albumId;
 	private FileManager.OnFinish onFinish;
 	private ProgressDialog progress;
+	private Long largestDate = 0L;
 
 
 	public ImportFilesAsyncTask(AppCompatActivity activity, ArrayList<Uri> uris, int set, String albumId, FileManager.OnFinish onFinish){
@@ -58,8 +59,12 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 			return null;
 		}
 		int index = 0;
+
 		for (Uri uri : uris) {
-			ImportFile.importFile(myActivity, uri, set, albumId, this);
+			Long date = ImportFile.importFile(myActivity, uri, set, albumId, this);
+			if(date != null && date > largestDate){
+				largestDate = date;
+			}
 
 			publishProgress(index+1);
 			index++;
@@ -82,7 +87,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 		progress.dismiss();
 
 		if(onFinish != null){
-			onFinish.onFinish();
+			onFinish.onFinish(largestDate);
 		}
 		AppCompatActivity myActivity = activity.get();
 		if(myActivity != null){

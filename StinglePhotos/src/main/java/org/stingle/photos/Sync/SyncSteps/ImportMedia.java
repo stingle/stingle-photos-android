@@ -197,7 +197,7 @@ public class ImportMedia {
 					}
 					Log.e("uri", name + " - " + dateAddedMillis + " - " + type + " - " + contentUri.toString());
 
-					if (ImportFile.importFile(context, contentUri, SyncManager.GALLERY, null, dateAddedMillis, null)) {
+					if (ImportFile.importFile(context, contentUri, SyncManager.GALLERY, null, dateAddedMillis, null) != null) {
 						isSomethingImported = true;
 						if(SyncManager.isImportDeleteEnabled(context)){
 							context.getApplicationContext().getContentResolver().delete(contentUri, null, null);

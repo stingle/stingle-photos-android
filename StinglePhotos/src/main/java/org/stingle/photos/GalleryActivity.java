@@ -116,6 +116,9 @@ public class GalleryActivity extends AppCompatActivity
 			if(galleryFragment != null) {
 				galleryFragment.updateDataSet();
 			}
+			if(albumsFragment != null){
+				albumsFragment.updateDataSet();
+			}
 		}
 	};
 	private BroadcastReceiver refreshGalleryItem = new BroadcastReceiver() {
@@ -654,12 +657,17 @@ public class GalleryActivity extends AppCompatActivity
 
 		if(urisToImport.size() > 0){
 			isImporting = true;
+			dontStartSyncYet = true;
 			(new ImportFilesAsyncTask(this, urisToImport, SyncManager.GALLERY, null, new FileManager.OnFinish() {
 				@Override
-				public void onFinish() {
+				public void onFinish(Long date) {
 					if(galleryFragment != null) {
 						galleryFragment.updateDataSet();
+						if(currentSet == SyncManager.GALLERY) {
+							galleryFragment.scrollToDate(date);
+						}
 					}
+					dontStartSyncYet = false;
 					SyncManager.startSync(GalleryActivity.this);
 					isImporting = false;
 					checkLoginAndInit();
@@ -1105,9 +1113,12 @@ public class GalleryActivity extends AppCompatActivity
 
 			(new ImportFilesAsyncTask(this, urisToImport, currentSet, currentAlbumId, new FileManager.OnFinish() {
 				@Override
-				public void onFinish() {
+				public void onFinish(Long date) {
 					if(galleryFragment != null) {
 						galleryFragment.updateDataSet();
+						if(currentSet == SyncManager.GALLERY) {
+							galleryFragment.scrollToDate(date);
+						}
 					}
 					dontStartSyncYet = false;
 					SyncManager.startSync(GalleryActivity.this);

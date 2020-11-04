@@ -1,9 +1,10 @@
 package org.stingle.photos.AsyncTasks;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
@@ -12,6 +13,7 @@ import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,29 +27,37 @@ public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private final File dir;
 	private final File thumbDir;
 	private final File cacheDir;
-	private WeakReference<Context> context;
+	private WeakReference<AppCompatActivity> activity;
 	private final OnAsyncTaskFinish onFinishListener;
 
-	public FreeUpSpaceAsyncTask(Context context, OnAsyncTaskFinish onFinishListener) {
-		this.context = new WeakReference<>(context);;
+	public FreeUpSpaceAsyncTask(AppCompatActivity activity, OnAsyncTaskFinish onFinishListener) {
+		this.activity = new WeakReference<>(activity);;
 		this.onFinishListener = onFinishListener;
 
-		dir = new File(FileManager.getHomeDir(context));
-		thumbDir = new File(FileManager.getThumbsDir(context));
-		cacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
+		dir = new File(FileManager.getHomeDir(activity));
+		thumbDir = new File(FileManager.getThumbsDir(activity));
+		cacheDir = new File(activity.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
 	}
 
+	@Override
+	protected void onPreExecute() {
+		AppCompatActivity myActivity = activity.get();
+		if(myActivity == null){
+			return;
+		}
+		Helpers.acquireWakeLock(myActivity);
+	}
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
-		Context myContext = context.get();
-		if(myContext == null){
-			return false;
+		AppCompatActivity myActivity = activity.get();
+		if(myActivity == null){
+			return null;
 		}
 
-		GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
-		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
-		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
+		GalleryTrashDb galleryDb = new GalleryTrashDb(myActivity, SyncManager.GALLERY);
+		GalleryTrashDb trashDb = new GalleryTrashDb(myActivity, SyncManager.TRASH);
+		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myActivity);
 
 
 		boolean result = deleteLocalFiles(galleryDb) && deleteLocalFiles(trashDb) && deleteLocalFiles(albumFilesDb);
@@ -147,6 +157,11 @@ public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			} else {
 				onFinishListener.onFail();
 			}
+		}
+
+		AppCompatActivity myActivity = activity.get();
+		if(myActivity != null){
+			Helpers.releaseWakeLock(myActivity);
 		}
 	}
 }

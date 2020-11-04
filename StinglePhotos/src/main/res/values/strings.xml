@@ -394,5 +394,7 @@
     <string name="changing_album_cover">Changing album cover…</string>
     <string name="set_album_blank_cover">Set a blank album cover</string>
     <string name="reset_album_cover">Reset album cover</string>
+    <string name="preserve_import_dates">Preserve dates on import</string>
+    <string name="preserve_import_dates_desc">Preserve dates of photos and videos during manual import</string>
 
 </resources>
