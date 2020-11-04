@@ -1,0 +1,4 @@
+- Now Stingle Photos will preserve dates when importing photos and videos from other apps
+- Optimized algorithms to improve gallery scrolling speed for very large number of files
+- Now dates in gallery will obey your local timezone
+- Minor bugfixes
