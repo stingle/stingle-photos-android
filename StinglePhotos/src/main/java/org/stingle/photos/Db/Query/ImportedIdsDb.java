@@ -5,19 +5,19 @@ import android.content.Context;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Db.DatabaseManager;
 import org.stingle.photos.Db.StingleDbContract;
 
 public class ImportedIdsDb {
 
-	private StingleDb db;
+	private DatabaseManager db;
 
 	private String tableName = StingleDbContract.Columns.TABLE_NAME_IMPORTED_IDS;
 
 	private final static int cleanupLimit = 500;
 
 	public ImportedIdsDb(Context context) {
-		db = new StingleDb(context);
+		db = DatabaseManager.getInstance(context);
 	}
 
 	private String[] projection = {
@@ -30,28 +30,28 @@ public class ImportedIdsDb {
 		ContentValues values = new ContentValues();
 		values.put(StingleDbContract.Columns.COLUMN_NAME_MEDIA_ID, id);
 
-		return db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		return db.getDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 	}
 
 	public boolean isIdExists(long id){
 		String selection = StingleDbContract.Columns.COLUMN_NAME_MEDIA_ID + " = ?";
 		String[] selectionArgs = {String.valueOf(id)};
-		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs) != 0;
+		return DatabaseUtils.queryNumEntries(db.getDb(), tableName, selection, selectionArgs) != 0;
 	}
 
 	public void cleanUpIds() {
-		if(DatabaseUtils.queryNumEntries(db.openReadDb(), tableName) > cleanupLimit) {
-			db.openReadDb().rawQuery("DELETE FROM " + tableName + " WHERE _id in (SELECT _id FROM " + tableName + " ORDER BY _id ASC LIMIT " + cleanupLimit + ")", null);
+		if(DatabaseUtils.queryNumEntries(db.getDb(), tableName) > cleanupLimit) {
+			db.getDb().rawQuery("DELETE FROM " + tableName + " WHERE _id in (SELECT _id FROM " + tableName + " ORDER BY _id ASC LIMIT " + cleanupLimit + ")", null);
 		}
 	}
 
 	public int truncateTable() {
-		return db.openWriteDb().delete(tableName, null, null);
+		return db.getDb().delete(tableName, null, null);
 	}
 
 	public void close() {
 		cleanUpIds();
-		db.close();
+		db.closeDb();
 	}
 }
 

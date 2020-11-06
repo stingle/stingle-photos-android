@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import org.stingle.photos.Crypto.CryptoHelpers;
+import org.stingle.photos.Db.DatabaseManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 
 public class AlbumsDb {
 
-	private StingleDb db;
+	private DatabaseManager db;
 
 	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUMS;
 
@@ -25,7 +26,7 @@ public class AlbumsDb {
 	public static final int SORT_BY_MODIFIED_DATE = 1;
 
 	public AlbumsDb(Context context) {
-		db = new StingleDb(context);
+		db = DatabaseManager.getInstance(context);
 	}
 
 	private String[] projection = {
@@ -69,7 +70,7 @@ public class AlbumsDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, album.dateCreated);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, album.dateModified);
 
-		db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		db.getDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
 		return album.albumId;
 	}
@@ -96,7 +97,7 @@ public class AlbumsDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = {String.valueOf(album.albumId)};
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -108,11 +109,11 @@ public class AlbumsDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = {String.valueOf(albumId)};
 
-		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+		return db.getDb().delete(tableName, selection, selectionArgs);
 	}
 
 	public int truncateTable() {
-		return db.openWriteDb().delete(tableName, null, null);
+		return db.getDb().delete(tableName, null, null);
 	}
 
 
@@ -122,7 +123,7 @@ public class AlbumsDb {
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		return db.openReadDb().query(
+		return db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -160,7 +161,7 @@ public class AlbumsDb {
 		}
 		Log.d("selection", selection);
 
-		Cursor result = db.openReadDb().query(
+		Cursor result = db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -183,7 +184,7 @@ public class AlbumsDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = {albumId};
 
-		Cursor result = db.openReadDb().query(
+		Cursor result = db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -206,20 +207,20 @@ public class AlbumsDb {
 		if(isHidden != null && isShared != null) {
 			String selection = StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN + " = ? OR " + StingleDbContract.Columns.COLUMN_NAME_IS_SHARED + " = ?";
 			String[] selectionArgs = {(isHidden ? "1" : "0"), (isShared ? "1" : "0")};
-			return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+			return DatabaseUtils.queryNumEntries(db.getDb(), tableName, selection, selectionArgs);
 		}
 		else if(isHidden != null) {
 			String selection = StingleDbContract.Columns.COLUMN_NAME_IS_HIDDEN + " = ?";
 			String[] selectionArgs = {(isHidden ? "1" : "0")};
-			return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+			return DatabaseUtils.queryNumEntries(db.getDb(), tableName, selection, selectionArgs);
 		}
 		else {
-			return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
+			return DatabaseUtils.queryNumEntries(db.getDb(), tableName);
 		}
 	}
 
 	public void close() {
-		db.close();
+		db.closeDb();
 	}
 }
 

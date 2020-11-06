@@ -7,6 +7,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import org.stingle.photos.Db.DatabaseManager;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 
 public class AlbumFilesDb implements FilesDb {
 
-	private StingleDb db;
+	private DatabaseManager db;
 
 	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUM_FILES;
 
@@ -34,7 +35,7 @@ public class AlbumFilesDb implements FilesDb {
 	};
 
 	public AlbumFilesDb(Context context) {
-		db = new StingleDb(context);
+		db = DatabaseManager.getInstance(context);
 	}
 
 	public long insertFile(StingleDbFile file){
@@ -53,7 +54,7 @@ public class AlbumFilesDb implements FilesDb {
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED, dateCreated);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, dateModified);
 
-		return db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		return db.getDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
 	}
 
@@ -72,7 +73,7 @@ public class AlbumFilesDb implements FilesDb {
 		String selection = StingleDbContract.Columns._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(file.id) };
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -85,20 +86,20 @@ public class AlbumFilesDb implements FilesDb {
 		String selection = StingleDbContract.Columns._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(id) };
 
-		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+		return db.getDb().delete(tableName, selection, selectionArgs);
 	}
 	public int deleteAlbumFile(String filename, String albumId){
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = { filename, albumId };
 
-		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+		return db.getDb().delete(tableName, selection, selectionArgs);
 	}
 
 	public int deleteAllFilesInAlbum(String albumId){
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = { albumId };
 
-		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+		return db.getDb().delete(tableName, selection, selectionArgs);
 	}
 
 	public void deleteAlbumFilesIfNotNeeded(Context context, String albumId){
@@ -112,7 +113,7 @@ public class AlbumFilesDb implements FilesDb {
 	}
 
 	public int truncateTable(){
-		return db.openWriteDb().delete(tableName, null, null);
+		return db.getDb().delete(tableName, null, null);
 	}
 
 
@@ -125,7 +126,7 @@ public class AlbumFilesDb implements FilesDb {
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		return db.openReadDb().query(
+		return db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -190,7 +191,7 @@ public class AlbumFilesDb implements FilesDb {
 			selArgs[i] = selectionArgs.get(i);
 		}
 
-		return db.openReadDb().query(
+		return db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -208,7 +209,7 @@ public class AlbumFilesDb implements FilesDb {
 
 		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created "+sign+" b.date_created AND album_id='"+albumId+"') AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"' AND album_id='"+albumId+"'";
 		Log.d("query-albumf", query);
-		Cursor cursor = db.openReadDb().rawQuery(query, null);
+		Cursor cursor = db.getDb().rawQuery(query, null);
 		if(cursor.getCount() == 1){
 			cursor.moveToNext();
 			return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
@@ -222,7 +223,7 @@ public class AlbumFilesDb implements FilesDb {
 
 		String[] selectionArgs = {"1", "1"};
 
-		return db.openReadDb().query(
+		return db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -241,7 +242,7 @@ public class AlbumFilesDb implements FilesDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -261,7 +262,7 @@ public class AlbumFilesDb implements FilesDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -289,7 +290,7 @@ public class AlbumFilesDb implements FilesDb {
 			selectionArgs[0] = filename;
 		}
 
-		Cursor result = db.openReadDb().query(
+		Cursor result = db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -314,7 +315,7 @@ public class AlbumFilesDb implements FilesDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " <> ?";
 		String[] selectionArgs = {filename, albumId};
 
-		long count = DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+		long count = DatabaseUtils.queryNumEntries(db.getDb(), tableName, selection, selectionArgs);
 
 		if(count > 0){
 			return true;
@@ -330,7 +331,7 @@ public class AlbumFilesDb implements FilesDb {
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		Cursor result = db.openReadDb().query(
+		Cursor result = db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -350,7 +351,7 @@ public class AlbumFilesDb implements FilesDb {
 	}
 
 	public Cursor getAvailableDates(String albumId, int sort){
-		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch', 'localtime') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
+		return db.getDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch', 'localtime') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"WHERE album_id='" + albumId + "' " +
 						"GROUP BY cdate " +
@@ -362,11 +363,11 @@ public class AlbumFilesDb implements FilesDb {
 	public long getTotalFilesCount(String albumId){
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = { albumId };
-		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName, selection, selectionArgs);
+		return DatabaseUtils.queryNumEntries(db.getDb(), tableName, selection, selectionArgs);
 	}
 
 	public void close(){
-		db.close();
+		db.closeDb();
 	}
 }
 
