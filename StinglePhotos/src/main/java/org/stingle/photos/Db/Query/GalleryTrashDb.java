@@ -7,6 +7,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import org.stingle.photos.Db.DatabaseManager;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Db.StingleDbContract;
@@ -15,7 +16,7 @@ import org.stingle.photos.Sync.SyncManager;
 public class GalleryTrashDb implements FilesDb{
 
 	private String tableName;
-	private StingleDb db;
+	private DatabaseManager db;
 
 	private String[] projection = {
 			StingleDbContract.Columns._ID,
@@ -39,7 +40,7 @@ public class GalleryTrashDb implements FilesDb{
 		else{
 			throw new RuntimeException("Invalid set");
 		}
-		db = new StingleDb(context);
+		db = DatabaseManager.getInstance(context);
 	}
 
 
@@ -59,7 +60,7 @@ public class GalleryTrashDb implements FilesDb{
 		values.put(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED, dateModified);
 		values.put(StingleDbContract.Columns.COLUMN_NAME_HEADERS, headers);
 
-		return db.openWriteDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		return db.getDb().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 
 	}
 
@@ -78,7 +79,7 @@ public class GalleryTrashDb implements FilesDb{
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { file.filename };
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -92,7 +93,7 @@ public class GalleryTrashDb implements FilesDb{
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -114,7 +115,7 @@ public class GalleryTrashDb implements FilesDb{
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -135,7 +136,7 @@ public class GalleryTrashDb implements FilesDb{
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return db.openWriteDb().update(
+		return db.getDb().update(
 				tableName,
 				values,
 				selection,
@@ -146,11 +147,11 @@ public class GalleryTrashDb implements FilesDb{
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = { filename };
 
-		return db.openWriteDb().delete(tableName, selection, selectionArgs);
+		return db.getDb().delete(tableName, selection, selectionArgs);
 	}
 
 	public int truncateTable(){
-		return db.openWriteDb().delete(tableName, null, null);
+		return db.getDb().delete(tableName, null, null);
 	}
 
 	public StingleDbFile getFileIfExists(String filename){
@@ -161,7 +162,7 @@ public class GalleryTrashDb implements FilesDb{
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ?";
 		String[] selectionArgs = {filename};
 
-		Cursor result = db.openReadDb().query(
+		Cursor result = db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -224,7 +225,7 @@ public class GalleryTrashDb implements FilesDb{
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		return db.openReadDb().query(
+		return db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -243,7 +244,7 @@ public class GalleryTrashDb implements FilesDb{
 
 		String[] selectionArgs = {"1", "1"};
 
-		return db.openReadDb().query(
+		return db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -260,7 +261,7 @@ public class GalleryTrashDb implements FilesDb{
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		Cursor result = db.openReadDb().query(
+		Cursor result = db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -283,7 +284,7 @@ public class GalleryTrashDb implements FilesDb{
 		String sign = (sort == StingleDb.SORT_DESC ? "<=" : ">=");
 		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created "+sign+" b.date_created) AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"'";
 		Log.d("query-gallery", query);
-		Cursor cursor = db.openReadDb().rawQuery(query, null);
+		Cursor cursor = db.getDb().rawQuery(query, null);
 		if(cursor.getCount() == 1){
 			cursor.moveToNext();
 			return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
@@ -292,7 +293,7 @@ public class GalleryTrashDb implements FilesDb{
 	}
 
 	public Cursor getAvailableDates(String albumId, int sort){
-		return db.openReadDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch', 'localtime') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
+		return db.getDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch', 'localtime') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"GROUP BY cdate " +
 						"ORDER BY cdate " + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC")
@@ -301,11 +302,11 @@ public class GalleryTrashDb implements FilesDb{
 	}
 
 	public long getTotalFilesCount(String albumId){
-		return DatabaseUtils.queryNumEntries(db.openReadDb(), tableName);
+		return DatabaseUtils.queryNumEntries(db.getDb(), tableName);
 	}
 
 	public void close(){
-		db.close();
+		db.closeDb();
 	}
 }
 
