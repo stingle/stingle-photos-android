@@ -126,11 +126,12 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		Log.d("lastScrollPosition", lastScrollPosition + "");
 		layoutManager.scrollToPosition(lastScrollPosition);
 
-		if(!parentActivity.isSyncBarDisabled()){
-			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_with_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
-		}
-		else{
-			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+		if(recyclerView != null) {
+			if (!parentActivity.isSyncBarDisabled()) {
+				recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_with_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+			} else {
+				recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
+			}
 		}
 	}
 
@@ -139,7 +140,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		super.onPause();
 		Log.e("GalleryFragment", "onPause");
 		lastScrollPosition = layoutManager.findFirstVisibleItemPosition();
-		recyclerView.setAdapter(null);
+		if(recyclerView != null) {
+			recyclerView.setAdapter(null);
+		}
 	}
 
 	@Override
@@ -151,25 +154,30 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		recyclerView.setAdapter(null);
+		if(recyclerView != null) {
+			recyclerView.setAdapter(null);
+		}
 		adapter = null;
 		Log.e("GalleryFragment", "onDetach");
 	}
 
 	public void init(){
 		Log.e("GalleryFragment", "init");
-		recyclerView.setAdapter(adapter);
+		if(recyclerView != null) {
+			recyclerView.setAdapter(adapter);
+		}
 		handleNoPhotos();
 	}
 
 	private void handleNoPhotos(){
-		if(adapter.getItemCount() == 0){
-			recyclerView.setVisibility(View.GONE);
-			noPhotosHolder.setVisibility(View.VISIBLE);
-		}
-		else{
-			recyclerView.setVisibility(View.VISIBLE);
-			noPhotosHolder.setVisibility(View.GONE);
+		if(recyclerView != null) {
+			if (adapter.getItemCount() == 0) {
+				recyclerView.setVisibility(View.GONE);
+				noPhotosHolder.setVisibility(View.VISIBLE);
+			} else {
+				recyclerView.setVisibility(View.VISIBLE);
+				noPhotosHolder.setVisibility(View.GONE);
+			}
 		}
 	}
 
@@ -199,7 +207,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			return;
 		}
 
-		recyclerView.setDragSelectActive(true, index);
+		if(recyclerView != null) {
+			recyclerView.setDragSelectActive(true, index);
+		}
 		if(!adapter.isSelectionModeActive()){
 			onSelectionChanged(1);
 		}
@@ -221,9 +231,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			adapter.updateDataSet();
 			handleNoPhotos();
 		}
-		if(recyclerView != null) {
-			recyclerView.setScrollY(lastScrollPos);
-		}
+		recyclerView.setScrollY(lastScrollPos);
 	}
 
 	public void updateItem(int position){
@@ -234,7 +242,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	public void scrollToTop(){
 		lastScrollPosition = 0;
-		recyclerView.scrollToPosition(0);
+		if(recyclerView != null) {
+			recyclerView.scrollToPosition(0);
+		}
 	}
 
 	public void scrollToDate(Long date){
@@ -248,7 +258,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		if(adapter != null) {
 			adapter.clearSelected();
 		}
-		recyclerView.setDragSelectActive(false, 0);
+		if(recyclerView != null) {
+			recyclerView.setDragSelectActive(false, 0);
+		}
 	}
 
 	public void updateAutoFit(){
