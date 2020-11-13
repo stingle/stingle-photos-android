@@ -394,4 +394,6 @@
     <string name="reset_album_cover">Абложка по умолчанию</string>
     <string name="preserve_import_dates">Сохранять даты во время импортирования</string>
     <string name="preserve_import_dates_desc">Сохранять даты фото и видео во время ручного импортирования</string>
+    <string name="upgrading">Обновление…</string>
+    <string name="upgrading_desc">Пожалуйста не закрывайте это окно</string>
 </resources>

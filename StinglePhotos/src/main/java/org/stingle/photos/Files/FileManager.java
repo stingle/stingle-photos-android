@@ -6,7 +6,6 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.UriPermission;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
@@ -14,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import androidx.annotation.RequiresApi;
@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -42,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -121,32 +121,22 @@ public class FileManager {
 	}
 
 	public static String getHomeDir(Context context) {
-		/*Uri homeUri = getHomeUri(activity);
-		if(homeUri != null){
-			return homeUri.getPath();
+		String externalStorage = context.getExternalFilesDir(null).getPath();
+
+		String homeDirPath = externalStorage + "/" + Helpers.getPreference(context, StinglePhotosApplication.USER_HOME_FOLDER, "default");
+
+		File homeDir = new File(homeDirPath);
+		if (!homeDir.exists()) {
+			homeDir.mkdirs();
 		}
-		else {*/
 
-			String externalStorage = Environment.getExternalStorageDirectory().getPath();
-
-			String homeDirPath = externalStorage + "/" + context.getString(R.string.default_home_folder_name) + "/" + Helpers.getPreference(context, StinglePhotosApplication.USER_HOME_FOLDER, "default");
-
-			File homeDir = new File(homeDirPath);
-			if (!homeDir.exists()) {
-				homeDir.mkdirs();
-			}
-
-			return homeDir.getPath();
-		//}
+		return homeDir.getPath();
 	}
 
-	public static Uri getHomeUri(Context context) {
-		List<UriPermission> persistedUriPermissions = context.getContentResolver().getPersistedUriPermissions();
-		if (persistedUriPermissions.size() > 0) {
-			UriPermission uriPermission = persistedUriPermissions.get(0);
-			return uriPermission.getUri();
-		}
-		return null;
+	public static String getOldHomeDir(Context context) {
+		String externalStorage = Environment.getExternalStorageDirectory().getPath();
+
+		return externalStorage + "/" + context.getString(R.string.default_home_folder_name);
 	}
 
 	public static String ensureLastSlash(String path){
@@ -486,5 +476,68 @@ public class FileManager {
 		if (thumbFile.exists()) {
 			thumbFile.delete();
 		}
+	}
+
+	public static boolean moveFile(String inputPath, String inputFile, String outputPath) {
+
+		InputStream in = null;
+		OutputStream out = null;
+		try {
+
+			//create output directory if it doesn't exist
+			File dir = new File (outputPath);
+			if (!dir.exists()){
+				dir.mkdirs();
+			}
+
+			File inFile = new File(inputPath + "/" + inputFile);
+
+			if(!inFile.exists()){
+				return true;
+			}
+
+			in = new FileInputStream(inFile);
+			out = new FileOutputStream(outputPath + "/"  + inputFile);
+
+			byte[] buffer = new byte[1024];
+			int read;
+			while ((read = in.read(buffer)) != -1) {
+				out.write(buffer, 0, read);
+			}
+			in.close();
+			in = null;
+
+			// write the output file
+			out.flush();
+			out.close();
+			out = null;
+
+			// delete the original file
+			if((new File(inputPath + "/" + inputFile)).delete()){
+				return true;
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public static boolean deleteRecursive(File fileOrDirectory) {
+		if(fileOrDirectory == null){
+			return false;
+		}
+		if (fileOrDirectory.isDirectory()) {
+			File[] files = fileOrDirectory.listFiles();
+			if(files != null && files.length > 0) {
+				for (File child : files) {
+					if (!deleteRecursive(child)) {
+						return false;
+					}
+				}
+			}
+		}
+		Log.d("DeletedFile", fileOrDirectory.getPath());
+		return fileOrDirectory.delete();
 	}
 }

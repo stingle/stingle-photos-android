@@ -41,7 +41,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 		if(myActivity == null){
 			return;
 		}
-		progress = Helpers.showProgressDialogWithBar(myActivity, myActivity.getString(R.string.importing_files), uris.size(), new DialogInterface.OnCancelListener() {
+		progress = Helpers.showProgressDialogWithBar(myActivity, myActivity.getString(R.string.importing_files), null, uris.size(), new DialogInterface.OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialogInterface) {
 				Helpers.releaseWakeLock(myActivity);
