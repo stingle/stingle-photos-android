@@ -60,6 +60,7 @@ import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -68,8 +69,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private Context context;
 
 	private int position = 0;
-	private final ImageHolderLayout parent;
-	private final ContentLoadingProgressBar loading;
+	private final WeakReference<ImageHolderLayout> parentRef;
+	private final WeakReference<ContentLoadingProgressBar> loadingRef;
+	private final WeakReference<ContentLoadingProgressBar> originalPhotoLoadingBarRef;
 	private final ViewPagerAdapter adapter;
 	private final FilesDb db;
 	private int set = SyncManager.GALLERY;
@@ -89,13 +91,14 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final static int GET_ORIGINAL_TASKS_LIMIT = 3;
 
 
-	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int set, String albumId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
+	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, ContentLoadingProgressBar originalPhotoLoading, FilesDb db, int set, String albumId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
 		this.context = context;
 		this.adapter = adapter;
 		this.position = position;
-		this.parent = parent;
-		this.loading = loading;
+		this.parentRef = new WeakReference<>(parent);
+		this.loadingRef = new WeakReference<>(loading);
+		this.originalPhotoLoadingBarRef = new WeakReference<>(originalPhotoLoading);
 		this.db = db;
 		this.set = set;
 		this.albumId = albumId;
@@ -233,6 +236,13 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	protected void onPostExecute(ViewItemAsyncTask.ViewItemTaskResult result) {
 		super.onPostExecute(result);
 
+		ImageHolderLayout parent = parentRef.get();
+		ContentLoadingProgressBar loading = loadingRef.get();
+		ContentLoadingProgressBar originalPhotoLoadingBar = originalPhotoLoadingBarRef.get();
+		if(parent == null || loading == null || originalPhotoLoadingBar == null){
+			return;
+		}
+
 		parent.removeAllViews();
 		parent.setFileType(result.fileType);
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -296,6 +306,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				attacher.update();
 
 				if (result.isRemote) {
+					originalPhotoLoadingBar.setVisibility(View.VISIBLE);
+
 					GetOriginalRemotePhotoTask getOriginalTask = new GetOriginalRemotePhotoTask(context, result);
 					getOriginalTask.setImage(image);
 					getOriginalTask.setAttacher(attacher);
@@ -306,6 +318,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 							super.onFinish();
 							getOriginalRemotePhotoTasks.remove(getOriginalTask);
 							Log.e("getOrigTask", "removed myself");
+							originalPhotoLoadingBar.setVisibility(View.GONE);
 						}
 					});
 					getOriginalTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -396,6 +409,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	}
 
 	private Player.EventListener getPlayerEventListener() {
+		ContentLoadingProgressBar loading = loadingRef.get();
+		if(loading == null){
+			return null;
+		}
 		return new Player.EventListener() {
 			@Override
 			public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
@@ -463,7 +480,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		}
 	}
 
-	public class ViewItemTaskResult {
+	public static class ViewItemTaskResult {
 		public int fileType = Crypto.FILE_TYPE_PHOTO;
 		public String filename = null;
 		public Bitmap bitmap = null;

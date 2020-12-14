@@ -17,5 +17,4 @@
 
     <include layout="@layout/item_content_view" />
 
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

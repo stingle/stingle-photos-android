@@ -81,8 +81,9 @@ public class ViewPagerAdapter extends PagerAdapter {
 		ViewGroup layout = (ViewGroup) layoutInflater.inflate(R.layout.item_view_item, container, false);
 		ImageHolderLayout parent = layout.findViewById(R.id.parent_layout);
 		ContentLoadingProgressBar loading = layout.findViewById(R.id.loading_spinner);
+		ContentLoadingProgressBar originalPhotoLoadingBar = layout.findViewById(R.id.originalPhotoLoadingBar);
 
-		(new ViewItemAsyncTask(context, this, position, parent, loading, db, set, albumId, onSingleClickListener, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		(new ViewItemAsyncTask(context, this, position, parent, loading, originalPhotoLoadingBar, db, set, albumId, onSingleClickListener, gestureTouchListener, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		container.addView(layout);
 		return layout;

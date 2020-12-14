@@ -18,4 +18,14 @@
         style="?android:attr/progressBarStyleLarge"
         android:theme="@style/WhiteLoading"
         android:layout_centerInParent="true"/>
+
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/originalPhotoLoadingBar"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:layout_margin="10dp" />
 </RelativeLayout>
