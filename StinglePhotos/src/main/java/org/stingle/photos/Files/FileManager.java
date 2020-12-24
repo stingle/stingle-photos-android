@@ -51,7 +51,6 @@ public class FileManager {
 
 
 	static final public String SHARE_CACHE_DIR = "share";
-	static final public String DECRYPT_DIR = "StinglePhotosDecrypted";
 	static final public String THUMB_CACHE_DIR = "thumbCache";
 
 	public static byte[] getAndCacheThumb(Context context, String filename, int set) throws IOException {

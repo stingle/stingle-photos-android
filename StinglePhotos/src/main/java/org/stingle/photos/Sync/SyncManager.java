@@ -158,7 +158,7 @@ public class SyncManager {
 		}
 
 		try {
-			HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, outputPath);
+			HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, outputPath, null);
 			return true;
 		} catch (IOException | NoSuchAlgorithmException | KeyManagementException e) {
 

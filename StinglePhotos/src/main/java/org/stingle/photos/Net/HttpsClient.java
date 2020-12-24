@@ -137,7 +137,7 @@ public class HttpsClient {
 		return json;
 	}
 
-	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath, OnUpdateProgress onProgress) throws IOException, NoSuchAlgorithmException, KeyManagementException {
 		Log.e("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -200,11 +200,17 @@ public class HttpsClient {
 		long total = 0;
 		int count;
 
+		if(onProgress != null){
+			onProgress.onUpdate(0);
+		}
+
 		while ((count = input.read(buf)) != -1) {
 			total += count;
 			// publishing the progress....
 			// After this onProgressUpdate will be called
-			//publishProgress("" + (int) ((total * 100) / lenghtOfFile));
+			if(onProgress != null){
+				onProgress.onUpdate((int) ((total * 100) / lenghtOfFile));
+			}
 
 			// writing data to
 			//Log.d("file", new String(buf));
@@ -536,4 +542,7 @@ public class HttpsClient {
 		}
 	}
 
+	abstract public static class OnUpdateProgress {
+		abstract public void onUpdate(int progress);
+	}
 }

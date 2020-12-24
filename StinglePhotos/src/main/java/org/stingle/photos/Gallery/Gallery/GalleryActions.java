@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -39,7 +38,6 @@ import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
@@ -221,8 +219,7 @@ public class GalleryActions {
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.decrypting_files), null);
 
-						File decryptDir = new File(Environment.getExternalStorageDirectory().getPath() + "/" + FileManager.DECRYPT_DIR);
-						DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, decryptDir, new OnAsyncTaskFinish() {
+						DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new OnAsyncTaskFinish() {
 							@Override
 							public void onFinish(ArrayList<File> files) {
 								super.onFinish(files);
@@ -237,7 +234,7 @@ public class GalleryActions {
 						});
 						decFilesJob.setSet(set);
 						decFilesJob.setAlbumId(albumId);
-						decFilesJob.setPerformMediaScan(true);
+						decFilesJob.setInsertIntoGallery(true);
 						decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, files);
 					}
 				},
