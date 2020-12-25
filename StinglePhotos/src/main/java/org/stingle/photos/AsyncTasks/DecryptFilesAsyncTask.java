@@ -3,6 +3,7 @@ package org.stingle.photos.AsyncTasks;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Crypto.CryptoProgress;
 import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Query.ImportedIdsDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Net.HttpsClient;
@@ -81,6 +83,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		});
 		progressDialog.setMessage(context.getString(R.string.decrypting_files));
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		progressDialog.setMax(100);
 		progressDialog.show();
 
 		Helpers.acquireWakeLock((Activity)context);
@@ -91,16 +94,16 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		List<StingleDbFile> filesToDecrypt = params[0];
 		ArrayList<File> decryptedFiles = new ArrayList<File>();
 
+		ImportedIdsDb db = new ImportedIdsDb(context);
 		File destinationFolder = new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/");
 
-		progressDialog.setMax(100);
+
 
 		destinationFolder.mkdirs();
 
 		for (int i = 0; i < filesToDecrypt.size(); i++) {
-			progressDialog.setProgress(0);
 			StingleDbFile dbFile = filesToDecrypt.get(i);
-
+			final int currentItemNumber = i;
 			if(dbFile == null){
 				continue;
 			}
@@ -111,7 +114,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 				file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
 			}
 			else {
-				progressDialog.setMessage("Downloading file " + (i+1) + "/" + filesToDecrypt.size());
+				publishProgress(0, currentItemNumber+1, filesToDecrypt.size(), 0);
 				HashMap<String, String> postParams = new HashMap<String, String>();
 
 				postParams.put("token", KeyManagement.getApiToken(context));
@@ -125,7 +128,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 					HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, finalWritePath, new HttpsClient.OnUpdateProgress() {
 						@Override
 						public void onUpdate(int progress) {
-							progressDialog.setProgress(progress);
+							publishProgress(0, currentItemNumber+1, filesToDecrypt.size(), progress);
 						}
 					});
 					file = new File(finalWritePath);
@@ -154,19 +157,22 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 							values.put(MediaStore.MediaColumns.DATE_TAKEN, System.currentTimeMillis());
 						}
 
-						Uri url = null;
+						Uri uri = null;
 
 						try {
 							if(headers.fileType == Crypto.FILE_TYPE_PHOTO) {
-								url = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+								uri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 							}
 							else if(headers.fileType == Crypto.FILE_TYPE_VIDEO) {
-								url = cr.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+								uri = cr.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
 							}
 							else{
 								continue;
 							}
-							outputStream = cr.openOutputStream(url);
+							long mediaId = ContentUris.parseId(uri);
+
+							db.insertImportedId(mediaId);
+							outputStream = cr.openOutputStream(uri);
 						}
 						catch (Exception e){
 							continue;
@@ -176,19 +182,21 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 						finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), headers.filename);
 						outputStream = new FileOutputStream(new File(finalWritePath));
 					}
-					progressDialog.setMessage("Decrypting file " + (i+1) + "/" + filesToDecrypt.size());
+
+					publishProgress(1, currentItemNumber+1, filesToDecrypt.size(), 0);
+
 
 					CryptoProgress progress = new CryptoProgress(headers.dataSize){
 						@Override
 						public void setProgress(long pCurrent){
 							super.setProgress(pCurrent);
-							progressDialog.setProgress((int) (100 * pCurrent / getTotal()));
+							int progress = (int) (100 * pCurrent / getTotal());
+							publishProgress(1, currentItemNumber+1, filesToDecrypt.size(), progress);
 						}
 					};
 
 					CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, false, inputStream, outputStream, progress, this);
 
-					publishProgress(i + 1);
 					if(finalWritePath != null) {
 						File decryptedFile = new File(finalWritePath);
 						if (performMediaScan) {
@@ -212,9 +220,30 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 			}
 		}
 
+		db.close();
+
 		return decryptedFiles;
 	}
 
+	/**
+	 * 0 - 0=downloading, 1=decrypting
+	 * 1 - current file number
+	 * 2 - all files count
+	 * 3 - operation progress 0-100
+	 * @param val
+	 */
+	@Override
+	protected void onProgressUpdate(Integer... val) {
+		super.onProgressUpdate(val);
+		if(val[0] == 0){
+			progressDialog.setMessage(context.getString(R.string.downloading_file, String.valueOf(val[1]), String.valueOf(val[2])));
+			progressDialog.setProgress(val[3]);
+		}
+		if(val[0] == 1){
+			progressDialog.setMessage(context.getString(R.string.decrypting_file, String.valueOf(val[1]), String.valueOf(val[2])));
+			progressDialog.setProgress(val[3]);
+		}
+	}
 
 	@Override
 	protected void onCancelled() {

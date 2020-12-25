@@ -396,4 +396,6 @@
     <string name="preserve_import_dates_desc">Сохранять даты фото и видео во время ручного импортирования</string>
     <string name="upgrading">Обновление…</string>
     <string name="upgrading_desc">Пожалуйста не закрывайте это окно</string>
+    <string name="downloading_file">Загружается файл %1$s из %2$s</string>
+    <string name="decrypting_file">Расшифровывается файл %1$s из %2$s</string>
 </resources>
