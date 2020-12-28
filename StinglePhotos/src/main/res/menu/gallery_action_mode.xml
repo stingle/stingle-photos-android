@@ -30,4 +30,9 @@
         android:icon="@drawable/ic_action_delete"
         android:title="@string/move_to_trash"
         app:showAsAction="always|withText" />
+    <item
+        android:id="@+id/download"
+        android:icon="@drawable/ic_cloud_download"
+        android:title="@string/download_selected"
+        app:showAsAction="never" />
 </menu>

@@ -30,6 +30,7 @@ import org.stingle.photos.AsyncTasks.FreeUpSpaceAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.DownloadAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.LeaveAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
@@ -643,7 +644,19 @@ public class GalleryActions {
 					.setMode(mode)
 					.setFilename(filename)
 					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
 
-
+	public static void downloadSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
+					new DownloadAsyncTask(activity, files, new SyncManager.OnFinish() {
+						@Override
+						public void onFinish(Boolean needToUpdateUI) {
+							activity.updateGalleryFragmentData();
+							activity.exitActionMode();
+							SyncManager.startSync(activity);
+						}
+					})
+							.setSet(activity.getCurrentSet())
+							.setAlbumId(activity.getCurrentAlbumId())
+							.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 }

@@ -334,8 +334,8 @@
     <string name="wait_for_upload">Дождитесь окончания резервного копирования, прежде чем продолжить</string>
     <string name="processing">Обработка…</string>
     <string name="success_decrypted">Успешно расшифровано</string>
-    <string name="sync_channel_name">Синхронизация уведомлений</string>
-    <string name="sharing_channel_name">Обмен уведомлениями</string>
+    <string name="sync_channel_name">Уведомления синхронизаций</string>
+    <string name="sharing_channel_name">Уведомления общих альбомов</string>
     <string name="new_shared_album">Новый общий альбом \"%s\"</string>
     <string name="tap_to_view">Нажмите, чтобы посмотреть</string>
     <string name="album_add_no_perm">Нет разрешения, чтобы добавить сюда</string>
@@ -398,4 +398,6 @@
     <string name="upgrading_desc">Пожалуйста не закрывайте это окно</string>
     <string name="downloading_file">Загружается файл %1$s из %2$s</string>
     <string name="decrypting_file">Расшифровывается файл %1$s из %2$s</string>
+    <string name="download_selected">Загрузить выбранные</string>
+    <string name="download_channel_name">Уведомления загрузок</string>
 </resources>

@@ -1064,6 +1064,9 @@ public class GalleryActivity extends AppCompatActivity
 					case R.id.set_as_album_cover :
 						GalleryActions.setAsAlbumCover(GalleryActivity.this,currentAlbumId, SetAlbumCoverAsyncTask.ALBUM_COVER_FILE, galleryFragment.getSelectedFiles().get(0).filename);
 						break;
+					case R.id.download :
+						GalleryActions.downloadSelected(GalleryActivity.this, galleryFragment.getSelectedFiles());
+						break;
 				}
 				return true;
 			}
