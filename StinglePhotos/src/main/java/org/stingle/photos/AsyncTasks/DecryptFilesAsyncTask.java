@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import java.util.List;
 public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Integer, ArrayList<File>> {
 
 	private ProgressDialog progressDialog;
-	private final Context context;
+	private WeakReference<Context> contextRef;
 	private final OnAsyncTaskFinish onFinishListener;
 	private int set = SyncManager.GALLERY;
 	private String albumId = null;
@@ -53,7 +54,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 	}
 
 	public DecryptFilesAsyncTask(Context context, OnAsyncTaskFinish onFinishListener) {
-		this.context = context;
+		this.contextRef = new WeakReference<>(context);
 		this.onFinishListener = onFinishListener;
 	}
 
@@ -75,6 +76,10 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
+		Context context = contextRef.get();
+		if(context == null){
+			return;
+		}
 		progressDialog = new ProgressDialog(context);
 		progressDialog.setCancelable(true);
 		progressDialog.setOnCancelListener(dialog -> {
@@ -91,6 +96,10 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 
 	@Override
 	protected ArrayList<File> doInBackground(List<StingleDbFile>... params) {
+		Context context = contextRef.get();
+		if(context == null){
+			return null;
+		}
 		List<StingleDbFile> filesToDecrypt = params[0];
 		ArrayList<File> decryptedFiles = new ArrayList<File>();
 
@@ -109,9 +118,15 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 			}
 
 			File file = null;
+			File cachedFile = FileManager.getCachedFile(context, dbFile.filename);
 
-			if (dbFile.isLocal) {
-				file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
+			if (dbFile.isLocal || cachedFile != null) {
+				if(cachedFile != null) {
+					file = cachedFile;
+				}
+				else {
+					file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
+				}
 			}
 			else {
 				publishProgress(0, currentItemNumber+1, filesToDecrypt.size(), 0);
@@ -206,7 +221,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 						decryptedFiles.add(decryptedFile);
 					}
 
-					if (!dbFile.isLocal) {
+					if (!dbFile.isLocal && cachedFile == null) {
 						file.delete();
 					}
 				} catch (IOException | CryptoException e) {
@@ -235,6 +250,10 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 	@Override
 	protected void onProgressUpdate(Integer... val) {
 		super.onProgressUpdate(val);
+		Context context = contextRef.get();
+		if(context == null){
+			return;
+		}
 		if(val[0] == 0){
 			progressDialog.setMessage(context.getString(R.string.downloading_file, String.valueOf(val[1]), String.valueOf(val[2])));
 			progressDialog.setProgress(val[3]);
@@ -257,7 +276,10 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		super.onPostExecute(decryptedFiles);
 
 		progressDialog.dismiss();
-		Helpers.releaseWakeLock((Activity)context);
+		Context context = contextRef.get();
+		if(context != null){
+			Helpers.releaseWakeLock((Activity)context);
+		}
 
 		if (onFinishListener != null) {
 			onFinishListener.onFinish(decryptedFiles);

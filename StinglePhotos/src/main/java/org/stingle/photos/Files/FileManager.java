@@ -52,6 +52,7 @@ public class FileManager {
 
 	static final public String SHARE_CACHE_DIR = "share";
 	static final public String THUMB_CACHE_DIR = "thumbCache";
+	static final public String FILE_CACHE_DIR = "filesCache";
 
 	public static byte[] getAndCacheThumb(Context context, String filename, int set) throws IOException {
 		return getAndCacheThumb(context,filename, set,null);
@@ -538,5 +539,22 @@ public class FileManager {
 		}
 		Log.d("DeletedFile", fileOrDirectory.getPath());
 		return fileOrDirectory.delete();
+	}
+
+	public static File getCachedFile(Context context, String filename){
+		File cacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
+		if(!cacheDir.exists()){
+			cacheDir.mkdirs();
+		}
+		File cachedFile = new File(cacheDir.getPath() + "/" + filename);
+
+		if(cachedFile.exists()){
+			return cachedFile;
+		}
+		return null;
+	}
+
+	public static boolean isFileCached(Context context, String filename){
+		return getCachedFile(context,filename) != null;
 	}
 }
