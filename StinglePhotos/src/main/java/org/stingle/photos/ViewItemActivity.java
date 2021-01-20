@@ -140,6 +140,10 @@ public class ViewItemActivity extends AppCompatActivity {
 		});
 	}
 
+	public void updateCurrentItem(){
+		adapter.notifyDataSetChanged();
+	}
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -349,6 +353,9 @@ public class ViewItemActivity extends AppCompatActivity {
 			if(albumId != null) {
 				GalleryActions.setAsAlbumCover(this, albumId, SetAlbumCoverAsyncTask.ALBUM_COVER_FILE, currentFile.filename);
 			}
+		}
+		else if (id == R.id.download) {
+			GalleryActions.downloadSelected(this, files, set, albumId);
 		}
 
 

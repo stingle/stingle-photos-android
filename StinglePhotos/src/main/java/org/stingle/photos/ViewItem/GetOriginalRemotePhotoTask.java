@@ -127,6 +127,7 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				FileOutputStream out = new FileOutputStream(cachedFile);
 				out.write(encFile);
 				out.close();
+				FileManager.cleanupFileCache(context);
 			}
 
 			if (encFile == null || encFile.length == 0) {

@@ -403,5 +403,10 @@
     <string name="decrypting_file">Decrypting file %1$s out of %2$s</string>
     <string name="download_selected">Download selected</string>
     <string name="download_channel_name">Download notifications</string>
+    <string name="cache_size">Maximum cache size</string>
+    <string name="no_limit">Unlimited</string>
+    <string name="cache5gb">5 GB</string>
+    <string name="cache20gb">20 GB</string>
+    <string name="cache50gb">50 GB</string>
 
 </resources>

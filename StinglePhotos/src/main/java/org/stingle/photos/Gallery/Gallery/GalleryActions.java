@@ -50,6 +50,7 @@ import org.stingle.photos.Sharing.AlbumSettingsDialogFragment;
 import org.stingle.photos.Sharing.SharingDialogFragment;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.ViewItemActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -646,17 +647,22 @@ public class GalleryActions {
 					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	public static void downloadSelected(GalleryActivity activity, final ArrayList<StingleDbFile> files) {
+	public static void downloadSelected(AppCompatActivity activity, final ArrayList<StingleDbFile> files, int set, String albumId) {
 					new DownloadAsyncTask(activity, files, new SyncManager.OnFinish() {
 						@Override
 						public void onFinish(Boolean needToUpdateUI) {
-							activity.updateGalleryFragmentData();
-							activity.exitActionMode();
+							if(activity instanceof GalleryActivity) {
+								((GalleryActivity)activity).updateGalleryFragmentData();
+								((GalleryActivity)activity).exitActionMode();
+							}
+							else if(activity instanceof ViewItemActivity) {
+								((ViewItemActivity)activity).updateCurrentItem();
+							}
 							SyncManager.startSync(activity);
 						}
 					})
-							.setSet(activity.getCurrentSet())
-							.setAlbumId(activity.getCurrentAlbumId())
+							.setSet(set)
+							.setAlbumId(albumId)
 							.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 }

@@ -6,12 +6,14 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -556,5 +558,41 @@ public class FileManager {
 
 	public static boolean isFileCached(Context context, String filename){
 		return getCachedFile(context,filename) != null;
+	}
+
+	public synchronized static void cleanupFileCache(Context context){
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+		int cacheSize = Integer.parseInt(settings.getString("cache_size", "0"));
+		if(cacheSize == 0){
+			return;
+		}
+
+		File cacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
+		if(!cacheDir.exists()){
+			return;
+		}
+
+		long totalSize = 0;
+		File[] files = cacheDir.listFiles();
+		for(File file : files){
+			totalSize += file.length();
+		}
+
+		long bytesInAMb = 1024 * 1024 * 1024;
+		long cacheSizeBytes =  bytesInAMb * cacheSize;
+
+		if(totalSize > cacheSizeBytes){
+			long needToDeleteBytes = totalSize - cacheSizeBytes;
+			long deletedBytes = 0;
+			Arrays.sort(files, (object1, object2) -> (int) (Math.min(object1.lastModified(), object2.lastModified())));
+			for (File file : files){
+				deletedBytes += file.length();
+				file.delete();
+
+				if(deletedBytes > needToDeleteBytes){
+					break;
+				}
+			}
+		}
 	}
 }

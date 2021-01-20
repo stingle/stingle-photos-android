@@ -400,4 +400,9 @@
     <string name="decrypting_file">Расшифровывается файл %1$s из %2$s</string>
     <string name="download_selected">Загрузить выбранные</string>
     <string name="download_channel_name">Уведомления загрузок</string>
+    <string name="cache_size">Максимальный размер кэша</string>
+    <string name="no_limit">Неограничено</string>
+    <string name="cache5gb">5 GB</string>
+    <string name="cache20gb">20 GB</string>
+    <string name="cache50gb">50 GB</string>
 </resources>
