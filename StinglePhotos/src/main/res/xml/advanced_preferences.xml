@@ -13,6 +13,15 @@
         app:summary="@string/resync_db_desc"
         app:title="@string/resync_db" />
 
+    <ListPreference
+        app:icon="@drawable/ic_cached"
+        app:key="cache_size"
+        app:title="@string/cache_size"
+        app:defaultValue="0"
+        app:entries="@array/cacheSizes"
+        app:entryValues="@array/cacheSizesValues"
+        app:useSimpleSummaryProvider="true" />
+
     <Preference
         app:icon="@drawable/ic_action_delete"
         app:key="delete_cache"

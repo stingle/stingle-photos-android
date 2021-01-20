@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -31,6 +30,7 @@ import org.stingle.photos.AsyncTasks.FreeUpSpaceAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.AddAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.DeleteFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.Gallery.DownloadAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.EmptyTrashAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.LeaveAlbumAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
@@ -39,7 +39,6 @@ import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
-import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Albums.AlbumsAdapterPisasso;
 import org.stingle.photos.Gallery.Albums.AlbumsFragment;
@@ -51,6 +50,7 @@ import org.stingle.photos.Sharing.AlbumSettingsDialogFragment;
 import org.stingle.photos.Sharing.SharingDialogFragment;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.ViewItemActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -221,8 +221,7 @@ public class GalleryActions {
 					public void onClick(DialogInterface dialog, int which) {
 						final ProgressDialog spinner = Helpers.showProgressDialog(activity, activity.getString(R.string.decrypting_files), null);
 
-						File decryptDir = new File(Environment.getExternalStorageDirectory().getPath() + "/" + FileManager.DECRYPT_DIR);
-						DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, decryptDir, new OnAsyncTaskFinish() {
+						DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new OnAsyncTaskFinish() {
 							@Override
 							public void onFinish(ArrayList<File> files) {
 								super.onFinish(files);
@@ -237,7 +236,7 @@ public class GalleryActions {
 						});
 						decFilesJob.setSet(set);
 						decFilesJob.setAlbumId(albumId);
-						decFilesJob.setPerformMediaScan(true);
+						decFilesJob.setInsertIntoGallery(true);
 						decFilesJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, files);
 					}
 				},
@@ -646,7 +645,24 @@ public class GalleryActions {
 					.setMode(mode)
 					.setFilename(filename)
 					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
 
-
+	public static void downloadSelected(AppCompatActivity activity, final ArrayList<StingleDbFile> files, int set, String albumId) {
+					new DownloadAsyncTask(activity, files, new SyncManager.OnFinish() {
+						@Override
+						public void onFinish(Boolean needToUpdateUI) {
+							if(activity instanceof GalleryActivity) {
+								((GalleryActivity)activity).updateGalleryFragmentData();
+								((GalleryActivity)activity).exitActionMode();
+							}
+							else if(activity instanceof ViewItemActivity) {
+								((ViewItemActivity)activity).updateCurrentItem();
+							}
+							SyncManager.startSync(activity);
+						}
+					})
+							.setSet(set)
+							.setAlbumId(albumId)
+							.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 }

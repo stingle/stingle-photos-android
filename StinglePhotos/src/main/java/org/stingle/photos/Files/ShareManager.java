@@ -27,7 +27,7 @@ public class ShareManager {
 	public static void shareDbFiles(final Context context, List<StingleDbFile> dbFiles, int set, String albumId){
 
 
-		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(context, new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
+		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(context, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish(ArrayList<File> files) {
 				super.onFinish(files);
@@ -86,7 +86,7 @@ public class ShareManager {
 	}
 
 	public static void sendBackSelection(final Activity activity, final Intent originalIntent, ArrayList<StingleDbFile> selectedFiles, int set, String albumId) {
-		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new File(activity.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR+"/"), new OnAsyncTaskFinish() {
+		DecryptFilesAsyncTask decFilesJob = new DecryptFilesAsyncTask(activity, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish(ArrayList<File> files) {
 				super.onFinish(files);

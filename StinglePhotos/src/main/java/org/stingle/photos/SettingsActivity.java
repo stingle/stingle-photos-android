@@ -401,8 +401,10 @@ public class SettingsActivity extends AppCompatActivity implements
 							task.setWork(new GenericAsyncTask.GenericTaskWork() {
 								@Override
 								public Object execute(Context context) {
-									File cacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
-									Helpers.deleteFolderRecursive(cacheDir);
+									File thumbCacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
+									File filesCacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
+									Helpers.deleteFolderRecursive(thumbCacheDir);
+									Helpers.deleteFolderRecursive(filesCacheDir);
 									return true;
 								}
 							});

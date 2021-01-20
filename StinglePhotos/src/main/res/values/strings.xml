@@ -159,6 +159,7 @@
     <string name="confirming_purchase">Confirming purchase…</string>
     <string name="envideo_service_started">envideo string</string>
     <string name="sync_service_started">sync_service</string>
+    <string name="download_service_started">download_service</string>
     <string name="confirm_decrypt_files">Are you sure you want to decrypt selected files? They will become accessible to other applications on this device.</string>
     <string name="empty_trash">Empty trash</string>
     <string name="confirm_empty_trash">Are you sure you want to empty trash? This action cannot be undone!</string>
@@ -396,5 +397,16 @@
     <string name="reset_album_cover">Reset album cover</string>
     <string name="preserve_import_dates">Preserve dates on import</string>
     <string name="preserve_import_dates_desc">Preserve dates of photos and videos during manual import</string>
+    <string name="upgrading">Upgrading…</string>
+    <string name="upgrading_desc">Please don\'t close the app until process completes</string>
+    <string name="downloading_file">Downloading file %1$s out of %2$s</string>
+    <string name="decrypting_file">Decrypting file %1$s out of %2$s</string>
+    <string name="download_selected">Download selected</string>
+    <string name="download_channel_name">Download notifications</string>
+    <string name="cache_size">Maximum cache size</string>
+    <string name="no_limit">Unlimited</string>
+    <string name="cache5gb">5 GB</string>
+    <string name="cache20gb">20 GB</string>
+    <string name="cache50gb">50 GB</string>
 
 </resources>

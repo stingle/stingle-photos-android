@@ -16,10 +16,6 @@ import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 
 public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
@@ -77,7 +73,7 @@ public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				StingleDbFile dbFile = new StingleDbFile(result);
 				File file = new File(dir.getPath() + "/" + dbFile.filename);
 
-				if(moveFile(thumbDir.getPath(), dbFile.filename, cacheDir.getPath())){
+				if(FileManager.moveFile(thumbDir.getPath(), dbFile.filename, cacheDir.getPath())){
 					if(file.exists()){
 						if(!file.delete()){
 							Log.d("free_up", dbFile.filename + " - FAIL");
@@ -100,51 +96,6 @@ public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			return false;
 		}
 		return true;
-	}
-
-	private boolean moveFile(String inputPath, String inputFile, String outputPath) {
-
-		InputStream in = null;
-		OutputStream out = null;
-		try {
-
-			//create output directory if it doesn't exist
-			File dir = new File (outputPath);
-			if (!dir.exists()){
-				dir.mkdirs();
-			}
-
-			File inFile = new File(inputPath + "/" + inputFile);
-
-			if(!inFile.exists()){
-				return true;
-			}
-
-			in = new FileInputStream(inFile);
-			out = new FileOutputStream(outputPath + "/"  + inputFile);
-
-			byte[] buffer = new byte[1024];
-			int read;
-			while ((read = in.read(buffer)) != -1) {
-				out.write(buffer, 0, read);
-			}
-			in.close();
-			in = null;
-
-			// write the output file
-			out.flush();
-			out.close();
-			out = null;
-
-			// delete the original file
-			if((new File(inputPath + "/" + inputFile)).delete()){
-				return true;
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
 	}
 
 	@Override

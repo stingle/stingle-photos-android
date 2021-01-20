@@ -42,6 +42,7 @@ import com.google.android.material.snackbar.Snackbar;
 import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
+import org.stingle.photos.AsyncTasks.MigrateFilesAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
@@ -63,6 +64,7 @@ import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class GalleryActivity extends AppCompatActivity
@@ -272,19 +274,40 @@ public class GalleryActivity extends AppCompatActivity
 		lbm.unregisterReceiver(onLogout);
 	}
 
+	private static MigrateFilesAsyncTask migrateTask;
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		Log.e("GalleryActivity", "onResume");
-		isSyncEnabled = SyncManager.isBackupEnabled(this);
-		if(!isSyncEnabled){
-			disableSyncBar();
+
+		File oldHomeDir = new File(FileManager.getOldHomeDir(this));
+		if(oldHomeDir.exists()) {
+			if(migrateTask == null) {
+				migrateTask = new MigrateFilesAsyncTask(this, new OnAsyncTaskFinish() {
+					@Override
+					public void onFinish() {
+						super.onFinish();
+						executeOnResume();
+					}
+				});
+				migrateTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+			}
 		}
-		else if (isSyncBarDisabled() && currentSet == SyncManager.GALLERY){
+		else {
+			executeOnResume();
+		}
+	}
+
+	private void executeOnResume(){
+		isSyncEnabled = SyncManager.isBackupEnabled(this);
+		if (!isSyncEnabled) {
+			disableSyncBar();
+		} else if (isSyncBarDisabled() && currentSet == SyncManager.GALLERY) {
 			enableSyncBar();
 		}
 
-		if(!isImporting){
+		if (!isImporting) {
 			SyncManager.startPeriodicWork(this);
 			checkLoginAndInit();
 		}
@@ -1040,6 +1063,9 @@ public class GalleryActivity extends AppCompatActivity
 						break;
 					case R.id.set_as_album_cover :
 						GalleryActions.setAsAlbumCover(GalleryActivity.this,currentAlbumId, SetAlbumCoverAsyncTask.ALBUM_COVER_FILE, galleryFragment.getSelectedFiles().get(0).filename);
+						break;
+					case R.id.download :
+						GalleryActions.downloadSelected(GalleryActivity.this, galleryFragment.getSelectedFiles(), getCurrentSet(), getCurrentAlbumId());
 						break;
 				}
 				return true;

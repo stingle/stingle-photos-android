@@ -60,16 +60,18 @@ import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTask.ViewItemTaskResult> {
 
-	private Context context;
+	private WeakReference<Context> contextRef;
 
 	private int position = 0;
-	private final ImageHolderLayout parent;
-	private final ContentLoadingProgressBar loading;
+	private final WeakReference<ImageHolderLayout> parentRef;
+	private final WeakReference<ContentLoadingProgressBar> loadingRef;
+	private final WeakReference<ContentLoadingProgressBar> originalPhotoLoadingBarRef;
 	private final ViewPagerAdapter adapter;
 	private final FilesDb db;
 	private int set = SyncManager.GALLERY;
@@ -89,13 +91,14 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	private final static int GET_ORIGINAL_TASKS_LIMIT = 3;
 
 
-	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, FilesDb db, int set, String albumId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
+	public ViewItemAsyncTask(Context context, ViewPagerAdapter adapter, int position, ImageHolderLayout parent, ContentLoadingProgressBar loading, ContentLoadingProgressBar originalPhotoLoading, FilesDb db, int set, String albumId, OnClickListener onClickListener, View.OnTouchListener touchListener, MemoryCache memCache) {
 		super();
-		this.context = context;
+		this.contextRef = new WeakReference<>(context);
 		this.adapter = adapter;
 		this.position = position;
-		this.parent = parent;
-		this.loading = loading;
+		this.parentRef = new WeakReference<>(parent);
+		this.loadingRef = new WeakReference<>(loading);
+		this.originalPhotoLoadingBarRef = new WeakReference<>(originalPhotoLoading);
 		this.db = db;
 		this.set = set;
 		this.albumId = albumId;
@@ -116,6 +119,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 
 	@Override
 	protected ViewItemAsyncTask.ViewItemTaskResult doInBackground(Void... params) {
+		Context context = contextRef.get();
+		if(context == null){
+			return null;
+		}
 		ViewItemTaskResult result = new ViewItemTaskResult();
 
 		result.set = set;
@@ -133,8 +140,15 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		result.filename = dbFile.filename;
 		result.headers = dbFile.headers;
 		try {
-			if (dbFile.isLocal) {
-				File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
+			File cachedFile = FileManager.getCachedFile(context, dbFile.filename);
+			if (dbFile.isLocal || cachedFile != null) {
+				File file;
+				if(cachedFile != null){
+					file = cachedFile;
+				}
+				else{
+					 file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
+				}
 
 				Crypto.Header fileHeader = CryptoHelpers.decryptFileHeaders(context, set, albumId, dbFile.headers, false);
 				fileType = fileHeader.fileType;
@@ -186,7 +200,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					postParams.put("set", String.valueOf(set));
 
 					JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_url_path), postParams);
-					StingleResponse response = new StingleResponse(this.context, json, false);
+					StingleResponse response = new StingleResponse(context, json, false);
 
 					if (response.isStatusOk()) {
 						String url = response.get("url");
@@ -232,6 +246,17 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	@Override
 	protected void onPostExecute(ViewItemAsyncTask.ViewItemTaskResult result) {
 		super.onPostExecute(result);
+		Context context = contextRef.get();
+		if(context == null){
+			return;
+		}
+
+		ImageHolderLayout parent = parentRef.get();
+		ContentLoadingProgressBar loading = loadingRef.get();
+		ContentLoadingProgressBar originalPhotoLoadingBar = originalPhotoLoadingBarRef.get();
+		if(parent == null || loading == null || originalPhotoLoadingBar == null){
+			return;
+		}
 
 		parent.removeAllViews();
 		parent.setFileType(result.fileType);
@@ -296,6 +321,8 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 				attacher.update();
 
 				if (result.isRemote) {
+					originalPhotoLoadingBar.setVisibility(View.VISIBLE);
+
 					GetOriginalRemotePhotoTask getOriginalTask = new GetOriginalRemotePhotoTask(context, result);
 					getOriginalTask.setImage(image);
 					getOriginalTask.setAttacher(attacher);
@@ -306,6 +333,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 							super.onFinish();
 							getOriginalRemotePhotoTasks.remove(getOriginalTask);
 							Log.e("getOrigTask", "removed myself");
+							originalPhotoLoadingBar.setVisibility(View.GONE);
 						}
 					});
 					getOriginalTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -396,6 +424,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	}
 
 	private Player.EventListener getPlayerEventListener() {
+		ContentLoadingProgressBar loading = loadingRef.get();
+		if(loading == null){
+			return null;
+		}
 		return new Player.EventListener() {
 			@Override
 			public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
@@ -463,7 +495,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		}
 	}
 
-	public class ViewItemTaskResult {
+	public static class ViewItemTaskResult {
 		public int fileType = Crypto.FILE_TYPE_PHOTO;
 		public String filename = null;
 		public Bitmap bitmap = null;

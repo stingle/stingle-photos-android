@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -137,7 +138,7 @@ public class HttpsClient {
 		return json;
 	}
 
-	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath, OnUpdateProgress onProgress) throws IOException, NoSuchAlgorithmException, KeyManagementException {
 		Log.e("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -200,11 +201,17 @@ public class HttpsClient {
 		long total = 0;
 		int count;
 
+		if(onProgress != null){
+			onProgress.onUpdate(0);
+		}
+
 		while ((count = input.read(buf)) != -1) {
 			total += count;
 			// publishing the progress....
 			// After this onProgressUpdate will be called
-			//publishProgress("" + (int) ((total * 100) / lenghtOfFile));
+			if(onProgress != null){
+				onProgress.onUpdate((int) ((total * 100) / lenghtOfFile));
+			}
 
 			// writing data to
 			//Log.d("file", new String(buf));
@@ -221,6 +228,12 @@ public class HttpsClient {
 	}
 
 	public static byte[] getFileAsByteArray(String urlStr, HashMap<String, String> params) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		getFileAsByteArray(urlStr, params, output);
+		return output.toByteArray();
+	}
+
+	public static void getFileAsByteArray(String urlStr, HashMap<String, String> params, OutputStream output) throws IOException, NoSuchAlgorithmException, KeyManagementException {
 		Log.e("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -275,9 +288,6 @@ public class HttpsClient {
 		// download the file
 		InputStream input = new BufferedInputStream(conn.getInputStream(),8192);
 
-		// Output stream
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-
 		byte buf[] = new byte[1024];
 
 		long total = 0;
@@ -295,8 +305,6 @@ public class HttpsClient {
 
 		// closing streams
 		input.close();
-
-		return output.toByteArray();
 	}
 
 	public static JSONObject multipartUpload(String urlTo, HashMap<String, String> params, FileToUpload file)  {
@@ -536,4 +544,7 @@ public class HttpsClient {
 		}
 	}
 
+	abstract public static class OnUpdateProgress {
+		abstract public void onUpdate(int progress);
+	}
 }

@@ -181,12 +181,16 @@ public class Helpers {
 	}
 
 
-	public static ProgressDialog showProgressDialogWithBar(Context context, String message, int max, DialogInterface.OnCancelListener onCancel){
+	public static ProgressDialog showProgressDialogWithBar(Context context, String title, String message, int max, DialogInterface.OnCancelListener onCancel){
 		ProgressDialog progressDialog = new ProgressDialog(context);
 		if(onCancel != null) {
 			progressDialog.setCancelable(true);
 			progressDialog.setOnCancelListener(onCancel);
 		}
+		else{
+			progressDialog.setCancelable(false);
+		}
+		progressDialog.setTitle(title);
 		progressDialog.setMessage(message);
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.setMax(max);
