@@ -382,6 +382,7 @@
     <string name="language">Language</string>
     <string name="english">English</string>
     <string name="russian">Русский</string>
+    <string name="german">Deutsch</string>
     <string name="free_up_space">Free up space</string>
     <string name="free_up_space_confirm">Free up %s?</string>
     <string name="free_up_space_confirm_desc">This action will free up %s from your device by deleting backed files from your local storage. Continue?</string>

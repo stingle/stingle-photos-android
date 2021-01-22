@@ -27,28 +27,29 @@
         android:paddingBottom="18dp"
         android:gravity="center_horizontal"/>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         android:paddingBottom="18dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/import_skip"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
-            android:layout_alignParentStart="true"
             android:text="@string/import_notenable" />
         <Button
             android:id="@+id/import_enable"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:layout_weight="1"
             android:text="@string/import_enable" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"

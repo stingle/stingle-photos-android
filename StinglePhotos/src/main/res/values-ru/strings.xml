@@ -373,12 +373,13 @@
     <string name="auto_import_title">Настройки авто импортирования</string>
     <string name="auto_import_title_desc">Фото и видео с вашего устройства будут автоматически импортированы, зашифрованы и синхнизированы с вашим аккаунтом Stingle Photos</string>
     <string name="import_notenable">Не сейчас</string>
-    <string name="import_enable">Включить\nавто импорт</string>
+    <string name="import_enable">Включить авто импорт</string>
     <string name="import_existing">Импортировать существующие файлы</string>
     <string name="auto_import_notice">Вы можете включить или выключить авто импортирование в любой момент из настроек</string>
     <string name="language">Язык</string>
     <string name="english">English</string>
     <string name="russian">Русский</string>
+    <string name="german">Deutsch</string>
     <string name="free_up_space">Освободить место</string>
     <string name="free_up_space_confirm">Освободить %s?</string>
     <string name="free_up_space_confirm_desc">Это действие освободит %s места с вашего устройства. Продолжить?</string>

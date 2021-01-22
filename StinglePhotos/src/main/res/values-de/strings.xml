@@ -41,7 +41,7 @@
     <string name="hour1">1 Stunde</string>
     <string name="share">Teilen</string>
     <string name="log_out">Abmelden</string>
-    <string name="gallery">Gallerie</string>
+    <string name="gallery">Galerie</string>
     <string name="volume_take_photo">Lautstärke Auf/Ab</string>
     <string name="volume_take_photo_desc">Lautstärke Auf/Ab macht Aufnahmen</string>
     <string name="timer_duration">Zeit Dauer</string>
@@ -54,7 +54,7 @@
     <string name="clear_cache">Cache leeren</string>
     <string name="clear_cache_desc">Thumbnail Cache leeren</string>
     <string name="confirm_delete_cache">Sind Sie sicher, dass Sie den Cache löschen möchten?</string>
-    <string name="title_gallery_for_app">Gallerie</string>
+    <string name="title_gallery_for_app">Galerie</string>
     <string name="title_setup">Einrichten</string>
     <string name="title_change_password">Passwort ändern</string>
     <string name="title_import">Importieren</string>
@@ -114,14 +114,14 @@
     <string name="email">Email</string>
     <string name="invalid_email">Invalid email address specified</string>
     <string name="fail_reg">Etwas ist schief gelaufen, bitte versuchen Sie es noch einmal.</string>
-    <string name="creating_account">Konto erstellen...</string>
+    <string name="creating_account">Konto erstellen…</string>
     <string name="navigation_drawer_open">Öffne Navigationdrawer</string>
     <string name="navigation_drawer_close">Schließe Navigationdrawer</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigationstitel</string>
 
-    <string name="menu_gallery">Gallerie</string>
+    <string name="menu_gallery">Galerie</string>
     <string name="save_to_gallery">In Galerie speichern</string>
     <string name="menu_trash">Papierkorb</string>
     <string name="title_trash">Papierkorb</string>
@@ -378,9 +378,9 @@
     <string name="import_existing">Vorhandene Elemente importieren</string>
     <string name="auto_import_notice">Sie können den automatischen Import jederzeit in den Einstellungen ein- oder ausschalten</string>
     <string name="language">Sprache</string>
-    <string name="english">Englisch</string>
+    <string name="english">English</string>
+    <string name="russian">Русский</string>
     <string name="german">Deutsch</string>
-    <string name="russian">Russisch</string>
     <string name="free_up_space">Speicher freimachen</string>
     <string name="free_up_space_confirm">%s Speicher freigeben?</string>
     <string name="free_up_space_confirm_desc">Durch diese Aktion wird %s von Ihrem Gerät freigegeben, indem gesicherte Dateien aus Ihrem lokalen Speicher gelöscht werden. Fortfahren?</string>
@@ -391,8 +391,22 @@
 
     <string name="importing_file">"Importieren der Datei %1$s aus %2$s"</string>
     <string name="set_as_album_cover">Als Albumcover festgelegt</string>
-    <string name="changing_album_cover">Albumcover ändern...</string>
+    <string name="changing_album_cover">Albumcover ändern…</string>
     <string name="set_album_blank_cover">Ein leeres Albumcover festlegen</string>
     <string name="reset_album_cover">Albumcover zurücksetzen</string>
+
+    <string name="preserve_import_dates">Daten beim Import beibehalten</string>
+    <string name="preserve_import_dates_desc">Bewahren Sie die Daten von Fotos und Videos während des manuellen Imports auf</string>
+    <string name="upgrading">Upgrade durchführen…</string>
+    <string name="upgrading_desc">Bitte schließen Sie die App erst, wenn der Vorgang abgeschlossen ist</string>
+    <string name="downloading_file">Herunterladen von Datei %1$s von %2$s</string>
+    <string name="decrypting_file">Entschlüsseln von Datei %1$s von %2$s</string>
+    <string name="download_selected">Download ausgewählt</string>
+    <string name="download_channel_name">Benachrichtigungen herunterladen</string>
+    <string name="cache_size">Maximale Cache-Größe</string>
+    <string name="no_limit">Unbegrenzt</string>
+    <string name="cache5gb">5 GB</string>
+    <string name="cache20gb">20 GB</string>
+    <string name="cache50gb">50 GB</string>
 
 </resources>
