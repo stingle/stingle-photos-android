@@ -49,6 +49,7 @@ public class StinglePhotosApplication extends Application{
     public static Bundle syncStatusParams = null;
     public static boolean syncRestartAfterFinish = false;
     public static int syncRestartAfterFinishMode = SyncAsyncTask.MODE_FULL;
+	public static boolean isSyncedThumbs = false;
 
     @Override
 	public void onCreate(){

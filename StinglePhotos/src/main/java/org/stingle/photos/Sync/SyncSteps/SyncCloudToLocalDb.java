@@ -324,6 +324,7 @@ public class SyncCloudToLocalDb {
 			albumsDb.insertAlbum(remoteAlbum);
 			if(isFirstSyncDone && remoteAlbum.isShared && !remoteAlbum.isOwner){
 				showSharingNotification(remoteAlbum);
+				StinglePhotosApplication.isSyncedThumbs = false;
 			}
 		} else {
 			if (album.dateModified != remoteAlbum.dateModified) {

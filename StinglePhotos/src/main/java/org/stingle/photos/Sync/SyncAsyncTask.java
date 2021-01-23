@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.Sync.DownloadThumbsAsyncTask;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncSteps.FSSync;
@@ -70,6 +71,7 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				FSSync(context);
 				autoImport(context);
 				upload(context);
+				downloadThumbs(context);
 				break;
 			case MODE_IMPORT_AND_UPLOAD:
 				autoImport(context);
@@ -116,7 +118,12 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	}
 
-
+	public void downloadThumbs(Context context){
+		if(!StinglePhotosApplication.isSyncedThumbs){
+			(new DownloadThumbsAsyncTask(context, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			StinglePhotosApplication.isSyncedThumbs = true;
+		}
+	}
 
 	@Override
 	protected void onPostExecute(Boolean result) {

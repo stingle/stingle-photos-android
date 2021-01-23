@@ -406,4 +406,5 @@
     <string name="cache5gb">5 GB</string>
     <string name="cache20gb">20 GB</string>
     <string name="cache50gb">50 GB</string>
+    <string name="downloading_thumb">Синхнизируется файл %1$s из %2$s</string>
 </resources>
