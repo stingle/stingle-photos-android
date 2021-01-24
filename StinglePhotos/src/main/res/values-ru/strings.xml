@@ -416,4 +416,7 @@
     <string name="is_delete_original_desc">Хотите ли удалить исходные файлы которые только что были успешно импортированы?</string>
     <string name="delete_failed">Неудалось удалить файлы</string>
     <string name="delete_failed_desc">Неудалось удалить некоторые или все исходные файлы. Пожалуйста удалите их вручную.</string>
+    <string name="backup_phrase_not_backed">Запишите резервную фразу</string>
+    <string name="backup_phrase_not_backed_desc">Если вы потеряли пароль, резервная фраза поможет вам восстановить учетную запись. Мы настоятельно рекомендуем записать резервную фразу в безопасное место.</string>
+    <string name="go_to_backup_phrase">См. Резервную фразу</string>
 </resources>

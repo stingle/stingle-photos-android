@@ -418,5 +418,8 @@
     <string name="is_delete_original_desc">Möchten Sie importierte Originaldateien löschen?</string>
     <string name="delete_failed">Fehler beim Löschen einiger Dateien</string>
     <string name="delete_failed_desc">Wir konnten einige aller Originaldateien nicht löschen. Bitte löschen Sie sie manuell.</string>
+    <string name="backup_phrase_not_backed_desc">Wenn Sie Ihr Passwort verlieren, hilft Ihnen die Sicherungsphrase, Ihr Konto wiederherzustellen. Wir empfehlen dringend, Ihre Sicherungsphrase an einem sicheren Ort aufzuschreiben.</string>
+    <string name="backup_phrase_not_backed">Bitte notieren Sie sich Ihre Sicherungsphrase</string>
+    <string name="go_to_backup_phrase">Siehe Sicherungssatz</string>
 
 </resources>
