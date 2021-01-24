@@ -10,14 +10,10 @@ import android.widget.ImageView;
 import androidx.core.widget.ContentLoadingProgressBar;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
-import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.Net.HttpsClient;
-import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher;
@@ -30,8 +26,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]> {
 
@@ -106,21 +100,9 @@ public class GetOriginalRemotePhotoTask extends AsyncTask<Void, Integer, byte[]>
 				encFile = out.toByteArray();
 			}
 			else {
-				HashMap<String, String> postParams = new HashMap<String, String>();
+				encFile = SyncManager.downloadFile(context, result.filename, false, result.set);
 
-				postParams.put("token", KeyManagement.getApiToken(context));
-				postParams.put("file", result.filename);
-				postParams.put("thumb", "0");
-				postParams.put("set", String.valueOf(result.set));
-
-
-				encFile = HttpsClient.getFileAsByteArray(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams);
 				if (encFile == null || encFile.length == 0) {
-					return null;
-				}
-
-				byte[] fileBeginning = Arrays.copyOfRange(encFile, 0, Crypto.FILE_BEGGINIG_LEN);
-				if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
 					return null;
 				}
 

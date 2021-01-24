@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
 
-import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
@@ -22,7 +21,6 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -35,7 +33,6 @@ import java.lang.ref.WeakReference;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Integer, ArrayList<File>> {
@@ -130,29 +127,22 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 			}
 			else {
 				publishProgress(0, currentItemNumber+1, filesToDecrypt.size(), 0);
-				HashMap<String, String> postParams = new HashMap<String, String>();
 
-				postParams.put("token", KeyManagement.getApiToken(context));
-				postParams.put("file", dbFile.filename);
-				postParams.put("thumb", "0");
-				postParams.put("set", String.valueOf(set));
-
-
+				String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), dbFile.filename);
 				try {
-					String finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), dbFile.filename);
-					HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, finalWritePath, new HttpsClient.OnUpdateProgress() {
+					SyncManager.downloadFile(context, dbFile.filename, finalWritePath, false, set, new HttpsClient.OnUpdateProgress() {
 						@Override
 						public void onUpdate(int progress) {
-							publishProgress(0, currentItemNumber+1, filesToDecrypt.size(), progress);
+							publishProgress(0, currentItemNumber + 1, filesToDecrypt.size(), progress);
 						}
 					});
-					file = new File(finalWritePath);
 				} catch (NoSuchAlgorithmException | IOException | KeyManagementException e) {
 					e.printStackTrace();
 				}
+				file = new File(finalWritePath);
 			}
 
-			if (file != null && file.exists() && file.isFile()) {
+			if (file.exists() && file.isFile()) {
 				try {
 					Crypto.Header headers = CryptoHelpers.decryptFileHeaders(context, set, albumId, dbFile.headers, false);
 					FileInputStream inputStream = new FileInputStream(file);

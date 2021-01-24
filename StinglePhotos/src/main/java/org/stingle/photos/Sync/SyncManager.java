@@ -40,10 +40,13 @@ import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -147,7 +150,7 @@ public class SyncManager {
 		}
 	}
 
-	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int set) {
+	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int set, HttpsClient.OnUpdateProgress onProgress) throws NoSuchAlgorithmException, IOException, KeyManagementException {
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
@@ -157,13 +160,41 @@ public class SyncManager {
 			postParams.put("thumb", "1");
 		}
 
-		try {
-			HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, outputPath, null);
-			return true;
-		} catch (IOException | NoSuchAlgorithmException | KeyManagementException e) {
-
+		HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams, outputPath, onProgress);
+		File dwnFile = new File(outputPath);
+		if (!dwnFile.exists() || dwnFile.length() == 0) {
+			return false;
 		}
-		return false;
+
+		FileInputStream is = new FileInputStream(dwnFile);
+		byte[] fileBeginning = new byte[Crypto.FILE_BEGGINIG_LEN];
+		is.read(fileBeginning);
+		if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
+			return false;
+		}
+		return true;
+	}
+
+	public static byte[] downloadFile(Context context, String filename, boolean isThumb, int set) throws NoSuchAlgorithmException, IOException, KeyManagementException {
+		HashMap<String, String> postParams = new HashMap<String, String>();
+
+		postParams.put("token", KeyManagement.getApiToken(context));
+		postParams.put("file", filename);
+		postParams.put("set", String.valueOf(set));
+		if (isThumb) {
+			postParams.put("thumb", "1");
+		}
+
+		byte[] encFile = HttpsClient.getFileAsByteArray(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams);
+		if (encFile == null || encFile.length == 0) {
+			return null;
+		}
+
+		byte[] fileBeginning = Arrays.copyOfRange(encFile, 0, Crypto.FILE_BEGGINIG_LEN);
+		if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
+			return null;
+		}
+		return encFile;
 	}
 
 	public static abstract class OnFinish {

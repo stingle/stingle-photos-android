@@ -23,6 +23,7 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private WeakReference<Context> context;
 	private final OnAsyncTaskFinish onFinishListener;
 	private int mode;
+	private static DownloadThumbsAsyncTask downloadThumbsAsyncTask;
 
 	static final public int MODE_FULL = 0;
 	static final public int MODE_IMPORT_AND_UPLOAD = 1;
@@ -119,8 +120,14 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	public void downloadThumbs(Context context){
-		if(!StinglePhotosApplication.isSyncedThumbs){
-			(new DownloadThumbsAsyncTask(context, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		if(!StinglePhotosApplication.isSyncedThumbs && (downloadThumbsAsyncTask == null || downloadThumbsAsyncTask.isCancelled())){
+			downloadThumbsAsyncTask = new DownloadThumbsAsyncTask(context, new SyncManager.OnFinish() {
+				@Override
+				public void onFinish(Boolean needToUpdateUI) {
+					downloadThumbsAsyncTask = null;
+				}
+			});
+			downloadThumbsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			StinglePhotosApplication.isSyncedThumbs = true;
 		}
 	}

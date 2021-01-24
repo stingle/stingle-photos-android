@@ -9,9 +9,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
-import org.stingle.photos.Auth.KeyManagement;
-import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -19,9 +18,7 @@ import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.GalleryActivity;
-import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.io.File;
@@ -30,8 +27,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -60,7 +55,7 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		if(myContext == null){
 			return null;
 		}
-
+		Log.d("downloadThumbs", "Download thumbs START");
 		GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
 		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
 		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
@@ -95,6 +90,7 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		galleryDb.close();
 		albumFilesDb.close();
 		trashDb.close();
+		Log.d("downloadThumbs", "Download thumbs END");
 		return null;
 	}
 
@@ -102,24 +98,12 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		File thumb = new File(thumbDir + "/" + dbFile.filename);
 		File thumbCache = new File(thumbCacheDir + "/" + dbFile.filename);
 		if(!thumb.exists() && !thumbCache.exists()) {
-			HashMap<String, String> postParams = new HashMap<String, String>();
-
-			postParams.put("token", KeyManagement.getApiToken(context));
-			postParams.put("file", dbFile.filename);
-			postParams.put("thumb", "1");
-			postParams.put("set", String.valueOf(set));
 			byte[] encFile;
 
 			try {
-				encFile = HttpsClient.getFileAsByteArray(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams);
-
+				encFile = SyncManager.downloadFile(context, dbFile.filename, true, set);
 
 				if (encFile == null || encFile.length == 0) {
-					return;
-				}
-
-				byte[] fileBeginning = Arrays.copyOfRange(encFile, 0, Crypto.FILE_BEGGINIG_LEN);
-				if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
 					return;
 				}
 

@@ -293,7 +293,7 @@ public class SettingsActivity extends AppCompatActivity implements
 		}
 	}
 
-	public static class AutoImportPreferenceFragment extends PreferenceFragmentCompat {
+	public static class ImportPreferenceFragment extends PreferenceFragmentCompat {
 
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {

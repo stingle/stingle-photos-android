@@ -117,7 +117,7 @@ public class Helpers {
 
 	public static void showAlertDialog(Context context, String title, String message, Integer icon, DialogInterface.OnClickListener onclick) {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
-		builder.setMessage(title);
+		builder.setTitle(title);
 		builder.setMessage(message);
 		builder.setNegativeButton(context.getString(R.string.ok), onclick);
 		if(icon == null){

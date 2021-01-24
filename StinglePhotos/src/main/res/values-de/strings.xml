@@ -362,7 +362,7 @@
     <string name="remove_member_question">Mitglied löschen?</string>
 
 
-    <string name="pref_header_import">Automatischer Import</string>
+    <string name="pref_header_import">Import</string>
     <string name="enable_import">Automatischen Import aktivieren</string>
     <string name="enable_import_desc">Automatisch Fotos und Videos von Ihrem Gerät importieren</string>
     <string name="import_autodelete">Originaldateien nach dem Import löschen</string>
@@ -409,5 +409,14 @@
     <string name="cache20gb">20 GB</string>
     <string name="cache50gb">50 GB</string>
     <string name="downloading_thumb">Synchronisieren der Galeriedatei %1$s von %2$s</string>
+    <string name="never">Noch nie</string>
+    <string name="ask_every_time">Frag jedes Mal</string>
+    <string name="always">Immer</string>
+    <string name="delete_after_import">Löschen Sie die Originaldateien nach dem Import</string>
+    <string name="manual_import">Manueller Import</string>
+    <string name="is_delete_original">Originaldateien löschen?</string>
+    <string name="is_delete_original_desc">Möchten Sie importierte Originaldateien löschen?</string>
+    <string name="delete_failed">Fehler beim Löschen einiger Dateien</string>
+    <string name="delete_failed_desc">Wir konnten einige aller Originaldateien nicht löschen. Bitte löschen Sie sie manuell.</string>
 
 </resources>

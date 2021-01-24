@@ -365,7 +365,7 @@
     <string name="remove_member_question">Remove member?</string>
 
 
-    <string name="pref_header_import">Auto import</string>
+    <string name="pref_header_import">Import</string>
     <string name="enable_import">Enable auto import</string>
     <string name="enable_import_desc">Automatically import photos and videos from your device</string>
     <string name="import_autodelete">Delete original files after import</string>
@@ -411,5 +411,14 @@
     <string name="cache20gb">20 GB</string>
     <string name="cache50gb">50 GB</string>
     <string name="downloading_thumb">Syncing gallery file %1$s out of %2$s</string>
+    <string name="never">Never</string>
+    <string name="ask_every_time">Ask every time</string>
+    <string name="always">Always</string>
+    <string name="delete_after_import">Delete original files after manual import</string>
+    <string name="manual_import">Manual import</string>
+    <string name="is_delete_original">Delete original files?</string>
+    <string name="is_delete_original_desc">Do you want to delete original files that you have imported?</string>
+    <string name="delete_failed">Failed to delete some files</string>
+    <string name="delete_failed_desc">We were unable to delete some of all original files. Please delete them manually.</string>
 
 </resources>

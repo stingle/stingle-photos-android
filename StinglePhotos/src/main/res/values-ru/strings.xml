@@ -361,7 +361,7 @@
     <string name="remove_member_question">Удалить участника?</string>
 
 
-    <string name="pref_header_import">Автоматическое импортирование</string>
+    <string name="pref_header_import">Импортирование</string>
     <string name="enable_import">Включить автоматическое импортирование</string>
     <string name="enable_import_desc">Автоматически импортировать фото и видео с вашего устройства</string>
     <string name="import_autodelete">Удалять исходные файлы после импортиворания</string>
@@ -407,4 +407,13 @@
     <string name="cache20gb">20 GB</string>
     <string name="cache50gb">50 GB</string>
     <string name="downloading_thumb">Синхнизируется файл %1$s из %2$s</string>
+    <string name="never">Никогда</string>
+    <string name="ask_every_time">Спрашивать каждый раз</string>
+    <string name="always">Всегда</string>
+    <string name="delete_after_import">Удалять исходные файлы после импортирования</string>
+    <string name="manual_import">Ручное импортирование</string>
+    <string name="is_delete_original">Удалить исходные файлы?</string>
+    <string name="is_delete_original_desc">Хотите ли удалить исходные файлы которые только что были успешно импортированы?</string>
+    <string name="delete_failed">Неудалось удалить файлы</string>
+    <string name="delete_failed_desc">Неудалось удалить некоторые или все исходные файлы. Пожалуйста удалите их вручную.</string>
 </resources>

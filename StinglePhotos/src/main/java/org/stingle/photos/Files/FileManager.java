@@ -24,11 +24,10 @@ import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
-import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.ByteArrayOutputStream;
@@ -44,7 +43,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,27 +84,16 @@ public class FileManager {
 		}
 
 
-		HashMap<String, String> postParams = new HashMap<String, String>();
-
-		postParams.put("token", KeyManagement.getApiToken(context));
-		postParams.put("file", filename);
-		postParams.put("thumb", "1");
-		postParams.put("set", String.valueOf(set));
 		byte[] encFile = new byte[0];
 
 		try {
-			encFile = HttpsClient.getFileAsByteArray(StinglePhotosApplication.getApiUrl() + context.getString(R.string.download_file_path), postParams);
+			encFile = SyncManager.downloadFile(context, filename, true, set);
 		}
 		catch (NoSuchAlgorithmException | KeyManagementException e) {
 
 		}
 
 		if(encFile == null || encFile.length == 0){
-			return null;
-		}
-
-		byte[] fileBeginning = Arrays.copyOfRange(encFile, 0, Crypto.FILE_BEGGINIG_LEN);
-		if (!new String(fileBeginning, "UTF-8").equals(Crypto.FILE_BEGGINING)) {
 			return null;
 		}
 

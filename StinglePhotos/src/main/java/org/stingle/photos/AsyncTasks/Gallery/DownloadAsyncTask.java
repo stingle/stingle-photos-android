@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 
-import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -17,7 +16,6 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.io.IOException;
@@ -25,7 +23,6 @@ import java.lang.ref.WeakReference;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class DownloadAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -77,18 +74,10 @@ public class DownloadAsyncTask extends AsyncTask<Void, Void, Void> {
 			if(file.isLocal){
 				continue;
 			}
-			HashMap<String, String> postParams = new HashMap<>();
-
-			postParams.put("token", KeyManagement.getApiToken(myContext));
-			postParams.put("file", file.filename);
-			postParams.put("thumb", "0");
-			postParams.put("set", String.valueOf(set));
-
-
 			final int itemNumber = count;
 			try {
 				String path = homeDir + "/" + file.filename;
-				HttpsClient.downloadFile(StinglePhotosApplication.getApiUrl() + myContext.getString(R.string.download_file_path), postParams, path, new HttpsClient.OnUpdateProgress() {
+				SyncManager.downloadFile(myContext, file.filename, path, false, set, new HttpsClient.OnUpdateProgress() {
 					@Override
 					public void onUpdate(int progress) {
 						if(progress % 5 == 0) {

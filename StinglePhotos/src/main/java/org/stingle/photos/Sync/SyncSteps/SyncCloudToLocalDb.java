@@ -35,6 +35,9 @@ import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 public class SyncCloudToLocalDb {
@@ -291,8 +294,12 @@ public class SyncCloudToLocalDb {
 				String mainFilePath = homeDir + "/" + file.filename;
 				String thumbPath = thumbDir + "/" + file.filename;
 
-				SyncManager.downloadFile(context, file.filename, mainFilePath, false, set);
-				SyncManager.downloadFile(context, file.filename, thumbPath, true, set);
+				try {
+					SyncManager.downloadFile(context, file.filename, mainFilePath, false, set, null);
+					SyncManager.downloadFile(context, file.filename, thumbPath, true, set, null);
+				} catch (NoSuchAlgorithmException | IOException | KeyManagementException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 

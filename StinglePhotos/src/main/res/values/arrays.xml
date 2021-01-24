@@ -96,4 +96,16 @@
         <item name="50gb">50</item>
     </string-array>
 
+    <string-array name="deleteAfterImport">
+        <item name="never">@string/never</item>
+        <item name="ask">@string/ask_every_time</item>
+        <item name="always">@string/always</item>
+    </string-array>
+
+    <string-array name="deleteAfterImportValues">
+        <item name="never">never</item>
+        <item name="ask">ask</item>
+        <item name="always">always</item>
+    </string-array>
+
 </resources>

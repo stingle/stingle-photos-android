@@ -2,8 +2,10 @@ package org.stingle.photos.AsyncTasks;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -94,5 +96,32 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 			Helpers.releaseWakeLock(myActivity);
 		}
 
+		deleteOriginals();
 	}
+
+	private void deleteOriginals(){
+		AppCompatActivity myActivity = activity.get();
+		if(myActivity == null){
+			return;
+		}
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(myActivity);
+		String pref = settings.getString("delete_after_import", "0");
+		if(pref.equals("never")){
+			return;
+		}
+		else if(pref.equals("ask")){
+			Helpers.showConfirmDialog(
+					myActivity,
+					myActivity.getString(R.string.is_delete_original),
+					myActivity.getString(R.string.is_delete_original_desc),
+					R.drawable.ic_action_delete,
+					(dialog, which) -> (new DeleteUrisAsyncTask(myActivity, uris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR),
+					null
+			);
+		}
+		else if(pref.equals("always")){
+			(new DeleteUrisAsyncTask(myActivity, uris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+	}
+
 }
