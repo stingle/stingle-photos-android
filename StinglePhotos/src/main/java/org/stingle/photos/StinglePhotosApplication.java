@@ -44,6 +44,7 @@ public class StinglePhotosApplication extends Application{
     public static final String USER_EMAIL = "user_email";
     public static final String USER_HOME_FOLDER = "user_home_folder";
     public static final String IS_KEY_BACKED_UP = "is_key_backed_up";
+    public static final String PREF_APP_START_COUNT = "app_start_count";
 
     public static int syncStatus = SyncManager.STATUS_IDLE;
     public static Bundle syncStatusParams = null;
@@ -61,6 +62,8 @@ public class StinglePhotosApplication extends Application{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		Helpers.applyTheme(prefs.getString("theme", "auto"));
 		Helpers.setLocale(getApplicationContext());
+
+		Helpers.storePreference(this, PREF_APP_START_COUNT, Helpers.getPreference(this, PREF_APP_START_COUNT, 0)+1);
     }
 
     public static Crypto getCrypto() {

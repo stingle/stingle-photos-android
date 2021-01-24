@@ -110,6 +110,8 @@ public class BackupKeyActivity extends AppCompatActivity {
 
 						keyText.setText(mnemonicKey);
 
+						Helpers.storePreference(BackupKeyActivity.this, "is_backup_phrase_seen", true);
+
 					} catch (IllegalArgumentException | IOException ignored) {
 					}
 				}

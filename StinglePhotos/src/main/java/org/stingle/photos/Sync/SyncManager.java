@@ -209,6 +209,7 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_FIRST_SYNC_DONE);
+		Helpers.deletePreference(context, StinglePhotosApplication.PREF_APP_START_COUNT);
 
 		GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 		galleryDb.truncateTable();

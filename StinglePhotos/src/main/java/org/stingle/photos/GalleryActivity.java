@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.view.GravityCompat;
@@ -35,6 +36,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -620,6 +622,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		AutoImportSetup.showAutoImportSetup(this);
+		showBackupPhraseReminder();
 	}
 
 	public boolean isSyncBarDisabled(){
@@ -1150,6 +1153,26 @@ public class GalleryActivity extends AppCompatActivity
 					SyncManager.startSync(GalleryActivity.this);
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+	}
+
+	private void showBackupPhraseReminder(){
+		int appStartCount = Helpers.getPreference(this, StinglePhotosApplication.PREF_APP_START_COUNT, 0);
+		boolean isBackedUpPhrase = Helpers.getPreference(this, "is_backup_phrase_seen", false);
+		if(!isBackedUpPhrase && appStartCount % 5 == 0) {
+			MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+			builder.setCancelable(true);
+			builder.setTitle(R.string.backup_phrase_not_backed);
+			builder.setMessage(R.string.backup_phrase_not_backed_desc);
+			builder.setIcon(R.drawable.ic_attention);
+			builder.setPositiveButton(R.string.go_to_backup_phrase, (dialog, which) -> {
+				Intent intent = new Intent();
+				intent.setClass(GalleryActivity.this, BackupKeyActivity.class);
+				startActivity(intent);
+			});
+			builder.setNegativeButton(R.string.cancel, null);
+			AlertDialog dialog = builder.create();
+			dialog.show();
 		}
 	}
 }
