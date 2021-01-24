@@ -159,8 +159,8 @@
     <string name="confirming_purchase">Confirming purchase…</string>
     <string name="envideo_service_started">envideo string</string>
     <string name="sync_service_started">sync_service</string>
-    <string name="download_service_started">download_service</string>
-    <string name="download_thumb_service_started">download_thumb_service_started</string>
+    <string name="download_service_started" translatable="false">download_service</string>
+    <string name="download_thumb_service_started" translatable="false">download_thumb_service_started</string>
     <string name="confirm_decrypt_files">Are you sure you want to decrypt selected files? They will become accessible to other applications on this device.</string>
     <string name="empty_trash">Empty trash</string>
     <string name="confirm_empty_trash">Are you sure you want to empty trash? This action cannot be undone!</string>

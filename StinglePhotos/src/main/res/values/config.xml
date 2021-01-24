@@ -14,39 +14,39 @@
   limitations under the License.
   -->
 <resources>
-    <string name="default_thumb_folder_name">.thumb</string>
-    <string name="min_pass_length">6</string>
+    <string name="default_thumb_folder_name" translatable="false">.thumb</string>
+    <string name="min_pass_length" translatable="false">6</string>
 
-    <string name="registration_path">register/createAccount</string>
-    <string name="login_path">login/login</string>
-    <string name="change_pass_path">login/changePass</string>
-    <string name="logout_path">login/logout</string>
-    <string name="pre_login_path">login/preLogin</string>
-    <string name="upload_key_bundle_path">keys/uploadKeyBundle</string>
-    <string name="upload_file_path">sync/upload</string>
-    <string name="get_updates_path">sync/getUpdates</string>
-    <string name="download_file_path">sync/download</string>
-    <string name="trash_file_path">sync/trash</string>
-    <string name="restore_file_path">sync/restore</string>
-    <string name="delete_file_path">sync/delete</string>
-    <string name="empty_trash_path">sync/emptyTrash</string>
-    <string name="get_url_path">sync/getUrl</string>
-    <string name="notify_purchase">billing/purchase</string>
-    <string name="check_key">login/checkKey</string>
-    <string name="recover_account">login/recoverAccount</string>
-    <string name="get_server_pk">keys/getServerPK</string>
-    <string name="reupload_keys">keys/reuploadKeys</string>
+    <string name="registration_path" translatable="false">register/createAccount</string>
+    <string name="login_path" translatable="false">login/login</string>
+    <string name="change_pass_path" translatable="false">login/changePass</string>
+    <string name="logout_path" translatable="false">login/logout</string>
+    <string name="pre_login_path" translatable="false">login/preLogin</string>
+    <string name="upload_key_bundle_path" translatable="false">keys/uploadKeyBundle</string>
+    <string name="upload_file_path" translatable="false">sync/upload</string>
+    <string name="get_updates_path" translatable="false">sync/getUpdates</string>
+    <string name="download_file_path" translatable="false">sync/download</string>
+    <string name="trash_file_path" translatable="false">sync/trash</string>
+    <string name="restore_file_path" translatable="false">sync/restore</string>
+    <string name="delete_file_path" translatable="false">sync/delete</string>
+    <string name="empty_trash_path" translatable="false">sync/emptyTrash</string>
+    <string name="get_url_path" translatable="false">sync/getUrl</string>
+    <string name="notify_purchase" translatable="false">billing/purchase</string>
+    <string name="check_key" translatable="false">login/checkKey</string>
+    <string name="recover_account" translatable="false">login/recoverAccount</string>
+    <string name="get_server_pk" translatable="false">keys/getServerPK</string>
+    <string name="reupload_keys" translatable="false">keys/reuploadKeys</string>
 
-    <string name="add_album">sync/addAlbum</string>
-    <string name="delete_album_path">sync/deleteAlbum</string>
-    <string name="move_file">sync/moveFile</string>
-    <string name="get_contact">sync/getContact</string>
-    <string name="share_url">sync/share</string>
-    <string name="album_edit_perms_url">sync/editPerms</string>
-    <string name="album_remove_member_url">sync/removeAlbumMember</string>
-    <string name="album_unshare_url">sync/unshareAlbum</string>
-    <string name="album_rename_url">sync/renameAlbum</string>
-    <string name="album_leave_url">sync/leaveAlbum</string>
-    <string name="album_cover_change_url">sync/changeAlbumCover</string>
+    <string name="add_album" translatable="false">sync/addAlbum</string>
+    <string name="delete_album_path" translatable="false">sync/deleteAlbum</string>
+    <string name="move_file" translatable="false">sync/moveFile</string>
+    <string name="get_contact" translatable="false">sync/getContact</string>
+    <string name="share_url" translatable="false">sync/share</string>
+    <string name="album_edit_perms_url" translatable="false">sync/editPerms</string>
+    <string name="album_remove_member_url" translatable="false">sync/removeAlbumMember</string>
+    <string name="album_unshare_url" translatable="false">sync/unshareAlbum</string>
+    <string name="album_rename_url" translatable="false">sync/renameAlbum</string>
+    <string name="album_leave_url" translatable="false">sync/leaveAlbum</string>
+    <string name="album_cover_change_url" translatable="false">sync/changeAlbumCover</string>
 
 </resources>
