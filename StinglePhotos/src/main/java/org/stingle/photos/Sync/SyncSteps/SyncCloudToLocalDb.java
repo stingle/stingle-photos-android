@@ -419,6 +419,8 @@ public class SyncCloudToLocalDb {
 
 				deleteFileIfNotUsed(context, file.filename);
 			}
+		} else if (type == SyncManager.DELETE_EVENT_CONTACT) {
+			contactsDb.deleteContact(Long.parseLong(filename));
 		}
 
 		if (date > lastDelSeenTime) {

@@ -100,6 +100,7 @@ public class SyncManager {
 	public static final int DELETE_EVENT_DELETE = 3;
 	public static final int DELETE_EVENT_ALBUM = 4;
 	public static final int DELETE_EVENT_ALBUM_FILE = 5;
+	public static final int DELETE_EVENT_CONTACT = 6;
 
 	public SyncManager(Context context) {
 		this.context = context;

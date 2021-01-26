@@ -1156,10 +1156,11 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	}
 
+	private boolean isShownBackupPhraseReminder = false;
 	private void showBackupPhraseReminder(){
-		int appStartCount = Helpers.getPreference(this, StinglePhotosApplication.PREF_APP_START_COUNT, 0);
+		int appStartCount = Helpers.getPreference(this, StinglePhotosApplication.PREF_APP_START_COUNT, 1);
 		boolean isBackedUpPhrase = Helpers.getPreference(this, "is_backup_phrase_seen", false);
-		if(!isBackedUpPhrase && appStartCount % 5 == 0) {
+		if(!isShownBackupPhraseReminder && !isBackedUpPhrase && (appStartCount % 5 == 0 || appStartCount == 2)) {
 			MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
 			builder.setCancelable(true);
 			builder.setTitle(R.string.backup_phrase_not_backed);
@@ -1173,6 +1174,7 @@ public class GalleryActivity extends AppCompatActivity
 			builder.setNegativeButton(R.string.cancel, null);
 			AlertDialog dialog = builder.create();
 			dialog.show();
+			isShownBackupPhraseReminder = true;
 		}
 	}
 }

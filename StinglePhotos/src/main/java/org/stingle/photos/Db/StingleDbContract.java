@@ -153,4 +153,7 @@ public class StingleDbContract {
 					")";
 	public static final String SQL_CREATE_IMPORTED_IDS_MID_INDEX =
 			"CREATE UNIQUE INDEX c_m_id ON "+ Columns.TABLE_NAME_IMPORTED_IDS +" ("+ Columns.COLUMN_NAME_MEDIA_ID +")";
+
+	public static final String SQL_CREATE_ALBUMS_SYNC_LOCAL_FIELD =
+			"ALTER TABLE "+Columns.TABLE_NAME_ALBUMS+" ADD "+Columns.COLUMN_NAME_SYNC_LOCAL+" INTEGER;";
 }

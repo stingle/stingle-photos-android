@@ -24,7 +24,7 @@ public class StingleDb extends SQLiteOpenHelper {
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if(oldVersion == 1 && newVersion ==2){
+		if(oldVersion == 1 && newVersion == 2){
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS);
 			db.execSQL(StingleDbContract.SQL_CREATE_ALBUM_FILES);
 
@@ -43,6 +43,7 @@ public class StingleDb extends SQLiteOpenHelper {
 		if(oldVersion == 2 && newVersion == 3){
 			db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS);
 			db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS_MID_INDEX);
+			//db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_SYNC_LOCAL_FIELD);
 		}
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {

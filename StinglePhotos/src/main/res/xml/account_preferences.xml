@@ -19,4 +19,9 @@
         app:summary="@string/backup_key_desc_pref"
         app:title="@string/backup_key"/>
 
+    <Preference
+        app:icon="@drawable/ic_action_delete_forever"
+        app:key="delete_account"
+        app:title="@string/delete_account" />
+
 </PreferenceScreen>

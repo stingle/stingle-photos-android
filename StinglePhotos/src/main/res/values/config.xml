@@ -22,6 +22,7 @@
     <string name="change_pass_path" translatable="false">login/changePass</string>
     <string name="logout_path" translatable="false">login/logout</string>
     <string name="pre_login_path" translatable="false">login/preLogin</string>
+    <string name="delete_account_url" translatable="false">login/deleteUser</string>
     <string name="upload_key_bundle_path" translatable="false">keys/uploadKeyBundle</string>
     <string name="upload_file_path" translatable="false">sync/upload</string>
     <string name="get_updates_path" translatable="false">sync/getUpdates</string>

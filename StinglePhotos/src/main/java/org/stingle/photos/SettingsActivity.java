@@ -20,6 +20,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SeekBarPreference;
 import androidx.preference.SwitchPreference;
 
+import org.stingle.photos.AsyncTasks.DeleteAccountAsyncTask;
 import org.stingle.photos.AsyncTasks.GenericAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ReuploadKeysAsyncTask;
@@ -27,6 +28,7 @@ import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Auth.PasswordReturnListener;
+import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -149,6 +151,7 @@ public class SettingsActivity extends AppCompatActivity implements
 			initEmail();
 			initKeyBackupSettings();
 			initChangePassword();
+			initDeleteAccount();
 		}
 
 		private void initEmail() {
@@ -216,6 +219,63 @@ public class SettingsActivity extends AppCompatActivity implements
 				Intent intent = new Intent();
 				intent.setClass(AccountPreferenceFragment.this.getActivity(), ChangePasswordActivity.class);
 				startActivity(intent);
+				return false;
+			});
+
+		}
+
+		private void initDeleteAccount() {
+			Preference deleteAccountPref = findPreference("delete_account");
+			deleteAccountPref.setOnPreferenceClickListener(preference -> {
+
+
+				Helpers.showConfirmDialog(
+						getContext(),
+						getString(R.string.delete_account_question),
+						getString(R.string.delete_account_question_desc),
+						R.drawable.ic_action_delete,
+						(dialog, which) -> {
+							LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
+								showCancel = true;
+								showLogout = false;
+								quitActivityOnCancel = false;
+								cancellable = true;
+								okButtonText = getContext().getString(R.string.ok);
+								titleText = getContext().getString(R.string.please_enter_password);
+								subTitleText = getContext().getString(R.string.password_for_account_delete);
+								showLockIcon = false;
+							}};
+							LoginManager.getPasswordFromUser(getActivity(), loginConfig, new PasswordReturnListener() {
+								@Override
+								public void passwordReceived(String enteredPassword, AlertDialog dialog) {
+									try{
+										StinglePhotosApplication.getCrypto().getPrivateKey(enteredPassword);
+										LoginManager.dismissLoginDialog(dialog);
+										Helpers.showConfirmDialog(
+												getContext(),
+												getString(R.string.delete_account_question2),
+												getString(R.string.delete_account_question_desc2),
+												R.drawable.ic_action_delete,
+												(dialog2, which) -> {
+													(new DeleteAccountAsyncTask(getActivity(), enteredPassword)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+												},
+												null);
+									}
+									catch (CryptoException e) {
+										Helpers.showAlertDialog(dialog.getContext(), dialog.getContext().getString(R.string.error), dialog.getContext().getString(R.string.incorrect_password));
+									}
+								}
+
+								@Override
+								public void passwordReceiveFailed(AlertDialog dialog) {
+									LoginManager.dismissLoginDialog(dialog);
+								}
+							});
+
+						},
+						null);
+
+
 				return false;
 			});
 
