@@ -91,6 +91,9 @@ public class AlbumMembersFragment extends Fragment {
 		return new MembersAdapter.UnshareListener() {
 			@Override
 			public void onUnshare(StingleContact contact) {
+				if(contact == null){
+					return;
+				}
 				Helpers.showConfirmDialog(
 						requireContext(),
 						requireContext().getString(R.string.remove_member_question),

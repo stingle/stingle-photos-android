@@ -57,7 +57,7 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 					}
 				}
 				File cachedFile = FileManager.getCachedFile(myContext, dbFile.filename);
-				if(cachedFile.exists()){
+				if(cachedFile != null){
 					cachedFile.delete();
 				}
 				File thumbFile = new File(thumbDir + "/" + dbFile.filename);
