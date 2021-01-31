@@ -425,7 +425,7 @@
     <string name="go_to_backup_phrase">See backup phrase</string>
     <string name="delete_account">Delete account</string>
     <string name="delete_account_question">Delete your account?</string>
-    <string name="delete_account_question_desc">Are you sure you want to delete your account? All your data will be irreversably deleted!</string>
+    <string name="delete_account_question_desc">Are you sure you want to delete your account? All your data will be irreversibly deleted!</string>
     <string name="password_for_account_delete">To delete your account please enter your password</string>
     <string name="delete_account_question2">Are you REALLY sure you want to DELETE your account?</string>
     <string name="delete_account_question_desc2">Last chance! Your account and all of your photos, videos, albums and shares will be deleted! This cannot be UNDONE!</string>

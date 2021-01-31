@@ -419,4 +419,11 @@
     <string name="backup_phrase_not_backed">Запишите резервную фразу</string>
     <string name="backup_phrase_not_backed_desc">Если вы потеряли пароль, резервная фраза поможет вам восстановить учетную запись. Мы настоятельно рекомендуем записать резервную фразу в безопасное место.</string>
     <string name="go_to_backup_phrase">См. Резервную фразу</string>
+    <string name="delete_account">Удалить аккаунт</string>
+    <string name="delete_account_question">Удалить Ваш аккаунт?</string>
+    <string name="delete_account_question_desc">Вы уверены, что хотите удалить свою учетную запись? Все ваши данные будут безвозвратно удалены!</string>
+    <string name="password_for_account_delete">Чтобы удалить свою учетную запись, введите свой пароль</string>
+    <string name="delete_account_question2">Вы ДЕЙСТВИТЕЛЬНО уверены, что хотите УДАЛИТЬ свою учетную запись?</string>
+    <string name="delete_account_question_desc2">Последний шанс! Ваша учетная запись и все ваши фотографии, видео, альбомы будут удалены! Этот поцесс не обратим!</string>
+    <string name="deleting_account">Удаление учетной записи...</string>
 </resources>

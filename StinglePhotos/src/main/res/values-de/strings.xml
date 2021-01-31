@@ -421,5 +421,12 @@
     <string name="backup_phrase_not_backed_desc">Wenn Sie Ihr Passwort verlieren, hilft Ihnen die Sicherungsphrase, Ihr Konto wiederherzustellen. Wir empfehlen dringend, Ihre Sicherungsphrase an einem sicheren Ort aufzuschreiben.</string>
     <string name="backup_phrase_not_backed">Bitte notieren Sie sich Ihre Sicherungsphrase</string>
     <string name="go_to_backup_phrase">Siehe Sicherungssatz</string>
+    <string name="delete_account">Konto löschen</string>
+    <string name="delete_account_question">Lösche deinen Account?</string>
+    <string name="delete_account_question_desc">Möchten Sie Ihr Konto wirklich löschen? Alle Ihre Daten werden irreversibel gelöscht!</string>
+    <string name="password_for_account_delete">Um Ihr Konto zu löschen, geben Sie bitte Ihr Passwort ein</string>
+    <string name="delete_account_question2">Sind Sie wirklich sicher, dass Sie Ihr Konto löschen möchten?</string>
+    <string name="delete_account_question_desc2">Letzte Möglichkeit! Ihr Konto und alle Ihre Fotos, Videos, Alben und Freigaben werden gelöscht! Das kann nicht rückgängig gemacht werden!</string>
+    <string name="deleting_account">Konto löschen ...</string>
 
 </resources>
