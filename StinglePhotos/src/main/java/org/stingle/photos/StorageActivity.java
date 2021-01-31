@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.ContentLoadingProgressBar;
@@ -54,6 +55,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	private Map<String, SkuDetails> skuDetailsMap = new HashMap<>();
 	private boolean isServiceConnected = false;
 	private LinearLayout boxesParent;
+	private boolean wentToPayment = true;
 
 	private static final String BASE_64_ENCODED_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA00IIe/BqA9IUbrj2y1bgvgi6Tqu37ulDOndT3v4ElDCViaZI+JFF97lvYX0ijPIZ0ryj3Jo2mC+ncXXtQKeFZsvh9EauJyQXyQbsVERGjpTZ+sMdTkYu46zRjHezl3siLWWZMuc9UFQcvU1qkMOH6MI1gic1PAXi46wuMSL+kanDyQ2UfO3VlQsVkq9o/JwZGzaA4D8NkS1Ja2JcvdLxg2ES9YLaJBL/b2inHjiZW5tO59eAy6KqZy+N6kMfaoL421AhKovocejza7g4LFkkNvqdKfLZe4CEJVhYHN2OOBsqci7KwODsyEZEv3WztqnaylnuQpDVRZztdt9qnMqKnQIDAQAB";
 	private int billingClientResponseCode;
@@ -102,7 +104,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		wentToPayment = false;
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
@@ -116,7 +118,9 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	@Override
 	protected void onPause() {
 		super.onPause();
-		LoginManager.setLockedTime(this);
+		if(!wentToPayment) {
+			LoginManager.setLockedTime(this);
+		}
 	}
 
 	@Override
@@ -321,18 +325,21 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 			public void run() {
 
 				if (areSubscriptionsSupported()) {
+					wentToPayment = true;
 					SkuDetails onetb = skuDetailsMap.get(sku);
 					BillingFlowParams.Builder flowParamsBuilder = BillingFlowParams.newBuilder();
 					flowParamsBuilder.setSkuDetails(onetb);
+					flowParamsBuilder.setObfuscatedAccountId(Helpers.getPreference(StorageActivity.this, StinglePhotosApplication.USER_ID, ""));
 
 					if(purchasedSkus != null && purchasedSkus.size() > 0){
-						flowParamsBuilder.setOldSku(purchasedSkus.get(0).getSku());
+						flowParamsBuilder.setOldSku(purchasedSkus.get(0).getSku(), purchasedSkus.get(0).getPurchaseToken());
 					}
 
 					BillingFlowParams flowParams = flowParamsBuilder.build();
 
 					BillingResult responseCode = billingClient.launchBillingFlow(StorageActivity.this, flowParams);
 					Log.e("responseCode", responseCode.toString());
+
 				}
 			}
 		};
@@ -342,7 +349,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	public void startServiceConnection(final Runnable executeOnSuccess) {
 		billingClient.startConnection(new BillingClientStateListener() {
 			@Override
-			public void onBillingSetupFinished(BillingResult billingResult) {
+			public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
 				if (billingResult.getResponseCode() == BillingResponseCode.OK) {
 					isServiceConnected = true;
 					if (executeOnSuccess != null) {
@@ -398,7 +405,6 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 			if (!purchase.isAcknowledged()) {
 				AcknowledgePurchaseParams params = AcknowledgePurchaseParams.newBuilder()
 						.setPurchaseToken(purchase.getPurchaseToken())
-						.setDeveloperPayload(Helpers.getPreference(this, StinglePhotosApplication.USER_ID, ""))
 						.build();
 				billingClient.acknowledgePurchase(params, billingResult -> {
 					Log.d("purchase", purchase.getSku() + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());

@@ -243,6 +243,7 @@ public class SyncManager {
 		importedIdsDb.truncateTable();
 		importedIdsDb.close();
 		Helpers.deletePreference(context, SyncManager.PREF_IMPORT_SETUP);
+		SyncAsyncTask.killDownloadThumbs();
 	}
 
 	public static boolean moveFiles(Context context, ArrayList<StingleDbFile> files, int fromSet, int toSet, String fromAlbumId, String toAlbumId, boolean isMoving) {

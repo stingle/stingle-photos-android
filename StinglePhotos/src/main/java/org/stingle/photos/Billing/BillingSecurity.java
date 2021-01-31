@@ -18,7 +18,6 @@ package org.stingle.photos.Billing;
 
 import android.text.TextUtils;
 import android.util.Base64;
-import com.android.billingclient.util.BillingHelper;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -52,7 +51,6 @@ public class BillingSecurity {
             String signature) throws IOException {
         if (TextUtils.isEmpty(signedData) || TextUtils.isEmpty(base64PublicKey)
                 || TextUtils.isEmpty(signature)) {
-            BillingHelper.logWarn(TAG, "Purchase verification failed: missing data.");
             return false;
         }
 
@@ -77,7 +75,6 @@ public class BillingSecurity {
             throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
             String msg = "Invalid key specification: " + e;
-            BillingHelper.logWarn(TAG, msg);
             throw new IOException(msg);
         }
     }
@@ -96,7 +93,6 @@ public class BillingSecurity {
         try {
             signatureBytes = Base64.decode(signature, Base64.DEFAULT);
         } catch (IllegalArgumentException e) {
-            BillingHelper.logWarn(TAG, "Base64 decoding failed.");
             return false;
         }
         try {
@@ -104,17 +100,13 @@ public class BillingSecurity {
             signatureAlgorithm.initVerify(publicKey);
             signatureAlgorithm.update(signedData.getBytes());
             if (!signatureAlgorithm.verify(signatureBytes)) {
-                BillingHelper.logWarn(TAG, "Signature verification failed.");
                 return false;
             }
             return true;
         } catch (NoSuchAlgorithmException e) {
             // "RSA" is guaranteed to be available.
             throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            BillingHelper.logWarn(TAG, "Invalid key specification.");
-        } catch (SignatureException e) {
-            BillingHelper.logWarn(TAG, "Signature exception.");
+        } catch (InvalidKeyException | SignatureException ignored) {
         }
         return false;
     }

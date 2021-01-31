@@ -132,6 +132,12 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		}
 	}
 
+	public static void killDownloadThumbs(){
+		if(downloadThumbsAsyncTask == null && !downloadThumbsAsyncTask.isCancelled()){
+			downloadThumbsAsyncTask.cancel(true);
+		}
+	}
+
 	@Override
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
