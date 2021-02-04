@@ -133,7 +133,7 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	public static void killDownloadThumbs(){
-		if(downloadThumbsAsyncTask == null && !downloadThumbsAsyncTask.isCancelled()){
+		if(downloadThumbsAsyncTask != null && !downloadThumbsAsyncTask.isCancelled()){
 			downloadThumbsAsyncTask.cancel(true);
 		}
 	}

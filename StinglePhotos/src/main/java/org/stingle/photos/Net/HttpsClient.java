@@ -228,12 +228,16 @@ public class HttpsClient {
 	}
 
 	public static byte[] getFileAsByteArray(String urlStr, HashMap<String, String> params) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+		return getFileAsByteArray(urlStr, params, true);
+	}
+
+	public static byte[] getFileAsByteArray(String urlStr, HashMap<String, String> params, boolean isPost) throws IOException, NoSuchAlgorithmException, KeyManagementException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		getFileAsByteArray(urlStr, params, output);
+		getFileAsByteArray(urlStr, params, output, isPost);
 		return output.toByteArray();
 	}
 
-	public static void getFileAsByteArray(String urlStr, HashMap<String, String> params, OutputStream output) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+	public static void getFileAsByteArray(String urlStr, HashMap<String, String> params, OutputStream output, boolean isPost) throws IOException, NoSuchAlgorithmException, KeyManagementException {
 		Log.e("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -258,9 +262,17 @@ public class HttpsClient {
 		// set Timeout and method
 		conn.setReadTimeout(60000);
 		conn.setConnectTimeout(7000);
-		conn.setRequestMethod("POST");
-		conn.setDoInput(true);
-		conn.setDoOutput(true);
+
+
+		if(isPost) {
+			conn.setRequestMethod("POST");
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+		}
+		else{
+			conn.setRequestMethod("GET");
+			conn.connect();
+		}
 
 		// Insert app version to all requests
 		if(params == null){
@@ -274,7 +286,7 @@ public class HttpsClient {
 			data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 		}
 
-		if (data.length() > 0) {
+		if (isPost && data.length() > 0) {
 			data = data.substring(0, data.length() - 1);
 
 			OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());

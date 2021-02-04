@@ -149,6 +149,7 @@ public class SyncManager {
 			SyncAsyncTask.instance.cancel(true);
 			SyncManager.setSyncStatus(context, SyncManager.STATUS_IDLE);
 		}
+		SyncAsyncTask.killDownloadThumbs();
 	}
 
 	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int set, HttpsClient.OnUpdateProgress onProgress) throws NoSuchAlgorithmException, IOException, KeyManagementException {
@@ -196,6 +197,30 @@ public class SyncManager {
 			return null;
 		}
 		return encFile;
+	}
+
+	public static JSONObject getDownloadLinks(Context context, HashMap<String, HashMap<String, String>> files, boolean isThumb) throws NoSuchAlgorithmException, IOException, KeyManagementException {
+		HashMap<String, String> postParams = new HashMap<String, String>();
+
+		postParams.put("token", KeyManagement.getApiToken(context));
+		int count = 0;
+		for (String key : files.keySet()) {
+			HashMap<String, String> file = files.get(key);
+			postParams.put("files[" + count + "][filename]", file.get("filename"));
+			postParams.put("files[" + count + "][set]", file.get("set"));
+			count++;
+		}
+		postParams.put("is_thumb", isThumb ? "1" : "0");
+
+		JSONObject json = HttpsClient.postFunc(StinglePhotosApplication.getApiUrl() + context.getString(R.string.get_download_urls), postParams);
+		StingleResponse response = new StingleResponse(context, json, false);
+
+		JSONObject urls = response.getObject("urls");
+
+		if(urls != null && urls.length() > 0){
+			return urls;
+		}
+		return null;
 	}
 
 	public static abstract class OnFinish {

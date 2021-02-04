@@ -71,7 +71,6 @@ public class GenericAsyncTask extends AsyncTask<Void, Void, Object> {
 
 		if(onFinishListener != null) {
 			if (result != null) {
-				onFinishListener.onFinish();
 				onFinishListener.onFinish(result);
 			}
 			else {

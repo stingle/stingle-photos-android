@@ -78,6 +78,20 @@ public class StingleResponse{
 		return parts.optString(name);
 	}
 
+	public JSONArray getArray(String name){
+		if(parts == null){
+			return null;
+		}
+		return parts.optJSONArray(name);
+	}
+
+	public JSONObject getObject(String name){
+		if(parts == null){
+			return null;
+		}
+		return parts.optJSONObject(name);
+	}
+
 	public String getRawOutput(){
 		if(this.result != null) {
 			return this.result.toString();
