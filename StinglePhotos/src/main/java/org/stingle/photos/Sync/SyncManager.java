@@ -199,13 +199,12 @@ public class SyncManager {
 		return encFile;
 	}
 
-	public static JSONObject getDownloadLinks(Context context, HashMap<String, HashMap<String, String>> files, boolean isThumb) throws NoSuchAlgorithmException, IOException, KeyManagementException {
+	public static JSONObject getDownloadLinks(Context context, ArrayList<HashMap<String, String>> files, boolean isThumb) throws NoSuchAlgorithmException, IOException, KeyManagementException {
 		HashMap<String, String> postParams = new HashMap<String, String>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
 		int count = 0;
-		for (String key : files.keySet()) {
-			HashMap<String, String> file = files.get(key);
+		for (HashMap<String, String> file : files) {
 			postParams.put("files[" + count + "][filename]", file.get("filename"));
 			postParams.put("files[" + count + "][set]", file.get("set"));
 			count++;
