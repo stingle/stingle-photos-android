@@ -14,6 +14,7 @@ import org.stingle.photos.Sync.SyncSteps.FSSync;
 import org.stingle.photos.Sync.SyncSteps.ImportMedia;
 import org.stingle.photos.Sync.SyncSteps.SyncCloudToLocalDb;
 import org.stingle.photos.Sync.SyncSteps.UploadToCloud;
+import org.stingle.photos.Util.Helpers;
 
 import java.lang.ref.WeakReference;
 
@@ -120,7 +121,8 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	public void downloadThumbs(Context context){
-		if(!StinglePhotosApplication.isSyncedThumbs && (downloadThumbsAsyncTask == null || downloadThumbsAsyncTask.isCancelled())){
+		boolean isThumbsDwnIsDone = Helpers.getPreference(context, DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE, false);
+		if(!isThumbsDwnIsDone && (downloadThumbsAsyncTask == null || downloadThumbsAsyncTask.isCancelled())){
 			downloadThumbsAsyncTask = new DownloadThumbsAsyncTask(context, new SyncManager.OnFinish() {
 				@Override
 				public void onFinish(Boolean needToUpdateUI) {
@@ -128,7 +130,6 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				}
 			});
 			downloadThumbsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			StinglePhotosApplication.isSyncedThumbs = true;
 		}
 	}
 

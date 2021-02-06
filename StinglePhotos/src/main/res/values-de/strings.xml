@@ -428,5 +428,7 @@
     <string name="delete_account_question2">Sind Sie wirklich sicher, dass Sie Ihr Konto löschen möchten?</string>
     <string name="delete_account_question_desc2">Letzte Möglichkeit! Ihr Konto und alle Ihre Fotos, Videos, Alben und Freigaben werden gelöscht! Das kann nicht rückgängig gemacht werden!</string>
     <string name="deleting_account">Konto löschen ...</string>
+    <string name="download_missing_thumbs">Laden Sie fehlende Thumbnails herunter</string>
+    <string name="download_missing_thumbs_desc">Laden Sie Miniaturansichten herunter, die nicht in Ihrem lokalen Cache vorhanden sind</string>
 
 </resources>

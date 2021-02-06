@@ -12,11 +12,13 @@ import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Util.Helpers;
 
 import java.lang.ref.WeakReference;
 
 public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 
+	public static final String PREF_IS_DWN_THUMBS_IS_DONE = "thumbs_dwn_is_done";
 	private final WeakReference<Context> context;
 	protected SyncManager.OnFinish onFinish;
 
@@ -31,7 +33,7 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		if(myContext == null){
 			return null;
 		}
-		Log.d("downloadThumbs", "Download thumbs START");
+		Log.d("downloadThumbs", "Download thumbs FULL START");
 		GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
 		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
 		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
@@ -73,7 +75,9 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		galleryDb.close();
 		albumFilesDb.close();
 		trashDb.close();
-		Log.d("downloadThumbs", "Download thumbs END");
+		Log.d("downloadThumbs", "Download thumbs FULL END");
+
+		Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
 		return null;
 	}
 

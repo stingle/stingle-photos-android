@@ -195,7 +195,6 @@ public class GalleryActivity extends AppCompatActivity
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
-			StinglePhotosApplication.isSyncedThumbs = false;
 			SyncManager.stopSync(this);
 			SyncManager.startSync(this);
 			pullToRefresh.setRefreshing(false);

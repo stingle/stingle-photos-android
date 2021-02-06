@@ -430,5 +430,7 @@
     <string name="delete_account_question2">Are you REALLY sure you want to DELETE your account?</string>
     <string name="delete_account_question_desc2">Last chance! Your account and all of your photos, videos, albums and shares will be deleted! This cannot be UNDONE!</string>
     <string name="deleting_account">Deleting account…</string>
+    <string name="download_missing_thumbs">Download missing thumbnails</string>
+    <string name="download_missing_thumbs_desc">Download thumbnails that are not present in your local cache</string>
 
 </resources>

@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stingle.photos.AsyncTasks.MultithreadDownloaderAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Objects.StingleContact;
@@ -55,6 +57,7 @@ public class SyncCloudToLocalDb {
 	private long lastDelSeenTime = 0;
 	private long lastContactsSeenTime = 0;
 	private boolean isFirstSyncDone;
+	private MultithreadDownloaderAsyncTask downloader;
 
 	public SyncCloudToLocalDb(Context context){
 		this.context = context;
@@ -64,6 +67,9 @@ public class SyncCloudToLocalDb {
 		albumFilesDb = new AlbumFilesDb(context);
 		contactsDb = new ContactsDb(context);
 		isFirstSyncDone = Helpers.getPreference(context, SyncManager.PREF_FIRST_SYNC_DONE, false);
+
+		downloader = new MultithreadDownloaderAsyncTask(context, null).setIsDownloadingThumbs(true);
+		downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	public boolean sync(){
@@ -144,6 +150,8 @@ public class SyncCloudToLocalDb {
 				needToUpdateUI = true;
 			}
 
+			downloader.setInputFinished();
+
 
 			String spaceUsedStr = response.get("spaceUsed");
 			String spaceQuotaStr = response.get("spaceQuota");
@@ -183,6 +191,8 @@ public class SyncCloudToLocalDb {
 					Log.d("receivedFile", set + " - " + dbFile.filename);
 					processFile(context, dbFile, set);
 					result = true;
+
+					downloader.addDownloadJob(dbFile, set);
 				}
 			}
 		}
@@ -331,7 +341,6 @@ public class SyncCloudToLocalDb {
 			albumsDb.insertAlbum(remoteAlbum);
 			if(isFirstSyncDone && remoteAlbum.isShared && !remoteAlbum.isOwner){
 				showSharingNotification(remoteAlbum);
-				StinglePhotosApplication.isSyncedThumbs = false;
 			}
 		} else {
 			if (album.dateModified != remoteAlbum.dateModified) {

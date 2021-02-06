@@ -426,4 +426,6 @@
     <string name="delete_account_question2">Вы ДЕЙСТВИТЕЛЬНО уверены, что хотите УДАЛИТЬ свою учетную запись?</string>
     <string name="delete_account_question_desc2">Последний шанс! Ваша учетная запись и все ваши фотографии, видео, альбомы будут удалены! Этот поцесс не обратим!</string>
     <string name="deleting_account">Удаление учетной записи...</string>
+    <string name="download_missing_thumbs">Скачать недостающие иконки</string>
+    <string name="download_missing_thumbs_desc">Загрузите иконки, которых нет в вашем локальном кеше</string>
 </resources>

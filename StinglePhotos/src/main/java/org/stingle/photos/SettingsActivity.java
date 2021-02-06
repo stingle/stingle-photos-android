@@ -24,6 +24,7 @@ import org.stingle.photos.AsyncTasks.DeleteAccountAsyncTask;
 import org.stingle.photos.AsyncTasks.GenericAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.AsyncTasks.ReuploadKeysAsyncTask;
+import org.stingle.photos.AsyncTasks.Sync.DownloadThumbsAsyncTask;
 import org.stingle.photos.AsyncTasks.Sync.FsSyncAsyncTask;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.LoginManager;
@@ -419,6 +420,7 @@ public class SettingsActivity extends AppCompatActivity implements
 			setPreferencesFromResource(R.xml.advanced_preferences, rootKey);
 
 			initResyncDBButton();
+			initDownloadThumbsButton();
 			initDeleteCacheButton();
 		}
 
@@ -441,6 +443,18 @@ public class SettingsActivity extends AppCompatActivity implements
 				Helpers.deletePreference(getContext(), SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
 				Helpers.deletePreference(getContext(), SyncManager.PREF_LAST_DEL_SEEN_TIME);
 				Helpers.deletePreference(getContext(), SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
+
+				return true;
+			});
+		}
+
+		private void initDownloadThumbsButton() {
+			Preference dwnThumbsPref = findPreference("download_thumbs");
+			assert dwnThumbsPref != null;
+			dwnThumbsPref.setOnPreferenceClickListener(preference -> {
+				Helpers.storePreference(getContext(), DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE, false);
+				SyncManager.startSync(getContext());
+				Toast.makeText(getContext(), getString(R.string.success), Toast.LENGTH_SHORT).show();
 
 				return true;
 			});

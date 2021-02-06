@@ -20,6 +20,7 @@ import androidx.work.WorkManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.AsyncTasks.Sync.DownloadThumbsAsyncTask;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -235,6 +236,7 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_FIRST_SYNC_DONE);
 		Helpers.deletePreference(context, StinglePhotosApplication.PREF_APP_START_COUNT);
+		Helpers.deletePreference(context, DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE);
 
 		GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
 		galleryDb.truncateTable();

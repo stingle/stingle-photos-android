@@ -72,16 +72,19 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		cachedThreadPool = Executors.newCachedThreadPool();
 	}
 
-	public void setIsDownloadingThumbs(boolean isDownloadingThumbs){
+	public MultithreadDownloaderAsyncTask setIsDownloadingThumbs(boolean isDownloadingThumbs){
 		this.isDownloadingThumbs = isDownloadingThumbs;
+		return this;
 	}
 
-	public void setBatchSize(int batchSize){
+	public MultithreadDownloaderAsyncTask setBatchSize(int batchSize){
 		this.batchSize = batchSize;
+		return this;
 	}
 
-	public void setMessageStringId(int id){
+	public MultithreadDownloaderAsyncTask setMessageStringId(int id){
 		messageStringId = id;
+		return this;
 	}
 
 	public void setInputFinished(){
@@ -94,7 +97,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		if(myContext == null){
 			return null;
 		}
-		Log.d("downloadThumbs", "Download thumbs START");
+		Log.d("multithreadDwn", "Downloader START");
 
 
 		try {
@@ -109,12 +112,12 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 
 		removeNotification();
 
-
+		Log.d("multithreadDwn", "Downloader END");
 		return null;
 	}
 
 
-	public void addDownloadJob(StingleDbFile dbFile, int set) {
+	public synchronized void addDownloadJob(StingleDbFile dbFile, int set) {
 		try {
 			while (filesArray.size() >= FILES_ARRAY_SIZE_LIMIT) {
 				Thread.sleep(500);
@@ -161,7 +164,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		try {
 			ArrayList<HashMap<String, String>> filesToDownloadNow = new ArrayList<>();
 			int thisBatchSize = AVAILABLE_URLS_LIMIT - queuedUrls.size();
-			Log.e("downloadThumbs", "Download urls - " + thisBatchSize);
+			Log.d("multithreadDwn", "Download urls - " + thisBatchSize);
 			for (int i = 0; i < thisBatchSize;i++) {
 				HashMap<String, String> item = filesArray.poll();
 				if(item == null){
@@ -201,7 +204,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 			String url = urlItem.get("url");
 			String filename = urlItem.get("filename");
 
-			Log.e("thumbDownload", "START - SIZE - " + workers.size() + " - " + filename);
+			Log.d("multithreadDwn", "START - SIZE - " + workers.size() + " - " + filename);
 
 			GenericAsyncTask task = new GenericAsyncTask(context);
 			workers.add(task);
@@ -229,7 +232,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 						HttpsClient.getFileAsByteArray(url, null, new FileOutputStream(cacheFile), false);
 
 						if (!cachedFileResult.exists()) {
-							Log.e("downloadThumbs", "File " + cachedFileResult.getPath() + " failed to download!");
+							Log.d("multithreadDwn", "File " + cachedFileResult.getPath() + " failed to download!");
 							return false;
 						} else {
 							byte[] fileBeginning = new byte[Crypto.FILE_BEGGINIG_LEN];
@@ -258,7 +261,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 				public void onFinish() {
 					workers.remove(task);
 					incrementProgress();
-					Log.e("thumbDownload", "FINISH - SIZE - " + workers.size() + " - " + filename);
+					Log.d("multithreadDwn", "FINISH - SIZE - " + workers.size() + " - " + filename);
 				}
 
 			});

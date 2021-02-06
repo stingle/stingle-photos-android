@@ -23,6 +23,12 @@
         app:useSimpleSummaryProvider="true" />
 
     <Preference
+        app:icon="@drawable/ic_image"
+        app:key="download_thumbs"
+        app:summary="@string/download_missing_thumbs_desc"
+        app:title="@string/download_missing_thumbs" />
+
+    <Preference
         app:icon="@drawable/ic_action_delete"
         app:key="delete_cache"
         app:summary="@string/delete_cache_desc"
