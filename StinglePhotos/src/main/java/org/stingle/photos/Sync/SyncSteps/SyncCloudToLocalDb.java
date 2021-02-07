@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -192,7 +194,14 @@ public class SyncCloudToLocalDb {
 					processFile(context, dbFile, set);
 					result = true;
 
-					downloader.addDownloadJob(dbFile, set);
+					if(isFirstSyncDone) {
+						downloader.addDownloadJob(dbFile, set);
+					}
+
+					// Refresh gallery on initial sync every 200 items
+					if(!isFirstSyncDone && i > 0 && i % 200 == 0){
+						LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("REFRESH_GALLERY"));
+					}
 				}
 			}
 		}
@@ -211,6 +220,11 @@ public class SyncCloudToLocalDb {
 					processAlbum(dbAlbum);
 					result = true;
 				}
+			}
+
+			// Refresh albums on initial sync after albums import
+			if(!isFirstSyncDone){
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("REFRESH_GALLERY"));
 			}
 		}
 		return result;

@@ -16,6 +16,7 @@ public class GenericAsyncTask extends AsyncTask<Void, Void, Object> {
 	private boolean showSpinner = false;
 	private String spinnerMessage = "";
 	private ProgressDialog spinner;
+	private String altData = "";
 
 	public GenericAsyncTask(Context context) {
 		this.context = new WeakReference<>(context);;
@@ -24,6 +25,15 @@ public class GenericAsyncTask extends AsyncTask<Void, Void, Object> {
 	public GenericAsyncTask setWork(GenericTaskWork work){
 		this.work = work;
 		return this;
+	}
+
+	public GenericAsyncTask setAltData(String altData){
+		this.altData = altData;
+		return this;
+	}
+
+	public String getAltData(){
+		return altData;
 	}
 
 	public GenericAsyncTask setOnFinish(OnAsyncTaskFinish onFinishListener){

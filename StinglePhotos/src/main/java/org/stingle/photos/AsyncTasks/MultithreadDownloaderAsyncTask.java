@@ -208,47 +208,60 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 
 			GenericAsyncTask task = new GenericAsyncTask(context);
 			workers.add(task);
+			task.setAltData(filename);
 			task.setWork(new GenericAsyncTask.GenericTaskWork() {
 				@Override
 				public Object execute(Context context) {
 
+					File cacheFileTmp;
+					File cachedFileResultTmp;
 					File cacheFile;
-					File cachedFileResult;
 					if (isDownloadingThumbs) {
 						if (!thumbCacheDir.exists()) {
 							thumbCacheDir.mkdirs();
 						}
+						cacheFileTmp = new File(thumbCacheDir.getPath() + "/" + filename  + ".tmp");
+						cachedFileResultTmp = new File(thumbCacheDir.getPath() + "/" + filename  + ".tmp");
 						cacheFile = new File(thumbCacheDir.getPath() + "/" + filename);
-						cachedFileResult = new File(thumbCacheDir.getPath() + "/" + filename);
 					} else {
 						if (!filesCacheDir.exists()) {
 							filesCacheDir.mkdirs();
 						}
+						cacheFileTmp = new File(filesCacheDir.getPath() + "/" + filename  + ".tmp");
+						cachedFileResultTmp = new File(filesCacheDir.getPath() + "/" + filename  + ".tmp");
 						cacheFile = new File(filesCacheDir.getPath() + "/" + filename);
-						cachedFileResult = new File(filesCacheDir.getPath() + "/" + filename);
 					}
 
 					try {
-						HttpsClient.getFileAsByteArray(url, null, new FileOutputStream(cacheFile), false);
+						HttpsClient.getFileAsByteArray(url, null, new FileOutputStream(cacheFileTmp), false);
 
-						if (!cachedFileResult.exists()) {
-							Log.d("multithreadDwn", "File " + cachedFileResult.getPath() + " failed to download!");
+						if (!cachedFileResultTmp.exists()) {
+							Log.e("multithreadDwn", "File " + cachedFileResultTmp.getPath() + " failed to download!");
 							return false;
 						} else {
 							byte[] fileBeginning = new byte[Crypto.FILE_BEGGINIG_LEN];
-							FileInputStream outTest = new FileInputStream(cachedFileResult);
+							FileInputStream outTest = new FileInputStream(cachedFileResultTmp);
 							outTest.read(fileBeginning);
 
 							if (fileBeginning.length == 0 || !new String(fileBeginning, StandardCharsets.UTF_8).equals(Crypto.FILE_BEGGINING)) {
-								cachedFileResult.delete();
+								Log.e("multithreadDwn", "File " + cachedFileResultTmp.getPath() + " has invalid header!");
+								cachedFileResultTmp.delete();
 								return false;
+							}
+
+							if(!cacheFile.exists()){
+								cacheFileTmp.renameTo(cacheFile);
+							}
+							else{
+								Log.e("multithreadDwn", "File " + cacheFile.getPath() + " existed, deleting tmp file!");
+								cacheFileTmp.delete();
 							}
 
 							return true;
 						}
 					} catch (NoSuchAlgorithmException | IOException | KeyManagementException e) {
-						if(cachedFileResult.exists()){
-							cachedFileResult.delete();
+						if(cachedFileResultTmp.exists()){
+							cachedFileResultTmp.delete();
 						}
 						e.printStackTrace();
 					}
@@ -278,6 +291,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 	@Override
 	protected void onCancelled() {
 		super.onCancelled();
+		isFinishedQueueInput = true;
 		removeNotification();
 	}
 

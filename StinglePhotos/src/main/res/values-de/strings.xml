@@ -430,5 +430,6 @@
     <string name="deleting_account">Konto löschen ...</string>
     <string name="download_missing_thumbs">Laden Sie fehlende Thumbnails herunter</string>
     <string name="download_missing_thumbs_desc">Laden Sie Miniaturansichten herunter, die nicht in Ihrem lokalen Cache vorhanden sind</string>
+    <string name="dont_show_again">Nicht mehr zeigen</string>
 
 </resources>

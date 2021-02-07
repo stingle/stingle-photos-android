@@ -21,6 +21,7 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 	public static final String PREF_IS_DWN_THUMBS_IS_DONE = "thumbs_dwn_is_done";
 	private final WeakReference<Context> context;
 	protected SyncManager.OnFinish onFinish;
+	private MultithreadDownloaderAsyncTask downloader;
 
 	public DownloadThumbsAsyncTask(Context context, SyncManager.OnFinish onFinish){
 		this.context = new WeakReference<>(context);
@@ -43,9 +44,14 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		Cursor resultAlbums = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
 		Cursor resultTrash = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
 
-		MultithreadDownloaderAsyncTask downloader = new MultithreadDownloaderAsyncTask(myContext, null);
-
 		int gallerySize = result.getCount() + resultAlbums.getCount() + resultTrash.getCount();
+
+		downloader = new MultithreadDownloaderAsyncTask(myContext, new SyncManager.OnFinish() {
+			@Override
+			public void onFinish(Boolean needToUpdateUI) {
+				Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
+			}
+		});
 
 		downloader.setBatchSize(gallerySize);
 		downloader.setIsDownloadingThumbs(true);
@@ -77,11 +83,16 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		trashDb.close();
 		Log.d("downloadThumbs", "Download thumbs FULL END");
 
-		Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
 		return null;
 	}
 
-
+	@Override
+	protected void onCancelled() {
+		super.onCancelled();
+		if(downloader != null){
+			downloader.cancel(true);
+		}
+	}
 
 	@Override
 	protected void onPostExecute(Void result) {

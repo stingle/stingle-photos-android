@@ -153,6 +153,4 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		instance = null;
 
 	}
-
-
 }

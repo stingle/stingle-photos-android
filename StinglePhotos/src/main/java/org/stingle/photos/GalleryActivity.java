@@ -1158,7 +1158,7 @@ public class GalleryActivity extends AppCompatActivity
 	private boolean isShownBackupPhraseReminder = false;
 	private void showBackupPhraseReminder(){
 		int appStartCount = Helpers.getPreference(this, StinglePhotosApplication.PREF_APP_START_COUNT, 1);
-		boolean isBackedUpPhrase = Helpers.getPreference(this, "is_backup_phrase_seen", false);
+		boolean isBackedUpPhrase = Helpers.getPreference(this, SyncManager.PREF_IS_BACKUP_PHRASE_SEEN, false);
 		if(!isShownBackupPhraseReminder && !isBackedUpPhrase && (appStartCount % 5 == 0 || appStartCount == 2)) {
 			MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
 			builder.setCancelable(true);
@@ -1170,6 +1170,11 @@ public class GalleryActivity extends AppCompatActivity
 				intent.setClass(GalleryActivity.this, BackupKeyActivity.class);
 				startActivity(intent);
 			});
+
+			if(appStartCount != 2){
+				builder.setNeutralButton(R.string.dont_show_again, (dialog, which) -> Helpers.storePreference(GalleryActivity.this, SyncManager.PREF_IS_BACKUP_PHRASE_SEEN, true));
+			}
+
 			builder.setNegativeButton(R.string.cancel, null);
 			AlertDialog dialog = builder.create();
 			dialog.show();

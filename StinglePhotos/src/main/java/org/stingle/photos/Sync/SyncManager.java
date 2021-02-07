@@ -87,6 +87,7 @@ public class SyncManager {
 	public static final String PREF_IMPORT_DELETE = "auto_import_delete";
 	public static final String PREF_IMPORT_FROM = "import_from";
 	public static final String PREF_IMPORT_SETUP = "import_setup";
+	public static final String PREF_IS_BACKUP_PHRASE_SEEN = "is_backup_phrase_seen";
 
 	public static final String LAST_IMPORTED_FILE_DATE = "last_imported_date";
 
@@ -235,6 +236,7 @@ public class SyncManager {
 		Helpers.deletePreference(context, SyncManager.PREF_ALBUM_FILES_LAST_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME);
 		Helpers.deletePreference(context, SyncManager.PREF_FIRST_SYNC_DONE);
+		Helpers.deletePreference(context, SyncManager.PREF_IS_BACKUP_PHRASE_SEEN);
 		Helpers.deletePreference(context, StinglePhotosApplication.PREF_APP_START_COUNT);
 		Helpers.deletePreference(context, DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE);
 

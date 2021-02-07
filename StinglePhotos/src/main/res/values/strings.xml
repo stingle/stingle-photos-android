@@ -432,5 +432,6 @@
     <string name="deleting_account">Deleting account…</string>
     <string name="download_missing_thumbs">Download missing thumbnails</string>
     <string name="download_missing_thumbs_desc">Download thumbnails that are not present in your local cache</string>
+    <string name="dont_show_again">Don\'t show again</string>
 
 </resources>

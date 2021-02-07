@@ -18,6 +18,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Crypto.MnemonicUtils;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.IOException;
@@ -110,7 +111,7 @@ public class BackupKeyActivity extends AppCompatActivity {
 
 						keyText.setText(mnemonicKey);
 
-						Helpers.storePreference(BackupKeyActivity.this, "is_backup_phrase_seen", true);
+						Helpers.storePreference(BackupKeyActivity.this, SyncManager.PREF_IS_BACKUP_PHRASE_SEEN, true);
 
 					} catch (IllegalArgumentException | IOException ignored) {
 					}
