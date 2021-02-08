@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -18,6 +19,7 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.BackupKeyActivity;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.Net.HttpsClient;
@@ -40,6 +42,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private String homeFolder;
 	private String token;
 	private boolean privateKeyIsAlreadySaved = false;
+	private boolean showBackupPhrase = false;
 
 
 	public LoginAsyncTask(AppCompatActivity context, String email, String password){
@@ -48,8 +51,14 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		this.password = password;
 	}
 
-	public void setPrivateKeyIsAlreadySaved(boolean privateKeyIsAlreadySaved) {
+	public LoginAsyncTask setPrivateKeyIsAlreadySaved(boolean privateKeyIsAlreadySaved) {
 		this.privateKeyIsAlreadySaved = privateKeyIsAlreadySaved;
+		return this;
+	}
+
+	public LoginAsyncTask setShowBackupPhrase(boolean showBackupPhrase){
+		this.showBackupPhrase = showBackupPhrase;
+		return this;
 	}
 
 	@Override
@@ -179,6 +188,14 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 						progressDialog.dismiss();
 					}
 				});
+			}
+			else if(showBackupPhrase){
+				BackupKeyActivity.showBackupPhraseDialog(activity, new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						loginSuccess();
+					}
+				}, R.string.backup_phrase_not_backed_up);
 			}
 			else{
 				loginSuccess();

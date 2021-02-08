@@ -93,30 +93,49 @@ public class BackupKeyActivity extends AppCompatActivity {
 			LoginManager.showEnterPasswordToUnlock(this, loginConfig, new LoginManager.UserLogedinCallback() {
 				@Override
 				public void onUserAuthSuccess() {
-					MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(BackupKeyActivity.this);
-					builder.setView(R.layout.dialog_backup_phrase);
-					builder.setCancelable(true);
-					AlertDialog dialog = builder.create();
-					dialog.show();
-
-					Button okButton = dialog.findViewById(R.id.okButton);
-					TextView keyText = dialog.findViewById(R.id.keyText);
-
-					okButton.setOnClickListener(v -> dialog.dismiss());
-
-					try {
-						byte[] privateKey = StinglePhotosApplication.getKey();
-
-						String mnemonicKey = MnemonicUtils.generateMnemonic(BackupKeyActivity.this, privateKey);
-
-						keyText.setText(mnemonicKey);
-
-						Helpers.storePreference(BackupKeyActivity.this, SyncManager.PREF_IS_BACKUP_PHRASE_SEEN, true);
-
-					} catch (IllegalArgumentException | IOException ignored) {
-					}
+					showBackupPhraseDialog(BackupKeyActivity.this, null, null);
 				}
 			});
 		};
+	}
+
+	public static void showBackupPhraseDialog(Context context, View.OnClickListener onClick, Integer descriptionText){
+		if(!LoginManager.isKeyInMemory()){
+			return;
+		}
+
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+		builder.setView(R.layout.dialog_backup_phrase);
+		builder.setCancelable(true);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+
+		Button okButton = dialog.findViewById(R.id.okButton);
+		TextView keyText = dialog.findViewById(R.id.keyText);
+
+		if(descriptionText != null){
+			TextView descText = dialog.findViewById(R.id.description);
+			descText.setText(descriptionText);
+			descText.setVisibility(View.VISIBLE);
+		}
+
+		okButton.setOnClickListener(v -> {
+			dialog.dismiss();
+			if(onClick != null){
+				onClick.onClick(v);
+			}
+		});
+
+		try {
+			byte[] privateKey = StinglePhotosApplication.getKey();
+
+			String mnemonicKey = MnemonicUtils.generateMnemonic(context, privateKey);
+
+			keyText.setText(mnemonicKey);
+
+			Helpers.storePreference(context, SyncManager.PREF_IS_BACKUP_PHRASE_SEEN, true);
+
+		} catch (IllegalArgumentException | IOException ignored) {
+		}
 	}
 }

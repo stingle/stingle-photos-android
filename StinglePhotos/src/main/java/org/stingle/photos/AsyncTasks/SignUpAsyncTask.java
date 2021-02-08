@@ -80,6 +80,9 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		if(result) {
 			LoginAsyncTask loginAsyncTask = new LoginAsyncTask(activity, email, password);
 			loginAsyncTask.setPrivateKeyIsAlreadySaved(true);
+			if(!isBackup){
+				loginAsyncTask.setShowBackupPhrase(true);
+			}
 			loginAsyncTask.execute();
 		}
 		else{
