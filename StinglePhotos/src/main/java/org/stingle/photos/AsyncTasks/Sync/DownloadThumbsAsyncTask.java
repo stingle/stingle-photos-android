@@ -44,18 +44,18 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		Cursor resultAlbums = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
 		Cursor resultTrash = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
 
-		try {
-			int gallerySize = result.getCount() + resultAlbums.getCount() + resultTrash.getCount();
-			downloader.setBatchSize(gallerySize);
-		}
-		catch (IllegalStateException ignored){}
-
 		downloader = new MultithreadDownloaderAsyncTask(myContext, new SyncManager.OnFinish() {
 			@Override
 			public void onFinish(Boolean needToUpdateUI) {
 				Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
 			}
 		});
+
+		try {
+			int gallerySize = result.getCount() + resultAlbums.getCount() + resultTrash.getCount();
+			downloader.setBatchSize(gallerySize);
+		}
+		catch (IllegalStateException ignored){}
 
 		downloader.setIsDownloadingThumbs(true);
 		downloader.setMessageStringId(R.string.downloading_thumb);
