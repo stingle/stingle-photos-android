@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.stingle.photos"
-    android:versionCode="38"
-    android:versionName="2.6.1">
+    android:versionCode="39"
+    android:versionName="2.6.2">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -37,10 +37,10 @@
 
     <application
         android:name=".StinglePhotosApplication"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_stingle_photos_round"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:allowBackup="false"
         android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme">
 
@@ -55,8 +55,8 @@
             android:exported="false" />
         <service
             android:name=".Sync.JobScheduler.ImportJobSchedulerService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true"/>
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <activity
             android:name=".GalleryActivity"
@@ -148,11 +148,11 @@
             android:alwaysRetainTaskState="true"
             android:clearTaskOnLaunch="true"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:icon="@mipmap/ic_stingle_camera"
             android:label="@string/camera"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
-            android:icon="@mipmap/ic_stingle_camera"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -202,7 +202,8 @@
         <activity
             android:name=".ForgotPasswordActivity"
             android:label="@string/title_forgot_password"
-            android:theme="@style/AppThemeCompatWithActionBar"/>
+            android:theme="@style/AppThemeCompatWithActionBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="@string/content_provider"
@@ -212,12 +213,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/share_provider_paths" />
         </provider>
+
         <receiver
-            android:enabled="true"
             android:name=".Sync.BootCompleteReceiver"
+            android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
     </application>

@@ -480,6 +480,7 @@ public class SettingsActivity extends AppCompatActivity implements
 									File filesCacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
 									Helpers.deleteFolderRecursive(thumbCacheDir);
 									Helpers.deleteFolderRecursive(filesCacheDir);
+									Helpers.storePreference(context, DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE, false);
 									return true;
 								}
 							});

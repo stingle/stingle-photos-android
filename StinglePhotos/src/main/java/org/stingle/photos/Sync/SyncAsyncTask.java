@@ -24,7 +24,6 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private WeakReference<Context> context;
 	private final OnAsyncTaskFinish onFinishListener;
 	private int mode;
-	private static DownloadThumbsAsyncTask downloadThumbsAsyncTask;
 
 	static final public int MODE_FULL = 0;
 	static final public int MODE_IMPORT_AND_UPLOAD = 1;
@@ -122,20 +121,22 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	public void downloadThumbs(Context context){
 		boolean isThumbsDwnIsDone = Helpers.getPreference(context, DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE, false);
-		if(!isThumbsDwnIsDone && (downloadThumbsAsyncTask == null || downloadThumbsAsyncTask.isCancelled())){
-			downloadThumbsAsyncTask = new DownloadThumbsAsyncTask(context, new SyncManager.OnFinish() {
+		StinglePhotosApplication app = (StinglePhotosApplication) context.getApplicationContext();
+		if(!isThumbsDwnIsDone && app.downloadThumbsAsyncTask == null){
+			app.downloadThumbsAsyncTask = new DownloadThumbsAsyncTask(context, new SyncManager.OnFinish() {
 				@Override
 				public void onFinish(Boolean needToUpdateUI) {
-					downloadThumbsAsyncTask = null;
+					app.downloadThumbsAsyncTask = null;
 				}
 			});
-			downloadThumbsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			app.downloadThumbsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 
-	public static void killDownloadThumbs(){
-		if(downloadThumbsAsyncTask != null && !downloadThumbsAsyncTask.isCancelled()){
-			downloadThumbsAsyncTask.cancel(true);
+	public static void killDownloadThumbs(Context context){
+		StinglePhotosApplication app = (StinglePhotosApplication) context.getApplicationContext();
+		if(app.downloadThumbsAsyncTask != null && !app.downloadThumbsAsyncTask.isCancelled()){
+			app.downloadThumbsAsyncTask.cancel(true);
 		}
 	}
 

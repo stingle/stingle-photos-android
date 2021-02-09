@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import org.stingle.photos.AsyncTasks.MultithreadDownloaderAsyncTask;
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -15,6 +16,7 @@ import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.CountDownLatch;
 
 public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -44,10 +46,15 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		Cursor resultAlbums = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
 		Cursor resultTrash = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
 
-		downloader = new MultithreadDownloaderAsyncTask(myContext, new SyncManager.OnFinish() {
+		downloader = new MultithreadDownloaderAsyncTask(myContext, new OnAsyncTaskFinish() {
 			@Override
-			public void onFinish(Boolean needToUpdateUI) {
-				Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
+			public void onFinish(Boolean result) {
+				if(result) {
+					Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
+				}
+				if(onFinish != null){
+					onFinish.onFinish(true);
+				}
 			}
 		});
 
@@ -63,19 +70,42 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		while (result.moveToNext()) {
 			StingleDbFile dbFile = new StingleDbFile(result);
-			downloader.addDownloadJob(dbFile, SyncManager.GALLERY);
+			CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.GALLERY);
+			if(latch != null){
+				try {
+					Log.e("downloadThumbs", "Waiting for latch");
+					latch.await();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		result.close();
 
 		while (resultAlbums.moveToNext()) {
 			StingleDbFile dbFile = new StingleDbFile(resultAlbums);
-			downloader.addDownloadJob(dbFile, SyncManager.ALBUM);
+			CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.ALBUM);
+			if(latch != null){
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
 		}
 		resultAlbums.close();
 
 		while (resultTrash.moveToNext()) {
 			StingleDbFile dbFile = new StingleDbFile(resultTrash);
-			downloader.addDownloadJob(dbFile, SyncManager.TRASH);
+			CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.TRASH);
+			if(latch != null){
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		resultTrash.close();
 
@@ -100,10 +130,6 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onPostExecute(Void result) {
 		super.onPostExecute(result);
-
-		if(onFinish != null){
-			onFinish.onFinish(true);
-		}
 	}
 
 }

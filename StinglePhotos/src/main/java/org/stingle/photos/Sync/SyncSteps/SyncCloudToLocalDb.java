@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
 public class SyncCloudToLocalDb {
 
@@ -195,7 +196,14 @@ public class SyncCloudToLocalDb {
 					result = true;
 
 					if(isFirstSyncDone) {
-						downloader.addDownloadJob(dbFile, set);
+						CountDownLatch latch = downloader.addDownloadJob(dbFile, set);
+						if(latch != null){
+							try {
+								latch.await();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
 					}
 
 					// Refresh gallery on initial sync every 200 items

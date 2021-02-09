@@ -131,18 +131,18 @@ public class SyncManager {
 	}
 
 	public static void startSync(Context context, int mode, OnAsyncTaskFinish onFinishListener){
-		Log.e("SYNC_STATUS", StinglePhotosApplication.syncStatus + "");
+		Log.d("SYNC_STATUS", StinglePhotosApplication.syncStatus + "");
 		if(StinglePhotosApplication.syncStatus != SyncManager.STATUS_IDLE || (SyncAsyncTask.instance != null && !SyncAsyncTask.instance.isCancelled())){
-			Log.e("SYNC_ACTIONS", "Schedule restart");
+			Log.d("SYNC_ACTIONS", "Schedule restart");
 			StinglePhotosApplication.syncRestartAfterFinish = true;
 			StinglePhotosApplication.syncRestartAfterFinishMode = mode;
 			if(SyncAsyncTask.instance == null || SyncAsyncTask.instance.isCancelled()){
-				Log.e("SYNC_ACTIONS", "Actually started sync async task");
+				Log.d("SYNC_ACTIONS", "Actually started sync async task");
 				(new SyncAsyncTask(context, mode)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 			return;
 		}
-		Log.e("SYNC_ACTIONS", "Normal start of sync");
+		Log.d("SYNC_ACTIONS", "Normal start of sync");
 		(new SyncAsyncTask(context, mode, onFinishListener)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
@@ -151,7 +151,7 @@ public class SyncManager {
 			SyncAsyncTask.instance.cancel(true);
 			SyncManager.setSyncStatus(context, SyncManager.STATUS_IDLE);
 		}
-		SyncAsyncTask.killDownloadThumbs();
+		SyncAsyncTask.killDownloadThumbs(context);
 	}
 
 	public static boolean downloadFile(Context context, String filename, String outputPath, boolean isThumb, int set, HttpsClient.OnUpdateProgress onProgress) throws NoSuchAlgorithmException, IOException, KeyManagementException {
@@ -271,7 +271,7 @@ public class SyncManager {
 		importedIdsDb.truncateTable();
 		importedIdsDb.close();
 		Helpers.deletePreference(context, SyncManager.PREF_IMPORT_SETUP);
-		SyncAsyncTask.killDownloadThumbs();
+		SyncAsyncTask.killDownloadThumbs(context);
 	}
 
 	public static boolean moveFiles(Context context, ArrayList<StingleDbFile> files, int fromSet, int toSet, String fromAlbumId, String toAlbumId, boolean isMoving) {

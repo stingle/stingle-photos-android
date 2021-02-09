@@ -32,8 +32,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -42,9 +46,10 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 	static final public int URLS_GET_THRESHOLD = 50;
 	static final public int FILES_ARRAY_SIZE_LIMIT = 1000;
 	private final ExecutorService cachedThreadPool;
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	private final WeakReference<Context> context;
-	protected SyncManager.OnFinish onFinish;
+	protected OnAsyncTaskFinish onFinish;
 	public static NotificationManager mNotifyManager;
 	public static Notification.Builder notificationBuilder;
 	public static boolean isNotificationActive = false;
@@ -60,8 +65,10 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 	private ArrayList<GenericAsyncTask> workers = new ArrayList<>();
 	private ArrayDeque<HashMap<String, String>> filesArray = new ArrayDeque<>();
 	private ArrayDeque<HashMap<String, String>> queuedUrls = new ArrayDeque<>();
+	private CountDownLatch downloadJobLatch;
+	private boolean isFailedDownloads = false;
 
-	public MultithreadDownloaderAsyncTask(Context context, SyncManager.OnFinish onFinish){
+	public MultithreadDownloaderAsyncTask(Context context, OnAsyncTaskFinish onFinish){
 		this.context = new WeakReference<>(context);
 		this.onFinish = onFinish;
 		mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -100,32 +107,25 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		Log.d("multithreadDwn", "Downloader START");
 
 
-		try {
-			while (!isFinishedQueueInput || workers.size() > 0 || filesArray.size() > 0) {
-				fillUrls(myContext);
-				startDownloadThreads(myContext);
-				Thread.sleep(500);
+		scheduler.scheduleAtFixedRate(() -> {
+			Log.d("multithreadDwn", "Downloader RUN");
+			fillUrls(myContext);
+			startDownloadThreads(myContext);
+
+			if (isFinishedQueueInput && workers.size() == 0 && filesArray.size() == 0 && queuedUrls.size() == 0) {
+				Log.d("multithreadDwn", "Downloader END");
+				removeNotification();
+				if(onFinish != null){
+					onFinish.onFinish(!isFailedDownloads && isFinishedQueueInput);
+				}
+				scheduler.shutdownNow();
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		}, 1000, 500, MILLISECONDS);
 
-		removeNotification();
-
-		Log.d("multithreadDwn", "Downloader END");
 		return null;
 	}
 
-
-	public synchronized void addDownloadJob(StingleDbFile dbFile, int set) {
-		try {
-			while (filesArray.size() >= FILES_ARRAY_SIZE_LIMIT) {
-				Thread.sleep(500);
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
+	public synchronized CountDownLatch addDownloadJob(StingleDbFile dbFile, int set) {
 		boolean needToDownload = false;
 		if(isDownloadingThumbs) {
 			File thumb = new File(thumbDir + "/" + dbFile.filename);
@@ -151,10 +151,17 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		else {
 			count++;
 		}
+
+		if(filesArray.size() >= FILES_ARRAY_SIZE_LIMIT){
+			downloadJobLatch = new CountDownLatch(1);
+			return downloadJobLatch;
+		}
+
+		return null;
 	}
 
 
-	private  synchronized void fillUrls(Context context){
+	private void fillUrls(Context context){
 		if(filesArray.size() == 0){
 			return;
 		}
@@ -192,9 +199,15 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		} catch (NoSuchAlgorithmException | KeyManagementException | IOException | JSONException e) {
 			e.printStackTrace();
 		}
+
+		if(filesArray.size() <= FILES_ARRAY_SIZE_LIMIT){
+			if(downloadJobLatch != null) {
+				downloadJobLatch.countDown();
+			}
+		}
 	}
 
-	private synchronized void startDownloadThreads(Context context){
+	private void startDownloadThreads(Context context){
 		if(queuedUrls.size() == 0){
 			return;
 		}
@@ -236,7 +249,8 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 						HttpsClient.getFileAsByteArray(url, null, new FileOutputStream(cacheFileTmp), false);
 
 						if (!cachedFileResultTmp.exists()) {
-							Log.e("multithreadDwn", "File " + cachedFileResultTmp.getPath() + " failed to download!");
+							Log.d("multithreadDwn", "File " + cachedFileResultTmp.getPath() + " failed to download!");
+							isFailedDownloads = true;
 							return false;
 						} else {
 							byte[] fileBeginning = new byte[Crypto.FILE_BEGGINIG_LEN];
@@ -244,8 +258,9 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 							outTest.read(fileBeginning);
 
 							if (fileBeginning.length == 0 || !new String(fileBeginning, StandardCharsets.UTF_8).equals(Crypto.FILE_BEGGINING)) {
-								Log.e("multithreadDwn", "File " + cachedFileResultTmp.getPath() + " has invalid header!");
+								Log.d("multithreadDwn", "File " + cachedFileResultTmp.getPath() + " has invalid header!");
 								cachedFileResultTmp.delete();
+								isFailedDownloads = true;
 								return false;
 							}
 
@@ -253,7 +268,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 								cacheFileTmp.renameTo(cacheFile);
 							}
 							else{
-								Log.e("multithreadDwn", "File " + cacheFile.getPath() + " existed, deleting tmp file!");
+								Log.d("multithreadDwn", "File " + cacheFile.getPath() + " existed, deleting tmp file!");
 								cacheFileTmp.delete();
 							}
 
@@ -262,6 +277,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 					} catch (NoSuchAlgorithmException | IOException | KeyManagementException e) {
 						if(cachedFileResultTmp.exists()){
 							cachedFileResultTmp.delete();
+							isFailedDownloads = true;
 						}
 						e.printStackTrace();
 					}
@@ -298,10 +314,6 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 	@Override
 	protected void onPostExecute(Void result) {
 		super.onPostExecute(result);
-
-		if(onFinish != null){
-			onFinish.onFinish(true);
-		}
 	}
 
 	private void showNotification() {
@@ -342,10 +354,19 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		mNotifyManager.notify(R.string.download_thumb_service_started, notification);
 	}
 
+	long lastNotificationUpdateTime = 0;
+
 	private void updateNotification(int totalItemsNumber, int downloadedFilesCount){
 		if(messageStringId == null){
 			return;
 		}
+
+		long now = System.currentTimeMillis();
+		if(now - lastNotificationUpdateTime < 400){
+			return;
+		}
+		lastNotificationUpdateTime = now;
+
 		Context myContext = context.get();
 		if(myContext == null){
 			return;

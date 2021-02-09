@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.preference.PreferenceManager;
 
+import org.stingle.photos.AsyncTasks.Sync.DownloadThumbsAsyncTask;
 import org.stingle.photos.Sync.SyncAsyncTask;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Sync.SyncManager;
@@ -50,6 +51,7 @@ public class StinglePhotosApplication extends Application{
     public static Bundle syncStatusParams = null;
     public static boolean syncRestartAfterFinish = false;
     public static int syncRestartAfterFinishMode = SyncAsyncTask.MODE_FULL;
+	public DownloadThumbsAsyncTask downloadThumbsAsyncTask;
 
     @Override
 	public void onCreate(){

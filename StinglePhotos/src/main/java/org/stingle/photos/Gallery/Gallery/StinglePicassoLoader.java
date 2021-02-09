@@ -53,11 +53,6 @@ public class StinglePicassoLoader extends RequestHandler {
 
 	@Override
 	public void load(@NonNull Picasso picasso, @NonNull com.squareup.picasso3.Request request, @NonNull Callback callback) throws IOException {
-		/*try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			//Log.e("interrupted", String.valueOf(position));
-		}*/
 		String uri = request.uri.toString();
 		String setStr = uri.substring(1, 2);
 		String position = uri.substring(2);
