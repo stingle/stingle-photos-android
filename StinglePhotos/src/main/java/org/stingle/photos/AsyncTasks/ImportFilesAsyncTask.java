@@ -86,7 +86,9 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 	protected void onPostExecute(Void result) {
 		super.onPostExecute(result);
 
-		progress.dismiss();
+		if(progress != null && progress.isShowing()) {
+			progress.dismiss();
+		}
 
 		if(onFinish != null){
 			onFinish.onFinish(largestDate);

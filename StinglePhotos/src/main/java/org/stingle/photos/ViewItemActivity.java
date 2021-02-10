@@ -141,7 +141,9 @@ public class ViewItemActivity extends AppCompatActivity {
 	}
 
 	public void updateCurrentItem(){
-		adapter.notifyDataSetChanged();
+		if(adapter != null) {
+			adapter.notifyDataSetChanged();
+		}
 	}
 
 	@Override

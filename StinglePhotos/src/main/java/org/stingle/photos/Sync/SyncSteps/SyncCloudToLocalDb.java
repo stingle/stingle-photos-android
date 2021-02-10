@@ -72,7 +72,9 @@ public class SyncCloudToLocalDb {
 		isFirstSyncDone = Helpers.getPreference(context, SyncManager.PREF_FIRST_SYNC_DONE, false);
 
 		downloader = new MultithreadDownloaderAsyncTask(context, null).setIsDownloadingThumbs(true);
-		downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		if(isFirstSyncDone) {
+			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
 	}
 
 	public boolean sync(){
@@ -207,7 +209,7 @@ public class SyncCloudToLocalDb {
 					}
 
 					// Refresh gallery on initial sync every 200 items
-					if(!isFirstSyncDone && i > 0 && i % 200 == 0){
+					if(!isFirstSyncDone && i > 0 && i % 400 == 0){
 						LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("REFRESH_GALLERY"));
 					}
 				}

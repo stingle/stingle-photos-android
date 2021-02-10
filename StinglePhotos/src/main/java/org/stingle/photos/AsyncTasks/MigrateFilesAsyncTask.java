@@ -80,16 +80,17 @@ public class MigrateFilesAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			}
 
 			File[] files = from.listFiles();
-			for(File file : files){
-				if(file.isDirectory()){
-					moveFolder(file, new File(to.getAbsolutePath() + "/" + file.getName()));
-				}
-				else{
-					if(!FileManager.moveFile(file.getParent(), file.getName(), to.getPath())){
-						throw new IOException("Failed to move file " + file.getPath());
+			if(files != null) {
+				for (File file : files) {
+					if (file.isDirectory()) {
+						moveFolder(file, new File(to.getAbsolutePath() + "/" + file.getName()));
+					} else {
+						if (!FileManager.moveFile(file.getParent(), file.getName(), to.getPath())) {
+							throw new IOException("Failed to move file " + file.getPath());
+						}
+						spinner.setProgress(spinner.getProgress() + 1);
+						Log.d("MovedFile", file.getPath() + " - " + to.getPath());
 					}
-					spinner.setProgress(spinner.getProgress() + 1);
-					Log.d("MovedFile", file.getPath() + " - " + to.getPath());
 				}
 			}
 		}

@@ -157,7 +157,15 @@ public class DownloadAsyncTask extends AsyncTask<Void, Void, Void> {
 		mNotifyManager.notify(R.string.download_service_started, notification);
 	}
 
+
+	long lastNotificationUpdateTime = 0;
 	private void updateNotification(int totalItemsNumber, int downloadedFilesCount, int progess){
+		long now = System.currentTimeMillis();
+		if(now - lastNotificationUpdateTime < 400){
+			return;
+		}
+		lastNotificationUpdateTime = now;
+
 		Context myContext = context.get();
 		if(myContext == null){
 			return;
