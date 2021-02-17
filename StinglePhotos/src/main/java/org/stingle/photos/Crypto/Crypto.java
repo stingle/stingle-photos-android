@@ -911,14 +911,24 @@ public class Crypto {
         return Base64.encodeToString(bytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 encoding
     }
     public static byte[] base64ToByteArrayUrlSafe(String base64str) {
-        return Base64.decode(base64str, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 decoding
+        try {
+            return Base64.decode(base64str, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP); //base64 decoding
+        }
+        catch (IllegalArgumentException e){
+            return null;
+        }
     }
 
     public static String byteArrayToBase64(byte[] bytes) {
         return Base64.encodeToString(bytes, Base64.NO_WRAP); //base64 encoding
     }
     public static byte[] base64ToByteArray(String base64str) {
-        return Base64.decode(base64str, Base64.NO_WRAP); //base64 decoding
+        try {
+            return Base64.decode(base64str, Base64.NO_WRAP); //base64 decoding
+        }
+        catch (IllegalArgumentException e){
+            return null;
+        }
     }
 
     public static String assembleHeadersString(byte[] fileHeader, byte[] thumbHeader){
@@ -952,6 +962,10 @@ public class Crypto {
         headers.file = base64ToByteArrayUrlSafe(headersStrArr[0]);
         headers.thumb = base64ToByteArrayUrlSafe(headersStrArr[1]);
 
+        if(headers.file == null || headers.thumb == null){
+            return null;
+        }
+
         return headers;
     }
 
@@ -965,12 +979,18 @@ public class Crypto {
     public Header getFileHeaderFromHeadersStr(String headersStr, byte[] privateKey, byte[] publicKey) throws IOException, CryptoException {
         FileThumbHeaders headers = parseFileHeaders(headersStr);
 
-        return getFileHeader(headers.file, privateKey, publicKey);
+        if(headers != null) {
+            return getFileHeader(headers.file, privateKey, publicKey);
+        }
+        return null;
     }
     public Header getThumbHeaderFromHeadersStr(String headersStr, byte[] privateKey, byte[] publicKey) throws IOException, CryptoException {
         FileThumbHeaders headers = parseFileHeaders(headersStr);
 
-        return getFileHeader(headers.thumb, privateKey, publicKey);
+        if(headers != null) {
+            return getFileHeader(headers.thumb, privateKey, publicKey);
+        }
+        return null;
     }
 
     public static int getOverallHeaderSize(InputStream in) throws IOException, CryptoException {
@@ -1136,6 +1156,10 @@ public class Crypto {
 
     public String reencryptFileHeaders(String headersStr, byte[] publicKeyTo, byte[] privateKeyFrom, byte[] publicKeyFrom) throws IOException, CryptoException {
         FileThumbHeaders headers = parseFileHeaders(headersStr);
+
+        if(headers == null){
+            return null;
+        }
 
         Header fileHeader = getFileHeader(headers.file, privateKeyFrom, publicKeyFrom);
         ByteArrayOutputStream fileOut = new ByteArrayOutputStream();

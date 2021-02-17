@@ -177,6 +177,9 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					return result;
 				}
 				Crypto.Header fileHeader = CryptoHelpers.decryptFileHeaders(context, set, albumId, dbFile.headers, true);
+				if(fileHeader == null){
+					return null;
+				}
 				fileType = fileHeader.fileType;
 				result.fileType = fileType;
 				result.isRemote = true;
@@ -247,7 +250,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 	protected void onPostExecute(ViewItemAsyncTask.ViewItemTaskResult result) {
 		super.onPostExecute(result);
 		Context context = contextRef.get();
-		if(context == null){
+		if(context == null || result == null){
 			return;
 		}
 
