@@ -18,6 +18,7 @@ import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -119,7 +120,11 @@ public class ImportFile {
 				thumbHeader = Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
 			} else if (fileType == Crypto.FILE_TYPE_VIDEO) {
 				Bitmap thumb = Helpers.getVideoThumbnail(context, uri);
-				if (thumb != null) {
+				if (thumb == null) {
+					thumb = Helpers.drawableToBitmap(context.getDrawable(R.drawable.ic_video));
+				}
+
+				if(thumb != null) {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
 
@@ -132,6 +137,12 @@ public class ImportFile {
 			Crypto.Header fileHeader =  StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, task);
 
 			if(fileHeader == null || thumbHeader == null){
+				if(thumbHeader != null){
+					(new File(FileManager.getThumbsDir(context) + "/" + encFilename)).delete();
+				}
+				if(fileHeader != null){
+					(new File(encFilePath)).delete();
+				}
 				return null;
 			}
 

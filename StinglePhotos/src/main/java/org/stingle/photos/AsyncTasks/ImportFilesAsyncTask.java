@@ -17,7 +17,7 @@ import org.stingle.photos.Util.Helpers;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
+public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 
 	private WeakReference<AppCompatActivity> activity;
 	private ArrayList<Uri> uris;
@@ -55,15 +55,19 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 	}
 
 	@Override
-	protected Void doInBackground(Void... params) {
+	protected Boolean doInBackground(Void... params) {
 		AppCompatActivity myActivity = activity.get();
 		if(myActivity == null){
 			return null;
 		}
 		int index = 0;
 
+		Boolean result = true;
 		for (Uri uri : uris) {
 			Long date = ImportFile.importFile(myActivity, uri, set, albumId, this);
+			if(date == null){
+				result = false;
+			}
 			if(date != null && date > largestDate){
 				largestDate = date;
 			}
@@ -72,7 +76,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 			index++;
 		}
 
-		return null;
+		return result;
 	}
 
 	@Override
@@ -83,7 +87,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 	}
 
 	@Override
-	protected void onPostExecute(Void result) {
+	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
 
 		if(progress != null && progress.isShowing()) {
@@ -98,7 +102,9 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Void> {
 			Helpers.releaseWakeLock(myActivity);
 		}
 
-		deleteOriginals();
+		if(result) {
+			deleteOriginals();
+		}
 	}
 
 	private void deleteOriginals(){
