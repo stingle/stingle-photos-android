@@ -421,7 +421,7 @@
     <string name="delete_failed">Failed to delete some files</string>
     <string name="delete_failed_desc">We were unable to delete some of all original files. Please delete them manually.</string>
     <string name="backup_phrase_not_backed">Please write down your backup phrase</string>
-    <string name="backup_phrase_not_backed_desc">If you loose your password, backup phrase will help you to recover your account. We strongly advice to write down you backup phrase somewhere safe.</string>
+    <string name="backup_phrase_not_backed_desc">If you lose your password your backup phrase will allow you to recover your account. We strongly advise you to write it down and keep it somewhere safe.</string>
     <string name="go_to_backup_phrase">See backup phrase</string>
     <string name="delete_account">Delete account</string>
     <string name="delete_account_question">Delete your account?</string>
