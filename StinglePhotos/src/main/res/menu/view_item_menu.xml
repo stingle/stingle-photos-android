@@ -23,7 +23,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/decrypt"
-        android:icon="@drawable/ic_action_unlock"
+        android:icon="@drawable/ic_save_alt"
         android:title="@string/save_to_gallery"
         app:showAsAction="always" />
     <item

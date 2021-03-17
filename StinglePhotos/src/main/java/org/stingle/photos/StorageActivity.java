@@ -1,11 +1,9 @@
 package org.stingle.photos;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,9 +31,10 @@ import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Billing.BillingSecurity;
-import org.stingle.photos.Billing.StingleBilling;
+import org.stingle.photos.Sync.SyncAsyncTask;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
@@ -92,8 +91,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
-			updateQuotaInfo();
-			getSkuDetails();
+			syncAndUpdateQuota();
 			pullToRefresh.setRefreshing(false);
 		});
 
@@ -410,35 +408,35 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 					Log.d("purchase", purchase.getSku() + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
 
 					if (billingResult.getResponseCode() == BillingResponseCode.OK) {
-						notifyServerAboutPurchase(purchase);
+						Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
+						syncAndUpdateQuota();
+					}
+					else{
+						Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_error), Snackbar.LENGTH_LONG).show();
+						syncAndUpdateQuota();
 					}
 				});
 			}
 			else{
-				notifyServerAboutPurchase(purchase);
+				Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
+				syncAndUpdateQuota();
 			}
 		}
 		else{
 			Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.pending_purchase), Snackbar.LENGTH_LONG).show();
+			syncAndUpdateQuota();
 		}
 	}
 
-	private void notifyServerAboutPurchase(Purchase purchase){
-		final ProgressDialog spinner = Helpers.showProgressDialog(this, getString(R.string.confirming_purchase), null);
-		(new StingleBilling.NotifyServerAboutPurchase(StorageActivity.this, purchase.getSku(), purchase.getPurchaseToken(), new StingleBilling.OnFinish() {
+	private void syncAndUpdateQuota(){
+		SyncManager.startSync(this, SyncAsyncTask.MODE_CLOUD_TO_LOCAL, new OnAsyncTaskFinish() {
 			@Override
-			public void onFinish(boolean isSuccess) {
-				if(isSuccess) {
-					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
-					updateQuotaInfo();
-					getSkuDetails();
-				}
-				else{
-					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_error), Snackbar.LENGTH_LONG).show();
-				}
-				spinner.dismiss();
+			public void onFinish() {
+				super.onFinish();
+				updateQuotaInfo();
+				getSkuDetails();
 			}
-		})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		});
 	}
 
 	private boolean verifyValidSignature(String signedData, String signature) {
