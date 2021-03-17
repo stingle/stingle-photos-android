@@ -1,0 +1,1 @@
+* Fixed bugs related to importing videos recorded on latest iPhones

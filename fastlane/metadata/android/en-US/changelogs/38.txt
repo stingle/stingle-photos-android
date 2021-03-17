@@ -1,0 +1,3 @@
+* Improved multi thread thumbnail downloader
+* Backup phrase will be shown right after sign up if you choose not to backup your keys
+* Various bugfixes

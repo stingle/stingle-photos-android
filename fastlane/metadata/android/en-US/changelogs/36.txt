@@ -1,0 +1,6 @@
+* App will now download missing local thumbnails in the background
+* Ability to delete manually imported files after a successful import
+* Backup phrase reminder dialog
+* Delete account functionality.
+* Fixes for billing problems
+* German translation

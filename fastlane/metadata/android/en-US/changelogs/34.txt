@@ -1,0 +1,4 @@
+* This release will migrate Stingle Photos encrypted files to it's internal storage from SD card. Android soon will forbid apps writing to SD card without a special permission.
+* Ability to download photos/videos to local storage for faster viewing
+* Loading indicator while loading original image quality
+* Now loaded images will be saved in the cache. You can control maximum cache size in the Settings->Advanced section

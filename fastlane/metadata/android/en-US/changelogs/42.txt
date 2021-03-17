@@ -1,0 +1,2 @@
+* Fixed billing issues
+* Changed "Save to gallery" icon in action bar, now it's more clear what it does
