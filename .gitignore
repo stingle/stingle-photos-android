@@ -35,5 +35,3 @@ output.json
 #NDK
 obj/
 .externalNativeBuild
-
-keystore.properties
