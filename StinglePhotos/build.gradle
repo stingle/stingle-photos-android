@@ -62,7 +62,7 @@ android {
 
 dependencies {
     implementation 'com.github.terl:lazysodium-android:4.3.1@aar'
-    implementation 'net.java.dev.jna:jna:5.6.0@aar'
+    implementation 'net.java.dev.jna:jna:5.7.0@aar'
     implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.7.3'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
