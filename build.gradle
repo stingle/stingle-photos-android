@@ -13,9 +13,6 @@ allprojects {
     repositories {
         jcenter()
         google()
-        maven {
-            url  "https://dl.bintray.com/terl/lazysodium-maven"
-        }
         maven { url 'https://jitpack.io' }
     }
 }
