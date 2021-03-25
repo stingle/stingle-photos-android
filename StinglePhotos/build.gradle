@@ -51,6 +51,12 @@ android {
         }
     }
     productFlavors {
+        playstore {
+            dimension 'version'
+        }
+        fdroid {
+            dimension 'version'
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -58,6 +64,7 @@ android {
     }
     ndkVersion '21.3.6528147'
     buildToolsVersion '30.0.2'
+    flavorDimensions 'version'
 }
 
 dependencies {
@@ -74,11 +81,12 @@ dependencies {
     implementation 'androidx.exifinterface:exifinterface:1.3.2'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.preference:preference:1.1.1'
-    implementation 'com.android.billingclient:billing:3.0.3'
     implementation "androidx.biometric:biometric:1.1.0"
     implementation 'com.google.android:flexbox:2.0.1'
     implementation "androidx.work:work-runtime:2.5.0"
     implementation project(path: ':picasso')
+
+    playstoreImplementation 'com.android.billingclient:billing:3.0.3'
 
     def camerax_version = "1.0.0-alpha06"
     def camerax_view_version = "1.0.0-alpha03"

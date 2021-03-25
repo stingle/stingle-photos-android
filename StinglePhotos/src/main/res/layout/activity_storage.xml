@@ -62,7 +62,17 @@
                             android:layout_width="match_parent"
                             android:layout_height="5dp"
                             android:progressDrawable="@drawable/navview_progress" />
-
+                        <TextView
+                            android:id="@+id/paymentNotice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="25dp"
+                            android:layout_marginBottom="5dp"
+                            android:autoLink="web|email"
+                            android:text="@string/payment_notice"
+                            android:textIsSelectable="true"
+                            android:textSize="18sp"
+                            android:visibility="gone"/>
                         <LinearLayout
                             android:id="@+id/payment_boxes"
                             android:layout_width="match_parent"

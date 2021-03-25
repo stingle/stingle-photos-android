@@ -187,11 +187,19 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 					(billingResult, skuDetailsList) -> {
 						if (billingResult.getResponseCode() == BillingResponseCode.OK && skuDetailsList != null) {
 							Log.d("skuDetails", skuDetailsList.toString());
-							for (SkuDetails skuDetails : skuDetailsList) {
-								skuDetailsMap.put(skuDetails.getSku(), skuDetails);
+							if(skuDetailsList.size() == 0){
+								findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
 							}
+							else {
+								for (SkuDetails skuDetails : skuDetailsList) {
+									skuDetailsMap.put(skuDetails.getSku(), skuDetails);
+								}
 
-							createPaymentBoxes();
+								createPaymentBoxes();
+							}
+						}
+						else{
+							findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
 						}
 
 					});
@@ -353,6 +361,9 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 					if (executeOnSuccess != null) {
 						executeOnSuccess.run();
 					}
+				}
+				else{
+					findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
 				}
 				billingClientResponseCode = billingResult.getResponseCode();
 			}
