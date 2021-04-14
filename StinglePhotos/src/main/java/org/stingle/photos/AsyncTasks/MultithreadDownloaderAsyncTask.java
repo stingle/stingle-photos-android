@@ -108,7 +108,11 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 
 
 		scheduler.scheduleAtFixedRate(() -> {
-			Log.d("multithreadDwn", "Downloader RUN");
+			Log.d("multithreadDwn", "Downloader RUN - " +
+					"isFinishedQueueInput - " + isFinishedQueueInput +
+					" | workers.size() - " + workers.size() +
+					" | filesArray.size() - " + filesArray.size() +
+					" | queuedUrls.size() - " + queuedUrls.size());
 			fillUrls(myContext);
 			startDownloadThreads(myContext);
 
@@ -120,7 +124,7 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 				}
 				scheduler.shutdownNow();
 			}
-		}, 1000, 500, MILLISECONDS);
+		}, 1000, 600, MILLISECONDS);
 
 		return null;
 	}

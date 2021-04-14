@@ -36,86 +36,94 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 		if(myContext == null){
 			return null;
 		}
-		Log.d("downloadThumbs", "Download thumbs FULL START");
-		GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
-		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
-		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
-
-
-		Cursor result = galleryDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
-		Cursor resultAlbums = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
-		Cursor resultTrash = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
-
-		downloader = new MultithreadDownloaderAsyncTask(myContext, new OnAsyncTaskFinish() {
-			@Override
-			public void onFinish(Boolean result) {
-				if(result) {
-					Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
-				}
-				if(onFinish != null){
-					onFinish.onFinish(true);
-				}
-			}
-		});
-
 		try {
-			int gallerySize = result.getCount() + resultAlbums.getCount() + resultTrash.getCount();
-			downloader.setBatchSize(gallerySize);
-		}
-		catch (IllegalStateException ignored){}
+			Log.d("downloadThumbs", "Download thumbs FULL START");
+			GalleryTrashDb galleryDb = new GalleryTrashDb(myContext, SyncManager.GALLERY);
+			AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
+			GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
 
-		downloader.setIsDownloadingThumbs(true);
-		downloader.setMessageStringId(R.string.downloading_thumb);
-		downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-		while (result.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(result);
-			CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.GALLERY);
-			if(latch != null){
-				try {
-					Log.e("downloadThumbs", "Waiting for latch");
-					latch.await();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			Cursor result = galleryDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
+			Cursor resultAlbums = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
+			Cursor resultTrash = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ONLY_REMOTE, StingleDb.SORT_DESC, null, null);
+
+			downloader = new MultithreadDownloaderAsyncTask(myContext, new OnAsyncTaskFinish() {
+				@Override
+				public void onFinish(Boolean result) {
+					if (result) {
+						Helpers.storePreference(myContext, PREF_IS_DWN_THUMBS_IS_DONE, true);
+					}
+					if (onFinish != null) {
+						onFinish.onFinish(true);
+					}
 				}
-			}
-		}
-		result.close();
+			});
 
-		while (resultAlbums.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(resultAlbums);
-			CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.ALBUM);
-			if(latch != null){
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			try {
+				int gallerySize = result.getCount() + resultAlbums.getCount() + resultTrash.getCount();
+				downloader.setBatchSize(gallerySize);
+			} catch (IllegalStateException ignored) {
 			}
 
-		}
-		resultAlbums.close();
+			downloader.setIsDownloadingThumbs(true);
+			downloader.setMessageStringId(R.string.downloading_thumb);
+			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-		while (resultTrash.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(resultTrash);
-			CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.TRASH);
-			if(latch != null){
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			while (result.moveToNext()) {
+				StingleDbFile dbFile = new StingleDbFile(result);
+				CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.GALLERY);
+				if (latch != null) {
+					try {
+						Log.e("downloadThumbs", "Waiting for latch");
+						latch.await();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
+			result.close();
+
+			while (resultAlbums.moveToNext()) {
+				StingleDbFile dbFile = new StingleDbFile(resultAlbums);
+				CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.ALBUM);
+				if (latch != null) {
+					try {
+						latch.await();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+
+			}
+			resultAlbums.close();
+
+			while (resultTrash.moveToNext()) {
+				StingleDbFile dbFile = new StingleDbFile(resultTrash);
+				CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.TRASH);
+				if (latch != null) {
+					try {
+						latch.await();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			resultTrash.close();
+
+			Log.d("downloadThumbs", "Download thumbs Set Finished input end");
+			downloader.setInputFinished();
+
+			galleryDb.close();
+			albumFilesDb.close();
+			trashDb.close();
+			Log.d("downloadThumbs", "Download thumbs FULL END");
+
 		}
-		resultTrash.close();
-
-		downloader.setInputFinished();
-
-		galleryDb.close();
-		albumFilesDb.close();
-		trashDb.close();
-		Log.d("downloadThumbs", "Download thumbs FULL END");
-
+		catch (Exception e){
+			if(downloader != null){
+				downloader.setInputFinished();
+			}
+		}
 		return null;
 	}
 

@@ -435,5 +435,5 @@
     <string name="dont_show_again">Don\'t show again</string>
     <string name="backup_phrase_not_backed_up">IMPORTANT! Please write down your backup phrase as you have chosen not to backup your keys. You will not be able to login again without your backup phrase!</string>
     <string name="payment_notice">Google play billing is not available on your device.\nTo purchase more storage please contact us via\n\nEmail: support@stingle.org\n\nTelegram: https://t.me/fenritz</string>
-
+    <string name="french">Française</string>
 </resources>

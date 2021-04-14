@@ -68,7 +68,7 @@ public class CryptoHelpers {
 		return out.toByteArray();
 	}
 
-	public static void decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
+	public static boolean decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		Crypto crypto = StinglePhotosApplication.getCrypto();
 		Crypto.Header header = null;
 		if(set == SyncManager.ALBUM){
@@ -92,7 +92,7 @@ public class CryptoHelpers {
 			}
 		}
 
-		crypto.decryptFile(in, out, progress, task, header);
+		return crypto.decryptFile(in, out, progress, task, header);
 	}
 
 	public static Crypto.Header decryptFileHeaders(Context context, int set, String albumId, String headers, boolean isThumb) throws IOException, CryptoException {

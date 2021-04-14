@@ -35,7 +35,7 @@ public class DatabaseManager {
 		}
 		if(mOpenCounter == 0 && mDatabase != null) {
 			// Closing database
-			mDatabase.close();
+			//mDatabase.close();
 		}
 	}
 }

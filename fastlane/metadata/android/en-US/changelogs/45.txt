@@ -1,0 +1,3 @@
+* Fixed bug wthat was resulting in corrupted images after import
+* French translation
+* Other minor bug fixes

@@ -1,0 +1,836 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <string name="login">Connexion</string>
+
+    <string name="password">Mot de passe</string>
+
+    <string name="ok">OK</string>
+
+    <string name="setup_info">Veuillez choisir votre mot de passe principal. Bien qu\'aucune limite ne soit fixée sur ce que vous pouvez entrer ici, il est fortement conseillé que votre mot de passe ait au moins 12 caractères et contienne des lettres minuscules et majuscules, des chiffres et des symboles spéciaux (!?/$%#). Si votre mot de passe n\'est pas suffisamment sécurisé, vos photos/vidéos peuvent être vulnérables aux attaques par force brute.</string>
+
+    <string name="confirm_password">Confirmez le mot de passe</string>
+
+    <string name="password_not_match">Les mots de passe ne correspondent pas. Veuillez saisir correctement le même mot de passe deux fois.</string>
+
+    <string name="password_empty">Le mot de passe ne peut pas être vide.</string>
+
+    <string name="incorrect_password">Mot de passe incorrect</string>
+
+    <string name="settings">Réglages</string>
+
+    <string name="deleting_files">Suppression de fichier(s)…</string>
+
+    <string name="trashing_files">Déplacement des fichiers vers la corbeille…</string>
+
+    <string name="deleting_album">Suppression de l\'album…</string>
+
+    <string name="decrypting_files">Décryptage du (des) fichier(s)…</string>
+
+    <string name="encrypting_files">Chiffrement du ou des fichiers…</string>
+
+    <string name="encrypting_video">Cryptage de la vidéo…</string>
+
+    <string name="confirm_delete_files">Voulez-vous vraiment supprimer %s fichiers ?</string>
+
+    <string name="confirm_trash_files">Voulez-vous vraiment placer %s fichiers dans la corbeille ?</string>
+
+    <string name="confirm_delete_album">Voulez-vous vraiment supprimer l\'album %s ? Tous les fichiers de cet album seront placés dans la corbeille.</string>
+
+    <string name="yes">Oui</string>
+
+    <string name="no">Non</string>
+
+    <string name="delete">Effacer</string>
+
+    <string name="change_password">Changer le mot de passe</string>
+
+    <string name="changing_password">Modification du mot de passe du compte…</string>
+
+    <string name="success_change_pass">Le mot de passe a été changé avec succès</string>
+
+    <string name="import_btn">Importer</string>
+
+    <string name="importing_files">Importation de fichiers…</string>
+
+    <string name="lock_time">Verrouillez l\'application après</string>
+
+    <string name="lock_time_desc">Verrouiller l\'application si elle est inactive pendant une durée spécifiée</string>
+
+    <string name="seconds5">5 secondes</string>
+
+    <string name="seconds10">10 secondes</string>
+
+    <string name="seconds15">15 secondes</string>
+
+    <string name="seconds20">20 secondes</string>
+
+    <string name="seconds30">30 secondes</string>
+
+    <string name="minute1">1 minute</string>
+
+    <string name="minutes5">5 minutes</string>
+
+    <string name="minutes10">10 minutes</string>
+
+    <string name="minutes30">30 minutes</string>
+
+    <string name="hour1">1 heure</string>
+
+    <string name="share">Partager</string>
+
+    <string name="log_out">Se déconnecter</string>
+
+    <string name="gallery">Galerie</string>
+
+    <string name="volume_take_photo">Volume haut/bas</string>
+
+    <string name="volume_take_photo_desc">Volume haut/bas prend une photo</string>
+
+    <string name="timer_duration">Durée de la minuterie</string>
+
+    <string name="timer_duartion_desc">Durée de la minuterie de la caméra</string>
+
+    <string name="password_short">Le mot de passe doit contenir au moins %s caractères</string>
+
+    <string name="flash">Flash</string>
+
+    <string name="timer">Minuteur</string>
+
+    <string name="sign_up">S\'inscrire</string>
+
+    <string name="bottom_text">https://stingle.org</string>
+
+    <string name="clear_cache">Vider le cache</string>
+
+    <string name="clear_cache_desc">Effacer le cache des vignettes</string>
+
+    <string name="confirm_delete_cache">Voulez-vous vraiment supprimer le cache ?</string>
+
+    <string name="title_gallery_for_app">Galerie</string>
+
+    <string name="title_setup">Installer</string>
+
+    <string name="title_change_password">Changer le mot de passe</string>
+
+    <string name="title_import">Importer</string>
+
+    <string name="options">Options</string>
+
+    <string name="rotating">Rotation…</string>
+
+    <string name="forgot_password">mot de passe oublié ?</string>
+
+    <string name="internal_sd_card">Carte SD interne</string>
+
+    <string name="external_sd_card">Carte SD externe</string>
+
+    <string name="read_only">Lecture seulement</string>
+
+    <string name="home_folder_problem_title">Problème avec le dossier StinglePhotos</string>
+
+    <string name="please_enter_password">Veuillez entrer le mot de passe</string>
+
+    <string name="app_locked">Stingle Photos est verrouillé</string>
+
+    <string name="use_fingerprint">Authentification d\'empreintes digitales</string>
+
+    <string name="use_fingerprint_desc">Utilisez votre empreinte digitale au lieu de saisir le mot de passe</string>
+
+    <string name="error_fingerprint_perm">Veuillez activer l\'autorisation d\'empreinte digitale</string>
+
+    <string name="error_fingerprint_enroll">Aucune empreinte digitale configurée. Veuillez enregistrer au moins une empreinte digitale dans les paramètres de votre appareil</string>
+
+    <string name="error_fingerprint_screenguard">Veuillez activer la sécurité de l\'écran de verrouillage dans les paramètres de votre appareil</string>
+
+    <string name="use_password">Utiliser le mot de passe</string>
+
+    <string name="fingerprint_auth_error">Erreur d\'authentification %s</string>
+
+    <string name="fingerprint_auth_failed">Authentification échouée</string>
+
+    <string name="fingerprint_auth_success">Succès !</string>
+
+    <string name="fingerprint_auth_help">Aide à l\'authentification %s</string>
+
+    <string name="enter_password_desc">Veuillez entrer votre mot de passe pour déverrouiller</string>
+
+    <string name="other">Autre</string>
+
+    <!-- File Dialog -->
+
+    <string name="cancel">Annuler</string>
+
+    <string name="change">Changement</string>
+
+    <string name="current_password">Mot de passe actuel</string>
+
+    <string name="new_password">nouveau mot de passe</string>
+
+    <string name="sdcard_perm_explain">Stingle Photos nécessite un accès à la carte SD pour afficher et créer des photos. Veuillez autoriser l\'accès pour continuer.</string>
+
+    <string name="camera_perm_explain">Stingle Photos nécessite l\'accès à l\'appareil photo pour prendre des photos. Veuillez autoriser l\'accès pour continuer.</string>
+
+    <string name="shutter_sound">Son de l\'obturateur de l\'appareil photo</string>
+
+    <string name="shutter_sound_desc">Lire le son lors de la prise de photos</string>
+
+    <string name="title_activity_settings">Réglages</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+
+    <string name="pref_header_general">Général</string>
+
+    <!-- Example settings for Data & Sync -->
+
+    <!-- Example settings for Notifications -->
+
+    <string name="pref_header_security">Sécurité</string>
+
+    <string name="pref_header_camera">Caméra</string>
+
+    <string name="photo">photo</string>
+
+    <string name="video">Vidéo</string>
+
+    <string name="back_camera_photo_res">Résolution photo de la caméra arrière</string>
+
+    <string name="back_camera_video_res">Résolution vidéo de la caméra arrière</string>
+
+    <string name="front_camera_photo_res">Résolution photo de la caméra frontale</string>
+
+    <string name="front_camera_video_res">Résolution vidéo de la caméra avant</string>
+
+    <string name="megapixels">mégapixels</string>
+
+    <string name="fps">images par seconde</string>
+
+    <string name="email">E-mail</string>
+
+    <string name="invalid_email">Adresse e-mail non valide spécifiée</string>
+
+    <string name="fail_reg">Une erreur s\'est produite. Veuillez réessayer.</string>
+
+    <string name="creating_account">Création du compte…</string>
+
+    <string name="navigation_drawer_open">Ouvrir le tiroir de navigation</string>
+
+    <string name="navigation_drawer_close">Fermer le panneau de navigation</string>
+
+    <string name="nav_header_title">Studio Android</string>
+
+    <string name="nav_header_subtitle">android.studio\@android.com</string>
+
+    <string name="nav_header_desc">En-tête de navigation</string>
+
+    <string name="menu_gallery">Galerie</string>
+
+    <string name="save_to_gallery">Sauvegarder dans la galerie</string>
+
+    <string name="menu_trash">Déchets</string>
+
+    <string name="title_trash">Déchets</string>
+
+    <string name="restore">Restaurer</string>
+
+    <string name="restoring_files">Restauration de fichier(s)</string>
+
+    <string name="move_to_trash">Mettre à la corbeille</string>
+
+    <string name="sign_in">S\'identifier</string>
+
+    <string name="signing_in">Connectez-vous…</string>
+
+    <string name="fail_login">Une erreur s\'est produite lors de la connexion, veuillez réessayer.</string>
+
+    <string name="create_account">Créer un compte</string>
+
+    <string name="uploading_file">Importation du fichier %1$s sur %2$s</string>
+
+    <string name="refreshing">Rafraîchissant…</string>
+
+    <string name="backup_complete">Sauvegarde/synchronisation terminée</string>
+
+    <string name="logging_out">Déconnecter…</string>
+
+    <string name="confirm_logout">Êtes-vous sûr de vouloir vous déconnecter ?</string>
+
+    <string name="lock">Verrouiller</string>
+
+    <string name="title_activity_view_item">ViewItemActivity</string>
+
+    <string name="moved_to_trash">Déplacé vers la corbeille</string>
+
+    <string name="menu_change_password">Changer le mot de passe</string>
+
+    <string name="warning_chpass">Avertissement ! La modification du mot de passe déconnectera tous les autres appareils actuellement connectés à ce compte et vous devrez les reconnecter avec de nouvelles informations d\'identification.</string>
+
+    <string name="home_folder_problem">Veuillez vérifier que l\'application a accès au stockage externe</string>
+
+    <string name="no_space_left">Impossible de télécharger le(s) fichier(s), il ne reste plus d\'espace dans votre compte !</string>
+
+    <string name="quota_text">%1$s sur %2$s (%3$s) utilisés</string>
+
+    <string name="menu_account">Compte</string>
+
+    <string name="title_account">Compte</string>
+
+    <string name="current_storage">Stockage actuel</string>
+
+    <string name="payment_success">Paiement terminé avec succès !</string>
+
+    <string name="pending_purchase">Votre paiement est toujours en cours.</string>
+
+    <string name="payment_error">Échec de la notification de l\'achat au serveur</string>
+
+    <string name="monthly_plan">%s / mois</string>
+
+    <string name="yearly_plan">%1$s / an</string>
+
+    <string name="free">Libérer</string>
+
+    <string name="upgrade">Améliorer</string>
+
+    <string name="current_plan">Plan actuel</string>
+
+    <string name="confirming_purchase">Confirmation de l\'achat…</string>
+
+    <string name="envideo_service_started">chaîne envideo</string>
+
+    <string name="sync_service_started">sync_service</string>
+
+    <string name="download_service_started" translatable="false">download_service</string>
+
+    <string name="download_thumb_service_started" translatable="false">download_thumb_service_started</string>
+
+    <string name="confirm_decrypt_files">Voulez-vous vraiment décrypter les fichiers sélectionnés ? Ils deviendront accessibles à d\'autres applications sur cet appareil.</string>
+
+    <string name="empty_trash">Poubelle vide</string>
+
+    <string name="confirm_empty_trash">Voulez-vous vraiment vider la corbeille ? Cette action ne peut pas être annulée !</string>
+
+    <string name="emptying_trash">Vidage de la corbeille…</string>
+
+    <string name="resync_db_desc">Resynchroniser la base de données avec le système de fichiers</string>
+
+    <string name="resync_db">Resynchroniser la base de données</string>
+
+    <string name="syncing_db">Synchronisation de la base de données…</string>
+
+    <string name="immediately">Immédiatement</string>
+
+    <string name="website_link">Site officiel</string>
+
+    <string name="block_screenshots">Interdire les captures d\'écran de cette application</string>
+
+    <string name="need_restart">Pour que ce paramètre prenne effet, l\'application doit être redémarrée. Voulez-vous le redémarrer maintenant ?</string>
+
+    <string name="enable_backup">Activer la sauvegarde</string>
+
+    <string name="enable_backup_desc">Sauvegardez vos photos et vidéos dans le cloud dès que vous les prenez ou les importez</string>
+
+    <string name="pref_header_sync">Sauvegarde</string>
+
+    <string name="upload_only_on_wifi">Sauvegarde uniquement sur Wifi</string>
+
+    <string name="upload_only_on_wifi_desc">Sauvegarde uniquement lorsque vous êtes connecté au réseau Wifi</string>
+
+    <string name="upload_battery">Ne pas sauvegarder si la batterie est en dessous</string>
+
+    <string name="upload_battery_summary">%s%%</string>
+
+    <string name="sync_disabled">La sauvegarde est désactivée</string>
+
+    <string name="sync_not_on_wifi">Sauvegarde suspendue. Non connecté au réseau Wifi</string>
+
+    <string name="sync_battery_low">Sauvegarde suspendue. Batterie faible</string>
+
+    <string name="title_activity_camera_settings">Paramètres de la caméra</string>
+
+    <string name="encryption_service">Service de cryptage de la caméra</string>
+
+    <string name="upload_current_image">Photo ou vidéo actuelle en cours de téléchargement</string>
+
+    <string name="welcome">Bienvenue</string>
+
+    <string name="welcome_header1">Cryptage zéro connaissance</string>
+
+    <string name="welcome_desc1">Vos données sont les vôtres et uniquement les vôtres. Personne, sauf vous, ne peut le voir. Même nous, en tant que fournisseur, notre fournisseur de cloud, le gouvernement ou toute autre entité, ne pouvons voir vos données. C\'est toujours crypté et sécurisé !</string>
+
+    <string name="welcome_header2">Vraie vie privée</string>
+
+    <string name="welcome_desc2">Stingle Photos vise à vous garder aussi anonyme que possible.  Nous ne collectons aucune information personnelle, aucune analyse, nous ne diffusons aucune publicité.</string>
+
+    <string name="welcome_header3">Sauvegarde et synchronisation</string>
+
+    <string name="welcome_desc3">Toutes vos photos et vidéos sont sauvegardées en toute sécurité dans le cloud et synchronisées avec vos autres appareils.</string>
+
+    <string name="welcome_header4">Rapide, facile à utiliser</string>
+
+    <string name="welcome_desc4">Stingle Photos est optimisé non seulement pour la sécurité, mais aussi pour la vitesse. c\'est tellement rapide que vous n\'avez pas vraiment l\'impression de parcourir des fichiers cryptés.</string>
+
+    <string name="have_an_account">Vous avez déjà un compte ?</string>
+
+    <string name="dont_have_an_account">Vous n\'avez pas de compte ?</string>
+
+    <string name="menu_storage">Espace de rangement</string>
+
+    <string name="title_storage">Espace de rangement</string>
+
+    <string name="yearly_plan_save">Ou prépayer annuellement (économisez %s) :</string>
+
+    <string name="change_to_monthly_plan">Ou passez au paiement mensuel et payez :</string>
+
+    <string name="biometric_auth">Authentification biométrique</string>
+
+    <string name="biometric_login_desc">Connectez-vous à l\'aide de la biométrie</string>
+
+    <string name="login_using_password">Utiliser le mot de passe</string>
+
+    <string name="failed_biometrics_setup">Échec de la configuration de la biométrie</string>
+
+    <string name="biometric_auth_desc">Utilisez la biométrie pour déverrouiller les photos Stingle</string>
+
+    <string name="failed_biometrics_auth">L\'authentification biométrique a échoué</string>
+
+    <!-- Preference Titles -->
+
+    <string name="messages_header">messages</string>
+
+    <string name="sync_header">Synchroniser</string>
+
+    <!-- Messages Preferences -->
+
+    <string name="signature_title">Votre signature</string>
+
+    <string name="reply_title">Action de réponse par défaut</string>
+
+    <!-- Sync Preferences -->
+
+    <string name="sync_title">Synchroniser régulièrement les e-mails</string>
+
+    <string name="attachment_title">Télécharger les pièces jointes entrantes</string>
+
+    <string name="attachment_summary_on">Télécharger automatiquement les pièces jointes pour les e-mails entrants</string>
+
+    <string name="attachment_summary_off">Télécharger uniquement les pièces jointes lorsqu\'elles sont demandées manuellement</string>
+
+    <string name="enable_biometrics">Voulez-vous activer l\'authentification biométrique ?</string>
+
+    <string name="volume_keys_snap">Prenez des photos à l\'aide des touches de volume</string>
+
+    <string name="title_activity_backup_phrase">Phrase de sauvegarde</string>
+
+    <string name="backup_phrase_desc">Votre phrase de sauvegarde est le secret le plus précieux de votre compte. \n\nVeuillez vous assurer de leasauvegarder en lieu sûr. \n\nSi quelqu\'un obtient cette phrase, il peut accéder à toutes vos données !</string>
+
+    <string name="biometrics_confirm">Exiger une confirmation</string>
+
+    <string name="biometrics_confirm_desc">Appuyez sur le bouton de confirmation après le déverrouillage du visage</string>
+
+    <string name="title_forgot_password">Mot de passe oublié</string>
+
+    <string name="backup_phrase_enter_desc">Veuillez entrer votre phrase de récupération de 24 mots</string>
+
+    <string name="recovery_desc">Veuillez saisir votre adresse e-mail et votre phrase de récupération. Sei elle est correcte, vous pourrez définir un nouveau mot de passe pour votre compte.</string>
+
+    <string name="check">Vérifier</string>
+
+    <string name="checking_phrase">Vérification de la phrase de récupération…</string>
+
+    <string name="fail_phrase_check">Votre phrase de récupération est incorrecte !</string>
+
+    <string name="please_set_new_password">Veuillez définir un nouveau mot de passe</string>
+
+    <string name="new_password2">Confirmez votre nouveau mot de passe</string>
+
+    <string name="set">Établir</string>
+
+    <string name="setting_new_password">Définition d\'un nouveau mot de passe pour votre compte…</string>
+
+    <string name="something_went_wrong">Désolé, quelque chose s\'est mal passé !</string>
+
+    <string name="backup_phrase">Phrase de sauvegarde</string>
+
+    <string name="get_backup_phrase">Compris, obtenez la phrase de secours</string>
+
+    <string name="your_backup_phrase">Votre phrase de sauvegarde</string>
+
+    <string name="backup_key">Sauvegarder mes clés</string>
+
+    <string name="backup_key_desc">Lorsque vous créez un compte, les clés seront générées localement qui sont le secret principal de votre compte.\n\nSi vous choisissez de les sauvegarder, elles seront fortement cryptées avant la sauvegarde et vous pourrez vous connecter à partir d\'un autre appareil sans effort.\n\nCependant, vous pouvez choisir de ne pas sauvegarder les clés, dans ce cas, vous devrez absolument noter votre phrase de sauvegarde, sinon vous ne pourrez plus vous reconnecter à l\'avenir.</string>
+
+    <string name="enter_backup_phrase">Veuillez saisir votre phrase de sauvegarde</string>
+
+    <string name="enter_backup_phrase_desc">Parce que vous avez choisi de ne pas sauvegarder votre clé privée, vous devez entrer votre phrase de sauvegarde pour reconstruire votre clé privée localement. Sans cela, il est impossible de décrypter vos photos et vidéos.</string>
+
+    <string name="backup_key_desc_pref">Sauvegarder mes clés pour permettre la connexion sans saisir de phrase de sauvegarde</string>
+
+    <string name="key_backup_delete_confirm">ATTENTION !!!\n\nVoulez-vous vraiment supprimer la sauvegarde de vos clés ?\n\nPour vous reconnecter, vous devrez entrer votre phrase de sauvegarde !</string>
+
+    <string name="deleting_keys">Suppression des clés…</string>
+
+    <string name="uploading_keys">Téléchargement des clés…</string>
+
+    <string name="success_delete_keys">Votre sauvegarde de clé a été supprimée avec succès. À partir de maintenant, vous devrez entrer votre phrase de sauvegarde après la connexion avec votre e-mail et votre mot de passe.</string>
+
+    <string name="success_backup_keys">Vos clés ont été sauvegardées avec succès.</string>
+
+    <string name="pref_header_account">Compte</string>
+
+    <string name="pref_header_advanced">Avancé</string>
+
+    <string name="authentication">Authentification</string>
+
+    <string name="locking">Accès à l\'application</string>
+
+    <string name="key_management">Gestion des clés</string>
+
+    <string name="advanced">Avancé</string>
+
+    <string name="password_for_biometrics">Pour configurer l\'authentification biométrique, veuillez entrer votre mot de passe</string>
+
+    <string name="password_for_backup">Pour afficher votre phrase de sauvegarde, veuillez entrer votre mot de passe</string>
+
+    <string name="password_for_key_backup">Pour sauvegarder vos clés, veuillez entrer votre mot de passe</string>
+
+    <string name="exit">Quitter</string>
+
+    <string name="albums">Albums</string>
+
+    <string name="sharing">Partage</string>
+
+    <string name="enter_album_name">Veuillez saisir le nom de l\'album</string>
+
+    <string name="add_album_failed">Échec de l\'ajout de l\'album</string>
+
+    <string name="add_to_album">Ajouter à l\'album</string>
+
+    <string name="new_album">Nouvel album</string>
+
+    <string name="album">Album</string>
+
+    <string name="add_to_this_album">Ajouter à cet album</string>
+
+    <string name="add_move_to_album">Ajouter ou déplacer vers l\'album</string>
+
+    <string name="move_to_album">Déplacer vers l\'album</string>
+
+    <string name="main_gallery">Galerie principale</string>
+
+    <string name="add_or_move">Ajouter ou déplacer</string>
+
+    <string name="delete_album">Supprimer l\'album</string>
+
+    <string name="create_new_album">Créer un nouvel album</string>
+
+    <string name="album_items_count">%d éléments</string>
+
+    <string name="count_others">et %d autres</string>
+
+    <string name="share_via_stingle">Partager via Stingle Photos</string>
+
+    <string name="share_to_apps">Partager avec d\'autres applications</string>
+
+    <string name="type_an_email">Saisissez une adresse e-mail</string>
+
+    <string name="allow_album_add_desc">Les membres peuvent ajouter des photos à cet album partagé</string>
+
+    <string name="allow_share">Partage</string>
+
+    <string name="allow_share_desc">Les membres peuvent inviter d\'autres utilisateurs à rejoindre cet album partagé</string>
+
+    <string name="allow_copy">Copier</string>
+
+    <string name="allow_copy_desc">Les membres peuvent copier des photos et des vidéos dans leur propre bibliothèque et prendre des captures d\'écran</string>
+
+    <string name="or">ou</string>
+
+    <string name="unlock">Ouvrir</string>
+
+    <string name="pref_header_appearance">Apparence</string>
+
+    <string name="theme">Thème</string>
+
+    <string name="auto">Suivez le système</string>
+
+    <string name="dark">Foncé</string>
+
+    <string name="light">Clair</string>
+
+    <string name="close">Fermer</string>
+
+    <string name="not_on_stingle">Cet e-mail n\'est pas enregistré sur Stingle Photos</string>
+
+    <string name="cant_share_to_self">Désolé, vous ne pouvez pas partager avec vous-même</string>
+
+    <string name="spinner_sharing">Partage…</string>
+
+    <string name="failed_to_share">Échec du partage, veuillez réessayer</string>
+
+    <string name="share_via_sp">Partager via Stingle Photos</string>
+
+    <string name="share_securely">Partagez en toute sécurité</string>
+
+    <string name="already_added">Déjà ajouté</string>
+
+    <string name="shared_album_name">Nom de l\'album partagé</string>
+
+    <string name="permissions">Autorisations</string>
+
+    <string name="next">Suivant</string>
+
+    <string name="select_recp">Veuillez sélectionner au moins un destinataire</string>
+
+    <string name="album_name">Nom de l\'album partagé</string>
+
+    <string name="allow_album_add">Ajouter de nouvelles photos</string>
+
+    <string name="save">Sauvegarder</string>
+
+    <string name="spinner_saving">Sauvegarde…</string>
+
+    <string name="share_success">Partagé avec succès</string>
+
+    <string name="save_success">Enregistré</string>
+
+    <string name="album_settings">Paramètres de l\'album</string>
+
+    <string name="shared_album">Album partagé</string>
+
+    <string name="unshare">Annuler le partage</string>
+
+    <string name="loading">Chargement…</string>
+
+    <string name="members">Membres</string>
+
+    <string name="remove">Supprimer</string>
+
+    <string name="unshare_member">Voulez-vous vraiment supprimer %s ?</string>
+
+    <string name="unshare_confirm">Voulez-vous vraiment arrêter de partager l\'album %s avec tout le monde ?</string>
+
+    <string name="stop_sharing_question">Arrêter de partager ?</string>
+
+    <string name="spinner_unsharing">Annulation du partage…</string>
+
+    <string name="unshare_success">L\'album %s a bien été annulé</string>
+
+    <string name="rename_album">Renommer l\'album</string>
+
+    <string name="add_member">Ajouter un membre</string>
+
+    <string name="album_info">Informations sur l\'album</string>
+
+    <string name="leave_album">Quitter l\'album</string>
+
+    <string name="confirm_leave_album">Voulez-vous vraiment quitter cet album partagé ?</string>
+
+    <string name="leaving_album">Sortie de l\'album…</string>
+
+    <string name="delete_cache">Supprimer le cache</string>
+
+    <string name="delete_cache_desc">Efface le cache des vignettes et autres données temporaires</string>
+
+    <string name="deleting_cache">Suppression du cache…</string>
+
+    <string name="success_deleted">Supprimé avec succès</string>
+
+    <string name="delete_original">Supprimer les fichiers d\'origine après l\'ajout</string>
+
+    <string name="wait_for_upload">Veuillez attendre la fin de la sauvegarde avant de pouvoir continuer</string>
+
+    <string name="processing">Traitement…</string>
+
+    <string name="success_decrypted">Décrypté avec succès</string>
+
+    <string name="sync_channel_name">Notifications de synchronisation</string>
+
+    <string name="sharing_channel_name">Partage de notifications</string>
+
+    <string name="new_shared_album">Nouvel album partagé \"%s\"</string>
+
+    <string name="tap_to_view">Appuyez pour voir</string>
+
+    <string name="album_add_no_perm">Aucune permission d\'ajouter ici</string>
+
+    <string name="album_add_others">Impossible d\'ajouter directement à l\'album reçu</string>
+
+    <string name="no_photos">Tu n\'as encore rien ici</string>
+
+    <string name="no_photos_desc">Les photos et vidéos importées apparaîtront ici</string>
+
+    <string name="no_sharing">Vous n\'avez pas encore d\'album partagé</string>
+
+    <string name="no_sharing_desc">Les albums partagés apparaîtront ici</string>
+
+    <string name="no_photos_trash">La corbeille est vide</string>
+
+    <string name="no_photos_trash_desc">Les photos et vidéos supprimées apparaîtront ici</string>
+
+    <string name="cant_share_others_album">Vous ne pouvez pas partager immédiatement les fichiers de l\'album reçu. Veuillez d\'abord copier dans votre galerie ou votre propre album.</string>
+
+    <string name="disable_battery_optimization">Optimisation de la batterie</string>
+
+    <string name="disable_battery_optimization_desc">Étant donné que Stingle Photos n\'utilise aucune bibliothèque source fermée, nous devons désactiver les optimisations de la batterie pour pouvoir envoyer des notifications et effectuer l\'importation automatique de vos photos et vidéos.\n\nVeuillez cliquer sur autoriser sur l\'écran suivant.</string>
+
+    <string name="error">Erreur !</string>
+
+    <string name="success">Succès ! </string>
+
+    <string name="decrypt_files">Décrypter ?</string>
+
+    <string name="move_to_trash_question">Mettre à la corbeille ?</string>
+
+    <string name="delete_question">Effacer ?</string>
+
+    <string name="empty_trash_question">Poubelle vide ?</string>
+
+    <string name="leave_question">Quitter ?</string>
+
+    <string name="delete_key_backup_question">Supprimer la sauvegarde des clés ?</string>
+
+    <string name="app_restart_question">Redémarrer l\'application ?</string>
+
+    <string name="remove_member_question">Supprimer le membre ?</string>
+
+    <string name="pref_header_import">Importer</string>
+
+    <string name="enable_import">Activer l\'importation automatique</string>
+
+    <string name="enable_import_desc">Importez automatiquement des photos et des vidéos depuis votre appareil</string>
+
+    <string name="import_autodelete">Supprimer les fichiers originaux après l\'importation</string>
+
+    <string name="import_autodelete_desc">Supprimer les fichiers originaux de l\'appareil après une importation réussie</string>
+
+    <string name="import_from">Importer de</string>
+
+    <string name="import_from_desc">Emplacement pour rechercher de nouvelles photos et vidéos</string>
+
+    <string name="camera_folder">Dossier de l\'appareil photo</string>
+
+    <string name="all_folders">Tous les dossiers</string>
+
+    <string name="auto_import_title">Paramètres d\'importation automatique</string>
+
+    <string name="auto_import_title_desc">Les photos et vidéos de votre appareil seront automatiquement importées, cryptées et sauvegardées sur votre compte Stingle Photos</string>
+
+    <string name="import_notenable">Passer</string>
+
+    <string name="import_enable">Activer l\'importation automatique</string>
+
+    <string name="import_existing">Importer des éléments existants</string>
+
+    <string name="auto_import_notice">Vous pouvez activer ou désactiver l\'importation automatique à tout moment dans les paramètres</string>
+
+    <string name="language">Langue</string>
+
+    <string name="english">English</string>
+
+    <string name="russian">Русский</string>
+
+    <string name="german">Deutsch</string>
+
+    <string name="free_up_space">Libérez de l\'espace</string>
+
+    <string name="free_up_space_confirm">Libérer %s ?</string>
+
+    <string name="free_up_space_confirm_desc">Cette action libérera %s de votre appareil en supprimant les fichiers sauvegardés de votre stockage local. Continuez ?</string>
+
+    <string name="free_up_space_success">%s d\'espace libéré avec succès</string>
+
+    <string name="free_up_space_fail">La libération d\'espace a échoué !</string>
+
+    <string name="free_up_space_nothing">Rien à supprimer</string>
+
+    <string name="free_up_space_nothing_desc">Il n\'y a aucun fichier sauvegardé que nous pouvons supprimer en toute sécurité de votre appareil à ce stade</string>
+
+    <string name="importing_file">Importation du fichier %1$s sur %2$s</string>
+
+    <string name="set_as_album_cover">Définir comme couverture d\'album</string>
+
+    <string name="changing_album_cover">Changement de la couverture de l\'album…</string>
+
+    <string name="set_album_blank_cover">Définir une couverture d\'album vierge</string>
+
+    <string name="reset_album_cover">Réinitialiser la couverture de l\'album</string>
+
+    <string name="preserve_import_dates">Conserver les dates lors de l\'importation</string>
+
+    <string name="preserve_import_dates_desc">Conserver les dates des photos et des vidéos lors de l\'importation manuelle</string>
+
+    <string name="upgrading">Mise à jour…</string>
+
+    <string name="upgrading_desc">Veuillez ne pas fermer l\'application tant que le processus n\'est pas terminé</string>
+
+    <string name="downloading_file">Téléchargement du fichier %1$s sur %2$s</string>
+
+    <string name="decrypting_file">Décryptage du fichier %1$s sur %2$s</string>
+
+    <string name="download_selected">Téléchargement sélectionné</string>
+
+    <string name="download_channel_name">Télécharger les notifications</string>
+
+    <string name="cache_size">Taille maximale du cache</string>
+
+    <string name="no_limit">Illimité</string>
+
+    <string name="cache5gb">5 Go</string>
+
+    <string name="cache20gb">20 Go</string>
+
+    <string name="cache50gb">50 Go</string>
+
+    <string name="downloading_thumb">Synchronisation du fichier de galerie %1$s sur %2$s</string>
+
+    <string name="never">Jamais</string>
+
+    <string name="ask_every_time">Demandez à chaque fois</string>
+
+    <string name="always">Toujours</string>
+
+    <string name="delete_after_import">Supprimer les fichiers originaux après l\'importation manuelle</string>
+
+    <string name="manual_import">Importation manuelle</string>
+
+    <string name="is_delete_original">Supprimer les fichiers originaux ?</string>
+
+    <string name="is_delete_original_desc">Voulez-vous supprimer les fichiers originaux que vous avez importés ?</string>
+
+    <string name="delete_failed">Échec de la suppression de certains fichiers</string>
+
+    <string name="delete_failed_desc">Nous n\'avons pas pu supprimer certains de tous les fichiers d\'origine. Veuillez les supprimer manuellement.</string>
+
+    <string name="backup_phrase_not_backed">Veuillez noter votre phrase de sauvegarde</string>
+
+    <string name="backup_phrase_not_backed_desc">Si vous perdez votre mot de passe, votre phrase de sauvegarde vous permettra de récupérer votre compte. Nous vous conseillons vivement de l\'écrire et de la conserver dans un endroit sûr.</string>
+
+    <string name="go_to_backup_phrase">Voir la phrase de sauvegarde</string>
+
+    <string name="delete_account">Supprimer le compte</string>
+
+    <string name="delete_account_question">Supprimer votre compte ?</string>
+
+    <string name="delete_account_question_desc">Voulez-vous vraiment supprimer votre compte ? Toutes vos données seront supprimées de manière irréversible !</string>
+
+    <string name="password_for_account_delete">Pour supprimer votre compte, veuillez entrer votre mot de passe</string>
+
+    <string name="delete_account_question2">Êtes-vous VRAIMENT sûr de vouloir SUPPRIMER votre compte ?</string>
+
+    <string name="delete_account_question_desc2">Dernière chance ! Votre compte et toutes vos photos, vidéos, albums et partages seront supprimés ! Ça ne peut pas être annulé !</string>
+
+    <string name="deleting_account">Suppression du compte…</string>
+
+    <string name="download_missing_thumbs">Télécharger les miniatures manquantes</string>
+
+    <string name="download_missing_thumbs_desc">Téléchargez des miniatures qui ne sont pas présentes dans votre cache local</string>
+
+    <string name="dont_show_again">Ne plus montrer</string>
+
+    <string name="backup_phrase_not_backed_up">IMPORTANT ! Veuillez noter votre phrase de sauvegarde car vous avez choisi de ne pas sauvegarder vos clés. Vous ne pourrez pas vous reconnecter sans votre phrase de sauvegarde !</string>
+
+    <string name="payment_notice">La facturation Google Play n\'est pas disponible sur votre appareil.\nPour acheter plus de stockage, veuillez nous contacter par e-mail : support\@stingle.org Telegram : https://t.me/fenritz</string>
+    <string name="french">Française</string>
+</resources>

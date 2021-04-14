@@ -78,11 +78,12 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 			return;
 		}
 		progressDialog = new ProgressDialog(context);
-		progressDialog.setCancelable(true);
+		progressDialog.setCancelable(false);
+		/*progressDialog.setCancelable(true);
 		progressDialog.setOnCancelListener(dialog -> {
 			DecryptFilesAsyncTask.this.cancel(false);
 			Helpers.releaseWakeLock((Activity)context);
-		});
+		});*/
 		progressDialog.setMessage(context.getString(R.string.decrypting_files));
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.setMax(100);
@@ -108,6 +109,9 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 		destinationFolder.mkdirs();
 
 		for (int i = 0; i < filesToDecrypt.size(); i++) {
+			if(isCancelled()){
+				break;
+			}
 			StingleDbFile dbFile = filesToDecrypt.get(i);
 			final int currentItemNumber = i;
 			if(dbFile == null){
@@ -200,9 +204,9 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 						}
 					};
 
-					CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, false, inputStream, outputStream, progress, this);
+					boolean decryptResult = CryptoHelpers.decryptDbFile(context, set, albumId, dbFile.headers, false, inputStream, outputStream, progress, null);
 
-					if(finalWritePath != null) {
+					if(decryptResult && finalWritePath != null) {
 						File decryptedFile = new File(finalWritePath);
 						if (performMediaScan) {
 							ShareManager.scanFile(context, decryptedFile);
@@ -217,11 +221,6 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 				} catch (IOException | CryptoException e) {
 					e.printStackTrace();
 				}
-			}
-
-
-			if (isCancelled()) {
-				break;
 			}
 		}
 

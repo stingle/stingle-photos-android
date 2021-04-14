@@ -136,6 +136,21 @@ public class ImportFile {
 			FileOutputStream outputStream = new FileOutputStream(encFilePath);
 			Crypto.Header fileHeader =  StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, task);
 
+			// If task is cancelled delete generated thumbnail and file and return
+			if(task != null){
+				if(task.isCancelled()){
+					File thumb = new File(FileManager.getThumbsDir(context) + "/" + encFilename);
+					if(thumb.exists()) {
+						thumb.delete();
+					}
+					File file = new File(encFilePath);
+					if(file.exists()){
+						file.delete();
+					}
+					return null;
+				}
+			}
+
 			if(fileHeader == null || thumbHeader == null){
 				if(thumbHeader != null){
 					(new File(FileManager.getThumbsDir(context) + "/" + encFilename)).delete();

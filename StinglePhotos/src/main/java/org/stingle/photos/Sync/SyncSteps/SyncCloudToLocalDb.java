@@ -103,6 +103,7 @@ public class SyncCloudToLocalDb {
 			Helpers.storePreference(context, SyncManager.PREF_LAST_CONTACTS_SEEN_TIME, lastContactsSeenTime);
 		} catch (JSONException | RuntimeException e) {
 			e.printStackTrace();
+			downloader.setInputFinished();
 		}
 
 		galleryDb.close();
@@ -155,6 +156,7 @@ public class SyncCloudToLocalDb {
 				needToUpdateUI = true;
 			}
 
+			Log.d("downloadThumbs", "Sync cloud to local Set Finished input end");
 			downloader.setInputFinished();
 
 
@@ -179,7 +181,9 @@ public class SyncCloudToLocalDb {
 					needToUpdateUI = true;
 				}
 			}
-
+		}
+		else{
+			downloader.setInputFinished();
 		}
 
 		return needToUpdateUI;

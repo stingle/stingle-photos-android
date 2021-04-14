@@ -1,7 +1,6 @@
 package org.stingle.photos.AsyncTasks;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -21,6 +20,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 
 	private WeakReference<AppCompatActivity> activity;
 	private ArrayList<Uri> uris;
+	private ArrayList<Uri> importedUris = new ArrayList<>();
 	private int set;
 	private String albumId;
 	private FileManager.OnFinish onFinish;
@@ -43,14 +43,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 		if(myActivity == null){
 			return;
 		}
-		progress = Helpers.showProgressDialogWithBar(myActivity, myActivity.getString(R.string.importing_files), null, uris.size(), new DialogInterface.OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialogInterface) {
-				Helpers.releaseWakeLock(myActivity);
-				ImportFilesAsyncTask.this.cancel(false);
-				onFinish.onFinish();
-			}
-		});
+		progress = Helpers.showProgressDialogWithBar(myActivity, myActivity.getString(R.string.importing_files), null, uris.size(), null);
 		Helpers.acquireWakeLock(myActivity);
 	}
 
@@ -62,11 +55,17 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 		}
 		int index = 0;
 
-		Boolean result = true;
+		boolean result = true;
 		for (Uri uri : uris) {
+			if(isCancelled()){
+				break;
+			}
 			Long date = ImportFile.importFile(myActivity, uri, set, albumId, this);
 			if(date == null){
 				result = false;
+			}
+			else{
+				importedUris.add(uri);
 			}
 			if(date != null && date > largestDate){
 				largestDate = date;
@@ -109,11 +108,11 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 
 	private void deleteOriginals(){
 		AppCompatActivity myActivity = activity.get();
-		if(myActivity == null){
+		if(myActivity == null || importedUris.size() == 0){
 			return;
 		}
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(myActivity);
-		String pref = settings.getString("delete_after_import", "0");
+		String pref = settings.getString("delete_after_import", "ask");
 		if(pref.equals("never")){
 			return;
 		}
@@ -123,12 +122,12 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 					myActivity.getString(R.string.is_delete_original),
 					myActivity.getString(R.string.is_delete_original_desc),
 					R.drawable.ic_action_delete,
-					(dialog, which) -> (new DeleteUrisAsyncTask(myActivity, uris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR),
+					(dialog, which) -> (new DeleteUrisAsyncTask(myActivity, importedUris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR),
 					null
 			);
 		}
 		else if(pref.equals("always")){
-			(new DeleteUrisAsyncTask(myActivity, uris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			(new DeleteUrisAsyncTask(myActivity, importedUris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 

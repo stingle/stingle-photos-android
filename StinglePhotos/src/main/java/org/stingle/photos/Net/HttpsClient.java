@@ -88,7 +88,7 @@ public class HttpsClient {
 
 			// set Timeout and method
 			conn.setReadTimeout(60000);
-			conn.setConnectTimeout(7000);
+			conn.setConnectTimeout(15000);
 			conn.setRequestMethod("POST");
 			conn.setDoInput(true);
 
@@ -162,7 +162,7 @@ public class HttpsClient {
 
 		// set Timeout and method
 		conn.setReadTimeout(60000);
-		conn.setConnectTimeout(7000);
+		conn.setConnectTimeout(15000);
 		conn.setRequestMethod("POST");
 		conn.setDoInput(true);
 		conn.setDoOutput(true);
@@ -261,7 +261,7 @@ public class HttpsClient {
 
 		// set Timeout and method
 		conn.setReadTimeout(60000);
-		conn.setConnectTimeout(7000);
+		conn.setConnectTimeout(15000);
 
 
 		if(isPost) {

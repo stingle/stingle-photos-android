@@ -686,7 +686,7 @@ public class Crypto {
         return out.toByteArray();
     }
 
-    public void decryptFile(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task, Header header) throws IOException, CryptoException{
+    public boolean decryptFile(InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task, Header header) throws IOException, CryptoException{
         long time = System.nanoTime();
 
         if(header == null) {
@@ -696,10 +696,7 @@ public class Crypto {
             getOverallHeaderSize(in, false);
         }
 
-        decryptData(in, out, header, progress, task);
-        long time2 = System.nanoTime();
-        long diff = time2 - time;
-        //Log.d("time", String.valueOf((double)diff / 1000000000.0));
+        return decryptData(in, out, header, progress, task);
     }
 
     public byte[] getRandomData(int length){
@@ -810,6 +807,9 @@ public class Crypto {
         out.close();
         in.close();
 
+        if(task != null && task.isCancelled()){
+            return false;
+        }
         return true;
     }
 
