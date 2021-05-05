@@ -432,6 +432,5 @@
     <string name="download_missing_thumbs_desc">Laden Sie Miniaturansichten herunter, die nicht in Ihrem lokalen Cache vorhanden sind</string>
     <string name="dont_show_again">Nicht mehr zeigen</string>
     <string name="backup_phrase_not_backed_up">WICHTIG! Bitte notieren Sie sich Ihre Sicherungsphrase, da Sie sich entschieden haben, Ihre Schlüssel nicht zu sichern. Sie können sich ohne Ihre Sicherungsphrase nicht erneut anmelden!</string>
-    <string name="payment_notice">Die Google Play-Abrechnung ist auf Ihrem Gerät nicht verfügbar.\nUm mehr Speicherplatz zu erwerben, kontaktieren Sie uns bitte per\n\nE-Mail: support@stingle.org\n\nTelegramm: https://t.me/fenritz</string>
     <string name="french">Française</string>
 </resources>

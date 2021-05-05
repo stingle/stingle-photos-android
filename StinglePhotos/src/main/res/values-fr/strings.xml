@@ -831,6 +831,5 @@
 
     <string name="backup_phrase_not_backed_up">IMPORTANT ! Veuillez noter votre phrase de sauvegarde car vous avez choisi de ne pas sauvegarder vos clés. Vous ne pourrez pas vous reconnecter sans votre phrase de sauvegarde !</string>
 
-    <string name="payment_notice">La facturation Google Play n\'est pas disponible sur votre appareil.\nPour acheter plus de stockage, veuillez nous contacter par e-mail : support\@stingle.org Telegram : https://t.me/fenritz</string>
     <string name="french">Française</string>
 </resources>

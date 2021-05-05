@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StorageActivity extends AppCompatActivity implements PurchasesUpdatedListener {
+public class StorageActivityPS extends AppCompatActivity implements PurchasesUpdatedListener {
 
 	private BillingClient billingClient;
 
@@ -63,7 +63,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 	private BroadcastReceiver onLogout = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			LoginManager.redirectToLogin(StorageActivity.this);
+			LoginManager.redirectToLogin(StorageActivityPS.this);
 		}
 	};
 
@@ -188,7 +188,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 						if (billingResult.getResponseCode() == BillingResponseCode.OK && skuDetailsList != null) {
 							Log.d("skuDetails", skuDetailsList.toString());
 							if(skuDetailsList.size() == 0){
-								findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
+								//findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
 							}
 							else {
 								for (SkuDetails skuDetails : skuDetailsList) {
@@ -199,7 +199,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 							}
 						}
 						else{
-							findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
+							//findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
 						}
 
 					});
@@ -335,7 +335,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 					SkuDetails onetb = skuDetailsMap.get(sku);
 					BillingFlowParams.Builder flowParamsBuilder = BillingFlowParams.newBuilder();
 					flowParamsBuilder.setSkuDetails(onetb);
-					flowParamsBuilder.setObfuscatedAccountId(Helpers.getPreference(StorageActivity.this, StinglePhotosApplication.USER_ID, ""));
+					flowParamsBuilder.setObfuscatedAccountId(Helpers.getPreference(StorageActivityPS.this, StinglePhotosApplication.USER_ID, ""));
 
 					if(purchasedSkus != null && purchasedSkus.size() > 0){
 						flowParamsBuilder.setOldSku(purchasedSkus.get(0).getSku(), purchasedSkus.get(0).getPurchaseToken());
@@ -343,7 +343,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 
 					BillingFlowParams flowParams = flowParamsBuilder.build();
 
-					BillingResult responseCode = billingClient.launchBillingFlow(StorageActivity.this, flowParams);
+					BillingResult responseCode = billingClient.launchBillingFlow(StorageActivityPS.this, flowParams);
 					Log.e("responseCode", responseCode.toString());
 
 				}
@@ -363,7 +363,7 @@ public class StorageActivity extends AppCompatActivity implements PurchasesUpdat
 					}
 				}
 				else{
-					findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
+					//findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
 				}
 				billingClientResponseCode = billingResult.getResponseCode();
 			}

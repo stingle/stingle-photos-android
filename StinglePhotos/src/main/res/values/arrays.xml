@@ -110,4 +110,27 @@
         <item name="always">always</item>
     </string-array>
 
+    <string-array name="paymentPlans">
+        <item>free</item>
+        <item>100gb_monthly</item>
+        <item>100gb_yearly</item>
+        <item>300gb_monthly</item>
+        <item>300gb_yearly</item>
+        <item>1tb_monthly</item>
+        <item>1tb_yearly</item>
+        <item>3tb_monthly</item>
+        <item>3tb_yearly</item>
+        <item>5tb_monthly</item>
+        <item>5tb_yearly</item>
+        <item>10tb_monthly</item>
+        <item>10tb_yearly</item>
+        <item>20tb_monthly</item>
+        <item>20tb_yearly</item>
+    </string-array>
+
+    <string-array name="paymentOptions">
+        <item>Google Play Billing</item>
+        <item>Stripe</item>
+    </string-array>
+
 </resources>

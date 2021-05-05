@@ -430,6 +430,5 @@
     <string name="download_missing_thumbs_desc">Загрузите иконки, которых нет в вашем локальном кеше</string>
     <string name="dont_show_again">Больше не показывать</string>
     <string name="backup_phrase_not_backed_up">ВАЖНО! Запишите резервную фразу, так как вы решили не создавать резервные копии ключей. Вы не сможете снова войти в систему без резервной фразы!</string>
-    <string name="payment_notice">Google Play биллинг недоступен на вашем устройстве.\nЧтобы приобрести дополнительное пространство для хранения, свяжитесь с нами\n\nПо электронной почте: support@stingle.org\n\nTelegram: https://t.me/fenritz</string>
     <string name="french">Française</string>
 </resources>
