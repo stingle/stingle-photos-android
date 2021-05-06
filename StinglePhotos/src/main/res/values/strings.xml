@@ -438,4 +438,6 @@
     <string name="google_play_billing">Google Pay</string>
     <string name="stripe_billing">Credit card (Stripe)</string>
     <string name="choose_payment_method">Please choose the payment method</string>
+    <string name="select">Select</string>
+    <string name="purchase_subscription">Purchase subscription</string>
 </resources>

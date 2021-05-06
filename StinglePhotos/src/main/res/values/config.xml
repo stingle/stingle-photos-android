@@ -50,5 +50,6 @@
     <string name="album_leave_url" translatable="false">sync/leaveAlbum</string>
     <string name="album_cover_change_url" translatable="false">sync/changeAlbumCover</string>
     <string name="get_download_urls" translatable="false">sync/getDownloadUrls</string>
+    <string name="stripe_url" translatable="false">billing/stripe</string>
 
 </resources>

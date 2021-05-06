@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -15,17 +16,25 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
+import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Billing.WebBillingDialogFragment;
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Sync.SyncAsyncTask;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -292,15 +301,39 @@ public class StorageActivity extends AppCompatActivity {
 		BottomSheetDialog sheet = new BottomSheetDialog(this);
 		sheet.setContentView(R.layout.dialog_payment_options);
 
-		sheet.findViewById(R.id.option_google_pay).setOnClickListener(v -> {
+		sheet.findViewById(R.id.button_google_pay).setOnClickListener(v -> {
 			Toast.makeText(this, "Google", Toast.LENGTH_SHORT).show();
+			sheet.dismiss();
 		});
 
-		sheet.findViewById(R.id.option_stripe).setOnClickListener(v -> {
-			Toast.makeText(this, "Stripe", Toast.LENGTH_SHORT).show();
+		sheet.findViewById(R.id.button_stripe).setOnClickListener(v -> {
+			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+			WebBillingDialogFragment newFragment = new WebBillingDialogFragment();
+
+			String url = getUrlForStripe(plan);
+			Log.e("url", url);
+			newFragment.setUrl(url);
+
+			newFragment.show(ft, "stripe_dialog");
+			sheet.dismiss();
 		});
 
 		sheet.show();
+	}
+
+	private String getUrlForStripe(String plan){
+		HashMap<String, String> params = new HashMap<>();
+		params.put("plan", plan);
+
+		try {
+			String token = URLEncoder.encode(KeyManagement.getApiToken(this), "utf-8");
+			String encParams = Crypto.byteArrayToBase64UrlSafe(CryptoHelpers.encryptParamsForServer(params).getBytes());
+
+			return StinglePhotosApplication.getApiUrl() + getString(R.string.stripe_url) + "/?token=" + token + "&params=" + encParams;
+		}
+		catch (CryptoException | UnsupportedEncodingException e){
+			return null;
+		}
 	}
 
 
