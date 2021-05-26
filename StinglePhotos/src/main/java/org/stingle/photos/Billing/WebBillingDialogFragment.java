@@ -1,12 +1,15 @@
 package org.stingle.photos.Billing;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +35,7 @@ public class WebBillingDialogFragment extends AppCompatDialogFragment {
 		setStyle(AppCompatDialogFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
 	}
 
+	@SuppressLint("SetJavaScriptEnabled")
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -47,6 +51,15 @@ public class WebBillingDialogFragment extends AppCompatDialogFragment {
 		toolbar.setTitle(getString(R.string.purchase_subscription));
 
 		webView = view.findViewById(R.id.webview);
+		WebSettings webSettings = webView.getSettings();
+		webSettings.setJavaScriptEnabled(true);
+		webView.setWebViewClient(new WebViewClient() {
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				return false;
+			}
+		});
+
 		/*webView.setWebViewClient(new WebViewClient(){
 			@Override
 			public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {

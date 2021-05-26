@@ -293,6 +293,7 @@ public class StorageActivity extends AppCompatActivity {
 			public void onFinish() {
 				super.onFinish();
 				updateQuotaInfo();
+				createPaymentBoxes();
 			}
 		});
 	}

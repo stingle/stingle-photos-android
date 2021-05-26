@@ -583,12 +583,7 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public void onUserAuthSuccess() {
 				LoginManager.disableLockTimer(GalleryActivity.this);
-				if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-					initGallery();
-				}
-				else{
-					FileManager.requestSDCardPermission(GalleryActivity.this);
-				}
+				initGallery();
 			}
 		});
 	}

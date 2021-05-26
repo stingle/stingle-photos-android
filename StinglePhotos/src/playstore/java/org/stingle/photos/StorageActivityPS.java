@@ -216,7 +216,7 @@ public class StorageActivityPS extends AppCompatActivity implements PurchasesUpd
 			createPaymentBox(Helpers.formatSpaceUnits(spaceQuota), null, null);
 		}
 		else{
-			String purchasedSku = purchasedSkus.get(0).getSku();
+			String purchasedSku = purchasedSkus.get(0).getSkus().get(0);
 			for(int i = 0; i < paymentBoxDetails.size(); i++) {
 				HashMap<String, String> boxDetails = paymentBoxDetails.get(i);
 				if(boxDetails != null && boxDetails.get("monthly").equals(purchasedSku) || (boxDetails.get("yearly") != null && boxDetails.get("yearly").equals(purchasedSku))){
@@ -239,7 +239,7 @@ public class StorageActivityPS extends AppCompatActivity implements PurchasesUpd
 		boolean isPurchasedMonthly = false;
 		boolean isPurchasedYearly = false;
 		if(purchasedSkus.size() > 0 && purchasedSkus.get(0) != null) {
-			String purchasedSku = purchasedSkus.get(0).getSku();
+			String purchasedSku = purchasedSkus.get(0).getSkus().get(0);
 			if (monthly != null && monthly.getSku().equals(purchasedSku)) {
 				isPurchasedMonthly = true;
 			}
@@ -338,7 +338,10 @@ public class StorageActivityPS extends AppCompatActivity implements PurchasesUpd
 					flowParamsBuilder.setObfuscatedAccountId(Helpers.getPreference(StorageActivityPS.this, StinglePhotosApplication.USER_ID, ""));
 
 					if(purchasedSkus != null && purchasedSkus.size() > 0){
-						flowParamsBuilder.setOldSku(purchasedSkus.get(0).getSku(), purchasedSkus.get(0).getPurchaseToken());
+						//purchasedSkus.get(0).getSkus().get(0)
+						flowParamsBuilder.setSubscriptionUpdateParams(
+								BillingFlowParams.SubscriptionUpdateParams.newBuilder().setOldSkuPurchaseToken(purchasedSkus.get(0).getPurchaseToken()).build()
+						);
 					}
 
 					BillingFlowParams flowParams = flowParamsBuilder.build();
@@ -416,7 +419,7 @@ public class StorageActivityPS extends AppCompatActivity implements PurchasesUpd
 						.setPurchaseToken(purchase.getPurchaseToken())
 						.build();
 				billingClient.acknowledgePurchase(params, billingResult -> {
-					Log.d("purchase", purchase.getSku() + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
+					Log.d("purchase", purchase.getSkus().get(0) + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
 
 					if (billingResult.getResponseCode() == BillingResponseCode.OK) {
 						Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
