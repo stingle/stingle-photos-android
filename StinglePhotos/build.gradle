@@ -35,7 +35,7 @@ android {
             resValue "string", "api_server_url", "https://api.stingle.org/"
             resValue "string", "default_home_folder_name", "StinglePhotos"
             buildConfigField "Boolean", "ALLOW_INSECURE_TLS", 'false'
-            debuggable false
+            debuggable true
         }
         debug {
             applicationIdSuffix '.debug'

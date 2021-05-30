@@ -1,8 +1,34 @@
 package org.stingle.photos.Billing;
 
-class PlayBilling /*implements PurchasesUpdatedListener*/ {
+import android.app.Activity;
+import android.util.Log;
 
-	/*private Activity activity;
+import androidx.annotation.NonNull;
+
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesResponseListener;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsParams;
+
+import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
+import org.stingle.photos.Util.Helpers;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+class PlayBilling implements PurchasesUpdatedListener {
+
+	private Activity activity;
 	private BillingClient billingClient;
 
 	private List<Purchase> purchasedSkus = new ArrayList<>();
@@ -10,14 +36,16 @@ class PlayBilling /*implements PurchasesUpdatedListener*/ {
 	private boolean isServiceConnected = false;
 	private boolean wentToPayment = false;
 	private List<String> skus = new ArrayList<>();
+	private BillingEventsListener billingEventsListener;
 
 	private static final String BASE_64_ENCODED_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA00IIe/BqA9IUbrj2y1bgvgi6Tqu37ulDOndT3v4ElDCViaZI+JFF97lvYX0ijPIZ0ryj3Jo2mC+ncXXtQKeFZsvh9EauJyQXyQbsVERGjpTZ+sMdTkYu46zRjHezl3siLWWZMuc9UFQcvU1qkMOH6MI1gic1PAXi46wuMSL+kanDyQ2UfO3VlQsVkq9o/JwZGzaA4D8NkS1Ja2JcvdLxg2ES9YLaJBL/b2inHjiZW5tO59eAy6KqZy+N6kMfaoL421AhKovocejza7g4LFkkNvqdKfLZe4CEJVhYHN2OOBsqci7KwODsyEZEv3WztqnaylnuQpDVRZztdt9qnMqKnQIDAQAB";
-	private int billingClientResponseCode;
 
-	public PlayBilling(Context context){
-		this.activity = context;
-		billingClient = BillingClient.newBuilder(context).enablePendingPurchases().setListener(this).build();
+	public PlayBilling(Activity activity, BillingEventsListener billingEventsListener){
+		this.activity = activity;
+		this.billingEventsListener = billingEventsListener;
+		billingClient = BillingClient.newBuilder(activity).enablePendingPurchases().setListener(this).build();
 
+		initSkus();
 	}
 
 	private void initSkus() {
@@ -43,75 +71,80 @@ class PlayBilling /*implements PurchasesUpdatedListener*/ {
 		}
 	}
 
-	private void pay(final String sku) {
-		Runnable queryRequest = new Runnable() {
-			@Override
-			public void run() {
-
-				if (areSubscriptionsSupported()) {
-					wentToPayment = true;
-					SkuDetails onetb = skuDetailsMap.get(sku);
-					BillingFlowParams.Builder flowParamsBuilder = BillingFlowParams.newBuilder();
-					flowParamsBuilder.setSkuDetails(onetb);
-					flowParamsBuilder.setObfuscatedAccountId(Helpers.getPreference(activity, StinglePhotosApplication.USER_ID, ""));
-
-					if(purchasedSkus != null && purchasedSkus.size() > 0){
-						flowParamsBuilder.setOldSku(purchasedSkus.get(0).getSku(), purchasedSkus.get(0).getPurchaseToken());
-					}
-
-					BillingFlowParams flowParams = flowParamsBuilder.build();
-
-					BillingResult responseCode = billingClient.launchBillingFlow(activity, flowParams);
-					Log.e("responseCode", responseCode.toString());
-
-				}
-			}
+	public void pay(String plan) {
+		Runnable queryRequest = () -> {
+			getSkuDetailsAndPay(plan);
 		};
 		executeServiceRequest(queryRequest);
 	}
 
-	private void getSkuDetails() {
+	private void goToPayment(String plan){
+		if (areSubscriptionsSupported()) {
+			wentToPayment = true;
+			SkuDetails onetb = skuDetailsMap.get(plan);
+			BillingFlowParams.Builder flowParamsBuilder = BillingFlowParams.newBuilder();
+			flowParamsBuilder.setSkuDetails(onetb);
+			flowParamsBuilder.setObfuscatedAccountId(Helpers.getPreference(activity, StinglePhotosApplication.USER_ID, ""));
+
+			if(purchasedSkus != null && purchasedSkus.size() > 0){
+				flowParamsBuilder.setSubscriptionUpdateParams(
+						BillingFlowParams.SubscriptionUpdateParams.newBuilder().setOldSkuPurchaseToken(purchasedSkus.get(0).getPurchaseToken()).build()
+				);
+			}
+
+			BillingFlowParams flowParams = flowParamsBuilder.build();
+
+			BillingResult responseCode = billingClient.launchBillingFlow(activity, flowParams);
+			Log.e("responseCode", responseCode.toString());
+
+		}
+	}
+
+	private void getSkuDetailsAndPay(String plan) {
 		purchasedSkus.clear();
 		skuDetailsMap.clear();
-		Runnable queryRequest = () -> {
-			Purchase.PurchasesResult subscriptionResult = billingClient.queryPurchases(BillingClient.SkuType.SUBS);
-			if (subscriptionResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-				purchasedSkus.addAll(subscriptionResult.getPurchasesList());
-				Log.d("purchasedItems", purchasedSkus.toString());
-			}
-			else {
-				Log.e("qaq", "Got an error response trying to query subscription purchases");
-			}
+		billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS, new PurchasesResponseListener() {
+			@Override
+			public void onQueryPurchasesResponse(@NonNull BillingResult billingResult, @NonNull List<Purchase> list) {
+				if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+					purchasedSkus.addAll(list);
+					Log.d("purchasedItems", purchasedSkus.toString());
 
-
-			SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-			params.setSkusList(skus).setType(BillingClient.SkuType.SUBS);
-			billingClient.querySkuDetailsAsync(params.build(),
-					(billingResult, skuDetailsList) -> {
-						if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && skuDetailsList != null) {
-							Log.d("skuDetails", skuDetailsList.toString());
-							if(skuDetailsList.size() == 0){
-								findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
-							}
-							else {
-								for (SkuDetails skuDetails : skuDetailsList) {
-									skuDetailsMap.put(skuDetails.getSku(), skuDetails);
+					SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
+					params.setSkusList(skus).setType(BillingClient.SkuType.SUBS);
+					billingClient.querySkuDetailsAsync(params.build(),
+							(billingResult1, skuDetailsList) -> {
+								if (billingResult1.getResponseCode() == BillingClient.BillingResponseCode.OK && skuDetailsList != null) {
+									Log.d("skuDetails", skuDetailsList.toString());
+									if(skuDetailsList.size() == 0){
+										if(billingEventsListener != null){ billingEventsListener.playBillingNotAvailable();	}
+									}
+									else {
+										for (SkuDetails skuDetails : skuDetailsList) {
+											skuDetailsMap.put(skuDetails.getSku(), skuDetails);
+										}
+									}
+									goToPayment(plan);
+								}
+								else{
+									if(billingEventsListener != null){ billingEventsListener.playBillingNotAvailable();	}
 								}
 
-								createPaymentBoxes();
-							}
-						}
-						else{
-							findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
-						}
+							});
+				}
+				else {
+					Log.e("playBilling", "Got an error response trying to query subscription purchases");
+				}
+			}
+		});
 
-					});
-		};
-		executeServiceRequest(queryRequest);
+
 	}
 
 	private void handlePurchase(final Purchase purchase) {
 		if (!verifyValidSignature(purchase.getOriginalJson(), purchase.getSignature())) {
+			billingEventsListener.makeSnackBar(activity.getString(R.string.payment_error));
+			billingEventsListener.refresh();
 			return;
 		}
 
@@ -121,26 +154,33 @@ class PlayBilling /*implements PurchasesUpdatedListener*/ {
 						.setPurchaseToken(purchase.getPurchaseToken())
 						.build();
 				billingClient.acknowledgePurchase(params, billingResult -> {
-					Log.d("purchase", purchase.getSku() + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
+					Log.d("purchase", purchase.getSkus().get(0) + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
 
 					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-						Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
-						syncAndUpdateQuota();
+						if(billingEventsListener != null){
+							billingEventsListener.makeSnackBar(activity.getString(R.string.payment_success));
+							billingEventsListener.refresh();
+						}
 					}
 					else{
-						Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_error), Snackbar.LENGTH_LONG).show();
-						syncAndUpdateQuota();
+						if(billingEventsListener != null){
+							billingEventsListener.refresh();
+						}
 					}
 				});
 			}
 			else{
-				Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.payment_success), Snackbar.LENGTH_LONG).show();
-				syncAndUpdateQuota();
+				if(billingEventsListener != null){
+					billingEventsListener.makeSnackBar(activity.getString(R.string.payment_success));
+					billingEventsListener.refresh();
+				}
 			}
 		}
 		else{
-			Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.pending_purchase), Snackbar.LENGTH_LONG).show();
-			syncAndUpdateQuota();
+			if(billingEventsListener != null){
+				billingEventsListener.makeSnackBar(activity.getString(R.string.pending_purchase));
+				billingEventsListener.refresh();
+			}
 		}
 	}
 
@@ -155,9 +195,10 @@ class PlayBilling /*implements PurchasesUpdatedListener*/ {
 					}
 				}
 				else{
-					findViewById(R.id.paymentNotice).setVisibility(View.VISIBLE);
+					if(billingEventsListener != null){
+						billingEventsListener.playBillingNotAvailable();
+					}
 				}
-				billingClientResponseCode = billingResult.getResponseCode();
 			}
 
 			@Override
@@ -202,5 +243,5 @@ class PlayBilling /*implements PurchasesUpdatedListener*/ {
 			billingClient.endConnection();
 			billingClient = null;
 		}
-	}*/
+	}
 }

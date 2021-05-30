@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -25,6 +24,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Billing.PlayBillingProxy;
 import org.stingle.photos.Billing.WebBillingDialogFragment;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -287,7 +287,7 @@ public class StorageActivity extends AppCompatActivity {
 
 
 
-	private void syncAndUpdateQuota(){
+	public void syncAndUpdateQuota(){
 		SyncManager.startSync(this, SyncAsyncTask.MODE_CLOUD_TO_LOCAL, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {
@@ -302,10 +302,14 @@ public class StorageActivity extends AppCompatActivity {
 		BottomSheetDialog sheet = new BottomSheetDialog(this);
 		sheet.setContentView(R.layout.dialog_payment_options);
 
+
 		sheet.findViewById(R.id.button_google_pay).setOnClickListener(v -> {
-			Toast.makeText(this, "Google", Toast.LENGTH_SHORT).show();
+			PlayBillingProxy.initiatePayment(this, plan);
 			sheet.dismiss();
 		});
+		if(!PlayBillingProxy.isPlayBillingAvailable(this)){
+			sheet.findViewById(R.id.button_google_pay).setEnabled(false);
+		}
 
 		sheet.findViewById(R.id.button_stripe).setOnClickListener(v -> {
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();

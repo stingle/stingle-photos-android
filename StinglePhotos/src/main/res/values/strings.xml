@@ -150,7 +150,7 @@
     <string name="current_storage">Current storage</string>
     <string name="payment_success">Payment successfully completed!</string>
     <string name="pending_purchase">Your payment is still in progress.</string>
-    <string name="payment_error">Failed to notify server about the purchase</string>
+    <string name="payment_error">Purchase failed</string>
     <string name="monthly_plan">%s / month</string>
     <string name="yearly_plan">%1$s / year</string>
     <string name="free">Free</string>
@@ -440,4 +440,5 @@
     <string name="choose_payment_method">Please choose the payment method</string>
     <string name="select">Select</string>
     <string name="purchase_subscription">Purchase subscription</string>
+    <string name="play_billing_unavailable">Sorry, Google Play Billing is not available on your device.</string>
 </resources>
