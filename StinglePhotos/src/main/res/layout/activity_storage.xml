@@ -62,11 +62,20 @@
                             android:layout_width="match_parent"
                             android:layout_height="5dp"
                             android:progressDrawable="@drawable/navview_progress" />
+                        <TextView
+                            android:id="@+id/planInfo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:visibility="gone"
+                            android:textSize="15sp" />
                         <LinearLayout
                             android:id="@+id/payment_boxes"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="32dp"
+                            android:layout_marginBottom="12dp"
                             android:orientation="vertical" />
 
                     </LinearLayout>

@@ -2,8 +2,10 @@ package org.stingle.photos;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,21 +23,24 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import org.stingle.photos.AsyncTasks.DowngradeToFreeAsyncTask;
+import org.stingle.photos.AsyncTasks.GetBillingInfoAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Billing.BillingEventsListener;
 import org.stingle.photos.Billing.PlayBillingProxy;
 import org.stingle.photos.Billing.WebBillingDialogFragment;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
-import org.stingle.photos.Sync.SyncAsyncTask;
-import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,7 +50,11 @@ public class StorageActivity extends AppCompatActivity {
 	private LinearLayout boxesParent;
 	private boolean wentToPayment = false;
 	private String currentPlan = "free";
+	int spaceUsed = 0;
+	int spaceQuota = 0;
+	boolean isManual = false;
 	private String currency = "USD";
+	private boolean isPlayBillingAvailable = true;
 	private HashMap<String,Double> prices = new HashMap<String,Double>() {{
 		put("free", (double) 0);
 		put("100gb_monthly", 2.99);
@@ -106,14 +115,22 @@ public class StorageActivity extends AppCompatActivity {
 
 		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
-			syncAndUpdateQuota();
+			getPlanInfo();
 			pullToRefresh.setRefreshing(false);
 		});
 
 		lbm = LocalBroadcastManager.getInstance(this);
 		lbm.registerReceiver(onLogout, new IntentFilter("ACTION_LOGOUT"));
 
-		createPaymentBoxes();
+
+
+		PlayBillingProxy.playBillingListener(this, new BillingEventsListener() {
+			@Override
+			public void playBillingNotAvailable() {
+				isPlayBillingAvailable = false;
+			}
+		});
+		getPlanInfo();
 	}
 
 	@Override
@@ -123,7 +140,7 @@ public class StorageActivity extends AppCompatActivity {
 		LoginManager.checkLogin(this, new LoginManager.UserLogedinCallback() {
 			@Override
 			public void onUserAuthSuccess() {
-				updateQuotaInfo();
+				getPlanInfo();
 			}
 		});
 		LoginManager.disableLockTimer(this);
@@ -144,6 +161,42 @@ public class StorageActivity extends AppCompatActivity {
 	}
 
 
+	public void getPlanInfo(){
+		((TextView) findViewById(R.id.planInfo)).setVisibility(View.GONE);
+		(new GetBillingInfoAsyncTask(this, new OnAsyncTaskFinish() {
+			@Override
+			public void onFinish(Object object) {
+				super.onFinish(object);
+				if(object instanceof GetBillingInfoAsyncTask.BillingInfo){
+					GetBillingInfoAsyncTask.BillingInfo info = (GetBillingInfoAsyncTask.BillingInfo) object;
+					String planInfoText = "";
+					if(info.plan == null || info.paymentGw == null || info.expiration == null || info.spaceQuota == null || info.spaceUsed == null){
+						return;
+					}
+					if(!info.plan.equals("free") && !info.paymentGw.equals("null")) {
+						planInfoText += getString(R.string.plan_info_gw_text, Helpers.capitalize(info.paymentGw));
+					}
+					if(info.isManual && info.expiration != null){
+						Date date = new Date(Long.parseLong(info.expiration));
+
+						DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+						planInfoText += "\n" + getString(R.string.plan_info_expires_text, dateFormat.format(date));
+					}
+					if(planInfoText.length() > 0) {
+						((TextView) findViewById(R.id.planInfo)).setText(planInfoText);
+						((TextView) findViewById(R.id.planInfo)).setVisibility(View.VISIBLE);
+					}
+					currentPlan = info.plan;
+					spaceQuota = Integer.parseInt(info.spaceQuota);
+					spaceUsed = Integer.parseInt(info.spaceUsed);
+					isManual = info.isManual;
+
+					updateQuotaInfo();
+					createPaymentBoxes();
+				}
+			}
+		})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
 
 	private void initPaymentBoxDetails(){
 		paymentBoxDetails.clear();
@@ -157,10 +210,7 @@ public class StorageActivity extends AppCompatActivity {
 	}
 
 	private void updateQuotaInfo() {
-		int spaceUsed = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_USED, 0);
-		int spaceQuota = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_QUOTA, 1);
 		int percent = Math.round(spaceUsed * 100 / spaceQuota);
-
 
 		String quotaText = getString(R.string.quota_text, Helpers.formatSpaceUnits(spaceUsed), Helpers.formatSpaceUnits(spaceQuota), percent + "%");
 		((TextView) findViewById(R.id.quotaInfo)).setText(quotaText);
@@ -168,7 +218,6 @@ public class StorageActivity extends AppCompatActivity {
 
 		progressBar.setMax(100);
 		progressBar.setProgress(percent);
-
 	}
 
 
@@ -177,8 +226,7 @@ public class StorageActivity extends AppCompatActivity {
 		initPaymentBoxDetails();
 		boxesParent.removeAllViews();
 
-		if(currentPlan == "free") {
-			int spaceQuota = Helpers.getPreference(this, SyncManager.PREF_LAST_SPACE_QUOTA, 0);
+		if(currentPlan.equals("free")) {
 			createPaymentBox(Helpers.formatSpaceUnits(spaceQuota), null, null);
 		}
 		else{
@@ -194,6 +242,10 @@ public class StorageActivity extends AppCompatActivity {
 
 		for(HashMap<String, String> boxDetails : paymentBoxDetails) {
 			createPaymentBox(boxDetails.get("title"), boxDetails.get("monthly"), boxDetails.get("yearly"));
+		}
+
+		if(!isManual && !currentPlan.equals("free")) {
+			createPaymentBox(Helpers.formatSpaceUnits(1024), null, null);
 		}
 	}
 
@@ -228,6 +280,11 @@ public class StorageActivity extends AppCompatActivity {
 			String topPrice = "";
 			if(isFreePlan){
 				topPrice = getString(R.string.free);
+				if(!currentPlan.equals("free")){
+					payButton.setText(getString(R.string.downgrade_to_free_plan));
+					payButton.setEnabled(true);
+					payButton.setOnClickListener(view -> downgradeToFree());
+				}
 				yearlyInfo.setVisibility(View.GONE);
 				yearlyPrice.setVisibility(View.GONE);
 			}
@@ -287,17 +344,6 @@ public class StorageActivity extends AppCompatActivity {
 
 
 
-	public void syncAndUpdateQuota(){
-		SyncManager.startSync(this, SyncAsyncTask.MODE_CLOUD_TO_LOCAL, new OnAsyncTaskFinish() {
-			@Override
-			public void onFinish() {
-				super.onFinish();
-				updateQuotaInfo();
-				createPaymentBoxes();
-			}
-		});
-	}
-
 	private void pay(String plan){
 		BottomSheetDialog sheet = new BottomSheetDialog(this);
 		sheet.setContentView(R.layout.dialog_payment_options);
@@ -307,13 +353,19 @@ public class StorageActivity extends AppCompatActivity {
 			PlayBillingProxy.initiatePayment(this, plan);
 			sheet.dismiss();
 		});
-		if(!PlayBillingProxy.isPlayBillingAvailable(this)){
+
+		boolean disableGoogleBecauseOfPlan = false;
+		if(plan.equals("5tb_yearly") || plan.equals("10tb_yearly") || plan.equals("20tb_yearly")){
+			disableGoogleBecauseOfPlan = true;
+		}
+		if(!isPlayBillingAvailable || disableGoogleBecauseOfPlan){
 			sheet.findViewById(R.id.button_google_pay).setEnabled(false);
 		}
 
 		sheet.findViewById(R.id.button_stripe).setOnClickListener(v -> {
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-			WebBillingDialogFragment newFragment = new WebBillingDialogFragment();
+			WebBillingDialogFragment newFragment = new WebBillingDialogFragment(this);
+
 
 			String url = getUrlForStripe(plan);
 			Log.e("url", url);
@@ -324,6 +376,34 @@ public class StorageActivity extends AppCompatActivity {
 		});
 
 		sheet.show();
+	}
+
+	private void downgradeToFree(){
+		Helpers.showConfirmDialog(
+				this,
+				getString(R.string.downgrade_question),
+				getString(R.string.downgrade_question_desc),
+				R.drawable.ic_action_delete,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						(new DowngradeToFreeAsyncTask(StorageActivity.this, new OnAsyncTaskFinish() {
+							@Override
+							public void onFinish(Boolean result) {
+								super.onFinish(result);
+								if(result != null && result) {
+									Helpers.showInfoDialog(StorageActivity.this, getString(R.string.success), getString(R.string.success_downgrade));
+								}
+								else{
+									Helpers.showAlertDialog(StorageActivity.this, getString(R.string.error), getString(R.string.something_went_wrong));
+								}
+								getPlanInfo();
+							}
+						})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+				},
+				null
+		);
 	}
 
 	private String getUrlForStripe(String plan){

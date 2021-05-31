@@ -78,6 +78,13 @@ public class StingleResponse{
 		return parts.optString(name);
 	}
 
+	public boolean has(String name){
+		if(parts == null){
+			return false;
+		}
+		return parts.has(name);
+	}
+
 	public JSONArray getArray(String name){
 		if(parts == null){
 			return null;

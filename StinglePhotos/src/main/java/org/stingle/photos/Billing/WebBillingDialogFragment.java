@@ -3,6 +3,7 @@ package org.stingle.photos.Billing;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,14 +21,20 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.R;
+import org.stingle.photos.StorageActivity;
 
 
 public class WebBillingDialogFragment extends AppCompatDialogFragment {
 
 
+	private StorageActivity activity;
 	private Toolbar toolbar;
 	private String url;
 	private WebView webView;
+
+	public WebBillingDialogFragment(StorageActivity activity){
+		this.activity = activity;
+	}
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,7 +82,6 @@ public class WebBillingDialogFragment extends AppCompatDialogFragment {
 		return view;
 	}
 
-
 	public void setUrl(String url){
 		this.url = url;
 	}
@@ -84,4 +90,9 @@ public class WebBillingDialogFragment extends AppCompatDialogFragment {
 		Snackbar.make(requireDialog().findViewById(R.id.drawer_layout), message, Snackbar.LENGTH_LONG).show();
 	}
 
+	@Override
+	public void onDismiss(@NonNull DialogInterface dialog) {
+		super.onDismiss(dialog);
+		activity.getPlanInfo();
+	}
 }

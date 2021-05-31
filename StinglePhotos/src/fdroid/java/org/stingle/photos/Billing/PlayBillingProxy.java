@@ -1,8 +1,10 @@
 package org.stingle.photos.Billing;
 
+import android.app.Activity;
+
 public class PlayBillingProxy {
-	public static boolean isPlayBillingAvailable(Activity activity){
-		return false;
+	public static void playBillingListener(Activity activity, BillingEventsListener listener){
+		listener.playBillingNotAvailable();
 	}
 
 	public static void initiatePayment(Activity activity, String plan){

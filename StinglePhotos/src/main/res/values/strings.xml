@@ -441,4 +441,11 @@
     <string name="select">Select</string>
     <string name="purchase_subscription">Purchase subscription</string>
     <string name="play_billing_unavailable">Sorry, Google Play Billing is not available on your device.</string>
+    <string name="plan_info_gw_text">Payment method: %s</string>
+    <string name="plan_info_expires_text">Expires at: %s</string>
+    <string name="error_loading_storage">Error loading storage data!</string>
+    <string name="downgrade_to_free_plan">Downgrade to Free</string>
+    <string name="success_downgrade">You have successfully downgraded your account to free plan.</string>
+    <string name="downgrade_question">Downgrade?</string>
+    <string name="downgrade_question_desc">Are you sure you want to downgrade to a free plan?</string>
 </resources>

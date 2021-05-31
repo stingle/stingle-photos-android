@@ -8,16 +8,9 @@ import org.stingle.photos.R;
 import org.stingle.photos.StorageActivity;
 
 public class PlayBillingProxy {
-	public static boolean isPlayBillingAvailable(Activity activity){
-		final Boolean[] isPlayBillingAvailable = {true};
-		PlayBilling billing = new PlayBilling(activity, new BillingEventsListener() {
-			@Override
-			public void playBillingNotAvailable() {
-				isPlayBillingAvailable[0] = false;
-			}
-		});
-		return isPlayBillingAvailable[0];
-		//return true;
+	public static void playBillingListener(Activity activity, BillingEventsListener listener){
+		PlayBilling billing = new PlayBilling(activity, listener);
+		billing.checkPlayStoreAvailability();
 	}
 
 	public static void initiatePayment(StorageActivity activity, String plan){
@@ -28,7 +21,7 @@ public class PlayBillingProxy {
 			}
 			@Override
 			public void refresh() {
-				activity.syncAndUpdateQuota();
+				activity.getPlanInfo();
 			}
 
 			@Override
