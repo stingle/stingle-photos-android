@@ -439,4 +439,11 @@
     <string name="select">Wählen</string>
     <string name="purchase_subscription">Abonnement kaufen</string>
     <string name="play_billing_unavailable">Leider ist Google Play Billing auf Ihrem Gerät nicht verfügbar.</string>
+    <string name="plan_info_gw_text">Zahlungsarten %s</string>
+    <string name="plan_info_expires_text">Läuft ab: %s</string>
+    <string name="error_loading_storage">Fehler beim Laden von Speicherdaten!</string>
+    <string name="downgrade_to_free_plan">Downgrade kostenlos.</string>
+    <string name="success_downgrade">Sie haben Ihr Konto erfolgreich in den kostenlosen Plan herabgestuft.</string>
+    <string name="downgrade_question">Downgrade?</string>
+    <string name="downgrade_question_desc">Sind Sie sicher, dass Sie sicher, dass Sie zu einem kostenlosen Plan herabstufen möchten?</string>
 </resources>

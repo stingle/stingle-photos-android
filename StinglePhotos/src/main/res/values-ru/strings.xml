@@ -437,4 +437,11 @@
     <string name="select">Выбрать</string>
     <string name="purchase_subscription">Приобрести подписку</string>
     <string name="play_billing_unavailable">К сожалению, оплата через Google Play недоступна на вашем устройстве.</string>
+    <string name="plan_info_gw_text">Способы оплаты %s</string>
+    <string name="plan_info_expires_text">Истекает: %s</string>
+    <string name="error_loading_storage">Ошибка загрузки данных хранения!</string>
+    <string name="downgrade_to_free_plan">Отказаться от подписки</string>
+    <string name="success_downgrade">Вы успешно понизили свою учетную запись в свободный план.</string>
+    <string name="downgrade_question">Отказаться?</string>
+    <string name="downgrade_question_desc">Вы уверены, что хотите перейти на бесплатный план?</string>
 </resources>

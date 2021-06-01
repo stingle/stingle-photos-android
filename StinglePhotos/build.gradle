@@ -35,7 +35,7 @@ android {
             resValue "string", "api_server_url", "https://api.stingle.org/"
             resValue "string", "default_home_folder_name", "StinglePhotos"
             buildConfigField "Boolean", "ALLOW_INSECURE_TLS", 'false'
-            debuggable true
+            debuggable false
         }
         debug {
             applicationIdSuffix '.debug'
@@ -43,8 +43,8 @@ android {
             resValue "string", "content_provider", "org.stingle.photos.share.debug"
             resValue "string", "app_name", "Stingle Photos Dev"
             resValue "string", "camera", "Camera Dev"
-            resValue "string", "api_server_url", "https://192.168.1.2/"
-            //resValue "string", "api_server_url", "https://apidev.stingle.org/"
+            //resValue "string", "api_server_url", "https://192.168.1.2/"
+            resValue "string", "api_server_url", "https://apidev.stingle.org/"
             resValue "string", "default_home_folder_name", "StinglePhotosDev"
             buildConfigField "Boolean", "ALLOW_INSECURE_TLS", 'true'
             debuggable true

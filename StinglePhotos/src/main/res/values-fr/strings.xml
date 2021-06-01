@@ -834,4 +834,11 @@
     <string name="select">Sélectionner</string>
     <string name="purchase_subscription">Acheter un abonnement</string>
     <string name="play_billing_unavailable">Désolé, la facturation Google Play n\'est pas disponible sur votre appareil.</string>
+    <string name="plan_info_gw_text">Méthodes de payement %s</string>
+    <string name="plan_info_expires_text">Expire à: %s</string>
+    <string name="error_loading_storage">Erreur lors du chargement de données de stockage!</string>
+    <string name="downgrade_to_free_plan">Déclasser pour libérer</string>
+    <string name="success_downgrade">Vous avez réussi votre compte à votre compte gratuitement.</string>
+    <string name="downgrade_question">Rétrograder?</string>
+    <string name="downgrade_question_desc">Êtes-vous sûr de vouloir déclasser dans un plan gratuit?</string>
 </resources>
