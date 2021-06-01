@@ -149,7 +149,7 @@
     <string name="current_storage">Текущее хранилище</string>
     <string name="payment_success">Платеж успешно выполнен!</string>
     <string name="pending_purchase">Ваш платеж все еще выполняется.</string>
-    <string name="payment_error">Не удалось уведомить сервер о покупке</string>
+    <string name="payment_error">Покупка не удалась</string>
     <string name="monthly_plan">%s / месяц</string>
     <string name="yearly_plan">%1$s / год</string>
     <string name="free">Бесплатно</string>
@@ -430,6 +430,18 @@
     <string name="download_missing_thumbs_desc">Загрузите иконки, которых нет в вашем локальном кеше</string>
     <string name="dont_show_again">Больше не показывать</string>
     <string name="backup_phrase_not_backed_up">ВАЖНО! Запишите резервную фразу, так как вы решили не создавать резервные копии ключей. Вы не сможете снова войти в систему без резервной фразы!</string>
-    <string name="payment_notice">Google Play биллинг недоступен на вашем устройстве.\nЧтобы приобрести дополнительное пространство для хранения, свяжитесь с нами\n\nПо электронной почте: support@stingle.org\n\nTelegram: https://t.me/fenritz</string>
     <string name="french">Française</string>
+    <string name="google_play_billing">Google Pay</string>
+    <string name="stripe_billing">Кредитная карта (Stripe)</string>
+    <string name="choose_payment_method">Выберите способ оплаты</string>
+    <string name="select">Выбрать</string>
+    <string name="purchase_subscription">Приобрести подписку</string>
+    <string name="play_billing_unavailable">К сожалению, оплата через Google Play недоступна на вашем устройстве.</string>
+    <string name="plan_info_gw_text">Способы оплаты %s</string>
+    <string name="plan_info_expires_text">Истекает: %s</string>
+    <string name="error_loading_storage">Ошибка загрузки данных хранения!</string>
+    <string name="downgrade_to_free_plan">Отказаться от подписки</string>
+    <string name="success_downgrade">Вы успешно понизили свою учетную запись в свободный план.</string>
+    <string name="downgrade_question">Отказаться?</string>
+    <string name="downgrade_question_desc">Вы уверены, что хотите перейти на бесплатный план?</string>
 </resources>

@@ -150,7 +150,7 @@
     <string name="current_storage">Current storage</string>
     <string name="payment_success">Payment successfully completed!</string>
     <string name="pending_purchase">Your payment is still in progress.</string>
-    <string name="payment_error">Failed to notify server about the purchase</string>
+    <string name="payment_error">Purchase failed</string>
     <string name="monthly_plan">%s / month</string>
     <string name="yearly_plan">%1$s / year</string>
     <string name="free">Free</string>
@@ -434,6 +434,18 @@
     <string name="download_missing_thumbs_desc">Download thumbnails that are not present in your local cache</string>
     <string name="dont_show_again">Don\'t show again</string>
     <string name="backup_phrase_not_backed_up">IMPORTANT! Please write down your backup phrase as you have chosen not to backup your keys. You will not be able to login again without your backup phrase!</string>
-    <string name="payment_notice">Google play billing is not available on your device.\nTo purchase more storage please contact us via\n\nEmail: support@stingle.org\n\nTelegram: https://t.me/fenritz</string>
     <string name="french">Française</string>
+    <string name="google_play_billing">Google Pay</string>
+    <string name="stripe_billing">Credit card (Stripe)</string>
+    <string name="choose_payment_method">Please choose the payment method</string>
+    <string name="select">Select</string>
+    <string name="purchase_subscription">Purchase subscription</string>
+    <string name="play_billing_unavailable">Sorry, Google Play Billing is not available on your device.</string>
+    <string name="plan_info_gw_text">Payment method: %s</string>
+    <string name="plan_info_expires_text">Expires at: %s</string>
+    <string name="error_loading_storage">Error loading storage data!</string>
+    <string name="downgrade_to_free_plan">Downgrade to Free</string>
+    <string name="success_downgrade">You have successfully downgraded your account to free plan.</string>
+    <string name="downgrade_question">Downgrade?</string>
+    <string name="downgrade_question_desc">Are you sure you want to downgrade to a free plan?</string>
 </resources>

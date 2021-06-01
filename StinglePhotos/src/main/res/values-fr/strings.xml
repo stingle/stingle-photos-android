@@ -283,7 +283,7 @@
 
     <string name="pending_purchase">Votre paiement est toujours en cours.</string>
 
-    <string name="payment_error">Échec de la notification de l\'achat au serveur</string>
+    <string name="payment_error">Achat raté</string>
 
     <string name="monthly_plan">%s / mois</string>
 
@@ -300,10 +300,6 @@
     <string name="envideo_service_started">chaîne envideo</string>
 
     <string name="sync_service_started">sync_service</string>
-
-    <string name="download_service_started" translatable="false">download_service</string>
-
-    <string name="download_thumb_service_started" translatable="false">download_thumb_service_started</string>
 
     <string name="confirm_decrypt_files">Voulez-vous vraiment décrypter les fichiers sélectionnés ? Ils deviendront accessibles à d\'autres applications sur cet appareil.</string>
 
@@ -831,6 +827,18 @@
 
     <string name="backup_phrase_not_backed_up">IMPORTANT ! Veuillez noter votre phrase de sauvegarde car vous avez choisi de ne pas sauvegarder vos clés. Vous ne pourrez pas vous reconnecter sans votre phrase de sauvegarde !</string>
 
-    <string name="payment_notice">La facturation Google Play n\'est pas disponible sur votre appareil.\nPour acheter plus de stockage, veuillez nous contacter par e-mail : support\@stingle.org Telegram : https://t.me/fenritz</string>
     <string name="french">Française</string>
+    <string name="google_play_billing">Google Pay</string>
+    <string name="stripe_billing">Carte de crédit (Stripe)</string>
+    <string name="choose_payment_method">Veuillez choisir le mode de paiement</string>
+    <string name="select">Sélectionner</string>
+    <string name="purchase_subscription">Acheter un abonnement</string>
+    <string name="play_billing_unavailable">Désolé, la facturation Google Play n\'est pas disponible sur votre appareil.</string>
+    <string name="plan_info_gw_text">Méthodes de payement %s</string>
+    <string name="plan_info_expires_text">Expire à: %s</string>
+    <string name="error_loading_storage">Erreur lors du chargement de données de stockage!</string>
+    <string name="downgrade_to_free_plan">Déclasser pour libérer</string>
+    <string name="success_downgrade">Vous avez réussi votre compte à votre compte gratuitement.</string>
+    <string name="downgrade_question">Rétrograder?</string>
+    <string name="downgrade_question_desc">Êtes-vous sûr de vouloir déclasser dans un plan gratuit?</string>
 </resources>

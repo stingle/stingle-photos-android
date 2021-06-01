@@ -65,8 +65,7 @@ public class CameraXActivity extends AppCompatActivity {
 	private static final String[] CAMERA_PERMISSIONS = {
 			Manifest.permission.CAMERA,
 			Manifest.permission.RECORD_AUDIO,
-			Manifest.permission.READ_EXTERNAL_STORAGE,
-			Manifest.permission.WRITE_EXTERNAL_STORAGE,
+			Manifest.permission.READ_EXTERNAL_STORAGE
 	};
 	public static final String FLASH_MODE_PREF = "flash_modeX";
 	private CameraView cameraView;
@@ -218,10 +217,6 @@ public class CameraXActivity extends AppCompatActivity {
 				}
 				else if(permission.equals(Manifest.permission.RECORD_AUDIO)){
 					requestAudioPermission();
-					break;
-				}
-				else if(permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE) || permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-					FileManager.requestSDCardPermission(this);
 					break;
 				}
 			}

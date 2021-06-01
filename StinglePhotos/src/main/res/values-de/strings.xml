@@ -150,7 +150,7 @@
     <string name="current_storage">Aktueller Speicher</string>
     <string name="payment_success">Zahlung erfolgreich abgeschlossen!</string>
     <string name="pending_purchase">Ihre Zahlung ist noch nicht abgeschlossen.</string>
-    <string name="payment_error">Der Server wurde nicht über den Kauf benachrichtigt</string>
+    <string name="payment_error">Kauf gescheitert</string>
     <string name="monthly_plan">%s / Monat</string>
     <string name="yearly_plan">%1$s / Jahr</string>
     <string name="free">Kostenlos</string>
@@ -432,6 +432,18 @@
     <string name="download_missing_thumbs_desc">Laden Sie Miniaturansichten herunter, die nicht in Ihrem lokalen Cache vorhanden sind</string>
     <string name="dont_show_again">Nicht mehr zeigen</string>
     <string name="backup_phrase_not_backed_up">WICHTIG! Bitte notieren Sie sich Ihre Sicherungsphrase, da Sie sich entschieden haben, Ihre Schlüssel nicht zu sichern. Sie können sich ohne Ihre Sicherungsphrase nicht erneut anmelden!</string>
-    <string name="payment_notice">Die Google Play-Abrechnung ist auf Ihrem Gerät nicht verfügbar.\nUm mehr Speicherplatz zu erwerben, kontaktieren Sie uns bitte per\n\nE-Mail: support@stingle.org\n\nTelegramm: https://t.me/fenritz</string>
     <string name="french">Française</string>
+    <string name="google_play_billing">Google Pay</string>
+    <string name="stripe_billing">Kreditkarte (Stripe)</string>
+    <string name="choose_payment_method">Bitte wählen Sie die Zahlungsmethode</string>
+    <string name="select">Wählen</string>
+    <string name="purchase_subscription">Abonnement kaufen</string>
+    <string name="play_billing_unavailable">Leider ist Google Play Billing auf Ihrem Gerät nicht verfügbar.</string>
+    <string name="plan_info_gw_text">Zahlungsarten %s</string>
+    <string name="plan_info_expires_text">Läuft ab: %s</string>
+    <string name="error_loading_storage">Fehler beim Laden von Speicherdaten!</string>
+    <string name="downgrade_to_free_plan">Downgrade kostenlos.</string>
+    <string name="success_downgrade">Sie haben Ihr Konto erfolgreich in den kostenlosen Plan herabgestuft.</string>
+    <string name="downgrade_question">Downgrade?</string>
+    <string name="downgrade_question_desc">Sind Sie sicher, dass Sie sicher, dass Sie zu einem kostenlosen Plan herabstufen möchten?</string>
 </resources>

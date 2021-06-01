@@ -1,6 +1,6 @@
 package org.stingle.photos;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -253,6 +254,8 @@ public class GalleryActivity extends AppCompatActivity
 		}
 
 		updateBottomNavigationMenu();
+
+		setVersionLabel();
 	}
 
 	@Override
@@ -391,6 +394,17 @@ public class GalleryActivity extends AppCompatActivity
 		currentSet = SyncManager.ALBUM;
 		currentAlbumId = albumId;
 		initCurrentFragment();
+	}
+
+	@SuppressLint("SetTextI18n")
+	private void setVersionLabel(){
+		try {
+			PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+			((TextView)findViewById(R.id.version_label)).setText("v"+pInfo.versionName);
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public void initCurrentFragment(){
@@ -583,12 +597,7 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public void onUserAuthSuccess() {
 				LoginManager.disableLockTimer(GalleryActivity.this);
-				if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-					initGallery();
-				}
-				else{
-					FileManager.requestSDCardPermission(GalleryActivity.this);
-				}
+				initGallery();
 			}
 		});
 	}

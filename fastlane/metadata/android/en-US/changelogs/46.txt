@@ -1,0 +1,2 @@
+* Added support for Credit Card (Stripe) payment for all users including users from F-Droid
+* Bug fixes
