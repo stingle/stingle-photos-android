@@ -106,7 +106,9 @@ public class LoginManager {
                         if(loginCallback != null) {
                             loginCallback.onUserAuthFail();
                         }
-                        activity.finish();
+                        if(activity != null) {
+                            activity.finish();
+                        }
                     }
                 }, loginCallback, true);
             }

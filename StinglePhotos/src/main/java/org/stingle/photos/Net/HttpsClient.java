@@ -367,7 +367,8 @@ public class HttpsClient {
 
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Connection", "Keep-Alive");
-			connection.setRequestProperty("User-Agent", "Stingle Photos HTTP Client 1.0");
+
+			connection.setRequestProperty("User-Agent", "Stingle Photos HTTP Client" + BuildConfig.VERSION_NAME);
 			connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
 

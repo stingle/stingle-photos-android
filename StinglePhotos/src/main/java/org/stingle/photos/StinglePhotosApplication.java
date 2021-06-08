@@ -8,8 +8,8 @@ import android.os.Bundle;
 import androidx.preference.PreferenceManager;
 
 import org.stingle.photos.AsyncTasks.Sync.DownloadThumbsAsyncTask;
-import org.stingle.photos.Sync.SyncAsyncTask;
 import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Sync.SyncAsyncTask;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
