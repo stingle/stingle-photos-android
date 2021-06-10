@@ -372,6 +372,28 @@ public class HttpsClient {
 			connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
 
+			if(params == null){
+				params = new HashMap<>();
+			}
+
+			// Upload POST Data
+			outputStream = new DataOutputStream(connection.getOutputStream());
+			Iterator<String> keys = params.keySet().iterator();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				String value = params.get(key);
+				Log.d("param", key + " = " + value);
+
+				if(value != null) {
+					outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+					outputStream.writeBytes("Content-Disposition: form-data; name=\"" + key + "\"" + lineEnd);
+					outputStream.writeBytes("Content-Type: text/plain" + lineEnd);
+					outputStream.writeBytes(lineEnd);
+					outputStream.writeBytes(value);
+					outputStream.writeBytes(lineEnd);
+				}
+			}
+
 			for(FileToUpload file : files) {
 				String[] q = file.filePath.split("/");
 				int idx = q.length - 1;
@@ -400,28 +422,6 @@ public class HttpsClient {
 
 				outputStream.writeBytes(lineEnd);
 				fileInputStream.close();
-			}
-
-			// Insert app version to all requests
-			if(params == null){
-				params = new HashMap<>();
-			}
-
-			// Upload POST Data
-			Iterator<String> keys = params.keySet().iterator();
-			while (keys.hasNext()) {
-				String key = keys.next();
-				String value = params.get(key);
-				Log.d("param", key + " = " + value);
-
-				if(value != null) {
-					outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-					outputStream.writeBytes("Content-Disposition: form-data; name=\"" + key + "\"" + lineEnd);
-					outputStream.writeBytes("Content-Type: text/plain" + lineEnd);
-					outputStream.writeBytes(lineEnd);
-					outputStream.writeBytes(value);
-					outputStream.writeBytes(lineEnd);
-				}
 			}
 
 			outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);

@@ -175,6 +175,10 @@ public final class CameraXModule {
 	}
 
 	public void setMediaRotation(Integer degrees){
+		if(mImageCapture == null){
+			return;
+		}
+
 		if (getCaptureMode() == CameraView.CaptureMode.IMAGE) {
 			mImageCapture.setTargetRotation(degrees);
 		} else if (getCaptureMode() == CameraView.CaptureMode.VIDEO) {

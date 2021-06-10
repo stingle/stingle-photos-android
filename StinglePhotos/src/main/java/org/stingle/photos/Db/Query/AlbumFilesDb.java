@@ -201,7 +201,6 @@ public class AlbumFilesDb implements FilesDb {
 				sortOrder,               // The sort order
 				limit
 		);
-
 	}
 
 	public int getFilePositionByFilename(String filename, String albumId, int sort){
