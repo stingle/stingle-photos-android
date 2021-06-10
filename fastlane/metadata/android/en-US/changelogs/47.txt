@@ -1,0 +1,3 @@
+* Fixed crash on deleted imported files
+* Fixed automatically logging out when upload of file is interrupted
+* Fixed gallery restoration taking long time
