@@ -338,7 +338,7 @@ public class HttpsClient {
 
 		String result = "";
 
-		int bytesRead, bytesAvailable, bufferSize;
+		int bytesRead;
 		byte[] buffer;
 		int maxBufferSize = 1024 * 1024;
 
@@ -408,16 +408,12 @@ public class HttpsClient {
 
 				outputStream.writeBytes(lineEnd);
 
-				bytesAvailable = fileInputStream.available();
-				bufferSize = Math.min(bytesAvailable, maxBufferSize);
-				buffer = new byte[bufferSize];
+				buffer = new byte[maxBufferSize];
 
-				bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+				bytesRead = fileInputStream.read(buffer, 0, maxBufferSize);
 				while (bytesRead > 0) {
-					outputStream.write(buffer, 0, bufferSize);
-					bytesAvailable = fileInputStream.available();
-					bufferSize = Math.min(bytesAvailable, maxBufferSize);
-					bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+					outputStream.write(buffer, 0, bytesRead);
+					bytesRead = fileInputStream.read(buffer, 0, maxBufferSize);
 				}
 
 				outputStream.writeBytes(lineEnd);
