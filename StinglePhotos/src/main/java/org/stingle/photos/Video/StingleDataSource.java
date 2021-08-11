@@ -82,7 +82,7 @@ public class StingleDataSource implements DataSource {
 			long chunkOffset = header.overallHeaderSize;
 			if(dataSpec.absoluteStreamPosition > 0){
 				currentChunkNumber = (int) Math.floor(dataSpec.absoluteStreamPosition / header.chunkSize) + 1;
-				chunkOffset = header.overallHeaderSize +  (currentChunkNumber - 1) * (AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES + header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES);
+				chunkOffset = header.overallHeaderSize +  (long)(currentChunkNumber - 1) * (AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES + header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES);
 
 				positionInChunk = (int)(dataSpec.absoluteStreamPosition - ((currentChunkNumber-1) * header.chunkSize));
 			}
