@@ -430,10 +430,19 @@ public class Helpers {
 	}
 
 	public static String formatVideoDuration(int duration){
-		return String.format(Locale.getDefault(), "%2d:%02d",
-				TimeUnit.SECONDS.toMinutes(duration),
-				TimeUnit.SECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(duration))
-		);
+		String formattedText = "";
+		if(duration > 3600){
+			formattedText = String.format(Locale.getDefault(), "%2d:%02d:%02d",
+					TimeUnit.SECONDS.toHours(duration),
+					TimeUnit.SECONDS.toMinutes(duration) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(duration)),
+					TimeUnit.SECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(duration)));
+		}
+		else {
+			formattedText = String.format(Locale.getDefault(), "%2d:%02d",
+					TimeUnit.SECONDS.toMinutes(duration),
+					TimeUnit.SECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(duration)));
+		}
+		return formattedText;
 	}
 
 	public static int bytesToMb(long bytes){
@@ -572,14 +581,20 @@ public class Helpers {
 
 	public static Bitmap getVideoThumbnail(Context context, Uri uri) throws IllegalArgumentException,
 			SecurityException{
-		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+		try {
+			MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 
-		if(uri == null){
-			return null;
+			if (uri == null) {
+				return null;
+			}
+
+			retriever.setDataSource(context, uri);
+			return retriever.getFrameAtTime();
 		}
+		catch (RuntimeException e){
 
-		retriever.setDataSource(context,uri);
-		return retriever.getFrameAtTime();
+		}
+		return null;
 	}
 
 	public static <T, E> T getKeyByValue(Map<T, E> map, E value) {

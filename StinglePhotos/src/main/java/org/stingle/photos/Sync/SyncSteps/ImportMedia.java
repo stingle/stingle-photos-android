@@ -199,7 +199,12 @@ public class ImportMedia {
 					if (ImportFile.importFile(context, contentUri, SyncManager.GALLERY, null, dateAddedMillis, null) != null) {
 						isSomethingImported = true;
 						if(SyncManager.isImportDeleteEnabled(context)){
-							context.getApplicationContext().getContentResolver().delete(contentUri, null, null);
+							try {
+								context.getContentResolver().delete(contentUri, null, null);
+							}
+							catch (SecurityException ignored){
+
+							}
 						}
 						importCountForRefresh++;
 						if(importCountForRefresh > REFRESH_GALLERY_AFTER_N_IMPORT) {

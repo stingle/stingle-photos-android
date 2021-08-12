@@ -1,12 +1,15 @@
 package org.stingle.photos.AsyncTasks;
 
 import android.app.ProgressDialog;
+import android.app.RecoverableSecurityException;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentSender;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -14,11 +17,13 @@ import android.provider.MediaStore;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 public class DeleteUrisAsyncTask extends AsyncTask<Void, Integer, Void> {
@@ -28,6 +33,8 @@ public class DeleteUrisAsyncTask extends AsyncTask<Void, Integer, Void> {
 	private FileManager.OnFinish onFinish;
 	private ProgressDialog progress;
 	private boolean deleteFailed = false;
+
+	public static ArrayDeque<Uri> urisToDelete = new ArrayDeque<>();
 
 
 	public DeleteUrisAsyncTask(AppCompatActivity activity, ArrayList<Uri> uris, FileManager.OnFinish onFinish){
@@ -67,9 +74,19 @@ public class DeleteUrisAsyncTask extends AsyncTask<Void, Integer, Void> {
 			if(contentUri != null) {
 				try {
 					myActivity.getApplicationContext().getContentResolver().delete(contentUri, null, null);
-				}
-				catch (Exception e){
-					deleteFailed = true;
+				} catch (SecurityException e) {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+						if(e instanceof RecoverableSecurityException) {
+							RecoverableSecurityException excRec = (RecoverableSecurityException) e;
+							try {
+								urisToDelete.add(uri);
+								myActivity.startIntentSenderForResult(excRec.getUserAction().getActionIntent().getIntentSender(), GalleryActivity.INTENT_DELETE_FILE, null, 0, 0, 0, null);
+							}
+							catch (IntentSender.SendIntentException ex) { }
+						} else {
+							deleteFailed = true;
+						}
+					}
 				}
 			}
 			else{

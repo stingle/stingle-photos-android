@@ -83,7 +83,7 @@ public class ReuploadKeysAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				Helpers.showInfoDialog(activity, activity.getString(R.string.success), activity.getString(R.string.success_delete_keys));
 			}
 			else{
-				Helpers.showAlertDialog(activity, activity.getString(R.string.error), activity.getString(R.string.success_backup_keys));
+				Helpers.showInfoDialog(activity, activity.getString(R.string.success), activity.getString(R.string.success_backup_keys));
 			}
 			onFinish.onFinish();
 		} else {

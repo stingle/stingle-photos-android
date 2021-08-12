@@ -41,6 +41,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.stingle.photos.AsyncTasks.DeleteUrisAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.GetServerPKAsyncTask;
 import org.stingle.photos.AsyncTasks.ImportFilesAsyncTask;
@@ -91,7 +92,8 @@ public class GalleryActivity extends AppCompatActivity
 	private boolean sendBackDecryptedFile = false;
 	private Intent originalIntent = null;
 
-	protected int INTENT_IMPORT = 1;
+	public static int INTENT_IMPORT = 1;
+	public static int INTENT_DELETE_FILE = 2;
 
 	private boolean dontStartSyncYet = false;
 	private View headerView;
@@ -651,6 +653,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 		switch (requestCode) {
 			case StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION: {
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -1122,10 +1125,11 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (resultCode != Activity.RESULT_OK || data == null) {
+
+		if (resultCode != Activity.RESULT_OK) {
 			return;
 		}
-		if(requestCode == INTENT_IMPORT){
+		if(requestCode == INTENT_IMPORT && data != null){
 			dontStartSyncYet = true;
 
 			if(galleryFragment != null) {
@@ -1158,6 +1162,23 @@ public class GalleryActivity extends AppCompatActivity
 					SyncManager.startSync(GalleryActivity.this);
 				}
 			})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+		else if(requestCode == INTENT_DELETE_FILE){
+			Uri uri = DeleteUrisAsyncTask.urisToDelete.pollFirst();
+			if(uri != null){
+				Uri contentUri = DeleteUrisAsyncTask.getContentUri(this, uri);
+				if(contentUri != null) {
+					try {
+						getContentResolver().delete(contentUri, null, null);
+					} catch (Exception e) {
+						Helpers.showAlertDialog(
+								this,
+								getString(R.string.delete_failed),
+								getString(R.string.delete_failed_desc)
+						);
+					}
+				}
+			}
 		}
 	}
 

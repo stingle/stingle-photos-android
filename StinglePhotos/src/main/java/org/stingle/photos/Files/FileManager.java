@@ -552,7 +552,7 @@ public class FileManager {
 						.show();
 
 			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION);
+				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION);
 			}
 			return false;
 		}
