@@ -1,0 +1,2 @@
+* Fixed crashes on delete imported files if app don't have permission to delete
+* Fixed issues with upload and playback with videos over 2Gb is size
