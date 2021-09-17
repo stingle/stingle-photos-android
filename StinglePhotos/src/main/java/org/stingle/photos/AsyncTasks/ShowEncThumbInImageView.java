@@ -68,7 +68,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 		}
 		try {
 			if(thumbSize == null){
-				thumbSize = Helpers.getThumbSize(context);
+				thumbSize = Helpers.getScreenWidthByColumns(context);
 			}
 
 			byte[] decryptedData = null;

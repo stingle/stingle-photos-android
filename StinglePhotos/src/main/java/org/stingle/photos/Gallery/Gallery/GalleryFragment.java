@@ -75,7 +75,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
 		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentSet, albumId);
-		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext()));
+		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getScreenWidthByColumns(getContext()));
 		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
 			@Override
 			public int getSpanSize(int position) {

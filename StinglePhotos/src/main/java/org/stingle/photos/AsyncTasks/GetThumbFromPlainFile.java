@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.widget.ImageView;
 
 import org.stingle.photos.Util.Helpers;
 
@@ -49,7 +48,7 @@ public class GetThumbFromPlainFile extends AsyncTask<Void, Void, Bitmap> {
 			return null;
 		}
 		if(thumbSize == null){
-			thumbSize = Helpers.getThumbSize(context);
+			thumbSize = Helpers.getScreenWidthByColumns(context);
 		}
 
 		if(!isVideo) {

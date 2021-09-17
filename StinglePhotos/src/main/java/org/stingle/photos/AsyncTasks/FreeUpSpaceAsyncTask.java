@@ -32,7 +32,7 @@ public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		dir = new File(FileManager.getHomeDir(activity));
 		thumbDir = new File(FileManager.getThumbsDir(activity));
-		cacheDir = new File(activity.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
+		cacheDir = new File(FileManager.getThumbCacheDirPath(activity));
 	}
 
 	@Override

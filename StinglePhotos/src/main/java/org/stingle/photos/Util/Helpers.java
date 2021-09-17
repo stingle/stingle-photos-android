@@ -65,6 +65,7 @@ public class Helpers {
 	public static final String IMAGE_FILE_PREFIX = "IMG_";
 	public static final String VIDEO_FILE_PREFIX = "VID_";
 	protected static final int SHARE_DECRYPT = 0;
+	public static final int THUMB_SIZE = 350;
 	private static PowerManager.WakeLock wakelock;
 
 
@@ -204,11 +205,11 @@ public class Helpers {
 
 
 	public static Crypto.Header generateThumbnail(Context context, byte[] data, String encFilename, String realFileName, byte[] fileId, int type, int videoDuration) throws IOException, CryptoException {
-		Bitmap bitmap = decodeBitmap(data, getThumbSize(context));
+		Bitmap bitmap = decodeBitmap(data, THUMB_SIZE);
 		
 		if (bitmap != null) {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-			bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream);
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
 
 			FileOutputStream out = new FileOutputStream(FileManager.getThumbsDir(context) + "/" + encFilename);
 			Crypto.Header header = StinglePhotosApplication.getCrypto().encryptFile(out, stream.toByteArray(), realFileName, type, fileId, videoDuration);
@@ -222,22 +223,6 @@ public class Helpers {
 	public static int convertDpToPixels(Context context, int dp){
 		float scale = context.getResources().getDisplayMetrics().density;
 		return (int) (dp * scale + 0.5f);
-	}
-
-	public static int getThumbSize(Context context){
-		return getThumbSize(context, 3);
-	}
-	public static int getThumbSize(Context context, int colls){
-		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		DisplayMetrics metrics = new DisplayMetrics();
-		wm.getDefaultDisplay().getMetrics(metrics);
-
-		if(metrics.widthPixels <= metrics.heightPixels){
-			return (int) Math.floor(metrics.widthPixels / colls);
-		}
-		else{
-			return (int) Math.floor(metrics.heightPixels / colls);
-		}
 	}
 
 	public static Bitmap getThumbFromBitmap(Bitmap bitmap, int squareSide) {
@@ -333,6 +318,25 @@ public class Helpers {
 			}
 		}
 		return null;
+	}
+
+	public static int getScreenWidthByColumns(Context context){
+		return getScreenWidthByColumns(context, 3);
+	}
+	public static int getScreenWidthByColumns(Context context, int columns){
+		if(columns == 0){
+			return 0;
+		}
+		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics metrics = new DisplayMetrics();
+		wm.getDefaultDisplay().getMetrics(metrics);
+
+		if(metrics.widthPixels <= metrics.heightPixels){
+			return (int) Math.floor(metrics.widthPixels / columns);
+		}
+		else{
+			return (int) Math.floor(metrics.heightPixels / columns);
+		}
 	}
 	
 	public static String getRealPathFromURI(Activity activity, Uri contentUri) {
@@ -560,7 +564,7 @@ public class Helpers {
 		if(fileOrDirectory == null){
 			return;
 		}
-		if (fileOrDirectory.isDirectory()) {
+		if (fileOrDirectory.exists() && fileOrDirectory.isDirectory()) {
 			for (File child : fileOrDirectory.listFiles()) {
 				deleteFolderRecursive(child);
 			}

@@ -126,7 +126,7 @@ public class ImportFile {
 
 				if(thumb != null) {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					thumb.compress(Bitmap.CompressFormat.PNG, 100, bos);
+					thumb.compress(Bitmap.CompressFormat.JPEG, 70, bos);
 
 					thumbHeader = Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 				}

@@ -40,6 +40,8 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 		GalleryTrashDb trashDb = new GalleryTrashDb(myContext, SyncManager.TRASH);
 		String homeDir = FileManager.getHomeDir(myContext);
 		String thumbDir = FileManager.getThumbsDir(myContext);
+		String thumbCacheDir = FileManager.getThumbCacheDirPath(myContext);
+		String fileCacheDir = FileManager.getFileCacheDirPath(myContext);
 
 		Cursor result = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, null);
 
@@ -56,9 +58,13 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 						mainFile.delete();
 					}
 				}
-				File cachedFile = FileManager.getCachedFile(myContext, dbFile.filename);
-				if(cachedFile != null){
+				File cachedFile = new File(fileCacheDir + "/" + dbFile.filename);
+				if(cachedFile.exists()){
 					cachedFile.delete();
+				}
+				File cachedThumb = new File(thumbCacheDir + "/" + dbFile.filename);
+				if(cachedThumb.exists()){
+					cachedThumb.delete();
 				}
 				File thumbFile = new File(thumbDir + "/" + dbFile.filename);
 				if (thumbFile.exists()) {

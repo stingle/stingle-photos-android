@@ -39,6 +39,8 @@ public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		String homeDir = FileManager.getHomeDir(myContext);
 		String thumbDir = FileManager.getThumbsDir(myContext);
+		String thumbCacheDir = FileManager.getThumbCacheDirPath(myContext);
+		String fileCacheDir = FileManager.getFileCacheDirPath(myContext);
 
 		ArrayList<String> filenamesToNotify = new ArrayList<String>();
 
@@ -57,12 +59,20 @@ public class DeleteFilesAsyncTask extends AsyncTask<Void, Void, Void> {
 				if(!existsInGallery && !existsInAlbums) {
 					File mainFile = new File(homeDir + "/" + file.filename);
 					File thumbFile = new File(thumbDir + "/" + file.filename);
+					File thumbCacheFile = new File(thumbCacheDir + "/" + file.filename);
+					File fileCacheFile = new File(fileCacheDir + "/" + file.filename);
 
 					if (mainFile.exists()) {
 						mainFile.delete();
 					}
 					if (thumbFile.exists()) {
 						thumbFile.delete();
+					}
+					if (thumbCacheFile.exists()) {
+						thumbCacheFile.delete();
+					}
+					if (fileCacheFile.exists()) {
+						fileCacheFile.delete();
 					}
 					Log.d("deleteFiles", "deleted - " + file.filename);
 				}

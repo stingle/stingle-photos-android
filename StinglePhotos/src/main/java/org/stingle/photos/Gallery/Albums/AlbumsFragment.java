@@ -101,7 +101,7 @@ public class AlbumsFragment extends Fragment{
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
 		if(view == VIEW_ALBUMS) {
-			layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getThumbSize(getContext(), 2));
+			layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getScreenWidthByColumns(getContext(), 2));
 		}
 		else if(view == VIEW_SHARES){
 			layoutManager = new LinearLayoutManager(getContext());

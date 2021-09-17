@@ -224,7 +224,7 @@ public class MediaEncryptService extends Service {
 						Bitmap thumb = ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
 						if(thumb != null) {
 							ByteArrayOutputStream bos = new ByteArrayOutputStream();
-							thumb.compress(Bitmap.CompressFormat.PNG, 0, bos);
+							thumb.compress(Bitmap.CompressFormat.JPEG, 70, bos);
 
 							Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, realFilename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
 						}

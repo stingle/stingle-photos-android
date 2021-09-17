@@ -65,7 +65,7 @@ public class FileManager {
 			cacheDir = new File(cachePath);
 		}
 		else {
-			cacheDir = new File(context.getCacheDir().getPath() + "/" + THUMB_CACHE_DIR);
+			cacheDir = new File(getThumbCacheDirPath(context));
 
 		}
 		File cachedFile = new File(cacheDir.getPath() + "/" + filename);
@@ -144,6 +144,27 @@ public class FileManager {
 		}
 
 		return thumbDir.getPath();
+	}
+
+	public static String getThumbCacheDirPath(Context context){
+		String dirPath = context.getCacheDir().getPath() + "/" + THUMB_CACHE_DIR;
+
+		File dir = new File(dirPath);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+
+		return dir.getPath();
+	}
+	public static String getFileCacheDirPath(Context context){
+		String dirPath = context.getCacheDir().getPath() + "/" + FILE_CACHE_DIR;
+
+		File dir = new File(dirPath);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+
+		return dir.getPath();
 	}
 
 	public static String findNewFileNameIfNeeded(Context context, String filePath, String fileName) {
@@ -479,11 +500,16 @@ public class FileManager {
 	}
 
 	public static File getCachedFile(Context context, String filename){
-		File cacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
-		if(!cacheDir.exists()){
-			cacheDir.mkdirs();
+		File cachedFile = new File(getFileCacheDirPath(context) + "/" + filename);
+
+		if(cachedFile.exists()){
+			return cachedFile;
 		}
-		File cachedFile = new File(cacheDir.getPath() + "/" + filename);
+		return null;
+	}
+
+	public static File getCachedThumb(Context context, String filename){
+		File cachedFile = new File(getThumbCacheDirPath(context) + "/" + filename);
 
 		if(cachedFile.exists()){
 			return cachedFile;
@@ -502,7 +528,7 @@ public class FileManager {
 			return;
 		}
 
-		File cacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
+		File cacheDir = new File(getFileCacheDirPath(context));
 		if(!cacheDir.exists()){
 			return;
 		}

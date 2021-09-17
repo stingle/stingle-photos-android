@@ -85,7 +85,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				this.db = new AlbumFilesDb(context);
 				break;
 		}
-		this.thumbSize = Helpers.getThumbSize(context);
+		this.thumbSize = Helpers.getScreenWidthByColumns(context);
 		this.lm = lm;
 
 		this.picasso = new Picasso.Builder(context).addRequestHandler(new StinglePicassoLoader(context, db, thumbSize, albumId)).build();

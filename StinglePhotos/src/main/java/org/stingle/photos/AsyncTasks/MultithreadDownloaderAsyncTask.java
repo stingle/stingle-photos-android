@@ -1,5 +1,7 @@
 package org.stingle.photos.AsyncTasks;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -37,8 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> {
 
 	static final public int WORKERS_LIMIT = 100;
@@ -74,8 +74,8 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 		mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		filesDir = new File(FileManager.getHomeDir(context));
 		thumbDir = new File(FileManager.getThumbsDir(context));
-		thumbCacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
-		filesCacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
+		thumbCacheDir = new File(FileManager.getThumbCacheDirPath(context));
+		filesCacheDir = new File(FileManager.getFileCacheDirPath(context));
 		cachedThreadPool = Executors.newCachedThreadPool();
 	}
 
@@ -234,16 +234,10 @@ public class MultithreadDownloaderAsyncTask extends AsyncTask<Void, Void, Void> 
 					File cachedFileResultTmp;
 					File cacheFile;
 					if (isDownloadingThumbs) {
-						if (!thumbCacheDir.exists()) {
-							thumbCacheDir.mkdirs();
-						}
 						cacheFileTmp = new File(thumbCacheDir.getPath() + "/" + filename  + ".tmp");
 						cachedFileResultTmp = new File(thumbCacheDir.getPath() + "/" + filename  + ".tmp");
 						cacheFile = new File(thumbCacheDir.getPath() + "/" + filename);
 					} else {
-						if (!filesCacheDir.exists()) {
-							filesCacheDir.mkdirs();
-						}
 						cacheFileTmp = new File(filesCacheDir.getPath() + "/" + filename  + ".tmp");
 						cachedFileResultTmp = new File(filesCacheDir.getPath() + "/" + filename  + ".tmp");
 						cacheFile = new File(filesCacheDir.getPath() + "/" + filename);

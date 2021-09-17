@@ -1,5 +1,7 @@
 package org.stingle.photos;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -35,8 +37,6 @@ import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class SettingsActivity extends AppCompatActivity implements
 		PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -476,8 +476,8 @@ public class SettingsActivity extends AppCompatActivity implements
 								@Override
 								public Object execute(Context context) {
 									SyncManager.stopSync(context);
-									File thumbCacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.THUMB_CACHE_DIR);
-									File filesCacheDir = new File(context.getCacheDir().getPath() + "/" + FileManager.FILE_CACHE_DIR);
+									File thumbCacheDir = new File(FileManager.getThumbCacheDirPath(context));
+									File filesCacheDir = new File(FileManager.getFileCacheDirPath(context));
 									Helpers.deleteFolderRecursive(thumbCacheDir);
 									Helpers.deleteFolderRecursive(filesCacheDir);
 									Helpers.storePreference(context, DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE, false);

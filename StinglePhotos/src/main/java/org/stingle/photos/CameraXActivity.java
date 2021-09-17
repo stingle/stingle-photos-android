@@ -139,7 +139,7 @@ public class CameraXActivity extends AppCompatActivity {
 		lbm = LocalBroadcastManager.getInstance(this);
 
 		lbm.registerReceiver(onEncFinish, new IntentFilter("MEDIA_ENC_FINISH"));
-		thumbSize = (int) Math.round(Helpers.getThumbSize(this) / 1.4);
+		thumbSize = (int) Math.round(Helpers.getScreenWidthByColumns(this) / 1.4);
 	}
 
 

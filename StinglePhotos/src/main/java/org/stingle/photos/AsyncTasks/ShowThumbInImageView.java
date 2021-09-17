@@ -45,8 +45,7 @@ public class ShowThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 						null);
 
 				if (bitmap != null) {
-					int thumbSize = Helpers.getThumbSize(context);
-					return Helpers.getThumbFromBitmap(bitmap, thumbSize);
+					return Helpers.getThumbFromBitmap(bitmap, Helpers.getScreenWidthByColumns(context));
 				}
 			}
 

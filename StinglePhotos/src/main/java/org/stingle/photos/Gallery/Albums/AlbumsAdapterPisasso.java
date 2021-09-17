@@ -71,7 +71,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 		this.context = context;
 		this.db = new AlbumsDb(context);
 		this.filesDb = new AlbumFilesDb(context);
-		this.thumbSize = Helpers.getThumbSize(context,2);
+		this.thumbSize = Helpers.getScreenWidthByColumns(context,2);
 		this.lm = lm;
 		this.view = view;
 		this.showGalleryOption = showGalleryOption;
@@ -409,7 +409,7 @@ public class AlbumsAdapterPisasso extends RecyclerView.Adapter<RecyclerView.View
 
 			if(layoutStyle == LAYOUT_GRID) {
 				int margin = Helpers.convertDpToPixels(context, 10);
-				int size = Helpers.getThumbSize(context, 2) - margin;
+				int size = Helpers.getScreenWidthByColumns(context, 2) - margin;
 				ViewGroup.LayoutParams params = holder.layout.getLayoutParams();
 				params.height = size - margin;
 				holder.layout.setLayoutParams(params);
