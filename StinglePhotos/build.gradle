@@ -20,11 +20,11 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "org.stingle.photos"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 31
     }
     buildTypes {
         release {
@@ -65,6 +65,10 @@ android {
     ndkVersion '21.3.6528147'
     buildToolsVersion '30.0.2'
     flavorDimensions 'version'
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -85,20 +89,25 @@ dependencies {
     implementation 'com.google.android:flexbox:2.0.1'
     implementation "androidx.work:work-runtime:2.6.0-beta01"
     implementation project(path: ':picasso')
+    implementation 'androidx.camera:camera-video:1.1.0-alpha10'
 
     playstoreImplementation 'com.android.billingclient:billing:4.0.0'
 
-    def camerax_version = "1.0.0-alpha06"
-    def camerax_view_version = "1.0.0-alpha03"
-    def camerax_ext_version = "1.0.0-alpha03"
-    //noinspection GradleDependency
+    def camerax_version = "1.1.0-alpha10"
+
+    // CameraX core library
     implementation "androidx.camera:camera-core:$camerax_version"
-    //noinspection GradleDependency
+
+    // CameraX Camera2 extensions
     implementation "androidx.camera:camera-camera2:$camerax_version"
-    //noinspection GradleDependency
-    implementation "androidx.camera:camera-view:$camerax_view_version"
-    //noinspection GradleDependency
-    implementation "androidx.camera:camera-extensions:$camerax_ext_version"
+
+    // CameraX Lifecycle library
+    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+
+    // CameraX View class
+    implementation 'androidx.camera:camera-view:1.0.0-alpha30'
+
+    implementation 'androidx.window:window:1.0.0-alpha09'
 
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
 }

@@ -51,13 +51,7 @@
         android:layout_alignParentTop="true"
         android:orientation="horizontal">
 
-        <org.stingle.photos.CameraX.CameraView
-            android:id="@+id/view_finder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:keepScreenOn="true"
-            app:scaleType="centerInside" />
+
     </LinearLayout>
 
     <RelativeLayout
@@ -115,10 +109,9 @@
             android:id="@+id/modeChanger"
             android:layout_width="60dp"
             android:layout_height="60dp"
+            android:layout_centerInParent="true"
             android:layout_toLeftOf="@+id/switchCamButton"
             android:layout_toRightOf="@+id/take_photo"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
             android:background="@null"
             android:padding="10dp"
             android:scaleType="fitCenter"

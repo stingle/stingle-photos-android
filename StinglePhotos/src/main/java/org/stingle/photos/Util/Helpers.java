@@ -12,13 +12,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -34,7 +31,6 @@ import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import org.stingle.photos.CameraX.CameraImageSize;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -53,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -362,38 +357,6 @@ public class Helpers {
 		}
 	}
 
-
-	public static ArrayList<CameraImageSize> parseVideoOutputs(Context context, StreamConfigurationMap map){
-		ArrayList<CameraImageSize> videoSizes = new ArrayList<>();
-
-		android.util.Size [] cameraVideoSizes = map.getOutputSizes(MediaRecorder.class);
-		for(android.util.Size size : cameraVideoSizes) {
-			/*if( size.getWidth() > 4096 || size.getHeight() > 2160 || size.getHeight() < 480) {
-				continue; // Nexus 6 returns these, even though not supported?!
-			}*/
-			videoSizes.add(new CameraImageSize(context, size.getWidth(), size.getHeight()));
-		}
-		Collections.sort(videoSizes, new CameraImageSize.SizeSorter());
-
-		return videoSizes;
-	}
-
-	public static ArrayList<CameraImageSize> parsePhotoOutputs(Context context, StreamConfigurationMap map){
-		ArrayList<CameraImageSize> photoSizes = new ArrayList<>();
-
-		android.util.Size [] cameraPhotoSizes = map.getOutputSizes(ImageFormat.JPEG);
-		for(android.util.Size size : cameraPhotoSizes) {
-			CameraImageSize photoSize = new CameraImageSize(context, size.getWidth(), size.getHeight());
-			if(photoSize.megapixel < 0.9){
-				continue;
-			}
-			photoSizes.add(photoSize);
-		}
-		Collections.sort(photoSizes, new CameraImageSize.SizeSorter());
-
-		return photoSizes;
-	}
-
 	public final static boolean isValidEmail(CharSequence target) {
 		if (TextUtils.isEmpty(target)) {
 			return false;
@@ -405,6 +368,7 @@ public class Helpers {
 	public static void storePreference(Context context, String key, String value){
 		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putString(key, value).apply();
 	}
+
 	public static void storePreference(Context context, String key, int value){
 		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().putInt(key, value).apply();
 	}

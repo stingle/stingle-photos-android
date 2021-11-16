@@ -66,6 +66,7 @@ import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.camera.CameraNewActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -830,7 +831,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_camera) {
 			Intent intent = new Intent();
-			intent.setClass(this, CameraXActivity.class);
+			intent.setClass(this, CameraNewActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
