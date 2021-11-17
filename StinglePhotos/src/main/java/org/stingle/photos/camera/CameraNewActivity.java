@@ -25,6 +25,7 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -43,6 +44,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
+import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.ViewItemActivity;
 import org.stingle.photos.camera.helpers.CameraHelper;
@@ -61,8 +63,10 @@ import java.util.concurrent.Executors;
 public class CameraNewActivity extends AppCompatActivity {
 
     private static final String TAG = "StingleCamera";
+    private static final String FLASH_MODE_PREF = "flash_modeX";
     private static final long IMMERSIVE_FLAG_TIMEOUT = 500L;
 
+    private SharedPreferences preferences;
     private PermissionHelper permissionHelper;
     private OrientationHelper orientationHelper;
     private MediaSaveHelper mediaSaveHelper;
@@ -74,7 +78,9 @@ public class CameraNewActivity extends AppCompatActivity {
     private ImageAnalysis imageAnalyzer;
     private VideoCapture<Recorder> videoCapture;
     private ActiveRecording activeRecording;
+    private Camera camera;
 
+    private int flashMode = ImageCapture.FLASH_MODE_AUTO;
     private boolean isVideoCapture = false;
     private boolean isVideoRecording = false;
     private boolean isVideoRecordingStopped = false;
@@ -99,6 +105,24 @@ public class CameraNewActivity extends AppCompatActivity {
             }
             if (imageCapture != null) {
                 takePicture();
+            }
+        }
+    };
+
+    private final View.OnClickListener flashModeClickListener = v -> {
+        if (!isVideoCapture) {
+            if (flashMode == ImageCapture.FLASH_MODE_OFF) {
+                setFlashMode(ImageCapture.FLASH_MODE_AUTO);
+            } else if (flashMode == ImageCapture.FLASH_MODE_AUTO) {
+                setFlashMode(ImageCapture.FLASH_MODE_ON);
+            } else if (flashMode == ImageCapture.FLASH_MODE_ON) {
+                setFlashMode(ImageCapture.FLASH_MODE_OFF);
+            }
+        } else {
+            if (flashMode == ImageCapture.FLASH_MODE_OFF) {
+                setFlashMode(ImageCapture.FLASH_MODE_ON);
+            } else if (flashMode == ImageCapture.FLASH_MODE_ON) {
+                setFlashMode(ImageCapture.FLASH_MODE_OFF);
             }
         }
     };
@@ -142,6 +166,7 @@ public class CameraNewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         rootBinding = ActivityCameraNewctivityBinding.inflate(getLayoutInflater());
+        preferences = getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, MODE_PRIVATE);
         setContentView(rootBinding.getRoot());
         setupHelpers();
         setupProperties();
@@ -190,7 +215,7 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private void updateSystemUI() {
         SystemHelper.setBrightness(this);
-        SystemHelper.hideNavigationBar(this,  rootBinding.cameraContainer);
+        SystemHelper.hideNavigationBar(this, rootBinding.cameraContainer);
     }
 
     private void setupHelpers() {
@@ -265,6 +290,7 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.cameraSwitchButton.setOnClickListener(cameraSwitchListener);
         cameraUiContainerBinding.photoViewButton.setOnClickListener(photoViewClickListener);
         cameraUiContainerBinding.cameraModeChanger.setOnClickListener(modeChangerClickListener);
+        cameraUiContainerBinding.flashButton.setOnClickListener(flashModeClickListener);
         if (isVideoCapture) {
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
@@ -315,7 +341,6 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraProvider.unbindAll();
 
         try {
-            Camera camera;
             if (!isVideoCapture) {
                 camera = cameraProvider.bindToLifecycle(
                         this, cameraSelector, preview, imageCapture, imageAnalyzer);
@@ -323,8 +348,8 @@ public class CameraNewActivity extends AppCompatActivity {
             } else {
                 camera = cameraProvider.bindToLifecycle(
                         this, cameraSelector, preview, imageCapture, videoCapture);
+                camera.getCameraControl().enableTorch(flashMode == ImageCapture.FLASH_MODE_ON);
             }
-            camera.getCameraControl().setExposureCompensationIndex(0);
 
             CameraHelper.zoomAndFocus(rootBinding.viewFinder, camera);
 
@@ -338,6 +363,7 @@ public class CameraNewActivity extends AppCompatActivity {
     private void setUpCamera() {
         mediaSaveHelper.sendCameraStatusBroadcast(true, false);
         mediaSaveHelper.showLastThumb();
+        applyLastFlashMode();
         ListenableFuture<ProcessCameraProvider> processCameraProvider =
                 ProcessCameraProvider.getInstance(this);
         processCameraProvider.addListener(() -> {
@@ -494,6 +520,7 @@ public class CameraNewActivity extends AppCompatActivity {
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video));
+            setFlashMode(ImageCapture.FLASH_MODE_OFF);
         }
     }
 
@@ -508,4 +535,31 @@ public class CameraNewActivity extends AppCompatActivity {
         isVideoRecording = isRecording;
         mediaSaveHelper.setVideoRecording(isVideoRecording);
     }
+
+    private void setFlashMode(int mode) {
+        flashMode = mode;
+        updateFlashButton();
+        preferences.edit().putInt(FLASH_MODE_PREF, flashMode).apply();
+        if (!isVideoCapture) {
+            imageCapture.setFlashMode(flashMode);
+        } else {
+            camera.getCameraControl().enableTorch(flashMode == ImageCapture.FLASH_MODE_ON);
+        }
+    }
+
+    private void applyLastFlashMode() {
+        flashMode = preferences.getInt(FLASH_MODE_PREF, ImageCapture.FLASH_MODE_AUTO);
+        updateFlashButton();
+    }
+
+    private void updateFlashButton() {
+        if (flashMode == ImageCapture.FLASH_MODE_OFF) {
+            cameraUiContainerBinding.flashButton.setImageResource(R.drawable.flash_off);
+        } else if (flashMode == ImageCapture.FLASH_MODE_AUTO) {
+            cameraUiContainerBinding.flashButton.setImageResource(R.drawable.flash_auto);
+        } else if (flashMode == ImageCapture.FLASH_MODE_ON) {
+            cameraUiContainerBinding.flashButton.setImageResource(R.drawable.flash_on);
+        }
+    }
+
 }
