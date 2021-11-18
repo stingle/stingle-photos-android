@@ -90,6 +90,7 @@ dependencies {
     implementation "androidx.work:work-runtime:2.6.0-beta01"
     implementation project(path: ':picasso')
     implementation 'androidx.camera:camera-video:1.1.0-alpha10'
+    implementation 'androidx.camera:camera-extensions:1.0.0-alpha30'
 
     playstoreImplementation 'com.android.billingclient:billing:4.0.0'
 

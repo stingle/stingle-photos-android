@@ -122,7 +122,10 @@ public class OrientationHelper implements LifecycleObserver {
         rotateElement(cameraUiContainerBindingRef.get().flashButton, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().cameraSwitchButton, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().cameraModeChanger, oldOverallRotation, overallRotation1);
+        rotateElement(cameraUiContainerBindingRef.get().audioCheckBoxContainer, oldOverallRotation, overallRotation1);
+        rotateElement(cameraUiContainerBindingRef.get().exposureButton, oldOverallRotation, overallRotation1);
         repositionChronoBar();
+        repositionSeekBar();
     }
 
     private void rotateElement(View view, int start, int end) {
@@ -181,7 +184,7 @@ public class OrientationHelper implements LifecycleObserver {
                 params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
                 break;
             case 180:
-                params.addRule(RelativeLayout.ABOVE, R.id.bottomPanel);
+                params.addRule(RelativeLayout.ABOVE, R.id.seek_bar_container);
                 params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
                 break;
             case 270:
@@ -191,6 +194,50 @@ public class OrientationHelper implements LifecycleObserver {
         }
         cameraUiContainerBindingRef.get().chronoBar.setLayoutParams(params);
         cameraUiContainerBindingRef.get().chronoBar.setRotation(rotation);
+    }
+
+    private void repositionSeekBar() {
+        if (cameraUiContainerBindingRef == null) {
+            return;
+        }
+        int rotation = getCurrentDeviceRotation();
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                cameraUiContainerBindingRef.get().seekBarContainer.getLayoutParams());
+
+        params.addRule(RelativeLayout.BELOW, 0);
+        params.addRule(RelativeLayout.ABOVE, 0);
+        params.addRule(RelativeLayout.CENTER_VERTICAL, 0);
+        params.addRule(RelativeLayout.CENTER_HORIZONTAL, 0);
+        params.addRule(RelativeLayout.ALIGN_PARENT_START, 0);
+        params.addRule(RelativeLayout.ALIGN_PARENT_END, 0);
+
+        int marginPx = Helpers.convertDpToPixels(contextRef.get(), 5);
+
+        params.topMargin = marginPx;
+        params.rightMargin = marginPx;
+        params.bottomMargin = marginPx;
+        params.leftMargin = marginPx;
+
+        switch (rotation) {
+            case 0:
+                params.addRule(RelativeLayout.BELOW, R.id.chronoBar);
+                params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+                break;
+            case 90:
+                params.addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE);
+                params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+                break;
+            case 180:
+                params.addRule(RelativeLayout.ABOVE, R.id.bottomPanel);
+                params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+                break;
+            case 270:
+                params.addRule(RelativeLayout.ALIGN_PARENT_START, RelativeLayout.TRUE);
+                params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+                break;
+        }
+        cameraUiContainerBindingRef.get().seekBarContainer.setLayoutParams(params);
+        cameraUiContainerBindingRef.get().seekBarContainer.setRotation(rotation);
     }
 
     private int getHowMuchRotated(int oldRotation, int currentRotation) {

@@ -29,6 +29,15 @@
             android:scaleType="fitCenter"
             android:src="@drawable/flash_auto" />
 
+        <ImageView
+            android:id="@+id/exposure_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="30dp"
+            android:layout_centerInParent="true"
+            android:layout_toEndOf="@+id/optionsButton"
+            android:src="@drawable/ic_exposure" />
+
         <ImageButton
             android:id="@+id/optionsButton"
             android:layout_width="32dp"
@@ -39,8 +48,8 @@
             android:contentDescription="@string/options"
             android:layout_marginStart="16dp"
             android:scaleType="fitCenter"
-            android:tint="#FFF"
-            android:src="@drawable/ic_settings_white" />
+            android:src="@drawable/ic_settings_white"
+            app:tint="#FFF" />
     </RelativeLayout>
 
 
@@ -83,6 +92,25 @@
             android:layout_toEndOf="@id/chronoRec"
             android:textColor="#FFFFFF"
             android:textStyle="bold" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/seek_bar_container"
+        android:layout_width="wrap_content"
+        android:background="@drawable/chrono_bg"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/chronoBar"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp"
+        android:elevation="1dp"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <SeekBar
+            android:id="@+id/exposure_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:alpha="0.9" />
     </RelativeLayout>
 
     <RelativeLayout

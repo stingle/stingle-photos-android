@@ -34,11 +34,13 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Range;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -88,6 +90,7 @@ public class CameraNewActivity extends AppCompatActivity {
     private boolean isVideoRecordingStopped = false;
     private boolean isAudioEnabled = false;
     private long timeWhenStopped = 0;
+    private int exposureIndex = 0;
     private int displayId = -1;
     private int lensFacing;
 
@@ -168,6 +171,14 @@ public class CameraNewActivity extends AppCompatActivity {
     private final CompoundButton.OnCheckedChangeListener audioCheckBoxListener = (compoundButton, b) -> {
         isAudioEnabled = b;
         preferences.edit().putBoolean(AUDIO_PREF, isAudioEnabled).apply();
+    };
+
+    private final View.OnClickListener exposureButtonClickListener = view -> {
+        if (cameraUiContainerBinding.seekBarContainer.getVisibility() == View.VISIBLE) {
+            cameraUiContainerBinding.seekBarContainer.setVisibility(View.GONE);
+            return;
+        }
+        cameraUiContainerBinding.seekBarContainer.setVisibility(View.VISIBLE);
     };
 
     @Override
@@ -300,6 +311,7 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.photoViewButton.setOnClickListener(photoViewClickListener);
         cameraUiContainerBinding.cameraModeChanger.setOnClickListener(modeChangerClickListener);
         cameraUiContainerBinding.flashButton.setOnClickListener(flashModeClickListener);
+        cameraUiContainerBinding.exposureButton.setOnClickListener(exposureButtonClickListener);
         if (isVideoCapture) {
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
@@ -362,7 +374,7 @@ public class CameraNewActivity extends AppCompatActivity {
             }
 
             CameraHelper.zoomAndFocus(rootBinding.viewFinder, camera);
-
+            exposeUI();
             // Attach the viewfinder's surface provider to preview use case
             preview.setSurfaceProvider(rootBinding.viewFinder.getSurfaceProvider());
         } catch (Exception exc) {
@@ -459,6 +471,7 @@ public class CameraNewActivity extends AppCompatActivity {
         timeWhenStopped = 0;
         cameraUiContainerBinding.chrono.stop();
         cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
+        cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(1f);
         cameraUiContainerBinding.chronoBar.setVisibility(View.INVISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(1f);
@@ -473,6 +486,7 @@ public class CameraNewActivity extends AppCompatActivity {
         setVideoRecordingState(true);
         startRecording();
         cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
+        cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(0f);
         cameraUiContainerBinding.chronoBar.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.INVISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(0f);
@@ -538,11 +552,13 @@ public class CameraNewActivity extends AppCompatActivity {
     private void changePhotoVideoMode() {
         if (!isVideoCapture) {
             cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
+            cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(0f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_video);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter));
         } else {
             cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
+            cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(1f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video));
@@ -593,4 +609,35 @@ public class CameraNewActivity extends AppCompatActivity {
         }
     }
 
+    private void exposeUI() {
+        if (camera.getCameraInfo().getExposureState().isExposureCompensationSupported()) {
+            exposureIndex = camera.getCameraInfo().getExposureState().getExposureCompensationIndex() + 24;
+            SeekBar exposureSeekBar = cameraUiContainerBinding.exposureSeekbar;
+            exposureSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
+            exposureSeekBar.setMax(48);
+            exposureSeekBar.setProgress(exposureIndex);
+            exposureSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    exposureIndex = seekBar.getProgress() - 24;
+                    exposure();
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
+        }
+    }
+
+    private void exposure() {
+        Range<Integer> range = camera.getCameraInfo().getExposureState().getExposureCompensationRange();
+        if (range.contains(exposureIndex)) {
+            camera.getCameraControl().setExposureCompensationIndex(exposureIndex);
+        }
+    }
 }
