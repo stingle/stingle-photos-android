@@ -448,4 +448,5 @@
     <string name="success_downgrade">You have successfully downgraded your account to free plan.</string>
     <string name="downgrade_question">Downgrade?</string>
     <string name="downgrade_question_desc">Are you sure you want to downgrade to a free plan?</string>
+    <string name="audio">Audio</string>
 </resources>

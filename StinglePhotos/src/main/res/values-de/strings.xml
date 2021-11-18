@@ -446,4 +446,5 @@
     <string name="success_downgrade">Sie haben Ihr Konto erfolgreich in den kostenlosen Plan herabgestuft.</string>
     <string name="downgrade_question">Downgrade?</string>
     <string name="downgrade_question_desc">Sind Sie sicher, dass Sie sicher, dass Sie zu einem kostenlosen Plan herabstufen möchten?</string>
+    <string name="audio">Audio</string>
 </resources>

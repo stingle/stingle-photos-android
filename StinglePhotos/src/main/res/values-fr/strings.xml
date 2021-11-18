@@ -841,4 +841,5 @@
     <string name="success_downgrade">Vous avez réussi votre compte à votre compte gratuitement.</string>
     <string name="downgrade_question">Rétrograder?</string>
     <string name="downgrade_question_desc">Êtes-vous sûr de vouloir déclasser dans un plan gratuit?</string>
+    <string name="audio">L\'audio</string>
 </resources>

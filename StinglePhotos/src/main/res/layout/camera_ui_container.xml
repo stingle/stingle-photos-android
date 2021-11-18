@@ -95,15 +95,15 @@
 
         <ImageButton
             android:id="@+id/camera_switch_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="16dp"
             android:background="@null"
             android:contentDescription="@string/camera"
             android:scaleType="fitCenter"
-            android:src="@drawable/flip_camera" />
+            android:src="@drawable/ic_flip_camera" />
 
         <ImageButton
             android:id="@+id/camera_mode_changer"
@@ -117,6 +117,35 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_video" />
 
+        <RelativeLayout
+            android:id="@+id/audio_check_box_container"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_toLeftOf="@+id/camera_capture_button"
+            android:layout_toRightOf="@+id/lastPhotoContainer"
+            android:visibility="gone">
+
+            <CheckBox
+                android:id="@+id/audio_check_box"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="30dp"
+                android:buttonTint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/audio_check_box"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="30dp"
+                android:text="@string/audio"
+                android:textAlignment="textStart"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+        </RelativeLayout>
 
         <ImageButton
             android:id="@+id/camera_capture_button"

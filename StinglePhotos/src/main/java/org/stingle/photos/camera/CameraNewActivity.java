@@ -38,6 +38,7 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CompoundButton;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -64,6 +65,7 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private static final String TAG = "StingleCamera";
     private static final String FLASH_MODE_PREF = "flash_modeX";
+    private static final String AUDIO_PREF = "audio_enableX";
     private static final long IMMERSIVE_FLAG_TIMEOUT = 500L;
 
     private SharedPreferences preferences;
@@ -84,6 +86,7 @@ public class CameraNewActivity extends AppCompatActivity {
     private boolean isVideoCapture = false;
     private boolean isVideoRecording = false;
     private boolean isVideoRecordingStopped = false;
+    private boolean isAudioEnabled = false;
     private long timeWhenStopped = 0;
     private int displayId = -1;
     private int lensFacing;
@@ -160,6 +163,11 @@ public class CameraNewActivity extends AppCompatActivity {
         isVideoCapture = !isVideoCapture;
         changePhotoVideoMode();
         bindCameraUseCases();
+    };
+
+    private final CompoundButton.OnCheckedChangeListener audioCheckBoxListener = (compoundButton, b) -> {
+        isAudioEnabled = b;
+        preferences.edit().putBoolean(AUDIO_PREF, isAudioEnabled).apply();
     };
 
     @Override
@@ -288,6 +296,7 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.cameraCaptureButton.setOnClickListener(capturePhotoClickListener);
         cameraUiContainerBinding.cameraSwitchButton.setEnabled(false);
         cameraUiContainerBinding.cameraSwitchButton.setOnClickListener(cameraSwitchListener);
+        cameraUiContainerBinding.audioCheckBox.setOnCheckedChangeListener(audioCheckBoxListener);
         cameraUiContainerBinding.photoViewButton.setOnClickListener(photoViewClickListener);
         cameraUiContainerBinding.cameraModeChanger.setOnClickListener(modeChangerClickListener);
         cameraUiContainerBinding.flashButton.setOnClickListener(flashModeClickListener);
@@ -295,6 +304,7 @@ public class CameraNewActivity extends AppCompatActivity {
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(this, R.drawable.button_shutter_video));
+            cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
             setVideoRecordingState(false);
 
             mediaSaveHelper.showLastThumb();
@@ -364,6 +374,7 @@ public class CameraNewActivity extends AppCompatActivity {
         mediaSaveHelper.sendCameraStatusBroadcast(true, false);
         mediaSaveHelper.showLastThumb();
         applyLastFlashMode();
+        applyLastAudioEnabled();
         ListenableFuture<ProcessCameraProvider> processCameraProvider =
                 ProcessCameraProvider.getInstance(this);
         processCameraProvider.addListener(() -> {
@@ -396,14 +407,25 @@ public class CameraNewActivity extends AppCompatActivity {
                 new File(FileManager.getCameraTmpDir(CameraNewActivity.this) + name)).build();
 
         // configure Recorder and Start recording to the mediaStoreOutput.
-        activeRecording = videoCapture.getOutput().prepareRecording(this, outputOptions)
-                .withEventListener(
-                        cameraExecutor,
-                        videoRecordEvent -> {
-                            if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
-                                mediaSaveHelper.saveVideo(videoRecordEvent);
-                            }
-                        }).start();
+        if (isAudioEnabled) {
+            activeRecording = videoCapture.getOutput().prepareRecording(this, outputOptions)
+                    .withEventListener(
+                            cameraExecutor,
+                            videoRecordEvent -> {
+                                if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
+                                    mediaSaveHelper.saveVideo(videoRecordEvent);
+                                }
+                            }).withAudioEnabled().start();
+        } else {
+            activeRecording = videoCapture.getOutput().prepareRecording(this, outputOptions)
+                    .withEventListener(
+                            cameraExecutor,
+                            videoRecordEvent -> {
+                                if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
+                                    mediaSaveHelper.saveVideo(videoRecordEvent);
+                                }
+                            }).start();
+        }
         Log.i(TAG, "Recording started");
     }
 
@@ -436,19 +458,21 @@ public class CameraNewActivity extends AppCompatActivity {
         setVideoRecordingState(false);
         timeWhenStopped = 0;
         cameraUiContainerBinding.chrono.stop();
+        cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.chronoBar.setVisibility(View.INVISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(1f);
         cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                 ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video));
         cameraUiContainerBinding.cameraSwitchButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.ic_switch_camera));
+                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.ic_flip_camera));
     }
 
     private void startVideoRecording() {
         Log.d(TAG, "Video recording Started");
         setVideoRecordingState(true);
         startRecording();
+        cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
         cameraUiContainerBinding.chronoBar.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.INVISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(0f);
@@ -513,10 +537,12 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private void changePhotoVideoMode() {
         if (!isVideoCapture) {
+            cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_video);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter));
         } else {
+            cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video));
@@ -534,6 +560,11 @@ public class CameraNewActivity extends AppCompatActivity {
     private void setVideoRecordingState(boolean isRecording) {
         isVideoRecording = isRecording;
         mediaSaveHelper.setVideoRecording(isVideoRecording);
+    }
+
+    private void applyLastAudioEnabled() {
+        isAudioEnabled = preferences.getBoolean(AUDIO_PREF, false);
+        cameraUiContainerBinding.audioCheckBox.setChecked(isAudioEnabled);
     }
 
     private void setFlashMode(int mode) {
