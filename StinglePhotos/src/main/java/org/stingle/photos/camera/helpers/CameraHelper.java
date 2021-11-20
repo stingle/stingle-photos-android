@@ -1,9 +1,12 @@
 package org.stingle.photos.camera.helpers;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.util.Log;
+import android.util.Range;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.widget.SeekBar;
 
 import androidx.camera.core.Camera;
 import androidx.camera.core.FocusMeteringAction;
@@ -12,12 +15,28 @@ import androidx.camera.core.MeteringPointFactory;
 import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
 import androidx.camera.view.PreviewView;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
 public class CameraHelper {
 
+    private final WeakReference<Context> contextRef;
+
+    private Camera camera;
+    private ScaleGestureDetector scaleGestureDetector;
+    private int exposureIndex = 0;
+
+    public CameraHelper(Context context) {
+        this.contextRef = new WeakReference<>(context);
+        initGestureListener();
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    public static void zoomAndFocus(PreviewView previewView, Camera camera) {
+    public void zoomAndFocus(PreviewView previewView) {
         previewView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
             MeteringPoint autoFocusPoint = new SurfaceOrientedMeteringPointFactory(1f, 1f)
                     .createPoint(.5f, .5f);
@@ -26,28 +45,14 @@ public class CameraHelper {
                         autoFocusPoint,
                         FocusMeteringAction.FLAG_AF
                 ).setAutoCancelDuration(2, TimeUnit.SECONDS).build();
-                camera.getCameraControl().startFocusAndMetering(autoFocusAction);
+                if (camera != null) {
+                    camera.getCameraControl().startFocusAndMetering(autoFocusAction);
+                }
             } catch (Exception e) {
                 Log.d("ERROR", "cannot access camera", e);
             }
         });
 
-        ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(previewView.getContext(),
-                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                    @Override
-                    public boolean onScale(ScaleGestureDetector detector) {
-                        try {
-                            float currentZoomRatio =
-                                    camera.getCameraInfo().getZoomState().getValue().getZoomRatio();
-                            float delta = detector.getScaleFactor();
-                            camera.getCameraControl().setZoomRatio(currentZoomRatio * delta);
-                            return true;
-                        } catch (Exception e) {
-                            camera.getCameraControl().setZoomRatio(1F);
-                            return false;
-                        }
-                    }
-                });
         previewView.getViewTreeObserver()
                 .addOnGlobalLayoutListener(() -> previewView.setOnTouchListener((view, event) -> {
                     scaleGestureDetector.onTouchEvent(event);
@@ -60,10 +65,12 @@ public class CameraHelper {
                             );
                             MeteringPoint autoFocusPoint = factory.createPoint(event.getX(), event.getY());
                             try {
-                                camera.getCameraControl().startFocusAndMetering(new FocusMeteringAction.Builder(
-                                        autoFocusPoint,
-                                        FocusMeteringAction.FLAG_AF
-                                ).disableAutoCancel().build());
+                                if (camera != null) {
+                                    camera.getCameraControl().startFocusAndMetering(new FocusMeteringAction.Builder(
+                                            autoFocusPoint,
+                                            FocusMeteringAction.FLAG_AF
+                                    ).disableAutoCancel().build());
+                                }
                             } catch (Exception e) {
                                 Log.d("ERROR", "cannot access camera", e);
                             }
@@ -74,5 +81,59 @@ public class CameraHelper {
                 }));
     }
 
+    public void exposure(SeekBar exposureSeekBar) {
+        if (camera.getCameraInfo().getExposureState().isExposureCompensationSupported()) {
+            exposureIndex = camera.getCameraInfo().getExposureState().getExposureCompensationIndex() + 24;
+            exposureSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
+            exposureSeekBar.setMax(48);
+            exposureSeekBar.setProgress(exposureIndex);
+            exposureSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    exposureIndex = seekBar.getProgress() - 24;
+                    exposure();
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
+        }
+    }
+
+    private void exposure() {
+        Range<Integer> range = camera.getCameraInfo().getExposureState().getExposureCompensationRange();
+        if (range.contains(exposureIndex)) {
+            camera.getCameraControl().setExposureCompensationIndex(exposureIndex);
+        }
+    }
+
+    private void initGestureListener() {
+        scaleGestureDetector = new ScaleGestureDetector(contextRef.get(),
+                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                    @Override
+                    public boolean onScale(ScaleGestureDetector detector) {
+                        try {
+                            if (camera != null) {
+                                float currentZoomRatio =
+                                        camera.getCameraInfo().getZoomState().getValue().getZoomRatio();
+                                float delta = detector.getScaleFactor();
+                                camera.getCameraControl().setZoomRatio(currentZoomRatio * delta);
+                                return true;
+                            }
+                            return false;
+                        } catch (Exception e) {
+                            if (camera != null) {
+                                camera.getCameraControl().setZoomRatio(1F);
+                            }
+                            return false;
+                        }
+                    }
+                });
+    }
 
 }
