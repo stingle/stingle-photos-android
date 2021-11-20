@@ -1,6 +1,8 @@
+
 package org.stingle.photos;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -12,33 +14,33 @@ import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.camera.CameraNewActivity;
 
-import java.util.ArrayList;
 
 public class CameraSettingsActivity extends AppCompatActivity {
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Helpers.setLocale(this);
-		setContentView(R.layout.activity_camera_settings);
-		getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.settings, new SettingsFragment())
-				.commit();
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Helpers.setLocale(this);
+        setContentView(R.layout.activity_camera_settings);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.settings, new SettingsFragment())
+                .commit();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
 
-	public static class SettingsFragment extends PreferenceFragmentCompat {
-		@Override
-		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-			setPreferencesFromResource(R.xml.camera_preferences, rootKey);
+    public static class SettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.camera_preferences, rootKey);
 
-			initCameraResolution();
-		}
+            initCameraResolution();
+        }
 
 		public void initCameraResolution(){
 			try {
@@ -95,9 +97,17 @@ public class CameraSettingsActivity extends AppCompatActivity {
 		}
 	}
 
-	@Override
-	public boolean onSupportNavigateUp() {
-		onBackPressed();
-		return true;
-	}
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.setClass(CameraSettingsActivity.this, CameraNewActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+    }
 }

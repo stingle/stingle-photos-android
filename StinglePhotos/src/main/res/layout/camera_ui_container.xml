@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/camera_ui_container"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
->
+    android:layout_height="fill_parent">
 
 
     <RelativeLayout
@@ -14,8 +13,8 @@
         android:layout_width="fill_parent"
         android:layout_height="50dp"
         android:layout_alignParentTop="true"
-        android:elevation="1dp"
-        android:background="@drawable/camera_top_gradient">
+        android:background="@drawable/camera_top_gradient"
+        android:elevation="1dp">
 
         <ImageButton
             android:id="@+id/flashButton"
@@ -23,9 +22,9 @@
             android:layout_height="24dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
             android:background="@null"
             android:contentDescription="@string/flash"
-            android:layout_marginEnd="16dp"
             android:scaleType="fitCenter"
             android:src="@drawable/flash_auto" />
 
@@ -33,10 +32,31 @@
             android:id="@+id/exposure_button"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_marginStart="30dp"
             android:layout_centerInParent="true"
+            android:layout_marginStart="30dp"
             android:layout_toEndOf="@+id/optionsButton"
             android:src="@drawable/ic_exposure" />
+
+
+        <ImageView
+            android:id="@+id/time"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="30dp"
+            android:scaleType="fitCenter"
+            android:layout_toEndOf="@+id/exposure_button"
+            android:src="@drawable/ic_timer_off" />
+
+        <ImageView
+            android:id="@+id/repeat"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="30dp"
+            android:scaleType="fitCenter"
+            android:layout_toEndOf="@+id/time"
+            android:src="@drawable/ic_repeat_off" />
 
         <ImageButton
             android:id="@+id/optionsButton"
@@ -44,9 +64,9 @@
             android:layout_height="32dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
             android:background="@null"
             android:contentDescription="@string/options"
-            android:layout_marginStart="16dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_settings_white"
             app:tint="#FFF" />
@@ -82,7 +102,7 @@
             android:layout_height="10dp"
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
-            android:src="@drawable/chrono_rec_circle"/>
+            android:src="@drawable/chrono_rec_circle" />
 
         <Chronometer
             android:id="@+id/chrono"
@@ -112,6 +132,18 @@
             android:layout_height="50dp"
             android:alpha="0.9" />
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/timeout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="5"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="100sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/bottomPanel"
@@ -187,19 +219,20 @@
             android:id="@+id/lastPhotoContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/round_shape"
             android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:layout_marginLeft="16dp"
-            android:layout_centerVertical="true">
+            android:background="@drawable/round_shape">
+
             <ImageView
                 android:id="@+id/photo_view_button"
                 android:layout_width="65dp"
                 android:layout_height="65dp"
-                android:contentDescription="@string/gallery"
                 android:layout_margin="2dp"
+                android:background="@drawable/round_shape"
+                android:contentDescription="@string/gallery"
                 android:scaleType="fitCenter"
-                android:src="@drawable/lock_cam"
-                android:background="@drawable/round_shape" />
+                android:src="@drawable/lock_cam" />
         </LinearLayout>
     </RelativeLayout>
 

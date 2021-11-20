@@ -29,8 +29,10 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
+import android.media.MediaActionSound;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -38,13 +40,17 @@ import android.util.Range;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.CameraSettingsActivity;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -67,6 +73,8 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private static final String TAG = "StingleCamera";
     private static final String FLASH_MODE_PREF = "flash_modeX";
+    private static final String TIMER_PREF = "timerX";
+    private static final String REPEAT_PREF = "repeatX";
     private static final String AUDIO_PREF = "audio_enableX";
     private static final long IMMERSIVE_FLAG_TIMEOUT = 500L;
 
@@ -89,10 +97,13 @@ public class CameraNewActivity extends AppCompatActivity {
     private boolean isVideoRecording = false;
     private boolean isVideoRecordingStopped = false;
     private boolean isAudioEnabled = false;
+    private boolean isCaptureProcess;
     private long timeWhenStopped = 0;
     private int exposureIndex = 0;
     private int displayId = -1;
     private int lensFacing;
+    private int timerValue = 0;
+    private int repeatValue = 1;
 
     private ActivityCameraNewctivityBinding rootBinding;
     private CameraUiContainerBinding cameraUiContainerBinding;
@@ -100,17 +111,53 @@ public class CameraNewActivity extends AppCompatActivity {
     private final View.OnClickListener capturePhotoClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            SystemHelper.playSoundEffect(CameraNewActivity.this);
+            Animation animation = AnimationUtils.loadAnimation(CameraNewActivity.this, R.anim.time_animation);
             if (isVideoCapture) {
                 if (isVideoRecording) {
                     stopVideoRecording();
                     return;
                 }
-                startVideoRecording();
+                int currentTimerValue = timerValue;
+                isCaptureProcess = true;
+                new CountDownTimer(timerValue * 1000L, 1000) {
+                    public void onTick(long millisUntilFinished) {
+                        SystemHelper.playLowSound();
+                        cameraUiContainerBinding.timeout.startAnimation(animation);
+                        cameraUiContainerBinding.timeout.setText(String.valueOf(timerValue--));
+                        cameraUiContainerBinding.timeout.setVisibility(View.VISIBLE);
+
+                    }
+                    public void onFinish() {
+                        isCaptureProcess = false;
+                        startVideoRecording();
+                        cameraUiContainerBinding.timeout.clearAnimation();
+                        cameraUiContainerBinding.timeout.setVisibility(View.GONE);
+                        timerValue = currentTimerValue;
+                    }
+                }.start();
                 return;
             }
             if (imageCapture != null) {
-                takePicture();
+                int currentTimerValue = timerValue;
+                isCaptureProcess = true;
+                new CountDownTimer(timerValue * 1000L, 1000) {
+                    public void onTick(long millisUntilFinished) {
+                        SystemHelper.playLowSound();
+                        cameraUiContainerBinding.timeout.startAnimation(animation);
+                        cameraUiContainerBinding.timeout.setText(String.valueOf(timerValue--));
+                        cameraUiContainerBinding.timeout.setVisibility(View.VISIBLE);
+
+                    }
+                    public void onFinish() {
+                        isCaptureProcess = false;
+                        for (int i = 0; i < repeatValue; i++) {
+                            takePicture();
+                        }
+                        cameraUiContainerBinding.timeout.clearAnimation();
+                        cameraUiContainerBinding.timeout.setVisibility(View.GONE);
+                        timerValue = currentTimerValue;
+                    }
+                }.start();
             }
         }
     };
@@ -181,6 +228,40 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.seekBarContainer.setVisibility(View.VISIBLE);
     };
 
+    private final View.OnClickListener optionsButtonClickListener = view -> {
+        Intent intent = new Intent();
+        intent.setClass(CameraNewActivity.this, CameraSettingsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+    };
+
+    private final View.OnClickListener repeatButtonClickListener = view -> {
+        if (repeatValue == 1) {
+            repeatValue = 2;
+        } else if (repeatValue == 2) {
+            repeatValue = 5;
+        } else if (repeatValue == 5) {
+            repeatValue = 10;
+        } else if (repeatValue == 10) {
+            repeatValue = 1;
+        }
+        preferences.edit().putInt(REPEAT_PREF, repeatValue).apply();
+        updateRepeatButton();
+    };
+    private final View.OnClickListener timeButtonClickListener = view -> {
+        if (timerValue == 0) {
+            timerValue = 2;
+        } else if (timerValue == 2) {
+            timerValue = 5;
+        } else if (timerValue == 5) {
+            timerValue = 10;
+        } else if (timerValue == 10) {
+            timerValue = 0;
+        }
+        preferences.edit().putInt(TIMER_PREF, timerValue).apply();
+        updateTimeButton();
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,9 +311,18 @@ public class CameraNewActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (isCaptureProcess) {
+            return false;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     /* Helper Methods */
 
     private void updateSystemUI() {
+        SystemHelper.initSounds(this);
         SystemHelper.setBrightness(this);
         SystemHelper.hideNavigationBar(this, rootBinding.cameraContainer);
     }
@@ -312,6 +402,9 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.cameraModeChanger.setOnClickListener(modeChangerClickListener);
         cameraUiContainerBinding.flashButton.setOnClickListener(flashModeClickListener);
         cameraUiContainerBinding.exposureButton.setOnClickListener(exposureButtonClickListener);
+        cameraUiContainerBinding.optionsButton.setOnClickListener(optionsButtonClickListener);
+        cameraUiContainerBinding.time.setOnClickListener(timeButtonClickListener);
+        cameraUiContainerBinding.repeat.setOnClickListener(repeatButtonClickListener);
         if (isVideoCapture) {
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
@@ -387,6 +480,8 @@ public class CameraNewActivity extends AppCompatActivity {
         mediaSaveHelper.showLastThumb();
         applyLastFlashMode();
         applyLastAudioEnabled();
+        applyLastTimer();
+        applyLastRepeat();
         ListenableFuture<ProcessCameraProvider> processCameraProvider =
                 ProcessCameraProvider.getInstance(this);
         processCameraProvider.addListener(() -> {
@@ -443,6 +538,9 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private void takePicture() {
         Log.d(TAG, "Photo capture Finished");
+        SystemHelper.playSound(this, MediaActionSound.SHUTTER_CLICK);
+        Animation animation = AnimationUtils.loadAnimation(CameraNewActivity.this, R.anim.capture_animation);
+        rootBinding.viewFinder.startAnimation(animation);
         String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
         ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(
                 new File(FileManager.getCameraTmpDir(CameraNewActivity.this) + filename))
@@ -468,6 +566,7 @@ public class CameraNewActivity extends AppCompatActivity {
         Log.d(TAG, "Video recording Finished");
         activeRecording.stop();
         setVideoRecordingState(false);
+        SystemHelper.playSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
         timeWhenStopped = 0;
         cameraUiContainerBinding.chrono.stop();
         cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
@@ -484,6 +583,7 @@ public class CameraNewActivity extends AppCompatActivity {
     private void startVideoRecording() {
         Log.d(TAG, "Video recording Started");
         setVideoRecordingState(true);
+        SystemHelper.playSound(this, MediaActionSound.START_VIDEO_RECORDING);
         startRecording();
         cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
         cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(0f);
@@ -553,12 +653,16 @@ public class CameraNewActivity extends AppCompatActivity {
         if (!isVideoCapture) {
             cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
             cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(0f);
+            cameraUiContainerBinding.repeat.setVisibility(View.VISIBLE);
+            cameraUiContainerBinding.repeat.setAlpha(1f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_video);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter));
         } else {
             cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
             cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(1f);
+            cameraUiContainerBinding.repeat.setVisibility(View.GONE);
+            cameraUiContainerBinding.repeat.setAlpha(0f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video));
@@ -581,6 +685,16 @@ public class CameraNewActivity extends AppCompatActivity {
     private void applyLastAudioEnabled() {
         isAudioEnabled = preferences.getBoolean(AUDIO_PREF, false);
         cameraUiContainerBinding.audioCheckBox.setChecked(isAudioEnabled);
+    }
+
+    private void applyLastTimer() {
+        timerValue = preferences.getInt(TIMER_PREF, 0);
+        updateTimeButton();
+    }
+
+    private void applyLastRepeat() {
+        repeatValue = preferences.getInt(REPEAT_PREF, 1);
+        updateRepeatButton();
     }
 
     private void setFlashMode(int mode) {
@@ -606,6 +720,30 @@ public class CameraNewActivity extends AppCompatActivity {
             cameraUiContainerBinding.flashButton.setImageResource(R.drawable.flash_auto);
         } else if (flashMode == ImageCapture.FLASH_MODE_ON) {
             cameraUiContainerBinding.flashButton.setImageResource(R.drawable.flash_on);
+        }
+    }
+
+    private void updateRepeatButton() {
+        if (repeatValue == 1) {
+            cameraUiContainerBinding.repeat.setImageResource(R.drawable.ic_repeat_off);
+        } else if (repeatValue == 2) {
+            cameraUiContainerBinding.repeat.setImageResource(R.drawable.ic_repeat_2);
+        } else if (repeatValue == 5) {
+            cameraUiContainerBinding.repeat.setImageResource(R.drawable.ic_repeat_5);
+        } else if (repeatValue == 10) {
+            cameraUiContainerBinding.repeat.setImageResource(R.drawable.ic_repeat_10);
+        }
+    }
+
+    private void updateTimeButton() {
+        if (timerValue == 0) {
+            cameraUiContainerBinding.time.setImageResource(R.drawable.ic_timer_off);
+        } else if (timerValue == 2) {
+            cameraUiContainerBinding.time.setImageResource(R.drawable.ic_timer_2);
+        } else if (timerValue == 5) {
+            cameraUiContainerBinding.time.setImageResource(R.drawable.ic_timer_5);
+        } else if (timerValue == 10) {
+            cameraUiContainerBinding.time.setImageResource(R.drawable.ic_timer_10);
         }
     }
 
