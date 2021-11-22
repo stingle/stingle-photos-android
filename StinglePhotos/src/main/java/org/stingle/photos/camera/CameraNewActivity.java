@@ -1,6 +1,9 @@
 package org.stingle.photos.camera;
 
+import static androidx.camera.video.QualitySelector.QUALITY_FHD;
 import static androidx.camera.video.QualitySelector.QUALITY_HD;
+import static androidx.camera.video.QualitySelector.QUALITY_SD;
+import static androidx.camera.video.QualitySelector.QUALITY_UHD;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +22,7 @@ import androidx.camera.video.Recorder;
 import androidx.camera.video.VideoCapture;
 import androidx.camera.video.VideoRecordEvent;
 import androidx.core.content.ContextCompat;
-import androidx.window.WindowManager;
+import androidx.preference.PreferenceManager;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -27,22 +30,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaActionSound;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Display;
+import android.util.Size;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.CompoundButton;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -64,6 +71,7 @@ import org.stingle.photos.databinding.ActivityCameraNewctivityBinding;
 import org.stingle.photos.databinding.CameraUiContainerBinding;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,11 +79,10 @@ import java.util.concurrent.Executors;
 public class CameraNewActivity extends AppCompatActivity {
 
     private static final String TAG = "StingleCamera";
-
-    private static final String AUDIO_PREF = "audio_enableX";
     private static final long IMMERSIVE_FLAG_TIMEOUT = 500L;
 
     private SharedPreferences preferences;
+    private SharedPreferences settings;
     private PermissionHelper permissionHelper;
     private OrientationHelper orientationHelper;
     private MediaSaveHelper mediaSaveHelper;
@@ -83,8 +90,8 @@ public class CameraNewActivity extends AppCompatActivity {
     private CameraToolsHelper cameraToolsHelper;
     private CameraSoundHelper cameraSoundHelper;
     private ExecutorService cameraExecutor;
-    private WindowManager windowManager;
 
+    private CameraImageSize cameraImageSize;
     private ProcessCameraProvider cameraProvider;
     private ImageCapture imageCapture;
     private ImageAnalysis imageAnalyzer;
@@ -92,17 +99,17 @@ public class CameraNewActivity extends AppCompatActivity {
     private ActiveRecording activeRecording;
     private Camera camera;
 
+    private int quality = QUALITY_HD;
     private boolean isVideoCapture = false;
     private boolean isVideoRecording = false;
     private boolean isVideoRecordingStopped = false;
-    private boolean isAudioEnabled = false;
     private long timeWhenStopped = 0;
-    private int displayId = -1;
     private int lensFacing;
     private boolean isCaptureProcess;
 
     private ActivityCameraNewctivityBinding rootBinding;
     private CameraUiContainerBinding cameraUiContainerBinding;
+
 
     private final View.OnClickListener capturePhotoClickListener = v -> {
         if (isVideoCapture) {
@@ -124,13 +131,9 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private final View.OnClickListener modeChangerClickListener = v -> {
         isVideoCapture = !isVideoCapture;
+        applyResolution();
         changePhotoVideoMode();
         bindCameraUseCases();
-    };
-
-    private final CompoundButton.OnCheckedChangeListener audioCheckBoxListener = (compoundButton, b) -> {
-        isAudioEnabled = b;
-        preferences.edit().putBoolean(AUDIO_PREF, isAudioEnabled).apply();
     };
 
     private final View.OnClickListener optionsButtonClickListener = view -> {
@@ -167,8 +170,10 @@ public class CameraNewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Helpers.setLocale(this);
         rootBinding = ActivityCameraNewctivityBinding.inflate(getLayoutInflater());
         preferences = getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, MODE_PRIVATE);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
         setContentView(rootBinding.getRoot());
         setupHelpers();
         setupProperties();
@@ -181,6 +186,13 @@ public class CameraNewActivity extends AppCompatActivity {
         if (LoginManager.checkIfLoggedIn(this)) {
             permissionHelper.requirePermissionsResult(this::startCamera);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        cameraToolsHelper.cancelTimer();
+        isCaptureProcess = false;
     }
 
     @Override
@@ -205,7 +217,9 @@ public class CameraNewActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+        boolean volumeKeysTakePhoto = settings.getBoolean("volume_keys_snap", true);
+        if (volumeKeysTakePhoto &&
+                (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             cameraUiContainerBinding.cameraCaptureButton.callOnClick();
             return true;
         } else {
@@ -230,7 +244,12 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private void setupHelpers() {
         permissionHelper = new PermissionHelper(this);
-        orientationHelper = new OrientationHelper(this);
+        orientationHelper = new OrientationHelper(this, () -> {
+            if (imageCapture != null) {
+                imageCapture.setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX());
+                imageAnalyzer.setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX());
+            }
+        });
         mediaSaveHelper = new MediaSaveHelper(this);
         cameraHelper = new CameraHelper(this);
         cameraToolsHelper = new CameraToolsHelper(this, preferences);
@@ -241,41 +260,11 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private void setupProperties() {
         cameraExecutor = Executors.newSingleThreadExecutor();
-        windowManager = new WindowManager(this);
-        registerDisplayListener();
-    }
-
-    private void registerDisplayListener() {
-        // Every time the orientation of device changes, update rotation for use cases
-        DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
-        displayManager.registerDisplayListener(new DisplayManager.DisplayListener() {
-            @Override
-            public void onDisplayAdded(int displayId) {
-
-            }
-
-            @Override
-            public void onDisplayRemoved(int displayId) {
-
-            }
-
-            @Override
-            public void onDisplayChanged(int displayId) {
-                if (displayId == CameraNewActivity.this.displayId) {
-                    Display display = ((android.view.WindowManager) getSystemService(WINDOW_SERVICE))
-                            .getDefaultDisplay();
-                    imageCapture.setTargetRotation(display.getRotation());
-                    imageAnalyzer.setTargetRotation(display.getRotation());
-
-                }
-            }
-        }, null);
     }
 
     private void startCamera() {
         // Wait for the views to be properly laid out
         rootBinding.viewFinder.post(() -> {
-            displayId = rootBinding.viewFinder.getDisplay().getDisplayId();
             updateCameraUi();
             setUpCamera();
         });
@@ -301,7 +290,6 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.cameraCaptureButton.setOnClickListener(capturePhotoClickListener);
         cameraUiContainerBinding.cameraSwitchButton.setEnabled(false);
         cameraUiContainerBinding.cameraSwitchButton.setOnClickListener(cameraSwitchListener);
-        cameraUiContainerBinding.audioCheckBox.setOnCheckedChangeListener(audioCheckBoxListener);
         cameraUiContainerBinding.photoViewButton.setOnClickListener(photoViewClickListener);
         cameraUiContainerBinding.cameraModeChanger.setOnClickListener(modeChangerClickListener);
         cameraUiContainerBinding.flashButton.setOnClickListener(flashModeClickListener);
@@ -311,9 +299,10 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.repeat.setOnClickListener(repeatButtonClickListener);
         if (isVideoCapture) {
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
+            cameraUiContainerBinding.repeat.setVisibility(View.GONE);
+            cameraUiContainerBinding.repeat.setAlpha(0f);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(this, R.drawable.button_shutter_video));
-            cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
             setVideoRecordingState(false);
 
             mediaSaveHelper.showLastThumb();
@@ -321,35 +310,31 @@ public class CameraNewActivity extends AppCompatActivity {
     }
 
     private void bindCameraUseCases() {
-        // Get screen metrics used to setup camera for full screen resolution
-        Rect metrics = windowManager.getCurrentWindowMetrics().getBounds();
-        int screenAspectRatio = SystemHelper.aspectRatio(metrics.width(), metrics.height());
-        int rotation = rootBinding.viewFinder.getDisplay().getRotation();
-
+        Size size = orientationHelper.isPortrait() ? cameraImageSize.getRevertedSize() : cameraImageSize.getSize();
         // CameraSelector
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
 
         // Preview
         Preview preview = new Preview.Builder()
-                .setTargetAspectRatio(screenAspectRatio)
-                .setTargetRotation(rotation)
+                .setTargetResolution(cameraImageSize.getRevertedSize())
+                .setTargetRotation(Surface.ROTATION_0)
                 .build();
 
         // ImageCapture
         imageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                .setTargetAspectRatio(screenAspectRatio)
-                .setTargetRotation(rotation)
+                .setTargetResolution(size)
+                .setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX())
                 .build();
 
         // ImageAnalysis
         imageAnalyzer = new ImageAnalysis.Builder()
-                .setTargetAspectRatio(screenAspectRatio)
-                .setTargetRotation(rotation)
+                .setTargetResolution(size)
+                .setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX())
                 .build();
 
         Recorder recorder = new Recorder.Builder()
-                .setQualitySelector(QualitySelector.of(QUALITY_HD)) // TODO -> settings
+                .setQualitySelector(QualitySelector.of(quality)) // TODO -> settings
                 .build();
 
         videoCapture = VideoCapture.withOutput(recorder);
@@ -384,7 +369,6 @@ public class CameraNewActivity extends AppCompatActivity {
         mediaSaveHelper.sendCameraStatusBroadcast(true, false);
         mediaSaveHelper.showLastThumb();
         applyLastFlashMode();
-        applyLastAudioEnabled();
         applyLastTimer();
         applyLastRepeat();
         ListenableFuture<ProcessCameraProvider> processCameraProvider =
@@ -401,6 +385,7 @@ public class CameraNewActivity extends AppCompatActivity {
                     throw new IllegalArgumentException("Back and front camera are unavailable");
                 }
                 updateCameraSwitchButton();
+                applyResolution();
                 bindCameraUseCases();
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -415,7 +400,9 @@ public class CameraNewActivity extends AppCompatActivity {
             cameraToolsHelper.startCapturing(cameraUiContainerBinding.timeout, new CameraToolsHelper.OnTimerListener() {
                 @Override
                 public void onTick() {
-                    cameraSoundHelper.playLowSound();
+                    if (settings.getBoolean("sound_enabled", true)) {
+                        cameraSoundHelper.playLowSound();
+                    }
                 }
 
                 @Override
@@ -435,11 +422,14 @@ public class CameraNewActivity extends AppCompatActivity {
             stopVideoRecording();
             return;
         }
+        cameraUiContainerBinding.cameraCaptureButton.setEnabled(false);
         isCaptureProcess = true;
         cameraToolsHelper.startCapturing(cameraUiContainerBinding.timeout, new CameraToolsHelper.OnTimerListener() {
             @Override
             public void onTick() {
-                cameraSoundHelper.playLowSound();
+                if (settings.getBoolean("sound_enabled", true)) {
+                    cameraSoundHelper.playLowSound();
+                }
             }
 
             @Override
@@ -464,6 +454,7 @@ public class CameraNewActivity extends AppCompatActivity {
         } else {
             lensFacing = CameraSelector.LENS_FACING_FRONT;
         }
+        applyResolution();
         bindCameraUseCases();
     }
 
@@ -478,6 +469,7 @@ public class CameraNewActivity extends AppCompatActivity {
                 new File(FileManager.getCameraTmpDir(CameraNewActivity.this) + name)).build();
 
         // configure Recorder and Start recording to the mediaStoreOutput.
+        boolean isAudioEnabled = settings.getBoolean("audio_enabled", true);
         if (isAudioEnabled) {
             activeRecording = videoCapture.getOutput().prepareRecording(this, outputOptions)
                     .withEventListener(
@@ -501,8 +493,12 @@ public class CameraNewActivity extends AppCompatActivity {
     }
 
     private void takePicture() {
+        imageCapture.setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX());
+        imageAnalyzer.setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX());
         Log.d(TAG, "Photo capture Finished");
-        cameraSoundHelper.playSound(MediaActionSound.SHUTTER_CLICK);
+        if (settings.getBoolean("sound_enabled", true)) {
+            cameraSoundHelper.playSound(MediaActionSound.SHUTTER_CLICK);
+        }
         Animation animation = AnimationUtils.loadAnimation(CameraNewActivity.this, R.anim.capture_animation);
         rootBinding.viewFinder.startAnimation(animation);
         String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
@@ -527,12 +523,15 @@ public class CameraNewActivity extends AppCompatActivity {
     }
 
     private void startVideoRecording() {
+        if (settings.getBoolean("sound_enabled", true)) {
+            cameraSoundHelper.playSound(MediaActionSound.START_VIDEO_RECORDING);
+        }
         Log.d(TAG, "Video recording Started");
         setVideoRecordingState(true);
-        cameraSoundHelper.playSound(MediaActionSound.START_VIDEO_RECORDING);
-        startRecording();
-        cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
-        cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(0f);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            startRecording();
+            cameraUiContainerBinding.cameraCaptureButton.setEnabled(true);
+        }, 700L);
         cameraUiContainerBinding.chronoBar.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.INVISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(0f);
@@ -550,11 +549,11 @@ public class CameraNewActivity extends AppCompatActivity {
         Log.d(TAG, "Video recording Finished");
         activeRecording.stop();
         setVideoRecordingState(false);
-        cameraSoundHelper.playSound(MediaActionSound.STOP_VIDEO_RECORDING);
+        if (settings.getBoolean("sound_enabled", true)) {
+            cameraSoundHelper.playSound(MediaActionSound.STOP_VIDEO_RECORDING);
+        }
         timeWhenStopped = 0;
         cameraUiContainerBinding.chrono.stop();
-        cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
-        cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(1f);
         cameraUiContainerBinding.chronoBar.setVisibility(View.INVISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(1f);
@@ -615,16 +614,12 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private void changePhotoVideoMode() {
         if (!isVideoCapture) {
-            cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.GONE);
-            cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(0f);
             cameraUiContainerBinding.repeat.setVisibility(View.VISIBLE);
             cameraUiContainerBinding.repeat.setAlpha(1f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_video);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
                     ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter));
         } else {
-            cameraUiContainerBinding.audioCheckBoxContainer.setVisibility(View.VISIBLE);
-            cameraUiContainerBinding.audioCheckBoxContainer.setAlpha(1f);
             cameraUiContainerBinding.repeat.setVisibility(View.GONE);
             cameraUiContainerBinding.repeat.setAlpha(0f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
@@ -647,11 +642,6 @@ public class CameraNewActivity extends AppCompatActivity {
         mediaSaveHelper.setVideoRecording(isVideoRecording);
     }
 
-    private void applyLastAudioEnabled() {
-        isAudioEnabled = preferences.getBoolean(AUDIO_PREF, false);
-        cameraUiContainerBinding.audioCheckBox.setChecked(isAudioEnabled);
-    }
-
     private void applyLastTimer() {
         cameraToolsHelper.applyLastTimer(
                 iconId -> cameraUiContainerBinding.time.setImageResource(iconId));
@@ -665,5 +655,70 @@ public class CameraNewActivity extends AppCompatActivity {
     private void applyLastFlashMode() {
         cameraToolsHelper.applyLastFlashMode(
                 iconId -> cameraUiContainerBinding.flashButton.setImageResource(iconId));
+    }
+
+    private void applyResolution() {
+        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+            for (String cameraId : manager.getCameraIdList()) {
+
+                CameraCharacteristics cameraCharacteristics = manager.getCameraCharacteristics(cameraId);
+                if (cameraCharacteristics != null) {
+                    if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) != lensFacing) {
+                        continue;
+                    }
+                    StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+                    String sizeIndex = "0";
+                    if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                        if (isVideoCapture) {
+                            sizeIndex = settings.getString("front_video_res", "0");
+                        } else {
+                            sizeIndex = settings.getString("front_photo_res", "0");
+                        }
+                    } else if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+                        if (isVideoCapture) {
+                            sizeIndex = settings.getString("back_video_res", "0");
+                        } else {
+
+                            sizeIndex = settings.getString("back_photo_res", "0");
+                        }
+                    }
+
+                    cameraImageSize = null;
+                    if (isVideoCapture) {
+                        ArrayList<String> videoOutputs = Helpers.parseVideoOutputs(this, map);
+                        if (videoOutputs.size() > 0) {
+                            String qualityString = videoOutputs.get(Integer.parseInt(sizeIndex));
+                            switch (qualityString) {
+                                case "UHD":
+                                    quality = QUALITY_UHD;
+                                    cameraImageSize = new CameraImageSize(this, 3840, 2160);
+                                    break;
+                                case "Full HD":
+                                    quality = QUALITY_FHD;
+                                    cameraImageSize = new CameraImageSize(this, 1920, 1080);
+                                    break;
+                                case "HD":
+                                    quality = QUALITY_HD;
+                                    cameraImageSize = new CameraImageSize(this, 1280, 720);
+                                    break;
+                                case "SD":
+                                    quality = QUALITY_SD;
+                                    cameraImageSize = new CameraImageSize(this, 720, 480);
+                                    break;
+                            }
+                        }
+                    } else {
+                        ArrayList<CameraImageSize> photoOutputs = Helpers.parsePhotoOutputs(this, map);
+                        if (photoOutputs.size() > 0) {
+                            cameraImageSize = photoOutputs.get(Integer.parseInt(sizeIndex));
+                        }
+                    }
+                }
+            }
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
     }
 }

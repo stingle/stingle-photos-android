@@ -33,6 +33,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
             android:layout_marginStart="30dp"
             android:layout_toEndOf="@+id/optionsButton"
             android:src="@drawable/ic_exposure" />
@@ -40,21 +41,21 @@
 
         <ImageView
             android:id="@+id/time"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
             android:layout_marginStart="30dp"
-            android:scaleType="fitCenter"
             android:layout_toEndOf="@+id/exposure_button"
-            android:src="@drawable/ic_timer_off" />
+            android:src="@drawable/ic_time_off" />
 
         <ImageView
             android:id="@+id/repeat"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
             android:layout_marginStart="30dp"
-            android:scaleType="fitCenter"
             android:layout_toEndOf="@+id/time"
             android:src="@drawable/ic_repeat_off" />
 
@@ -117,11 +118,11 @@
     <RelativeLayout
         android:id="@+id/seek_bar_container"
         android:layout_width="wrap_content"
-        android:background="@drawable/chrono_bg"
         android:layout_height="wrap_content"
         android:layout_below="@+id/chronoBar"
         android:layout_centerHorizontal="true"
         android:layout_margin="20dp"
+        android:background="@drawable/chrono_bg"
         android:elevation="1dp"
         android:padding="10dp"
         android:visibility="gone">
@@ -176,36 +177,6 @@
             android:padding="10dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_video" />
-
-        <RelativeLayout
-            android:id="@+id/audio_check_box_container"
-            android:layout_width="60dp"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:layout_toLeftOf="@+id/camera_capture_button"
-            android:layout_toRightOf="@+id/lastPhotoContainer"
-            android:visibility="gone">
-
-            <CheckBox
-                android:id="@+id/audio_check_box"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="30dp"
-                android:buttonTint="#FFFFFF" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/audio_check_box"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="30dp"
-                android:text="@string/audio"
-                android:textAlignment="textStart"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
-        </RelativeLayout>
 
         <ImageButton
             android:id="@+id/camera_capture_button"

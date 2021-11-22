@@ -21,6 +21,11 @@
         app:key="volume_keys_snap"
         app:title="@string/volume_keys_snap" />
 
+    <SwitchPreference
+        app:defaultValue="true"
+        app:key="sound_enabled"
+        app:title="@string/enable_sound" />
+
     <PreferenceCategory app:title="@string/photo">
 
         <ListPreference
@@ -35,6 +40,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/video">
+
+        <SwitchPreference
+            app:defaultValue="true"
+            app:key="audio_enabled"
+            app:title="@string/enable_audio_in_video" />
 
         <ListPreference
             app:key="back_video_res"

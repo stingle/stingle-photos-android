@@ -226,6 +226,8 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="enable_biometrics">Do you want to enable biometric authentication?</string>
     <string name="volume_keys_snap">Take photos using volume keys</string>
+    <string name="enable_audio_in_video">Enable audio in video scanning</string>
+    <string name="enable_sound">Enable shutter sound</string>
     <string name="title_activity_backup_phrase">Backup phrase</string>
     <string name="backup_phrase_desc">Your backup phrase is the most valuable secret of your account. \n\nPlease make sure to back it up in safe place. \n\nIf someone gets this phrase then they can get access to all of your data!</string>
     <string name="biometrics_confirm">Require confirmation</string>

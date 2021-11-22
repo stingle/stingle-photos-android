@@ -3,6 +3,7 @@ package org.stingle.photos.camera.helpers;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.view.OrientationEventListener;
+import android.view.Surface;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -25,6 +26,7 @@ public class OrientationHelper implements LifecycleObserver {
     private static final int ORIENTATION_PORTRAIT_INVERTED = 2;
     private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
     private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
+    private final OnOrientationListener orientationListener;
 
     private WeakReference<CameraUiContainerBinding> cameraUiContainerBindingRef;
     private final WeakReference<Context> contextRef;
@@ -34,12 +36,30 @@ public class OrientationHelper implements LifecycleObserver {
     private int deviceRotation = 0;
     private int overallRotation = 0;
 
-    public OrientationHelper(Context context) {
+    public OrientationHelper(Context context, OnOrientationListener orientationListener) {
         contextRef = new WeakReference<>(context);
+        this.orientationListener = orientationListener;
     }
 
     public void setUI(CameraUiContainerBinding binding) {
         cameraUiContainerBindingRef = new WeakReference<>(binding);
+    }
+    public boolean isPortrait() {
+        return orientation == ORIENTATION_PORTRAIT_NORMAL || orientation == ORIENTATION_PORTRAIT_INVERTED;
+    }
+
+    public int getCurrentDeviceRotationForCameraX() {
+        switch (orientation) {
+            case ORIENTATION_PORTRAIT_NORMAL:
+                return Surface.ROTATION_0;
+            case ORIENTATION_PORTRAIT_INVERTED:
+                return Surface.ROTATION_180;
+            case ORIENTATION_LANDSCAPE_NORMAL:
+                return Surface.ROTATION_90;
+            case ORIENTATION_LANDSCAPE_INVERTED:
+                return Surface.ROTATION_270;
+        }
+        return Surface.ROTATION_0;
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -87,6 +107,9 @@ public class OrientationHelper implements LifecycleObserver {
                     }
 
                     if (lastOrientation != OrientationHelper.this.orientation) {
+                        if (orientationListener != null) {
+                            orientationListener.onOrientationChanged();
+                        }
                         rotateUIElements();
                     }
                 }
@@ -122,7 +145,6 @@ public class OrientationHelper implements LifecycleObserver {
         rotateElement(cameraUiContainerBindingRef.get().flashButton, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().cameraSwitchButton, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().cameraModeChanger, oldOverallRotation, overallRotation1);
-        rotateElement(cameraUiContainerBindingRef.get().audioCheckBoxContainer, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().exposureButton, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().time, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().repeat, oldOverallRotation, overallRotation1);
@@ -312,5 +334,9 @@ public class OrientationHelper implements LifecycleObserver {
         }
 
         return howMuchRotated;
+    }
+
+    public interface OnOrientationListener {
+        void onOrientationChanged();
     }
 }
