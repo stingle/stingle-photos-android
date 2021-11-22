@@ -91,16 +91,16 @@ public class CameraToolsHelper {
     public void onRepeatClick(UIUpdateListener listener) {
         String toastMessage = "";
         if (repeatValue == 1) {
-            toastMessage = "Timer enabled 2 times";
+            toastMessage = contextRef.get().getString(R.string.repeat_enabled_2);
             repeatValue = 2;
         } else if (repeatValue == 2) {
-            toastMessage = "Timer enabled 5 times";
+            toastMessage = contextRef.get().getString(R.string.repeat_enabled_5);
             repeatValue = 5;
         } else if (repeatValue == 5) {
-            toastMessage = "Timer enabled 10 times";
+            toastMessage = contextRef.get().getString(R.string.repeat_enabled_10);
             repeatValue = 10;
         } else if (repeatValue == 10) {
-            toastMessage = "Repeat disabled";
+            toastMessage = contextRef.get().getString(R.string.repeat_disabled);
             repeatValue = 1;
         }
         showToast(toastMessage);
@@ -113,16 +113,16 @@ public class CameraToolsHelper {
     public void onTimerClick(UIUpdateListener listener) {
         String toastMessage = "";
         if (timerValue == 0) {
-            toastMessage = "Timer enabled 2 seconds";
+            toastMessage = contextRef.get().getString(R.string.timer_enabled_2);
             timerValue = 2;
         } else if (timerValue == 2) {
-            toastMessage = "Timer enabled 5 seconds";
+            toastMessage = contextRef.get().getString(R.string.timer_enabled_5);
             timerValue = 5;
         } else if (timerValue == 5) {
-            toastMessage = "Timer enabled 10 seconds";
+            toastMessage = contextRef.get().getString(R.string.timer_enabled_10);
             timerValue = 10;
         } else if (timerValue == 10) {
-            toastMessage = "Timer disabled";
+            toastMessage = contextRef.get().getString(R.string.timer_disabled);
             timerValue = 0;
         }
         showToast(toastMessage);
@@ -136,21 +136,21 @@ public class CameraToolsHelper {
         String toastMessage = "";
         if (!isVideoCapture) {
             if (flashMode == ImageCapture.FLASH_MODE_OFF) {
-                toastMessage = "Flash mode auto";
+                toastMessage = contextRef.get().getString(R.string.flash_mode_auto);
                 setFlashMode(ImageCapture.FLASH_MODE_AUTO);
             } else if (flashMode == ImageCapture.FLASH_MODE_AUTO) {
-                toastMessage = "Flash mode on";
+                toastMessage = contextRef.get().getString(R.string.flash_mode_on);
                 setFlashMode(ImageCapture.FLASH_MODE_ON);
             } else if (flashMode == ImageCapture.FLASH_MODE_ON) {
-                toastMessage = "Flash mode off";
+                toastMessage = contextRef.get().getString(R.string.flash_mode_off);
                 setFlashMode(ImageCapture.FLASH_MODE_OFF);
             }
         } else {
             if (flashMode == ImageCapture.FLASH_MODE_OFF) {
-                toastMessage = "Torch on";
+                toastMessage = contextRef.get().getString(R.string.torch_on);
                 setFlashMode(ImageCapture.FLASH_MODE_ON);
             } else if (flashMode == ImageCapture.FLASH_MODE_ON) {
-                toastMessage = "Torch off";
+                toastMessage = contextRef.get().getString(R.string.torch_off);
                 setFlashMode(ImageCapture.FLASH_MODE_OFF);
             }
         }
@@ -200,7 +200,7 @@ public class CameraToolsHelper {
         } else if (timerValue == 10) {
             return R.drawable.ic_timer_10;
         }
-        return R.drawable.ic_time_off;
+        return R.drawable.ic_timer_off;
     }
 
     private @DrawableRes int updateFlashButton() {

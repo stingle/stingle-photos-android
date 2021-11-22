@@ -14,8 +14,10 @@ import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.camera.CameraImageSize;
 import org.stingle.photos.camera.CameraNewActivity;
 
+import java.util.ArrayList;
 
 public class CameraSettingsActivity extends AppCompatActivity {
 
@@ -45,53 +47,52 @@ public class CameraSettingsActivity extends AppCompatActivity {
 		public void initCameraResolution(){
 			try {
 				CameraManager manager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
-//				if (manager != null) {
-//					for (String cameraId : manager.getCameraIdList()) {
-//						CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-//						Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-//						StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-//
-////						ArrayList<CameraImageSize> imageSizes = Helpers.parsePhotoOutputs(getContext(), map);
-////						ArrayList<CameraImageSize> videoSizes = Helpers.parseVideoOutputs(getContext(), map);
-//
-//						ListPreference photoRes;
-//						ListPreference videoRes;
-//						if(facing == CameraCharacteristics.LENS_FACING_FRONT) {
-//							photoRes = (ListPreference) findPreference("front_photo_res");
-//							videoRes = (ListPreference) findPreference("front_video_res");
-//						}
-//						else {
-//							photoRes = (ListPreference) findPreference("back_photo_res");
-//							videoRes = (ListPreference) findPreference("back_video_res");
-//						}
-//
-//						CharSequence[] imageEntries = new CharSequence[imageSizes.size()];
-//						CharSequence[] imageEntriesValues = new CharSequence[imageSizes.size()];
-//						CharSequence[] videoEntries = new CharSequence[videoSizes.size()];
-//						CharSequence[] videoEntriesValues = new CharSequence[videoSizes.size()];
-//
-//						for(int i=0;i<imageSizes.size();i++){
-//							imageEntries[i] = imageSizes.get(i).getPhotoString();
-//							imageEntriesValues[i] = String.valueOf(i);
-//						}
-//						for(int i=0;i<videoSizes.size();i++){
-//							videoEntries[i] = videoSizes.get(i).getVideoString();
-//							videoEntriesValues[i] = String.valueOf(i);
-//						}
-//						photoRes.setEntries(imageEntries);
-//						photoRes.setEntryValues(imageEntriesValues);
-//						if(photoRes.getValue() == null) {
-//							photoRes.setValueIndex(0);
-//						}
-//
-//						videoRes.setEntries(videoEntries);
-//						videoRes.setEntryValues(videoEntriesValues);
-//						if(videoRes.getValue() == null) {
-//							videoRes.setValueIndex(0);
-//						}
-//
-//					}
-//				}
+				if (manager != null) {
+					for (String cameraId : manager.getCameraIdList()) {
+						CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+						Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+						StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+						ArrayList<CameraImageSize> imageSizes = Helpers.parsePhotoOutputs(getContext(), map);
+						ArrayList<String> videoSizes = Helpers.parseVideoOutputs(getContext(), map);
+						ListPreference photoRes;
+						ListPreference videoRes;
+						if(facing == CameraCharacteristics.LENS_FACING_FRONT) {
+							photoRes = (ListPreference) findPreference("front_photo_res");
+							videoRes = (ListPreference) findPreference("front_video_res");
+						}
+						else {
+							photoRes = (ListPreference) findPreference("back_photo_res");
+							videoRes = (ListPreference) findPreference("back_video_res");
+						}
+
+						CharSequence[] imageEntries = new CharSequence[imageSizes.size()];
+						CharSequence[] imageEntriesValues = new CharSequence[imageSizes.size()];
+						CharSequence[] videoEntries = new CharSequence[videoSizes.size()];
+						CharSequence[] videoEntriesValues = new CharSequence[videoSizes.size()];
+
+						for(int i=0;i<imageSizes.size();i++){
+							imageEntries[i] = imageSizes.get(i).getPhotoString();
+							imageEntriesValues[i] = String.valueOf(i);
+						}
+						for(int i=0;i<videoSizes.size();i++){
+							videoEntries[i] = videoSizes.get(i);
+							videoEntriesValues[i] = String.valueOf(i);
+						}
+						photoRes.setEntries(imageEntries);
+						photoRes.setEntryValues(imageEntriesValues);
+						if(photoRes.getValue() == null) {
+							photoRes.setValueIndex(0);
+						}
+
+						videoRes.setEntries(videoEntries);
+						videoRes.setEntryValues(videoEntriesValues);
+						if(videoRes.getValue() == null) {
+							videoRes.setValueIndex(0);
+						}
+
+					}
+				}
 			}
 			catch (Exception e){}
 		}

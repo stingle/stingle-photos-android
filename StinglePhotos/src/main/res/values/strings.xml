@@ -451,4 +451,17 @@
     <string name="downgrade_question">Downgrade?</string>
     <string name="downgrade_question_desc">Are you sure you want to downgrade to a free plan?</string>
     <string name="audio">Audio</string>
+    <string name="repeat_enabled_2">Repeat enabled 2 times</string>
+    <string name="repeat_enabled_5">Repeat enabled 5 times</string>
+    <string name="repeat_enabled_10">Repeat enabled 10 times</string>
+    <string name="repeat_disabled">Repeat disabled</string>
+    <string name="timer_enabled_2">Timer enabled 2 seconds</string>
+    <string name="timer_enabled_5">Timer enabled 5 seconds</string>
+    <string name="timer_enabled_10">Timer enabled 10 seconds</string>
+    <string name="timer_disabled">Timer disabled</string>
+    <string name="flash_mode_on">Flash mode on</string>
+    <string name="flash_mode_off">Flash mode off</string>
+    <string name="flash_mode_auto">Flash mode auto</string>
+    <string name="torch_on">Torch on</string>
+    <string name="torch_off">Torch off</string>
 </resources>

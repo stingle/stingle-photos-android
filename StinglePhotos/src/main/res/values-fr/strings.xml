@@ -842,4 +842,20 @@
     <string name="downgrade_question">Rétrograder?</string>
     <string name="downgrade_question_desc">Êtes-vous sûr de vouloir déclasser dans un plan gratuit?</string>
     <string name="audio">L\'audio</string>
+    <string name="enable_audio_in_video">Enable audio in video scanning</string>
+    <string name="enable_sound">Activer l\'audio dans l\'analyse vidéo</string>
+
+    <string name="repeat_enabled_2">Répéter activé 2 fois</string>
+    <string name="repeat_enabled_5">Répéter activé 5 fois</string>
+    <string name="repeat_enabled_10">Répéter activé 10 fois</string>
+    <string name="repeat_disabled">Répéter désactivé</string>
+    <string name="timer_enabled_2">Minuterie activée 2 secondes</string>
+    <string name="timer_enabled_5">Minuterie activée 5 secondes</string>
+    <string name="timer_enabled_10">Minuterie activée 10 secondes</string>
+    <string name="timer_disabled">Minuterie désactivée</string>
+    <string name="flash_mode_on">Mode flash activé</string>
+    <string name="flash_mode_off">Mode flash désactivé</string>
+    <string name="flash_mode_auto">Flash mode auto</string>
+    <string name="torch_on">Torche allumée</string>
+    <string name="torch_off">Torche éteinte</string>
 </resources>

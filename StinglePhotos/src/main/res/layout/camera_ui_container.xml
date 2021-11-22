@@ -47,7 +47,7 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="30dp"
             android:layout_toEndOf="@+id/exposure_button"
-            android:src="@drawable/ic_time_off" />
+            android:src="@drawable/ic_timer_off" />
 
         <ImageView
             android:id="@+id/repeat"

@@ -447,4 +447,20 @@
     <string name="downgrade_question">Downgrade?</string>
     <string name="downgrade_question_desc">Sind Sie sicher, dass Sie sicher, dass Sie zu einem kostenlosen Plan herabstufen möchten?</string>
     <string name="audio">Audio</string>
+    <string name="enable_audio_in_video">Audio beim Videoscan aktivieren</string>
+    <string name="enable_sound">Auslöserton aktivieren</string>
+
+    <string name="repeat_enabled_2">Wiederholen 2 Mal aktiviert</string>
+    <string name="repeat_enabled_5">Wiederholen 5 Mal aktiviert</string>
+    <string name="repeat_enabled_10">Wiederholen 10 Mal aktiviert</string>
+    <string name="repeat_disabled">Wiederholen deaktiviert</string>
+    <string name="timer_enabled_2">Timer aktiviert 2 Sekunden</string>
+    <string name="timer_enabled_5">Timer aktiviert 5 Sekunden</string>
+    <string name="timer_enabled_10">Timer aktiviert 10 Sekunden</string>
+    <string name="timer_disabled">Timer deaktiviert</string>
+    <string name="flash_mode_on">Blitzmodus an</string>
+    <string name="flash_mode_off">Blitzmodus aus</string>
+    <string name="flash_mode_auto">Blitzautomatikmodus</string>
+    <string name="torch_on">Fackel an</string>
+    <string name="torch_off">Fackel aus</string>
 </resources>
