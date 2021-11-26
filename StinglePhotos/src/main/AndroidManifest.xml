@@ -62,6 +62,7 @@
         <activity
             android:name=".GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -152,6 +153,7 @@
             android:icon="@mipmap/ic_stingle_camera"
             android:label="@string/camera"
             android:launchMode="singleInstance"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:theme="@style/AppTheme">
@@ -218,6 +220,7 @@
         <receiver
             android:name=".Sync.BootCompleteReceiver"
             android:enabled="true"
+            android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
