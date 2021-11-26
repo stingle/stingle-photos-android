@@ -218,7 +218,7 @@ public class CameraNewActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean volumeKeysTakePhoto = settings.getBoolean("volume_keys_snap", true);
-        if (volumeKeysTakePhoto &&
+        if (volumeKeysTakePhoto && !isCaptureProcess &&
                 (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             cameraUiContainerBinding.cameraCaptureButton.callOnClick();
             return true;
@@ -324,6 +324,7 @@ public class CameraNewActivity extends AppCompatActivity {
         imageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 .setTargetResolution(size)
+                .setFlashMode(cameraToolsHelper.getFlashMode())
                 .setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX())
                 .build();
 

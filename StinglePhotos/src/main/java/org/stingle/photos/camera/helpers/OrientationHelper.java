@@ -32,7 +32,7 @@ public class OrientationHelper implements LifecycleObserver {
     private final WeakReference<Context> contextRef;
 
     private OrientationEventListener orientationEventListener;
-    private int orientation = -1;
+    private int orientation = 1;
     private int deviceRotation = 0;
     private int overallRotation = 0;
 
