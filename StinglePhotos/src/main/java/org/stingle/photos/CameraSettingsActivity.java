@@ -14,8 +14,8 @@ import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.camera.CameraImageSize;
-import org.stingle.photos.camera.CameraNewActivity;
+import org.stingle.photos.camera.helpers.CameraImageSizeHelper;
+import org.stingle.photos.camera.models.CameraImageSize;
 
 import java.util.ArrayList;
 
@@ -53,8 +53,8 @@ public class CameraSettingsActivity extends AppCompatActivity {
 						Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
 						StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-						ArrayList<CameraImageSize> imageSizes = Helpers.parsePhotoOutputs(getContext(), map);
-						ArrayList<String> videoSizes = Helpers.parseVideoOutputs(getContext(), map);
+						ArrayList<CameraImageSize> imageSizes = CameraImageSizeHelper.parsePhotoOutputs(getContext(), map);
+						ArrayList<String> videoSizes = CameraImageSizeHelper.parseVideoOutputs(getContext(), map);
 						ListPreference photoRes;
 						ListPreference videoRes;
 						if(facing == CameraCharacteristics.LENS_FACING_FRONT) {

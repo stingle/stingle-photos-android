@@ -66,7 +66,6 @@ import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.camera.CameraNewActivity;
 
 import java.io.File;
 import java.util.ArrayList;

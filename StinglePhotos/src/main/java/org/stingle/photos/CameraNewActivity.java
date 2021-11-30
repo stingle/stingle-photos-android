@@ -1,9 +1,4 @@
-package org.stingle.photos.camera;
-
-import static androidx.camera.video.QualitySelector.QUALITY_FHD;
-import static androidx.camera.video.QualitySelector.QUALITY_HD;
-import static androidx.camera.video.QualitySelector.QUALITY_SD;
-import static androidx.camera.video.QualitySelector.QUALITY_UHD;
+package org.stingle.photos;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,15 +21,11 @@ import androidx.preference.PreferenceManager;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaActionSound;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,24 +45,21 @@ import android.view.animation.AnimationUtils;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.stingle.photos.Auth.LoginManager;
-import org.stingle.photos.CameraSettingsActivity;
 import org.stingle.photos.Files.FileManager;
-import org.stingle.photos.R;
-import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.ViewItemActivity;
 import org.stingle.photos.camera.helpers.CameraHelper;
+import org.stingle.photos.camera.helpers.CameraImageSizeHelper;
 import org.stingle.photos.camera.helpers.CameraSoundHelper;
 import org.stingle.photos.camera.helpers.MediaSaveHelper;
 import org.stingle.photos.camera.helpers.OrientationHelper;
 import org.stingle.photos.camera.helpers.PermissionHelper;
 import org.stingle.photos.camera.helpers.SystemHelper;
 import org.stingle.photos.camera.helpers.CameraToolsHelper;
+import org.stingle.photos.camera.models.CameraImageSize;
 import org.stingle.photos.databinding.ActivityCameraNewctivityBinding;
 import org.stingle.photos.databinding.CameraUiContainerBinding;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,7 +69,6 @@ public class CameraNewActivity extends AppCompatActivity {
     private static final String TAG = "StingleCamera";
     private static final long IMMERSIVE_FLAG_TIMEOUT = 500L;
 
-    private SharedPreferences preferences;
     private SharedPreferences settings;
     private PermissionHelper permissionHelper;
     private OrientationHelper orientationHelper;
@@ -89,9 +76,9 @@ public class CameraNewActivity extends AppCompatActivity {
     private CameraHelper cameraHelper;
     private CameraToolsHelper cameraToolsHelper;
     private CameraSoundHelper cameraSoundHelper;
+    private CameraImageSizeHelper cameraImageSizeHelper;
     private ExecutorService cameraExecutor;
 
-    private CameraImageSize cameraImageSize;
     private ProcessCameraProvider cameraProvider;
     private ImageCapture imageCapture;
     private ImageAnalysis imageAnalyzer;
@@ -99,7 +86,6 @@ public class CameraNewActivity extends AppCompatActivity {
     private ActiveRecording activeRecording;
     private Camera camera;
 
-    private int quality = QUALITY_HD;
     private boolean isVideoCapture = false;
     private boolean isVideoRecording = false;
     private boolean isVideoRecordingStopped = false;
@@ -109,7 +95,6 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private ActivityCameraNewctivityBinding rootBinding;
     private CameraUiContainerBinding cameraUiContainerBinding;
-
 
     private final View.OnClickListener capturePhotoClickListener = v -> {
         if (isVideoCapture) {
@@ -172,8 +157,6 @@ public class CameraNewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Helpers.setLocale(this);
         rootBinding = ActivityCameraNewctivityBinding.inflate(getLayoutInflater());
-        preferences = getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, MODE_PRIVATE);
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
         setContentView(rootBinding.getRoot());
         setupHelpers();
         setupProperties();
@@ -243,7 +226,9 @@ public class CameraNewActivity extends AppCompatActivity {
     }
 
     private void setupHelpers() {
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
         permissionHelper = new PermissionHelper(this);
+        cameraImageSizeHelper = new CameraImageSizeHelper(this, settings);
         orientationHelper = new OrientationHelper(this, () -> {
             if (imageCapture != null) {
                 imageCapture.setTargetRotation(orientationHelper.getCurrentDeviceRotationForCameraX());
@@ -252,7 +237,7 @@ public class CameraNewActivity extends AppCompatActivity {
         });
         mediaSaveHelper = new MediaSaveHelper(this);
         cameraHelper = new CameraHelper(this);
-        cameraToolsHelper = new CameraToolsHelper(this, preferences);
+        cameraToolsHelper = new CameraToolsHelper(this, settings);
         cameraSoundHelper = new CameraSoundHelper(this);
         getLifecycle().addObserver(orientationHelper);
         getLifecycle().addObserver(mediaSaveHelper);
@@ -310,6 +295,7 @@ public class CameraNewActivity extends AppCompatActivity {
     }
 
     private void bindCameraUseCases() {
+        CameraImageSize cameraImageSize = cameraImageSizeHelper.calculateCameraImageSize(lensFacing, isVideoCapture);
         Size size = orientationHelper.isPortrait() ? cameraImageSize.getRevertedSize() : cameraImageSize.getSize();
         // CameraSelector
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
@@ -335,7 +321,7 @@ public class CameraNewActivity extends AppCompatActivity {
                 .build();
 
         Recorder recorder = new Recorder.Builder()
-                .setQualitySelector(QualitySelector.of(quality)) // TODO -> settings
+                .setQualitySelector(QualitySelector.of(cameraImageSizeHelper.getQuality())) // TODO -> settings
                 .build();
 
         videoCapture = VideoCapture.withOutput(recorder);
@@ -509,11 +495,14 @@ public class CameraNewActivity extends AppCompatActivity {
         imageCapture.takePicture(outputOptions, cameraExecutor, new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                File file = new File(outputFileResults.getSavedUri().getPath());
-                if (!LoginManager.isKeyInMemory() && !isVideoRecording) {
-                    mediaSaveHelper.getThumbIntoMemory(file, false);
+                Uri savedUri = outputFileResults.getSavedUri();
+                if (savedUri != null) {
+                    File file = new File(savedUri.getPath());
+                    if (!LoginManager.isKeyInMemory() && !isVideoRecording) {
+                        mediaSaveHelper.getThumbIntoMemory(file, false);
+                    }
+                    mediaSaveHelper.sendNewMediaBroadcast(file);
                 }
-                mediaSaveHelper.sendNewMediaBroadcast(file);
             }
 
             @Override
@@ -659,67 +648,6 @@ public class CameraNewActivity extends AppCompatActivity {
     }
 
     private void applyResolution() {
-        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        try {
-            for (String cameraId : manager.getCameraIdList()) {
 
-                CameraCharacteristics cameraCharacteristics = manager.getCameraCharacteristics(cameraId);
-                if (cameraCharacteristics != null) {
-                    if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) != lensFacing) {
-                        continue;
-                    }
-                    StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-
-                    String sizeIndex = "0";
-                    if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-                        if (isVideoCapture) {
-                            sizeIndex = settings.getString("front_video_res", "0");
-                        } else {
-                            sizeIndex = settings.getString("front_photo_res", "0");
-                        }
-                    } else if (lensFacing == CameraSelector.LENS_FACING_BACK) {
-                        if (isVideoCapture) {
-                            sizeIndex = settings.getString("back_video_res", "0");
-                        } else {
-
-                            sizeIndex = settings.getString("back_photo_res", "0");
-                        }
-                    }
-
-                    cameraImageSize = null;
-                    if (isVideoCapture) {
-                        ArrayList<String> videoOutputs = Helpers.parseVideoOutputs(this, map);
-                        if (videoOutputs.size() > 0) {
-                            String qualityString = videoOutputs.get(Integer.parseInt(sizeIndex));
-                            switch (qualityString) {
-                                case "UHD":
-                                    quality = QUALITY_UHD;
-                                    cameraImageSize = new CameraImageSize(this, 3840, 2160);
-                                    break;
-                                case "Full HD":
-                                    quality = QUALITY_FHD;
-                                    cameraImageSize = new CameraImageSize(this, 1920, 1080);
-                                    break;
-                                case "HD":
-                                    quality = QUALITY_HD;
-                                    cameraImageSize = new CameraImageSize(this, 1280, 720);
-                                    break;
-                                case "SD":
-                                    quality = QUALITY_SD;
-                                    cameraImageSize = new CameraImageSize(this, 720, 480);
-                                    break;
-                            }
-                        }
-                    } else {
-                        ArrayList<CameraImageSize> photoOutputs = Helpers.parsePhotoOutputs(this, map);
-                        if (photoOutputs.size() > 0) {
-                            cameraImageSize = photoOutputs.get(Integer.parseInt(sizeIndex));
-                        }
-                    }
-                }
-            }
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
     }
 }

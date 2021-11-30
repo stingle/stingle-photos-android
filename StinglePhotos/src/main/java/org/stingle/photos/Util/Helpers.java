@@ -12,13 +12,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -41,7 +38,6 @@ import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
-import org.stingle.photos.camera.CameraImageSize;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -53,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -360,38 +355,6 @@ public class Helpers {
 		catch (IOException e){
 			return "";
 		}
-	}
-
-	public static ArrayList<String> parseVideoOutputs(Context context, StreamConfigurationMap map){
-		ArrayList<String> videoSizes = new ArrayList<>();
-
-		android.util.Size [] cameraVideoSizes = map.getOutputSizes(MediaRecorder.class);
-		for(android.util.Size size : cameraVideoSizes) {
-			/*if( size.getWidth() > 4096 || size.getHeight() > 2160 || size.getHeight() < 480) {
-				continue; // Nexus 6 returns these, even though not supported?!
-			}*/
-			String quality = new CameraImageSize(context, size.getWidth(), size.getHeight()).getQuality();
-			if (!quality.isEmpty() && !videoSizes.contains(quality)) {
-				videoSizes.add(quality);
-			}
-		}
-		return videoSizes;
-	}
-
-	public static ArrayList<CameraImageSize> parsePhotoOutputs(Context context, StreamConfigurationMap map){
-		ArrayList<CameraImageSize> photoSizes = new ArrayList<>();
-
-		android.util.Size [] cameraPhotoSizes = map.getOutputSizes(ImageFormat.JPEG);
-		for(android.util.Size size : cameraPhotoSizes) {
-			CameraImageSize photoSize = new CameraImageSize(context, size.getWidth(), size.getHeight());
-			if(photoSize.megapixel < 0.9){
-				continue;
-			}
-			photoSizes.add(photoSize);
-		}
-		Collections.sort(photoSizes, new CameraImageSize.SizeSorter());
-
-		return photoSizes;
 	}
 
 	public final static boolean isValidEmail(CharSequence target) {
