@@ -116,7 +116,6 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private final View.OnClickListener modeChangerClickListener = v -> {
         isVideoCapture = !isVideoCapture;
-        applyResolution();
         changePhotoVideoMode();
         bindCameraUseCases();
     };
@@ -321,12 +320,10 @@ public class CameraNewActivity extends AppCompatActivity {
                 .build();
 
         Recorder recorder = new Recorder.Builder()
-                .setQualitySelector(QualitySelector.of(cameraImageSizeHelper.getQuality())) // TODO -> settings
+                .setQualitySelector(QualitySelector.of(cameraImageSizeHelper.getQuality()))
                 .build();
 
         videoCapture = VideoCapture.withOutput(recorder);
-
-        // TODO -> imageAnalyzer.setAnalyzer(cameraExecutor, new LuminosityAnalyzer { luma ->
 
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll();
@@ -372,7 +369,6 @@ public class CameraNewActivity extends AppCompatActivity {
                     throw new IllegalArgumentException("Back and front camera are unavailable");
                 }
                 updateCameraSwitchButton();
-                applyResolution();
                 bindCameraUseCases();
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -441,7 +437,6 @@ public class CameraNewActivity extends AppCompatActivity {
         } else {
             lensFacing = CameraSelector.LENS_FACING_FRONT;
         }
-        applyResolution();
         bindCameraUseCases();
     }
 
@@ -645,9 +640,5 @@ public class CameraNewActivity extends AppCompatActivity {
     private void applyLastFlashMode() {
         cameraToolsHelper.applyLastFlashMode(
                 iconId -> cameraUiContainerBinding.flashButton.setImageResource(iconId));
-    }
-
-    private void applyResolution() {
-
     }
 }
