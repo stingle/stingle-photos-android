@@ -1,4 +1,4 @@
-package org.stingle.photos.camera.helpers;
+package org.stingle.photos.CameraX.helpers;
 
 import android.content.Context;
 import android.hardware.SensorManager;

@@ -1,4 +1,4 @@
-package org.stingle.photos.camera.helpers;
+package org.stingle.photos.CameraX.helpers;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

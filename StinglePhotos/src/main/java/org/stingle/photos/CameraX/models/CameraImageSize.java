@@ -1,4 +1,4 @@
-package org.stingle.photos.camera.models;
+package org.stingle.photos.CameraX.models;
 
 import android.content.Context;
 import android.util.Rational;

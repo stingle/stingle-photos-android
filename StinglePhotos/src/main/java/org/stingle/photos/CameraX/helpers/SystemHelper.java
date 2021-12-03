@@ -1,4 +1,4 @@
-package org.stingle.photos.camera.helpers;
+package org.stingle.photos.CameraX.helpers;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.max;

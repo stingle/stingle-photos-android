@@ -1,4 +1,4 @@
-package org.stingle.photos.camera.helpers;
+package org.stingle.photos.CameraX.helpers;
 
 import static androidx.camera.video.QualitySelector.QUALITY_FHD;
 import static androidx.camera.video.QualitySelector.QUALITY_HD;
@@ -16,7 +16,7 @@ import android.media.MediaRecorder;
 
 import androidx.camera.core.CameraSelector;
 
-import org.stingle.photos.camera.models.CameraImageSize;
+import org.stingle.photos.CameraX.models.CameraImageSize;
 
 import java.util.ArrayList;
 import java.util.Collections;

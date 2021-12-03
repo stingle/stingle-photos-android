@@ -14,8 +14,8 @@ import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.stingle.photos.Util.Helpers;
-import org.stingle.photos.camera.helpers.CameraImageSizeHelper;
-import org.stingle.photos.camera.models.CameraImageSize;
+import org.stingle.photos.CameraX.helpers.CameraImageSizeHelper;
+import org.stingle.photos.CameraX.models.CameraImageSize;
 
 import java.util.ArrayList;
 
