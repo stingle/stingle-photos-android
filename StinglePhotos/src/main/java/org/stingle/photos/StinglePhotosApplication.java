@@ -98,6 +98,6 @@ public class StinglePhotosApplication extends Application{
 	}
 
 	public static String getApiUrl(){
-		return "https://api.stingle.org/" + "v" + StinglePhotosApplication.API_VERSION + "/";
+		return context.getString(R.string.api_server_url) + "v" + StinglePhotosApplication.API_VERSION + "/";
 	}
 }
