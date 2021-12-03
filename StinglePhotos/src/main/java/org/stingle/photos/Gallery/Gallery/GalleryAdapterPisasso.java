@@ -497,7 +497,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			selectedIndices.add(index);
 		}
 		notifyItemChanged(index);
-		notifyItemChanged(datePositionsPlain.get(getItemDatePosition(index)));
+		int pos = getItemDatePosition(index);
+		if (pos >= 0 && pos < datePositionsPlain.size()) {
+			notifyItemChanged(datePositionsPlain.get(pos));
+		}
 		if (callback != null) {
 			callback.onSelectionChanged(selectedIndices.size());
 		}
