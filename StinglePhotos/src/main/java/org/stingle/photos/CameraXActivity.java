@@ -56,7 +56,7 @@ import org.stingle.photos.CameraX.helpers.PermissionHelper;
 import org.stingle.photos.CameraX.helpers.SystemHelper;
 import org.stingle.photos.CameraX.helpers.CameraToolsHelper;
 import org.stingle.photos.CameraX.models.CameraImageSize;
-import org.stingle.photos.databinding.ActivityCameraNewctivityBinding;
+import org.stingle.photos.databinding.ActivityCameraXBinding;
 import org.stingle.photos.databinding.CameraUiContainerBinding;
 
 import java.io.File;
@@ -64,7 +64,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CameraNewActivity extends AppCompatActivity {
+public class CameraXActivity extends AppCompatActivity {
 
     private static final String TAG = "StingleCamera";
     private static final long IMMERSIVE_FLAG_TIMEOUT = 500L;
@@ -93,7 +93,7 @@ public class CameraNewActivity extends AppCompatActivity {
     private int lensFacing;
     private boolean isCaptureProcess;
 
-    private ActivityCameraNewctivityBinding rootBinding;
+    private ActivityCameraXBinding rootBinding;
     private CameraUiContainerBinding cameraUiContainerBinding;
 
     private final View.OnClickListener capturePhotoClickListener = v -> {
@@ -122,7 +122,7 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private final View.OnClickListener optionsButtonClickListener = view -> {
         Intent intent = new Intent();
-        intent.setClass(CameraNewActivity.this, CameraSettingsActivity.class);
+        intent.setClass(CameraXActivity.this, CameraSettingsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
     };
@@ -155,7 +155,7 @@ public class CameraNewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Helpers.setLocale(this);
-        rootBinding = ActivityCameraNewctivityBinding.inflate(getLayoutInflater());
+        rootBinding = ActivityCameraXBinding.inflate(getLayoutInflater());
         setContentView(rootBinding.getRoot());
         setupHelpers();
         setupProperties();
@@ -448,7 +448,7 @@ public class CameraNewActivity extends AppCompatActivity {
         contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, name);
 
         FileOutputOptions outputOptions = new FileOutputOptions.Builder(
-                new File(FileManager.getCameraTmpDir(CameraNewActivity.this) + name)).build();
+                new File(FileManager.getCameraTmpDir(CameraXActivity.this) + name)).build();
 
         // configure Recorder and Start recording to the mediaStoreOutput.
         boolean isAudioEnabled = settings.getBoolean("audio_enabled", true);
@@ -481,11 +481,11 @@ public class CameraNewActivity extends AppCompatActivity {
         if (settings.getBoolean("sound_enabled", true)) {
             cameraSoundHelper.playSound(MediaActionSound.SHUTTER_CLICK);
         }
-        Animation animation = AnimationUtils.loadAnimation(CameraNewActivity.this, R.anim.capture_animation);
+        Animation animation = AnimationUtils.loadAnimation(CameraXActivity.this, R.anim.capture_animation);
         rootBinding.viewFinder.startAnimation(animation);
         String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
         ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(
-                new File(FileManager.getCameraTmpDir(CameraNewActivity.this) + filename))
+                new File(FileManager.getCameraTmpDir(CameraXActivity.this) + filename))
                 .build();
         imageCapture.takePicture(outputOptions, cameraExecutor, new ImageCapture.OnImageSavedCallback() {
             @Override
@@ -521,11 +521,11 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.INVISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(0f);
         cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video_active));
+                ContextCompat.getDrawable(CameraXActivity.this, R.drawable.button_shutter_video_active));
         cameraUiContainerBinding.photoViewButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter));
+                ContextCompat.getDrawable(CameraXActivity.this, R.drawable.button_shutter));
         cameraUiContainerBinding.cameraSwitchButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.ic_pause));
+                ContextCompat.getDrawable(CameraXActivity.this, R.drawable.ic_pause));
         cameraUiContainerBinding.chrono.setBase(SystemClock.elapsedRealtime());
         cameraUiContainerBinding.chrono.start();
     }
@@ -543,14 +543,14 @@ public class CameraNewActivity extends AppCompatActivity {
         cameraUiContainerBinding.cameraModeChanger.setVisibility(View.VISIBLE);
         cameraUiContainerBinding.cameraModeChanger.setAlpha(1f);
         cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video));
+                ContextCompat.getDrawable(CameraXActivity.this, R.drawable.button_shutter_video));
         cameraUiContainerBinding.cameraSwitchButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.ic_flip_camera));
+                ContextCompat.getDrawable(CameraXActivity.this, R.drawable.ic_flip_camera));
     }
 
     private void pauseVideoRecording() {
         cameraUiContainerBinding.cameraSwitchButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.ic_start));
+                ContextCompat.getDrawable(CameraXActivity.this, R.drawable.ic_start));
         isVideoRecordingStopped = true;
         timeWhenStopped = cameraUiContainerBinding.chrono.getBase() - SystemClock.elapsedRealtime();
         cameraUiContainerBinding.chrono.stop();
@@ -559,7 +559,7 @@ public class CameraNewActivity extends AppCompatActivity {
 
     private void resumeVideoRecording() {
         cameraUiContainerBinding.cameraSwitchButton.setImageDrawable(
-                ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.ic_pause));
+                ContextCompat.getDrawable(CameraXActivity.this, R.drawable.ic_pause));
         isVideoRecordingStopped = false;
         activeRecording.resume();
         cameraUiContainerBinding.chrono.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
@@ -603,13 +603,13 @@ public class CameraNewActivity extends AppCompatActivity {
             cameraUiContainerBinding.repeat.setAlpha(1f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_video);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
-                    ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter));
+                    ContextCompat.getDrawable(CameraXActivity.this, R.drawable.button_shutter));
         } else {
             cameraUiContainerBinding.repeat.setVisibility(View.GONE);
             cameraUiContainerBinding.repeat.setAlpha(0f);
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.cameraCaptureButton.setImageDrawable(
-                    ContextCompat.getDrawable(CameraNewActivity.this, R.drawable.button_shutter_video));
+                    ContextCompat.getDrawable(CameraXActivity.this, R.drawable.button_shutter_video));
             cameraToolsHelper.setFlashMode(ImageCapture.FLASH_MODE_OFF);
             applyLastFlashMode();
         }
@@ -618,7 +618,7 @@ public class CameraNewActivity extends AppCompatActivity {
     private void openGallery() {
         Log.d(TAG, "photoViewButton Clicked ");
         Intent intent = new Intent();
-        intent.setClass(CameraNewActivity.this, ViewItemActivity.class);
+        intent.setClass(CameraXActivity.this, ViewItemActivity.class);
         startActivity(intent);
     }
 

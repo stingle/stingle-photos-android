@@ -107,7 +107,7 @@ public class CameraSettingsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         Intent intent = new Intent();
-        intent.setClass(CameraSettingsActivity.this, CameraNewActivity.class);
+        intent.setClass(CameraSettingsActivity.this, CameraXActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
     }

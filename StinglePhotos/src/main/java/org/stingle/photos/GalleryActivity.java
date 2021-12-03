@@ -830,7 +830,7 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_camera) {
 			Intent intent = new Intent();
-			intent.setClass(this, CameraNewActivity.class);
+			intent.setClass(this, CameraXActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
