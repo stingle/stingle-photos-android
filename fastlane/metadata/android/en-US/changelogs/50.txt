@@ -1,0 +1,4 @@
+* Android 12 support
+* Long press on a date to select all items in that date
+* Increased thumbnail size for better quality previews
+* Bugfixes

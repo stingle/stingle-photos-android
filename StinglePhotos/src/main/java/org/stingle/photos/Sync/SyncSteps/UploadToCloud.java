@@ -1,5 +1,7 @@
 package org.stingle.photos.Sync.SyncSteps;
 
+import static android.content.Context.BATTERY_SERVICE;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -39,8 +41,6 @@ import org.stingle.photos.Util.Helpers;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static android.content.Context.BATTERY_SERVICE;
 
 public class UploadToCloud {
 
@@ -337,7 +337,7 @@ public class UploadToCloud {
 		}
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				new Intent(context, GalleryActivity.class), 0);
+				new Intent(context, GalleryActivity.class), PendingIntent.FLAG_IMMUTABLE);
 
 		Notification notification = notificationBuilder
 				.setSmallIcon(R.drawable.ic_sp)  // the status icon

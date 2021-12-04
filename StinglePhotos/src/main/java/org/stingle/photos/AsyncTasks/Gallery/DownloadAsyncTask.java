@@ -144,7 +144,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Void, Void> {
 		}
 
 		PendingIntent contentIntent = PendingIntent.getActivity(myContext, 0,
-				new Intent(myContext, GalleryActivity.class), 0);
+				new Intent(myContext, GalleryActivity.class), PendingIntent.FLAG_IMMUTABLE);
 
 		Notification notification = notificationBuilder
 				.setSmallIcon(R.drawable.ic_cloud_download)  // the status icon
