@@ -91,6 +91,9 @@ public class MediaSaveHelper implements LifecycleObserver {
     }
 
     public void getThumbIntoMemory(File file, boolean isVideo) {
+        if (LoginManager.isLoggedIn(activityRef.get())) {
+            return;
+        }
         (new GetThumbFromPlainFile(activityRef.get(), file).setThumbSize(thumbSize)
                 .setIsVideo(isVideo).setOnFinish(new OnAsyncTaskFinish() {
                     @Override
