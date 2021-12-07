@@ -60,7 +60,7 @@ public class Helpers {
 	public static final String IMAGE_FILE_PREFIX = "IMG_";
 	public static final String VIDEO_FILE_PREFIX = "VID_";
 	protected static final int SHARE_DECRYPT = 0;
-	public static final int THUMB_SIZE = 350;
+	public static final int THUMB_SIZE = 800;
 	private static PowerManager.WakeLock wakelock;
 
 

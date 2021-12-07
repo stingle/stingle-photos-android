@@ -293,7 +293,7 @@ public class MediaEncryptService extends Service {
 		}
 
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				new Intent(this, GalleryActivity.class), 0);
+				new Intent(this, GalleryActivity.class), PendingIntent.FLAG_IMMUTABLE);
 
 		Notification notification = notificationBuilder
 				.setSmallIcon(R.drawable.ic_sp)  // the status icon

@@ -146,16 +146,43 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			return true;
 		}
 	}
-	public class GalleryDate extends RecyclerView.ViewHolder {
+	public class GalleryDate extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 		public RelativeLayout layout;
 		public TextView text;
+		public CheckBox checkbox;
 
 		public GalleryDate(RelativeLayout v) {
 			super(v);
 			layout = v;
 			text = v.findViewById(R.id.text);
+			text.setOnLongClickListener(this);
+			checkbox = v.findViewById(R.id.checkBox);
+			checkbox.setOnClickListener(this);
 		}
 
+		@Override
+		public void onClick(View v) {
+			int index = getAdapterPosition();
+			if(isSelectModeActive) {
+				setSelectionInDate(index, !isAllItemsSelectedInDate(index));
+			}
+		}
+
+		@Override
+		public boolean onLongClick(View v) {
+			int index = getAdapterPosition();
+			if(!isSelectModeActive) {
+				setSelectionModeActive(true);
+				if(callback != null){
+					callback.onLongClick(index);
+				}
+				setSelectionInDate(index, true);
+			}
+			else{
+				setSelectionInDate(index, !isAllItemsSelectedInDate(index));
+			}
+			return true;
+		}
 	}
 
 	public interface Listener {
@@ -164,7 +191,40 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		void onSelectionChanged(int count);
 	}
 
-	protected class PosTranslate{
+	protected boolean isAllItemsSelectedInDate(int dateIndex){
+		boolean isAllSelected = true;
+		int endIndex = getEndIndexOfDate(dateIndex);
+		for(int i=dateIndex+1;i<endIndex; i++){
+			if(!selectedIndices.contains(i)){
+				isAllSelected = false;
+			}
+		}
+
+		return isAllSelected;
+	}
+
+	protected void setSelectionInDate(int dateIndex, boolean switchTo){
+		int endIndex = getEndIndexOfDate(dateIndex);
+
+		for(int i=dateIndex+1;i<endIndex; i++){
+			setSelected(i, switchTo);
+		}
+	}
+
+	protected int getEndIndexOfDate(int dateIndex){
+		int itemNum = datePositionsPlain.indexOf(dateIndex);
+		int datesNextIndex = datePositionsPlain.size() - 1;
+		if(datePositionsPlain.size()-1 > itemNum){
+			datesNextIndex = itemNum+1;
+			return datePositionsPlain.get(datesNextIndex);
+		}
+		else{
+			return getItemCount();
+		}
+
+	}
+
+	protected static class PosTranslate{
 		public int type;
 		public int dbPosition;
 		public String date = null;
@@ -206,6 +266,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return datePositions.containsKey(position);
 	}
 
+	private int getItemDatePosition(int index){
+		return (-Collections.binarySearch(datePositionsPlain, index) - 2);
+	}
+
 	private PosTranslate translatePos(int pos){
 		if(datePositions.containsKey(pos)){
 			PosTranslate posObj = new PosTranslate();
@@ -241,11 +305,9 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		return getPositionFromDate(convertDate(getDbDate(date)));
 	}
 	public int getPositionFromDate(String date){
-		if(datePositions != null) {
-			Integer result = Helpers.getKeyByValue(datePositions, date);
-			if(result != null){
-				return result;
-			}
+		Integer result = Helpers.getKeyByValue(datePositions, date);
+		if(result != null){
+			return result;
 		}
 		return 0;
 	}
@@ -388,6 +450,25 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		else if(holderObj instanceof GalleryDate) {
 			GalleryDate holder = (GalleryDate)holderObj;
 			holder.text.setText(transPos.date);
+			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)holder.text.getLayoutParams();
+
+			if (isSelectModeActive) {
+				holder.checkbox.setVisibility(View.VISIBLE);
+
+				if (isAllItemsSelectedInDate(rawPosition)) {
+					holder.checkbox.setChecked(true);
+				} else {
+					holder.checkbox.setChecked(false);
+				}
+				holder.layout.setElevation(0);
+
+				params.setMarginStart(Helpers.convertDpToPixels(context, 25));
+
+			} else {
+				holder.checkbox.setVisibility(View.GONE);
+				params.setMarginStart(Helpers.convertDpToPixels(context, 10));
+			}
+			holder.text.setLayoutParams(params);
 		}
 	}
 
@@ -416,6 +497,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			selectedIndices.add(index);
 		}
 		notifyItemChanged(index);
+		int pos = getItemDatePosition(index);
+		if (pos >= 0 && pos < datePositionsPlain.size()) {
+			notifyItemChanged(datePositionsPlain.get(pos));
+		}
 		if (callback != null) {
 			callback.onSelectionChanged(selectedIndices.size());
 		}
@@ -451,6 +536,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			selectedIndices.add(index);
 		}
 		notifyItemChanged(index);
+		notifyItemChanged(datePositionsPlain.get(getItemDatePosition(index)));
 		if (callback != null) {
 			callback.onSelectionChanged(selectedIndices.size());
 		}

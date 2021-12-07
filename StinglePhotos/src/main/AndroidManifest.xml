@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.stingle.photos"
-    android:versionCode="48"
-    android:versionName="2.7.2">
+    android:versionCode="50"
+    android:versionName="2.8.1">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -144,6 +144,7 @@
             android:icon="@mipmap/ic_stingle_camera"
             android:label="@string/camera"
             android:launchMode="singleInstance"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:exported="true"

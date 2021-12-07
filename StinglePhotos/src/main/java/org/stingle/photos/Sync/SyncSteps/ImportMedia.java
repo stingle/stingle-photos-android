@@ -264,7 +264,7 @@ public class ImportMedia {
 		}
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				new Intent(context, GalleryActivity.class), 0);
+				new Intent(context, GalleryActivity.class), PendingIntent.FLAG_IMMUTABLE);
 
 		Notification notification = notificationBuilder
 				.setSmallIcon(R.drawable.ic_sp)  // the status icon
