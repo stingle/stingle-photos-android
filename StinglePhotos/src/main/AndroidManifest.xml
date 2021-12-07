@@ -144,7 +144,6 @@
             android:icon="@mipmap/ic_stingle_camera"
             android:label="@string/camera"
             android:launchMode="singleInstance"
-            android:exported="true"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:exported="true"
