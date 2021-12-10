@@ -1,6 +1,7 @@
 package org.stingle.photos;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfoUnavailableException;
@@ -9,6 +10,8 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
+import androidx.camera.extensions.ExtensionMode;
+import androidx.camera.extensions.ExtensionsManager;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.video.ActiveRecording;
 import androidx.camera.video.FileOutputOptions;
@@ -41,6 +44,8 @@ import android.view.Surface;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -84,6 +89,8 @@ public class CameraXActivity extends AppCompatActivity {
     private ImageAnalysis imageAnalyzer;
     private VideoCapture<Recorder> videoCapture;
     private ActiveRecording activeRecording;
+    private ExtensionsManager extensionsManager;
+    private CameraSelector cameraSelector;
     private Camera camera;
 
     private boolean isVideoCapture = false;
@@ -150,6 +157,65 @@ public class CameraXActivity extends AppCompatActivity {
 
     private final View.OnClickListener timeButtonClickListener =
             view -> cameraToolsHelper.onTimerClick(iconId -> cameraUiContainerBinding.time.setImageResource(iconId));
+
+    private final View.OnClickListener cameraFeatureButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            AlertDialog.Builder builderSingle = new AlertDialog.Builder(CameraXActivity.this);
+            builderSingle.setIcon(R.mipmap.ic_stingle_photos_round);
+            builderSingle.setTitle("Select Feature: ");
+            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(CameraXActivity.this, android.R.layout.select_dialog_singlechoice);
+
+            if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.HDR)) {
+                arrayAdapter.add("HDR");
+            }
+            if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.BOKEH)) {
+                arrayAdapter.add("BOKEH");
+            }
+            if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.NIGHT)) {
+                arrayAdapter.add("NIGHT");
+            }
+            if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.FACE_RETOUCH)) {
+                arrayAdapter.add("FACE_RETOUCH");
+            }
+            arrayAdapter.add("NONE");
+
+            builderSingle.setNegativeButton("cancel", (dialog, which) -> dialog.dismiss());
+
+            builderSingle.setAdapter(arrayAdapter, (dialog, which) -> {
+                String strName = arrayAdapter.getItem(which);
+                switch (strName) {
+                    case "HDR":
+                        cameraSelector = extensionsManager
+                                .getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.HDR);
+                        Toast.makeText(CameraXActivity.this, "HDR", Toast.LENGTH_LONG).show();
+                        break;
+                    case "BOKEH":
+                        cameraSelector = extensionsManager
+                                    .getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.BOKEH);
+                        Toast.makeText(CameraXActivity.this, "BOKEH", Toast.LENGTH_LONG).show();
+                        break;
+                    case "NIGHT":
+                        cameraSelector = extensionsManager
+                                .getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.NIGHT);
+                        Toast.makeText(CameraXActivity.this, "NIGHT", Toast.LENGTH_LONG).show();
+                        break;
+                    case "FACE_RETOUCH":
+                        cameraSelector = extensionsManager
+                                .getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.FACE_RETOUCH);
+                        Toast.makeText(CameraXActivity.this, "FACE_RETOUCH", Toast.LENGTH_LONG).show();
+                        break;
+                    case "NONE":
+                        cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
+                        Toast.makeText(CameraXActivity.this, "NONE", Toast.LENGTH_LONG).show();
+                        break;
+                }
+                dialog.dismiss();
+                bindCameraUseCases();
+            });
+            builderSingle.show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -281,6 +347,7 @@ public class CameraXActivity extends AppCompatActivity {
         cameraUiContainerBinding.optionsButton.setOnClickListener(optionsButtonClickListener);
         cameraUiContainerBinding.time.setOnClickListener(timeButtonClickListener);
         cameraUiContainerBinding.repeat.setOnClickListener(repeatButtonClickListener);
+        cameraUiContainerBinding.feature.setOnClickListener(cameraFeatureButtonClickListener);
         if (isVideoCapture) {
             cameraUiContainerBinding.cameraModeChanger.setImageResource(R.drawable.ic_photo);
             cameraUiContainerBinding.repeat.setVisibility(View.GONE);
@@ -296,8 +363,6 @@ public class CameraXActivity extends AppCompatActivity {
     private void bindCameraUseCases() {
         CameraImageSize cameraImageSize = cameraImageSizeHelper.calculateCameraImageSize(lensFacing, isVideoCapture);
         Size size = orientationHelper.isPortrait() ? cameraImageSize.getRevertedSize() : cameraImageSize.getSize();
-        // CameraSelector
-        CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
 
         // Preview
         Preview preview = new Preview.Builder()
@@ -368,6 +433,8 @@ public class CameraXActivity extends AppCompatActivity {
                 } else {
                     throw new IllegalArgumentException("Back and front camera are unavailable");
                 }
+                cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
+                feature();
                 updateCameraSwitchButton();
                 bindCameraUseCases();
             } catch (ExecutionException | InterruptedException e) {
@@ -437,6 +504,8 @@ public class CameraXActivity extends AppCompatActivity {
         } else {
             lensFacing = CameraSelector.LENS_FACING_FRONT;
         }
+        cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
+        feature();
         bindCameraUseCases();
     }
 
@@ -640,5 +709,32 @@ public class CameraXActivity extends AppCompatActivity {
     private void applyLastFlashMode() {
         cameraToolsHelper.applyLastFlashMode(
                 iconId -> cameraUiContainerBinding.flashButton.setImageResource(iconId));
+    }
+
+    private void feature() {
+        ListenableFuture future = ExtensionsManager.getInstance(this);
+        // Obtain the ExtensionsManager instance from the returned ListenableFuture object
+        future.addListener(() -> {
+            try {
+                extensionsManager = (ExtensionsManager) future.get();
+
+                // Select the camera
+
+                // Query if extension is available.
+                if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.HDR) ||
+                        extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.BOKEH) ||
+                        extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.NIGHT) ||
+                        extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.FACE_RETOUCH)) {
+
+                    cameraUiContainerBinding.feature.setVisibility(View.VISIBLE);
+                } else {
+                    cameraUiContainerBinding.feature.setVisibility(View.GONE);
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                // This should not happen unless the future is cancelled or the thread is interrupted by
+                // applications.
+            }
+        }, ContextCompat.getMainExecutor(this));
+
     }
 }

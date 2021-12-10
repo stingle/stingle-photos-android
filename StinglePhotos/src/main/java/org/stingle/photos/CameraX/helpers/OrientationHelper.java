@@ -148,6 +148,7 @@ public class OrientationHelper implements LifecycleObserver {
         rotateElement(cameraUiContainerBindingRef.get().exposureButton, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().time, oldOverallRotation, overallRotation1);
         rotateElement(cameraUiContainerBindingRef.get().repeat, oldOverallRotation, overallRotation1);
+        rotateElement(cameraUiContainerBindingRef.get().feature, oldOverallRotation, overallRotation1);
         repositionChronoBar();
         repositionSeekBar();
     }
