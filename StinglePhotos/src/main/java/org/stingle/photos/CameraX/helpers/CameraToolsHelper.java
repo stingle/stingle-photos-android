@@ -8,16 +8,25 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.extensions.ExtensionMode;
+import androidx.camera.extensions.ExtensionsManager;
+import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.stingle.photos.R;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutionException;
 
 public class CameraToolsHelper {
 
@@ -28,6 +37,7 @@ public class CameraToolsHelper {
     private final WeakReference<Context> contextRef;
     private final Animation animation;
     private final SharedPreferences preferences;
+    private ExtensionsManager extensionsManager;
 
     private int flashMode = ImageCapture.FLASH_MODE_AUTO;
     private int timerValue = 0;
@@ -160,6 +170,75 @@ public class CameraToolsHelper {
         }
     }
 
+    public void onFeatureClick(ProcessCameraProvider cameraProvider,
+                                         CameraSelector cameraSelector,
+                                         FeatureListener listener) {
+
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(contextRef.get());
+        builderSingle.setIcon(R.mipmap.ic_stingle_photos_round);
+        builderSingle.setTitle("Select Feature: ");
+        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(contextRef.get(), android.R.layout.select_dialog_singlechoice);
+
+        if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.HDR)) {
+            arrayAdapter.add("HDR");
+        }
+        if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.BOKEH)) {
+            arrayAdapter.add("BOKEH");
+        }
+        if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.NIGHT)) {
+            arrayAdapter.add("NIGHT");
+        }
+        if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.FACE_RETOUCH)) {
+            arrayAdapter.add("FACE_RETOUCH");
+        }
+        arrayAdapter.add("NONE");
+
+        builderSingle.setNegativeButton("cancel", (dialog, which) -> dialog.dismiss());
+
+        builderSingle.setAdapter(arrayAdapter, (dialog, which) -> {
+            String strName = arrayAdapter.getItem(which);
+            switch (strName) {
+                case "HDR":
+                    if (listener != null) {
+                        listener.onFeatureEnabled(
+                                extensionsManager.getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.NONE));
+                    }
+                    showToast("HDR");
+                    break;
+                case "BOKEH":
+                    if (listener != null) {
+                        listener.onFeatureEnabled(
+                                extensionsManager.getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.BOKEH));
+                    }
+                    showToast("BOKEH");
+                    break;
+                case "NIGHT":
+                    if (listener != null) {
+                        listener.onFeatureEnabled(
+                                extensionsManager.getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.NIGHT));
+                    }
+                    showToast("NIGHT");
+                    break;
+                case "FACE_RETOUCH":
+                    if (listener != null) {
+                        listener.onFeatureEnabled(
+                                extensionsManager.getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.FACE_RETOUCH));
+                    }
+                    showToast("FACE_RETOUCH");
+                    break;
+                case "NONE":
+                    if (listener != null) {
+                        listener.onFeatureEnabled(
+                                extensionsManager.getExtensionEnabledCameraSelector(cameraProvider, cameraSelector, ExtensionMode.NONE));
+                    }
+                    showToast("NONE");
+                    break;
+            }
+            dialog.dismiss();
+        });
+        builderSingle.show();
+    }
+
     public void applyLastTimer(UIUpdateListener listener) {
         timerValue = preferences.getInt(TIMER_PREF, 0);
         if (listener != null) {
@@ -181,7 +260,41 @@ public class CameraToolsHelper {
         }
     }
 
-    private @DrawableRes int updateRepeatButton() {
+    public void applyCameraFeature(CameraSelector cameraSelector,
+                                   ProcessCameraProvider cameraProvider,
+                                   UIVisibilityListener listener) {
+
+        ListenableFuture future = ExtensionsManager.getInstance(contextRef.get());
+        // Obtain the ExtensionsManager instance from the returned ListenableFuture object
+        future.addListener(() -> {
+            try {
+                extensionsManager = (ExtensionsManager) future.get();
+
+                // Select the camera
+
+                // Query if extension is available.
+                if (extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.HDR) ||
+                        extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.BOKEH) ||
+                        extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.NIGHT) ||
+                        extensionsManager.isExtensionAvailable(cameraProvider, cameraSelector, ExtensionMode.FACE_RETOUCH)) {
+
+                    if (listener != null) {
+                        listener.onUpdate(true);
+                    }
+                } else {
+                    if (listener != null) {
+                        listener.onUpdate(false);
+                    }
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                // This should not happen unless the future is cancelled or the thread is interrupted by
+                // applications.
+            }
+        }, ContextCompat.getMainExecutor(contextRef.get()));
+    }
+
+    private @DrawableRes
+    int updateRepeatButton() {
         if (repeatValue == 2) {
             return R.drawable.ic_repeat_2;
         } else if (repeatValue == 5) {
@@ -192,7 +305,8 @@ public class CameraToolsHelper {
         return R.drawable.ic_repeat_off;
     }
 
-    private @DrawableRes int updateTimeButton() {
+    private @DrawableRes
+    int updateTimeButton() {
         if (timerValue == 2) {
             return R.drawable.ic_timer_2;
         } else if (timerValue == 5) {
@@ -203,7 +317,8 @@ public class CameraToolsHelper {
         return R.drawable.ic_timer_off;
     }
 
-    private @DrawableRes int updateFlashButton() {
+    private @DrawableRes
+    int updateFlashButton() {
         if (flashMode == ImageCapture.FLASH_MODE_AUTO) {
             return R.drawable.flash_auto;
         } else if (flashMode == ImageCapture.FLASH_MODE_ON) {
@@ -217,7 +332,7 @@ public class CameraToolsHelper {
         textview.setText(message);
         textview.setBackground(ContextCompat.getDrawable(contextRef.get(), R.drawable.chrono_bg));
         textview.setTextColor(Color.WHITE);
-        textview.setPadding(30,10,30,10);
+        textview.setPadding(30, 10, 30, 10);
         if (toast != null) {
             toast.cancel();
         }
@@ -232,8 +347,17 @@ public class CameraToolsHelper {
         void onUpdate(@DrawableRes int iconId);
     }
 
+    public interface UIVisibilityListener {
+        void onUpdate(boolean isVisible);
+    }
+
+    public interface FeatureListener {
+        void onFeatureEnabled(CameraSelector cameraSelector);
+    }
+
     public interface OnTimerListener {
         void onTick();
+
         void onFinish();
     }
 }
