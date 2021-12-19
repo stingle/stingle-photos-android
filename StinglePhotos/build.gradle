@@ -89,12 +89,10 @@ dependencies {
     implementation 'com.google.android:flexbox:2.0.1'
     implementation "androidx.work:work-runtime:2.7.1"
     implementation project(path: ':picasso')
-    implementation 'androidx.camera:camera-video:1.1.0-alpha10'
-    implementation 'androidx.camera:camera-extensions:1.0.0-alpha30'
 
     playstoreImplementation 'com.android.billingclient:billing:4.0.0'
 
-    def camerax_version = "1.1.0-alpha10"
+    def camerax_version = "1.1.0-alpha12"
 
     // CameraX core library
     implementation "androidx.camera:camera-core:$camerax_version"
@@ -106,7 +104,10 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
 
     // CameraX View class
-    implementation 'androidx.camera:camera-view:1.0.0-alpha30'
+    implementation 'androidx.camera:camera-view:1.0.0-alpha32'
+
+    implementation 'androidx.camera:camera-video:1.1.0-alpha12'
+    implementation 'androidx.camera:camera-extensions:1.0.0-alpha32'
 
     implementation 'androidx.window:window:1.0.0-alpha09'
 

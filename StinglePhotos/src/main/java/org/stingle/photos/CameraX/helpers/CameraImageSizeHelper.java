@@ -1,10 +1,5 @@
 package org.stingle.photos.CameraX.helpers;
 
-import static androidx.camera.video.QualitySelector.QUALITY_FHD;
-import static androidx.camera.video.QualitySelector.QUALITY_HD;
-import static androidx.camera.video.QualitySelector.QUALITY_SD;
-import static androidx.camera.video.QualitySelector.QUALITY_UHD;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.ImageFormat;
@@ -15,6 +10,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 
 import androidx.camera.core.CameraSelector;
+import androidx.camera.video.Quality;
 
 import org.stingle.photos.CameraX.models.CameraImageSize;
 
@@ -25,14 +21,14 @@ public class CameraImageSizeHelper {
 
     private final Context context;
     private final SharedPreferences settings;
-    private int quality = QUALITY_HD;
+    private Quality quality = Quality.HD;
 
     public CameraImageSizeHelper(Context context, SharedPreferences settings) {
         this.context = context;
         this.settings = settings;
     }
 
-    public int getQuality() {
+    public Quality getQuality() {
         return quality;
     }
 
@@ -71,17 +67,20 @@ public class CameraImageSizeHelper {
                             String qualityString = videoOutputs.get(Integer.parseInt(sizeIndex));
                             switch (qualityString) {
                                 case "UHD":
-                                    quality = QUALITY_UHD;
+                                    quality = Quality.UHD;
                                     return new CameraImageSize(context, 3840, 2160);
                                 case "Full HD":
-                                    quality = QUALITY_FHD;
+                                    quality = Quality.FHD;
                                     return new CameraImageSize(context, 1920, 1080);
                                 case "HD":
-                                    quality = QUALITY_HD;
+                                    quality = Quality.HD;
                                     return new CameraImageSize(context, 1280, 720);
                                 case "SD":
-                                    quality = QUALITY_SD;
+                                    quality = Quality.SD;
                                     return new CameraImageSize(context, 720, 480);
+                                default:
+                                    quality = Quality.HIGHEST;
+                                    return new CameraImageSize(context, 3840, 2160);
                             }
                         }
                     } else {
@@ -92,8 +91,9 @@ public class CameraImageSizeHelper {
                     }
                 }
             }
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            quality = Quality.LOWEST;
+            return new CameraImageSize(context, 720, 480);
         }
         return null;
     }

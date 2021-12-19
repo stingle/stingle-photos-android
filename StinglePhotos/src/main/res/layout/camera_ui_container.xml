@@ -57,7 +57,8 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="30dp"
             android:layout_toEndOf="@+id/time"
-            android:src="@drawable/ic_repeat_off" />
+            android:src="@drawable/ic_repeat_off"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/optionsButton"

@@ -10,10 +10,10 @@ import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.video.ActiveRecording;
 import androidx.camera.video.FileOutputOptions;
 import androidx.camera.video.QualitySelector;
 import androidx.camera.video.Recorder;
+import androidx.camera.video.Recording;
 import androidx.camera.video.VideoCapture;
 import androidx.camera.video.VideoRecordEvent;
 import androidx.core.content.ContextCompat;
@@ -83,7 +83,7 @@ public class CameraXActivity extends AppCompatActivity {
     private ImageCapture imageCapture;
     private ImageAnalysis imageAnalyzer;
     private VideoCapture<Recorder> videoCapture;
-    private ActiveRecording activeRecording;
+    private Recording activeRecording;
     private Camera camera;
 
     private boolean isVideoCapture = false;
@@ -320,7 +320,7 @@ public class CameraXActivity extends AppCompatActivity {
                 .build();
 
         Recorder recorder = new Recorder.Builder()
-                .setQualitySelector(QualitySelector.of(cameraImageSizeHelper.getQuality()))
+                .setQualitySelector(QualitySelector.from(cameraImageSizeHelper.getQuality()))
                 .build();
 
         videoCapture = VideoCapture.withOutput(recorder);
@@ -454,22 +454,23 @@ public class CameraXActivity extends AppCompatActivity {
         boolean isAudioEnabled = settings.getBoolean("audio_enabled", true);
         if (isAudioEnabled) {
             activeRecording = videoCapture.getOutput().prepareRecording(this, outputOptions)
-                    .withEventListener(
+                    .withAudioEnabled()
+                    .start(
                             cameraExecutor,
                             videoRecordEvent -> {
                                 if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
                                     mediaSaveHelper.saveVideo(videoRecordEvent);
                                 }
-                            }).withAudioEnabled().start();
+                            });
         } else {
             activeRecording = videoCapture.getOutput().prepareRecording(this, outputOptions)
-                    .withEventListener(
+                    .start(
                             cameraExecutor,
                             videoRecordEvent -> {
                                 if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
                                     mediaSaveHelper.saveVideo(videoRecordEvent);
                                 }
-                            }).start();
+                            });
         }
         Log.i(TAG, "Recording started");
     }
