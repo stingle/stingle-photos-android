@@ -340,7 +340,7 @@ public class CameraXActivity extends AppCompatActivity {
             }
 
             cameraHelper.setCamera(camera);
-            cameraHelper.zoomAndFocus(rootBinding.viewFinder);
+            cameraHelper.zoomAndFocus(rootBinding.viewFinder, rootBinding.focusRect, cameraImageSize);
             cameraHelper.exposure(cameraUiContainerBinding.exposureSeekbar);
             // Attach the viewfinder's surface provider to preview use case
             preview.setSurfaceProvider(rootBinding.viewFinder.getSurfaceProvider());

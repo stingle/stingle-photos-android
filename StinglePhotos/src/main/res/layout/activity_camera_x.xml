@@ -13,4 +13,10 @@
         app:implementationMode="compatible"
         app:scaleType="fitCenter"/>
 
+    <ImageView
+        android:id="@+id/focus_rect"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
