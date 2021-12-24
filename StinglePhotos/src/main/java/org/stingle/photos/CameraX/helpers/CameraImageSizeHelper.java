@@ -7,6 +7,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import androidx.camera.core.CameraSelector;
 import androidx.camera.video.Quality;
@@ -36,13 +37,13 @@ public class CameraImageSizeHelper {
         CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         try {
             for (String cameraId : manager.getCameraIdList()) {
-
                 CameraCharacteristics cameraCharacteristics = manager.getCameraCharacteristics(cameraId);
                 if (cameraCharacteristics != null) {
                     if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) != lensFacing) {
                         continue;
                     }
-                    StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                    StreamConfigurationMap map =
+                            cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
                     String sizeIndex = "0";
                     if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
@@ -102,12 +103,16 @@ public class CameraImageSizeHelper {
 
         android.util.Size[] cameraVideoSizes = map.getOutputSizes(MediaRecorder.class);
         for (android.util.Size size : cameraVideoSizes) {
+            try {
 			/*if( size.getWidth() > 4096 || size.getHeight() > 2160 || size.getHeight() < 480) {
 				continue; // Nexus 6 returns these, even though not supported?!
 			}*/
-            String quality = new CameraImageSize(context, size.getWidth(), size.getHeight()).getQuality();
-            if (!quality.isEmpty() && !videoSizes.contains(quality)) {
-                videoSizes.add(quality);
+                String quality = new CameraImageSize(context, size.getWidth(), size.getHeight()).getQuality();
+                if (!quality.isEmpty() && !videoSizes.contains(quality)) {
+                    videoSizes.add(quality);
+                }
+            } catch (Exception e) {
+                Log.d("CameraImageSizeHelper", e.getMessage());
             }
         }
         return videoSizes;
@@ -118,11 +123,15 @@ public class CameraImageSizeHelper {
 
         android.util.Size[] cameraPhotoSizes = map.getOutputSizes(ImageFormat.JPEG);
         for (android.util.Size size : cameraPhotoSizes) {
-            CameraImageSize photoSize = new CameraImageSize(context, size.getWidth(), size.getHeight());
-            if (photoSize.megapixel < 0.9) {
-                continue;
+            try {
+                CameraImageSize photoSize = new CameraImageSize(context, size.getWidth(), size.getHeight());
+                if (photoSize.megapixel < 0.9) {
+                    continue;
+                }
+                photoSizes.add(photoSize);
+            } catch (Exception e) {
+                Log.d("CameraImageSizeHelper", e.getMessage());
             }
-            photoSizes.add(photoSize);
         }
         Collections.sort(photoSizes, new CameraImageSize.SizeSorter());
 

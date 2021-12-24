@@ -44,6 +44,7 @@ public class OrientationHelper implements LifecycleObserver {
     public void setUI(CameraUiContainerBinding binding) {
         cameraUiContainerBindingRef = new WeakReference<>(binding);
     }
+
     public boolean isPortrait() {
         return orientation == ORIENTATION_PORTRAIT_NORMAL || orientation == ORIENTATION_PORTRAIT_INVERTED;
     }
@@ -153,7 +154,9 @@ public class OrientationHelper implements LifecycleObserver {
     }
 
     private void rotateElement(View view, int start, int end) {
-        RotateAnimation rotateAnimation = new RotateAnimation(start, end, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        RotateAnimation rotateAnimation = new RotateAnimation(start, end,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
         rotateAnimation.setInterpolator(new LinearInterpolator());
         rotateAnimation.setDuration(500);
         rotateAnimation.setFillAfter(true);

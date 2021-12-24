@@ -119,9 +119,11 @@ public class CameraHelper {
                 case MotionEvent.ACTION_UP: {
                     try {
                         if (camera != null) {
-                            MeteringPoint meteringPoint = new DisplayOrientedMeteringPointFactory(previewView.getDisplay(),
-                                    camera.getCameraInfo(), previewView.getWidth(), previewView.getHeight())
-                                    .createPoint(event.getX(), event.getY());
+                            MeteringPoint meteringPoint =
+                                    new DisplayOrientedMeteringPointFactory(previewView.getDisplay(),
+                                            camera.getCameraInfo(),
+                                            previewView.getWidth(), previewView.getHeight())
+                                            .createPoint(event.getX(), event.getY());
                             // drawing rect
                             drawRectangle(event.getX(), event.getY(), focusRect, cameraImageSize);
 

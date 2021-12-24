@@ -294,10 +294,13 @@ public class CameraXActivity extends AppCompatActivity {
     }
 
     private void bindCameraUseCases() {
-        CameraImageSize cameraImageSize = cameraImageSizeHelper.calculateCameraImageSize(lensFacing, isVideoCapture);
-        Size size = orientationHelper.isPortrait() ? cameraImageSize.getRevertedSize() : cameraImageSize.getSize();
+        CameraImageSize cameraImageSize =
+                cameraImageSizeHelper.calculateCameraImageSize(lensFacing, isVideoCapture);
+        Size size =
+                orientationHelper.isPortrait() ? cameraImageSize.getRevertedSize() : cameraImageSize.getSize();
         // CameraSelector
-        CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
+        CameraSelector cameraSelector =
+                new CameraSelector.Builder().requireLensFacing(lensFacing).build();
 
         // Preview
         Preview preview = new Preview.Builder()
@@ -380,22 +383,23 @@ public class CameraXActivity extends AppCompatActivity {
     private void onImageCapturing() {
         if (imageCapture != null) {
             isCaptureProcess = true;
-            cameraToolsHelper.startCapturing(cameraUiContainerBinding.timeout, new CameraToolsHelper.OnTimerListener() {
-                @Override
-                public void onTick() {
-                    if (settings.getBoolean("sound_enabled", true)) {
-                        cameraSoundHelper.playLowSound();
-                    }
-                }
+            cameraToolsHelper.startCapturing(cameraUiContainerBinding.timeout,
+                    new CameraToolsHelper.OnTimerListener() {
+                        @Override
+                        public void onTick() {
+                            if (settings.getBoolean("sound_enabled", true)) {
+                                cameraSoundHelper.playLowSound();
+                            }
+                        }
 
-                @Override
-                public void onFinish() {
-                    for (int i = 0; i < cameraToolsHelper.getRepeatValue(); i++) {
-                        takePicture();
-                    }
-                    isCaptureProcess = false;
-                }
-            });
+                        @Override
+                        public void onFinish() {
+                            for (int i = 0; i < cameraToolsHelper.getRepeatValue(); i++) {
+                                takePicture();
+                            }
+                            isCaptureProcess = false;
+                        }
+                    });
         }
     }
 
@@ -407,20 +411,21 @@ public class CameraXActivity extends AppCompatActivity {
         }
         cameraUiContainerBinding.cameraCaptureButton.setEnabled(false);
         isCaptureProcess = true;
-        cameraToolsHelper.startCapturing(cameraUiContainerBinding.timeout, new CameraToolsHelper.OnTimerListener() {
-            @Override
-            public void onTick() {
-                if (settings.getBoolean("sound_enabled", true)) {
-                    cameraSoundHelper.playLowSound();
-                }
-            }
+        cameraToolsHelper.startCapturing(cameraUiContainerBinding.timeout,
+                new CameraToolsHelper.OnTimerListener() {
+                    @Override
+                    public void onTick() {
+                        if (settings.getBoolean("sound_enabled", true)) {
+                            cameraSoundHelper.playLowSound();
+                        }
+                    }
 
-            @Override
-            public void onFinish() {
-                isCaptureProcess = false;
-                startVideoRecording();
-            }
-        });
+                    @Override
+                    public void onFinish() {
+                        isCaptureProcess = false;
+                        startVideoRecording();
+                    }
+                });
     }
 
     private void onCameraSwitch() {
@@ -482,7 +487,8 @@ public class CameraXActivity extends AppCompatActivity {
         if (settings.getBoolean("sound_enabled", true)) {
             cameraSoundHelper.playSound(MediaActionSound.SHUTTER_CLICK);
         }
-        Animation animation = AnimationUtils.loadAnimation(CameraXActivity.this, R.anim.capture_animation);
+        Animation animation =
+                AnimationUtils.loadAnimation(CameraXActivity.this, R.anim.capture_animation);
         rootBinding.viewFinder.startAnimation(animation);
         String filename = Helpers.getTimestampedFilename(Helpers.IMAGE_FILE_PREFIX, ".jpg");
         ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(
