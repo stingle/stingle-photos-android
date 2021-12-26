@@ -421,10 +421,6 @@
 
     <string name="backup_phrase_desc">Votre phrase de sauvegarde est le secret le plus précieux de votre compte. \n\nVeuillez vous assurer de leasauvegarder en lieu sûr. \n\nSi quelqu\'un obtient cette phrase, il peut accéder à toutes vos données !</string>
 
-    <string name="biometrics_confirm">Exiger une confirmation</string>
-
-    <string name="biometrics_confirm_desc">Appuyez sur le bouton de confirmation après le déverrouillage du visage</string>
-
     <string name="title_forgot_password">Mot de passe oublié</string>
 
     <string name="backup_phrase_enter_desc">Veuillez entrer votre phrase de récupération de 24 mots</string>

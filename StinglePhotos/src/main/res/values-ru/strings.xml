@@ -224,8 +224,6 @@
     <string name="volume_keys_snap">Делать фотографии с помощью клавиш громкости</string>
     <string name="title_activity_backup_phrase">Резервная фраза</string>
     <string name="backup_phrase_desc">Ваша резервная фраза - самый ценный секрет вашего аккаунта. \n\nСохраните ее в надежном месте. \n\nЕсли кто-то получит доступ к этой фразе, он сможет получить доступ ко всем вашим данным!</string>
-    <string name="biometrics_confirm">Требовать подтверждения</string>
-    <string name="biometrics_confirm_desc">Нажмите кнопку подтверждения после разблокировки лица</string>
     <string name="title_forgot_password">Забыли пароль</string>
     <string name="backup_phrase_enter_desc">Введите фразу восстановления из 24 слов</string>
     <string name="recovery_desc">Введите адрес электронной почты и фразу восстановления. Если они будут введены правильно, вы сможете установить новый пароль для вашей учетной записи.</string>

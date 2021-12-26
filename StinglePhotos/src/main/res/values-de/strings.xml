@@ -225,8 +225,6 @@
     <string name="volume_keys_snap">Fotos mit Lautstärketasten aufnehmen</string>
     <string name="title_activity_backup_phrase">Backup-Satz</string>
     <string name="backup_phrase_desc">Ihr Sicherungssatz ist das wertvollste Geheimnis Ihres Kontos. \n\n Bitte stellen Sie sicher, dass Sie ihn an einem sicheren Ort sichern. \n\n\nWenn jemand diesen Satz erhält, kann er auf all Ihre Daten zugreifen!</string>
-    <string name="biometrics_confirm">Bestätigung verlangen</string>
-    <string name="biometrics_confirm_desc">Drücken Sie die Bestätigungstaste nach der Gesichtsentriegelung</string>
     <string name="title_forgot_password">Vergessenes Passwort</string>
     <string name="backup_phrase_enter_desc">Bitte geben Sie Ihren Wiederherstellungssatz mit 24 Wörtern ein</string>
     <string name="recovery_desc">Bitte geben Sie Ihre E-Mail-Adresse und Ihren Wiederherstellungssatz ein. Wenn diese korrekt sind, können Sie ein neues Passwort für Ihr Konto festlegen.</string>

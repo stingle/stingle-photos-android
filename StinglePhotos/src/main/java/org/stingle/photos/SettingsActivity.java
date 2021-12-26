@@ -296,6 +296,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
 		private void initBiometricsSettings() {
 			SwitchPreference biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
+			SwitchPreference dontAuthSetting = findPreference("dont_auth");
 
 			BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper((AppCompatActivity) getActivity());
 			if (!biometricsManagerWrapper.isBiometricsAvailable()) {
@@ -308,6 +309,60 @@ public class SettingsActivity extends AppCompatActivity implements
 					return false;
 				}
 				return true;
+			});
+
+			dontAuthSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				boolean isEnabled = (boolean) newValue;
+				if (isEnabled) {
+					Helpers.showConfirmDialog(
+							getContext(),
+							getString(R.string.dont_auth_question),
+							getString(R.string.dont_auth_desc),
+							R.drawable.ic_baseline_close_24,
+							(dialog, which) -> {
+								LoginManager.LoginConfig loginConfig = new LoginManager.LoginConfig() {{
+									showCancel = true;
+									showLogout = false;
+									quitActivityOnCancel = false;
+									cancellable = true;
+									okButtonText = getContext().getString(R.string.ok);
+									titleText = getContext().getString(R.string.please_enter_password);
+									showLockIcon = false;
+								}};
+								LoginManager.getPasswordFromUser(getActivity(), loginConfig, new PasswordReturnListener() {
+									@Override
+									public void passwordReceived(String enteredPassword, AlertDialog dialog) {
+										try{
+											if(StinglePhotosApplication.getCrypto().saveDecryptedKey(enteredPassword)) {
+												LoginManager.dismissLoginDialog(dialog);
+												Helpers.showInfoDialog(getContext(), getString(R.string.success), getString(R.string.success_disable_pass));
+												dontAuthSetting.setChecked(true);
+											}
+											else{
+												Helpers.showAlertDialog(dialog.getContext(), dialog.getContext().getString(R.string.error), dialog.getContext().getString(R.string.fail_disable_password));
+											}
+										}
+										catch (CryptoException e) {
+											Helpers.showAlertDialog(dialog.getContext(), dialog.getContext().getString(R.string.error), dialog.getContext().getString(R.string.incorrect_password));
+										}
+									}
+
+									@Override
+									public void passwordReceiveFailed(AlertDialog dialog) {
+										LoginManager.dismissLoginDialog(dialog);
+									}
+								});
+
+							},
+							null
+					);
+				}
+				else{
+					if(StinglePhotosApplication.getCrypto().deleteDecryptedKey()) {
+						return true;
+					}
+				}
+				return false;
 			});
 		}
 
