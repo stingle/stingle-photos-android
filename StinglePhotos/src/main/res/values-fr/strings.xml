@@ -843,4 +843,8 @@
     <string name="success_disable_pass">Invite de mot de passe avec succès désactivé! Veuillez désactiver ce paramètre si vous êtes dans un risque de perte de contrôle sur votre appareil.</string>
     <string name="fail_disable_password">Impossible de désactiver l\'invite de mot de passe</string>
     <string name="spanish">Española</string>
+    <string name="change_email">Email (cliquez pour changer)</string>
+    <string name="enter_new_email">S\'il vous plaît entrer une nouvelle adresse e-mail</string>
+    <string name="changing_email">Changer de courrier électronique ...</string>
+    <string name="success_change_email">Votre adresse e-mail a changé avec succès!</string>
 </resources>

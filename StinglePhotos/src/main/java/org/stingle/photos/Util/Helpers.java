@@ -26,6 +26,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
@@ -123,6 +124,21 @@ public class Helpers {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
 		builder.setTitle(title);
 		builder.setMessage(message);
+		builder.setNegativeButton(context.getString(R.string.ok), onclick);
+		if(icon == null){
+			icon = R.drawable.ic_warning;
+		}
+		builder.setIcon(icon);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	public static void showPromptDialog(Context context, String title, String message, Integer icon, View input, DialogInterface.OnClickListener onclick) {
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+		builder.setTitle(title);
+		builder.setMessage(message);
+
+		builder.setView(input);
 		builder.setNegativeButton(context.getString(R.string.ok), onclick);
 		if(icon == null){
 			icon = R.drawable.ic_warning;

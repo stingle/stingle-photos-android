@@ -452,4 +452,8 @@
     <string name="success_disable_pass">Password prompt successfully disabled! Please disable this setting if you are in a risk of losing control over your device.</string>
     <string name="fail_disable_password">Failed to disable password prompt</string>
     <string name="spanish">Española</string>
+    <string name="change_email">Email (Click to change)</string>
+    <string name="enter_new_email">Please enter new email address</string>
+    <string name="changing_email">Changing email...</string>
+    <string name="success_change_email">Your email successfully changed!</string>
 </resources>

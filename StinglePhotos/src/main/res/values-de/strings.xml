@@ -450,4 +450,8 @@
     <string name="success_disable_pass">Kennwortaufforderung erfolgreich deaktiviert! Bitte deaktivieren Sie diese Einstellung, wenn Sie sich in Gefahr befinden, die Kontrolle über Ihr Gerät zu verlieren.</string>
     <string name="fail_disable_password">Fehler beim Deaktivieren der Kennwortaufforderung</string>
     <string name="spanish">Española</string>
+    <string name="change_email">E-Mail (klicken um sich ändern)</string>
+    <string name="enter_new_email">Bitte geben Sie eine neue E-Mail-Adresse ein</string>
+    <string name="changing_email">E-Mail ändern ...</string>
+    <string name="success_change_email">Ihre E-Mail-Adresse wurde erfolgreich geändert!</string>
 </resources>

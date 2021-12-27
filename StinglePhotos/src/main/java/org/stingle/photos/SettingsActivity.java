@@ -9,6 +9,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -22,6 +25,9 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SeekBarPreference;
 import androidx.preference.SwitchPreference;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import org.stingle.photos.AsyncTasks.ChangeEmailAsyncTask;
 import org.stingle.photos.AsyncTasks.DeleteAccountAsyncTask;
 import org.stingle.photos.AsyncTasks.GenericAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -158,6 +164,41 @@ public class SettingsActivity extends AppCompatActivity implements
 		private void initEmail() {
 			Preference email = findPreference("email");
 			email.setSummary(Helpers.getPreference(AccountPreferenceFragment.this.getActivity(), StinglePhotosApplication.USER_EMAIL, ""));
+
+
+			email.setOnPreferenceClickListener(preference -> {
+				MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext());
+				builder.setView(R.layout.dialog_change_email);
+				builder.setCancelable(true);
+				AlertDialog newEmailDialog = builder.create();
+				newEmailDialog.show();
+
+				Button okButton = newEmailDialog.findViewById(R.id.okButton);
+				Button cancelButton = newEmailDialog.findViewById(R.id.cancelButton);
+				final EditText newEmailText = newEmailDialog.findViewById(R.id.new_email);
+
+				final InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+
+				okButton.setOnClickListener(v -> {
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					String newEmail = newEmailText.getText().toString();
+					(new ChangeEmailAsyncTask(getActivity(), newEmail, new OnAsyncTaskFinish() {
+						@Override
+						public void onFinish() {
+							super.onFinish();
+							newEmailDialog.dismiss();
+							email.setSummary(Helpers.getPreference(AccountPreferenceFragment.this.getActivity(), StinglePhotosApplication.USER_EMAIL, ""));
+						}
+					})).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				});
+
+				cancelButton.setOnClickListener(v -> {
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					newEmailDialog.dismiss();
+				});
+				return false;
+			});
 		}
 
 		private void initKeyBackupSettings() {

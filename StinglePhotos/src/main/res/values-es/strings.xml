@@ -431,4 +431,8 @@
   <string name="success_disable_pass">¡El indicador de contraseña se deshabilita con éxito! Deshabilite esta configuración si está en riesgo de perder el control sobre su dispositivo.</string>
   <string name="fail_disable_password">Error al deshabilitar la solicitud de contraseña</string>
   <string name="spanish">Española</string>
+    <string name="change_email">Correo electrónico (haga clic para cambiar)</string>
+  <string name="enter_new_email">Por favor ingrese la nueva dirección de correo electrónico</string>
+  <string name="changing_email">Cambio de correo electrónico ...</string>
+  <string name="success_change_email">Su dirección de correo electrónico cambió con éxito!</string>
 </resources>
