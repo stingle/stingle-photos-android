@@ -451,4 +451,5 @@
     <string name="dont_auth_question">Are you sure you want to disable password prompt ?</string>
     <string name="success_disable_pass">Password prompt successfully disabled! Please disable this setting if you are in a risk of losing control over your device.</string>
     <string name="fail_disable_password">Failed to disable password prompt</string>
+    <string name="spanish">Española</string>
 </resources>

@@ -444,4 +444,10 @@
     <string name="success_downgrade">Sie haben Ihr Konto erfolgreich in den kostenlosen Plan herabgestuft.</string>
     <string name="downgrade_question">Downgrade?</string>
     <string name="downgrade_question_desc">Sind Sie sicher, dass Sie sicher, dass Sie zu einem kostenlosen Plan herabstufen möchten?</string>
+    <string name="dont_auth">Benötigen Sie kein Kennwort, um die App freizuschalten (gefährlich !!!)</string>
+    <string name="dont_auth_desc">Dadurch werden alle lokalen Sicherheitsvorrichtungen ruiniert, wird jedoch Komfort hinzufügen. Andere Apps oder forensische Tools können Ihre Verschlüsselungsschlüssel erhalten. Verwenden Sie es auf eigene Gefahr!</string>
+    <string name="dont_auth_question">Möchten Sie sicher, dass Sie die Kennwortaufforderung deaktivieren möchten?</string>
+    <string name="success_disable_pass">Kennwortaufforderung erfolgreich deaktiviert! Bitte deaktivieren Sie diese Einstellung, wenn Sie sich in Gefahr befinden, die Kontrolle über Ihr Gerät zu verlieren.</string>
+    <string name="fail_disable_password">Fehler beim Deaktivieren der Kennwortaufforderung</string>
+    <string name="spanish">Española</string>
 </resources>

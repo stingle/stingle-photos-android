@@ -442,4 +442,10 @@
     <string name="success_downgrade">Вы успешно понизили свою учетную запись в свободный план.</string>
     <string name="downgrade_question">Отказаться?</string>
     <string name="downgrade_question_desc">Вы уверены, что хотите перейти на бесплатный план?</string>
+    <string name="dont_auth">Не требовать пароля, чтобы разблокировать приложение (опасно !!!)</string>
+    <string name="dont_auth_desc">Это разрушит всю локальную безопасность, но добавит удобство. Другие приложения или инструменты смогут получить ключи шифрования. Используйте его на свой страх и риск!</string>
+    <string name="dont_auth_question">Вы уверены, что хотите отключить запрос на пароль?</string>
+    <string name="success_disable_pass">Пароль успешно отключен! Пожалуйста, отключите этот параметр, если вы рискуете потерять контроль над своим устройством.</string>
+    <string name="fail_disable_password">Не удалось отключить пароль</string>
+    <string name="spanish">Española</string>
 </resources>

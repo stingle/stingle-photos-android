@@ -837,4 +837,10 @@
     <string name="success_downgrade">Vous avez réussi votre compte à votre compte gratuitement.</string>
     <string name="downgrade_question">Rétrograder?</string>
     <string name="downgrade_question_desc">Êtes-vous sûr de vouloir déclasser dans un plan gratuit?</string>
+    <string name="dont_auth">N\'exige pas de mot de passe pour déverrouiller l\'application (dangereuse !!!)</string>
+    <string name="dont_auth_desc">Cela ruinera toutes les protections de sécurité locales, mais ajoutera de la commodité. D\'autres applications ou outils médico-légaux pourront obtenir vos clés de cryptage. Utilisez à vos risques et périls!</string>
+    <string name="dont_auth_question">Êtes-vous sûr de vouloir désactiver l\'invite de mot de passe?</string>
+    <string name="success_disable_pass">Invite de mot de passe avec succès désactivé! Veuillez désactiver ce paramètre si vous êtes dans un risque de perte de contrôle sur votre appareil.</string>
+    <string name="fail_disable_password">Impossible de désactiver l\'invite de mot de passe</string>
+    <string name="spanish">Española</string>
 </resources>
