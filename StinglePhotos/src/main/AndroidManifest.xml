@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="org.stingle.photos"
     android:versionCode="50"
     android:versionName="2.8.1">
@@ -17,19 +16,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <uses-feature
-        android:name="android.hardware.camera2.full"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera.front"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera.autofocus"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.screen.landscape"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.screen.portrait"
+        android:name="android.hardware.camera.any"
         android:required="false" />
     <uses-feature
         android:name="android.hardware.fingerprint"
@@ -44,10 +31,10 @@
         android:preserveLegacyExternalStorage="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
+            android:exported="false"
             android:theme="@style/AppThemeCompatWithActionBar" />
 
         <service
@@ -135,16 +122,20 @@
             android:name=".ViewItemActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_view_item"
+            android:exported="false"
             android:theme="@style/AppThemeDark" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/login"
+            android:exported="false"
             android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".WelcomeActivity"
             android:label="@string/welcome"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+
         <activity
             android:name=".CameraXActivity"
             android:alwaysRetainTaskState="true"
@@ -153,58 +144,49 @@
             android:icon="@mipmap/ic_stingle_camera"
             android:label="@string/camera"
             android:launchMode="singleInstance"
-            android:exported="true"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
+            android:exported="true"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.media.action.STILL_IMAGE_CAMERA" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.media.action.STILL_IMAGE_CAMERA_SECURE" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.media.action.VIDEO_CAMERA" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".SignUpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_setup"
+            android:exported="false"
             android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".ChangePasswordActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_change_password"
+            android:exported="false"
             android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".StorageActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_storage"
+            android:exported="false"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".CameraSettingsActivity"
             android:alwaysRetainTaskState="true"
             android:label="@string/title_activity_camera_settings"
+            android:exported="false"
             android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".BackupKeyActivity"
             android:label="@string/title_activity_backup_phrase"
+            android:exported="false"
             android:theme="@style/AppThemeCompatWithActionBar" />
         <activity
             android:name=".ForgotPasswordActivity"
             android:label="@string/title_forgot_password"
+            android:exported="false"
             android:theme="@style/AppThemeCompatWithActionBar" />
 
         <provider

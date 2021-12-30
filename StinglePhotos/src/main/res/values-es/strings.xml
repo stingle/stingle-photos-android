@@ -445,4 +445,20 @@
   <string name="gps_coordinates">Coordenadas GPS</string>
   <string name="encypted_filename">Nombre de archivo encriptado</string>
   <string name="original_filename">Nombre del archivo original</string>
+  <string name="audio">Audio</string>
+  <string name="repeat_enabled_2">Repetir habilitado 2 veces</string>
+  <string name="repeat_enabled_5">Repetir habilitado 5 veces</string>
+  <string name="repeat_enabled_10">Repetir habilitado 10 veces</string>
+  <string name="repeat_disabled">Repetir deshabilitado</string>
+  <string name="timer_enabled_2">Temporizador habilitado 2 segundos</string>
+  <string name="timer_enabled_5">Temporizador habilitado 5 segundos</string>
+  <string name="timer_enabled_10">Temporizador habilitado 10 segundos</string>
+  <string name="timer_disabled">Temporizador deshabilitado</string>
+  <string name="flash_mode_on">Modo flash en</string>
+  <string name="flash_mode_off">Modo flash apagado</string>
+  <string name="flash_mode_auto">Modo Flash Auto</string>
+  <string name="torch_on">Antorcha en</string>
+  <string name="torch_off">Asaltar</string>
+  <string name="enable_audio_in_video">Habilitar audio en el escaneo de video</string>
+  <string name="enable_sound">Habilitar el sonido del obturador</string>
 </resources>

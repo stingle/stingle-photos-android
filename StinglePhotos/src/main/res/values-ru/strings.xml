@@ -442,6 +442,23 @@
     <string name="success_downgrade">Вы успешно понизили свою учетную запись в свободный план.</string>
     <string name="downgrade_question">Отказаться?</string>
     <string name="downgrade_question_desc">Вы уверены, что хотите перейти на бесплатный план?</string>
+    <string name="audio">Аудио</string>
+    <string name="enable_audio_in_video">Включить звук при сканировании видео</string>
+    <string name="enable_sound">Включить звук срабатывания затвора</string>
+
+    <string name="repeat_enabled_2">Повтор включен 2 раза</string>
+    <string name="repeat_enabled_5">Повтор включен 5 раза</string>
+    <string name="repeat_enabled_10">Повтор включен 10 раза</string>
+    <string name="repeat_disabled">Повтор отключен</string>
+    <string name="timer_enabled_2">Таймер включен 2 секунды</string>
+    <string name="timer_enabled_5">Таймер включен 5 секунды</string>
+    <string name="timer_enabled_10">Таймер включен 10 секунды</string>
+    <string name="timer_disabled">Таймер отключен</string>
+    <string name="flash_mode_on">Режим вспышки включен</string>
+    <string name="flash_mode_off">Режим вспышки выключен</string>
+    <string name="flash_mode_auto">Автоматический режим вспышки</string>
+    <string name="torch_on">Факел включен</string>
+    <string name="torch_off">Факел выключен</string>
     <string name="dont_auth">Не требовать пароля, чтобы разблокировать приложение (опасно !!!)</string>
     <string name="dont_auth_desc">Это разрушит всю локальную безопасность, но добавит удобство. Другие приложения или инструменты смогут получить ключи шифрования. Используйте его на свой страх и риск!</string>
     <string name="dont_auth_question">Вы уверены, что хотите отключить запрос на пароль?</string>

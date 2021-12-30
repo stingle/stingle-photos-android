@@ -1,6 +1,8 @@
+
 package org.stingle.photos;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -11,35 +13,36 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
-import org.stingle.photos.CameraX.CameraImageSize;
 import org.stingle.photos.Util.Helpers;
+import org.stingle.photos.CameraX.helpers.CameraImageSizeHelper;
+import org.stingle.photos.CameraX.models.CameraImageSize;
 
 import java.util.ArrayList;
 
 public class CameraSettingsActivity extends AppCompatActivity {
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Helpers.setLocale(this);
-		setContentView(R.layout.activity_camera_settings);
-		getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.settings, new SettingsFragment())
-				.commit();
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Helpers.setLocale(this);
+        setContentView(R.layout.activity_camera_settings);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.settings, new SettingsFragment())
+                .commit();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
 
-	public static class SettingsFragment extends PreferenceFragmentCompat {
-		@Override
-		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-			setPreferencesFromResource(R.xml.camera_preferences, rootKey);
+    public static class SettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.camera_preferences, rootKey);
 
-			initCameraResolution();
-		}
+            initCameraResolution();
+        }
 
 		public void initCameraResolution(){
 			try {
@@ -50,9 +53,8 @@ public class CameraSettingsActivity extends AppCompatActivity {
 						Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
 						StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-						ArrayList<CameraImageSize> imageSizes = Helpers.parsePhotoOutputs(getContext(), map);
-						ArrayList<CameraImageSize> videoSizes = Helpers.parseVideoOutputs(getContext(), map);
-
+						ArrayList<CameraImageSize> imageSizes = CameraImageSizeHelper.parsePhotoOutputs(getContext(), map);
+						ArrayList<String> videoSizes = CameraImageSizeHelper.parseVideoOutputs(getContext(), map);
 						ListPreference photoRes;
 						ListPreference videoRes;
 						if(facing == CameraCharacteristics.LENS_FACING_FRONT) {
@@ -74,7 +76,7 @@ public class CameraSettingsActivity extends AppCompatActivity {
 							imageEntriesValues[i] = String.valueOf(i);
 						}
 						for(int i=0;i<videoSizes.size();i++){
-							videoEntries[i] = videoSizes.get(i).getVideoString();
+							videoEntries[i] = videoSizes.get(i);
 							videoEntriesValues[i] = String.valueOf(i);
 						}
 						photoRes.setEntries(imageEntries);
@@ -96,9 +98,17 @@ public class CameraSettingsActivity extends AppCompatActivity {
 		}
 	}
 
-	@Override
-	public boolean onSupportNavigateUp() {
-		onBackPressed();
-		return true;
-	}
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.setClass(CameraSettingsActivity.this, CameraXActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+    }
 }
