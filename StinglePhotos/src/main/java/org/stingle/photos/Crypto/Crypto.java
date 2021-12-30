@@ -301,6 +301,7 @@ public class Crypto {
         deletePrivateFile(SK_NONCE_FILENAME);
         deletePrivateFile(PRIVATE_KEY_FILENAME);
         deletePrivateFile(SERVER_PUBLIC_KEY_FILENAME);
+        deletePrivateFile(PLAIN_PRIVATE_KEY_FILENAME);
     }
 
     public byte[] getKeyFromPassword(String password, int difficulty) throws CryptoException{
