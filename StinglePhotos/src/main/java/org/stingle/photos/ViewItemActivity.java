@@ -14,19 +14,26 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.stingle.photos.AsyncTasks.Gallery.MoveFileAsyncTask;
 import org.stingle.photos.AsyncTasks.Gallery.SetAlbumCoverAsyncTask;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
 import org.stingle.photos.Auth.LoginManager;
+import org.stingle.photos.Crypto.Crypto;
+import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Crypto.CryptoHelpers;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
@@ -42,6 +49,7 @@ import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.ViewItem.ViewItemAsyncTask;
 import org.stingle.photos.ViewItem.ViewPagerAdapter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -359,8 +367,61 @@ public class ViewItemActivity extends AppCompatActivity {
 		else if (id == R.id.download) {
 			GalleryActions.downloadSelected(this, files, set, albumId);
 		}
+		else if (id == R.id.file_info) {
+			showFileInfoDialog();
+		}
 
 
 		return super.onOptionsItemSelected(item);
 	}
+
+	private void showFileInfoDialog(){
+		FilesDb db;
+		int sort = StingleDb.SORT_DESC;
+		if(set == SyncManager.GALLERY || set == SyncManager.TRASH) {
+			db = new GalleryTrashDb(this, set);
+		}
+		else if (set == SyncManager.ALBUM){
+			db = new AlbumFilesDb(this);
+			//sort = StingleDb.SORT_ASC;
+		}
+		else{
+			return;
+		}
+
+		StingleDbFile currentFile = db.getFileAtPosition(adapter.getCurrentPosition(), albumId, sort);
+		if(currentFile == null){
+			return;
+		}
+		Crypto.Header fileHeader;
+		try {
+			fileHeader = CryptoHelpers.decryptFileHeaders(this, set, albumId, currentFile.headers, false);
+		} catch (IOException | CryptoException e) {
+			return;
+		}
+
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+		builder.setView(R.layout.dialog_file_info);
+		builder.setCancelable(true);
+		AlertDialog infoDialog = builder.create();
+		infoDialog.show();
+
+		Button okButton = infoDialog.findViewById(R.id.okButton);
+		Objects.requireNonNull(okButton).setOnClickListener(v -> {
+			infoDialog.dismiss();
+		});
+
+		((TextView)infoDialog.findViewById(R.id.info_enc_name)).setText(currentFile.filename);
+		((TextView)infoDialog.findViewById(R.id.info_name)).setText(fileHeader.filename);
+
+
+		double mbSize = Math.round((fileHeader.dataSize / 1024.0 / 1024.0) * 100.0)/100.0;
+		((TextView)infoDialog.findViewById(R.id.info_size)).setText(Helpers.formatSpaceUnits(mbSize));
+
+
+		((TextView)infoDialog.findViewById(R.id.info_create)).setText(Helpers.getDateFromTimestamp(currentFile.dateCreated));
+		((TextView)infoDialog.findViewById(R.id.info_mod)).setText(Helpers.getDateFromTimestamp(currentFile.dateModified));
+	}
+
+
 }

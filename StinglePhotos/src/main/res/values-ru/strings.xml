@@ -452,4 +452,14 @@
     <string name="enter_new_email">Пожалуйста, введите новый адрес электронной почты</string>
     <string name="changing_email">Изменение электронной почты ...</string>
     <string name="success_change_email">Ваш электронный адрес успешно изменился!</string>
+    <string name="file_info">Информация о файле</string>
+    <string name="name">Имя</string>
+    <string name="size">Размер</string>
+    <string name="resolution">Разрешение</string>
+    <string name="last_mod">Последнее изменение</string>
+    <string name="date_created">Дата создания</string>
+    <string name="exif_data">EXIF</string>
+    <string name="gps_coordinates">GPS координаты</string>
+    <string name="encypted_filename">Имя зашифрованного файла</string>
+    <string name="original_filename">Исходное имя файла</string>
 </resources>

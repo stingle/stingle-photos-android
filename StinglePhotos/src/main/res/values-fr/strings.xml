@@ -847,4 +847,14 @@
     <string name="enter_new_email">S\'il vous plaît entrer une nouvelle adresse e-mail</string>
     <string name="changing_email">Changer de courrier électronique ...</string>
     <string name="success_change_email">Votre adresse e-mail a changé avec succès!</string>
+    <string name="file_info">Info de fichier</string>
+    <string name="name">Nom</string>
+    <string name="size">Taille</string>
+    <string name="resolution">Résolution</string>
+    <string name="last_mod">Dernière modification</string>
+    <string name="date_created">Date créée</string>
+    <string name="exif_data">Données exif</string>
+    <string name="gps_coordinates">Les coordonnées GPS</string>
+    <string name="encypted_filename">Nom du fichier crypté</string>
+    <string name="original_filename">Nom du fichier original</string>
 </resources>

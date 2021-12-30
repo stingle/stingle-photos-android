@@ -435,4 +435,14 @@
   <string name="enter_new_email">Por favor ingrese la nueva dirección de correo electrónico</string>
   <string name="changing_email">Cambio de correo electrónico ...</string>
   <string name="success_change_email">Su dirección de correo electrónico cambió con éxito!</string>
+    <string name="file_info">Información del archivo</string>
+  <string name="name">Nombre</string>
+  <string name="size">Tamaño</string>
+  <string name="resolution">Resolución</string>
+  <string name="last_mod">Última modificación</string>
+  <string name="date_created">Fecha de creacion</string>
+  <string name="exif_data">Datos exif</string>
+  <string name="gps_coordinates">Coordenadas GPS</string>
+  <string name="encypted_filename">Nombre de archivo encriptado</string>
+  <string name="original_filename">Nombre del archivo original</string>
 </resources>

@@ -456,4 +456,14 @@
     <string name="enter_new_email">Please enter new email address</string>
     <string name="changing_email">Changing email...</string>
     <string name="success_change_email">Your email successfully changed!</string>
+    <string name="file_info">File Info</string>
+    <string name="name">Name</string>
+    <string name="size">Size</string>
+    <string name="resolution">Resolution</string>
+    <string name="last_mod">Last modified</string>
+    <string name="date_created">Date created</string>
+    <string name="exif_data">EXIF data</string>
+    <string name="gps_coordinates">GPS coordinates</string>
+    <string name="encypted_filename">Encrypted file name</string>
+    <string name="original_filename">Original fIle name</string>
 </resources>
