@@ -19,15 +19,18 @@
             app:defaultValue="false"
             app:key="biometrics"
             app:summary="@string/biometric_auth_desc"
-            app:title="@string/biometric_auth" />
+            app:title="@string/biometric_auth"
+            app:disableDependentsState="true" />
 
         <SwitchPreference
-            app:icon="@drawable/ic_check_red"
+            app:icon="@drawable/ic_baseline_close_24"
             app:defaultValue="false"
-            app:key="biometrics_confirm"
-            app:summary="@string/biometrics_confirm_desc"
-            app:title="@string/biometrics_confirm"
-            app:dependency="biometrics"/>
+            app:key="dont_auth"
+            app:title="@string/dont_auth"
+            app:summary="@string/dont_auth_desc"
+            app:dependency="biometrics"
+            />
+
 
     </PreferenceCategory>
 

@@ -3,9 +3,8 @@
     <Preference
         app:icon="@drawable/ic_account"
         app:key="email"
-        app:title="@string/email"
-        app:summary=""
-        app:enabled="false"/>
+        app:title="@string/change_email"
+        app:summary=""/>
 
     <Preference
         app:icon="@drawable/ic_key"

@@ -230,8 +230,6 @@
     <string name="enable_sound">Enable shutter sound</string>
     <string name="title_activity_backup_phrase">Backup phrase</string>
     <string name="backup_phrase_desc">Your backup phrase is the most valuable secret of your account. \n\nPlease make sure to back it up in safe place. \n\nIf someone gets this phrase then they can get access to all of your data!</string>
-    <string name="biometrics_confirm">Require confirmation</string>
-    <string name="biometrics_confirm_desc">Press confirm button after face unlock</string>
     <string name="title_forgot_password">Forgot password</string>
     <string name="backup_phrase_enter_desc">Please enter your 24 word recovery phrase</string>
     <string name="recovery_desc">Please enter your email address and your recovery phrase. If correct you will be able to set a new password for your account.</string>
@@ -464,4 +462,24 @@
     <string name="flash_mode_auto">Flash mode auto</string>
     <string name="torch_on">Torch on</string>
     <string name="torch_off">Torch off</string>
+    <string name="dont_auth">Do not require password to unlock the app (DANGEROUS!!!)</string>
+    <string name="dont_auth_desc">This will ruin ALL local security protections, but will add convenience. Other apps or forensic tools will be able to get your encryption keys. Use it at your own risk!</string>
+    <string name="dont_auth_question">Are you sure you want to disable password prompt ?</string>
+    <string name="success_disable_pass">Password prompt successfully disabled! Please disable this setting if you are in a risk of losing control over your device.</string>
+    <string name="fail_disable_password">Failed to disable password prompt</string>
+    <string name="spanish">Española</string>
+    <string name="change_email">Email (Click to change)</string>
+    <string name="enter_new_email">Please enter new email address</string>
+    <string name="changing_email">Changing email...</string>
+    <string name="success_change_email">Your email successfully changed!</string>
+    <string name="file_info">File Info</string>
+    <string name="name">Name</string>
+    <string name="size">Size</string>
+    <string name="resolution">Resolution</string>
+    <string name="last_mod">Last modified</string>
+    <string name="date_created">Date created</string>
+    <string name="exif_data">EXIF data</string>
+    <string name="gps_coordinates">GPS coordinates</string>
+    <string name="encypted_filename">Encrypted file name</string>
+    <string name="original_filename">Original fIle name</string>
 </resources>

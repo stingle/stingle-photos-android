@@ -51,6 +51,7 @@ public class Crypto {
     protected static final String PRIVATE_KEY_FILENAME = "private";
     protected static final String PUBLIC_KEY_FILENAME = "public";
     protected static final String SERVER_PUBLIC_KEY_FILENAME = "server_public";
+    protected static final String PLAIN_PRIVATE_KEY_FILENAME = "private_plain";
 
     public static final String XCHACHA20POLY1305_IETF_CONTEXT = "__data__";
     public static final int MAX_BUFFER_LENGTH = 1024*1024*64;
@@ -175,6 +176,18 @@ public class Crypto {
         return encryptSymmetric(getKeyFromPassword(password, KDF_DIFFICULTY_NORMAL), nonce, decPrivKey);
     }
 
+    public boolean saveDecryptedKey(String password) throws CryptoException {
+        return savePrivateFile(PLAIN_PRIVATE_KEY_FILENAME, getPrivateKey(password));
+    }
+
+    public boolean deleteDecryptedKey(){
+        return deletePrivateFile(PLAIN_PRIVATE_KEY_FILENAME);
+    }
+
+    public byte[] getDecryptedKey(){
+        return readPrivateFile(PLAIN_PRIVATE_KEY_FILENAME);
+    }
+
     public byte[] exportKeyBundle(String password) throws IOException, CryptoException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(KEY_FILE_BEGGINING.getBytes());
@@ -288,6 +301,7 @@ public class Crypto {
         deletePrivateFile(SK_NONCE_FILENAME);
         deletePrivateFile(PRIVATE_KEY_FILENAME);
         deletePrivateFile(SERVER_PUBLIC_KEY_FILENAME);
+        deletePrivateFile(PLAIN_PRIVATE_KEY_FILENAME);
     }
 
     public byte[] getKeyFromPassword(String password, int difficulty) throws CryptoException{

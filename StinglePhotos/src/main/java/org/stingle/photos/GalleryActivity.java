@@ -211,7 +211,6 @@ public class GalleryActivity extends AppCompatActivity
 		handleIncomingIntent(getIntent());
 
 		headerView = navigationView.getHeaderView(0);
-		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
 
 		setupBottomNavigationView();
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -285,6 +284,7 @@ public class GalleryActivity extends AppCompatActivity
 	protected void onResume() {
 		super.onResume();
 		Log.e("GalleryActivity", "onResume");
+		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
 
 		File oldHomeDir = new File(FileManager.getOldHomeDir(this));
 		if(oldHomeDir.exists()) {

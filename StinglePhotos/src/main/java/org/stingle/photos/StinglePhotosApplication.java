@@ -80,6 +80,12 @@ public class StinglePhotosApplication extends Application{
     }
 	
 	public static byte[] getKey(){
+    	if(key == null){
+    		byte[] decryptedKey = getCrypto().getDecryptedKey();
+    		if(decryptedKey != null && decryptedKey.length > 0){
+    			key = decryptedKey;
+			}
+		}
         return key;
 	}
 	
