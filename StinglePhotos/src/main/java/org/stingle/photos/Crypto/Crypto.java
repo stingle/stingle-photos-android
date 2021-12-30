@@ -384,10 +384,10 @@ public class Crypto {
     }
 
     protected byte[] decryptSymmetric(byte[] key, byte[] nonce, byte[] data) throws CryptoException{
-        if(key.length != SecretBox.KEYBYTES){
+        if(key == null || key.length != SecretBox.KEYBYTES){
             throw new InvalidParameterException("Invalid size of the key");
         }
-        if(nonce.length != SecretBox.NONCEBYTES){
+        if(nonce == null || nonce.length != SecretBox.NONCEBYTES){
             throw new InvalidParameterException("Invalid size of the key");
         }
 
