@@ -7,8 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -327,18 +329,33 @@ public class SettingsActivity extends AppCompatActivity implements
 
 	public static class SecurityPreferenceFragment extends PreferenceFragmentCompat {
 
+		SwitchPreference biometricSetting;
+		SwitchPreference dontAuthSetting;
+		ListPreference lockTimeSetting;
+
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.security_preferences, rootKey);
 
-			initBiometricsSettings();
+			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+			biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
+			dontAuthSetting = findPreference("dont_auth");
+			lockTimeSetting = findPreference("lock_time");
+
+			initBiometricsSetting();
+			initDontAuthSetting();
 			initBlockScreenshotsSettings();
+
+			if(sharedPrefs.getBoolean("dont_auth", false)){
+				biometricSetting.setEnabled(false);
+				lockTimeSetting.setEnabled(false);
+			}
+			if(sharedPrefs.getBoolean(LoginManager.BIOMETRIC_PREFERENCE, false)){
+				dontAuthSetting.setEnabled(false);
+			}
 		}
 
-		private void initBiometricsSettings() {
-			SwitchPreference biometricSetting = findPreference(LoginManager.BIOMETRIC_PREFERENCE);
-			SwitchPreference dontAuthSetting = findPreference("dont_auth");
-
+		private void initBiometricsSetting() {
 			BiometricsManagerWrapper biometricsManagerWrapper = new BiometricsManagerWrapper((AppCompatActivity) getActivity());
 			if (!biometricsManagerWrapper.isBiometricsAvailable()) {
 				biometricSetting.setEnabled(false);
@@ -346,12 +363,27 @@ public class SettingsActivity extends AppCompatActivity implements
 			biometricSetting.setOnPreferenceChangeListener((preference, newValue) -> {
 				boolean isEnabled = (boolean) newValue;
 				if (isEnabled) {
-					biometricsManagerWrapper.setupBiometrics(biometricSetting, null);
+					biometricsManagerWrapper.setupBiometrics(biometricSetting, null, new BiometricsManagerWrapper.BiometricsSetupCallback() {
+						@Override
+						public void onSuccess() {
+							dontAuthSetting.setEnabled(false);
+						}
+
+						@Override
+						public void onFailed() {
+							dontAuthSetting.setEnabled(true);
+						}
+					});
 					return false;
+				}
+				else{
+					dontAuthSetting.setEnabled(true);
 				}
 				return true;
 			});
+		}
 
+		private void initDontAuthSetting(){
 			dontAuthSetting.setOnPreferenceChangeListener((preference, newValue) -> {
 				boolean isEnabled = (boolean) newValue;
 				if (isEnabled) {
@@ -378,6 +410,8 @@ public class SettingsActivity extends AppCompatActivity implements
 												LoginManager.dismissLoginDialog(dialog);
 												Helpers.showInfoDialog(getContext(), getString(R.string.success), getString(R.string.success_disable_pass));
 												dontAuthSetting.setChecked(true);
+												biometricSetting.setEnabled(false);
+												lockTimeSetting.setEnabled(false);
 											}
 											else{
 												Helpers.showAlertDialog(dialog.getContext(), dialog.getContext().getString(R.string.error), dialog.getContext().getString(R.string.fail_disable_password));
@@ -400,6 +434,8 @@ public class SettingsActivity extends AppCompatActivity implements
 				}
 				else{
 					if(StinglePhotosApplication.getCrypto().deleteDecryptedKey()) {
+						biometricSetting.setEnabled(true);
+						lockTimeSetting.setEnabled(true);
 						return true;
 					}
 				}

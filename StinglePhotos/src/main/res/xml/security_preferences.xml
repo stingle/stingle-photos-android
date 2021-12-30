@@ -18,18 +18,14 @@
             app:icon="@drawable/ic_fingerprint_red"
             app:defaultValue="false"
             app:key="biometrics"
-            app:summary="@string/biometric_auth_desc"
-            app:title="@string/biometric_auth"
-            app:disableDependentsState="true" />
+            app:summary="@string/biometric_auth_desc" />
 
         <SwitchPreference
             app:icon="@drawable/ic_baseline_close_24"
             app:defaultValue="false"
             app:key="dont_auth"
             app:title="@string/dont_auth"
-            app:summary="@string/dont_auth_desc"
-            app:dependency="biometrics"
-            />
+            app:summary="@string/dont_auth_desc" />
 
 
     </PreferenceCategory>
