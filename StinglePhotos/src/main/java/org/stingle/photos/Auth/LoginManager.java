@@ -60,6 +60,15 @@ public class LoginManager {
             loginCallback.onLoggedIn();
         }
 
+        byte[] decryptedKey = StinglePhotosApplication.getCrypto().getDecryptedKey();
+        if(decryptedKey != null && decryptedKey.length > 0){
+            StinglePhotosApplication.setKey(decryptedKey);
+            if(loginCallback != null) {
+                loginCallback.onUserAuthSuccess();
+            }
+            return;
+        }
+
         if(loginConfig == null){
             loginConfig = new LoginConfig();
         }

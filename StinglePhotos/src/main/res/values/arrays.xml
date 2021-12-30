@@ -74,6 +74,7 @@
         <item name="de">@string/german</item>
         <item name="ru">@string/russian</item>
         <item name="fr">@string/french</item>
+        <item name="es">@string/spanish</item>
     </string-array>
 
     <string-array name="localeValues">
@@ -82,6 +83,7 @@
         <item name="de">de</item>
         <item name="ru">ru</item>
         <item name="fr">fr</item>
+        <item name="es">es</item>
     </string-array>
 
     <string-array name="cacheSizes">

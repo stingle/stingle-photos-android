@@ -225,8 +225,6 @@
     <string name="volume_keys_snap">Fotos mit Lautstärketasten aufnehmen</string>
     <string name="title_activity_backup_phrase">Backup-Satz</string>
     <string name="backup_phrase_desc">Ihr Sicherungssatz ist das wertvollste Geheimnis Ihres Kontos. \n\n Bitte stellen Sie sicher, dass Sie ihn an einem sicheren Ort sichern. \n\n\nWenn jemand diesen Satz erhält, kann er auf all Ihre Daten zugreifen!</string>
-    <string name="biometrics_confirm">Bestätigung verlangen</string>
-    <string name="biometrics_confirm_desc">Drücken Sie die Bestätigungstaste nach der Gesichtsentriegelung</string>
     <string name="title_forgot_password">Vergessenes Passwort</string>
     <string name="backup_phrase_enter_desc">Bitte geben Sie Ihren Wiederherstellungssatz mit 24 Wörtern ein</string>
     <string name="recovery_desc">Bitte geben Sie Ihre E-Mail-Adresse und Ihren Wiederherstellungssatz ein. Wenn diese korrekt sind, können Sie ein neues Passwort für Ihr Konto festlegen.</string>
@@ -446,4 +444,24 @@
     <string name="success_downgrade">Sie haben Ihr Konto erfolgreich in den kostenlosen Plan herabgestuft.</string>
     <string name="downgrade_question">Downgrade?</string>
     <string name="downgrade_question_desc">Sind Sie sicher, dass Sie sicher, dass Sie zu einem kostenlosen Plan herabstufen möchten?</string>
+    <string name="dont_auth">Benötigen Sie kein Kennwort, um die App freizuschalten (gefährlich !!!)</string>
+    <string name="dont_auth_desc">Dadurch werden alle lokalen Sicherheitsvorrichtungen ruiniert, wird jedoch Komfort hinzufügen. Andere Apps oder forensische Tools können Ihre Verschlüsselungsschlüssel erhalten. Verwenden Sie es auf eigene Gefahr!</string>
+    <string name="dont_auth_question">Möchten Sie sicher, dass Sie die Kennwortaufforderung deaktivieren möchten?</string>
+    <string name="success_disable_pass">Kennwortaufforderung erfolgreich deaktiviert! Bitte deaktivieren Sie diese Einstellung, wenn Sie sich in Gefahr befinden, die Kontrolle über Ihr Gerät zu verlieren.</string>
+    <string name="fail_disable_password">Fehler beim Deaktivieren der Kennwortaufforderung</string>
+    <string name="spanish">Española</string>
+    <string name="change_email">E-Mail (klicken um sich ändern)</string>
+    <string name="enter_new_email">Bitte geben Sie eine neue E-Mail-Adresse ein</string>
+    <string name="changing_email">E-Mail ändern ...</string>
+    <string name="success_change_email">Ihre E-Mail-Adresse wurde erfolgreich geändert!</string>
+    <string name="file_info">Dateiinformation</string>
+    <string name="name">Name</string>
+    <string name="size">Größe</string>
+    <string name="resolution">Auflösung</string>
+    <string name="last_mod">Zuletzt geändert</string>
+    <string name="date_created">Datum erstellt</string>
+    <string name="exif_data">EXIF-Daten</string>
+    <string name="gps_coordinates">GPS Koordinaten</string>
+    <string name="encypted_filename">Verschlüsselter Dateiname</string>
+    <string name="original_filename">Original-Dateiname</string>
 </resources>

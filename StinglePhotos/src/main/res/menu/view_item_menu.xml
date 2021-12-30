@@ -32,6 +32,11 @@
         android:title="@string/move_to_trash"
         app:showAsAction="always" />
     <item
+        android:id="@+id/file_info"
+        android:icon="@drawable/ic_info"
+        android:title="@string/file_info"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/set_as_album_cover"
         android:icon="@drawable/ic_image"
         android:title="@string/set_as_album_cover"

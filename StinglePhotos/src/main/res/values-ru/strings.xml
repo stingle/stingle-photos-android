@@ -224,8 +224,6 @@
     <string name="volume_keys_snap">Делать фотографии с помощью клавиш громкости</string>
     <string name="title_activity_backup_phrase">Резервная фраза</string>
     <string name="backup_phrase_desc">Ваша резервная фраза - самый ценный секрет вашего аккаунта. \n\nСохраните ее в надежном месте. \n\nЕсли кто-то получит доступ к этой фразе, он сможет получить доступ ко всем вашим данным!</string>
-    <string name="biometrics_confirm">Требовать подтверждения</string>
-    <string name="biometrics_confirm_desc">Нажмите кнопку подтверждения после разблокировки лица</string>
     <string name="title_forgot_password">Забыли пароль</string>
     <string name="backup_phrase_enter_desc">Введите фразу восстановления из 24 слов</string>
     <string name="recovery_desc">Введите адрес электронной почты и фразу восстановления. Если они будут введены правильно, вы сможете установить новый пароль для вашей учетной записи.</string>
@@ -444,4 +442,24 @@
     <string name="success_downgrade">Вы успешно понизили свою учетную запись в свободный план.</string>
     <string name="downgrade_question">Отказаться?</string>
     <string name="downgrade_question_desc">Вы уверены, что хотите перейти на бесплатный план?</string>
+    <string name="dont_auth">Не требовать пароля, чтобы разблокировать приложение (опасно !!!)</string>
+    <string name="dont_auth_desc">Это разрушит всю локальную безопасность, но добавит удобство. Другие приложения или инструменты смогут получить ключи шифрования. Используйте его на свой страх и риск!</string>
+    <string name="dont_auth_question">Вы уверены, что хотите отключить запрос на пароль?</string>
+    <string name="success_disable_pass">Пароль успешно отключен! Пожалуйста, отключите этот параметр, если вы рискуете потерять контроль над своим устройством.</string>
+    <string name="fail_disable_password">Не удалось отключить пароль</string>
+    <string name="spanish">Española</string>
+    <string name="change_email">Е-мейл (нажмите, чтобы изменить)</string>
+    <string name="enter_new_email">Пожалуйста, введите новый адрес электронной почты</string>
+    <string name="changing_email">Изменение электронной почты ...</string>
+    <string name="success_change_email">Ваш электронный адрес успешно изменился!</string>
+    <string name="file_info">Информация о файле</string>
+    <string name="name">Имя</string>
+    <string name="size">Размер</string>
+    <string name="resolution">Разрешение</string>
+    <string name="last_mod">Последнее изменение</string>
+    <string name="date_created">Дата создания</string>
+    <string name="exif_data">EXIF</string>
+    <string name="gps_coordinates">GPS координаты</string>
+    <string name="encypted_filename">Имя зашифрованного файла</string>
+    <string name="original_filename">Исходное имя файла</string>
 </resources>

@@ -24,8 +24,10 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
@@ -53,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
@@ -115,6 +118,12 @@ public class Helpers {
 		return imageFileName + extension;
 	}
 
+	public static String getDateFromTimestamp(long time){
+		Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+		cal.setTimeInMillis(time);
+		return DateFormat.format("yyyy-MM-dd hh:mm:ss", cal).toString();
+	}
+
 	public static void showAlertDialog(Context context, String title, String message) {
 		showAlertDialog(context, title, message, null, null);
 	}
@@ -123,6 +132,21 @@ public class Helpers {
 		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
 		builder.setTitle(title);
 		builder.setMessage(message);
+		builder.setNegativeButton(context.getString(R.string.ok), onclick);
+		if(icon == null){
+			icon = R.drawable.ic_warning;
+		}
+		builder.setIcon(icon);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	public static void showPromptDialog(Context context, String title, String message, Integer icon, View input, DialogInterface.OnClickListener onclick) {
+		MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+		builder.setTitle(title);
+		builder.setMessage(message);
+
+		builder.setView(input);
 		builder.setNegativeButton(context.getString(R.string.ok), onclick);
 		if(icon == null){
 			icon = R.drawable.ic_warning;
@@ -470,6 +494,10 @@ public class Helpers {
 	}
 
 	public static String formatSpaceUnits(int mb){
+		return formatSpaceUnits((double) mb);
+	}
+
+	public static String formatSpaceUnits(double mb){
 		if(mb < 1024){
 			return String.valueOf(mb) + " MB";
 		}
