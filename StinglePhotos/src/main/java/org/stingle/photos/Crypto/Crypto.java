@@ -3,16 +3,14 @@ package org.stingle.photos.Crypto;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
-import android.util.Log;
 
-import com.goterl.lazycode.lazysodium.SodiumAndroid;
-import com.goterl.lazycode.lazysodium.interfaces.AEAD;
-import com.goterl.lazycode.lazysodium.interfaces.Box;
-import com.goterl.lazycode.lazysodium.interfaces.KeyDerivation;
-import com.goterl.lazycode.lazysodium.interfaces.PwHash;
-import com.goterl.lazycode.lazysodium.interfaces.SecretBox;
+import com.goterl.lazysodium.interfaces.AEAD;
+import com.goterl.lazysodium.interfaces.Box;
+import com.goterl.lazysodium.interfaces.KeyDerivation;
+import com.goterl.lazysodium.interfaces.PwHash;
+import com.goterl.lazysodium.interfaces.SecretBox;
+import com.goterl.lazysodium.SodiumAndroid;
 import com.sun.jna.NativeLong;
-import com.sun.jna.Pointer;
 
 import org.stingle.photos.StinglePhotosApplication;
 

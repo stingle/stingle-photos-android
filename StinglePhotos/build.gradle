@@ -72,11 +72,9 @@ android {
 }
 
 dependencies {
-    implementation 'com.github.terl:lazysodium-android:4.3.1@aar'
-    implementation 'net.java.dev.jna:jna:5.7.0@aar'
-    implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'
-    implementation 'com.google.android.exoplayer:exoplayer-dash:2.7.3'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
+    implementation "com.goterl:lazysodium-android:5.0.2@aar"
+    implementation 'net.java.dev.jna:jna:5.10.0@aar'
+    implementation 'com.google.android.exoplayer:exoplayer:2.7.3'
     implementation 'androidx.core:core:1.7.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.4.0'
@@ -111,5 +109,5 @@ dependencies {
 
     implementation 'androidx.window:window:1.0.0-alpha09'
 
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
+    //debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }
