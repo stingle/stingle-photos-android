@@ -1,1 +1,1 @@
-include ':StinglePhotos', ':picasso'
+include ':StinglePhotos', ':picasso', ':imagerecognition'

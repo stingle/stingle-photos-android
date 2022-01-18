@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    compileSdk 31
+    buildToolsVersion "31.0.0"
+
+    defaultConfig {
+        minSdk 23
+        targetSdk 31
+        versionCode 2
+        versionName "2.0.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "stingle-imagerecognition-${defaultConfig.versionName}.aar"
+        }
+    }
+}
+
+dependencies {
+    // TFLite
+    implementation 'org.tensorflow:tensorflow-lite-task-vision:0.2.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.6.0'
+
+    implementation 'com.google.mlkit:face-detection:16.1.2'
+
+    // Glide for detection objects gif
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+}
