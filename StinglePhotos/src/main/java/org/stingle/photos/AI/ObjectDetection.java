@@ -8,9 +8,13 @@ import android.util.Log;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.StinglePhotosApplication;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import ai.face.FaceRecogniser;
+import ai.face.Person;
 import ai.image.StingleImageRecognition;
 
 public class ObjectDetection {
@@ -20,6 +24,7 @@ public class ObjectDetection {
 
     private static volatile ObjectDetection instance = null;
     private final StingleImageRecognition objectDetector;
+    private final FaceRecogniser faceRecogniser;
 
     private ObjectDetection() {
         objectDetector = new StingleImageRecognition.Builder(StinglePhotosApplication.getAppContext())
@@ -27,6 +32,8 @@ public class ObjectDetection {
                 .modelPath("model.tflite")
                 .scoreThreshold(0.3f)
                 .build();
+        faceRecogniser = new FaceRecogniser();
+        faceRecogniser.init(StinglePhotosApplication.getAppContext(), "facenet.tflite");
     }
 
     public static ObjectDetection getInstance() {
@@ -86,6 +93,23 @@ public class ObjectDetection {
             objectDetector.runGifObjectDetection(gifPath, 1f, callback);
         } catch (Exception e) {
             Log.d(TAG, "Failed to detect gif");
+        }
+    }
+
+    public  FaceRecogniser.Result detectFace(Uri imageUri) {
+        try {
+            HashMap<UUID, Person > personNameMap = new HashMap<>();
+            FaceRecogniser.Result results = faceRecogniser.recognise(
+                    AIImageUtils.loadImage(StinglePhotosApplication.getAppContext(), imageUri),
+                    personNameMap.values()).get();
+            // TODO - save result.personList int database
+            // MockDatabase.getInstance().addPersonList(result.personList);
+            // TODO - save result.identifiedRectangleMap with imageUri in database
+            // MockDatabase.getInstance().addImage(new Image(imageUri, result.identifiedRectangleMap));
+
+            return results;
+        } catch (Exception e) {
+            return null;
         }
     }
 }
