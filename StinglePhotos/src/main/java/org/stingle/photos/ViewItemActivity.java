@@ -41,6 +41,7 @@ import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Editor.activities.EditorActivity;
 import org.stingle.photos.Files.ShareManager;
 import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
@@ -359,6 +360,9 @@ public class ViewItemActivity extends AppCompatActivity {
 			moveTask.setIsMoving(true);
 			moveTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
+		else if (id == R.id.edit) {
+			openEditor();
+		}
 		else if (id == R.id.set_as_album_cover) {
 			if(albumId != null) {
 				GalleryActions.setAsAlbumCover(this, albumId, SetAlbumCoverAsyncTask.ALBUM_COVER_FILE, currentFile.filename);
@@ -423,5 +427,11 @@ public class ViewItemActivity extends AppCompatActivity {
 		((TextView)infoDialog.findViewById(R.id.info_mod)).setText(Helpers.getDateFromTimestamp(currentFile.dateModified));
 	}
 
-
+	private void openEditor() {
+		Intent intent = new Intent(this, EditorActivity.class);
+		intent.putExtra("EXTRA_ITEM_POSITION", itemPosition);
+		intent.putExtra("EXTRA_ITEM_SET", set);
+		intent.putExtra("EXTRA_ITEM_ALBUM_ID", albumId);
+		startActivity(intent);
+	}
 }

@@ -41,4 +41,13 @@
     <dimen name="rect_button_width">80dp</dimen>
     <dimen name="rect_button_height">24dp</dimen>
     <dimen name="shutter_button_margin">80dp</dimen>
+
+    <dimen name="value_resolution">2dp</dimen>
+    <dimen name="wheel_line_height">12dp</dimen>
+    <dimen name="wheel_center_line_height">18dp</dimen>
+    <dimen name="wheel_text_size">12dp</dimen>
+    <dimen name="line_thickness1">1dp</dimen>
+    <dimen name="line_thickness2">2dp</dimen>
+    <dimen name="tool_list_item_margin">8dp</dimen>
+    <dimen name="adjust_item_width">96dp</dimen>
 </resources>

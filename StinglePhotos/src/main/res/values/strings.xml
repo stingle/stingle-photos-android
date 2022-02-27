@@ -482,4 +482,56 @@
     <string name="gps_coordinates">GPS coordinates</string>
     <string name="encypted_filename">Encrypted file name</string>
     <string name="original_filename">Original fIle name</string>
+
+    <!--   Editor  -->
+
+    <string name="edit">Edit</string>
+    <string name="crop">Crop</string>
+    <string name="resize">Resize</string>
+    <string name="rotate">Rotate</string>
+    <string name="exposure">Exposure</string>
+    <string name="highlights">Highlights</string>
+    <string name="shadows">Shadows</string>
+    <string name="contrast">Contrast</string>
+    <string name="black_point">Black point</string>
+    <string name="white_point">White point</string>
+    <string name="saturation">Saturation</string>
+    <string name="vibrance">Vibrance</string>
+    <string name="temperature">Temperature</string>
+    <string name="tint">Tint</string>
+    <string name="sharpness">Sharpness</string>
+    <string name="noise_reduction">Noise reduction</string>
+    <string name="vignette">Vignette</string>
+    <string name="suggestions">Suggestions</string>
+    <string name="adjust">Adjust</string>
+    <string name="tools">Tools</string>
+    <string name="filters">Filters</string>
+    <string name="markup">Markup</string>
+    <string name="more">More</string>
+    <string name="brightness">Brightness</string>
+    <string name="hdr">HDR</string>
+    <string name="warmth">Warmth</string>
+    <string name="skin_tone">Skin tone</string>
+    <string name="blue_tone">Blue tone</string>
+    <string name="pop">Pop</string>
+    <string name="sharpen">Sharpen</string>
+    <string name="denoise">Denoise</string>
+
+    <string name="current">Current: %1$dx%2$d</string>
+    <string name="sd">SD: %1$dx%2$d</string>
+    <string name="hd">HD: %1$dx%2$d</string>
+    <string name="fhd">Full HD: %1$dx%2$d</string>
+    <string name="qhd">Quad HD: %1$dx%2$d</string>
+    <string name="uhd">Ultra HD: %1$dx%2$d</string>
+    <string name="original">Original</string>
+    <string name="square">Square</string>
+    <string name="ratio_formatted">%1$d:%2$d</string>
+    <string name="reset">Reset</string>
+    <string name="flip_to_portrait">Flip to portrait</string>
+    <string name="flip_to_landscape">Flip to landscape</string>
+    <string name="degree_formatted">%1$d°</string>
+    <string name="done">Done</string>
+
+    <string name="width">Width</string>
+    <string name="height">Height</string>
 </resources>

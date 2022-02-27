@@ -31,6 +31,13 @@
         android:icon="@drawable/ic_action_delete"
         android:title="@string/move_to_trash"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/edit"
+        android:icon="@drawable/ic_tune"
+        android:title="@string/edit"
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/file_info"
         android:icon="@drawable/ic_info"

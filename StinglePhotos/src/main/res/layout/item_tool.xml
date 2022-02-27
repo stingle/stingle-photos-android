@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.button.MaterialButton xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:textAllCaps="false"
+    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+    app:shapeAppearance="@style/ShapeAppearance.App.RoundComponent"
+    app:backgroundTint="@color/selector_adjust_tool_shape_background"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="@color/selector_adjust_tool_text"
+    app:drawableTint="@color/selector_adjust_tool_icon"
+    tool:drawableStart="@drawable/ic_auto_awesome"
+    tool:text="Suggestions" />

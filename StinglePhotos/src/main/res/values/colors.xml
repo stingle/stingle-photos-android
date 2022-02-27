@@ -27,4 +27,19 @@
 
     <color name="hr_color">#36B6B6B6</color>
     <color name="loading_paceholder">#51B6B6B6</color>
+
+    <color name="blue1">#FFA8C7FA</color>
+    <color name="blue2">#FF003355</color>
+    <color name="blue3">#FF062E6F</color>
+
+    <color name="grey1">#FFE3E3E3</color>
+    <color name="grey2">#FF757575</color>
+    <color name="grey3">#FF444746</color>
+    <color name="grey4">#FF1F1F1F</color>
+    <color name="grey5">#FF8E918F</color>
+
+    <color name="black">#FF000000</color>
+
+    <color name="dark_grey">#FF444746</color>
+    <color name="light_grey">#FFCACACA</color>
 </resources>
