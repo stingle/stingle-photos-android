@@ -29,11 +29,15 @@ public class Image {
 
 	private Property brightnessProperty;
 	private Property contrastProperty;
+	private Property whitePointProperty;
 	private Property highlightsProperty;
 	private Property shadowsProperty;
+	private Property blackPointProperty;
 	private Property saturationProperty;
 	private Property warmthProperty;
+	private Property tintProperty;
 	private Property sharpnessProperty;
+	private Property denoiseProperty;
 	private Property vignetteProperty;
 
 	private int orientation;
@@ -197,30 +201,34 @@ public class Image {
 	}
 
 	public void init() {
-		brightnessProperty = new Property(AdjustOption.BRIGHTNESS.name, -100, 100, -0.1f, 0f, 0.3f);
+		brightnessProperty = new Property(AdjustOption.BRIGHTNESS.name, -100, 100, -0.3f, 0f, 0.3f);
 		contrastProperty = new Property(AdjustOption.CONTRAST.name, -100, 100, 0.6f, 1f, 2f);
+		whitePointProperty = new Property(AdjustOption.WHITE_POINT.name, -100, 100, -1f, 0f, 1f);
 		highlightsProperty = new Property(AdjustOption.HIGHLIGHTS.name, -100, 100, -1f, 0f, 1f);
 		shadowsProperty = new Property(AdjustOption.SHADOWS.name, -100, 100, -1f, 0f, 1f);
+		blackPointProperty = new Property(AdjustOption.BLACK_POINT.name, -100, 100, -1f, 0f, 1f);
 		saturationProperty = new Property(AdjustOption.SATURATION.name, -100, 100, 0f, 1f, 2f);
 		warmthProperty = new Property(AdjustOption.WARMTH.name, -100, 100, -1f, 0f, 1f);
+		tintProperty = new Property(AdjustOption.TINT.name, -100, 100, -1f, 0f, 1f);
 		sharpnessProperty = new Property(AdjustOption.SHARPEN.name, 0, 100, 0, 0f, 2f);
-		vignetteProperty = new Property(AdjustOption.VIGNETTE.name, 0, 100, 0f, 0f, 1f);
+		denoiseProperty = new Property(AdjustOption.DENOISE.name, 0, 100, 0, 0f, 2f);
+		vignetteProperty = new Property(AdjustOption.VIGNETTE.name, -100, 100, -1f, 0f, 1f);
 
 		propertyList.add(brightnessProperty);
 		propertyList.add(contrastProperty);
 		propertyList.add(new Property(AdjustOption.HDR.name, 0, 100));
-		propertyList.add(new Property(AdjustOption.WHITE_POINT.name, -100, 100));
+		propertyList.add(whitePointProperty);
 		propertyList.add(highlightsProperty);
 		propertyList.add(shadowsProperty);
-		propertyList.add(new Property(AdjustOption.BLACK_POINT.name, -100, 100));
+		propertyList.add(blackPointProperty);
 		propertyList.add(saturationProperty);
 		propertyList.add(warmthProperty);
-		propertyList.add(new Property(AdjustOption.TINT.name, -100, 100));
+		propertyList.add(tintProperty);
 		propertyList.add(new Property(AdjustOption.SKIN_TONE.name, -100, 100));
 		propertyList.add(new Property(AdjustOption.BLUE_TONE.name, -100, 100));
 		propertyList.add(new Property(AdjustOption.POP.name, 0, 100));
 		propertyList.add(sharpnessProperty);
-		propertyList.add(new Property(AdjustOption.DENOISE.name, 0, 100));
+		propertyList.add(denoiseProperty);
 		propertyList.add(vignetteProperty);
 	}
 
@@ -232,12 +240,20 @@ public class Image {
 		return contrastProperty.getNormalizedValue();
 	}
 
+	public float getWhitePointValueNormalized() {
+		return whitePointProperty.getNormalizedValue();
+	}
+
 	public float getHighlightsValueNormalized() {
 		return highlightsProperty.getNormalizedValue();
 	}
 
 	public float getShadowsValueNormalized() {
 		return shadowsProperty.getNormalizedValue();
+	}
+
+	public float getBlackPointValueNormalized() {
+		return blackPointProperty.getNormalizedValue();
 	}
 
 	public float getSaturationValueNormalized() {
@@ -248,8 +264,16 @@ public class Image {
 		return warmthProperty.getNormalizedValue();
 	}
 
+	public float getTintValueNormalized() {
+		return tintProperty.getNormalizedValue();
+	}
+
 	public float getSharpnessValueNormalized() {
 		return sharpnessProperty.getNormalizedValue();
+	}
+
+	public float getDenoiseValueNormalized() {
+		return denoiseProperty.getNormalizedValue();
 	}
 
 	public float getVignetteValueNormalized() {

@@ -32,11 +32,15 @@ public class BitmapImageRenderer {
 
 	private int brightnessLocation;
 	private int contrastLocation;
+	private int whitePointLocation;
 	private int highlightsLocation;
 	private int shadowsLocation;
+	private int blackPointLocation;
 	private int saturationLocation;
 	private int warmthLocation;
+	private int tintLocation;
 	private int sharpnessLocation;
+	private int denoiseLocation;
 	private int vignetteLocation;
 
 	private int cropCenterLocation;
@@ -112,11 +116,15 @@ public class BitmapImageRenderer {
 		textureLocation = GLES20.glGetUniformLocation(programId, "inputImageTexture");
 		brightnessLocation = GLES20.glGetUniformLocation(programId, "brightness");
 		contrastLocation = GLES20.glGetUniformLocation(programId, "contrast");
+		whitePointLocation = GLES20.glGetUniformLocation(programId, "whitePoint");
 		highlightsLocation = GLES20.glGetUniformLocation(programId, "highlights");
 		shadowsLocation = GLES20.glGetUniformLocation(programId, "shadows");
+		blackPointLocation = GLES20.glGetUniformLocation(programId, "blackPoint");
 		saturationLocation = GLES20.glGetUniformLocation(programId, "saturation");
 		warmthLocation = GLES20.glGetUniformLocation(programId, "warmth");
+		tintLocation = GLES20.glGetUniformLocation(programId, "tint");
 		sharpnessLocation = GLES20.glGetUniformLocation(programId, "sharpness");
+		denoiseLocation = GLES20.glGetUniformLocation(programId, "denoise");
 		vignetteLocation = GLES20.glGetUniformLocation(programId, "vignette");
 
 		cropCenterLocation = GLES20.glGetUniformLocation(programId, "cropCenter");
@@ -159,11 +167,15 @@ public class BitmapImageRenderer {
 
 				GLES20.glUniform1f(brightnessLocation, image.getBrightnessValueNormalized());
 				GLES20.glUniform1f(contrastLocation, image.getContrastValueNormalized());
+				GLES20.glUniform1f(whitePointLocation, image.getWhitePointValueNormalized());
 				GLES20.glUniform1f(highlightsLocation, image.getHighlightsValueNormalized());
 				GLES20.glUniform1f(shadowsLocation, image.getShadowsValueNormalized());
+				GLES20.glUniform1f(blackPointLocation, image.getBlackPointValueNormalized());
 				GLES20.glUniform1f(saturationLocation, image.getSaturationValueNormalized());
 				GLES20.glUniform1f(warmthLocation, image.getWarmthValueNormalized());
+				GLES20.glUniform1f(tintLocation, image.getTintValueNormalized());
 				GLES20.glUniform1f(sharpnessLocation, image.getSharpnessValueNormalized());
+				GLES20.glUniform1f(denoiseLocation, image.getDenoiseValueNormalized());
 				GLES20.glUniform1f(vignetteLocation, image.getVignetteValueNormalized());
 
 				GLES20.glUniform2f(cropCenterLocation, image.getCropCenter().x, image.getCropCenter().y);

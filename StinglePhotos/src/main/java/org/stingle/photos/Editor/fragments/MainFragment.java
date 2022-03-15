@@ -1,5 +1,6 @@
 package org.stingle.photos.Editor.fragments;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -16,11 +17,14 @@ import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.stingle.photos.Editor.adapters.ToolAdapter;
+import org.stingle.photos.Editor.core.Image;
 import org.stingle.photos.Editor.core.Tool;
+import org.stingle.photos.Editor.util.Callback;
 import org.stingle.photos.Editor.util.CenterOffsetItemDecoration;
+import org.stingle.photos.Editor.util.ImageSaver;
 import org.stingle.photos.R;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends ToolFragment {
 
 	private boolean userInitiatedScroll;
 
@@ -39,6 +43,20 @@ public class MainFragment extends Fragment {
 	@Override
 	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+
+		view.findViewById(R.id.btn_save).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				getImage(new Callback<Image>() {
+					@Override
+					public void call(Image image) {
+						Bitmap savedImage = ImageSaver.saveImage(image);
+
+						System.out.println("tada");
+					}
+				});
+			}
+		});
 
 		ToolAdapter toolAdapter = new ToolAdapter(getContext());
 		toolAdapter.submitList(Tool.getToolList());

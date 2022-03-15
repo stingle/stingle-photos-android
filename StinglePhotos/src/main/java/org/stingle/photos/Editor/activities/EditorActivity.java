@@ -50,6 +50,8 @@ public class EditorActivity extends AppCompatActivity {
 
 	private ContentLoadingProgressBar progressBar;
 
+	private Callback<Bitmap> bitmapCallback;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,7 +71,7 @@ public class EditorActivity extends AppCompatActivity {
 		progressBar = findViewById(R.id.progress);
 		progressBar.show();
 
-		loadImage(itemPosition, set, albumId, new Callback<Bitmap>() {
+		bitmapCallback = new Callback<Bitmap>() {
 			@Override
 			public void call(Bitmap bitmap) {
 				progressBar.hide();
@@ -87,7 +89,9 @@ public class EditorActivity extends AppCompatActivity {
 					}
 				}
 			}
-		});
+		};
+
+		loadImage(itemPosition, set, albumId, bitmapCallback);
 
 		FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -127,7 +131,9 @@ public class EditorActivity extends AppCompatActivity {
 			public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
 				float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
 
-				editorView.setViewportPadding(padding, padding, padding, rootView.getHeight() - top + padding);
+				if (left != oldLeft || top != oldTop || bottom != oldBottom || right != oldRight) {
+					editorView.setViewportPadding(padding, padding, padding, rootView.getHeight() - top + padding);
+				}
 			}
 		});
 

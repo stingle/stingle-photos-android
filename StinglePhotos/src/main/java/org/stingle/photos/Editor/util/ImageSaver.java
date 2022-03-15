@@ -7,21 +7,22 @@ import org.stingle.photos.Editor.core.Image;
 import org.stingle.photos.Editor.math.Vector2;
 
 public class ImageSaver {
+	private static final Vec3 hotTemperature = colorTemperatureToRGB(40000.0);
+	private static final Vec3 coldTemperature = colorTemperatureToRGB(2500.0);
+	private static final Vec3 luminanceWeighting = new Vec3(0.2125, 0.7154, 0.0721);
+
 	private static Vector2 p = new Vector2();
 
 	public static Bitmap saveImage(Image image) {
 		Bitmap resultBitmap = Bitmap.createBitmap((int) image.getCropWidth(), (int) image.getCropHeight(), image.getBitmap().getConfig());
-
-		Vector2 p = new Vector2();
-
-		Vec3 temperatureVector = colorTemperatureToRGB(mix(1000.0, 40000.0, (image.getWarmthValueNormalized() + 1.0) / 2.0));
 
 		for (int i = 0; i < resultBitmap.getHeight(); i++) {
 			for (int j = 0; j < resultBitmap.getWidth(); j++) {
 				int pixel = getPixel(image, j, i);
 
 				Vec3 color = getColorVec(pixel);
-				color = processPixel(image, color, j, i, temperatureVector);
+
+				color = processPixel(image, color, j, i);
 
 				resultBitmap.setPixel(j, i, getColorInt(Color.alpha(pixel), color));
 			}
@@ -54,70 +55,135 @@ public class ImageSaver {
 		return getColorVec(colorInt);
 	}
 
-	static Vec3 applyFilters(Image image, Vec3 inColor, Vec3 temperatureVector) {
+	static Vec3 applyFilters(Image image, Vec3 inColor) {
 		// Brightness
 		inColor.add(image.getBrightnessValueNormalized());
+		inColor.ensureLimits();
 
 		// Contrast
 		inColor.add(-0.5f);
 		inColor.mul(image.getContrastValueNormalized());
 		inColor.add(0.5f);
+		inColor.ensureLimits();
 
 		// Highlights and Shadows
 
-		double luminance = inColor.dot(0.3f);
+		double blackPointDistance = Math.abs(dot(inColor, luminanceWeighting) - 0.05);
+		double blackPointWeight = Math.pow(smoothstep(0.05, 0.5, blackPointDistance), 8.0);
 
-		double highlight = clamp((1.0 - (Math.pow(1.0 - luminance, 1.0f / (2.0 - image.getHighlightsValueNormalized())) +
-				-0.8 * Math.pow(1.0 - luminance, 2.0 / (2.0 - image.getHighlightsValueNormalized())))) - luminance, -1.0, 0.0);
+		double blackPointValue = image.getBlackPointValueNormalized() < 0.0 ? image.getBlackPointValueNormalized() * 0.2 : image.getBlackPointValueNormalized() * 0.1;
 
-		double shadow = clamp((Math.pow(luminance, 1.0 / (image.getShadowsValueNormalized() + 1.0)) + -0.76 * Math.pow(luminance,
-				2.0 / (image.getShadowsValueNormalized() + 1.0))) - luminance, 0.0, 1.0);
+		inColor = mix(new Vec3(inColor.r + blackPointValue, inColor.g + blackPointValue, inColor.b + blackPointValue), inColor, blackPointWeight);
+		inColor.ensureLimits();
 
-		inColor.mul(1.0 / luminance);
-		inColor.mul(luminance + shadow + highlight);
+		// Shadow
+		double shadowDistance = Math.abs(dot(inColor, luminanceWeighting) - 0.25);
+		double shadowWeight = Math.pow(smoothstep(0.15, 0.5, shadowDistance), 4.0);
+
+		double shadowValue = mix(-0.1, 0.1, (image.getShadowsValueNormalized() + 1.0) / 2.0);
+
+		inColor = mix(new Vec3(inColor.r + shadowValue, inColor.g + shadowValue, inColor.b + shadowValue), inColor, shadowWeight);
+		inColor.ensureLimits();
+
+		// Highlight
+		double highlightDistance = Math.abs(dot(inColor, luminanceWeighting) - 0.75);
+		double highlightWeight = Math.pow(smoothstep(0.15, 0.5, highlightDistance), 4.0);
+
+		double highlightValue = mix(-0.1, 0.1, (image.getHighlightsValueNormalized() + 1.0) / 2.0);
+
+		inColor = mix(new Vec3(inColor.r + highlightValue, inColor.g + highlightValue, inColor.b + highlightValue), inColor, highlightWeight);
+		inColor.ensureLimits();
+
+		// White point
+		double whitePointDistance = Math.abs(dot(inColor, luminanceWeighting) - 0.95);
+		double whitePointWeight = Math.pow(smoothstep(0.05, 0.5, whitePointDistance), 8.0);
+
+		double whitePointValue = image.getWhitePointValueNormalized() < 0.0 ? image.getWhitePointValueNormalized() * 0.2 : image.getWhitePointValueNormalized() * 0.1;
+
+		inColor = mix(new Vec3(inColor.r + whitePointValue, inColor.g + whitePointValue, inColor.b + whitePointValue), inColor, whitePointWeight);
+		inColor.ensureLimits();
 
 		// Saturation
 
-		luminance = inColor.dot(0.2125, 0.7154, 0.0721);
-
-		Vec3 greyScaleColor = new Vec3(luminance);
-
-		inColor = mix(greyScaleColor, inColor, image.getSaturationValueNormalized());
+		inColor = mix(new Vec3(inColor.dot(luminanceWeighting)), inColor, image.getSaturationValueNormalized());
+		inColor.ensureLimits();
 
 		// Warmth/Temperature
-		inColor.mul(temperatureVector);
+		Vec3 selectedTemperature = image.getWarmthValueNormalized() < 0.0 ? mix(hotTemperature, new Vec3(1.0), image.getWarmthValueNormalized() + 1.0) : mix(new Vec3(1.0), coldTemperature, image.getWarmthValueNormalized());
+
+		double oldLuminance = dot(inColor, luminanceWeighting);
+
+		inColor.mul(selectedTemperature);
+
+		double newLuminance = dot(inColor, luminanceWeighting);
+
+		inColor.mul(oldLuminance / Math.max(newLuminance, 1e-5));
+		inColor.ensureLimits();
+
+		// Tint
+		double greenTint = -clamp(image.getTintValueNormalized(), -1.0, 0.0);
+		double purpleTint = clamp(image.getTintValueNormalized(), 0.0, 1.0);
+
+		inColor.g = mix(inColor.g, 1.0, greenTint * 0.1);
+
+		inColor.r = mix(inColor.r, 1.0, purpleTint * 0.1);
+		inColor.b = mix(inColor.b, 1.0, purpleTint * 0.2);
+
+		inColor.ensureLimits();
 
 		return inColor;
 	}
 
-	static Vec3 processPixel(Image image, Vec3 inColor, double x, double y, Vec3 temperatureVector) {
-		applyFilters(image, inColor, temperatureVector);
+	static Vec3 processPixel(Image image, Vec3 inColor, double x, double y) {
+		applyFilters(image, inColor);
 
 		// Sharpness
-		Vec3 leftTextureColor = applyFilters(image, getColorVec(image, x - 1.0, y), temperatureVector);
-		Vec3 rightTextureColor = applyFilters(image, getColorVec(image, x + 1.0, y), temperatureVector);
-		Vec3 topTextureColor = applyFilters(image, getColorVec(image, x, y - 1.0), temperatureVector);
-		Vec3 bottomTextureColor = applyFilters(image, getColorVec(image, x, y + 1.0), temperatureVector);
+		if (image.getSharpnessValueNormalized() > 0.0) {
+			Vec3 leftTextureColor = applyFilters(image, getColorVec(image, x - 1.0, y));
+			Vec3 rightTextureColor = applyFilters(image, getColorVec(image, x + 1.0, y));
+			Vec3 topTextureColor = applyFilters(image, getColorVec(image, x, y - 1.0));
+			Vec3 bottomTextureColor = applyFilters(image, getColorVec(image, x, y + 1.0));
 
-		double centerMultiplier = 1.0 + 4.0 * image.getSharpnessValueNormalized();
-		double edgeMultiplier = image.getSharpnessValueNormalized();
+			double centerMultiplier = 1.0 + 4.0 * image.getSharpnessValueNormalized();
+			double edgeMultiplier = image.getSharpnessValueNormalized();
 
-		inColor.mul(centerMultiplier);
+			inColor.mul(centerMultiplier);
 
-		leftTextureColor.mul(edgeMultiplier);
-		rightTextureColor.mul(edgeMultiplier);
-		topTextureColor.mul(edgeMultiplier);
-		bottomTextureColor.mul(edgeMultiplier);
+			leftTextureColor.mul(edgeMultiplier);
+			rightTextureColor.mul(edgeMultiplier);
+			topTextureColor.mul(edgeMultiplier);
+			bottomTextureColor.mul(edgeMultiplier);
 
-		inColor.sub(leftTextureColor);
-		inColor.sub(rightTextureColor);
-		inColor.sub(topTextureColor);
-		inColor.sub(bottomTextureColor);
+			inColor.sub(leftTextureColor);
+			inColor.sub(rightTextureColor);
+			inColor.sub(topTextureColor);
+			inColor.sub(bottomTextureColor);
+			inColor.ensureLimits();
+		}
+
+		double dx = 0.0;
+		double dy = 0.0;
+
+		// Denoise
+		if (image.getDenoiseValueNormalized() > 0.0) {
+			for (int i = 0; i < 9; i++) {
+				dx = (float) (i % 3 - 1);
+				dy = (float) (i / 3 - 1);
+
+				Vec3 pixelColor = applyFilters(image, getColorVec(image, x + dx, y + dy));
+				pixelColor.mul(image.getDenoiseValueNormalized());
+
+				inColor.add(pixelColor);
+			}
+
+			inColor.mul(1.0 / (1.0 + image.getDenoiseValueNormalized() * 9.0));
+			inColor.ensureLimits();
+		}
 
 		double radius = Math.max(image.getCropWidth(), image.getCropHeight()) / 2.0;
 
-		double dx = Math.abs(x - image.getCropWidth() / 2f);
-		double dy = Math.abs(y - image.getCropHeight() / 2f);
+		dx = Math.abs(x - image.getCropWidth() / 2f);
+		dy = Math.abs(y - image.getCropHeight() / 2f);
 
 		// Vignette
 		double distance = Math.hypot(dx, dy);
@@ -126,10 +192,10 @@ public class ImageSaver {
 
 		double t = smoothstep(radius1, radius2, distance);
 
-		Vec3 vignettedColor = new Vec3(inColor);
-		vignettedColor.mul(1.0 - t);
+		Vec3 vignetteColor = image.getVignetteValueNormalized() > 0.0 ? new Vec3(0.0, 0.0, 0.0) : new Vec3(1.0, 1.0, 1.0);
+		Vec3 vignettedColor = mix(inColor, vignetteColor, t);
 
-		inColor = mix(inColor, vignettedColor, image.getVignetteValueNormalized());
+		inColor = mix(inColor, vignettedColor, Math.abs(image.getVignetteValueNormalized()));
 
 		return inColor;
 	}
@@ -177,6 +243,10 @@ public class ImageSaver {
 		x = clamp((x - a) / (b - a), 0.0, 1.0);
 		return x * x * (3.0 - 2.0 * x);
 	}
+	
+	private static double dot(Vec3 a, Vec3 b) {
+		return a.dot(b);
+	}
 
 	private static class Vec3 {
 		double r;
@@ -217,48 +287,36 @@ public class ImageSaver {
 			r += v.r;
 			g += v.g;
 			b += v.b;
-
-			ensureLimits();
 		}
 
 		public void sub(Vec3 v) {
 			r -= v.r;
 			g -= v.g;
 			b -= v.b;
-
-			ensureLimits();
 		}
 
 		public void add(double f) {
 			r += f;
 			g += f;
 			b += f;
-
-			ensureLimits();
 		}
 
 		public void mul(double f) {
 			r *= f;
 			g *= f;
 			b *= f;
-
-			ensureLimits();
 		}
 
 		public void mul(Vec3 v) {
 			r *= v.r;
 			g *= v.g;
 			b *= v.b;
-
-			ensureLimits();
 		}
 
 		public void div(Vec3 v) {
 			r /= v.r;
 			g /= v.g;
 			b /= v.b;
-
-			ensureLimits();
 		}
 
 		private void ensureLimits() {

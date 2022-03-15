@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import org.stingle.photos.Editor.activities.EditorActivity;
+import org.stingle.photos.Editor.core.Image;
+import org.stingle.photos.Editor.util.Callback;
 import org.stingle.photos.Editor.views.GLImageView;
 
 import java.util.concurrent.ExecutorService;
@@ -59,6 +61,13 @@ public abstract class ToolFragment extends Fragment {
 		}
 
 		return null;
+	}
+
+	public void getImage(Callback<Image> imageCallback) {
+		GLImageView imageView = getEditorView();
+		if (imageView != null) {
+			imageView.getImage(imageCallback);
+		}
 	}
 
 	public Bitmap processImage(Bitmap originalBitmap) {
