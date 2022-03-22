@@ -43,8 +43,8 @@ android {
             resValue "string", "content_provider", "org.stingle.photos.share.debug"
             resValue "string", "app_name", "Stingle Photos Dev"
             resValue "string", "camera", "Camera Dev"
-            resValue "string", "api_server_url", "https://192.168.1.2/"
-            //resValue "string", "api_server_url", "https://apidev.stingle.org/"
+            //resValue "string", "api_server_url", "https://192.168.1.2/"
+            resValue "string", "api_server_url", "https://apidev.stingle.org/"
             resValue "string", "default_home_folder_name", "StinglePhotosDev"
             buildConfigField "Boolean", "ALLOW_INSECURE_TLS", 'true'
             debuggable true
@@ -63,7 +63,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     ndkVersion '21.3.6528147'
-    buildToolsVersion '30.0.2'
     flavorDimensions 'version'
 
     buildFeatures {
@@ -109,6 +108,7 @@ dependencies {
     implementation 'androidx.camera:camera-extensions:1.0.0-alpha32'
 
     implementation 'androidx.window:window:1.0.0-alpha09'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
-    //debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }

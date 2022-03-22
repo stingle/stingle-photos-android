@@ -12,6 +12,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/StinglePhotos" />
+            <option value="$PROJECT_DIR$/imagerecognition" />
             <option value="$PROJECT_DIR$/picasso" />
           </set>
         </option>

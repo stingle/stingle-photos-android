@@ -4,12 +4,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
 
+import com.google.gson.Gson;
+import com.goterl.lazysodium.SodiumAndroid;
 import com.goterl.lazysodium.interfaces.AEAD;
 import com.goterl.lazysodium.interfaces.Box;
 import com.goterl.lazysodium.interfaces.KeyDerivation;
 import com.goterl.lazysodium.interfaces.PwHash;
 import com.goterl.lazysodium.interfaces.SecretBox;
-import com.goterl.lazysodium.SodiumAndroid;
 import com.sun.jna.NativeLong;
 
 import org.stingle.photos.StinglePhotosApplication;
@@ -21,7 +22,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1197,6 +1200,35 @@ public class Crypto {
         byte[] thumbNewHeader = thumbOut.toByteArray();
 
         return assembleHeadersString(fileNewHeader, thumbNewHeader);
+    }
+
+    public String encryptObject(Object obj, byte[] publicKey){
+        Gson gson = new Gson();
+        String json = gson.toJson(obj);
+        byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
+
+        int encJsonLength = jsonBytes.length + Box.SEALBYTES;
+
+        byte[] encryptedJson = new byte[encJsonLength];
+        so.crypto_box_seal(encryptedJson, jsonBytes, jsonBytes.length, publicKey);
+
+        return byteArrayToBase64UrlSafe(encryptedJson);
+    }
+
+    public Object decryptObject(String encryptedJson, byte[] privateKey, byte[] publicKey, Type type) throws CryptoException {
+
+        byte[] encryptedJsonBytes = base64ToByteArrayUrlSafe(encryptedJson);
+
+        byte[] jsonBytes = new byte[encryptedJsonBytes.length - Box.SEALBYTES];
+
+        if(so.crypto_box_seal_open(jsonBytes, encryptedJsonBytes, encryptedJsonBytes.length, publicKey, privateKey) != 0){
+            throw new CryptoException("Unable to decrypt json data");
+        }
+
+        String json = new String(jsonBytes, StandardCharsets.UTF_8);
+
+        Gson gson = new Gson();
+        return gson.fromJson(json, type);
     }
 
     public class Header{
