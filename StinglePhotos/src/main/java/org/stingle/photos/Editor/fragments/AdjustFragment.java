@@ -221,7 +221,13 @@ public class AdjustFragment extends Fragment {
 						}
 					};
 					smoothScroller.setTargetPosition(index);
-					layoutManager.startSmoothScroll(smoothScroller);
+					if (layoutManager != null) {
+						layoutManager.startSmoothScroll(smoothScroller);
+					}
+
+					if (listener != null) {
+						listener.onAdjustOptionSelected(tool);
+					}
 				}
 			}
 		});
