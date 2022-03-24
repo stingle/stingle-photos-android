@@ -31,6 +31,8 @@ public class Camera {
 	private float paddingRight;
 	private float paddingBottom;
 
+	private float totalScale;
+
 	private boolean matrixDirty;
 
 	private Handler mainThreadHandler;
@@ -81,6 +83,8 @@ public class Camera {
 			Matrix.scaleM(viewMatrix, 0, scale, scale, 1f);
 			Matrix.rotateM(viewMatrix, 0, -image.getCropRotation() + image.getOrientation() * 90, 0f, 0f, 1f);
 			Matrix.translateM(viewMatrix, 0, -cropCenter.x, -cropCenter.y, 0f);
+
+			totalScale = scale;
 //
 
 			Matrix.invertM(inverseViewMatrix, 0, viewMatrix, 0);
@@ -101,6 +105,11 @@ public class Camera {
 	}
 
 	public void scale(float s, float px, float py) {
+		float newScale = totalScale * s;
+		newScale = Math.max(0.5f, Math.min(newScale, 100f));
+		s = newScale / totalScale;
+		totalScale = newScale;
+
 		Matrix.setIdentityM(tmpMatrix, 0);
 		Matrix.translateM(tmpMatrix, 0, px, py, 0f);
 		Matrix.scaleM(tmpMatrix, 0, s, s, 1f);

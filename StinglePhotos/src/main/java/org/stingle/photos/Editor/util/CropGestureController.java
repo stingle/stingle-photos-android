@@ -196,9 +196,6 @@ public class CropGestureController {
 				float dx = imagePointer1.getX() - previousImagePointer1.getX();
 				float dy = imagePointer1.getY() - previousImagePointer1.getY();
 
-//				tmpVector.set(imagePointer1.getX() - previousImagePointer1.getX(), imagePointer1.getY() - previousImagePointer1.getY());
-//				tmpVector.rotate(-image.getCropRotationRadians());
-
 				float minWidth = 50f;
 				float minHeight = 50f;
 
@@ -453,19 +450,30 @@ public class CropGestureController {
 				int removedPointerId = event.getPointerId(removedPointerIndex);
 				boolean pointerRemoved = touchPointerId0 == removedPointerId || touchPointerId1 == removedPointerId;
 				if (pointerRemoved) {
-					for (int i = 0; i < event.getPointerCount(); ++i) {
-						int pointerId = event.getPointerId(i);
-						if (pointerId != touchPointerId0 && pointerId != touchPointerId1) {
-							if (touchPointerId0 == removedPointerId) {
-								touchPointerId0 = pointerId;
+					if (event.getPointerCount() > 2) {
+						for (int i = 0; i < event.getPointerCount(); ++i) {
+							int pointerId = event.getPointerId(i);
+							if (pointerId != touchPointerId0 && pointerId != touchPointerId1) {
+								if (touchPointerId0 == removedPointerId) {
+									touchPointerId0 = pointerId;
 
-								previousScreenPointer1.set(event.getX(i), event.getY(i));
-							} else {
-								touchPointerId1 = pointerId;
+									previousScreenPointer1.set(event.getX(i), event.getY(i));
+								} else {
+									touchPointerId1 = pointerId;
 
-								previousScreenPointer2.set(event.getX(i), event.getY(i));
+									previousScreenPointer2.set(event.getX(i), event.getY(i));
+								}
+								break;
 							}
-							break;
+						}
+					} else {
+						if (touchPointerId0 == removedPointerId) {
+							touchPointerId0 = touchPointerId1;
+							touchPointerId1 = MotionEvent.INVALID_POINTER_ID;
+
+							int validPointerIndex = event.findPointerIndex(touchPointerId0);
+
+							previousScreenPointer1.set(event.getX(validPointerIndex), event.getY(validPointerIndex));
 						}
 					}
 				}

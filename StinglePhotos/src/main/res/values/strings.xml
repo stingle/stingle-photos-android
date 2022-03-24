@@ -509,11 +509,7 @@
     <string name="markup">Markup</string>
     <string name="more">More</string>
     <string name="brightness">Brightness</string>
-    <string name="hdr">HDR</string>
     <string name="warmth">Warmth</string>
-    <string name="skin_tone">Skin tone</string>
-    <string name="blue_tone">Blue tone</string>
-    <string name="pop">Pop</string>
     <string name="sharpen">Sharpen</string>
     <string name="denoise">Denoise</string>
 

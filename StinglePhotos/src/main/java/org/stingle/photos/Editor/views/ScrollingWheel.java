@@ -155,6 +155,9 @@ public class ScrollingWheel extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
+		canvas.save();
+		canvas.translate(0f, -getPaddingBottom());
+
 		float width = getWidth();
 
 		boolean enabled = isEnabled();
@@ -197,7 +200,8 @@ public class ScrollingWheel extends View {
 
 		textPaint.getTextBounds(text, 0, text.length(), textBounds);
 
-		canvas.drawText(text, width / 2f - textBounds.left - textBounds.width() / 2f, -textBounds.top, textPaint);
+		canvas.restore();
+		canvas.drawText(text, width / 2f - textBounds.left - textBounds.width() / 2f, getPaddingTop() - textBounds.top, textPaint);
 	}
 
 	@Override

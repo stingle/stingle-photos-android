@@ -181,8 +181,6 @@ public class AdjustFragment extends Fragment {
 
 		LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
 
-//		context.getResources().getDimensionPixelOffset(R.dimen.tool_list_item_margin);
-
 		toolListView = view.findViewById(R.id.adjust_tool_list);
 		toolListView.setLayoutManager(layoutManager);
 		toolListView.setAdapter(toolAdapter);
@@ -209,7 +207,6 @@ public class AdjustFragment extends Fragment {
 							int start = super.calculateDxToMakeVisible(view, LinearSmoothScroller.SNAP_TO_START);
 							int end = super.calculateDxToMakeVisible(view, LinearSmoothScroller.SNAP_TO_END);
 
-//								return layoutManager.getWidth() / 2 - layoutManager.getDecoratedLeft(view);
 							return (start + end) / 2;
 						}
 
@@ -225,21 +222,6 @@ public class AdjustFragment extends Fragment {
 					};
 					smoothScroller.setTargetPosition(index);
 					layoutManager.startSmoothScroll(smoothScroller);
-
-
-//					LinearLayoutManager layoutManager = (LinearLayoutManager) toolListView.getLayoutManager();
-
-//					if (layoutManager != null && !layoutManager.isSmoothScrolling()) {
-//						int index = toolAdapter.findToolPosition(tool);
-//
-//
-//						userInitiatedScroll = false;
-//
-//						smoothScroller.setTargetPosition(index);
-//						layoutManager.startSmoothScroll(smoothScroller);
-//
-//						Log.d("Stingle", "Smooth scrolling to " + index + " position");
-//					}
 				}
 			}
 		});

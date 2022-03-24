@@ -216,7 +216,6 @@ public class Image {
 
 		propertyList.add(brightnessProperty);
 		propertyList.add(contrastProperty);
-		propertyList.add(new Property(AdjustOption.HDR.name, 0, 100));
 		propertyList.add(whitePointProperty);
 		propertyList.add(highlightsProperty);
 		propertyList.add(shadowsProperty);
@@ -224,9 +223,6 @@ public class Image {
 		propertyList.add(saturationProperty);
 		propertyList.add(warmthProperty);
 		propertyList.add(tintProperty);
-		propertyList.add(new Property(AdjustOption.SKIN_TONE.name, -100, 100));
-		propertyList.add(new Property(AdjustOption.BLUE_TONE.name, -100, 100));
-		propertyList.add(new Property(AdjustOption.POP.name, 0, 100));
 		propertyList.add(sharpnessProperty);
 		propertyList.add(denoiseProperty);
 		propertyList.add(vignetteProperty);
