@@ -22,8 +22,12 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import org.stingle.photos.AI.AIHelper;
+import org.stingle.photos.AI.ObjectDetection;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
+import org.stingle.photos.Db.Objects.StingleFileSearch;
+import org.stingle.photos.Db.Query.FileSearchDb;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
@@ -40,9 +44,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import ai.image.StingleImageRecognition;
 
 public class MediaEncryptService extends Service {
 
@@ -208,6 +215,7 @@ public class MediaEncryptService extends Service {
 
 
 					if (type == Crypto.FILE_TYPE_PHOTO) {
+						AIHelper.detectImageAndSaveInDb(context, encFilename, Uri.fromFile(file));
 						InputStream thumbIn = new FileInputStream(file);
 						ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 						int numRead = 0;

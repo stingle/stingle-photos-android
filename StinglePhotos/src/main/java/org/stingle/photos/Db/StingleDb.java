@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class StingleDb extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 3;
+	public static final int DATABASE_VERSION = 4;
 	public static final String DATABASE_NAME = "stingleFiles.db";
 
 	public static final int SORT_ASC = 0;
@@ -44,6 +44,11 @@ public class StingleDb extends SQLiteOpenHelper {
 			db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS);
 			db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS_MID_INDEX);
 			//db.execSQL(StingleDbContract.SQL_CREATE_ALBUMS_SYNC_LOCAL_FIELD);
+		} else if (oldVersion == 3 && newVersion == 4) {
+			db.execSQL(StingleDbContract.SQL_CREATE_SEARCH_INDEX);
+			db.execSQL(StingleDbContract.SQL_CREATE_FILE_INFO);
+			db.execSQL(StingleDbContract.SQL_CREATE_FACES);
+			db.execSQL(StingleDbContract.SQL_CREATE_LOCATIONS);
 		}
 	}
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -70,6 +75,11 @@ public class StingleDb extends SQLiteOpenHelper {
 
 		db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS);
 		db.execSQL(StingleDbContract.SQL_CREATE_IMPORTED_IDS_MID_INDEX);
+
+		db.execSQL(StingleDbContract.SQL_CREATE_SEARCH_INDEX);
+		db.execSQL(StingleDbContract.SQL_CREATE_FILE_INFO);
+		db.execSQL(StingleDbContract.SQL_CREATE_FACES);
+		db.execSQL(StingleDbContract.SQL_CREATE_LOCATIONS);
 	}
 
 	private void deleteTables(SQLiteDatabase db){

@@ -127,7 +127,7 @@ public class StingleImageRecognition {
      * @return detected objects list
      * @throws IOException when accessing corrupted or TF model file or not finding the model file path
      */
-    public List<DetectionResult> runObjectDetection(Bitmap bitmap) throws IOException {
+    public Set<DetectionResult> runObjectDetection(Bitmap bitmap) throws IOException {
         TensorImage image = TensorImage.fromBitmap(bitmap);
 
         if (detector == null) {
@@ -143,7 +143,7 @@ public class StingleImageRecognition {
         if (BuildConfig.DEBUG) {
             debugPrint(results);
         }
-        return finalResults;
+        return new HashSet<>(finalResults);
     }
 
     /**
@@ -180,7 +180,7 @@ public class StingleImageRecognition {
      * @return detected objects list
      * @throws IOException when accessing corrupted or TF model file or not finding the model file path
      */
-    public List<DetectionResult> runObjectDetection(Bitmap bitmap, ImageView inputImageView) throws IOException {
+    public Set<DetectionResult> runObjectDetection(Bitmap bitmap, ImageView inputImageView) throws IOException {
         TensorImage image = TensorImage.fromBitmap(bitmap);
 
         if (detector == null) {
@@ -209,7 +209,7 @@ public class StingleImageRecognition {
         Bitmap imgWithResult = drawDetectionResult(bitmap, finalResultsToDisplay);
         inputImageView.setImageBitmap(imgWithResult);
 
-        return finalResults;
+        return new HashSet<>(finalResults);
     }
 
     /**

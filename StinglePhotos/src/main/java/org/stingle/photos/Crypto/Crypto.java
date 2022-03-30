@@ -1231,6 +1231,14 @@ public class Crypto {
         return gson.fromJson(json, type);
     }
 
+    public String hashString(String objectName) {
+        // TODO hardcoded secret to---> generate secret, send to server, etc..
+        String SECRET = "dfgsdfgsdfgsdfg3343";
+        byte[] dataToHash = (SECRET + objectName).getBytes(StandardCharsets.UTF_8);
+        byte[] hash = Crypto.sha256(dataToHash);
+        return Crypto.byteArrayToBase64UrlSafe(hash);
+    }
+
     public class Header{
         public int fileVersion;
         public byte[] fileId;

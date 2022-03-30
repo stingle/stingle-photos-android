@@ -12,11 +12,15 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
 
+import org.stingle.photos.AI.AIHelper;
+import org.stingle.photos.AI.ObjectDetection;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleFileSearch;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.FileSearchDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -28,6 +32,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import ai.image.StingleImageRecognition;
 
 public class ImportFile {
 
@@ -104,7 +114,7 @@ public class ImportFile {
 
 
 			if (fileType == Crypto.FILE_TYPE_PHOTO) {
-
+				AIHelper.detectImageAndSaveInDb(context, encFilename, uri);
 				InputStream thumbIn = context.getContentResolver().openInputStream(uri);
 				if(thumbIn == null){
 					return null;

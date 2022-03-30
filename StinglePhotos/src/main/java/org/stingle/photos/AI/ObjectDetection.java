@@ -1,8 +1,10 @@
 package org.stingle.photos.AI;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import org.stingle.photos.Files.FileManager;
@@ -68,7 +70,7 @@ public class ObjectDetection {
         return null;
     }
 
-    public List<StingleImageRecognition.DetectionResult> detectImage(Bitmap bitmap) {
+    public Set<StingleImageRecognition.DetectionResult> detectImage(Bitmap bitmap) {
         try {
             return objectDetector.runObjectDetection(bitmap);
         } catch (Exception e) {
@@ -77,10 +79,9 @@ public class ObjectDetection {
         return null;
     }
 
-    public List<StingleImageRecognition.DetectionResult> detectImage(Uri imageUri) {
+    public Set<StingleImageRecognition.DetectionResult> detectImage(Context context, Uri imageUri) {
         try {
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            Bitmap bitmap = BitmapFactory.decodeFile(imageUri.getPath(), bmOptions);
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
             return objectDetector.runObjectDetection(bitmap);
         } catch (Exception e) {
             Log.d(TAG, "Failed to detect image");

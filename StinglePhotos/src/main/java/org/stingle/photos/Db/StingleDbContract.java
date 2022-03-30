@@ -14,6 +14,10 @@ public class StingleDbContract {
 		public static final String TABLE_NAME_ALBUM_FILES = "album_files";
 		public static final String TABLE_NAME_CONTACTS = "contacts";
 		public static final String TABLE_NAME_IMPORTED_IDS = "imported_ids";
+		public static final String TABLE_NAME_SEARCH_INDEX = "search_index";
+		public static final String TABLE_NAME_FILE_INFO = "file_info";
+		public static final String TABLE_NAME_FACES = "faces";
+		public static final String TABLE_NAME_LOCATIONS = "locations";
 
 		public static final String COLUMN_NAME_FILENAME = "filename";
 		public static final String COLUMN_NAME_IS_LOCAL = "is_local";
@@ -43,7 +47,11 @@ public class StingleDbContract {
 		public static final String COLUMN_NAME_PUBLIC_KEY = "pk";
 
 		public static final String COLUMN_NAME_MEDIA_ID = "media_id";
-
+		public static final String COLUMN_NAME_IS_PROC = "is_proc";
+		public static final String COLUMN_NAME_HASH = "hash";
+		public static final String COLUMN_NAME_DATA = "data";
+		public static final String COLUMN_NAME_FACE_ID = "face_id";
+		public static final String COLUMN_NAME_LOC_ID = "loc_id";
 	}
 
 	public static final String SQL_CREATE_FILES =
@@ -156,4 +164,34 @@ public class StingleDbContract {
 
 	public static final String SQL_CREATE_ALBUMS_SYNC_LOCAL_FIELD =
 			"ALTER TABLE "+Columns.TABLE_NAME_ALBUMS+" ADD "+Columns.COLUMN_NAME_SYNC_LOCAL+" INTEGER;";
+
+	public static final String SQL_CREATE_SEARCH_INDEX =
+			"CREATE TABLE " + Columns.TABLE_NAME_SEARCH_INDEX + " (" +
+					Columns._ID + " INTEGER PRIMARY KEY," +
+					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_HASH + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_IS_PROC + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+					")";
+
+	public static final String SQL_CREATE_FILE_INFO =
+			"CREATE TABLE " + Columns.TABLE_NAME_FILE_INFO + " (" +
+					Columns.COLUMN_NAME_FILENAME + " TEXT NOT NULL PRIMARY KEY," +
+					Columns.COLUMN_NAME_DATA + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+					")";
+
+	public static final String SQL_CREATE_FACES =
+			"CREATE TABLE " + Columns.TABLE_NAME_FACES + " (" +
+					Columns.COLUMN_NAME_FACE_ID + " TEXT NOT NULL PRIMARY KEY," +
+					Columns.COLUMN_NAME_DATA + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+					")";
+
+	public static final String SQL_CREATE_LOCATIONS =
+			"CREATE TABLE " + Columns.TABLE_NAME_LOCATIONS + " (" +
+					Columns.COLUMN_NAME_LOC_ID + " TEXT NOT NULL PRIMARY KEY," +
+					Columns.COLUMN_NAME_DATA + " TEXT NOT NULL," +
+					Columns.COLUMN_NAME_DATE_MODIFIED + " INTEGER" +
+					")";
 }

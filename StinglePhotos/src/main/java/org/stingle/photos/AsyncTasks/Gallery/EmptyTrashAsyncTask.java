@@ -5,7 +5,9 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Objects.StingleFileSearch;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.FileSearchDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -13,6 +15,7 @@ import org.stingle.photos.Sync.SyncManager;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -75,10 +78,15 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 			trashDb.deleteFile(dbFile.filename);
 		}
 
+		FileSearchDb db = new FileSearchDb(context.get());
+		List<StingleFileSearch> list = db.getAll();
+		System.out.println("list.size() = " + list.size());
+
 		result.close();
 		galleryDb.close();
 		albumFilesDb.close();
 		trashDb.close();
+		db.close();
 		return null;
 	}
 
