@@ -16,6 +16,7 @@ import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.FragmentManager;
 
 import org.stingle.photos.AsyncTasks.LoadImageAsyncTask;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Editor.core.AdjustOption;
 import org.stingle.photos.Editor.core.Image;
 import org.stingle.photos.Editor.core.Property;
@@ -37,6 +38,10 @@ import java.util.concurrent.Executors;
 
 public class EditorActivity extends AppCompatActivity {
 	private GLImageView editorView;
+
+	private int itemPosition;
+	private int set;
+	private String albumId;
 
 	private Image image;
 
@@ -63,9 +68,9 @@ public class EditorActivity extends AppCompatActivity {
 
 		Intent intent = getIntent();
 
-		int itemPosition = intent.getIntExtra("EXTRA_ITEM_POSITION", 0);
-		int set = intent.getIntExtra("EXTRA_ITEM_SET", 0);
-		String albumId = intent.getStringExtra("EXTRA_ITEM_ALBUM_ID");
+		itemPosition = intent.getIntExtra("EXTRA_ITEM_POSITION", 0);
+		set = intent.getIntExtra("EXTRA_ITEM_SET", 0);
+		albumId = intent.getStringExtra("EXTRA_ITEM_ALBUM_ID");
 
 
 		progressBar = findViewById(R.id.progress);
@@ -189,6 +194,18 @@ public class EditorActivity extends AppCompatActivity {
 		}
 
 		fragmentManager.beginTransaction().replace(R.id.tool_container1, adjustFragment, null).commit();
+	}
+
+	public int getItemPosition() {
+		return itemPosition;
+	}
+
+	public int getSet() {
+		return set;
+	}
+
+	public String getAlbumId() {
+		return albumId;
 	}
 
 	public GLImageView getEditorView() {

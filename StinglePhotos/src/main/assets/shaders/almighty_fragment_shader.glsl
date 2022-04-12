@@ -85,7 +85,7 @@ vec3 applyFilters(vec3 textureColor) {
     highp float whitePointDistance = abs(dot(outColor.rgb, luminanceWeighting) - 0.95);
     highp float whitePointWeight = pow(smoothstep(0.05, 0.5, whitePointDistance), 8.0);
 
-    highp float whitePointValue = whitePoint < 0.0 ? whitePoint * 0.2 : whitePoint * 0.2;
+    highp float whitePointValue = whitePoint * 0.2;
 
     outColor = mix(vec3(outColor.r + whitePointValue, outColor.g + whitePointValue, outColor.b + whitePointValue), outColor, whitePointWeight);
     outColor = clamp(outColor, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));

@@ -20,9 +20,7 @@ public class ImageSaver {
 			for (int j = 0; j < resultBitmap.getWidth(); j++) {
 				int pixel = getPixel(image, j, i);
 
-				Vec3 color = getColorVec(pixel);
-
-				color = processPixel(image, color, j, i);
+				Vec3 color = processPixel(image, getColorVec(pixel), j, i);
 
 				resultBitmap.setPixel(j, i, getColorInt(Color.alpha(pixel), color));
 			}
@@ -34,7 +32,7 @@ public class ImageSaver {
 	private static int getPixel(Image image, double x, double y) {
 		p.set((float) x, (float) y);
 		p.translate(-image.getCropWidth() / 2f, -image.getCropHeight() / 2f);
-		p.rotate(image.getCropRotationRadians());
+		p.rotate((float) Math.toRadians(image.getCropRotation() - image.getOrientation() * 90));
 		p.translate(image.getCropCenter().x, image.getCropCenter().y);
 
 		return image.getBitmap().getPixel(clamp((int) p.getX(), 0, image.getWidth() - 1), clamp((int) p.getY(), 0, image.getHeight() - 1));
@@ -98,7 +96,7 @@ public class ImageSaver {
 		double whitePointDistance = Math.abs(dot(inColor, luminanceWeighting) - 0.95);
 		double whitePointWeight = Math.pow(smoothstep(0.05, 0.5, whitePointDistance), 8.0);
 
-		double whitePointValue = image.getWhitePointValueNormalized() < 0.0 ? image.getWhitePointValueNormalized() * 0.2 : image.getWhitePointValueNormalized() * 0.1;
+		double whitePointValue = image.getWhitePointValueNormalized() * 0.2;
 
 		inColor = mix(new Vec3(inColor.r + whitePointValue, inColor.g + whitePointValue, inColor.b + whitePointValue), inColor, whitePointWeight);
 		inColor.ensureLimits();
@@ -135,7 +133,7 @@ public class ImageSaver {
 	}
 
 	static Vec3 processPixel(Image image, Vec3 inColor, double x, double y) {
-		applyFilters(image, inColor);
+		inColor = applyFilters(image, inColor);
 
 		// Sharpness
 		if (image.getSharpnessValueNormalized() > 0.0) {
@@ -320,9 +318,9 @@ public class ImageSaver {
 		}
 
 		private void ensureLimits() {
-			r = clamp(r, 0f, 1f);
-			g = clamp(g, 0f, 1f);
-			b = clamp(b, 0f, 1f);
+			r = clamp(r, 0.0, 1.0);
+			g = clamp(g, 0.0, 1.0);
+			b = clamp(b, 0.0, 1.0);
 		}
 	}
 }

@@ -220,5 +220,4 @@ public class ImportFile {
 			return null;
 		}
 	}
-
 }

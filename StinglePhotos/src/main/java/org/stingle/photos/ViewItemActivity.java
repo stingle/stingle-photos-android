@@ -263,6 +263,7 @@ public class ViewItemActivity extends AppCompatActivity {
 			if(album != null) {
 				if(album.isOwner){
 					menu.findItem(R.id.set_as_album_cover).setVisible(true);
+					menu.findItem(R.id.edit).setVisible(true);
 				}
 				else if(album.permissionsObj != null && album.isShared && !album.isOwner){
 					if (!album.permissionsObj.allowShare) {
@@ -273,6 +274,7 @@ public class ViewItemActivity extends AppCompatActivity {
 					}
 
 					menu.findItem(R.id.trash).setVisible(false);
+					menu.findItem(R.id.edit).setVisible(false);
 				}
 			}
 		}
@@ -281,6 +283,7 @@ public class ViewItemActivity extends AppCompatActivity {
 			menu.findItem(R.id.decrypt).setVisible(false);
 			menu.findItem(R.id.add_to_album).setVisible(false);
 			menu.findItem(R.id.trash).setVisible(false);
+			menu.findItem(R.id.edit).setVisible(false);
 		}
 		return true;
 	}

@@ -1,5 +1,6 @@
 package org.stingle.photos.Editor.fragments;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.stingle.photos.AsyncTasks.SaveEditedImageAsyncTask;
+import org.stingle.photos.Editor.activities.EditorActivity;
 import org.stingle.photos.Editor.adapters.ToolAdapter;
 import org.stingle.photos.Editor.core.Image;
 import org.stingle.photos.Editor.core.Tool;
@@ -24,11 +27,13 @@ import org.stingle.photos.Editor.util.CenterOffsetItemDecoration;
 import org.stingle.photos.Editor.util.ImageSaver;
 import org.stingle.photos.R;
 
-public class MainFragment extends ToolFragment {
+public class MainFragment extends ToolFragment implements Runnable {
 
 	private boolean userInitiatedScroll;
 
 	private ToolSelectedListener listener;
+
+	protected ProgressDialog progressDialog;
 
 	public void setListener(ToolSelectedListener listener) {
 		this.listener = listener;
@@ -52,7 +57,22 @@ public class MainFragment extends ToolFragment {
 					public void call(Image image) {
 						Bitmap savedImage = ImageSaver.saveImage(image);
 
-						System.out.println("tada");
+						EditorActivity editorActivity = getEditorActivity();
+						editorActivity.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								progressDialog = new ProgressDialog(editorActivity);
+								progressDialog.setMessage(getString(R.string.saving_image));
+								progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+								progressDialog.setCancelable(false);
+								progressDialog.show();
+
+								SaveEditedImageAsyncTask asyncTask = new SaveEditedImageAsyncTask(
+										editorActivity.getItemPosition(), editorActivity.getSet(), editorActivity.getAlbumId(),
+										savedImage, editorActivity, MainFragment.this);
+								asyncTask.execute();
+							}
+						});
 					}
 				});
 			}
@@ -161,6 +181,13 @@ public class MainFragment extends ToolFragment {
 				}
 			}
 		});
+	}
+
+	@Override
+	public void run() {
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+		}
 	}
 
 	public interface ToolSelectedListener {

@@ -471,6 +471,7 @@
     <string name="change_email">Email (Click to change)</string>
     <string name="enter_new_email">Please enter new email address</string>
     <string name="changing_email">Changing email...</string>
+    <string name="saving_image">Saving image…</string>
     <string name="success_change_email">Your email successfully changed!</string>
     <string name="file_info">File Info</string>
     <string name="name">Name</string>

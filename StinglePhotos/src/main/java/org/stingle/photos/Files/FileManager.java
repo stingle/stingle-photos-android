@@ -412,6 +412,13 @@ public class FileManager {
 		return tmpDir.getAbsolutePath() + "/";
 	}
 
+	public static String getTmpDir(Context context) {
+		File cacheDir = context.getCacheDir();
+		File tmpDir = new File(cacheDir.getAbsolutePath() + "/tmp/");
+		tmpDir.mkdirs();
+		return tmpDir.getAbsolutePath() + "/";
+	}
+
 	public static abstract class OnFinish{
 		public void onFinish(){}
 		public void onFinish(int integer){
