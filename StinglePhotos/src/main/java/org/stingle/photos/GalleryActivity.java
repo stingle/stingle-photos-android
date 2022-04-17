@@ -63,6 +63,7 @@ import org.stingle.photos.Gallery.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
 import org.stingle.photos.Gallery.Gallery.SyncBarHandler;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
+import org.stingle.photos.Search.SearchDialogFragment;
 import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
@@ -875,6 +876,10 @@ public class GalleryActivity extends AppCompatActivity
 		}
 		else if (id == R.id.action_reset_cover) {
 			GalleryActions.setAsAlbumCover(GalleryActivity.this, currentAlbumId, SetAlbumCoverAsyncTask.ALBUM_COVER_DEFAULT, null);
+		} else if (id == R.id.action_search) {
+			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+			SearchDialogFragment newFragment = new SearchDialogFragment();
+			newFragment.show(ft, "search");
 		}
 
 		return super.onOptionsItemSelected(item);
