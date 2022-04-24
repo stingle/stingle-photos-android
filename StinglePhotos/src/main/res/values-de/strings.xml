@@ -49,7 +49,7 @@
     <string name="password_short">Das Passwort muss mindestens %s Zeichen lang sein</string>
     <string name="flash">Blitz</string>
     <string name="timer">Timer</string>
-    <string name="sign_up">Anmelden</string>
+    <string name="sign_up">Registrieren</string>
     <string name="bottom_text">https://stingle.org</string>
     <string name="clear_cache">Cache leeren</string>
     <string name="clear_cache_desc">Thumbnail Cache leeren</string>
