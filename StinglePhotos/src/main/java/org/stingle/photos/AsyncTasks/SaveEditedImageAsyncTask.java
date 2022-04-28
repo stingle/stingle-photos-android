@@ -70,20 +70,14 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 					e.printStackTrace();
 				}
 
-				ImportFile.importFile(context, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
+				if (!fileExistsInOtherSets(file, galleryDb, albumFilesDb, trashDb)) {
+					ImportFile.replaceFile(context, file, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
+				} else {
+					removeFileFromCurrentSet(file, galleryDb, albumFilesDb, trashDb);
+					ImportFile.importFile(context, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
+				}
 
 				tmpFile.delete();
-
-				// Deleting old file
-				// If current file is available in other sets we just need to remove it from the current set
-				// 	without deleting it actually
-				// Otherwise if it only exists in current set we just delete it
-
-				removeFileFromCurrentSet(file, galleryDb, albumFilesDb, trashDb);
-
-				if (!fileExistsInOtherSets(file, galleryDb, albumFilesDb, trashDb)) {
-					deleteFile(file, context);
-				}
 			}
 
 			galleryDb.close();
@@ -124,6 +118,9 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 		} else {
 			trashDb.deleteFile(file.filename);
 		}
+
+		// transfer exif..
+		// update db ?
 	}
 	
 	private void deleteFile(StingleDbFile file, Context context) {

@@ -1,0 +1,3 @@
+/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/.cxx/Debug/4b1t5028/arm64-v8a/CMakeFiles/rebuild_cache.dir
+/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/.cxx/Debug/4b1t5028/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/.cxx/Debug/4b1t5028/arm64-v8a/CMakeFiles/editor.dir

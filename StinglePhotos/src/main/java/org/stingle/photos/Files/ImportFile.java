@@ -15,6 +15,7 @@ import android.util.Log;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
+import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -203,6 +204,199 @@ public class ImportFile {
 				if (album != null) {
 					String newHeaders = crypto.encryptFileHeaders(fileHeader, thumbHeader, Crypto.base64ToByteArray(album.publicKey));
 					albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, date, nowDate);
+					album.dateModified = System.currentTimeMillis();
+					albumsDb.updateAlbum(album);
+				}
+				else{
+					albumsDb.close();
+					albumFilesDb.close();
+					return null;
+				}
+				albumsDb.close();
+				albumFilesDb.close();
+			}
+			return date;
+		} catch (IOException | CryptoException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static Long replaceFile(Context context, StingleDbFile stingleFile, Uri uri, int set, String albumId, Long dateHint, AsyncTask<?,?,?> task) {
+		try {
+			int fileType = FileManager.getFileTypeFromUri(context, uri);
+
+			Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
+			String filename = null;
+			long fileSize = 0;
+			if (returnCursor != null) {
+				try {
+					int nameIndex = returnCursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
+					int sizeIndex = returnCursor.getColumnIndexOrThrow(OpenableColumns.SIZE);
+					returnCursor.moveToFirst();
+					filename = returnCursor.getString(nameIndex);
+					fileSize = returnCursor.getLong(sizeIndex);
+
+					if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+						try {
+							int pendingIndex = returnCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_PENDING);
+							String isPending = returnCursor.getString(pendingIndex);
+							Log.e("isPending", isPending);
+							if (!isPending.equals("0")) {
+								return null;
+							}
+						}
+						catch (Exception ignored){}
+					}
+
+				}
+				catch (Exception e){
+					return null;
+				}
+			} else {
+				String path = uri.getPath();
+				if(path != null) {
+					File fileToImport = new File(path);
+					if (fileToImport.exists()) {
+						filename = fileToImport.getName();
+						fileSize = fileToImport.length();
+					}
+				}
+			}
+
+			if (filename == null && returnCursor != null) {
+				int column_index = returnCursor.getColumnIndex(MediaStore.Images.Media.DATA);
+				Uri filePathUri = Uri.parse(returnCursor.getString(column_index));
+				String lastSegment = filePathUri.getLastPathSegment();
+				if(lastSegment != null) {
+					filename = lastSegment.toString();
+				}
+			}
+
+			if(returnCursor != null) {
+				returnCursor.close();
+			}
+
+
+			String encFilename = stingleFile.filename;//Helpers.getNewEncFilename();
+			String encFilePath = FileManager.getHomeDir(context) + "/" + encFilename;
+
+			int videoDuration = 0;
+			if (fileType == Crypto.FILE_TYPE_VIDEO) {
+				videoDuration = FileManager.getVideoDurationFromUri(context, uri);
+			}
+
+			byte[] fileId = StinglePhotosApplication.getCrypto().getNewFileId();
+			Crypto.Header thumbHeader = null;
+
+
+			if (fileType == Crypto.FILE_TYPE_PHOTO) {
+
+				InputStream thumbIn = context.getContentResolver().openInputStream(uri);
+				if(thumbIn == null){
+					return null;
+				}
+				ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+				int numRead = 0;
+				byte[] buf = new byte[1024];
+				while ((numRead = thumbIn.read(buf)) >= 0) {
+					bytes.write(buf, 0, numRead);
+				}
+				thumbIn.close();
+
+				thumbHeader = Helpers.generateThumbnail(context, bytes.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_PHOTO, videoDuration);
+			} else if (fileType == Crypto.FILE_TYPE_VIDEO) {
+				Bitmap thumb = Helpers.getVideoThumbnail(context, uri);
+				if (thumb == null) {
+					thumb = Helpers.drawableToBitmap(context.getDrawable(R.drawable.ic_video));
+				}
+
+				if(thumb != null) {
+					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					thumb.compress(Bitmap.CompressFormat.JPEG, 70, bos);
+
+					thumbHeader = Helpers.generateThumbnail(context, bos.toByteArray(), encFilename, filename, fileId, Crypto.FILE_TYPE_VIDEO, videoDuration);
+				}
+			}
+
+			InputStream in = context.getContentResolver().openInputStream(uri);
+			FileOutputStream outputStream = new FileOutputStream(encFilePath);
+			Crypto.Header fileHeader =  StinglePhotosApplication.getCrypto().encryptFile(in, outputStream, filename, fileType, fileSize, fileId, videoDuration, null, task);
+
+			// If task is cancelled delete generated thumbnail and file and return
+			if(task != null){
+				if(task.isCancelled()){
+					File thumb = new File(FileManager.getThumbsDir(context) + "/" + encFilename);
+					if(thumb.exists()) {
+						thumb.delete();
+					}
+					File file = new File(encFilePath);
+					if(file.exists()){
+						file.delete();
+					}
+					return null;
+				}
+			}
+
+			if(fileHeader == null || thumbHeader == null){
+				if(thumbHeader != null){
+					(new File(FileManager.getThumbsDir(context) + "/" + encFilename)).delete();
+				}
+				if(fileHeader != null){
+					(new File(encFilePath)).delete();
+				}
+				return null;
+			}
+
+			in.close();
+			outputStream.close();
+
+			long nowDate = System.currentTimeMillis();
+			long date = 0;
+
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+			if(settings.getBoolean("preserve_import_dates", true)){
+				long dateTaken = FileManager.getDateTakenFromUriMetadata(context, uri, fileType);
+
+				if (dateTaken == 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+					dateTaken = FileManager.queryForDateTaken(context, uri);
+				}
+
+				if(dateTaken > 0){
+					date = dateTaken;
+				}
+			}
+
+			if(date == 0 ) {
+				if(dateHint != null) {
+					date = dateHint;
+				}
+				else{
+					date = nowDate;
+				}
+			}
+
+			String headers = Crypto.getFileHeadersFromFile(encFilePath, FileManager.getThumbsDir(context) + "/" + encFilename);
+
+			stingleFile.reupload = GalleryTrashDb.REUPLOAD_YES;
+			stingleFile.headers = headers;
+			stingleFile.dateModified = nowDate;
+			stingleFile.version++;
+
+			if (set == SyncManager.GALLERY) {
+				GalleryTrashDb db = new GalleryTrashDb(context, SyncManager.GALLERY);
+				db.updateFile(stingleFile);
+//				db.insertFile(encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, date, nowDate, headers);
+				db.close();
+			} else if (set == SyncManager.ALBUM) {
+				Crypto crypto = StinglePhotosApplication.getCrypto();
+				AlbumsDb albumsDb = new AlbumsDb(context);
+				AlbumFilesDb albumFilesDb = new AlbumFilesDb(context);
+				StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+				if (album != null) {
+					stingleFile.headers = crypto.encryptFileHeaders(fileHeader, thumbHeader, Crypto.base64ToByteArray(album.publicKey));
+					albumFilesDb.updateFile(stingleFile);
+//					albumFilesDb.insertAlbumFile(album.albumId, encFilename, true, false, GalleryTrashDb.INITIAL_VERSION, newHeaders, date, nowDate);
 					album.dateModified = System.currentTimeMillis();
 					albumsDb.updateAlbum(album);
 				}

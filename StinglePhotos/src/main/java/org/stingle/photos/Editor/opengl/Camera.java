@@ -74,8 +74,11 @@ public class Camera {
 		if (viewportWidth != 0 && viewportHeight != 0) {
 			Point cropCenter = image.getCropCenter();
 
-			float scale = Math.min((viewportWidth - paddingLeft - paddingRight) / image.getCropWidth(),
-					(viewportHeight - paddingTop - paddingBottom) / image.getCropHeight());
+			float cropWidth = image.getOrientation() % 2 == 0 ? image.getCropWidth() : image.getCropHeight();
+			float cropHeight = image.getOrientation() % 2 == 0 ? image.getCropHeight() : image.getCropWidth();
+
+			float scale = Math.min((viewportWidth - paddingLeft - paddingRight) / cropWidth,
+					(viewportHeight - paddingTop - paddingBottom) / cropHeight);
 
 			Matrix.setIdentityM(viewMatrix, 0);
 			Matrix.translateM(viewMatrix, 0, paddingLeft + (viewportWidth - paddingLeft - paddingRight) / 2f,
@@ -122,17 +125,30 @@ public class Camera {
 		matrixDirty = true;
 	}
 
-	public void animateRotate(float degrees, float px, float py) {
+	public void animateRotate(Image image) {
 		float[] oldViewMatrix = new float[16];
 		float[] newViewMatrix = new float[16];
 		System.arraycopy(viewMatrix, 0, oldViewMatrix, 0, viewMatrix.length);
 
-		Matrix.setIdentityM(tmpMatrix, 0);
-		Matrix.translateM(tmpMatrix, 0, px, py, 0f);
-		Matrix.rotateM(tmpMatrix, 0, degrees, 0f, 0f, 1f);
-		Matrix.translateM(tmpMatrix, 0, -px, -py, 0f);
+		float cropWidth = (image.getOrientation() + 1) % 2 == 0 ? image.getCropWidth() : image.getCropHeight();
+		float cropHeight = (image.getOrientation() + 1) % 2 == 0 ? image.getCropHeight() : image.getCropWidth();
 
-		Matrix.multiplyMM(newViewMatrix, 0, viewMatrix, 0, tmpMatrix, 0);
+		float scale = Math.min((viewportWidth - paddingLeft - paddingRight) / cropWidth,
+				(viewportHeight - paddingTop - paddingBottom) / cropHeight);
+
+		Matrix.setIdentityM(newViewMatrix, 0);
+		Matrix.translateM(newViewMatrix, 0, paddingLeft + (viewportWidth - paddingLeft - paddingRight) / 2f,
+				paddingTop + (viewportHeight - paddingTop - paddingBottom) / 2f, 0f);
+		Matrix.scaleM(newViewMatrix, 0, scale, scale, 1f);
+		Matrix.rotateM(newViewMatrix, 0, -image.getCropRotation() + (image.getOrientation() + 1) * 90, 0f, 0f, 1f);
+		Matrix.translateM(newViewMatrix, 0, -image.getCropCenter().x, -image.getCropCenter().y, 0f);
+
+//		Matrix.setIdentityM(tmpMatrix, 0);
+//		Matrix.translateM(tmpMatrix, 0, px, py, 0f);
+//		Matrix.rotateM(tmpMatrix, 0, degrees, 0f, 0f, 1f);
+//		Matrix.translateM(tmpMatrix, 0, -px, -py, 0f);
+//
+//		Matrix.multiplyMM(newViewMatrix, 0, viewMatrix, 0, tmpMatrix, 0);
 
 		mainThreadHandler.post(() -> {
 			ValueAnimator valueAnimator = ValueAnimator.ofObject(new MatrixEvaluator(), oldViewMatrix, newViewMatrix);
@@ -162,9 +178,9 @@ public class Camera {
 						@Override
 						public void call(Image image) {
 							image.setOrientation(image.getOrientation() + 1);
-							float cropWidth = image.getCropWidth();
-							float cropHeight = image.getCropHeight();
-
+//							float cropWidth = image.getCropWidth();
+//							float cropHeight = image.getCropHeight();
+//
 //							image.setCropWidth(cropHeight);
 //							image.setCropHeight(cropWidth);
 

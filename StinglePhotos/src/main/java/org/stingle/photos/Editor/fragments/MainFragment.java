@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.stingle.photos.AsyncTasks.SaveEditedImageAsyncTask;
+import org.stingle.photos.CameraX.helpers.MediaSaveHelper;
 import org.stingle.photos.Editor.activities.EditorActivity;
 import org.stingle.photos.Editor.adapters.ToolAdapter;
 import org.stingle.photos.Editor.core.Image;
@@ -188,6 +189,8 @@ public class MainFragment extends ToolFragment implements Runnable {
 		if (progressDialog != null) {
 			progressDialog.dismiss();
 		}
+
+		getEditorActivity().finish();
 	}
 
 	public interface ToolSelectedListener {

@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/.cxx/Debug/4b1t5028/arm64-v8a",
+  "command": "/Users/arthurnazaryan/Library/Android/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=aarch64-none-linux-android23 --gcc-toolchain=/Users/arthurnazaryan/Library/Android/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/arthurnazaryan/Library/Android/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -Deditor_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC -o CMakeFiles/editor.dir/editor.cpp.o -c /Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/src/main/cpp/editor.cpp",
+  "file": "/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/src/main/cpp/editor.cpp"
+}
+]

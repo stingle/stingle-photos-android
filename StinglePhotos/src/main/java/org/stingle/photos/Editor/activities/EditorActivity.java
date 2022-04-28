@@ -119,7 +119,8 @@ public class EditorActivity extends AppCompatActivity {
 						fragmentManager.beginTransaction().replace(R.id.tool_container1, adjustFragment, null).commit();
 
 						editorView.setEditorMode(GLImageView.EDITOR_MODE_NORMAL);
-					} else if (tool == Tool.MISC) {
+					} else if (tool == Tool.
+							MISC) {
 						fragmentManager.beginTransaction().replace(R.id.tool_container1, miscToolsFragment, null).commit();
 
 						editorView.setEditorMode(GLImageView.EDITOR_MODE_NORMAL);

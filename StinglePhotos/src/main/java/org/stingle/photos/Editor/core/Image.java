@@ -72,6 +72,9 @@ public class Image {
 		rotationScale = 1f;
 		cropRatio = CropRatio.FREE;
 
+		resizedWidth = bitmap.getWidth();
+		resizedHeight = bitmap.getHeight();
+
 		dimAmount = DIM_FULL;
 
 		cropVertices = new Point[4];
@@ -131,9 +134,18 @@ public class Image {
 		correctCropPosition();
 	}
 
+	public int getResizedWidth() {
+		return resizedWidth;
+	}
+
 	public void setResizedSize(int resizedWidth, int resizedHeight) {
-		this.resizedWidth = resizedWidth;
-		this.resizedHeight = resizedHeight;
+		if (orientation % 2 == 0) {
+			this.resizedWidth = resizedWidth;
+			this.resizedHeight = resizedHeight;
+		} else {
+			this.resizedWidth = resizedHeight;
+			this.resizedHeight = resizedWidth;
+		}
 	}
 
 	public int getOrientation() {

@@ -123,7 +123,7 @@ public class CropFragment extends ToolFragment {
 						editorView.getCamera(new Callback<Camera>() {
 							@Override
 							public void call(Camera camera) {
-								camera.animateRotate(90f, image.getCropCenter().x, image.getCropCenter().y);
+								camera.animateRotate(image);
 							}
 						});
 					}

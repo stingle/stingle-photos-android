@@ -25,6 +25,12 @@ android {
         applicationId "org.stingle.photos"
         minSdkVersion 23
         targetSdkVersion 31
+
+        externalNativeBuild {
+            cmake {
+                cppFlags ''
+            }
+        }
     }
     buildTypes {
         release {
@@ -68,6 +74,13 @@ android {
 
     buildFeatures {
         viewBinding true
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.18.1'
+        }
     }
 }
 

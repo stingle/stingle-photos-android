@@ -209,6 +209,13 @@ public class ViewItemActivity extends AppCompatActivity {
 		}
 	};
 
+	private BroadcastReceiver onItemUpdated = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+
+		}
+	};
+
 	protected ViewPager.OnPageChangeListener getOnPageChangeListener(){
 		return new ViewPager.OnPageChangeListener() {
 			@Override
@@ -432,7 +439,7 @@ public class ViewItemActivity extends AppCompatActivity {
 
 	private void openEditor() {
 		Intent intent = new Intent(this, EditorActivity.class);
-		intent.putExtra("EXTRA_ITEM_POSITION", itemPosition);
+		intent.putExtra("EXTRA_ITEM_POSITION", viewPager.getCurrentItem());
 		intent.putExtra("EXTRA_ITEM_SET", set);
 		intent.putExtra("EXTRA_ITEM_ALBUM_ID", albumId);
 		startActivity(intent);

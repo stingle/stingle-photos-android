@@ -41,7 +41,19 @@ public class MiscToolsFragment extends ToolFragment {
 					public void call(Image image) {
 						ResizeDialog2 resizeDialog = new ResizeDialog2();
 						resizeDialog.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.ThemeOverlay_App_AlertDialog);
-						resizeDialog.setImageSize(image.getWidth(), image.getHeight());
+						resizeDialog.setImageSize(image.getOrientation() % 2 == 0 ? image.getWidth() : image.getHeight(),
+								image.getOrientation() % 2 == 0 ? image.getHeight() : image.getWidth());
+						resizeDialog.setListener(new ResizeDialog2.SizeSelectedListener() {
+							@Override
+							public void onSizeSelected(int width, int height) {
+								editorView.getImage(new Callback<Image>() {
+									@Override
+									public void call(Image image) {
+										image.setResizedSize(width, height);
+									}
+								});
+							}
+						});
 						resizeDialog.show(getChildFragmentManager(), null);
 					}
 				});

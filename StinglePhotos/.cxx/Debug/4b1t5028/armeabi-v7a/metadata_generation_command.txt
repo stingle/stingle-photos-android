@@ -1,0 +1,23 @@
+                    Executable : /Users/arthurnazaryan/Library/Android/sdk/cmake/3.18.1/bin/cmake
+arguments : 
+-H/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/src/main/cpp
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=23
+-DANDROID_PLATFORM=android-23
+-DANDROID_ABI=armeabi-v7a
+-DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a
+-DANDROID_NDK=/Users/arthurnazaryan/Library/Android/sdk/ndk/21.3.6528147
+-DCMAKE_ANDROID_NDK=/Users/arthurnazaryan/Library/Android/sdk/ndk/21.3.6528147
+-DCMAKE_TOOLCHAIN_FILE=/Users/arthurnazaryan/Library/Android/sdk/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/Users/arthurnazaryan/Library/Android/sdk/cmake/3.18.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/build/intermediates/cxx/Debug/4b1t5028/obj/armeabi-v7a
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/build/intermediates/cxx/Debug/4b1t5028/obj/armeabi-v7a
+-DCMAKE_BUILD_TYPE=Debug
+-B/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/.cxx/Debug/4b1t5028/armeabi-v7a
+-GNinja
+jvmArgs : 
+
+
+                    Build command args: []
+                    Version: 2
