@@ -1,2 +1,0 @@
-ninja: Entering directory `/Users/arthurnazaryan/Documents/Sources/git-repos/stingle-photos-android/StinglePhotos/.cxx/Debug/4b1t5028/arm64-v8a'
-ninja: no work to do.

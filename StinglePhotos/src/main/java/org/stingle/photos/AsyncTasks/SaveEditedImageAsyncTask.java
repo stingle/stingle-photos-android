@@ -6,8 +6,10 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 
+import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -75,6 +77,16 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 				} else {
 					removeFileFromCurrentSet(file, galleryDb, albumFilesDb, trashDb);
 					ImportFile.importFile(context, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
+
+					if (set == SyncManager.ALBUM) {
+						AlbumsDb albumsDb = new AlbumsDb(context);
+						StingleDbAlbum album = albumsDb.getAlbumById(albumId);
+
+						album.dateModified = System.currentTimeMillis();
+						albumsDb.updateAlbum(album);
+
+						albumsDb.close();
+					}
 				}
 
 				tmpFile.delete();
