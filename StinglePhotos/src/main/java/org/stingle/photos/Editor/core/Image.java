@@ -1,10 +1,8 @@
 package org.stingle.photos.Editor.core;
 
 import android.graphics.Bitmap;
-import android.graphics.PointF;
 
 import org.stingle.photos.Editor.math.Point;
-import org.stingle.photos.Editor.math.Vector;
 import org.stingle.photos.Editor.math.Vector2;
 
 import java.util.ArrayList;
@@ -87,6 +85,37 @@ public class Image {
 		vector1 = new Vector2();
 		vector2 = new Vector2();
 		vector3 = new Vector2();
+
+		initProperties();
+	}
+
+	public Image(Image image) {
+		this(image.getBitmap());
+
+		brightnessProperty.value = image.brightnessProperty.value;
+		contrastProperty.value = image.contrastProperty.value;
+		whitePointProperty.value = image.whitePointProperty.value;
+		highlightsProperty.value = image.highlightsProperty.value;
+		shadowsProperty.value = image.shadowsProperty.value;
+		blackPointProperty.value = image.blackPointProperty.value;
+		saturationProperty.value = image.saturationProperty.value;
+		warmthProperty.value = image.warmthProperty.value;
+		tintProperty.value = image.tintProperty.value;
+		sharpnessProperty.value = image.sharpnessProperty.value;
+		denoiseProperty.value = image.denoiseProperty.value;
+		vignetteProperty.value = image.vignetteProperty.value;
+
+		this.orientation = image.orientation;
+
+		this.resizedWidth = image.resizedWidth;
+		this.resizedHeight = image.resizedHeight;
+		this.cropCenter.set(image.cropCenter);
+		this.cropWidth = image.cropWidth;
+		this.cropHeight = image.cropHeight;
+		this.cropRotation = image.cropRotation;
+		this.rotationScale = image.rotationScale;
+
+		this.dimAmount = image.dimAmount;
 	}
 
 	public Bitmap getBitmap() {
@@ -212,7 +241,7 @@ public class Image {
 		return null;
 	}
 
-	public void init() {
+	private void initProperties() {
 		brightnessProperty = new Property(AdjustOption.BRIGHTNESS.name, -100, 100, -0.3f, 0f, 0.3f);
 		contrastProperty = new Property(AdjustOption.CONTRAST.name, -100, 100, 0.6f, 1f, 2f);
 		whitePointProperty = new Property(AdjustOption.WHITE_POINT.name, -100, 100, -1f, 0f, 1f);

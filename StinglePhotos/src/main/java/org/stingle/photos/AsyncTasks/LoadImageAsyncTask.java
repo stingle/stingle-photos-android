@@ -2,6 +2,7 @@ package org.stingle.photos.AsyncTasks;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
@@ -13,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -43,6 +45,7 @@ import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Editor.core.Image;
 import org.stingle.photos.Editor.util.Callback;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Net.HttpsClient;

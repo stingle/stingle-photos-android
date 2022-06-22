@@ -6,6 +6,9 @@
 # files for the dex VM
 *.dex
 
+# Native build files
+**/.cxx
+
 # Java class files
 *.class
 

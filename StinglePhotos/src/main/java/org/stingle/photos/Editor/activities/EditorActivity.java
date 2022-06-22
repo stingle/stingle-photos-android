@@ -1,10 +1,7 @@
 package org.stingle.photos.Editor.activities;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -16,7 +13,6 @@ import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.FragmentManager;
 
 import org.stingle.photos.AsyncTasks.LoadImageAsyncTask;
-import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Editor.core.AdjustOption;
 import org.stingle.photos.Editor.core.Image;
 import org.stingle.photos.Editor.core.Property;
@@ -29,12 +25,6 @@ import org.stingle.photos.Editor.fragments.MiscToolsFragment;
 import org.stingle.photos.Editor.util.Callback;
 import org.stingle.photos.Editor.views.GLImageView;
 import org.stingle.photos.R;
-import org.stingle.photos.ViewItem.ViewItemAsyncTask;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class EditorActivity extends AppCompatActivity {
 	private GLImageView editorView;
@@ -83,7 +73,6 @@ public class EditorActivity extends AppCompatActivity {
 
 				if (bitmap != null) {
 					image = new Image(bitmap);
-					image.init();
 
 					if (adjustFragment != null) {
 						adjustFragment.setImage(image);

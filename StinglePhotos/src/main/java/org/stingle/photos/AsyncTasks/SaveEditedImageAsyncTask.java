@@ -1,10 +1,14 @@
 package org.stingle.photos.AsyncTasks;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.widget.ProgressBar;
+
+import androidx.exifinterface.media.ExifInterface;
 
 import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
@@ -12,8 +16,11 @@ import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
+import org.stingle.photos.Editor.core.Image;
+import org.stingle.photos.Editor.util.ImageSaver;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ImportFile;
+import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
 
 import java.io.File;
@@ -27,25 +34,42 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 	private int itemPosition;
 	private int set;
 	private String albumId;
-
-	private Bitmap bitmap;
+	private Image image;
 	private WeakReference<Runnable> callbackWeakReference;
 	private WeakReference<Context> contextWeakReference;
 
-	public SaveEditedImageAsyncTask(int itemPosition, int set, String albumId, Bitmap bitmap, Context context, Runnable callback) {
+	private ProgressDialog progressDialog;
+
+	public SaveEditedImageAsyncTask(int itemPosition, int set, String albumId, Image image, Context context, Runnable callback) {
 		this.itemPosition = itemPosition;
 		this.set = set;
 		this.albumId = albumId;
-		this.bitmap = bitmap;
+		this.image = image;
 		this.contextWeakReference = new WeakReference<>(context);
 		this.callbackWeakReference = new WeakReference<>(callback);
+	}
+
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+
+		Context context = contextWeakReference.get();
+		if (context != null) {
+			progressDialog = new ProgressDialog(context);
+			progressDialog.setMessage(context.getString(R.string.saving_image));
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.setCancelable(false);
+			progressDialog.show();
+		}
 	}
 
 	@Override
 	protected Void doInBackground(Void... voids) {
 		// 1. Create new file
 		// 2. Delete old file from current set
-		
+
+		Bitmap savedImage = ImageSaver.saveImage(image);
+
 		Context context = contextWeakReference.get();
 		if (context != null) {
 			GalleryTrashDb galleryDb = new GalleryTrashDb(context, SyncManager.GALLERY);
@@ -67,10 +91,12 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 				File tmpFile = new File(FileManager.getTmpDir(context), UUID.randomUUID().toString());
 
 				try (FileOutputStream outputStream = new FileOutputStream(tmpFile)) {
-					bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+					savedImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+
+				// TODO: Save exif info
 
 				if (!fileExistsInOtherSets(file, galleryDb, albumFilesDb, trashDb)) {
 					ImportFile.replaceFile(context, file, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
@@ -103,6 +129,10 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onPostExecute(Void unused) {
 		super.onPostExecute(unused);
+
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+		}
 
 		Runnable callback = callbackWeakReference.get();
 		if (callback != null) {
