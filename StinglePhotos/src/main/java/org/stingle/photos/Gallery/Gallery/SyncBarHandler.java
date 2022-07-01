@@ -101,7 +101,7 @@ public class SyncBarHandler {
 					syncProgress.setProgress(params.getInt("uploadedFilesCount"));
 					syncText.setText(activity.getString(R.string.uploading_file, String.valueOf(params.getInt("uploadedFilesCount")), String.valueOf(params.getInt("totalFilesCount"))));
 					if (params.getString("filename") != null && params.getString("headers") != null) {
-						(new ShowEncThumbInImageView(activity, params.getString("filename"), syncPhoto))
+						(new ShowEncThumbInImageView(activity, params.getString("filename"), syncPhoto, false))
 								.setHeaders(params.getString("headers"))
 								.setSet(params.getInt("set"))
 								.setAlbumId(params.getString("albumId"))

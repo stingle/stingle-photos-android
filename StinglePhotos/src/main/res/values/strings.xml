@@ -528,6 +528,8 @@
     <string name="flip_to_landscape">Flip to landscape</string>
     <string name="degree_formatted">%1$d°</string>
     <string name="done">Done</string>
+    <string name="replace_original">Replace original</string>
+    <string name="make_copy">Make a copy</string>
 
     <string name="width">Width</string>
     <string name="height">Height</string>

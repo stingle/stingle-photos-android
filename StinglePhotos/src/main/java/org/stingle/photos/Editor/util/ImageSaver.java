@@ -3,6 +3,7 @@ package org.stingle.photos.Editor.util;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.util.Log;
 
 import org.stingle.photos.Editor.core.Image;
 import org.stingle.photos.Editor.math.Vector2;
@@ -26,6 +27,8 @@ public class ImageSaver {
 		resultCanvas.scale(scaleDown, scaleDown);
 		resultCanvas.translate(-image.getCropCenter().x, -image.getCropCenter().y);
 		resultCanvas.drawBitmap(image.getBitmap(), 0f, 0f, null);
+
+		long start = System.currentTimeMillis();
 
 		processImage(resultBitmap, image.getBrightnessValueNormalized(), image.getContrastValueNormalized(),
 				image.getWhitePointValueNormalized(), image.getHighlightsValueNormalized(), image.getShadowsValueNormalized(),

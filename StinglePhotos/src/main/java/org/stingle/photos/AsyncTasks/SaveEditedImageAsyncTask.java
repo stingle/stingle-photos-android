@@ -35,16 +35,18 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 	private int set;
 	private String albumId;
 	private Image image;
+	private boolean replace;
 	private WeakReference<Runnable> callbackWeakReference;
 	private WeakReference<Context> contextWeakReference;
 
 	private ProgressDialog progressDialog;
 
-	public SaveEditedImageAsyncTask(int itemPosition, int set, String albumId, Image image, Context context, Runnable callback) {
+	public SaveEditedImageAsyncTask(int itemPosition, int set, String albumId, Image image, boolean replace, Context context, Runnable callback) {
 		this.itemPosition = itemPosition;
 		this.set = set;
 		this.albumId = albumId;
 		this.image = image;
+		this.replace = replace;
 		this.contextWeakReference = new WeakReference<>(context);
 		this.callbackWeakReference = new WeakReference<>(callback);
 	}
@@ -99,7 +101,11 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 				// TODO: Save exif info
 
 				if (!fileExistsInOtherSets(file, galleryDb, albumFilesDb, trashDb)) {
-					ImportFile.replaceFile(context, file, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
+					if (replace) {
+						ImportFile.replaceFile(context, file, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
+					} else {
+						ImportFile.importFile(context, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);
+					}
 				} else {
 					removeFileFromCurrentSet(file, galleryDb, albumFilesDb, trashDb);
 					ImportFile.importFile(context, Uri.fromFile(tmpFile), set, albumId, file.dateModified, this);

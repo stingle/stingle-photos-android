@@ -3,6 +3,7 @@ package org.stingle.photos.Editor.fragments;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.telecom.Call;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,8 +18,14 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
 import org.stingle.photos.AsyncTasks.SaveEditedImageAsyncTask;
 import org.stingle.photos.CameraX.helpers.MediaSaveHelper;
+import org.stingle.photos.Db.Objects.StingleDbFile;
+import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.GalleryTrashDb;
+import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Editor.activities.EditorActivity;
 import org.stingle.photos.Editor.adapters.ToolAdapter;
 import org.stingle.photos.Editor.core.Image;
@@ -27,6 +34,9 @@ import org.stingle.photos.Editor.util.Callback;
 import org.stingle.photos.Editor.util.CenterOffsetItemDecoration;
 import org.stingle.photos.Editor.util.ImageSaver;
 import org.stingle.photos.R;
+import org.stingle.photos.Sync.SyncManager;
+
+import java.lang.ref.WeakReference;
 
 public class MainFragment extends ToolFragment implements Runnable {
 
@@ -51,21 +61,7 @@ public class MainFragment extends ToolFragment implements Runnable {
 		view.findViewById(R.id.btn_save).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				getImage(new Callback<Image>() {
-					@Override
-					public void call(Image image) {
-						EditorActivity editorActivity = getEditorActivity();
-						editorActivity.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								SaveEditedImageAsyncTask asyncTask = new SaveEditedImageAsyncTask(
-										editorActivity.getItemPosition(), editorActivity.getSet(), editorActivity.getAlbumId(),
-										new Image(image), editorActivity, MainFragment.this);
-								asyncTask.execute();
-							}
-						});
-					}
-				});
+				showSaveOptions();
 			}
 		});
 
@@ -177,6 +173,105 @@ public class MainFragment extends ToolFragment implements Runnable {
 	@Override
 	public void run() {
 		getEditorActivity().finish();
+	}
+
+	private void showSaveOptions() {
+		if (canFileBeReplaced()) {
+			SaveOptionsDialogFragment fragment = new SaveOptionsDialogFragment(this::saveImage);
+			fragment.show(getChildFragmentManager(), null);
+		} else {
+			saveImage(false);
+		}
+	}
+
+	private void saveImage(boolean replace) {
+		getImage(new Callback<Image>() {
+			@Override
+			public void call(Image image) {
+				EditorActivity editorActivity = getEditorActivity();
+				editorActivity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						SaveEditedImageAsyncTask asyncTask = new SaveEditedImageAsyncTask(
+								editorActivity.getItemPosition(), editorActivity.getSet(), editorActivity.getAlbumId(),
+								new Image(image), replace, editorActivity, MainFragment.this);
+						asyncTask.execute();
+					}
+				});
+			}
+		});
+	}
+
+	private boolean canFileBeReplaced() {
+		GalleryTrashDb galleryDb = new GalleryTrashDb(getContext(), SyncManager.GALLERY);
+		AlbumFilesDb albumFilesDb = new AlbumFilesDb(getContext());
+		GalleryTrashDb trashDb = new GalleryTrashDb(getContext(), SyncManager.TRASH);
+
+		boolean existsInOtherSets = false;
+
+		EditorActivity editorActivity = getEditorActivity();
+
+		int itemPosition = editorActivity.getItemPosition();
+		int set = editorActivity.getSet();
+		String albumId = editorActivity.getAlbumId();
+
+		if (set == SyncManager.GALLERY) {
+			StingleDbFile file = galleryDb.getFileAtPosition(itemPosition, albumId, StingleDb.SORT_DESC);
+			existsInOtherSets = albumFilesDb.getFileIfExists(file.filename) != null || trashDb.getFileIfExists(file.filename) != null;
+		} else if (set == SyncManager.ALBUM) {
+			StingleDbFile file = albumFilesDb.getFileAtPosition(itemPosition, albumId, StingleDb.SORT_DESC);
+			existsInOtherSets = galleryDb.getFileIfExists(file.filename) != null || trashDb.getFileIfExists(file.filename) != null;
+		} else {
+			StingleDbFile file = trashDb.getFileAtPosition(itemPosition, albumId, StingleDb.SORT_DESC);
+			existsInOtherSets = galleryDb.getFileIfExists(file.filename) != null || albumFilesDb.getFileIfExists(file.filename) != null;
+		}
+
+		return !existsInOtherSets;
+	}
+
+	public static class SaveOptionsDialogFragment extends BottomSheetDialogFragment {
+		private WeakReference<Callback> callbackWeakReference;
+
+		public SaveOptionsDialogFragment(Callback callback) {
+			callbackWeakReference = new WeakReference<>(callback);
+		}
+
+		@Nullable
+		@Override
+		public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+			return inflater.inflate(R.layout.fragment_save_options, container, false);
+		}
+
+		@Override
+		public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+			super.onViewCreated(view, savedInstanceState);
+
+			Callback callback = callbackWeakReference.get();
+
+			view.findViewById(R.id.btn_replace_original).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dismiss();
+					if (callback != null) {
+						callback.onSavePressed(true);
+					}
+				}
+			});
+
+			view.findViewById(R.id.btn_make_copy).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dismiss();
+					if (callback != null) {
+						callback.onSavePressed(false);
+					}
+				}
+			});
+		}
+
+		static interface Callback {
+			void onSavePressed(boolean replace);
+		}
 	}
 
 	public interface ToolSelectedListener {

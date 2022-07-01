@@ -32,11 +32,17 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 	private String headers = null;
 	private boolean isRemote = false;
 	private OnAsyncTaskFinish onFinish;
+	private boolean roundThumbnail;
 
-	public ShowEncThumbInImageView(Context context, String filename, ImageView imageView){
+	public ShowEncThumbInImageView(Context context, String filename, ImageView imageView) {
+		this(context, filename, imageView, true);
+	}
+
+	public ShowEncThumbInImageView(Context context, String filename, ImageView imageView, boolean roundThumbnail) {
 		this.context = context;
 		this.filename = filename;
 		this.imageView = imageView;
+		this.roundThumbnail = roundThumbnail;
 	}
 
 	public ShowEncThumbInImageView setThumbSize(int size){
@@ -128,10 +134,14 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 		canvas.drawARGB(0, 0, 0, 0);
 		paint.setColor(color);
 
-		canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-				bitmap.getWidth() / 2, paint);
-		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+		if (roundThumbnail) {
+			canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+					bitmap.getWidth() / 2, paint);
+			paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+		}
+
 		canvas.drawBitmap(bitmap, rect, rect, paint);
+
 		return output;
 	}
 }
