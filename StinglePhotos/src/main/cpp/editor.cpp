@@ -20,8 +20,8 @@ struct ImageConfig {
 
     bool hasFilter() {
         return brightness != 0.0f || contrast != 1.0f ||
-        whitePoint != 0.0f || highlights != 0.0f || shadows != 0.0f || blackPoint != 0.0f ||
-        saturation != 1.0f || warmth != 0.0f || tint != 0.0f;
+               whitePoint != 0.0f || highlights != 0.0f || shadows != 0.0f || blackPoint != 0.0f ||
+               saturation != 1.0f || warmth != 0.0f || tint != 0.0f;
     }
 
     bool hasProcess() {
@@ -60,14 +60,14 @@ public:
         g = f;
         b = f;
     }
-    
+
     Vec3() {
         r = 0.0;
         g = 0.0;
         b = 0.0;
     }
-    
-    void set(Vec3* v) {
+
+    void set(Vec3 *v) {
         this->r = v->r;
         this->g = v->g;
         this->b = v->b;
@@ -78,7 +78,7 @@ public:
         this->g = g;
         this->b = b;
     }
-    
+
     void set(float v) {
         this->r = v;
         this->g = v;
@@ -91,14 +91,14 @@ public:
         this->b = ((color >> 16) & 0xFF) / 255.0f;
     }
 
-    void set(uint32_t* colors, int i, int j, int width, int height) {
+    void set(uint32_t *colors, int i, int j, int width, int height) {
         i = clamp(i, 0, height - 1);
         j = clamp(j, 0, width - 1);
 
         set(colors[i * width + j]);
     }
 
-    void set(Vec3* v, float f) {
+    void set(Vec3 *v, float f) {
         this->r += (v->r - this->r) * f;
         this->g += (v->g - this->g) * f;
         this->b += (v->b - this->b) * f;
@@ -164,13 +164,13 @@ public:
         b /= v->b;
     }
 
-    void setToMix(Vec3* v1, Vec3* v2, float f) {
+    void setToMix(Vec3 *v1, Vec3 *v2, float f) {
         this->r = v1->r + (v2->r - v1->r) * f;
         this->g = v1->g + (v2->g - v1->g) * f;
         this->b = v1->b + (v2->b - v1->b) * f;
     }
 
-    void setToMix(Vec3* v1, float f) {
+    void setToMix(Vec3 *v1, float f) {
         this->r = this->r + (v1->r - this->r) * f;
         this->g = this->g + (v1->g - this->g) * f;
         this->b = this->b + (v1->b - this->b) * f;
@@ -195,7 +195,7 @@ float mix(float a, float b, float f) {
     return a + (b - a) * f;
 }
 
-void mix(Vec3 *a, Vec3 *b, Vec3* r, float f) {
+void mix(Vec3 *a, Vec3 *b, Vec3 *r, float f) {
     r->r = a->r + (b->r - a->r) * f;
     r->g = a->g + (b->g - a->g) * f;
     r->b = a->b + (b->b - a->b) * f;
@@ -254,7 +254,7 @@ float distance(float x1, float y1, float x2, float y2) {
     return hypot(x1 - x2, y1 - y2);
 }
 
-void applyFilters(Vec3* inColor, ImageConfig* imageConfig) {
+void applyFilters(Vec3 *inColor, ImageConfig *imageConfig) {
     // Brightness
     if (imageConfig->brightness != 0.0f) {
         inColor->add(imageConfig->brightness);
@@ -269,12 +269,14 @@ void applyFilters(Vec3* inColor, ImageConfig* imageConfig) {
         inColor->ensureLimits();
     }
 
-    // Highlights and Shadows
+    // Black point
     if (imageConfig->blackPoint != 0.0f) {
         float blackPointDistance = abs(dot(inColor, luminanceWeighting) - 0.05f);
         float blackPointWeight = pow(smoothstep(0.05f, 0.5f, blackPointDistance), 8.0f);
 
-        inColor->add(imageConfig->blackPoint, blackPointWeight);
+        float blackPointValue = imageConfig->blackPoint < 0.0 ? imageConfig->blackPoint * 0.2f : imageConfig->blackPoint * 0.1f;
+
+        inColor->add(blackPointValue, blackPointWeight);
         inColor->ensureLimits();
     }
 
@@ -313,7 +315,10 @@ void applyFilters(Vec3* inColor, ImageConfig* imageConfig) {
 
     // Saturation
     if (imageConfig->saturation != 1.0f) {
-        tmpVec1->set(inColor->dot(luminanceWeighting), imageConfig->saturation);
+        tmpVec1->set(inColor->dot(luminanceWeighting));
+        tmpVec2->set(inColor);
+
+        inColor->setToMix(tmpVec1, tmpVec2, imageConfig->saturation);
         inColor->ensureLimits();
     }
 
@@ -351,8 +356,8 @@ void applyFilters(Vec3* inColor, ImageConfig* imageConfig) {
     }
 }
 
-void processPixel(Vec3* inColor, int x, int y, int width, int height, uint32_t* outPixels,
-                  ImageConfig* imageConfig) {
+void processPixel(Vec3 *inColor, int x, int y, int width, int height, uint32_t *outPixels,
+                  ImageConfig *imageConfig) {
     // Sharpness
     if (imageConfig->sharpness > 0.0f) {
         float centerMultiplier = 1.0f + 4.0f * imageConfig->sharpness;
@@ -428,11 +433,14 @@ extern "C" JNIEXPORT void JNICALL
 Java_org_stingle_photos_Editor_util_ImageSaver_processImage(JNIEnv *env, jobject thiz,
                                                             jobject outBitmap,
                                                             jfloat brightness, jfloat contrast,
-                                                            jfloat whitePoint, jfloat highlights, jfloat shadows, jfloat blackPoint,
-                                                            jfloat saturation, jfloat warmth, jfloat tint,
-                                                            jfloat sharpness, jfloat denoise, jfloat vignette) {
+                                                            jfloat whitePoint, jfloat highlights,
+                                                            jfloat shadows, jfloat blackPoint,
+                                                            jfloat saturation, jfloat warmth,
+                                                            jfloat tint,
+                                                            jfloat sharpness, jfloat denoise,
+                                                            jfloat vignette) {
 
-    ImageConfig* imageConfig = new ImageConfig();
+    ImageConfig *imageConfig = new ImageConfig();
     imageConfig->brightness = brightness;
     imageConfig->contrast = contrast;
     imageConfig->whitePoint = whitePoint;
@@ -464,23 +472,25 @@ Java_org_stingle_photos_Editor_util_ImageSaver_processImage(JNIEnv *env, jobject
 
     outPixels = (uint32_t *) outDataPointer;
 
-    uint32_t* tmpPixels = new uint32_t[outBitmapInfo.height * outBitmapInfo.width];
-
-    Vec3* color = new Vec3();
-
-    if (imageConfig->hasFilter()) {
-        for (int i = 0; i < outBitmapInfo.height; i++) {
-            for (int j = 0; j < outBitmapInfo.width; j++) {
-                color->set(outPixels, i, j, outBitmapInfo.width, outBitmapInfo.height);
-
-                applyFilters(color, imageConfig);
-
-                tmpPixels[i * outBitmapInfo.width + j] = color->colorInt();
-            }
-        }
-    }
+    Vec3 *color = new Vec3();
 
     if (imageConfig->hasProcess()) {
+        uint32_t *tmpPixels = new uint32_t[outBitmapInfo.height * outBitmapInfo.width];
+
+        if (imageConfig->hasFilter()) {
+            for (int i = 0; i < outBitmapInfo.height; i++) {
+                for (int j = 0; j < outBitmapInfo.width; j++) {
+                    color->set(outPixels, i, j, outBitmapInfo.width, outBitmapInfo.height);
+
+                    applyFilters(color, imageConfig);
+
+                    tmpPixels[i * outBitmapInfo.width + j] = color->colorInt();
+                }
+            }
+        } else {
+            memcpy(tmpPixels, outPixels, outBitmapInfo.width * outBitmapInfo.height * 4);
+        }
+
         for (int i = 0; i < outBitmapInfo.height; i++) {
             for (int j = 0; j < outBitmapInfo.width; j++) {
                 color->set(tmpPixels, i, j, outBitmapInfo.width, outBitmapInfo.height);
@@ -492,9 +502,21 @@ Java_org_stingle_photos_Editor_util_ImageSaver_processImage(JNIEnv *env, jobject
                 outPixels[i * outBitmapInfo.width + j] |= color->colorInt();
             }
         }
+
+        delete[] tmpPixels;
+    } else if (imageConfig->hasFilter()) {
+        for (int i = 0; i < outBitmapInfo.height; i++) {
+            for (int j = 0; j < outBitmapInfo.width; j++) {
+                color->set(outPixels, i, j, outBitmapInfo.width, outBitmapInfo.height);
+
+                applyFilters(color, imageConfig);
+
+                outPixels[i * outBitmapInfo.width + j] &= 0xFF000000;
+                outPixels[i * outBitmapInfo.width + j] |= color->colorInt();
+            }
+        }
     }
 
-    delete[] tmpPixels;
     delete color;
     delete imageConfig;
 
