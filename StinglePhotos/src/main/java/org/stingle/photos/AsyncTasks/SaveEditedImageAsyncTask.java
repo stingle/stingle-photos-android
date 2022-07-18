@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ProgressBar;
 
 import androidx.exifinterface.media.ExifInterface;
@@ -93,7 +94,7 @@ public class SaveEditedImageAsyncTask extends AsyncTask<Void, Void, Void> {
 				File tmpFile = new File(FileManager.getTmpDir(context), UUID.randomUUID().toString());
 
 				try (FileOutputStream outputStream = new FileOutputStream(tmpFile)) {
-					savedImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+					savedImage.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
