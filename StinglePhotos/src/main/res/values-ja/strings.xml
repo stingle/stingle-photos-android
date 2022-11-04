@@ -116,7 +116,7 @@
     <string name="fail_reg">エラーが発生しました。もう一度お試しください。</string>
     <string name="creating_account">アカウントを作成中…</string>
     <string name="navigation_drawer_open">ナビゲーションドロワーを開く</string>
-    <string name="navigation_drawer_close">ナビゲーションドロワーを閉じる/string>
+    <string name="navigation_drawer_close">ナビゲーションドロワーを閉じる</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">ナビゲーッションヘッダー</string>
