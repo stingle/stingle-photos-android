@@ -4,7 +4,7 @@
     <string name="login">ログイン</string>
     <string name="password">パスワード</string>
     <string name="ok">確定</string>
-    <string name="setup_info">パスワードを設定してください。文字数に上限は設けておりませんが、大文字と小文字および記号を含む12文字以上のパスワードを推奨しています。パスワードが短すぎる場合、総当たり攻撃によりお客様の写真・動画が解読される危険性が高まります。</string>
+    <string name="setup_info">パスワードを設定してください。文字の種類に制限は設けておりませんが、大文字と小文字および記号を含む12文字以上のパスワードを推奨しています。パスワードが短すぎる場合、総当たり攻撃によりお客様の写真・動画が解読される危険性が高まります。</string>
     <string name="confirm_password">パスワードをもう一度入力</string>
     <string name="password_not_match">パスワードが一致していません。</string>
     <string name="password_empty">パスワードを設定してください。</string>
