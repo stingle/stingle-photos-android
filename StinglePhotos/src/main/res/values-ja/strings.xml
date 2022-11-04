@@ -43,7 +43,7 @@
     <string name="log_out">ログアウト</string>
     <string name="gallery">ギャラリー</string>
     <string name="volume_take_photo">音量ボタン</string>
-    <string name="volume_take_photo_desc">音量ボタンで写真を撮影します/string>
+    <string name="volume_take_photo_desc">音量ボタンで写真を撮影します</string>
     <string name="timer_duration">タイマーの時間</string>
     <string name="timer_duartion_desc">タイマーの時間を設定できます</string>
     <string name="password_short">パスワードは%s文字以上で設定してください。</string>
