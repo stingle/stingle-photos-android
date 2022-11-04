@@ -27,8 +27,8 @@
     <string name="success_change_pass">パスワードを変更しました</string>
     <string name="import_btn">取り込み</string>
     <string name="importing_files">取り込み中</string>
-    <string name="lock_time">アプリをロックするまでの時間</string>
-    <string name="lock_time_desc">指定の時間が経過後、アプリをロックします。</string>
+    <string name="lock_time">アプリを再ロックするまでの時間</string>
+    <string name="lock_time_desc">指定の時間が経過後、アプリを再度ロックします。</string>
     <string name="seconds5">5秒</string>
     <string name="seconds10">10秒</string>
     <string name="seconds15">15秒</string>
@@ -206,7 +206,7 @@
     <string name="biometric_auth">生体認証</string>
     <string name="biometric_login_desc">生体認証を使用してログインします。</string>
     <string name="login_using_password">パスワードを使用する</string>
-    <string name="failed_biometrics_setup">生体認証を使用できませんでした<。/string>
+    <string name="failed_biometrics_setup">生体認証を使用できませんでした。</string>
     <string name="biometric_auth_desc">生体認証を使用してアプリを開きます。</string>
     <string name="failed_biometrics_auth">生体認証に失敗</string>
 
@@ -256,7 +256,7 @@
     <string name="pref_header_account">アカウント</string>
     <string name="pref_header_advanced">その他の設定</string>
     <string name="authentication">認証</string>
-    <string name="locking">アプリのアクセス</string>
+    <string name="locking">アプリのロック</string>
     <string name="key_management">鍵の管理</string>
     <string name="advanced">その他</string>
     <string name="password_for_biometrics">生体認証を設定するには、パスワードを入力してください。</string>
