@@ -196,7 +196,7 @@
     <string name="welcome_header3">バックアップと同期</string>
     <string name="welcome_desc3">すべての写真や動画は安全にクラウド上に保存され、デバイス間で同期されます。</string>
     <string name="welcome_header4">速く、使いやすく。</string>
-    <string name="welcome_desc4">Stingle Photosはセキュリティーのみでなく、速さも念頭に置き作られています。その速さは、通常は動作が遅くなってしまいがちな高度な暗号化を施しているということを忘れさせてしまうでしょう。</string>
+    <string name="welcome_desc4">Stingle Photosはセキュリティーのみでなく、速さも念頭に置き作られています。その速さは、通常は動作が遅くなってしまいがちな高度な暗号化を施しているということを忘れさせてしまうほどです。</string>
     <string name="have_an_account">アカウントを作成済みですか？</string>
     <string name="dont_have_an_account">アカウントの作成はまだお済みでないですか？</string>
     <string name="menu_storage">ストレージ</string>
