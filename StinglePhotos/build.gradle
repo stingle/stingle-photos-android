@@ -69,7 +69,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     ndkVersion '21.3.6528147'
-    buildToolsVersion '30.0.2'
     flavorDimensions 'version'
 
     buildFeatures {
