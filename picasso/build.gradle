@@ -37,7 +37,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:7.0.4'
+    classpath 'com.android.tools.build:gradle:7.4.0'
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
     classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.16'
   }
@@ -55,17 +55,18 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
-  lintOptions {
-    textOutput 'stdout'
-    textReport true
-    lintConfig rootProject.file('lint.xml')
-  }
 
-  testOptions {
+    testOptions {
     unitTests {
       includeAndroidResources = true
     }
   }
+    lint {
+        lintConfig file('lint.xml')
+        textOutput file('stdout')
+        textReport true
+    }
+    namespace 'com.squareup.picasso3'
 }
 
 dependencies {

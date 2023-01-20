@@ -20,11 +20,11 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         applicationId "org.stingle.photos"
         minSdkVersion 23
-        targetSdkVersion 31
+        targetSdkVersion 33
     }
     buildTypes {
         release {
@@ -43,8 +43,8 @@ android {
             resValue "string", "content_provider", "org.stingle.photos.share.debug"
             resValue "string", "app_name", "Stingle Photos Dev"
             resValue "string", "camera", "Camera Dev"
-            resValue "string", "api_server_url", "https://192.168.1.2/"
-            //resValue "string", "api_server_url", "https://apidev.stingle.org/"
+            //resValue "string", "api_server_url", "https://192.168.1.2/"
+            resValue "string", "api_server_url", "https://api.stingle.org/"
             resValue "string", "default_home_folder_name", "StinglePhotosDev"
             buildConfigField "Boolean", "ALLOW_INSECURE_TLS", 'true'
             debuggable true
@@ -63,50 +63,42 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     ndkVersion '21.3.6528147'
-    buildToolsVersion '30.0.2'
     flavorDimensions 'version'
 
     buildFeatures {
         viewBinding true
     }
+    namespace 'org.stingle.photos'
 }
 
 dependencies {
     implementation "com.goterl:lazysodium-android:5.0.2@aar"
     implementation 'net.java.dev.jna:jna:5.10.0@aar'
     implementation 'com.google.android.exoplayer:exoplayer:2.7.3'
-    implementation 'androidx.core:core:1.7.0'
+    implementation 'androidx.core:core:1.9.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.appcompat:appcompat:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
-    implementation 'androidx.exifinterface:exifinterface:1.3.3'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'androidx.preference:preference:1.1.1'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.exifinterface:exifinterface:1.3.5'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.preference:preference:1.2.0'
     implementation "androidx.biometric:biometric:1.1.0"
     implementation 'com.google.android:flexbox:2.0.1'
     implementation "androidx.work:work-runtime:2.7.1"
     implementation project(path: ':picasso')
 
-    playstoreImplementation 'com.android.billingclient:billing:4.0.0'
+    playstoreImplementation 'com.android.billingclient:billing:5.1.0'
 
     def camerax_version = "1.1.0-alpha12"
 
-    // CameraX core library
-    implementation "androidx.camera:camera-core:$camerax_version"
-
-    // CameraX Camera2 extensions
-    implementation "androidx.camera:camera-camera2:$camerax_version"
-
-    // CameraX Lifecycle library
-    implementation "androidx.camera:camera-lifecycle:$camerax_version"
-
-    // CameraX View class
+    // CameraX
+    implementation "androidx.camera:camera-core:1.1.0-alpha12"
+    implementation "androidx.camera:camera-camera2:1.1.0-alpha12"
+    implementation "androidx.camera:camera-lifecycle:1.1.0-alpha12"
     implementation 'androidx.camera:camera-view:1.0.0-alpha32'
-
     implementation 'androidx.camera:camera-video:1.1.0-alpha12'
     implementation 'androidx.camera:camera-extensions:1.0.0-alpha32'
-
     implementation 'androidx.window:window:1.0.0-alpha09'
 
     //debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'

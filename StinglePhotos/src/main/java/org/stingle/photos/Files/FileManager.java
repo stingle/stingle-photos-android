@@ -304,7 +304,7 @@ public class FileManager {
 
 			retriever.release();
 		}
-		catch (RuntimeException e){ }
+		catch (RuntimeException | IOException e){ }
 
 		return duration;
 	}
@@ -365,7 +365,7 @@ public class FileManager {
 				dateTaken = formatMediaDate(date);
 
 				retriever.release();
-			} catch (RuntimeException e) {
+			} catch (RuntimeException | IOException e) {
 			}
 		}
 

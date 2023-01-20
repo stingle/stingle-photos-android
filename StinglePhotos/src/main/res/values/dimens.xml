@@ -6,7 +6,7 @@
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
     <dimen name="nav_header_height">140dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="bottom_nav_height">48dp</dimen>
+    <dimen name="bottom_nav_height">56dp</dimen>
     <dimen name="gallery_top_padding_with_syncbar">72dp</dimen>
     <dimen name="gallery_top_padding_without_syncbar">0dp</dimen>
     <dimen name="dsrv_defaultHotspotHeight">56dp</dimen>
