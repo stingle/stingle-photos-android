@@ -49,6 +49,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -630,6 +631,15 @@ public class Helpers {
 		}
 
 		return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
+
+	public static boolean isValidURL(String urlString) {
+		try {
+			new URL(urlString).toURI();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }

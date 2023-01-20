@@ -482,4 +482,7 @@
     <string name="gps_coordinates">GPS coordinates</string>
     <string name="encypted_filename">Encrypted file name</string>
     <string name="original_filename">Original fIle name</string>
+    <string name="server_url">API Server URL</string>
+    <string name="revert_default">Revert to default</string>
+    <string name="invalid_url">Invalid URL specified!</string>
 </resources>

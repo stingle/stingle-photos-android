@@ -6,6 +6,16 @@
     android:orientation="vertical"
     tools:context="org.stingle.photos.WelcomeActivity">
 
+    <ImageButton
+        android:id="@+id/settings_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:background="@null"
+        android:layout_margin="18dp"
+        android:elevation="8dp"
+        android:src="@drawable/ic_settings_large" />
+
     <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
