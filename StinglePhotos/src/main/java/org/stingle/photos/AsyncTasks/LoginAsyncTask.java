@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.stingle.photos.Auth.BiometricsManagerWrapper;
 import org.stingle.photos.Auth.KeyManagement;
@@ -41,6 +42,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	private String userId;
 	private String homeFolder;
 	private String token;
+	private JSONArray addons;
 	private boolean privateKeyIsAlreadySaved = false;
 	private boolean showBackupPhrase = false;
 
@@ -104,6 +106,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 					userId = response.get("userId");
 					isKeyBackedUp = response.get("isKeyBackedUp").equals("1");
 					homeFolder = response.get("homeFolder");
+					addons = response.getArray("addons");
 					if (token != null && keyBundle != null && homeFolder != null && userId != null && token.length() > 0 && keyBundle.length() > 0 && homeFolder.length() > 0 && userId.length() > 0) {
 						try {
 							if(privateKeyIsAlreadySaved) {
@@ -218,6 +221,9 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		Helpers.storePreference(activity, StinglePhotosApplication.USER_ID, userId);
 		Helpers.storePreference(activity, StinglePhotosApplication.USER_EMAIL, email);
 		Helpers.storePreference(activity, StinglePhotosApplication.USER_HOME_FOLDER, homeFolder);
+		if(addons != null) {
+			Helpers.storePreference(activity, StinglePhotosApplication.SERVER_ADDONS, addons.toString());
+		}
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(activity);
 		settings.edit().putBoolean(StinglePhotosApplication.IS_KEY_BACKED_UP, isKeyBackedUp).apply();

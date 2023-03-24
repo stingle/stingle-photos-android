@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.goterl.lazysodium.exceptions.SodiumException;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.R;
@@ -112,7 +113,16 @@ public class FileManager {
 	public static String getHomeDir(Context context) {
 		String externalStorage = context.getExternalFilesDir(null).getPath();
 
-		String homeDirPath = externalStorage + "/" + Helpers.getPreference(context, StinglePhotosApplication.USER_HOME_FOLDER, "default");
+		String additionalPath = "";
+		if(!StinglePhotosApplication.getApiUrl().equals(context.getString(R.string.api_server_url))){
+			try {
+				additionalPath = StinglePhotosApplication.getCrypto().blake2bHash(StinglePhotosApplication.getApiUrl()) + "/";
+			} catch (SodiumException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		String homeDirPath = externalStorage + "/" + additionalPath + Helpers.getPreference(context, StinglePhotosApplication.USER_HOME_FOLDER, "default");
 
 		File homeDir = new File(homeDirPath);
 		if (!homeDir.exists()) {

@@ -256,6 +256,9 @@ public class GalleryActivity extends AppCompatActivity
 		updateBottomNavigationMenu();
 
 		setVersionLabel();
+		if(Helpers.isServerAddonPresent(this,"addon-api-stingle-org")){
+			navigationView.getMenu().findItem(R.id.nav_storage).setVisible(true);
+		}
 	}
 
 	@Override
@@ -882,7 +885,7 @@ public class GalleryActivity extends AppCompatActivity
 
 	private void setupBottomNavigationView() {
 		// Set action to perform when any menu-item is selected.
-		bottomNavigationView.setOnNavigationItemSelectedListener(
+		bottomNavigationView.setOnItemSelectedListener(
 				item -> {
 					item.setChecked(true);
 

@@ -46,6 +46,7 @@ public class StinglePhotosApplication extends Application{
     public static final String USER_ID = "user_id";
     public static final String USER_EMAIL = "user_email";
     public static final String USER_HOME_FOLDER = "user_home_folder";
+    public static final String SERVER_ADDONS = "server_addons";
     public static final String IS_KEY_BACKED_UP = "is_key_backed_up";
     public static final String PREF_APP_START_COUNT = "app_start_count";
 

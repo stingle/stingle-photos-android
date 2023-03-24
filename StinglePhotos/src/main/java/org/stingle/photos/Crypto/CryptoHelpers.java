@@ -70,13 +70,13 @@ public class CryptoHelpers {
 
 	public static boolean decryptDbFile(Context context, int set, String albumId, String headers, boolean isThumb, InputStream in, OutputStream out, CryptoProgress progress, AsyncTask<?,?,?> task) throws IOException, CryptoException {
 		Crypto crypto = StinglePhotosApplication.getCrypto();
-		Crypto.Header header = null;
+		Crypto.Header header;
 		if(set == SyncManager.ALBUM){
 			AlbumsDb albumsDb = new AlbumsDb(context);
 			StingleDbAlbum dbAlbum = albumsDb.getAlbumById(albumId);
 			Crypto.AlbumData albumData = crypto.parseAlbumData(dbAlbum.publicKey, dbAlbum.encPrivateKey, dbAlbum.metadata);
 
-			if(isThumb) {
+			if(isThumb){
 				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, albumData.publicKey);
 			}
 			else{
@@ -84,7 +84,7 @@ public class CryptoHelpers {
 			}
 		}
 		else {
-			if(isThumb) {
+			if(isThumb){
 				header = crypto.getThumbHeaderFromHeadersStr(headers);
 			}
 			else{
@@ -97,13 +97,13 @@ public class CryptoHelpers {
 
 	public static Crypto.Header decryptFileHeaders(Context context, int set, String albumId, String headers, boolean isThumb) throws IOException, CryptoException {
 		Crypto crypto = StinglePhotosApplication.getCrypto();
-		Crypto.Header header = null;
+		Crypto.Header header;
 		if(set == SyncManager.ALBUM){
 			AlbumsDb albumsDb = new AlbumsDb(context);
 			StingleDbAlbum dbAlbum = albumsDb.getAlbumById(albumId);
 			Crypto.AlbumData albumData = crypto.parseAlbumData(dbAlbum.publicKey, dbAlbum.encPrivateKey, dbAlbum.metadata);
 
-			if(isThumb) {
+			if(isThumb){
 				header = crypto.getThumbHeaderFromHeadersStr(headers, albumData.privateKey, albumData.publicKey);
 			}
 			else{
@@ -111,7 +111,7 @@ public class CryptoHelpers {
 			}
 		}
 		else {
-			if(isThumb) {
+			if(isThumb){
 				header = crypto.getThumbHeaderFromHeadersStr(headers);
 			}
 			else{

@@ -113,6 +113,9 @@ public class StingleResponse{
 
 	public void showErrors(){
 		StringBuilder errorsBuilder = new StringBuilder();
+		if(this.errors == null){
+			return;
+		}
 		for (int i = 0; i < this.errors.length(); i++) {
 			String error = this.errors.optString(i);
 			if(error != null){
@@ -125,6 +128,9 @@ public class StingleResponse{
 	}
 
 	public void showInfos(){
+		if(this.infos == null){
+			return;
+		}
 		StringBuilder infoBuilder = new StringBuilder();
 		for (int i = 0; i < this.infos.length(); i++) {
 			String info = this.infos.optString(i);

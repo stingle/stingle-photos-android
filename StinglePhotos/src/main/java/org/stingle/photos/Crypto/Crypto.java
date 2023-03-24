@@ -4,8 +4,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
 
+import com.goterl.lazysodium.LazySodium;
+import com.goterl.lazysodium.LazySodiumAndroid;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.interfaces.AEAD;
 import com.goterl.lazysodium.interfaces.Box;
+import com.goterl.lazysodium.interfaces.GenericHash;
 import com.goterl.lazysodium.interfaces.KeyDerivation;
 import com.goterl.lazysodium.interfaces.PwHash;
 import com.goterl.lazysodium.interfaces.SecretBox;
@@ -22,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,8 +35,9 @@ import java.util.HashMap;
 
 public class Crypto {
 
-    protected Context context;
-    protected SodiumAndroid so;
+	protected Context context;
+	protected final SodiumAndroid so;
+	protected final LazySodium ls;
 
     public static final int FILE_TYPE_GENERAL = 1;
     public static final int FILE_TYPE_PHOTO = 2;
@@ -89,6 +95,7 @@ public class Crypto {
     public Crypto(Context context){
         this.context = context;
         so = new SodiumAndroid();
+		ls = new LazySodiumAndroid(so);
     }
 
     public void generateMainKeypair(String password) throws CryptoException{
@@ -188,7 +195,7 @@ public class Crypto {
 
     public byte[] exportKeyBundle(String password) throws IOException, CryptoException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write(KEY_FILE_BEGGINING.getBytes());
+        out.write(ls.bytes(KEY_FILE_BEGGINING));
         out.write(CURRENT_KEY_FILE_VERSION);
         out.write(KEY_FILE_TYPE_BUNDLE_ENCRYPTED);
         out.write(readPrivateFile(PUBLIC_KEY_FILENAME));
@@ -200,7 +207,7 @@ public class Crypto {
 
     public byte[] exportPublicKey() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write(KEY_FILE_BEGGINING.getBytes());
+        out.write(ls.bytes(KEY_FILE_BEGGINING));
         out.write(CURRENT_KEY_FILE_VERSION);
         out.write(KEY_FILE_TYPE_PUBLIC_PLAIN);
         out.write(readPrivateFile(PUBLIC_KEY_FILENAME));
@@ -217,7 +224,7 @@ public class Crypto {
         byte[] fileBeginning = new byte[KEY_FILE_BEGGINIG_LEN];
         in.read(fileBeginning);
 
-        if (!new String(fileBeginning, "UTF-8").equals(KEY_FILE_BEGGINING)) {
+        if (!ls.str(fileBeginning).equals(KEY_FILE_BEGGINING)) {
             throw new CryptoException("Invalid file header, not our file");
         }
 
@@ -309,7 +316,7 @@ public class Crypto {
         }
 
         byte[] key = new byte[SecretBox.KEYBYTES];
-        byte[] passwordBytes = password.getBytes();
+        byte[] passwordBytes = ls.bytes(password);
 
         long opsLimit = PwHash.OPSLIMIT_INTERACTIVE;
         NativeLong memlimit = PwHash.MEMLIMIT_INTERACTIVE;
@@ -349,7 +356,7 @@ public class Crypto {
     }
 
     public String getPasswordHashForStorage(String password, byte[] salt){
-        byte[] passwordBytes = password.getBytes();
+        byte[] passwordBytes = ls.bytes(password);
         byte[] hashedPassword = new byte[PWHASH_LEN];
 
         so.crypto_pwhash(hashedPassword, hashedPassword.length, passwordBytes, passwordBytes.length, salt, PwHash.OPSLIMIT_MODERATE, PwHash.MEMLIMIT_MODERATE, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue());
@@ -359,7 +366,7 @@ public class Crypto {
 
     public boolean verifyStoredPassword(String storedPassword, String providedPassword){
         byte[] hashedPassword = hex2byte(storedPassword);
-        byte[] passwordBytes = providedPassword.getBytes();
+        byte[] passwordBytes = ls.bytes(providedPassword);
 
         if(so.crypto_pwhash_str_verify(hashedPassword, passwordBytes, passwordBytes.length) == 0){
             return true;
@@ -420,7 +427,7 @@ public class Crypto {
 
     protected void writeHeader(OutputStream out, Header header, byte[] publicKey) throws IOException, CryptoException {
         // File beggining - 2 bytes
-        out.write(FILE_BEGGINING.getBytes());
+        out.write(ls.bytes(FILE_BEGGINING));
 
         // File version number - 1 byte
         out.write(CURRENT_FILE_VERSION);
@@ -449,7 +456,7 @@ public class Crypto {
         headerByteStream.write(header.fileType);
 
         if(header.filename != null && header.filename != "") {
-            byte[] filenameBytes = header.filename.getBytes();
+            byte[] filenameBytes = ls.bytes(header.filename);
 
             // Filename length
             headerByteStream.write(intToByteArray(filenameBytes.length));
@@ -512,7 +519,7 @@ public class Crypto {
         in.read(fileBeginning);
         overallHeaderSize += FILE_BEGGINIG_LEN;
 
-        if (!new String(fileBeginning, "UTF-8").equals(FILE_BEGGINING)) {
+        if (!ls.str(fileBeginning).equals(FILE_BEGGINING)) {
             throw new CryptoException("Invalid file header, not our file");
         }
 
@@ -597,7 +604,7 @@ public class Crypto {
             // Read filename
             byte[] filenameBytes = new byte[filenameSize];
             headerStream.read(filenameBytes);
-            header.filename = new String(filenameBytes);
+            header.filename = ls.str(filenameBytes);
         }
         else{
             header.filename = "";
@@ -716,6 +723,10 @@ public class Crypto {
         so.randombytes_buf(data, data.length);
         return data;
     }
+
+	public String blake2bHash(String data) throws SodiumException {
+		return ls.cryptoGenericHash(data);
+	}
 
 
     protected boolean encryptData(InputStream in, OutputStream out, Header header) throws IOException, CryptoException {
@@ -1079,9 +1090,9 @@ public class Crypto {
         // Current metadata version - 1 byte
         metadataByteStream.write(CURRENT_ALBUM_METADATA_VERSION);
 
-        byte[] albumNameBytes = metadata.name.getBytes();
+        byte[] albumNameBytes = ls.bytes(metadata.name);
         // name length
-        metadataByteStream.write(intToByteArray(metadata.name.length()));
+        metadataByteStream.write(intToByteArray(albumNameBytes.length));
         // name itself
         metadataByteStream.write(albumNameBytes);
         byte[] metadataBytes = metadataByteStream.toByteArray();
@@ -1157,7 +1168,7 @@ public class Crypto {
             // Read filename
             byte[] albumNameBytes = new byte[albumNameSize];
             in.read(albumNameBytes);
-            metadata.name = new String(albumNameBytes);
+            metadata.name = ls.str(albumNameBytes);
         }
         else{
             metadata.name = "";

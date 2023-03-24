@@ -485,4 +485,5 @@
     <string name="server_url">API Server URL</string>
     <string name="revert_default">Revert to default</string>
     <string name="invalid_url">Invalid URL specified!</string>
+    <string name="invalid_url_http">Please use a secure server. URL has to start with https://</string>
 </resources>

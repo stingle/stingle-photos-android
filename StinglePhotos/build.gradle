@@ -43,7 +43,6 @@ android {
             resValue "string", "content_provider", "org.stingle.photos.share.debug"
             resValue "string", "app_name", "Stingle Photos Dev"
             resValue "string", "camera", "Camera Dev"
-            //resValue "string", "api_server_url", "https://192.168.1.2/"
             resValue "string", "api_server_url", "https://api.stingle.org/"
             resValue "string", "default_home_folder_name", "StinglePhotosDev"
             buildConfigField "Boolean", "ALLOW_INSECURE_TLS", 'true'
@@ -99,5 +98,5 @@ dependencies {
     implementation 'androidx.camera:camera-extensions:1.0.0-alpha32'
     implementation 'androidx.window:window:1.0.0-alpha09'
 
-    //debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }

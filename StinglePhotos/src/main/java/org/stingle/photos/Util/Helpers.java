@@ -33,6 +33,8 @@ import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -420,6 +422,23 @@ public class Helpers {
 	}
 	public static void deleteAllPreferences(Context context){
 		context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, Context.MODE_PRIVATE).edit().clear().apply();
+	}
+
+	public static boolean isServerAddonPresent(Context context, String addon){
+		String addonsArrayStr = getPreference(context, StinglePhotosApplication.SERVER_ADDONS, null);
+		if(addonsArrayStr != null){
+			try {
+				JSONArray array = new JSONArray(addonsArrayStr);
+				for(int i=0; i<array.length(); i++){
+					if(array.getString(i).equals(addon)){
+						return true;
+					}
+				}
+			} catch (JSONException e) {
+
+			}
+		}
+		return false;
 	}
 
 	public static String formatVideoDuration(int duration){

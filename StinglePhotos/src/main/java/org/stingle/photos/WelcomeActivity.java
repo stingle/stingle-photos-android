@@ -118,6 +118,10 @@ public class WelcomeActivity extends AppCompatActivity {
 					Helpers.showAlertDialog(this, getString(R.string.error), getString(R.string.invalid_url));
 					return;
 				}
+				if(serverURL.startsWith("http://")){
+					Helpers.showAlertDialog(this, getString(R.string.error), getString(R.string.invalid_url_http));
+					return;
+				}
 				getSharedPreferences(StinglePhotosApplication.STICKY_PREFS, Context.MODE_PRIVATE).edit().putString(StinglePhotosApplication.SERVER_URL, serverURL).apply();
 				settingsDialog.dismiss();
 				Toast.makeText(this, R.string.save_success, Toast.LENGTH_LONG).show();
