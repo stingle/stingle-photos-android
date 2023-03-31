@@ -125,7 +125,7 @@ public class HttpsClient {
 				// Append server response in string
 				sb.append(line + "\n");
 			}
-			Log.e("resultStr", sb.toString());
+			Log.d("resultStr", sb.toString());
 			json = new JSONObject(sb.toString());
 
 			reader.close();
@@ -139,7 +139,7 @@ public class HttpsClient {
 	}
 
 	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath, OnUpdateProgress onProgress) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-		Log.e("url", urlStr);
+		Log.i("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
@@ -238,7 +238,7 @@ public class HttpsClient {
 	}
 
 	public static void getFileAsByteArray(String urlStr, HashMap<String, String> params, OutputStream output, boolean isPost) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-		Log.e("url", urlStr);
+		Log.i("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
@@ -435,7 +435,7 @@ public class HttpsClient {
 			inputStream.close();
 			outputStream.flush();
 			outputStream.close();
-			Log.e("resultStr", result);
+			Log.d("resultStr", result);
 			json = new JSONObject(result);
 
 		} catch (IOException | NoSuchAlgorithmException | KeyManagementException | JSONException e) {

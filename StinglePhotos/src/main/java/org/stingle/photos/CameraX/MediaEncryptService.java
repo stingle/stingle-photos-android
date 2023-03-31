@@ -99,7 +99,7 @@ public class MediaEncryptService extends Service {
 					AsyncTask<Void, Void, Void> task = new EncryptMediaTask(MediaEncryptService.this, file, new EncryptMediaTask.OnFinish() {
 						@Override
 						public void onFinish() {
-							Log.e("encrypt_n", "encrypted " + file.getName());
+							Log.i("encrypt_n", "encrypted " + file.getName());
 							lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 							tasksStack.remove(file.getName());
 
@@ -154,7 +154,7 @@ public class MediaEncryptService extends Service {
 		(new EncryptMediaTask(MediaEncryptService.this, filesList, new EncryptMediaTask.OnFinish() {
 			@Override
 			public void onFinish() {
-				Log.e("encrypt_l", "encrypted " + filesList.toString());
+				Log.i("encrypt_l", "encrypted " + filesList.toString());
 				lbm.sendBroadcast(new Intent("MEDIA_ENC_FINISH"));
 				triggerSyncAndStop();
 			}
@@ -239,7 +239,7 @@ public class MediaEncryptService extends Service {
 					StinglePhotosApplication.getCrypto().encryptFile(in, out, realFilename, type, file.length(), fileId, videoDuration);
 
 					Helpers.insertFileIntoDB(context, encFilename);
-					Log.e("insertFileIntoDB", encFilename);
+					Log.d("insertFileIntoDB", encFilename);
 
 					file.delete();
 

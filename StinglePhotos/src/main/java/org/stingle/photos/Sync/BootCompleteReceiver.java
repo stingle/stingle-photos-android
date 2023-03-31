@@ -11,7 +11,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.e("stingleStarted", "started");
+		Log.d("stingleStarted", "started");
 		if (SyncManager.isImportEnabled(context)) {
 			ImportJobSchedulerService.scheduleJob(context);
 		}

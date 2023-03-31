@@ -124,7 +124,7 @@ public class AlbumsFragment extends Fragment{
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.e("function", "onResume");
+		Log.d("function", "onResume");
 		if (adapter != null) {
 			adapter.updateDataSet();
 		}
@@ -141,7 +141,7 @@ public class AlbumsFragment extends Fragment{
 	@Override
 	public void onPause() {
 		super.onPause();
-		Log.e("function", "onPause");
+		Log.d("function", "onPause");
 		if(view == VIEW_ALBUMS) {
 			parentActivity.albumsLastScrollPos = layoutManager.findFirstVisibleItemPosition();
 		}
@@ -155,13 +155,13 @@ public class AlbumsFragment extends Fragment{
 	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
-		Log.e("function", "onAttach");
+		Log.d("function", "onAttach");
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		Log.e("function", "onDetach");
+		Log.d("function", "onDetach");
 	}
 
 

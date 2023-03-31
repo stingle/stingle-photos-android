@@ -130,7 +130,6 @@ public class StorageActivity extends AppCompatActivity {
 				isPlayBillingAvailable = false;
 			}
 		});
-		getPlanInfo();
 	}
 
 	@Override
@@ -368,7 +367,7 @@ public class StorageActivity extends AppCompatActivity {
 
 
 			String url = getUrlForStripe(plan);
-			Log.e("url", url);
+			Log.i("url", url);
 			newFragment.setUrl(url);
 
 			newFragment.show(ft, "stripe_dialog");

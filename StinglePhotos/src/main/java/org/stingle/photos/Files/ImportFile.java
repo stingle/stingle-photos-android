@@ -54,7 +54,7 @@ public class ImportFile {
 						try {
 							int pendingIndex = returnCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_PENDING);
 							String isPending = returnCursor.getString(pendingIndex);
-							Log.e("isPending", isPending);
+							Log.d("isPending", isPending);
 							if (!isPending.equals("0")) {
 								return null;
 							}

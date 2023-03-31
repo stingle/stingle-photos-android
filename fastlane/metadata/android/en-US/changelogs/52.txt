@@ -1,0 +1,6 @@
+* New Stingle Camera module that will ensure smooth operation on most devices. Take photos and videos with Stingle Camera to immediately secure them.
+* New option in Security settings to disable password prompt on app launch.
+* Change email functionality. Now you can change your email in Account Settings.
+* File info dialog. Now you can view file info for every photo or video. You can find it in the context menu.
+* Spanish translation (thanks to Hessel)
+* Other minor bugfixes

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -369,9 +370,10 @@ public class LoginManager {
             HttpsClient.post(activity, StinglePhotosApplication.getApiUrl() + activity.getString(R.string.logout_path), postParams, new HttpsClient.OnNetworkFinish() {
                 @Override
                 public void onFinish(StingleResponse response) {
+                    spinner.dismiss();
+                    logoutLocally(activity);
                     if (response.isStatusOk()) {
-                        spinner.dismiss();
-                        logoutLocally(activity);
+                        Log.i("logout", "Successfully logged out from server");
                     }
                     if(yes != null) {
                         yes.onClick(mDialog, which);

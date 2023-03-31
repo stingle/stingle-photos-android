@@ -286,7 +286,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.e("GalleryActivity", "onResume");
+		Log.d("GalleryActivity", "onResume");
 		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
 
 		File oldHomeDir = new File(FileManager.getOldHomeDir(this));

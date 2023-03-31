@@ -53,7 +53,7 @@ public class ImportMedia {
 		if(!SyncManager.isImportEnabled(context)){
 			return false;
 		}
-		Log.e("EnteredImportMedia", "1");
+		Log.d("EnteredImportMedia", "1");
 		boolean isSomethingImported = false;
 
 		long lastImportedFileDate = Helpers.getPreference(context, SyncManager.LAST_IMPORTED_FILE_DATE, 0L);
@@ -137,7 +137,7 @@ public class ImportMedia {
 
 			int importCountForRefresh = 0;
 			ImportedIdsDb db = new ImportedIdsDb(context);
-			Log.e("cursorCount", "" + cursor.getCount());
+			Log.d("cursorCount", "" + cursor.getCount());
 			totalFilesCount = cursor.getCount();
 			if(totalFilesCount > 0){
 				SyncManager.setSyncStatus(context, SyncManager.STATUS_IMPORTING);
@@ -148,7 +148,7 @@ public class ImportMedia {
 				if(task != null && task.isCancelled()){
 					break;
 				}
-				Log.e("EnteredImportMediaFor", "1");
+				Log.d("EnteredImportMediaFor", "1");
 				long id = cursor.getLong(idColumn);
 				String name = cursor.getString(nameColumn);
 				int type = cursor.getInt(typeColumn);
@@ -194,7 +194,7 @@ public class ImportMedia {
 					} else {
 						dateAddedMillis = dateAdded * 1000;
 					}
-					Log.e("uri", name + " - " + dateAddedMillis + " - " + type + " - " + contentUri.toString());
+					Log.i("uri", name + " - " + dateAddedMillis + " - " + type + " - " + contentUri.toString());
 
 					if (ImportFile.importFile(context, contentUri, SyncManager.GALLERY, null, dateAddedMillis, null) != null) {
 						isSomethingImported = true;

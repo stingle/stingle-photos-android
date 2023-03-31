@@ -74,7 +74,7 @@ public class DownloadThumbsAsyncTask extends AsyncTask<Void, Void, Void> {
 				CountDownLatch latch = downloader.addDownloadJob(dbFile, SyncManager.GALLERY);
 				if (latch != null) {
 					try {
-						Log.e("downloadThumbs", "Waiting for latch");
+						Log.d("downloadThumbs", "Waiting for latch");
 						latch.await();
 					} catch (InterruptedException e) {
 						e.printStackTrace();

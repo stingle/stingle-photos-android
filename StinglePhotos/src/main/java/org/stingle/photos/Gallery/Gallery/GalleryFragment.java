@@ -58,7 +58,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Override
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		Log.e("GalleryFragment", "onActivityCreated");
+		Log.d("GalleryFragment", "onActivityCreated");
 		Bundle bundle = getArguments();
 		boolean initNow = false;
 		if (bundle != null) {
@@ -118,7 +118,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.e("GalleryFragment", "onResume");
+		Log.d("GalleryFragment", "onResume");
 		if (adapter != null) {
 			adapter.updateDataSet();
 			handleNoPhotos();
@@ -138,7 +138,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Override
 	public void onPause() {
 		super.onPause();
-		Log.e("GalleryFragment", "onPause");
+		Log.d("GalleryFragment", "onPause");
 		lastScrollPosition = layoutManager.findFirstVisibleItemPosition();
 		if(recyclerView != null) {
 			recyclerView.setAdapter(null);
@@ -148,7 +148,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
-		Log.e("GalleryFragment", "onAttach");
+		Log.d("GalleryFragment", "onAttach");
 	}
 
 	@Override
@@ -158,11 +158,11 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			recyclerView.setAdapter(null);
 		}
 		adapter = null;
-		Log.e("GalleryFragment", "onDetach");
+		Log.d("GalleryFragment", "onDetach");
 	}
 
 	public void init(){
-		Log.e("GalleryFragment", "init");
+		Log.d("GalleryFragment", "init");
 		if(recyclerView != null) {
 			recyclerView.setAdapter(adapter);
 		}

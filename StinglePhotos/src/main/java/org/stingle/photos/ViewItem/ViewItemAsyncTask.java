@@ -335,7 +335,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 						public void onFinish() {
 							super.onFinish();
 							getOriginalRemotePhotoTasks.remove(getOriginalTask);
-							Log.e("getOrigTask", "removed myself");
+							Log.d("getOrigTask", "removed myself");
 							originalPhotoLoadingBar.setVisibility(View.GONE);
 						}
 					});
@@ -344,11 +344,11 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					getOriginalRemotePhotoTasks.add(getOriginalTask);
 
 					if(getOriginalRemotePhotoTasks.size() > GET_ORIGINAL_TASKS_LIMIT){
-						Log.e("getOrigTask", "tasks exceeds limit, it's: " + getOriginalRemotePhotoTasks.size() + " will remove " + (getOriginalRemotePhotoTasks.size()-GET_ORIGINAL_TASKS_LIMIT));
+						Log.d("getOrigTask", "tasks exceeds limit, it's: " + getOriginalRemotePhotoTasks.size() + " will remove " + (getOriginalRemotePhotoTasks.size()-GET_ORIGINAL_TASKS_LIMIT));
 						for(int i=0; i < getOriginalRemotePhotoTasks.size()-GET_ORIGINAL_TASKS_LIMIT; i++){
 							getOriginalRemotePhotoTasks.get(0).cancel(true);
 							getOriginalRemotePhotoTasks.remove(0);
-							Log.e("getOrigTask", "removed 1 task");
+							Log.d("getOrigTask", "removed 1 task");
 						}
 					}
 				}
@@ -494,7 +494,7 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 		for(int i=0; i < getOriginalRemotePhotoTasks.size(); i++){
 			getOriginalRemotePhotoTasks.get(0).cancel(true);
 			getOriginalRemotePhotoTasks.remove(0);
-			Log.e("getOrigTask", "removed all 1 task");
+			Log.d("getOrigTask", "removed all 1 task");
 		}
 	}
 

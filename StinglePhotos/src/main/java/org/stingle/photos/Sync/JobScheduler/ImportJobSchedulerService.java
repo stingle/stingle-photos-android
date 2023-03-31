@@ -59,7 +59,7 @@ public class ImportJobSchedulerService extends JobService {
 			return false;
 		}
 
-		Log.e("ImportRequest", "received");
+		Log.d("ImportRequest", "received");
 		SyncManager.startSync(this, SyncAsyncTask.MODE_IMPORT_AND_UPLOAD, new OnAsyncTaskFinish() {
 			@Override
 			public void onFinish() {

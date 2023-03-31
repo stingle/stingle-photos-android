@@ -94,7 +94,7 @@ class PlayBilling implements PurchasesUpdatedListener {
 			BillingFlowParams flowParams = flowParamsBuilder.build();
 
 			BillingResult responseCode = billingClient.launchBillingFlow(activity, flowParams);
-			Log.e("responseCode", responseCode.toString());
+			Log.i("responseCode", responseCode.toString());
 
 		}
 	}

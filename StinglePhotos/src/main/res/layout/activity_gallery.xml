@@ -57,8 +57,9 @@
 
                 <ImageView
                     android:id="@+id/syncPhoto"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="5dp"
                     android:layout_alignParentEnd="true"
                     android:visibility="gone"
                     android:contentDescription="@string/upload_current_image" />
