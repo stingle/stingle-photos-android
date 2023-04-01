@@ -1,5 +1,5 @@
 * Now you can enter API server URL on the login page. This is useful if you self host the API server
-* Japanese translation
-* Simplified Chinese translation
+* Japanese translation (thanks to @kou-kee)
+* Simplified Chinese translation (thanks to @qian-jiahong)
 * Fixed bug where it will cut the album name if album name is written in Unicode
 * Other minor bugfixes
