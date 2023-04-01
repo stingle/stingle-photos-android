@@ -379,6 +379,8 @@
     <string name="english">English</string>
     <string name="russian">Русский</string>
     <string name="german">Deutsch</string>
+    <string name="japanese">日本語</string>
+    <string name="chinese">简体中文</string>
     <string name="free_up_space">Speicher freimachen</string>
     <string name="free_up_space_confirm">%s Speicher freigeben?</string>
     <string name="free_up_space_confirm_desc">Durch diese Aktion wird %s von Ihrem Gerät freigegeben, indem gesicherte Dateien aus Ihrem lokalen Speicher gelöscht werden. Fortfahren?</string>
@@ -425,7 +427,7 @@
     <string name="password_for_account_delete">Um Ihr Konto zu löschen, geben Sie bitte Ihr Passwort ein</string>
     <string name="delete_account_question2">Sind Sie wirklich sicher, dass Sie Ihr Konto löschen möchten?</string>
     <string name="delete_account_question_desc2">Letzte Möglichkeit! Ihr Konto und alle Ihre Fotos, Videos, Alben und Freigaben werden gelöscht! Das kann nicht rückgängig gemacht werden!</string>
-    <string name="deleting_account">Konto löschen ...</string>
+    <string name="deleting_account">Konto löschen …</string>
     <string name="download_missing_thumbs">Laden Sie fehlende Thumbnails herunter</string>
     <string name="download_missing_thumbs_desc">Laden Sie Miniaturansichten herunter, die nicht in Ihrem lokalen Cache vorhanden sind</string>
     <string name="dont_show_again">Nicht mehr zeigen</string>
@@ -469,7 +471,7 @@
     <string name="spanish">Española</string>
     <string name="change_email">E-Mail (klicken um sich ändern)</string>
     <string name="enter_new_email">Bitte geben Sie eine neue E-Mail-Adresse ein</string>
-    <string name="changing_email">E-Mail ändern ...</string>
+    <string name="changing_email">E-Mail ändern …</string>
     <string name="success_change_email">Ihre E-Mail-Adresse wurde erfolgreich geändert!</string>
     <string name="file_info">Dateiinformation</string>
     <string name="name">Name</string>
@@ -481,4 +483,8 @@
     <string name="gps_coordinates">GPS Koordinaten</string>
     <string name="encypted_filename">Verschlüsselter Dateiname</string>
     <string name="original_filename">Original-Dateiname</string>
+    <string name="server_url">API-Server-URL</string>
+    <string name="revert_default">Auf Standard zurücksetzen</string>
+    <string name="invalid_url">Ungültige URL angegeben!</string>
+    <string name="invalid_url_http">Bitte verwenden Sie einen sicheren Server. URL muss mit https:// beginnen</string>
 </resources>

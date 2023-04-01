@@ -159,8 +159,6 @@
     <string name="confirming_purchase">購入処理中…</string>
     <string name="envideo_service_started">エンコード中</string>
     <string name="sync_service_started">同期中</string>
-    <string name="download_service_started" translatable="false">download_service</string>
-    <string name="download_thumb_service_started" translatable="false">download_thumb_service_started</string>
     <string name="confirm_decrypt_files">選択したものを復号し、保存しますか？保存したものは他のアプリが読み取ることができるようになります。</string>
     <string name="empty_trash">ごみ箱を空にする</string>
     <string name="confirm_empty_trash">ごみ箱を空にしますか？ごみ箱内のファイルは復元することができなくなります。</string>
@@ -384,6 +382,7 @@
     <string name="russian">Русский</string>
     <string name="german">Deutsch</string>
     <string name="japanese">日本語</string>
+    <string name="chinese">简体中文</string>
     <string name="free_up_space">容量の解放</string>
     <string name="free_up_space_confirm">%sの容量を解放しますか？</string>
     <string name="free_up_space_confirm_desc">アップロードした写真を端末上から削除し、%sの容量を解放することができます。続行しますか？</string>
@@ -470,7 +469,7 @@
     <string name="spanish">Española</string>
     <string name="change_email">メールアドレス（タップして変更）</string>
     <string name="enter_new_email">新しいメールアドレスを入力</string>
-    <string name="changing_email">変更中...</string>
+    <string name="changing_email">変更中…</string>
     <string name="success_change_email">メールアドレスの変更が完了しました</string>
     <string name="file_info">詳細</string>
     <string name="name">ファイル名</string>
@@ -482,4 +481,8 @@
     <string name="gps_coordinates">GPS座標</string>
     <string name="encypted_filename">暗号化後のファイル名</string>
     <string name="original_filename">元のファイル名</string>
+    <string name="server_url">API サーバーの URL</string>
+    <string name="revert_default">デフォルトに戻す</string>
+    <string name="invalid_url">無効な URL が指定されました!</string>
+    <string name="invalid_url_http">安全なサーバーを使用してください。 URL は https:// で始まる必要があります</string>
 </resources>

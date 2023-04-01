@@ -378,6 +378,8 @@
     <string name="english">English</string>
     <string name="russian">Русский</string>
     <string name="german">Deutsch</string>
+    <string name="japanese">日本語</string>
+    <string name="chinese">简体中文</string>
     <string name="free_up_space">Освободить место</string>
     <string name="free_up_space_confirm">Освободить %s?</string>
     <string name="free_up_space_confirm_desc">Это действие освободит %s места с вашего устройства. Продолжить?</string>
@@ -423,7 +425,7 @@
     <string name="password_for_account_delete">Чтобы удалить свою учетную запись, введите свой пароль</string>
     <string name="delete_account_question2">Вы ДЕЙСТВИТЕЛЬНО уверены, что хотите УДАЛИТЬ свою учетную запись?</string>
     <string name="delete_account_question_desc2">Последний шанс! Ваша учетная запись и все ваши фотографии, видео, альбомы будут удалены! Этот поцесс не обратим!</string>
-    <string name="deleting_account">Удаление учетной записи...</string>
+    <string name="deleting_account">Удаление учетной записи…</string>
     <string name="download_missing_thumbs">Скачать недостающие иконки</string>
     <string name="download_missing_thumbs_desc">Загрузите иконки, которых нет в вашем локальном кеше</string>
     <string name="dont_show_again">Больше не показывать</string>
@@ -467,7 +469,7 @@
     <string name="spanish">Española</string>
     <string name="change_email">Е-мейл (нажмите, чтобы изменить)</string>
     <string name="enter_new_email">Пожалуйста, введите новый адрес электронной почты</string>
-    <string name="changing_email">Изменение электронной почты ...</string>
+    <string name="changing_email">Изменение электронной почты …</string>
     <string name="success_change_email">Ваш электронный адрес успешно изменился!</string>
     <string name="file_info">Информация о файле</string>
     <string name="name">Имя</string>
@@ -479,4 +481,8 @@
     <string name="gps_coordinates">GPS координаты</string>
     <string name="encypted_filename">Имя зашифрованного файла</string>
     <string name="original_filename">Исходное имя файла</string>
+    <string name="server_url">URL-адрес сервера API</string>
+    <string name="revert_default">Сбросить</string>
+    <string name="invalid_url">Указан неверный URL!</string>
+    <string name="invalid_url_http">Пожалуйста, используйте безопасный сервер. URL-адрес должен начинаться с https://</string>
 </resources>
