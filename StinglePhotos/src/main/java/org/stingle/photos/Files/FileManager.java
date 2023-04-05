@@ -114,7 +114,8 @@ public class FileManager {
 		String externalStorage = context.getExternalFilesDir(null).getPath();
 
 		String additionalPath = "";
-		if(!StinglePhotosApplication.getApiUrl().equals(context.getString(R.string.api_server_url))){
+		String currentServerURL = context.getSharedPreferences(StinglePhotosApplication.STICKY_PREFS, Context.MODE_PRIVATE).getString(StinglePhotosApplication.SERVER_URL, context.getString(R.string.api_server_url));;
+		if(!currentServerURL.equals(context.getString(R.string.api_server_url))){
 			try {
 				additionalPath = StinglePhotosApplication.getCrypto().blake2bHash(StinglePhotosApplication.getApiUrl()) + "/";
 			} catch (SodiumException e) {
@@ -128,7 +129,6 @@ public class FileManager {
 		if (!homeDir.exists()) {
 			homeDir.mkdirs();
 		}
-
 		return homeDir.getPath();
 	}
 

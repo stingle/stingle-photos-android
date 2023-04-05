@@ -35,3 +35,6 @@ output.json
 #NDK
 obj/
 .externalNativeBuild
+
+StinglePhotos/fdroid
+StinglePhotos/playstore
