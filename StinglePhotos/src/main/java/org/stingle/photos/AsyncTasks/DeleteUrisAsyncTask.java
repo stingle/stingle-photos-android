@@ -1,5 +1,6 @@
 package org.stingle.photos.AsyncTasks;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.RecoverableSecurityException;
 import android.content.ContentUris;
@@ -80,9 +81,10 @@ public class DeleteUrisAsyncTask extends AsyncTask<Void, Integer, Void> {
 							RecoverableSecurityException excRec = (RecoverableSecurityException) e;
 							try {
 								urisToDelete.add(uri);
-								myActivity.startIntentSenderForResult(excRec.getUserAction().getActionIntent().getIntentSender(), GalleryActivity.INTENT_DELETE_FILE, null, 0, 0, 0, null);
+								((Activity) myActivity).startIntentSenderForResult(excRec.getUserAction().getActionIntent().getIntentSender(), GalleryActivity.INTENT_DELETE_FILE, null, 0, 0, 0, null);
+							} catch (IntentSender.SendIntentException ex) {
+								deleteFailed = true;
 							}
-							catch (IntentSender.SendIntentException ex) { }
 						} else {
 							deleteFailed = true;
 						}

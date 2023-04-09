@@ -487,4 +487,7 @@
     <string name="revert_default">Auf Standard zurücksetzen</string>
     <string name="invalid_url">Ungültige URL angegeben!</string>
     <string name="invalid_url_http">Bitte verwenden Sie einen sicheren Server. URL muss mit https:// beginnen</string>
+    <string name="magage_storage_perm_explain">Stingle Photos benötigt die Berechtigung „Externen Speicher verwalten“, um Originalfotos und -videos aus der Galerie des Telefons löschen zu können</string>
+    <string name="permission_required">Genehmigung erforderlich</string>
+    <string name="disabling_autoimport">Fehlende Speicherberechtigungen. Auto-Import deaktivieren!</string>
 </resources>

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -567,31 +566,52 @@ public class FileManager {
 		}
 	}
 
-	public static boolean requestSDCardPermission(final Activity activity){
-		if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-			if (activity.shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+	public static boolean requestOldMediaPermissions(Activity activity) {
+		boolean result = true;
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+			if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 				new MaterialAlertDialogBuilder(activity)
 						.setMessage(activity.getString(R.string.sdcard_perm_explain))
-						.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION);
-							}
+						.setPositiveButton(activity.getString(R.string.ok), (dialog, which) -> {
+							activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION);
 						})
-						.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int which) {
-										activity.finish();
-									}
-								}
-						)
-						.create()
-						.show();
-
-			} else {
-				activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION);
+						.setNegativeButton(activity.getString(R.string.cancel), (dialog, which) -> {
+							dialog.dismiss();
+							activity.finish();
+						})
+						.create().show();
+				result = false;
 			}
-			return false;
 		}
-		return true;
+		return result;
+	}
+
+	public static boolean requestReadMediaPermissions(Activity activity) {
+		boolean result = true;
+		result = requestOldMediaPermissions(activity);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (
+					activity.checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ||
+							activity.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED ||
+							activity.checkSelfPermission(Manifest.permission.ACCESS_MEDIA_LOCATION) != PackageManager.PERMISSION_GRANTED
+
+			) {
+				if (
+						activity.shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES) ||
+								activity.shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VIDEO) ||
+								activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_MEDIA_LOCATION)
+				) {
+					new MaterialAlertDialogBuilder(activity)
+							.setMessage(activity.getString(R.string.sdcard_perm_explain))
+							.setPositiveButton(activity.getString(R.string.ok), (dialog, which) -> activity.requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.ACCESS_MEDIA_LOCATION}, StinglePhotosApplication.REQUEST_MEDIA_PERMISSION))
+							.setNegativeButton(activity.getString(R.string.cancel), (dialog, which) -> dialog.dismiss())
+							.create().show();
+				} else {
+					activity.requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.ACCESS_MEDIA_LOCATION}, StinglePhotosApplication.REQUEST_MEDIA_PERMISSION);
+				}
+				result = false;
+			}
+		}
+		return result;
 	}
 }

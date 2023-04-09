@@ -17,7 +17,6 @@ public class PermissionHelper {
     private static final String[] CAMERA_PERMISSIONS = {
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.READ_EXTERNAL_STORAGE
     };
 
     private final WeakReference<AppCompatActivity> activityRef;

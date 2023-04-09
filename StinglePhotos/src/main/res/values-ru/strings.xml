@@ -485,4 +485,7 @@
     <string name="revert_default">Сбросить</string>
     <string name="invalid_url">Указан неверный URL!</string>
     <string name="invalid_url_http">Пожалуйста, используйте безопасный сервер. URL-адрес должен начинаться с https://</string>
+    <string name="magage_storage_perm_explain">Stingle Photos требуется разрешение «Управление внешним хранилищем», чтобы иметь возможность удалять исходные фотографии и видео из галереи телефона.</string>
+    <string name="permission_required">Требуется разрешение</string>
+    <string name="disabling_autoimport">Отсутствуют разрешения на хранение. Отключение автоматического импорта!</string>
 </resources>

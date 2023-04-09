@@ -85,6 +85,7 @@ public class SyncManager {
 
 	public static final String PREF_IMPORT_ENABLED = "enable_import";
 	public static final String PREF_IMPORT_DELETE = "auto_import_delete";
+	public static final String PREF_IMPORT_DELETE_APP = "delete_after_import";
 	public static final String PREF_IMPORT_FROM = "import_from";
 	public static final String PREF_IMPORT_SETUP = "import_setup";
 	public static final String PREF_IS_BACKUP_PHRASE_SEEN = "is_backup_phrase_seen";

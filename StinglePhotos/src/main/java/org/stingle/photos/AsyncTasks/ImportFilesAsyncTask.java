@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.stingle.photos.Files.FileManager;
 import org.stingle.photos.Files.ImportFile;
 import org.stingle.photos.R;
+import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 
 import java.lang.ref.WeakReference;
@@ -112,7 +113,7 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 			return;
 		}
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(myActivity);
-		String pref = settings.getString("delete_after_import", "ask");
+		String pref = settings.getString(SyncManager.PREF_IMPORT_DELETE_APP, "ask");
 		if(pref.equals("never")){
 			return;
 		}
@@ -125,8 +126,10 @@ public class ImportFilesAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 					(dialog, which) -> (new DeleteUrisAsyncTask(myActivity, importedUris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR),
 					null
 			);
+			FileManager.requestReadMediaPermissions(myActivity);
 		}
 		else if(pref.equals("always")){
+			FileManager.requestReadMediaPermissions(myActivity);
 			(new DeleteUrisAsyncTask(myActivity, importedUris, null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}

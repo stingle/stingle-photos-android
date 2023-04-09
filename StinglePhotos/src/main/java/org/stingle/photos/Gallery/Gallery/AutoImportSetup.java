@@ -1,19 +1,21 @@
 package org.stingle.photos.Gallery.Gallery;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ListPopupWindow;
-import android.widget.Switch;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import org.stingle.photos.Files.FileManager;
+import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
@@ -24,8 +26,18 @@ import java.util.Arrays;
 public class AutoImportSetup {
 
 	private static View dialogView;
+	private static BottomSheetDialog dialog;
 
-	public static void showAutoImportSetup(AppCompatActivity activity){
+	public static void setImportDeleteSwitch(Context context, boolean value){
+		if(dialog != null) {
+			SwitchMaterial importDelete = dialog.findViewById(R.id.import_delete);
+			importDelete.setChecked(value);
+		}
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		sharedPrefs.edit().putBoolean(SyncManager.PREF_IMPORT_DELETE, value).apply();
+	}
+
+	public static void showAutoImportSetup(GalleryActivity activity){
 		if(dialogView != null && dialogView.isShown()){
 			return;
 		}
@@ -39,19 +51,19 @@ public class AutoImportSetup {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
 
 		dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_autoimport_setup, null);
-		BottomSheetDialog dialog = new BottomSheetDialog(activity);
+		dialog = new BottomSheetDialog(activity);
 		dialog.setContentView(dialogView);
 		dialog.setCancelable(false);
-		BottomSheetBehavior mBehavior = dialog.getBehavior();
+		BottomSheetBehavior<FrameLayout> mBehavior = dialog.getBehavior();
 
 		dialog.setOnShowListener(dialogInterface -> {
 			//mBehavior.setPeekHeight(dialogView.getHeight());
 			mBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 		});
 
-		Switch importDelete = dialog.findViewById(R.id.import_delete);
+		SwitchMaterial importDelete = dialog.findViewById(R.id.import_delete);
 		TextView importFromValue = dialog.findViewById(R.id.import_from_value);
-		Switch importExisting = dialog.findViewById(R.id.import_existing);
+		SwitchMaterial importExisting = dialog.findViewById(R.id.import_existing);
 
 		dialog.findViewById(R.id.import_skip).setOnClickListener(v -> {
 			sharedPrefs.edit().putBoolean(SyncManager.PREF_IMPORT_ENABLED, false).apply();
@@ -61,6 +73,7 @@ public class AutoImportSetup {
 		});
 
 		dialog.findViewById(R.id.import_enable).setOnClickListener(v -> {
+			FileManager.requestReadMediaPermissions(activity);
 			sharedPrefs.edit().putBoolean(SyncManager.PREF_IMPORT_ENABLED, true).apply();
 			if(!importExisting.isChecked()){
 				Helpers.storePreference(activity, SyncManager.LAST_IMPORTED_FILE_DATE, System.currentTimeMillis() / 1000);
@@ -84,7 +97,7 @@ public class AutoImportSetup {
 		String[] itemVals = activity.getResources().getStringArray(R.array.import_from_values);
 
 		String currentImportFromVal = sharedPrefs.getString(SyncManager.PREF_IMPORT_FROM, itemVals[0]);
-		Boolean currentImportDeleteVal = sharedPrefs.getBoolean(SyncManager.PREF_IMPORT_DELETE, false);
+		boolean currentImportDeleteVal = sharedPrefs.getBoolean(SyncManager.PREF_IMPORT_DELETE, false);
 
 		importFromValue.setText(items[Arrays.asList(itemVals).indexOf(currentImportFromVal)]);
 
@@ -98,7 +111,13 @@ public class AutoImportSetup {
 		importDelete.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				sharedPrefs.edit().putBoolean(SyncManager.PREF_IMPORT_DELETE, isChecked).apply();
+				if(isChecked) {
+					activity.requestManageExternalStoragePermission();
+					sharedPrefs.edit().putBoolean(SyncManager.PREF_IMPORT_DELETE, true).apply();
+				}
+				else {
+					sharedPrefs.edit().putBoolean(SyncManager.PREF_IMPORT_DELETE, false).apply();
+				}
 			}
 		});
 

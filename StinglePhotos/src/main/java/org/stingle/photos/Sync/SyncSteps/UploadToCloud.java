@@ -331,8 +331,7 @@ public class UploadToCloud {
 			assert manager != null;
 			manager.createNotificationChannel(chan);
 			notificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL_ID);
-		}
-		else{
+		} else {
 			notificationBuilder = new Notification.Builder(context);
 		}
 

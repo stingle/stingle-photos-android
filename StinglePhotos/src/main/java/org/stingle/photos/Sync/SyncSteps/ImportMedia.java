@@ -59,7 +59,7 @@ public class ImportMedia {
 		long lastImportedFileDate = Helpers.getPreference(context, SyncManager.LAST_IMPORTED_FILE_DATE, 0L);
 
 		String[] projection;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			projection = new String[] {
 					MediaStore.MediaColumns._ID,
 					MediaStore.MediaColumns.DISPLAY_NAME,
@@ -79,7 +79,7 @@ public class ImportMedia {
 			};
 		}
 		String selection;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && SyncManager.getImportFrom(context).equals("camera_folder")) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && SyncManager.getImportFrom(context).equals("camera_folder")) {
 			selection =
 					"("
 							+ MediaStore.Files.FileColumns.MEDIA_TYPE + "="
@@ -102,7 +102,7 @@ public class ImportMedia {
 		}
 
 		String[] selectionArgs;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && SyncManager.getImportFrom(context).equals("camera_folder")) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && SyncManager.getImportFrom(context).equals("camera_folder")) {
 			selectionArgs = new String[]{String.valueOf(lastImportedFileDate), "Camera"};
 		}
 		else{
@@ -127,7 +127,7 @@ public class ImportMedia {
 			int dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);;
 			int dateTakenColumn = -1;
 			int parentColumn;
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 				dateTakenColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN);
 				parentColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME);
 			}
@@ -165,7 +165,7 @@ public class ImportMedia {
 
 
 				String parentName;
-				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 					parentName = cursor.getString(parentColumn);
 				}
 				else{
@@ -186,7 +186,7 @@ public class ImportMedia {
 					db.insertImportedId(id);
 
 					long dateAddedMillis;
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && dateTakenColumn >= 0) {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && dateTakenColumn >= 0) {
 						dateAddedMillis = cursor.getLong(dateTakenColumn);
 						if(dateAddedMillis == 0){
 							dateAddedMillis = dateAdded * 1000;
@@ -202,8 +202,8 @@ public class ImportMedia {
 							try {
 								context.getContentResolver().delete(contentUri, null, null);
 							}
-							catch (SecurityException ignored){
-
+							catch (SecurityException e){
+								e.printStackTrace();
 							}
 						}
 						importCountForRefresh++;

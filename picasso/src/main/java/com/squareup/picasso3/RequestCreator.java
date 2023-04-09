@@ -15,26 +15,6 @@
  */
 package com.squareup.picasso3;
 
-import android.app.Notification;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.view.Gravity;
-import android.widget.ImageView;
-import android.widget.RemoteViews;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.core.content.ContextCompat;
-import com.squareup.picasso3.RemoteViewsAction.RemoteViewsTarget;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static com.squareup.picasso3.BitmapHunter.forRequest;
 import static com.squareup.picasso3.MemoryPolicy.shouldReadFromMemoryCache;
 import static com.squareup.picasso3.MemoryPolicy.shouldWriteToMemoryCache;
@@ -51,6 +31,29 @@ import static com.squareup.picasso3.Utils.VERB_CREATED;
 import static com.squareup.picasso3.Utils.checkMain;
 import static com.squareup.picasso3.Utils.checkNotMain;
 import static com.squareup.picasso3.Utils.log;
+
+import android.app.Notification;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.view.Gravity;
+import android.widget.ImageView;
+import android.widget.RemoteViews;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.content.ContextCompat;
+
+import com.squareup.picasso3.RemoteViewsAction.RemoteViewsTarget;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Fluent API for building an image download request. */
 @SuppressWarnings("UnusedDeclaration") // Public API.
@@ -349,7 +352,6 @@ public class RequestCreator {
    * <p>
    * Custom transformations will always be run after the built-in transformations.
    */
-  // TODO show example of calling resize after a transform in the javadoc
   @NonNull
   public RequestCreator transform(@NonNull Transformation transformation) {
     data.transform(transformation);
@@ -412,7 +414,6 @@ public class RequestCreator {
   /**
    * Synchronously fulfill this request. Must not be called from the main thread.
    */
-  @Nullable // TODO make non-null and always throw?
   public Bitmap get() throws IOException {
     long started = System.nanoTime();
     checkNotMain();

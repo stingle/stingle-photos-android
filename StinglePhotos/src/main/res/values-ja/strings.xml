@@ -485,4 +485,7 @@
     <string name="revert_default">デフォルトに戻す</string>
     <string name="invalid_url">無効な URL が指定されました!</string>
     <string name="invalid_url_http">安全なサーバーを使用してください。 URL は https:// で始まる必要があります</string>
+    <string name="magage_storage_perm_explain">Stingle Photos では、電話のギャラリーから元の写真やビデオを削除できるようにするには、「外部ストレージの管理」権限が必要です</string>
+    <string name="permission_required">許可が必要</string>
+    <string name="disabling_autoimport">ストレージ権限がありません。 自動インポートを無効にします!</string>
 </resources>

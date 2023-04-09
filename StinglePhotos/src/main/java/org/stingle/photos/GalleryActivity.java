@@ -12,14 +12,19 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -32,6 +37,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -259,12 +265,12 @@ public class GalleryActivity extends AppCompatActivity
 		if(Helpers.isServerAddonPresent(this,"addon-api-stingle-org")){
 			navigationView.getMenu().findItem(R.id.nav_storage).setVisible(true);
 		}
+
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-
 	}
 
 	@Override
@@ -318,6 +324,16 @@ public class GalleryActivity extends AppCompatActivity
 		if (!isImporting) {
 			SyncManager.startPeriodicWork(this);
 			checkLoginAndInit();
+		}
+
+		// Check if delete after import is enabled and we are not storage manager, request for permission
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			if(SyncManager.isImportEnabled(this)){
+				FileManager.requestReadMediaPermissions(this);
+			}
+			if(SyncManager.isImportDeleteEnabled(this) && !Environment.isExternalStorageManager()){
+				requestManageExternalStoragePermission();
+			}
 		}
 		if (SyncManager.isImportEnabled(this)) {
 			ImportJobSchedulerService.scheduleJob(this);
@@ -594,14 +610,86 @@ public class GalleryActivity extends AppCompatActivity
 			@Override
 			public void onUserAuthSuccess() {
 				LoginManager.disableLockTimer(GalleryActivity.this);
-				if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-					initGallery();
-				}
-				else{
-					FileManager.requestSDCardPermission(GalleryActivity.this);
-				}
+				requestNotificationPermission();
+				initGallery();
 			}
 		});
+	}
+
+	private void requestNotificationPermission(){
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (!Helpers.getPreference(this, "notif_denied", false)) {
+				if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+					requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, StinglePhotosApplication.REQUEST_NOTIF_PERMISSION);
+				}
+			}
+		}
+	}
+
+	public ActivityResultLauncher<Intent> manageExternalStoragePermissionLauncher =
+			registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+					result -> {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+							if (Environment.isExternalStorageManager()) {
+								AutoImportSetup.setImportDeleteSwitch(this, true);
+							} else {
+								AutoImportSetup.setImportDeleteSwitch(this, false);
+							}
+						}
+					});
+
+	public void requestManageExternalStoragePermission() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			if (!Environment.isExternalStorageManager()) {
+
+				new MaterialAlertDialogBuilder(this)
+						.setTitle(getString(R.string.permission_required))
+						.setMessage(getString(R.string.magage_storage_perm_explain))
+						.setPositiveButton(getString(R.string.ok), (dialog, which) -> {
+							Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+							intent.setData(Uri.parse("package:" + getPackageName()));
+							manageExternalStoragePermissionLauncher.launch(intent);
+						})
+						.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+							AutoImportSetup.setImportDeleteSwitch(this, false);
+							dialog.dismiss();
+
+						})
+						.create().show();
+			}
+			else {
+				AutoImportSetup.setImportDeleteSwitch(this,true);
+			}
+		}
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		switch (requestCode) {
+			case StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION:
+			case StinglePhotosApplication.REQUEST_MEDIA_PERMISSION: {
+				if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+					if(SyncManager.isImportEnabled(this)) {
+						sharedPreferences.edit().putBoolean(SyncManager.PREF_IMPORT_ENABLED, false).apply();
+						Toast.makeText(this, getString(R.string.disabling_autoimport), Toast.LENGTH_LONG).show();
+					}
+					if(sharedPreferences.getString(SyncManager.PREF_IMPORT_DELETE_APP, "ask").equals("always")){
+						sharedPreferences.edit().putString(SyncManager.PREF_IMPORT_DELETE_APP, "ask").apply();
+					}
+				}
+				else{
+					SyncManager.startSync(this);
+				}
+				return;
+			}
+			case StinglePhotosApplication.REQUEST_NOTIF_PERMISSION: {
+				if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+					Helpers.storePreference(this, "notif_denied", true);
+				}
+				return;
+			}
+		}
 	}
 
 	private void initGallery(){
@@ -622,7 +710,9 @@ public class GalleryActivity extends AppCompatActivity
 			findViewById(R.id.import_fab).setVisibility(View.VISIBLE);
 		}
 		if(!dontStartSyncYet){
-			SyncManager.startSync(this);
+			if(FileManager.requestOldMediaPermissions(GalleryActivity.this)) {
+				SyncManager.startSync(this);
+			}
 		}
 		updateQuotaInfo();
 
@@ -651,20 +741,6 @@ public class GalleryActivity extends AppCompatActivity
 				syncBarHandler.showSyncBarAnimated();
 			}
 			syncBarHandler.updateSyncBar();
-		}
-	}
-
-	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		switch (requestCode) {
-			case StinglePhotosApplication.REQUEST_SD_CARD_PERMISSION: {
-				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					initGallery();
-				} else {
-					finish();
-				}
-			}
 		}
 	}
 

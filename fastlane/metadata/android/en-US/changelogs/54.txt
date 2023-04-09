@@ -1,0 +1,5 @@
+* Fixed crash on startup that some users were experiencing
+* Now Stingle Photos will ask to get All files access to be able to automatically delete files after import, if that option is selected
+* On startup app will ask for Notification permission to send status notifications
+* Now Auto import works as expected on newer Android versions
+* Lot's of smaller bugfixes

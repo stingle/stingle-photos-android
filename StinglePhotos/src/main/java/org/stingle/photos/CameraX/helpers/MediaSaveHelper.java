@@ -85,9 +85,11 @@ public class MediaSaveHelper implements LifecycleObserver {
     }
 
     public void showLastThumb() {
-        (new ShowLastThumbAsyncTask(activityRef.get(), imageViewRef.get()))
-                .setThumbSize(thumbSize)
-                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if(activityRef != null && imageViewRef != null) {
+            (new ShowLastThumbAsyncTask(activityRef.get(), imageViewRef.get()))
+                    .setThumbSize(thumbSize)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     public void getThumbIntoMemory(File file, boolean isVideo) {

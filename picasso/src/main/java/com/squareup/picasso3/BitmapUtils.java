@@ -15,6 +15,9 @@
  */
 package com.squareup.picasso3;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static com.squareup.picasso3.Utils.checkNotNull;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -24,20 +27,20 @@ import android.graphics.ImageDecoder;
 import android.os.Build;
 import android.util.Size;
 import android.util.TypedValue;
+
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ForwardingSource;
 import okio.Okio;
 import okio.Source;
-
-import static android.os.Build.VERSION.SDK_INT;
-import static com.squareup.picasso3.Utils.checkNotNull;
 
 final class BitmapUtils {
   /**
@@ -226,8 +229,6 @@ final class BitmapUtils {
 
     void throwIfCaught() throws IOException {
       if (thrownException != null) {
-        // TODO: Log when Android returns a non-null Bitmap after swallowing an IOException.
-        // TODO: https://github.com/square/picasso/issues/2003/
         throw thrownException;
       }
     }

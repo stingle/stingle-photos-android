@@ -880,4 +880,7 @@
     <string name="revert_default">Revenir à la valeur par défaut</string>
     <string name="invalid_url">URL non valide !</string>
     <string name="invalid_url_http">Veuillez utiliser un serveur sécurisé. L\'URL doit commencer par https://</string>
+    <string name="magage_storage_perm_explain">Stingle Photos a besoin de l\'autorisation \"Gérer le stockage externe\" pour pouvoir supprimer les photos et vidéos originales de la galerie du téléphone</string>
+    <string name="permission_required">Autorisation requise</string>
+    <string name="disabling_autoimport">Autorisations de stockage manquantes. Désactivation de l\'importation automatique !</string>
 </resources>

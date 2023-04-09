@@ -486,4 +486,7 @@
      <string name="revert_default">恢复默认</string>
      <string name="invalid_url">指定的网址无效！</string>
      <string name="invalid_url_http">请使用安全的服务器。 网址必须以 https:// 开头</string>
+    <string name="magage_storage_perm_explain">Stingle Photos 需要“管理外部存储”权限才能从手机图库中删除原始照片和视频</string>
+    <string name="permission_required">需要许可</string>
+     <string name="disabling_autoimport">缺少存储权限。 禁用自动导入！</string>
 </resources>

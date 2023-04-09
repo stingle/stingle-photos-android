@@ -8,14 +8,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -493,14 +499,18 @@ public class SettingsActivity extends AppCompatActivity implements
 			setPreferencesFromResource(R.xml.import_preferences, rootKey);
 			initEnableAutoImport();
 			initAutoImportSource();
+			initEnableDeleteAfterImport();
+			initEnableDeleteAfterAppImport();
 		}
 
 		private void initEnableAutoImport() {
 			SwitchPreference enableImportSetting = findPreference(SyncManager.PREF_IMPORT_ENABLED);
 
+			assert enableImportSetting != null;
 			enableImportSetting.setOnPreferenceChangeListener((preference, newValue) -> {
 				boolean isEnabled = (boolean) newValue;
 				if (isEnabled) {
+					FileManager.requestReadMediaPermissions(getActivity());
 					Helpers.storePreference(getContext(), SyncManager.LAST_IMPORTED_FILE_DATE, System.currentTimeMillis() / 1000);
 				}
 				SyncManager.stopSync(getContext());
@@ -508,11 +518,69 @@ public class SettingsActivity extends AppCompatActivity implements
 			});
 		}
 
+		private void initEnableDeleteAfterImport() {
+			SwitchPreference pref = findPreference(SyncManager.PREF_IMPORT_DELETE);
+
+			assert pref != null;
+			pref.setOnPreferenceChangeListener((preference, newValue) -> {
+				boolean isEnabled = (boolean) newValue;
+				if (isEnabled) {
+					requestManageExternalStoragePermission();
+				}
+				SyncManager.stopSync(getContext());
+				return true;
+			});
+		}
+
+		public ActivityResultLauncher<Intent> manageExternalStoragePermissionLauncher =
+				registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+						result -> {
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+								SwitchPreference pref = findPreference(SyncManager.PREF_IMPORT_DELETE);
+								pref.setChecked(Environment.isExternalStorageManager());
+							}
+						});
+
+		public void requestManageExternalStoragePermission() {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+				if (!Environment.isExternalStorageManager()) {
+					SwitchPreference pref = findPreference(SyncManager.PREF_IMPORT_DELETE);
+
+					new MaterialAlertDialogBuilder(getContext())
+							.setTitle(getString(R.string.permission_required))
+							.setMessage(getString(R.string.magage_storage_perm_explain))
+							.setPositiveButton(getString(R.string.ok), (dialog, which) -> {
+								Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+								intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+								manageExternalStoragePermissionLauncher.launch(intent);
+							})
+							.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+								pref.setChecked(false);
+								dialog.dismiss();
+
+							})
+							.create().show();
+				}
+			}
+		}
+
 		private void initAutoImportSource() {
 			ListPreference importFromSetting = findPreference(SyncManager.PREF_IMPORT_FROM);
 
+			assert importFromSetting != null;
 			importFromSetting.setOnPreferenceChangeListener((preference, newValue) -> {
 				SyncManager.stopSync(getContext());
+				return true;
+			});
+		}
+		private void initEnableDeleteAfterAppImport() {
+			ListPreference deleteImportSetting = findPreference(SyncManager.PREF_IMPORT_DELETE_APP);
+
+			assert deleteImportSetting != null;
+			deleteImportSetting.setOnPreferenceChangeListener((preference, newValue) -> {
+				if(newValue.equals("always")){
+					FileManager.requestReadMediaPermissions(getActivity());
+				}
 				return true;
 			});
 		}
