@@ -9,6 +9,7 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.AutoCloseableCursor;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.StinglePhotosApplication;
@@ -46,11 +47,12 @@ public class DeleteAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		AlbumFilesDb albumFilesDb = new AlbumFilesDb(myContext);
 		ArrayList<StingleDbFile> files = new ArrayList<>();
 
-		Cursor result = albumFilesDb.getFilesList(FilesDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, albumId);
-		while(result.moveToNext()) {
-			files.add(new StingleDbFile(result));
+		try(AutoCloseableCursor autoCloseableCursor = albumFilesDb.getFilesList(FilesDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, albumId)) {
+			Cursor result = autoCloseableCursor.getCursor();
+			while (result.moveToNext()) {
+				files.add(new StingleDbFile(result));
+			}
 		}
-		albumFilesDb.close();
 
 		boolean moveResult = SyncManager.moveFiles(myContext, files, SyncManager.ALBUM, SyncManager.TRASH, albumId, null, true);
 

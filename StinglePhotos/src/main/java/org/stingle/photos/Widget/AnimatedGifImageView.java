@@ -1,8 +1,4 @@
 package org.stingle.photos.Widget;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,14 +7,14 @@ import android.graphics.Movie;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
-import android.util.AttributeSet;
 import android.view.View;
-import android.widget.ImageView;
 
-import androidx.appcompat.widget.AppCompatImageView;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
-public class AnimatedGifImageView extends ImageView {
+public class AnimatedGifImageView extends androidx.appcompat.widget.AppCompatImageView {
 
     public static enum TYPE {
         FIT_CENTER, STRETCH_TO_FIT, AS_IS

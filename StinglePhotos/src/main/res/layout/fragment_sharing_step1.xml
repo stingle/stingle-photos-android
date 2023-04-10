@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:src="@drawable/ic_add"
-            android:tint="?attr/colorPrimary" />
+            app:tint="?attr/colorPrimary" />
     </LinearLayout>
 
     <com.google.android.flexbox.FlexboxLayout

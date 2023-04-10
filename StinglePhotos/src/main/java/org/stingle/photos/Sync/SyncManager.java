@@ -30,6 +30,7 @@ import org.stingle.photos.Db.Objects.StingleDbAlbum;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.AlbumsDb;
+import org.stingle.photos.Db.Query.AutoCloseableCursor;
 import org.stingle.photos.Db.Query.ContactsDb;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
@@ -781,15 +782,16 @@ public class SyncManager {
 	public static boolean areFilesAlreadyUploaded(Context context, String albumId){
 		AlbumFilesDb albumFilesDb = new AlbumFilesDb(context);
 
-		Cursor result = albumFilesDb.getFilesList(FilesDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, albumId);
-		while(result.moveToNext()) {
-			StingleDbFile file = new StingleDbFile(result);
-			if(!file.isRemote){
-				albumFilesDb.close();
-				return false;
+		try(AutoCloseableCursor autoCloseableCursor = albumFilesDb.getFilesList(FilesDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, albumId)) {
+			Cursor result = autoCloseableCursor.getCursor();
+			while (result.moveToNext()) {
+				StingleDbFile file = new StingleDbFile(result);
+				if (!file.isRemote) {
+					albumFilesDb.close();
+					return false;
+				}
 			}
 		}
-		albumFilesDb.close();
 		return true;
 	}
 

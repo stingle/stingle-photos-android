@@ -16,15 +16,15 @@ import java.util.ArrayList;
 
 public class ContactsDb {
 
-	private DatabaseManager db;
+	private final DatabaseManager db;
 
-	private String tableName = StingleDbContract.Columns.TABLE_NAME_CONTACTS;
+	private final String tableName = StingleDbContract.Columns.TABLE_NAME_CONTACTS;
 
 	public ContactsDb(Context context) {
 		db = DatabaseManager.getInstance(context);
 	}
 
-	private String[] projection = {
+	private final String[] projection = {
 			StingleDbContract.Columns.COLUMN_NAME_USER_ID,
 			StingleDbContract.Columns.COLUMN_NAME_EMAIL,
 			StingleDbContract.Columns.COLUMN_NAME_PUBLIC_KEY,
@@ -77,27 +77,25 @@ public class ContactsDb {
 	}
 
 
-	public Cursor getContactsList(int sort) {
-		String selection = null;
-
+	public AutoCloseableCursor getContactsList(int sort) {
 		//String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		return db.getDb().query(
+		return new AutoCloseableCursor(db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
-				selection,              // The columns for the WHERE clause
+				null,              // The columns for the WHERE clause
 				null,          // The values for the WHERE clause
 				null,                   // don't group the rows
 				null,                   // don't filter by row groups
 				null               // The sort order
-		);
+		));
 
 	}
 
 	public StingleContact getContactAtPosition(int pos, int sort) {
 		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_USED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -106,12 +104,13 @@ public class ContactsDb {
 				null,
 				null,
 				sortOrder,
-				String.valueOf(pos) + ", 1"
-		);
-
-		if (result.getCount() > 0) {
-			result.moveToNext();
-			return new StingleContact(result);
+				pos + ", 1"
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				return new StingleContact(result);
+			}
 		}
 		return null;
 	}
@@ -122,7 +121,7 @@ public class ContactsDb {
 
 		String sortOrder = StingleDbContract.Columns.COLUMN_NAME_DATE_USED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -131,12 +130,13 @@ public class ContactsDb {
 				null,
 				null,
 				sortOrder,
-				String.valueOf(pos) + ", 1"
-		);
-
-		if (result.getCount() > 0) {
-			result.moveToNext();
-			return new StingleContact(result);
+				pos + ", 1"
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				return new StingleContact(result);
+			}
 		}
 		return null;
 	}
@@ -160,7 +160,7 @@ public class ContactsDb {
 				null,
 				null,
 				sortOrder,
-				String.valueOf(pos) + ", 1"
+				pos + ", 1"
 		);
 
 		if (result.getCount() > 0) {
@@ -174,7 +174,7 @@ public class ContactsDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_USER_ID + " = ?";
 		String[] selectionArgs = {String.valueOf(userId)};
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -184,11 +184,12 @@ public class ContactsDb {
 				null,
 				null,
 				null
-		);
-
-		if (result.getCount() > 0) {
-			result.moveToNext();
-			return new StingleContact(result);
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				return new StingleContact(result);
+			}
 		}
 		return null;
 	}
@@ -197,7 +198,7 @@ public class ContactsDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_EMAIL + " = ?";
 		String[] selectionArgs = {email};
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -207,11 +208,12 @@ public class ContactsDb {
 				null,
 				null,
 				null
-		);
-
-		if (result.getCount() > 0) {
-			result.moveToNext();
-			return new StingleContact(result);
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				return new StingleContact(result);
+			}
 		}
 		return null;
 	}

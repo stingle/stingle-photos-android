@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 
 import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AutoCloseableCursor;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -56,9 +57,8 @@ public class CalculateFreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Long> {
 	private long getTotalFilesSize(FilesDb db){
 		long totalSize = 0;
 
-		try {
-
-			Cursor result = db.getFilesList(FilesDb.GET_MODE_LOCAL_AND_REMOTE, StingleDb.SORT_ASC, null, null);
+		try(AutoCloseableCursor autoCloseableCursor = db.getFilesList(FilesDb.GET_MODE_LOCAL_AND_REMOTE, StingleDb.SORT_ASC, null, null)){
+			Cursor result = autoCloseableCursor.getCursor();
 			while (result.moveToNext()) {
 				String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
 				File file = new File(dir.getPath() + "/" + filename);

@@ -60,7 +60,19 @@ public class StinglePhotosApplication extends Application{
 
     @Override
 	public void onCreate(){
-        super.onCreate();
+		super.onCreate();
+
+		/*if (BuildConfig.DEBUG) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+		}*/
+
         StinglePhotosApplication.context = getApplicationContext();
         StinglePhotosApplication.cache = new MemoryCache();
         StinglePhotosApplication.crypto = new Crypto(getApplicationContext());

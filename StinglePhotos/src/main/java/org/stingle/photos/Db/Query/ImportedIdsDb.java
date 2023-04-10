@@ -10,9 +10,9 @@ import org.stingle.photos.Db.StingleDbContract;
 
 public class ImportedIdsDb {
 
-	private DatabaseManager db;
+	private final DatabaseManager db;
 
-	private String tableName = StingleDbContract.Columns.TABLE_NAME_IMPORTED_IDS;
+	private final String tableName = StingleDbContract.Columns.TABLE_NAME_IMPORTED_IDS;
 
 	private final static int cleanupLimit = 500;
 
@@ -20,7 +20,7 @@ public class ImportedIdsDb {
 		db = DatabaseManager.getInstance(context);
 	}
 
-	private String[] projection = {
+	private final String[] projection = {
 			StingleDbContract.Columns._ID,
 			StingleDbContract.Columns.COLUMN_NAME_MEDIA_ID
 	};
@@ -41,7 +41,7 @@ public class ImportedIdsDb {
 
 	public void cleanUpIds() {
 		if(DatabaseUtils.queryNumEntries(db.getDb(), tableName) > cleanupLimit) {
-			db.getDb().rawQuery("DELETE FROM " + tableName + " WHERE _id in (SELECT _id FROM " + tableName + " ORDER BY _id ASC LIMIT " + cleanupLimit + ")", null);
+			db.getDb().rawQuery("DELETE FROM " + tableName + " WHERE _id in (SELECT _id FROM " + tableName + " ORDER BY _id ASC LIMIT " + cleanupLimit + ")", null).close();
 		}
 	}
 

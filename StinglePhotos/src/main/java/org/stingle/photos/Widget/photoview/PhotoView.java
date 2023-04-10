@@ -23,13 +23,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
-import android.widget.ImageView;
 
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher.OnMatrixChangedListener;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher.OnPhotoTapListener;
 import org.stingle.photos.Widget.photoview.PhotoViewAttacher.OnViewTapListener;
 
-public class PhotoView extends ImageView implements IPhotoView {
+public class PhotoView extends androidx.appcompat.widget.AppCompatImageView implements IPhotoView {
 
     private final PhotoViewAttacher mAttacher;
 

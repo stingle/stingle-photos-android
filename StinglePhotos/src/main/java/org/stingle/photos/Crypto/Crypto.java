@@ -95,7 +95,7 @@ public class Crypto {
     public Crypto(Context context){
         this.context = context;
         so = new SodiumAndroid();
-		ls = new LazySodiumAndroid(so);
+        ls = new LazySodiumAndroid(so);
     }
 
     public void generateMainKeypair(String password) throws CryptoException{
@@ -852,13 +852,11 @@ public class Crypto {
     }
 
     protected byte[] readPrivateFile(String filename){
-        FileInputStream inputStream;
-
-        try {
+        try (FileInputStream inputStream = context.openFileInput(filename)){
             int numRead = 0;
             byte[] buf = new byte[bufSize];
             ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-            inputStream = context.openFileInput(filename);
+
             while ((numRead = inputStream.read(buf)) >= 0) {
                 byteBuffer.write(buf, 0, numRead);
             }

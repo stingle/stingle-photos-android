@@ -17,11 +17,11 @@ import java.util.ArrayList;
 
 public class AlbumFilesDb implements FilesDb {
 
-	private DatabaseManager db;
+	private final DatabaseManager db;
 
-	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUM_FILES;
+	private final String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUM_FILES;
 
-	private String[] projection = {
+	private final String[] projection = {
 			StingleDbContract.Columns._ID,
 			StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
 			StingleDbContract.Columns.COLUMN_NAME_FILENAME,
@@ -82,64 +82,44 @@ public class AlbumFilesDb implements FilesDb {
 
 
 
-	public int deleteAlbumFile(Long id){
+	public void deleteAlbumFile(Long id){
 		String selection = StingleDbContract.Columns._ID + " = ?";
 		String[] selectionArgs = { String.valueOf(id) };
 
-		return db.getDb().delete(tableName, selection, selectionArgs);
+		db.getDb().delete(tableName, selection, selectionArgs);
 	}
-	public int deleteAlbumFile(String filename, String albumId){
+	public void deleteAlbumFile(String filename, String albumId){
 		String selection = StingleDbContract.Columns.COLUMN_NAME_FILENAME + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = { filename, albumId };
 
-		return db.getDb().delete(tableName, selection, selectionArgs);
+		db.getDb().delete(tableName, selection, selectionArgs);
 	}
 
-	public int deleteAllFilesInAlbum(String albumId){
+	public void deleteAllFilesInAlbum(String albumId){
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = { albumId };
 
-		return db.getDb().delete(tableName, selection, selectionArgs);
+		db.getDb().delete(tableName, selection, selectionArgs);
 	}
 
 	public void deleteAlbumFilesIfNotNeeded(Context context, String albumId){
-		Cursor result = getFilesList(AlbumFilesDb.GET_MODE_REMOTE, StingleDb.SORT_ASC, null, albumId);
-		while(result.moveToNext()) {
-			StingleDbFile file = new StingleDbFile(result);
-			if(!isFileExistsInOtherAlbums(file.filename, albumId)){
-				FileManager.deleteLocalFile(context, file.filename);
+		try(AutoCloseableCursor autoCloseableCursor = getFilesList(AlbumFilesDb.GET_MODE_REMOTE, StingleDb.SORT_ASC, null, albumId)) {
+			Cursor result = autoCloseableCursor.getCursor();
+			while (result.moveToNext()) {
+				StingleDbFile file = new StingleDbFile(result);
+				if (!isFileExistsInOtherAlbums(file.filename, albumId)) {
+					FileManager.deleteLocalFile(context, file.filename);
+				}
 			}
 		}
 	}
 
-	public int truncateTable(){
-		return db.getDb().delete(tableName, null, null);
+	public void truncateTable(){
+		db.getDb().delete(tableName, null, null);
 	}
 
 
-
-	public Cursor getFilesList1(int mode, int sort, String limit, String albumId){
-
-		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
-		String[] selectionArgs = { albumId };
-
-		String sortOrder =
-				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
-
-		return db.getDb().query(
-				tableName,   // The table to query
-				projection,             // The array of columns to return (pass null to get all)
-				selection,              // The columns for the WHERE clause
-				selectionArgs,          // The values for the WHERE clause
-				null,                   // don't group the rows
-				null,                   // don't filter by row groups
-				sortOrder,               // The sort order
-				limit
-		);
-
-	}
-
-	public Cursor getFilesList(int mode, int sort, String limit, String albumId){
+	public AutoCloseableCursor getFilesList(int mode, int sort, String limit, String albumId){
 
 		String selection = "";
 
@@ -191,7 +171,7 @@ public class AlbumFilesDb implements FilesDb {
 			selArgs[i] = selectionArgs.get(i);
 		}
 
-		return db.getDb().query(
+		return new AutoCloseableCursor(db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -200,7 +180,7 @@ public class AlbumFilesDb implements FilesDb {
 				null,                   // don't filter by row groups
 				sortOrder,               // The sort order
 				limit
-		);
+		));
 	}
 
 	public int getFilePositionByFilename(String filename, String albumId, int sort){
@@ -208,21 +188,23 @@ public class AlbumFilesDb implements FilesDb {
 
 		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created "+sign+" b.date_created AND album_id='"+albumId+"') AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"' AND album_id='"+albumId+"'";
 		Log.d("query-albumf", query);
-		Cursor cursor = db.getDb().rawQuery(query, null);
-		if(cursor.getCount() == 1){
-			cursor.moveToNext();
-			return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().rawQuery(query, null))) {
+			Cursor cursor = autoCloseableCursor.getCursor();
+			if (cursor.getCount() == 1) {
+				cursor.moveToNext();
+				return cursor.getInt(cursor.getColumnIndexOrThrow("position")) - 1;
+			}
 		}
 		return 0;
 	}
 
-	public Cursor getReuploadFilesList(){
+	public AutoCloseableCursor getReuploadFilesList(){
 
 		String selection = StingleDbContract.Columns.COLUMN_NAME_IS_LOCAL + " = ? AND " + StingleDbContract.Columns.COLUMN_NAME_REUPLOAD + " = ?";
 
 		String[] selectionArgs = {"1", "1"};
 
-		return db.getDb().query(
+		return new AutoCloseableCursor(db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -230,7 +212,7 @@ public class AlbumFilesDb implements FilesDb {
 				null,                   // don't group the rows
 				null,                   // don't filter by row groups
 				null               // The sort order
-		);
+		));
 
 	}
 
@@ -289,7 +271,7 @@ public class AlbumFilesDb implements FilesDb {
 			selectionArgs[0] = filename;
 		}
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
 				selection,              // The columns for the WHERE clause
@@ -297,15 +279,15 @@ public class AlbumFilesDb implements FilesDb {
 				null,                   // don't group the rows
 				null,                   // don't filter by row groups
 				null               // The sort order
-		);
-
-		if(result.getCount() > 0){
-			result.moveToNext();
-			StingleDbFile dbFile = new StingleDbFile(result);
-			result.close();
-			return dbFile;
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				StingleDbFile dbFile = new StingleDbFile(result);
+				result.close();
+				return dbFile;
+			}
 		}
-		result.close();
 		return null;
 	}
 
@@ -316,10 +298,7 @@ public class AlbumFilesDb implements FilesDb {
 
 		long count = DatabaseUtils.queryNumEntries(db.getDb(), tableName, selection, selectionArgs);
 
-		if(count > 0){
-			return true;
-		}
-		return false;
+		return count > 0;
 	}
 
 	public StingleDbFile getFileAtPosition(int pos, String albumId, int sort){
@@ -330,7 +309,7 @@ public class AlbumFilesDb implements FilesDb {
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -339,23 +318,24 @@ public class AlbumFilesDb implements FilesDb {
 				null,
 				null,
 				sortOrder,
-				String.valueOf(pos) + ", 1"
-		);
-
-		if(result.getCount() > 0){
-			result.moveToNext();
-			return new StingleDbFile(result);
+				pos + ", 1"
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				return new StingleDbFile(result);
+			}
 		}
 		return null;
 	}
 
-	public Cursor getAvailableDates(String albumId, int sort){
-		return db.getDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch', 'localtime') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
+	public AutoCloseableCursor getAvailableDates(String albumId, int sort){
+		return new AutoCloseableCursor(db.getDb().rawQuery("SELECT date(round(" + StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + "/1000), 'unixepoch', 'localtime') as `cdate`, COUNT(" + StingleDbContract.Columns.COLUMN_NAME_FILENAME + ") " +
 						"FROM " + tableName + " " +
 						"WHERE album_id='" + albumId + "' " +
 						"GROUP BY cdate " +
 						"ORDER BY cdate " + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC")
-				, null);
+				, null));
 
 	}
 

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AutoCloseableCursor;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -43,42 +44,43 @@ public class EmptyTrashAsyncTask extends AsyncTask<Void, Void, Void> {
 		String thumbCacheDir = FileManager.getThumbCacheDirPath(myContext);
 		String fileCacheDir = FileManager.getFileCacheDirPath(myContext);
 
-		Cursor result = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, null);
+		try(AutoCloseableCursor autoCloseableCursor = trashDb.getFilesList(GalleryTrashDb.GET_MODE_ALL, StingleDb.SORT_ASC, null, null)) {
+			Cursor result = autoCloseableCursor.getCursor();
+			while (result.moveToNext()) {
+				StingleDbFile dbFile = new StingleDbFile(result);
 
-		while(result.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(result);
+				boolean existsInGallery = galleryDb.getFileIfExists(dbFile.filename) != null;
+				boolean existsInAlbums = albumFilesDb.getFileIfExists(dbFile.filename) != null;
 
-			boolean existsInGallery = galleryDb.getFileIfExists(dbFile.filename) != null;
-			boolean existsInAlbums = albumFilesDb.getFileIfExists(dbFile.filename) != null;
-
-			if(!existsInGallery && !existsInAlbums) {
-				if (dbFile.isLocal) {
-					File mainFile = new File(homeDir + "/" + dbFile.filename);
-					if (mainFile.exists()) {
-						mainFile.delete();
+				if (!existsInGallery && !existsInAlbums) {
+					if (dbFile.isLocal) {
+						File mainFile = new File(homeDir + "/" + dbFile.filename);
+						if (mainFile.exists()) {
+							mainFile.delete();
+						}
+					}
+					File cachedFile = new File(fileCacheDir + "/" + dbFile.filename);
+					if (cachedFile.exists()) {
+						cachedFile.delete();
+					}
+					File cachedThumb = new File(thumbCacheDir + "/" + dbFile.filename);
+					if (cachedThumb.exists()) {
+						cachedThumb.delete();
+					}
+					File thumbFile = new File(thumbDir + "/" + dbFile.filename);
+					if (thumbFile.exists()) {
+						thumbFile.delete();
 					}
 				}
-				File cachedFile = new File(fileCacheDir + "/" + dbFile.filename);
-				if(cachedFile.exists()){
-					cachedFile.delete();
-				}
-				File cachedThumb = new File(thumbCacheDir + "/" + dbFile.filename);
-				if(cachedThumb.exists()){
-					cachedThumb.delete();
-				}
-				File thumbFile = new File(thumbDir + "/" + dbFile.filename);
-				if (thumbFile.exists()) {
-					thumbFile.delete();
-				}
+
+				trashDb.deleteFile(dbFile.filename);
 			}
 
-			trashDb.deleteFile(dbFile.filename);
+			result.close();
+			galleryDb.close();
+			albumFilesDb.close();
+			trashDb.close();
 		}
-
-		result.close();
-		galleryDb.close();
-		albumFilesDb.close();
-		trashDb.close();
 		return null;
 	}
 

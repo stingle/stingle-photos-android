@@ -9,6 +9,7 @@ import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AutoCloseableCursor;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
 import org.stingle.photos.Files.FileManager;
@@ -62,29 +63,33 @@ public class FSSync {
 			}
 		}
 
-		Cursor result = galleryDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null);
-		while(result.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(result);
-			File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
-			File thumb = new File(FileManager.getThumbsDir(context) + "/" + dbFile.filename);
-			if(!file.exists() || !thumb.exists()){
-				dbFile.isLocal = false;
-				galleryDb.updateFile(dbFile);
+		try(AutoCloseableCursor autoCloseableCursor = galleryDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null)) {
+			Cursor result = autoCloseableCursor.getCursor();
+			while (result.moveToNext()) {
+				StingleDbFile dbFile = new StingleDbFile(result);
+				File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
+				File thumb = new File(FileManager.getThumbsDir(context) + "/" + dbFile.filename);
+				if (!file.exists() || !thumb.exists()) {
+					dbFile.isLocal = false;
+					galleryDb.updateFile(dbFile);
+				}
 			}
+			result.close();
 		}
-		result.close();
 
-		Cursor albumsResult = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null);
-		while(albumsResult.moveToNext()) {
-			StingleDbFile dbFile = new StingleDbFile(albumsResult);
-			File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
-			File thumb = new File(FileManager.getThumbsDir(context) + "/" + dbFile.filename);
-			if(!file.exists() || !thumb.exists()){
-				dbFile.isLocal = false;
-				albumFilesDb.updateFile(dbFile);
+		try(AutoCloseableCursor autoCloseableCursor = albumFilesDb.getFilesList(GalleryTrashDb.GET_MODE_LOCAL, StingleDb.SORT_ASC, null, null)) {
+			Cursor albumsResult = autoCloseableCursor.getCursor();
+			while (albumsResult.moveToNext()) {
+				StingleDbFile dbFile = new StingleDbFile(albumsResult);
+				File file = new File(FileManager.getHomeDir(context) + "/" + dbFile.filename);
+				File thumb = new File(FileManager.getThumbsDir(context) + "/" + dbFile.filename);
+				if (!file.exists() || !thumb.exists()) {
+					dbFile.isLocal = false;
+					albumFilesDb.updateFile(dbFile);
+				}
 			}
+			albumsResult.close();
 		}
-		albumsResult.close();
 
 
 		galleryDb.close();

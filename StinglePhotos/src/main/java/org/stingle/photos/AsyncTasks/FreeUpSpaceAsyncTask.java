@@ -66,9 +66,8 @@ public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	private boolean deleteLocalFiles(FilesDb db){
-		try {
-
-			Cursor result = db.getFilesList(FilesDb.GET_MODE_LOCAL_AND_REMOTE, StingleDb.SORT_ASC, null, null);
+		try (AutoCloseable autoCloseableCursor = db.getFilesList(FilesDb.GET_MODE_LOCAL_AND_REMOTE, StingleDb.SORT_ASC, null, null)){
+			Cursor result = (Cursor) autoCloseableCursor;
 			while (result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
 				File file = new File(dir.getPath() + "/" + dbFile.filename);

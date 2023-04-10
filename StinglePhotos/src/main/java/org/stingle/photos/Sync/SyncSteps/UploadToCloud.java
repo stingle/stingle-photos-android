@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AutoCloseableCursor;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -172,17 +173,22 @@ public class UploadToCloud {
 			return 0;
 		}
 
-		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, null, null);
-		int uploadCount = result.getCount();
-		result.close();
+		try(
+				AutoCloseableCursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_ASC, null, null);
+				AutoCloseableCursor reuploadResult = db.getReuploadFilesList();
+		) {
+			int uploadCount = result.getCursor().getCount();
+			result.close();
 
-		Cursor reuploadResult = db.getReuploadFilesList();
-		int reuploadCount = reuploadResult.getCount();
-		reuploadResult.close();
 
-		db.close();
 
-		return uploadCount + reuploadCount;
+			int reuploadCount = reuploadResult.getCursor().getCount();
+			reuploadResult.close();
+
+			db.close();
+
+			return uploadCount + reuploadCount;
+		}
 	}
 
 	protected void uploadSet(int set){
@@ -197,33 +203,40 @@ public class UploadToCloud {
 			return;
 		}
 
-		Cursor result = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_DESC, null, null);
-		while(result.moveToNext()) {
-			if(task != null && task.isCancelled()){
-				break;
+		try(
+			AutoCloseableCursor resultAutoCloseableCursor = db.getFilesList(GalleryTrashDb.GET_MODE_ONLY_LOCAL, StingleDb.SORT_DESC, null, null);
+			AutoCloseableCursor reuploadResultAutoCloseableCursor = db.getReuploadFilesList()
+		) {
+			Cursor result = resultAutoCloseableCursor.getCursor();
+			Cursor reuploadResult = reuploadResultAutoCloseableCursor.getCursor();
+			while (result.moveToNext()) {
+				if (task != null && task.isCancelled()) {
+					break;
+				}
+				if (!isUploadAllowed()) {
+					break;
+				}
+				uploadedFilesCount++;
+				uploadFile(set, db, result, false);
 			}
-			if(!isUploadAllowed()){
-				break;
-			}
-			uploadedFilesCount++;
-			uploadFile(set, db, result, false);
-		}
-		result.close();
+			result.close();
 
-		Cursor reuploadResult = db.getReuploadFilesList();
-		while(reuploadResult.moveToNext()) {
-			if(task != null && task.isCancelled()){
-				break;
-			}
-			if(!isUploadAllowed()){
-				break;
-			}
-			uploadedFilesCount++;
-			uploadFile(set, db, reuploadResult, true);
-		}
-		reuploadResult.close();
 
-		db.close();
+			while (reuploadResult.moveToNext()) {
+				if (task != null && task.isCancelled()) {
+					break;
+				}
+				if (!isUploadAllowed()) {
+					break;
+				}
+				uploadedFilesCount++;
+				uploadFile(set, db, reuploadResult, true);
+			}
+			reuploadResult.close();
+		}
+		finally {
+			db.close();
+		}
 	}
 
 	protected void uploadFile(int set, FilesDb db, Cursor result, boolean isReupload){

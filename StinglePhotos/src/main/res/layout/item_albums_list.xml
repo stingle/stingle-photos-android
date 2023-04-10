@@ -51,10 +51,10 @@
         android:layout_height="24dp"
         android:layout_alignParentEnd="true"
         android:visibility="visible"
-        android:tint="?attr/colorControlNormal"
         android:alpha="0.5"
         android:layout_marginEnd="10dp"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        app:tint="?attr/colorControlNormal" />
 
 
 </RelativeLayout>

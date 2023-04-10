@@ -1,6 +1,7 @@
 package org.stingle.photos.Net;
 
 import android.content.Context;
+import android.net.TrafficStats;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -110,6 +111,9 @@ public class HttpsClient {
 			if (data.length() > 0) {
 				data = data.substring(0, data.length() - 1);
 
+				int socketTag = 1001;
+				TrafficStats.setThreadStatsTag(socketTag);
+
 				OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 
 				wr.write(data);
@@ -132,6 +136,10 @@ public class HttpsClient {
 		}
 		catch (IOException | NoSuchAlgorithmException | KeyManagementException | JSONException e) {
 			e.printStackTrace();
+		}
+		finally {
+			// Clear the tag when the operation is completed
+			TrafficStats.clearThreadStatsTag();
 		}
 
 		//conn.connect();

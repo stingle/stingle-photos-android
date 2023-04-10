@@ -17,9 +17,9 @@ import java.util.ArrayList;
 
 public class AlbumsDb {
 
-	private DatabaseManager db;
+	private final DatabaseManager db;
 
-	private String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUMS;
+	private final String tableName = StingleDbContract.Columns.TABLE_NAME_ALBUMS;
 
 	public static final int ALBUM_ID_LEN = 32;
 	public static final int SORT_BY_CREATION_DATE = 0;
@@ -29,7 +29,7 @@ public class AlbumsDb {
 		db = DatabaseManager.getInstance(context);
 	}
 
-	private String[] projection = {
+	private final String[] projection = {
 			StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID,
 			StingleDbContract.Columns.COLUMN_NAME_ALBUM_SK,
 			StingleDbContract.Columns.COLUMN_NAME_ALBUM_PK,
@@ -117,22 +117,19 @@ public class AlbumsDb {
 	}
 
 
-	public Cursor getAlbumsList(int sort) {
-		String selection = null;
-
+	public AutoCloseableCursor getAlbumsList(int sort) {
 		String sortOrder =
 				StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED + (sort == StingleDb.SORT_DESC ? " DESC" : " ASC");
 
-		return db.getDb().query(
+		return new AutoCloseableCursor(db.getDb().query(
 				tableName,   // The table to query
 				projection,             // The array of columns to return (pass null to get all)
-				selection,              // The columns for the WHERE clause
+				null,              // The columns for the WHERE clause
 				null,          // The values for the WHERE clause
 				null,                   // don't group the rows
 				null,                   // don't filter by row groups
 				sortOrder               // The sort order
-		);
-
+		));
 	}
 
 
@@ -161,7 +158,7 @@ public class AlbumsDb {
 		}
 		Log.d("selection", selection);
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -170,12 +167,13 @@ public class AlbumsDb {
 				null,
 				null,
 				sortOrder,
-				String.valueOf(pos) + ", 1"
-		);
-
-		if (result.getCount() > 0) {
-			result.moveToNext();
-			return new StingleDbAlbum(result);
+				pos + ", 1"
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				return new StingleDbAlbum(result);
+			}
 		}
 		return null;
 	}
@@ -184,7 +182,7 @@ public class AlbumsDb {
 		String selection = StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID + " = ?";
 		String[] selectionArgs = {albumId};
 
-		Cursor result = db.getDb().query(
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().query(
 				false,
 				tableName,
 				projection,
@@ -194,11 +192,12 @@ public class AlbumsDb {
 				null,
 				null,
 				null
-		);
-
-		if (result.getCount() > 0) {
-			result.moveToNext();
-			return new StingleDbAlbum(result);
+		))) {
+			Cursor result = autoCloseableCursor.getCursor();
+			if (result.getCount() > 0) {
+				result.moveToNext();
+				return new StingleDbAlbum(result);
+			}
 		}
 		return null;
 	}

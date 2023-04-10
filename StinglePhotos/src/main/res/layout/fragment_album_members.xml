@@ -28,9 +28,9 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_add_circle_outline"
-            android:tint="?attr/colorPrimary"
             android:layout_centerVertical="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            app:tint="?attr/colorPrimary" />
 
         <TextView
             android:layout_width="match_parent"
