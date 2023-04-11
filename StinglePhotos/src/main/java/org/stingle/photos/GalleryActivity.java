@@ -326,15 +326,6 @@ public class GalleryActivity extends AppCompatActivity
 			checkLoginAndInit();
 		}
 
-		// Check if delete after import is enabled and we are not storage manager, request for permission
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			if(SyncManager.isImportEnabled(this)){
-				FileManager.requestReadMediaPermissions(this);
-			}
-			if(SyncManager.isImportDeleteEnabled(this) && !Environment.isExternalStorageManager()){
-				requestManageExternalStoragePermission();
-			}
-		}
 		if (SyncManager.isImportEnabled(this)) {
 			ImportJobSchedulerService.scheduleJob(this);
 		}
@@ -723,6 +714,16 @@ public class GalleryActivity extends AppCompatActivity
 
 		AutoImportSetup.showAutoImportSetup(this);
 		showBackupPhraseReminder();
+
+		// Check if delete after import is enabled and we are not storage manager, request for permission
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			if(SyncManager.isImportEnabled(this)){
+				FileManager.requestReadMediaPermissions(this);
+			}
+			if(SyncManager.isImportDeleteEnabled(this) && !Environment.isExternalStorageManager()){
+				requestManageExternalStoragePermission();
+			}
+		}
 	}
 
 	public boolean isSyncBarDisabled(){
