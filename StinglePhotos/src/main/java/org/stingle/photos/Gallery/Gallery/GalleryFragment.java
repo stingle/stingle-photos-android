@@ -339,6 +339,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 				case MotionEvent.ACTION_MOVE:
 					float y = event.getRawY();
 					float recyclerViewHeight = recyclerView.getHeight();
+					int scrollBarHeight = scrollbarThumb.getHeight();
+					int halfScrollBarHeight = (scrollBarHeight/2);
 
 					Log.e("scrollbarWithTooltip", "scrollbarWithTooltip - " + scrollbarWithTooltip.getHeight() + "");
 					Log.e("recyclerView.getHeight()", "recyclerViewHeight - " + recyclerViewHeight + "");
@@ -348,15 +350,15 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 					Log.e("scrollbarThumb.getHeight()", "scrollbarThumb.getHeight()/2 - " + (scrollbarThumb.getHeight()/2) + "");
 					Log.e("y", "y - " + y);
 
-					if(y > recyclerViewHeight){
-						y = recyclerViewHeight;
+					if(y > recyclerViewHeight - halfScrollBarHeight){
+						y = recyclerViewHeight  - halfScrollBarHeight;
 					}
-					else if(y < topOffset){
-						y = topOffset;
+					else if(y < topOffset + halfScrollBarHeight){
+						y = topOffset + halfScrollBarHeight;
 					}
 					Log.e("y2", "y2 - " + y);
 					// Calculate the thumbTop value considering status bar height and parent view position
-					float thumbTop = y - topOffset - (scrollbarThumb.getHeight()/2);
+					float thumbTop = y - topOffset - halfScrollBarHeight-20;
 					if(thumbTop < 0){
 						thumbTop = 0;
 					}
@@ -372,7 +374,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 //					Log.e("scrollbarThumbPosition", "scrollbarThumbPosition - " + scrollbarThumbPosition + "");
 
 					// Calculate the target scroll position
-					int targetScrollPosition = (int) (((y - topOffset) * totalItemCount) / (recyclerViewHeight - topOffset));
+					int targetScrollPosition = (int) (((y - topOffset - halfScrollBarHeight) * totalItemCount) / (recyclerViewHeight - topOffset - scrollBarHeight));
 					Log.e("targetScrollPosition", "targetScrollPosition - " + targetScrollPosition + "");
 					Log.e("delim", "----------------------------------------------------");
 
@@ -387,7 +389,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 					// Update the scrollbar thumb and date tooltip positions
 					scrollbarThumb.setY(thumbTop);
-					dateTooltip.setY(thumbTop + (dateTooltip.getHeight() / 2));
+					dateTooltip.setY(thumbTop + halfScrollBarHeight - (dateTooltip.getHeight() / 2));
 
 					break;
 

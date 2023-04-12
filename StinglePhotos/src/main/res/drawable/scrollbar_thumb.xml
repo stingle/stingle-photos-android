@@ -3,6 +3,6 @@
     <corners android:radius="100dp" />
     <solid android:color="?attr/colorOnPrimarySurface" />
     <size
-        android:width="24dp"
-        android:height="30dp" />
+        android:width="30dp"
+        android:height="70dp" />
 </shape>
