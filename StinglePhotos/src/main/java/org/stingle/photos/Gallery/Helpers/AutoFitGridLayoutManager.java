@@ -11,6 +11,7 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 	private int columnWidth;
 	private boolean columnWidthChanged = true;
 	protected int currentCalcSpanCount = 1;
+	private boolean updateSpanCount = true;
 
 	public AutoFitGridLayoutManager(Context context, int columnWidth) {
 		super(context, 1);
@@ -25,17 +26,21 @@ public class AutoFitGridLayoutManager extends GridLayoutManager {
 		}
 	}
 
-	public int getCurrentCalcSpanCount(){
+	public int getCurrentCalcSpanCount() {
 		return currentCalcSpanCount;
 	}
 
-	public void updateAutoFit(){
+	public void updateAutoFit() {
 		columnWidthChanged = true;
+	}
+
+	public void setUpdateSpanCount(boolean updateSpanCount) {
+		this.updateSpanCount = updateSpanCount;
 	}
 
 	@Override
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-		if (columnWidthChanged && columnWidth > 0) {
+		if (columnWidthChanged && columnWidth > 0 && updateSpanCount) {
 			int totalSpace;
 			if (getOrientation() == RecyclerView.VERTICAL) {
 				totalSpace = getWidth() - getPaddingRight() - getPaddingLeft();

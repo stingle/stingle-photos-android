@@ -132,14 +132,14 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		@Override
 		public void onClick(View v) {
 			if (callback != null) {
-				callback.onClick(getBindingAdapterPosition());
+				callback.onClick(getAdapterPosition());
 			}
 		}
 
 		@Override
 		public boolean onLongClick(View v) {
 			if (callback != null) {
-				callback.onLongClick(getBindingAdapterPosition());
+				callback.onLongClick(getAdapterPosition());
 			}
 			return true;
 		}
@@ -160,7 +160,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 		@Override
 		public void onClick(View v) {
-			int index = getBindingAdapterPosition();
+			int index = getAdapterPosition();
 			if(isSelectModeActive) {
 				setSelectionInDate(index, !isAllItemsSelectedInDate(index));
 			}
@@ -168,7 +168,7 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 		@Override
 		public boolean onLongClick(View v) {
-			int index = getBindingAdapterPosition();
+			int index = getAdapterPosition();
 			if(!isSelectModeActive) {
 				setSelectionModeActive(true);
 				if(callback != null){
@@ -268,6 +268,19 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private int getItemDatePosition(int index){
 		return (-Collections.binarySearch(datePositionsPlain, index) - 2);
 	}
+
+	public String getDateForPosition(int position) {
+		String date = null;
+		for (int i = 0; i < datePositionsPlain.size(); i++) {
+			if (position >= datePositionsPlain.get(i)) {
+				date = datePositions.get(datePositionsPlain.get(i));
+			} else {
+				break;
+			}
+		}
+		return date;
+	}
+
 
 	private PosTranslate translatePos(int pos){
 		if(datePositions.containsKey(pos)){

@@ -12,11 +12,18 @@
             android:paddingTop="@dimen/gallery_top_padding_with_syncbar"
             android:paddingBottom="@dimen/bottom_nav_height"
             android:clipToPadding="false"/>
+        <include
+            android:id="@+id/scrollbar_with_tooltip"
+            layout="@layout/scrollbar_with_tooltip"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:paddingTop="@dimen/gallery_top_padding_with_syncbar"
+            android:paddingBottom="@dimen/bottom_nav_height"
+            android:layout_marginEnd="16dp" />
 
         <include
             android:id="@+id/no_photos_holder"
             android:visibility="gone"
             layout="@layout/part_no_photos"/>
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

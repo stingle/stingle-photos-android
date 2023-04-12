@@ -1,0 +1,30 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:elevation="2dp">
+
+    <ImageView
+        android:id="@+id/scrollbar_thumb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:elevation="2dp"
+        android:src="@drawable/scrollbar_thumb" />
+
+    <TextView
+        android:id="@+id/date_tooltip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/scrollbar_thumb"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/tooltip_background"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="4dp"
+        android:elevation="2dp"
+        android:textColor="@color/simpletooltip_text"
+        android:textSize="12sp"
+        android:visibility="gone"/>
+
+</RelativeLayout>

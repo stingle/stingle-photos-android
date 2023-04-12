@@ -177,6 +177,7 @@ public class GalleryActivity extends AppCompatActivity
 	private ActionBarDrawerToggle toggle;
 	private DrawerLayout drawer;
 	private NavigationView navigationView;
+	private SwipeRefreshLayout pullToRefresh;
 
 
 	@Override
@@ -201,7 +202,7 @@ public class GalleryActivity extends AppCompatActivity
 		navigationView = findViewById(R.id.nav_view);
 		showBurgerMenu();
 
-		final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
+		pullToRefresh = findViewById(R.id.pullToRefresh);
 		pullToRefresh.setOnRefreshListener(() -> {
 			SyncManager.stopSync(this);
 			SyncManager.startSync(this);
@@ -409,6 +410,15 @@ public class GalleryActivity extends AppCompatActivity
 
 	private void setVersionLabel(){
 		((TextView)findViewById(R.id.version_label)).setText("v" + BuildConfig.VERSION_NAME);
+	}
+
+
+	public void disablePullToRefresh(){
+		pullToRefresh.setEnabled(false);
+	}
+
+	public void enablePullToRefresh(){
+		pullToRefresh.setEnabled(true);
 	}
 
 	public void initCurrentFragment(){
