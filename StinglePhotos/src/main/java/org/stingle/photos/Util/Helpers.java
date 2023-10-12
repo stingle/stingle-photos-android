@@ -440,6 +440,13 @@ public class Helpers {
 		}
 		return false;
 	}
+	public static boolean isServerAddonsFieldSet(Context context){
+		String addonsArrayStr = getPreference(context, StinglePhotosApplication.SERVER_ADDONS, null);
+		if(addonsArrayStr != null){
+			return true;
+		}
+		return false;
+	}
 
 	public static String formatVideoDuration(int duration){
 		String formattedText = "";

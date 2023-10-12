@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -47,6 +48,10 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	private int currentSet = SyncManager.GALLERY;
 	private String albumId = null;
+	private View scrollBarWithTooltip;
+	private boolean isScrollBarDragging = false;
+	private ImageView scrollbarThumb;
+	final Handler handler = new Handler();
 
 
 	@Nullable
@@ -57,6 +62,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		recyclerView = view.findViewById(R.id.recycler_view);
 		noPhotosHolder = view.findViewById(R.id.no_photos_holder);
 		parentActivity = (GalleryFragmentParent) getActivity();
+		scrollBarWithTooltip = view.findViewById(R.id.scrollbar_with_tooltip);
+		scrollbarThumb = view.findViewById(R.id.scrollbar_thumb);
 		setupDraggableScrollbar(view);
 
 		return view;
@@ -82,6 +89,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
 		recyclerView.setHasFixedSize(true);
 
+
 		adapter = new GalleryAdapterPisasso(getContext(), this, layoutManager, currentSet, albumId);
 		layoutManager = new AutoFitGridLayoutManager(getContext(), Helpers.getScreenWidthByColumns(getContext()));
 		layoutManager.setSpanSizeLookup(new AutoFitGridLayoutManager.SpanSizeLookup() {
@@ -104,6 +112,25 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			@Override
 			public void onShow() {
 				parentActivity.scrolledUp();
+			}
+		});
+		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+				super.onScrollStateChanged(recyclerView, newState);
+				if(newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING){
+					scrollBarWithTooltip.setVisibility(View.VISIBLE);
+				}
+				else {
+					handler.removeCallbacksAndMessages(null);
+					handler.postDelayed(() -> {
+						if (!isScrollBarDragging) {
+							scrollBarWithTooltip.setVisibility(View.GONE);
+						}
+					}, 2000);
+
+				}
+				updateScrollTabPosition();
 			}
 		});
 
@@ -311,19 +338,16 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 	@SuppressLint("ClickableViewAccessibility")
 	private void setupDraggableScrollbar(View view) {
-		final View scrollbarWithTooltip = view.findViewById(R.id.scrollbar_with_tooltip);
 		final TextView dateTooltip = view.findViewById(R.id.date_tooltip);
-		final ImageView scrollbarThumb = view.findViewById(R.id.scrollbar_thumb);
 
 		float statusBarHeight = getStatusBarHeight(getContext());
 		float toolbarHeight = getToolbarHeight(getContext());
 		int bottomNavHeight = getResources().getDimensionPixelSize(R.dimen.bottom_nav_height);
 		int topOffset = getResources().getDimensionPixelSize(R.dimen.gallery_top_padding_with_syncbar);
-		int bottomOffset = getResources().getDimensionPixelSize(R.dimen.bottom_nav_height);
 
-		Log.e("statusBarHeight", "statusBarHeight - " + statusBarHeight + "");
+		/*Log.e("statusBarHeight", "statusBarHeight - " + statusBarHeight + "");
 		Log.e("toolbarHeight", "toolbarHeight - " + toolbarHeight + "");
-		Log.e("bottomNavHeight", "bottomNavHeight - " + bottomNavHeight + "");
+		Log.e("bottomNavHeight", "bottomNavHeight - " + bottomNavHeight + "");*/
 
 
 
@@ -334,21 +358,23 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 				case MotionEvent.ACTION_DOWN:
 					dateTooltip.setVisibility(View.VISIBLE);
 					((GalleryActivity) parentActivity).disablePullToRefresh();
+					isScrollBarDragging = true;
 					break;
 
 				case MotionEvent.ACTION_MOVE:
+					isScrollBarDragging = true;
 					float y = event.getRawY();
 					float recyclerViewHeight = recyclerView.getHeight();
 					int scrollBarHeight = scrollbarThumb.getHeight();
 					int halfScrollBarHeight = (scrollBarHeight/2);
 
-					Log.e("scrollbarWithTooltip", "scrollbarWithTooltip - " + scrollbarWithTooltip.getHeight() + "");
+					/*Log.e("scrollbarWithTooltip", "scrollbarWithTooltip - " + scrollBarWithTooltip.getHeight() + "");
 					Log.e("recyclerView.getHeight()", "recyclerViewHeight - " + recyclerViewHeight + "");
 					Log.e("topOffset", "topOffset - " + topOffset + "");
 					Log.e("bottomOffset", "bottomOffset - " + bottomNavHeight + "");
 					Log.e("scrollbarThumb.getHeight()", "scrollbarThumb.getHeight() - " + scrollbarThumb.getHeight() + "");
 					Log.e("scrollbarThumb.getHeight()", "scrollbarThumb.getHeight()/2 - " + (scrollbarThumb.getHeight()/2) + "");
-					Log.e("y", "y - " + y);
+					Log.e("y", "y - " + y);*/
 
 					if(y > recyclerViewHeight - halfScrollBarHeight){
 						y = recyclerViewHeight  - halfScrollBarHeight;
@@ -356,17 +382,17 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 					else if(y < topOffset + halfScrollBarHeight){
 						y = topOffset + halfScrollBarHeight;
 					}
-					Log.e("y2", "y2 - " + y);
+					//Log.e("y2", "y2 - " + y);
 					// Calculate the thumbTop value considering status bar height and parent view position
 					float thumbTop = y - topOffset - halfScrollBarHeight-20;
 					if(thumbTop < 0){
 						thumbTop = 0;
 					}
-					Log.e("thumbTop", "thumbTop - " + thumbTop + "");
+					//Log.e("thumbTop", "thumbTop - " + thumbTop + "");
 
 					// Get the total number of items in the adapter
 					int totalItemCount = recyclerView.getAdapter().getItemCount();
-					Log.e("totalItemCount", "totalItemCount - " + totalItemCount + "");
+					//Log.e("totalItemCount", "totalItemCount - " + totalItemCount + "");
 
 					// Calculate the scroll position based on the scrollbar thumb position
 //					float factor = thumbTop * 100 / totalItemCount;
@@ -375,8 +401,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 					// Calculate the target scroll position
 					int targetScrollPosition = (int) (((y - topOffset - halfScrollBarHeight) * totalItemCount) / (recyclerViewHeight - topOffset - scrollBarHeight));
-					Log.e("targetScrollPosition", "targetScrollPosition - " + targetScrollPosition + "");
-					Log.e("delim", "----------------------------------------------------");
+					//Log.e("targetScrollPosition", "targetScrollPosition - " + targetScrollPosition + "");
+					//Log.e("delim", "----------------------------------------------------");
 
 					// Update the RecyclerView's scroll position
 					layoutManager.setUpdateSpanCount(false);
@@ -397,11 +423,39 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 				case MotionEvent.ACTION_CANCEL:
 					dateTooltip.setVisibility(View.GONE);
 					((GalleryActivity) parentActivity).enablePullToRefresh();
+					isScrollBarDragging = false;
 					break;
 			}
 
 			return true;
 		});
+	}
+
+	private void updateScrollTabPosition() {
+		if (recyclerView != null && recyclerView.getAdapter() != null && recyclerView.getLayoutManager() != null) {
+			int totalItemCount = recyclerView.getAdapter().getItemCount();
+			int firstVisibleItemPosition = ((AutoFitGridLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+			int topOffset = getResources().getDimensionPixelSize(R.dimen.gallery_top_padding_with_syncbar);
+			int scrollBarHeight = scrollbarThumb.getHeight();
+			int halfScrollBarHeight = (scrollBarHeight/2);
+
+
+			float scrollbarThumbPosition = (float) firstVisibleItemPosition / totalItemCount;
+			float recyclerViewHeight = recyclerView.getHeight();
+			float thumbTop = scrollbarThumbPosition * (recyclerViewHeight - topOffset - scrollBarHeight);
+
+
+			// Calculate the thumbTop value considering status bar height and parent view position
+			thumbTop -= 20;
+			if(thumbTop < 0){
+				thumbTop = 0;
+			}
+
+			//Log.e("updateScrollTabPosition", "ThumbTop - " + thumbTop);
+			if (scrollbarThumb != null) {
+				scrollbarThumb.setY(thumbTop);
+			}
+		}
 	}
 
 	private int getStatusBarHeight(Context context) {

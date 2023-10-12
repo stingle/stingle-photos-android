@@ -35,7 +35,7 @@ public class StinglePicassoLoader extends RequestHandler {
 	private Crypto crypto;
 	private String albumId = null;
 
-	public StinglePicassoLoader(Context context, FilesDb db, int thumbSize, String albumId){
+	public StinglePicassoLoader(Context context, FilesDb db, int thumbSize, String albumId) {
 		this.context = context;
 		this.db = db;
 		this.thumbSize = thumbSize;
@@ -45,7 +45,7 @@ public class StinglePicassoLoader extends RequestHandler {
 
 	@Override
 	public boolean canHandleRequest(com.squareup.picasso3.Request data) {
-		if(data.uri.toString().startsWith("p")){
+		if (data.uri.toString().startsWith("p")) {
 			return true;
 		}
 		return false;
@@ -59,18 +59,17 @@ public class StinglePicassoLoader extends RequestHandler {
 
 		int sort = StingleDb.SORT_DESC;
 		int set = SyncManager.GALLERY;
-		if(setStr.equals("t")){
+		if (setStr.equals("t")) {
 			set = SyncManager.TRASH;
-		}
-		else if(setStr.equals("a")){
+		} else if (setStr.equals("a")) {
 			set = SyncManager.ALBUM;
 			//sort = StingleDb.SORT_ASC;
 		}
 
 		StingleDbFile file = db.getFileAtPosition(Integer.parseInt(position), albumId, sort);
 
-		File fileToDec = new File(FileManager.getThumbsDir(context) +"/"+ file.filename);
-		if(file.isLocal && fileToDec.exists()) {
+		File fileToDec = new File(FileManager.getThumbsDir(context) + "/" + file.filename);
+		if (file.isLocal && fileToDec.exists()) {
 			try {
 				FileInputStream input = new FileInputStream(fileToDec);
 
@@ -99,13 +98,12 @@ public class StinglePicassoLoader extends RequestHandler {
 				returnNoImage(callback);
 			}
 
-		}
-		else if(file.isRemote){
+		} else if (file.isRemote) {
 
 			try {
 				byte[] encFile = FileManager.getAndCacheThumb(context, file.filename, set);
 
-				if(encFile == null || encFile.length == 0){
+				if (encFile == null || encFile.length == 0) {
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));
 				}
 
@@ -117,7 +115,7 @@ public class StinglePicassoLoader extends RequestHandler {
 					bitmap = Helpers.getThumbFromBitmap(bitmap, thumbSize);
 					Crypto.Header header = CryptoHelpers.decryptFileHeaders(context, set, albumId, file.headers, true);
 
-					if(bitmap == null) {
+					if (bitmap == null) {
 						bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.file);
 					}
 
@@ -130,10 +128,9 @@ public class StinglePicassoLoader extends RequestHandler {
 					props.isUploaded = file.isRemote;
 
 					result.addProperty("fileProps", props);
-					
+
 					callback.onSuccess(result);
-				}
-				else{
+				} else {
 					callback.onSuccess(new Result(BitmapFactory.decodeResource(context.getResources(), R.drawable.file), Picasso.LoadedFrom.NETWORK));
 				}
 			} catch (IOException | CryptoException e) {
@@ -143,7 +140,7 @@ public class StinglePicassoLoader extends RequestHandler {
 		}
 	}
 
-	private void returnNoImage(Callback callback){
+	private void returnNoImage(Callback callback) {
 		Drawable drawable = context.getDrawable(R.drawable.ic_no_image);
 		if (drawable == null) {
 			return;

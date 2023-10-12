@@ -263,7 +263,7 @@ public class GalleryActivity extends AppCompatActivity
 		updateBottomNavigationMenu();
 
 		setVersionLabel();
-		if(Helpers.isServerAddonPresent(this,"addon-api-stingle-org")){
+		if(Helpers.isServerAddonPresent(this,"addon-api-stingle-org") || !Helpers.isServerAddonsFieldSet(this)){
 			navigationView.getMenu().findItem(R.id.nav_storage).setVisible(true);
 		}
 
