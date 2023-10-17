@@ -1,0 +1,4 @@
+* Added scroll tab. Now you can quickly scroll through your whole library and get to the desired date in an instant.
+* Fixed issue where Storage section was not visible for some users
+* Android 14 support
+* Lots of bugfixes
