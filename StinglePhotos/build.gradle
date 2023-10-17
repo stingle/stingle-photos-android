@@ -25,7 +25,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 34
         compileSdk 34
-        versionCode 55
+        versionCode 57
         versionName "2.11.0"
     }
     buildTypes {
@@ -89,7 +89,7 @@ dependencies {
     implementation "androidx.work:work-runtime:2.8.1"
     implementation project(path: ':picasso')
 
-    playstoreImplementation 'com.android.billingclient:billing:5.2.0'
+    playstoreImplementation 'com.android.billingclient:billing:5.2.1'
 
     // CameraX
     implementation "androidx.camera:camera-core:1.1.0-alpha12"
