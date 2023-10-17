@@ -70,8 +70,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	}
 
 	@Override
-	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
+	public void onViewCreated(@NonNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
 		Log.d("GalleryFragment", "onActivityCreated");
 		Bundle bundle = getArguments();
 		boolean initNow = false;
@@ -467,7 +467,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		return result;
 	}
 	private int getToolbarHeight(Context context) {
-		TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(new int[]{R.attr.actionBarSize});
+		TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(new int[]{androidx.appcompat.R.attr.actionBarSize});
 		int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
 		styledAttributes.recycle();
 		return toolbarHeight;

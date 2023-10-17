@@ -274,7 +274,7 @@ public class StorageActivity extends AppCompatActivity {
 			box.setBackground(getDrawable(R.drawable.rectangle_selected));
 			payButton.setText(getString(R.string.current_plan));
 			payButton.setEnabled(false);
-			payButton.setTextColor(Helpers.getAttrColor(this, R.attr.colorControlNormal));
+			payButton.setTextColor(Helpers.getAttrColor(this, androidx.appcompat.R.attr.colorControlNormal));
 
 			String topPrice = "";
 			if(isFreePlan){

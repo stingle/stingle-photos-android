@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.stingle.photos.Db.Objects.StingleDbFile;
 import org.stingle.photos.Db.Query.AlbumFilesDb;
+import org.stingle.photos.Db.Query.AutoCloseableCursor;
 import org.stingle.photos.Db.Query.FilesDb;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDb;
@@ -66,8 +67,8 @@ public class FreeUpSpaceAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	private boolean deleteLocalFiles(FilesDb db){
-		try (AutoCloseable autoCloseableCursor = db.getFilesList(FilesDb.GET_MODE_LOCAL_AND_REMOTE, StingleDb.SORT_ASC, null, null)){
-			Cursor result = (Cursor) autoCloseableCursor;
+		try (AutoCloseableCursor autoCloseableCursor = db.getFilesList(FilesDb.GET_MODE_LOCAL_AND_REMOTE, StingleDb.SORT_ASC, null, null)){
+			Cursor result = autoCloseableCursor.getCursor();
 			while (result.moveToNext()) {
 				StingleDbFile dbFile = new StingleDbFile(result);
 				File file = new File(dir.getPath() + "/" + dbFile.filename);

@@ -240,14 +240,14 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 		}
 	}
 
-	private String convertDate(String dateString){
-		try {
-			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-			Date date = fmt.parse(dateString);
+	private final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+	private final SimpleDateFormat outputFormat = new SimpleDateFormat("MMMM d, y", Locale.getDefault());
 
-			SimpleDateFormat fmtOut = new SimpleDateFormat("MMMM d, y", Locale.getDefault());
+	private synchronized String convertDate(String dateString){
+		try {
+			Date date = inputFormat.parse(dateString);
 			if(date != null) {
-				return fmtOut.format(date);
+				return outputFormat.format(date);
 			}
 		}
 		catch (ParseException ignored) {}

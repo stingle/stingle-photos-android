@@ -302,6 +302,11 @@ public class MediaEncryptService extends Service {
 				.setContentIntent(contentIntent)  // The intent to send when the entry is clicked
 				.build();
 
-		startForeground(R.string.envideo_service_started, notification);
+		try {
+			startForeground(R.string.envideo_service_started, notification);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

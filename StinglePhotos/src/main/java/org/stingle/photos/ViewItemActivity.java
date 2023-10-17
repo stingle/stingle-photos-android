@@ -349,7 +349,7 @@ public class ViewItemActivity extends AppCompatActivity {
 						adapter.notifyDataSetChanged();
 					}
 					spinner.dismiss();
-					Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.default_error_msg), Snackbar.LENGTH_SHORT).show();
+					Snackbar.make(findViewById(R.id.drawer_layout), getString(androidx.biometric.R.string.default_error_msg), Snackbar.LENGTH_SHORT).show();
 					SyncManager.startSync(ViewItemActivity.this);
 				}
 			});

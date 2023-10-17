@@ -127,7 +127,7 @@ public class ShareAlbumAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			}
 
 			if(albumId == null){
-				errorMessage = myContext.getString(R.string.default_error_msg);
+				errorMessage = myContext.getString(androidx.biometric.R.string.default_error_msg);
 				return false;
 			}
 

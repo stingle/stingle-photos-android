@@ -89,9 +89,10 @@ public class AlbumsFragment extends Fragment{
 		return view;
 	}
 
+
 	@Override
-	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
+	public void onViewCreated(@NonNull View viewArg, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+		super.onViewCreated(viewArg, savedInstanceState);
 
 		Bundle bundle = getArguments();
 		if (bundle != null) {
