@@ -144,7 +144,7 @@ public class ContactsDb {
 		if(excludedIds == null || excludedIds.size() == 0){
 			return getContactAtPosition(pos, sort, filter);
 		}
-		String excludedIdsStr = Helpers.impode(",", excludedIds);
+                String excludedIdsStr = Helpers.implode(",", excludedIds);
 
 		String selection = StingleDbContract.Columns.COLUMN_NAME_EMAIL + " LIKE ? AND " + StingleDbContract.Columns.COLUMN_NAME_USER_ID + " NOT IN ("+excludedIdsStr+")";
 		String[] selectionArgs = {"%" + filter + "%"};
@@ -232,7 +232,7 @@ public class ContactsDb {
 		if(excludedIds == null || excludedIds.size() == 0){
 			return getTotalContactsCount(filter);
 		}
-		String excludedIdsStr = Helpers.impode(",", excludedIds);
+                String excludedIdsStr = Helpers.implode(",", excludedIds);
 
 		String selection = StingleDbContract.Columns.COLUMN_NAME_EMAIL + " LIKE ? AND " + StingleDbContract.Columns.COLUMN_NAME_USER_ID + " NOT IN ("+excludedIdsStr+")";
 		String[] selectionArgs = {"%" + filter + "%"};
