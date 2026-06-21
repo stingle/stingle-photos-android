@@ -4,4 +4,33 @@
     <color name="hr_color">#84B6B6B6</color>
     <color name="textColor">#E7FFFFFF</color>
     <color name="loading_paceholder">#25B6B6B6</color>
+
+    <!-- Material 3 color tokens (dark). Use a vivid brand red as the primary (matching
+         the app's classic dark-mode red) instead of the desaturated M3 pink tint, so
+         buttons/outlines/accents stay on-brand red in dark mode. -->
+    <color name="md_primary">#F44336</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#93000A</color>
+    <color name="md_on_primary_container">#FFDAD5</color>
+    <color name="md_secondary">#E7BDB6</color>
+    <color name="md_on_secondary">#442925</color>
+    <color name="md_secondary_container">#5D3F3B</color>
+    <color name="md_on_secondary_container">#FFDAD5</color>
+    <color name="md_tertiary">#E0C38C</color>
+    <color name="md_on_tertiary">#3F2E04</color>
+    <color name="md_tertiary_container">#574419</color>
+    <color name="md_on_tertiary_container">#FCDFA6</color>
+    <color name="md_background">#1A1110</color>
+    <color name="md_on_background">#EDE0DD</color>
+    <color name="md_surface">#1A1110</color>
+    <color name="md_on_surface">#EDE0DD</color>
+    <color name="md_surface_variant">#534341</color>
+    <color name="md_on_surface_variant">#D8C2BE</color>
+    <color name="md_surface_container">#271D1C</color>
+    <color name="md_outline">#A08C89</color>
+    <color name="md_outline_variant">#534341</color>
+    <color name="md_error">#FFB4AB</color>
+    <color name="md_on_error">#690005</color>
+    <color name="md_error_container">#93000A</color>
+    <color name="md_on_error_container">#FFDAD6</color>
 </resources>

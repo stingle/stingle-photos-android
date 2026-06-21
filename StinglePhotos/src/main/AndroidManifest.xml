@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -43,6 +44,12 @@
         <service
             android:name=".CameraX.MediaEncryptService"
             android:enabled="true"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
+        <service
+            android:name=".Sync.ThumbsDownloadService"
+            android:enabled="true"
+            android:foregroundServiceType="dataSync"
             android:exported="false" />
         <service
             android:name=".Sync.JobScheduler.ImportJobSchedulerService"
@@ -53,6 +60,7 @@
             android:name=".GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
+            android:theme="@style/Theme.Stingle.Splash"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

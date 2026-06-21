@@ -53,6 +53,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	private final ArrayList<Integer> selectedIndices = new ArrayList<>();
 	private final int thumbSize;
 	private boolean isSelectModeActive = false;
+	// When the right-side scrollbar is being dragged we skip thumbnail loading to avoid
+	// thrashing Picasso (each jump would cancel in-flight thumbnail decrypts); items are
+	// reloaded once when the drag is released.
+	private boolean skipImageLoad = false;
 	private final AutoFitGridLayoutManager lm;
 	private final Picasso picasso;
 	private final LruCache<Integer, FileProps> filePropsCache = new LruCache<>(512);
@@ -95,6 +99,10 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 	public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
 		super.onDetachedFromRecyclerView(recyclerView);
 		db.close();
+	}
+
+	public void setSkipImageLoad(boolean skipImageLoad){
+		this.skipImageLoad = skipImageLoad;
 	}
 
 	public void updateDataSet(){
@@ -352,8 +360,34 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 			GalleryVH vh = new GalleryVH(v);
 
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(thumbSize, thumbSize);
+			// Pin the cell to a fixed square so its height is known before any thumbnail loads.
+			// The root was wrap_content, so the cell height was inferred from content and a
+			// relayout (notify, date header, a decrypt arriving) could re-derive it and shift
+			// the scroll position. Fix the root height (and make the image fill it) instead.
+			ViewGroup.LayoutParams rootLp = v.getLayoutParams();
+			if (rootLp == null) {
+				rootLp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, thumbSize);
+			} else {
+				rootLp.height = thumbSize;
+			}
+			v.setLayoutParams(rootLp);
+
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
 			vh.image.setLayoutParams(params);
+
+			// Pin the video-duration label to a fixed size. setText() relayouts whenever a
+			// dimension is wrap_content (TextView.checkForRelayout), and that relayout shifts
+			// the scroll anchor. Measure a worst-case duration once and freeze the size.
+			vh.videoDuration.setText("0:00:00");
+			vh.videoDuration.measure(
+					View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+					View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+			RelativeLayout.LayoutParams vdLp = (RelativeLayout.LayoutParams) vh.videoDuration.getLayoutParams();
+			vdLp.width = vh.videoDuration.getMeasuredWidth();
+			vdLp.height = vh.videoDuration.getMeasuredHeight();
+			vh.videoDuration.setLayoutParams(vdLp);
+			vh.videoDuration.setText("");
 
 			return vh;
 		}
@@ -361,7 +395,35 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 			RelativeLayout v = (RelativeLayout) LayoutInflater.from(parent.getContext())
 					.inflate(R.layout.item_gallery_date, parent, false);
 
-			return new GalleryDate(v);
+			GalleryDate dateVh = new GalleryDate(v);
+
+			// Pin the date header to its measured (single-line) height so the LayoutManager
+			// knows it before layout. Otherwise the header is wrap_content and a jump into a
+			// region containing a header re-derives its height on measure, nudging the scroll
+			// position. Measured once here so it respects font scale / theme.
+			dateVh.text.setText("Ag");
+			int wSpec = View.MeasureSpec.makeMeasureSpec(thumbSize * 4, View.MeasureSpec.AT_MOST);
+			int hSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+			v.measure(wSpec, hSpec);
+			int headerHeight = v.getMeasuredHeight();
+			int textHeight = dateVh.text.getMeasuredHeight();
+			ViewGroup.LayoutParams dateLp = v.getLayoutParams();
+			if (dateLp == null) {
+				dateLp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, headerHeight);
+			} else {
+				dateLp.height = headerHeight;
+			}
+			v.setLayoutParams(dateLp);
+
+			// Pin the header text to a fixed size too: setText() in onBind otherwise relayouts
+			// (checkForRelayout fires whenever width OR height is wrap_content), and that
+			// relayout shifts the scroll anchor when a header scrolls into view.
+			RelativeLayout.LayoutParams dateTextLp = (RelativeLayout.LayoutParams) dateVh.text.getLayoutParams();
+			dateTextLp.width = RelativeLayout.LayoutParams.MATCH_PARENT;
+			dateTextLp.height = textHeight;
+			dateVh.text.setLayoutParams(dateTextLp);
+
+			return dateVh;
 		}
 	}
 
@@ -386,71 +448,26 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 				holder.layout.setElevation(3);
 			}
 
-			holder.image.setImageBitmap(null);
-			holder.videoIcon.setVisibility(View.GONE);
-			holder.videoDuration.setVisibility(View.GONE);
-			holder.noCloudIcon.setVisibility(View.GONE);
+			// Use setImageDrawable(null), NOT setImageBitmap(null): the latter wraps the null
+			// in a fresh BitmapDrawable every call, so ImageView always sees a "new" drawable
+			// and fires requestLayout(). During a fast scroll/jump that re-layout rebinds the
+			// row, which calls this again -> a self-sustaining layout loop that creeps the scroll
+			// anchor one row at a time (the gallery scrolls by itself until touched) and cancels
+			// in-flight thumbnail decrypts so images never appear. setImageDrawable(null) no-ops
+			// when the drawable is already null, breaking the loop.
+			holder.image.setImageDrawable(null);
+			holder.videoIcon.setVisibility(View.INVISIBLE);
+			holder.videoDuration.setVisibility(View.INVISIBLE);
+			holder.noCloudIcon.setVisibility(View.INVISIBLE);
 
-			String set = "m";
-			if(this.set == SyncManager.TRASH){
-				set = "t";
+			// Skip loading while the scrollbar is being dragged. On release the fragment calls
+			// loadVisibleThumbnails() to load the final visible items directly, WITHOUT a
+			// notifyItemRange* (which would trigger a relayout and shift the scroll position).
+			if (skipImageLoad) {
+				return;
 			}
-			else if(this.set == SyncManager.ALBUM){
-				set = "a";
-			}
 
-			final RequestCreator req = picasso.load("p" + set + position);
-			req.networkPolicy(NetworkPolicy.NO_CACHE);
-			req.tag(holder);
-			req.noFade();
-			req.addProp("pos", String.valueOf(position));
-			req.into(holder.image, new Callback() {
-				@Override
-				public void onSuccess(RequestHandler.Result result, Request request) {
-					Integer pos = Integer.valueOf(request.getProp("pos"));
-					GalleryVH holder = (GalleryVH) request.tag;
-
-					if(holder == null){
-						return;
-					}
-
-					FileProps props = filePropsCache.get(pos);
-					if (props == null) {
-						props = (FileProps) result.getProperty("fileProps");
-						if (props != null) {
-							filePropsCache.put(pos, props);
-						}
-						else{
-							props = new FileProps();
-						}
-					}
-
-					if (props.fileType == Crypto.FILE_TYPE_VIDEO) {
-						holder.videoIcon.setVisibility(View.VISIBLE);
-					} else {
-						holder.videoIcon.setVisibility(View.GONE);
-					}
-
-					if (props.fileType == Crypto.FILE_TYPE_VIDEO && props.videoDuration >= 0) {
-						holder.videoDuration.setText(Helpers.formatVideoDuration(props.videoDuration));
-						holder.videoDuration.setVisibility(View.VISIBLE);
-					} else {
-						holder.videoDuration.setVisibility(View.GONE);
-					}
-
-					if (!props.isUploaded) {
-						holder.noCloudIcon.setVisibility(View.VISIBLE);
-					} else {
-						holder.noCloudIcon.setVisibility(View.GONE);
-					}
-
-				}
-
-				@Override
-				public void onError(@NonNull Throwable t) {
-
-				}
-			});
+			loadThumbnail(holder, position);
 		}
 		else if(holderObj instanceof GalleryDate) {
 			GalleryDate holder = (GalleryDate)holderObj;
@@ -462,14 +479,103 @@ public class GalleryAdapterPisasso extends RecyclerView.Adapter<RecyclerView.Vie
 
 				holder.checkbox.setChecked(isAllItemsSelectedInDate(rawPosition));
 				holder.layout.setElevation(0);
-
-				params.setMarginStart(Helpers.convertDpToPixels(context, 25));
-
 			} else {
-				holder.checkbox.setVisibility(View.GONE);
-				params.setMarginStart(Helpers.convertDpToPixels(context, 10));
+				holder.checkbox.setVisibility(View.INVISIBLE);
 			}
-			holder.text.setLayoutParams(params);
+			// Only call setLayoutParams when the margin actually changes: setLayoutParams always
+			// triggers requestLayout(), and doing it on every bind relayouts the RecyclerView and
+			// shifts the scroll position when a header scrolls into view after a scrollbar jump.
+			int desiredMargin = Helpers.convertDpToPixels(context, isSelectModeActive ? 25 : 10);
+			if (params.getMarginStart() != desiredMargin) {
+				params.setMarginStart(desiredMargin);
+				holder.text.setLayoutParams(params);
+			}
+		}
+	}
+
+	// Loads a single thumbnail into an already-bound photo holder. Kept separate from
+	// onBindViewHolder so the scrollbar drag can defer loading and then load the final
+	// visible holders directly (see loadVisibleThumbnails) without a notify/relayout.
+	private void loadThumbnail(GalleryVH holder, int position) {
+		String set = "m";
+		if(this.set == SyncManager.TRASH){
+			set = "t";
+		}
+		else if(this.set == SyncManager.ALBUM){
+			set = "a";
+		}
+
+		final RequestCreator req = picasso.load("p" + set + position);
+		req.networkPolicy(NetworkPolicy.NO_CACHE);
+		req.tag(holder);
+		req.noFade();
+		req.addProp("pos", String.valueOf(position));
+		req.into(holder.image, new Callback() {
+			@Override
+			public void onSuccess(RequestHandler.Result result, Request request) {
+				Integer pos = Integer.valueOf(request.getProp("pos"));
+				GalleryVH holder = (GalleryVH) request.tag;
+
+				if(holder == null){
+					return;
+				}
+
+				FileProps props = filePropsCache.get(pos);
+				if (props == null) {
+					props = (FileProps) result.getProperty("fileProps");
+					if (props != null) {
+						filePropsCache.put(pos, props);
+					}
+					else{
+						props = new FileProps();
+					}
+				}
+
+				if (props.fileType == Crypto.FILE_TYPE_VIDEO) {
+					holder.videoIcon.setVisibility(View.VISIBLE);
+				} else {
+					holder.videoIcon.setVisibility(View.INVISIBLE);
+				}
+
+				if (props.fileType == Crypto.FILE_TYPE_VIDEO && props.videoDuration >= 0) {
+					holder.videoDuration.setText(Helpers.formatVideoDuration(props.videoDuration));
+					holder.videoDuration.setVisibility(View.VISIBLE);
+				} else {
+					holder.videoDuration.setVisibility(View.INVISIBLE);
+				}
+
+				if (!props.isUploaded) {
+					holder.noCloudIcon.setVisibility(View.VISIBLE);
+				} else {
+					holder.noCloudIcon.setVisibility(View.INVISIBLE);
+				}
+
+			}
+
+			@Override
+			public void onError(@NonNull Throwable t) {
+
+			}
+		});
+	}
+
+	// Loads thumbnails for the currently attached photo cells directly, without notifying the
+	// adapter (which would relayout and shift the scroll position). Used by the draggable
+	// scrollbar to resume loading once the drag ends.
+	public void loadVisibleThumbnails(RecyclerView rv) {
+		if (rv == null) {
+			return;
+		}
+		for (int i = 0; i < rv.getChildCount(); i++) {
+			View child = rv.getChildAt(i);
+			RecyclerView.ViewHolder vh = rv.getChildViewHolder(child);
+			if (vh instanceof GalleryVH) {
+				int rawPos = vh.getBindingAdapterPosition();
+				if (rawPos == RecyclerView.NO_POSITION) {
+					continue;
+				}
+				loadThumbnail((GalleryVH) vh, translatePos(rawPos).dbPosition);
+			}
 		}
 	}
 

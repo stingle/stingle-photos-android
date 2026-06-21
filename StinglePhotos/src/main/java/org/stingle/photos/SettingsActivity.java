@@ -630,6 +630,7 @@ public class SettingsActivity extends AppCompatActivity implements
 			resyncDBPref.setOnPreferenceClickListener(preference -> {
 				final ProgressDialog spinner = Helpers.showProgressDialog(getContext(), getString(R.string.syncing_db), null);
 
+				Helpers.deletePreference(getContext(), SyncManager.PREF_FIRST_SYNC_DONE);
 				(new FsSyncAsyncTask(getContext(), new SyncManager.OnFinish() {
 					@Override
 					public void onFinish(Boolean needToUpdateUI) {

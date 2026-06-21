@@ -38,3 +38,5 @@ obj/
 
 StinglePhotos/fdroid
 StinglePhotos/playstore
+memory/
+.vscode/

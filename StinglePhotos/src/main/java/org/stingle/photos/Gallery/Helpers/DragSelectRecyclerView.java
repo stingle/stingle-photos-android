@@ -177,7 +177,7 @@ public class DragSelectRecyclerView extends RecyclerView {
 			new Runnable() {
 				@Override
 				public void run() {
-					if (autoScrollHandler == null) {
+					if (autoScrollHandler == null || !dragSelectActive) {
 						return;
 					}
 					if (inTopHotspot) {
@@ -294,7 +294,11 @@ public class DragSelectRecyclerView extends RecyclerView {
 		if (dragSelectActive) {
 			LOG("Drag selection is active");
 			final int itemPosition = getItemPosition(e);
-			if (e.getAction() == MotionEvent.ACTION_UP) {
+			// ACTION_CANCEL must be handled like ACTION_UP: when a parent (SwipeRefreshLayout,
+			// DrawerLayout, gesture-nav) steals the gesture, the system delivers CANCEL instead
+			// of UP. Without this, dragSelectActive + the hotspot flags stay set and the
+			// self-reposting autoScrollRunnable scrolls the grid forever until the next touch.
+			if (e.getAction() == MotionEvent.ACTION_UP || e.getAction() == MotionEvent.ACTION_CANCEL) {
 				dragSelectActive = false;
 				inTopHotspot = false;
 				inBottomHotspot = false;

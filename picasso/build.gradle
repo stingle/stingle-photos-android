@@ -1,49 +1,19 @@
 apply plugin: 'com.android.library'
-buildscript {
-  ext.versions = [
-          'compileSdk': 30,
-          'minSdk': 14,
-          'targetSdk': 30,
-          'sourceCompatibility': JavaVersion.VERSION_1_8,
-          'targetCompatibility': JavaVersion.VERSION_1_8,
-          'okhttp': '4.9.0',
-          'okio': '2.9.0',
-  ]
 
-  ext.deps = [
-          androidPlugin: 'com.android.tools.build:gradle:3.2.1',
-          okhttp: "com.squareup.okhttp3:okhttp:${versions.okhttp}",
-          okio: "com.squareup.okio:okio:${versions.okio}",
-          mockWebServer: "com.squareup.okhttp3:mockwebserver:${versions.okhttp}",
-          pollexor: 'com.squareup:pollexor:2.0.4',
-          androidxAnnotations: 'androidx.annotation:annotation:1.0.0',
-          androidxCore: 'androidx.core:core:1.0.0',
-          androidxExifInterface: 'androidx.exifinterface:exifinterface:1.0.0',
-          androidxFragment: 'androidx.fragment:fragment:1.0.0',
-          androidxLifecycle: 'androidx.lifecycle:lifecycle-common:2.0.0',
-          errorProne: 'com.google.errorprone:error_prone_core:2.3.2',
-          junit: 'junit:junit:4.12',
-          truth: 'com.google.truth:truth:0.42',
-          robolectric: 'org.robolectric:robolectric:4.0.1',
-          mockito: 'org.mockito:mockito-core:2.23.0',
-          nullaway: 'com.uber.nullaway:nullaway:0.6.0'
-  ]
+ext.versions = [
+        'okhttp': '4.12.0',
+        'okio': '3.9.1',
+]
 
-  ext.isCi = "true" == System.getenv('CI')
+ext.deps = [
+        okhttp: "com.squareup.okhttp3:okhttp:${versions.okhttp}",
+        okio: "com.squareup.okio:okio:${versions.okio}",
+        mockWebServer: "com.squareup.okhttp3:mockwebserver:${versions.okhttp}",
+        mockito: 'org.mockito:mockito-core:2.23.0',
+]
 
-  repositories {
-    google()
-    maven { url 'https://plugins.gradle.org/m2/' }
-  }
-
-  dependencies {
-    classpath 'com.android.tools.build:gradle:8.1.2'
-    classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
-    classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.16'
-  }
-}
 android {
-  compileSdkVersion 30
+  compileSdk 36
 
   defaultConfig {
     minSdkVersion 23
@@ -51,8 +21,8 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
   }
 
 

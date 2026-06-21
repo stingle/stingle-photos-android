@@ -25,10 +25,14 @@ import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -542,6 +546,104 @@ public class Helpers {
 		}
 		else if(theme.equals("light")) {
 			AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+		}
+	}
+
+	// --- Edge-to-edge insets helpers ------------------------------------------------
+	// With edge-to-edge (enforced on targetSdk 35), the system bars are transparent and
+	// content draws underneath them. These helpers add the relevant system-bar inset on
+	// top of a view's existing padding/margin so chrome doesn't sit under the bars.
+
+	public static void applyTopInsetPadding(final View view) {
+		final int initialTop = view.getPaddingTop();
+		ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+			// Include the display cutout so the view clears a punch-hole/notch camera even
+			// when the status bar itself is hidden (immersive full-screen viewers).
+			Insets bars = insets.getInsets(
+					WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+			v.setPadding(v.getPaddingLeft(), initialTop + bars.top, v.getPaddingRight(), v.getPaddingBottom());
+			return insets;
+		});
+		requestInsetsWhenReady(view);
+	}
+
+	public static void applyBottomInsetPadding(final View view) {
+		final int initialBottom = view.getPaddingBottom();
+		ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+			Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+			v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), initialBottom + bars.bottom);
+			return insets;
+		});
+		requestInsetsWhenReady(view);
+	}
+
+	// For fixed-height bottom bars (e.g. BottomNavigationView): grow the height by the
+	// bottom inset AND pad the bottom by the same amount, so the content area keeps its
+	// designed height and the extra space sits over the (transparent) navigation bar.
+	public static void applyBottomInsetPaddingAndHeight(final View view) {
+		final int initialBottom = view.getPaddingBottom();
+		final int initialHeight = view.getLayoutParams() != null ? view.getLayoutParams().height : ViewGroup.LayoutParams.WRAP_CONTENT;
+		ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+			int bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+			v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), initialBottom + bottom);
+			if (initialHeight >= 0) {
+				ViewGroup.LayoutParams lp = v.getLayoutParams();
+				lp.height = initialHeight + bottom;
+				v.setLayoutParams(lp);
+			}
+			return insets;
+		});
+		requestInsetsWhenReady(view);
+	}
+
+	// Offsets a fixed-height bar (e.g. an overlay toolbar) below the status bar / display
+	// cutout using top MARGIN, so its content height is preserved (padding would shrink the
+	// content area and clip the icons).
+	public static void applyTopInsetMargin(final View view) {
+		if (!(view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)) {
+			return;
+		}
+		final int initialTop = ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).topMargin;
+		ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+			Insets bars = insets.getInsets(
+					WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+			ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+			lp.topMargin = initialTop + bars.top;
+			v.setLayoutParams(lp);
+			return insets;
+		});
+		requestInsetsWhenReady(view);
+	}
+
+	public static void applyBottomInsetMargin(final View view) {
+		if (!(view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)) {
+			return;
+		}
+		final int initialBottom = ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).bottomMargin;
+		ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+			Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+			ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+			lp.bottomMargin = initialBottom + bars.bottom;
+			v.setLayoutParams(lp);
+			return insets;
+		});
+		requestInsetsWhenReady(view);
+	}
+
+	private static void requestInsetsWhenReady(final View view) {
+		if (view.isAttachedToWindow()) {
+			ViewCompat.requestApplyInsets(view);
+		} else {
+			view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+				@Override
+				public void onViewAttachedToWindow(View v) {
+					ViewCompat.requestApplyInsets(v);
+					v.removeOnAttachStateChangeListener(this);
+				}
+
+				@Override
+				public void onViewDetachedFromWindow(View v) { }
+			});
 		}
 	}
 

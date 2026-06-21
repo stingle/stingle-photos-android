@@ -14,6 +14,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
@@ -23,6 +25,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -114,23 +117,36 @@ public class GalleryActivity extends AppCompatActivity
 			LoginManager.redirectToLogin(GalleryActivity.this);
 		}
 	};
-	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
+	// Debounce full gallery refreshes. During a large sync the server pushes many
+	// REFRESH_GALLERY broadcasts in quick succession; running a full updateDataSet()
+	// (notifyDataSetChanged + Picasso reload of every visible thumbnail) on each one
+	// makes the grid flicker wildly. Coalesce them into one refresh.
+	private final Handler refreshHandler = new Handler(Looper.getMainLooper());
+	private final Runnable refreshRunnable = new Runnable() {
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			if(galleryFragment != null) {
-				galleryFragment.updateDataSet();
-			}
-		}
-	};
-	private BroadcastReceiver refreshGallery = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void run() {
 			if(galleryFragment != null) {
 				galleryFragment.updateDataSet();
 			}
 			if(albumsFragment != null){
 				albumsFragment.updateDataSet();
 			}
+		}
+	};
+	private void scheduleGalleryRefresh() {
+		refreshHandler.removeCallbacks(refreshRunnable);
+		refreshHandler.postDelayed(refreshRunnable, 350);
+	}
+	private BroadcastReceiver onEncFinish = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			scheduleGalleryRefresh();
+		}
+	};
+	private BroadcastReceiver refreshGallery = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			scheduleGalleryRefresh();
 		}
 	};
 	private BroadcastReceiver refreshGalleryItem = new BroadcastReceiver() {
@@ -182,6 +198,9 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		// Modern splash screen: shown via Theme.Stingle.Splash, then swaps to AppTheme.
+		androidx.core.splashscreen.SplashScreen.installSplashScreen(this);
+		EdgeToEdge.enable(this);
 		super.onCreate(savedInstanceState);
 		Helpers.setLocale(this);
 		setContentView(R.layout.activity_gallery);
@@ -197,6 +216,13 @@ public class GalleryActivity extends AppCompatActivity
 		fab = findViewById(R.id.import_fab);
 		fab.setOnClickListener(getImportOnClickListener());
 		bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+		// Edge-to-edge: keep chrome clear of the transparent system bars.
+		Helpers.applyTopInsetPadding(findViewById(R.id.appbar));
+		// Bottom nav is wrap_content (M3 self-sizes its bar height); just add the
+		// navigation-bar inset as bottom padding so it clears the system nav bar.
+		Helpers.applyBottomInsetPadding(bottomNavigationView);
+		Helpers.applyBottomInsetMargin(fab);
 
 		drawer = findViewById(R.id.drawer_layout);
 		navigationView = findViewById(R.id.nav_view);
@@ -277,6 +303,7 @@ public class GalleryActivity extends AppCompatActivity
 	@Override
 	protected void onStop() {
 		super.onStop();
+		refreshHandler.removeCallbacks(refreshRunnable);
 		galleryFragment = null;
 		albumsFragment = null;
 	}

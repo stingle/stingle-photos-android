@@ -11,7 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.viewpager.widget.PagerAdapter;
 
-import com.google.android.exoplayer2.SimpleExoPlayer;
+import androidx.annotation.OptIn;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlayer;
 
 import org.stingle.photos.Db.Query.AlbumFilesDb;
 import org.stingle.photos.Db.Query.FilesDb;
@@ -22,6 +24,7 @@ import org.stingle.photos.Widget.ImageHolderLayout;
 
 import java.util.HashMap;
 
+@OptIn(markerClass = UnstableApi.class)
 public class ViewPagerAdapter extends PagerAdapter {
 
 	private Context context;
@@ -31,7 +34,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 	private int lastFilesCount = -1;
 	private int set = SyncManager.GALLERY;
 	private String albumId = null;
-	private HashMap<Integer, SimpleExoPlayer> players = new HashMap<Integer, SimpleExoPlayer>();
+	private HashMap<Integer, ExoPlayer> players = new HashMap<Integer, ExoPlayer>();
 	private View.OnTouchListener gestureTouchListener;
 	private View.OnClickListener onSingleClickListener;
 
@@ -93,7 +96,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 	public void destroyItem(ViewGroup container, int position, Object view) {
 		container.removeView((View) view);
 		if (players.containsKey(position)) {
-			SimpleExoPlayer player = players.get(position);
+			ExoPlayer player = players.get(position);
 			if (player != null) {
 				player.release();
 			}
@@ -106,7 +109,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 		return POSITION_NONE;
 	}
 
-	public void addPlayer(int position, SimpleExoPlayer player) {
+	public void addPlayer(int position, ExoPlayer player) {
 		synchronized (this) {
 			players.put(position, player);
 		}
@@ -124,7 +127,7 @@ public class ViewPagerAdapter extends PagerAdapter {
 	public void pauseAllPlayers() {
 		synchronized (this) {
 			for (int pos : players.keySet()) {
-				SimpleExoPlayer player = players.get(pos);
+				ExoPlayer player = players.get(pos);
 				if (player != null) {
 					player.setPlayWhenReady(false);
 				}
@@ -134,14 +137,14 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 	public void startPlaying(int position) {
 		synchronized (this) {
-			SimpleExoPlayer player = players.get(position);
+			ExoPlayer player = players.get(position);
 			if (player != null) {
 				player.setPlayWhenReady(true);
 			}
 		}
 	}
 
-	public SimpleExoPlayer getPlayer(int position) {
+	public ExoPlayer getPlayer(int position) {
 		return players.get(position);
 	}
 

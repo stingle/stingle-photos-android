@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -83,6 +84,7 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				break;
 			case MODE_CLOUD_TO_LOCAL_AND_UPLOAD:
 				syncCloudToLocalDb(context);
+				autoImport(context);
 				upload(context);
 				break;
 		}
@@ -123,13 +125,24 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		boolean isThumbsDwnIsDone = Helpers.getPreference(context, DownloadThumbsAsyncTask.PREF_IS_DWN_THUMBS_IS_DONE, false);
 		StinglePhotosApplication app = (StinglePhotosApplication) context.getApplicationContext();
 		if(!isThumbsDwnIsDone && app.downloadThumbsAsyncTask == null){
-			app.downloadThumbsAsyncTask = new DownloadThumbsAsyncTask(context, new SyncManager.OnFinish() {
-				@Override
-				public void onFinish(Boolean needToUpdateUI) {
-					app.downloadThumbsAsyncTask = null;
-				}
-			});
-			app.downloadThumbsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			// Run the thumbnail download inside a foreground service so it isn't frozen/killed
+			// when the app is backgrounded (this is the MODE_FULL, app-open sync). The service
+			// creates and runs the DownloadThumbsAsyncTask itself.
+			try {
+				ContextCompat.startForegroundService(context, new Intent(context, ThumbsDownloadService.class));
+			} catch (Exception e) {
+				// Starting a foreground service from a background process is disallowed on
+				// Android 12+. Sync is normally foreground-triggered, but fall back to the
+				// in-process task just in case.
+				e.printStackTrace();
+				app.downloadThumbsAsyncTask = new DownloadThumbsAsyncTask(context, new SyncManager.OnFinish() {
+					@Override
+					public void onFinish(Boolean needToUpdateUI) {
+						app.downloadThumbsAsyncTask = null;
+					}
+				});
+				app.downloadThumbsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			}
 		}
 	}
 
@@ -137,6 +150,10 @@ public class SyncAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		StinglePhotosApplication app = (StinglePhotosApplication) context.getApplicationContext();
 		if(app.downloadThumbsAsyncTask != null && !app.downloadThumbsAsyncTask.isCancelled()){
 			app.downloadThumbsAsyncTask.cancel(true);
+		}
+		try {
+			context.stopService(new Intent(context, ThumbsDownloadService.class));
+		} catch (Exception ignored) {
 		}
 	}
 

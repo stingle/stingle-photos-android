@@ -14,6 +14,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -73,9 +77,6 @@ public class ViewItemActivity extends AppCompatActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-
 		Helpers.blockScreenshotsIfEnabled(this);
 
 		lbm = LocalBroadcastManager.getInstance(this);
@@ -83,7 +84,22 @@ public class ViewItemActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		Helpers.setLocale(this);
 		setContentView(R.layout.activity_view_item);
+
+		// Immersive full-screen viewer: hide both system bars (the legacy FLAG_FULLSCREEN
+		// only hid the status bar and is ignored under edge-to-edge on targetSdk 35).
+		// Swipe from an edge reveals the bars transiently.
+		WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+		WindowInsetsControllerCompat insetsController =
+				WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+		insetsController.setSystemBarsBehavior(
+				WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+		insetsController.hide(WindowInsetsCompat.Type.systemBars());
+
 		Toolbar toolbar = findViewById(R.id.toolbar);
+		// Offset the overlay toolbar below the status bar / punch-hole camera cutout using
+		// a top margin (not padding) so its fixed 56dp content height is preserved and the
+		// action icons aren't clipped, even though the system bars are hidden here.
+		Helpers.applyTopInsetMargin(toolbar);
 		setSupportActionBar(toolbar);
 
 		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);

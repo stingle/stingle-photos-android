@@ -9,6 +9,8 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
+import androidx.camera.core.UseCaseGroup;
+import androidx.camera.core.ViewPort;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.video.FileOutputOptions;
 import androidx.camera.video.QualitySelector;
@@ -332,13 +334,23 @@ public class CameraXActivity extends AppCompatActivity {
         cameraProvider.unbindAll();
 
         try {
+            // Bind via a UseCaseGroup with the PreviewView's ViewPort so all use cases
+            // (preview + image/video capture) share one aspect ratio/crop. Without this,
+            // the preview and VideoCapture pick conflicting aspect ratios and the preview
+            // gets stretched/squeezed when switching to video mode.
+            ViewPort viewPort = rootBinding.viewFinder.getViewPort();
+            UseCaseGroup.Builder groupBuilder = new UseCaseGroup.Builder()
+                    .addUseCase(preview)
+                    .addUseCase(imageCapture);
+            if (viewPort != null) {
+                groupBuilder.setViewPort(viewPort);
+            }
             if (!isVideoCapture) {
-                camera = cameraProvider.bindToLifecycle(
-                        this, cameraSelector, preview, imageCapture, imageAnalyzer);
-
+                groupBuilder.addUseCase(imageAnalyzer);
+                camera = cameraProvider.bindToLifecycle(this, cameraSelector, groupBuilder.build());
             } else {
-                camera = cameraProvider.bindToLifecycle(
-                        this, cameraSelector, preview, imageCapture, videoCapture);
+                groupBuilder.addUseCase(videoCapture);
+                camera = cameraProvider.bindToLifecycle(this, cameraSelector, groupBuilder.build());
                 camera.getCameraControl().enableTorch(cameraToolsHelper.isTorchEnabled());
             }
 

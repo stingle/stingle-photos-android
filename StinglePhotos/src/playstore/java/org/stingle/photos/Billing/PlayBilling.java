@@ -10,10 +10,12 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
+import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryPurchasesParams;
 
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
@@ -31,7 +33,7 @@ class PlayBilling implements PurchasesUpdatedListener {
 	private BillingClient billingClient;
 
 	private List<Purchase> purchasedSkus = new ArrayList<>();
-	private Map<String, SkuDetails> skuDetailsMap = new HashMap<>();
+	private Map<String, ProductDetails> productDetailsMap = new HashMap<>();
 	private boolean isServiceConnected = false;
 	private boolean wentToPayment = false;
 	private List<String> skus = new ArrayList<>();
@@ -42,7 +44,10 @@ class PlayBilling implements PurchasesUpdatedListener {
 	public PlayBilling(Activity activity, BillingEventsListener billingEventsListener) {
 		this.activity = activity;
 		this.billingEventsListener = billingEventsListener;
-		billingClient = BillingClient.newBuilder(activity).enablePendingPurchases().setListener(this).build();
+		billingClient = BillingClient.newBuilder(activity)
+				.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+				.setListener(this)
+				.build();
 
 		initSkus();
 	}
@@ -61,9 +66,20 @@ class PlayBilling implements PurchasesUpdatedListener {
 		skus.add("20tb_monthly");
 	}
 
+	private QueryProductDetailsParams buildProductDetailsParams() {
+		List<QueryProductDetailsParams.Product> products = new ArrayList<>();
+		for (String sku : skus) {
+			products.add(QueryProductDetailsParams.Product.newBuilder()
+					.setProductId(sku)
+					.setProductType(BillingClient.ProductType.SUBS)
+					.build());
+		}
+		return QueryProductDetailsParams.newBuilder().setProductList(products).build();
+	}
+
 	@Override
 	public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
-		if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+		if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
 			for (Purchase purchase : purchases) {
 				handlePurchase(purchase);
 			}
@@ -79,15 +95,40 @@ class PlayBilling implements PurchasesUpdatedListener {
 
 	private void goToPayment(String plan) {
 		if (areSubscriptionsSupported()) {
+			ProductDetails productDetails = productDetailsMap.get(plan);
+			if (productDetails == null) {
+				if (billingEventsListener != null) {
+					billingEventsListener.playBillingNotAvailable();
+				}
+				return;
+			}
+
+			String offerToken = getOfferToken(productDetails);
+			if (offerToken == null) {
+				if (billingEventsListener != null) {
+					billingEventsListener.playBillingNotAvailable();
+				}
+				return;
+			}
+
 			wentToPayment = true;
-			SkuDetails onetb = skuDetailsMap.get(plan);
+
+			List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
+			productDetailsParamsList.add(BillingFlowParams.ProductDetailsParams.newBuilder()
+					.setProductDetails(productDetails)
+					.setOfferToken(offerToken)
+					.build());
+
 			BillingFlowParams.Builder flowParamsBuilder = BillingFlowParams.newBuilder();
-			flowParamsBuilder.setSkuDetails(onetb);
+			flowParamsBuilder.setProductDetailsParamsList(productDetailsParamsList);
 			flowParamsBuilder.setObfuscatedAccountId(Helpers.getPreference(activity, StinglePhotosApplication.USER_ID, ""));
 
 			if (purchasedSkus != null && purchasedSkus.size() > 0) {
 				flowParamsBuilder.setSubscriptionUpdateParams(
-						BillingFlowParams.SubscriptionUpdateParams.newBuilder().setOldSkuPurchaseToken(purchasedSkus.get(0).getPurchaseToken()).build()
+						BillingFlowParams.SubscriptionUpdateParams.newBuilder()
+								.setOldPurchaseToken(purchasedSkus.get(0).getPurchaseToken())
+								.setSubscriptionReplacementMode(BillingFlowParams.SubscriptionUpdateParams.ReplacementMode.WITH_TIME_PRORATION)
+								.build()
 				);
 			}
 
@@ -95,18 +136,30 @@ class PlayBilling implements PurchasesUpdatedListener {
 
 			BillingResult responseCode = billingClient.launchBillingFlow(activity, flowParams);
 			Log.i("responseCode", responseCode.toString());
-
 		}
+	}
+
+	// Picks the subscription offer to purchase: prefer the base plan (no offer id),
+	// otherwise fall back to the first available offer.
+	private String getOfferToken(ProductDetails productDetails) {
+		List<ProductDetails.SubscriptionOfferDetails> offers = productDetails.getSubscriptionOfferDetails();
+		if (offers == null || offers.isEmpty()) {
+			return null;
+		}
+		for (ProductDetails.SubscriptionOfferDetails offer : offers) {
+			if (offer.getOfferId() == null) {
+				return offer.getOfferToken();
+			}
+		}
+		return offers.get(0).getOfferToken();
 	}
 
 	public void checkPlayStoreAvailability() {
 		Runnable queryRequest = () -> {
-			SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-			params.setSkusList(skus).setType(BillingClient.SkuType.SUBS);
-			billingClient.querySkuDetailsAsync(params.build(),
-					(billingResult1, skuDetailsList) -> {
-						if (billingResult1.getResponseCode() != BillingClient.BillingResponseCode.OK || skuDetailsList == null || skuDetailsList.size()==0) {
-							if(billingEventsListener != null){ billingEventsListener.playBillingNotAvailable(); }
+			billingClient.queryProductDetailsAsync(buildProductDetailsParams(),
+					(billingResult1, productDetailsList) -> {
+						if (billingResult1.getResponseCode() != BillingClient.BillingResponseCode.OK || productDetailsList == null || productDetailsList.isEmpty()) {
+							if (billingEventsListener != null) { billingEventsListener.playBillingNotAvailable(); }
 						}
 					});
 		};
@@ -115,39 +168,39 @@ class PlayBilling implements PurchasesUpdatedListener {
 
 	private void getSkuDetailsAndPay(String plan) {
 		purchasedSkus.clear();
-		skuDetailsMap.clear();
-		billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS, (billingResult, list) -> {
-			if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-				purchasedSkus.addAll(list);
-				Log.d("purchasedItems", purchasedSkus.toString());
+		productDetailsMap.clear();
+		billingClient.queryPurchasesAsync(
+				QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(),
+				(billingResult, list) -> {
+					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+						purchasedSkus.addAll(list);
+						Log.d("purchasedItems", purchasedSkus.toString());
 
-				SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-				params.setSkusList(skus).setType(BillingClient.SkuType.SUBS);
-				billingClient.querySkuDetailsAsync(params.build(),
-						(billingResult1, skuDetailsList) -> {
-							if (billingResult1.getResponseCode() == BillingClient.BillingResponseCode.OK && skuDetailsList != null) {
-								Log.d("skuDetails", skuDetailsList.toString());
-								if (skuDetailsList.size() == 0) {
-									if (billingEventsListener != null) {
-										billingEventsListener.playBillingNotAvailable();
+						billingClient.queryProductDetailsAsync(buildProductDetailsParams(),
+								(billingResult1, productDetailsList) -> {
+									if (billingResult1.getResponseCode() == BillingClient.BillingResponseCode.OK && productDetailsList != null) {
+										Log.d("productDetails", productDetailsList.toString());
+										if (productDetailsList.isEmpty()) {
+											if (billingEventsListener != null) {
+												billingEventsListener.playBillingNotAvailable();
+											}
+										} else {
+											for (ProductDetails productDetails : productDetailsList) {
+												productDetailsMap.put(productDetails.getProductId(), productDetails);
+											}
+										}
+										goToPayment(plan);
+									} else {
+										if (billingEventsListener != null) {
+											billingEventsListener.playBillingNotAvailable();
+										}
 									}
-								} else {
-									for (SkuDetails skuDetails : skuDetailsList) {
-										skuDetailsMap.put(skuDetails.getSku(), skuDetails);
-									}
-								}
-								goToPayment(plan);
-							} else {
-								if (billingEventsListener != null) {
-									billingEventsListener.playBillingNotAvailable();
-								}
-							}
 
-						});
-			} else {
-				Log.e("playBilling", "Got an error response trying to query subscription purchases");
-			}
-		});
+								});
+					} else {
+						Log.e("playBilling", "Got an error response trying to query subscription purchases");
+					}
+				});
 
 
 	}
@@ -165,7 +218,7 @@ class PlayBilling implements PurchasesUpdatedListener {
 						.setPurchaseToken(purchase.getPurchaseToken())
 						.build();
 				billingClient.acknowledgePurchase(params, billingResult -> {
-					Log.d("purchase", purchase.getSkus().get(0) + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
+					Log.d("purchase", purchase.getProducts().get(0) + " - " + purchase.getPurchaseToken() + " - " + billingResult.getResponseCode());
 
 					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
 						if (billingEventsListener != null) {

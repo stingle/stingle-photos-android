@@ -163,7 +163,12 @@ public class MediaEncryptService extends Service {
 
 
 	private void triggerSyncAndStop(){
-		SyncManager.startSync(this);
+		// Hand the upload off to WorkManager instead of running it on this (app-managed)
+		// foreground service: Android 15 cuts such a service shortly after the app is
+		// backgrounded ("Stop FGS timeout"), which interrupted the upload. A WorkManager
+		// job runs the (now synchronous) sync/upload reliably in the background and is
+		// retried/persisted across process death.
+		SyncManager.startOneTimeSync(this);
 		stopSelf();
 	}
 

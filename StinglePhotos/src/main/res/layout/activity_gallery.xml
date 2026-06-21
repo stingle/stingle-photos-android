@@ -5,7 +5,6 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -14,6 +13,8 @@
         tools:context="org.stingle.photos.GalleryActivity">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+            android:background="?attr/colorSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -111,14 +112,14 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             android:visibility="invisible"
-            app:tint="?attr/colorOnPrimarySurface"
+            app:tint="?attr/colorOnPrimary"
             app:backgroundTint="?attr/colorPrimary"
             app:srcCompat="@drawable/ic_dialog_add" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/bottom_nav_height"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:background="?attr/colorBackgroundFloating"
             android:visibility="invisible"

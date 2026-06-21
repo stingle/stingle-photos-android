@@ -30,7 +30,6 @@ import org.stingle.photos.Auth.KeyManagement;
 import org.stingle.photos.Auth.LoginManager;
 import org.stingle.photos.Billing.BillingEventsListener;
 import org.stingle.photos.Billing.PlayBillingProxy;
-import org.stingle.photos.Billing.WebBillingDialogFragment;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
 import org.stingle.photos.Crypto.CryptoHelpers;
@@ -71,19 +70,6 @@ public class StorageActivity extends AppCompatActivity {
 		put("10tb_yearly", 1109.99);
 		put("20tb_monthly", 239.99);
 		put("20tb_yearly", 2399.99);
-	}};
-
-	private ArrayList<HashMap<String, String>> paymentOptions = new ArrayList<HashMap<String, String>>(){{
-		add(new HashMap<String, String>(){{
-			put("name", "google");
-			put("title", String.valueOf(R.string.google_play_billing));
-			put("icon", String.valueOf(R.mipmap.ic_google_pay));
-		}});
-		add(new HashMap<String, String>(){{
-			put("name", "stripe");
-			put("title", String.valueOf(R.string.stripe_billing));
-			put("icon", String.valueOf(R.mipmap.ic_stripe));
-		}});
 	}};
 
 	private LocalBroadcastManager lbm;
@@ -203,9 +189,11 @@ public class StorageActivity extends AppCompatActivity {
 		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "300 GB"); put("monthly", "300gb_monthly"); put("yearly", "300gb_yearly");}});
 		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "1 TB"); put("monthly", "1tb_monthly"); put("yearly", "1tb_yearly");}});
 		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "3 TB"); put("monthly", "3tb_monthly"); put("yearly", "3tb_yearly");}});
-		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "5 TB"); put("monthly", "5tb_monthly"); put("yearly", "5tb_yearly");}});
-		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "10 TB"); put("monthly", "10tb_monthly"); put("yearly", "10tb_yearly");}});
-		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "20 TB"); put("monthly", "20tb_monthly"); put("yearly", "20tb_yearly");}});
+		// 5TB/10TB/20TB have no yearly Google Play subscription (they were Stripe-only),
+		// so only offer the monthly plan for these tiers.
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "5 TB"); put("monthly", "5tb_monthly");}});
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "10 TB"); put("monthly", "10tb_monthly");}});
+		paymentBoxDetails.add(new HashMap<String, String>() {{put("title", "20 TB"); put("monthly", "20tb_monthly");}});
 	}
 
 	private void updateQuotaInfo() {
@@ -344,37 +332,13 @@ public class StorageActivity extends AppCompatActivity {
 
 
 	private void pay(String plan){
-		BottomSheetDialog sheet = new BottomSheetDialog(this);
-		sheet.setContentView(R.layout.dialog_payment_options);
-
-
-		sheet.findViewById(R.id.button_google_pay).setOnClickListener(v -> {
-			PlayBillingProxy.initiatePayment(this, plan);
-			sheet.dismiss();
-		});
-
-		boolean disableGoogleBecauseOfPlan = false;
-		if(plan.equals("5tb_yearly") || plan.equals("10tb_yearly") || plan.equals("20tb_yearly")){
-			disableGoogleBecauseOfPlan = true;
+		// Stripe was removed, so there is no payment-method selector anymore: go
+		// straight to Google Play Billing.
+		if(!isPlayBillingAvailable){
+			Helpers.showAlertDialog(this, getString(R.string.error), getString(R.string.play_billing_unavailable));
+			return;
 		}
-		if(!isPlayBillingAvailable || disableGoogleBecauseOfPlan){
-			sheet.findViewById(R.id.button_google_pay).setEnabled(false);
-		}
-
-		sheet.findViewById(R.id.button_stripe).setOnClickListener(v -> {
-			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-			WebBillingDialogFragment newFragment = new WebBillingDialogFragment(this);
-
-
-			String url = getUrlForStripe(plan);
-			Log.i("url", url);
-			newFragment.setUrl(url);
-
-			newFragment.show(ft, "stripe_dialog");
-			sheet.dismiss();
-		});
-
-		sheet.show();
+		PlayBillingProxy.initiatePayment(this, plan);
 	}
 
 	private void downgradeToFree(){
@@ -404,21 +368,5 @@ public class StorageActivity extends AppCompatActivity {
 				null
 		);
 	}
-
-	private String getUrlForStripe(String plan){
-		HashMap<String, String> params = new HashMap<>();
-		params.put("plan", plan);
-
-		try {
-			String token = URLEncoder.encode(KeyManagement.getApiToken(this), "utf-8");
-			String encParams = Crypto.byteArrayToBase64UrlSafe(CryptoHelpers.encryptParamsForServer(params).getBytes());
-
-			return StinglePhotosApplication.getApiUrl() + getString(R.string.stripe_url) + "/?token=" + token + "&params=" + encParams;
-		}
-		catch (CryptoException | UnsupportedEncodingException e){
-			return null;
-		}
-	}
-
 
 }

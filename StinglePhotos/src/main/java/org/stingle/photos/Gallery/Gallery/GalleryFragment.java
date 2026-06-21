@@ -43,6 +43,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	private LinearLayout noPhotosHolder;
 
 	private int lastScrollPosition = 0;
+	private int lastScrollOffset = 0;
 
 	private GalleryFragmentParent parentActivity;
 
@@ -50,6 +51,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	private String albumId = null;
 	private View scrollBarWithTooltip;
 	private boolean isScrollBarDragging = false;
+	private int lastScrollbarTargetPosition = -1;
 	private ImageView scrollbarThumb;
 	final Handler handler = new Handler();
 
@@ -60,6 +62,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		View view = inflater.inflate(R.layout.fragment_gallery, container, false);
 
 		recyclerView = view.findViewById(R.id.recycler_view);
+		// Edge-to-edge: extend the grid's bottom padding by the navigation-bar inset so
+		// the last row clears the (also inset-lifted) bottom navigation bar.
+		Helpers.applyBottomInsetPadding(recyclerView);
 		noPhotosHolder = view.findViewById(R.id.no_photos_holder);
 		parentActivity = (GalleryFragmentParent) getActivity();
 		scrollBarWithTooltip = view.findViewById(R.id.scrollbar_with_tooltip);
@@ -167,7 +172,10 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 			handleNoPhotos();
 		}
 		Log.d("lastScrollPosition", lastScrollPosition + "");
-		layoutManager.scrollToPosition(lastScrollPosition);
+		// Restore the exact scroll position INCLUDING the pixel offset of the first visible
+		// row. scrollToPosition() alone snaps that row flush to the top, dropping the partial
+		// offset and visibly shifting the grid down when returning from the photo viewer.
+		layoutManager.scrollToPositionWithOffset(lastScrollPosition, lastScrollOffset);
 		setScrollbarThumbPosition();
 
 		if (recyclerView != null) {
@@ -185,6 +193,11 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		super.onPause();
 		Log.d("GalleryFragment", "onPause");
 		lastScrollPosition = layoutManager.findFirstVisibleItemPosition();
+		// Remember how far the first visible row is scrolled past the top so onResume can
+		// restore the exact position (see scrollToPositionWithOffset there).
+		View firstChild = layoutManager.findViewByPosition(lastScrollPosition);
+		lastScrollOffset = (firstChild != null && recyclerView != null)
+				? firstChild.getTop() - recyclerView.getPaddingTop() : 0;
 		if (recyclerView != null) {
 			recyclerView.setAdapter(null);
 		}
@@ -270,12 +283,27 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		if (recyclerView == null) {
 			return;
 		}
-		int lastScrollPos = recyclerView.getScrollY();
+		// Preserve the scroll position across the adapter's notifyDataSetChanged. NOTE:
+		// recyclerView.getScrollY()/setScrollY() are no-ops on a RecyclerView (it scrolls via
+		// internal offsets, not the View scroll position), so the old code did NOT preserve
+		// position — every sync/refresh tick let the grid re-anchor and visibly shift. Capture
+		// the first visible item + its pixel offset and restore it explicitly.
+		int firstPos = -1;
+		int offset = 0;
+		if (layoutManager != null) {
+			firstPos = layoutManager.findFirstVisibleItemPosition();
+			View firstChild = (firstPos >= 0) ? layoutManager.findViewByPosition(firstPos) : null;
+			if (firstChild != null) {
+				offset = firstChild.getTop() - recyclerView.getPaddingTop();
+			}
+		}
 		if (adapter != null) {
 			adapter.updateDataSet();
 			handleNoPhotos();
 		}
-		recyclerView.setScrollY(lastScrollPos);
+		if (layoutManager != null && firstPos >= 0) {
+			layoutManager.scrollToPositionWithOffset(firstPos, offset);
+		}
 	}
 
 	public void updateItem(int position) {
@@ -359,6 +387,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 					dateTooltip.setVisibility(View.VISIBLE);
 					((GalleryActivity) parentActivity).disablePullToRefresh();
 					isScrollBarDragging = true;
+					if (adapter != null) {
+						adapter.setSkipImageLoad(true);
+					}
 					break;
 
 				case MotionEvent.ACTION_MOVE:
@@ -404,10 +435,14 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 					//Log.e("targetScrollPosition", "targetScrollPosition - " + targetScrollPosition + "");
 					//Log.e("delim", "----------------------------------------------------");
 
-					// Update the RecyclerView's scroll position
-					layoutManager.setUpdateSpanCount(false);
-					layoutManager.scrollToPositionWithOffset(targetScrollPosition, 0);
-					layoutManager.setUpdateSpanCount(true);
+					// Update the RecyclerView's scroll position only when the target actually
+					// changes, so we don't thrash the list on every touch-move event.
+					if (targetScrollPosition != lastScrollbarTargetPosition) {
+						lastScrollbarTargetPosition = targetScrollPosition;
+						layoutManager.setUpdateSpanCount(false);
+						layoutManager.scrollToPositionWithOffset(targetScrollPosition, 0);
+						layoutManager.setUpdateSpanCount(true);
+					}
 
 					// Update the date tooltip based on the new scroll position
 					String date = getDateForScrollPosition(targetScrollPosition); // Implement this method to fetch the date based on the current scroll position
@@ -424,6 +459,19 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 					dateTooltip.setVisibility(View.GONE);
 					((GalleryActivity) parentActivity).enablePullToRefresh();
 					isScrollBarDragging = false;
+					lastScrollbarTargetPosition = -1;
+					// Resume thumbnail loading once at the final position. Post it so the layout
+					// has settled and the visible range is accurate (computing it inline at
+					// ACTION_UP can miss a row, leaving it blank). Notify a small buffer beyond
+					// the visible range to be safe.
+					if (adapter != null && recyclerView != null) {
+						recyclerView.post(() -> {
+							adapter.setSkipImageLoad(false);
+							// Load the final visible thumbnails directly (no notify -> no relayout
+							// -> no scroll-position shift).
+							adapter.loadVisibleThumbnails(recyclerView);
+						});
+					}
 					break;
 			}
 

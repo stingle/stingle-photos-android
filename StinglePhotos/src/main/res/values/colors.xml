@@ -27,4 +27,31 @@
 
     <color name="hr_color">#36B6B6B6</color>
     <color name="loading_paceholder">#51B6B6B6</color>
+
+    <!-- Material 3 color tokens (light), seeded from the Stingle brand red #B71C1C. -->
+    <color name="md_primary">#B71C1C</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#FFDAD5</color>
+    <color name="md_on_primary_container">#410002</color>
+    <color name="md_secondary">#775651</color>
+    <color name="md_on_secondary">#FFFFFF</color>
+    <color name="md_secondary_container">#FFDAD5</color>
+    <color name="md_on_secondary_container">#2C1512</color>
+    <color name="md_tertiary">#715B2E</color>
+    <color name="md_on_tertiary">#FFFFFF</color>
+    <color name="md_tertiary_container">#FCDFA6</color>
+    <color name="md_on_tertiary_container">#231B00</color>
+    <color name="md_background">#FFF8F6</color>
+    <color name="md_on_background">#201A19</color>
+    <color name="md_surface">#FFF8F6</color>
+    <color name="md_on_surface">#201A19</color>
+    <color name="md_surface_variant">#F5DDDA</color>
+    <color name="md_on_surface_variant">#534341</color>
+    <color name="md_surface_container">#F8E9E6</color>
+    <color name="md_outline">#857370</color>
+    <color name="md_outline_variant">#D8C2BE</color>
+    <color name="md_error">#BA1A1A</color>
+    <color name="md_on_error">#FFFFFF</color>
+    <color name="md_error_container">#FFDAD6</color>
+    <color name="md_on_error_container">#410002</color>
 </resources>

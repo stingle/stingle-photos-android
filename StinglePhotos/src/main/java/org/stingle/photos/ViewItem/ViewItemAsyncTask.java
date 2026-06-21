@@ -12,24 +12,21 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import androidx.annotation.OptIn;
 import androidx.core.widget.ContentLoadingProgressBar;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
-import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.FileDataSource;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.datasource.FileDataSource;
+import androidx.media3.exoplayer.DefaultLoadControl;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.ProgressiveMediaSource;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.ui.PlayerView;
 
 import org.json.JSONObject;
 import org.stingle.photos.AsyncTasks.OnAsyncTaskFinish;
@@ -51,7 +48,6 @@ import org.stingle.photos.Sync.SyncManager;
 import org.stingle.photos.Util.Helpers;
 import org.stingle.photos.Util.MemoryCache;
 import org.stingle.photos.Video.StingleDataSourceFactory;
-import org.stingle.photos.Video.StingleHttpDataSource;
 import org.stingle.photos.ViewItemActivity;
 import org.stingle.photos.Widget.AnimatedGifImageView;
 import org.stingle.photos.Widget.ImageHolderLayout;
@@ -64,6 +60,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@OptIn(markerClass = UnstableApi.class)
 public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTask.ViewItemTaskResult> {
 
 	private WeakReference<Context> contextRef;
@@ -368,9 +365,11 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			}
 
 
-			SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(
-					new DefaultRenderersFactory(context),
-					new DefaultTrackSelector(), new DefaultLoadControl());
+			ExoPlayer player = new ExoPlayer.Builder(context,
+					new DefaultRenderersFactory(context))
+					.setTrackSelector(new DefaultTrackSelector(context))
+					.setLoadControl(new DefaultLoadControl())
+					.build();
 			adapter.addPlayer(position, player);
 
 
@@ -383,16 +382,17 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 					Uri uri = Uri.parse(result.url);
 					Log.d("url", result.url);
 
-					StingleHttpDataSource http = new StingleHttpDataSource("stingle", null);
+					DefaultHttpDataSource.Factory http = new DefaultHttpDataSource.Factory()
+							.setUserAgent("stingle")
+							.setAllowCrossProtocolRedirects(true);
 					StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, http, videoFileHeader);
 
-					mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
+					mediaSource = new ProgressiveMediaSource.Factory(stingle).createMediaSource(MediaItem.fromUri(uri));
 				}
 			} else {
 				Uri uri = Uri.fromFile(new File(FileManager.getHomeDir(context) + "/" + result.filename));
-				FileDataSource file = new FileDataSource();
-				StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, file, videoFileHeader);
-				mediaSource = new ExtractorMediaSource.Factory(stingle).createMediaSource(uri);
+				StingleDataSourceFactory stingle = new StingleDataSourceFactory(context, new FileDataSource.Factory(), videoFileHeader);
+				mediaSource = new ProgressiveMediaSource.Factory(stingle).createMediaSource(MediaItem.fromUri(uri));
 			}
 
 			if (mediaSource != null) {
@@ -420,72 +420,28 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 						}
 					});
 				}
-				player.prepare(mediaSource, true, false);
+				player.setMediaSource(mediaSource);
+				player.prepare();
 				loading.setVisibility(View.INVISIBLE);
 			}
 		}
 	}
 
-	private Player.EventListener getPlayerEventListener() {
+	private Player.Listener getPlayerEventListener() {
 		ContentLoadingProgressBar loading = loadingRef.get();
 		if(loading == null){
 			return null;
 		}
-		return new Player.EventListener() {
+		return new Player.Listener() {
 			@Override
-			public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-
-			}
-
-			@Override
-			public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-			}
-
-			@Override
-			public void onLoadingChanged(boolean isLoading) {
-
-			}
-
-			@Override
-			public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-				if (playbackState == ExoPlayer.STATE_BUFFERING) {
+			public void onPlaybackStateChanged(int playbackState) {
+				if (playbackState == Player.STATE_BUFFERING) {
 					loading.setVisibility(View.VISIBLE);
 					Log.d("buffering", "yes");
 				} else {
 					loading.setVisibility(View.INVISIBLE);
 					Log.d("buffering", "no");
 				}
-			}
-
-			@Override
-			public void onRepeatModeChanged(int repeatMode) {
-
-			}
-
-			@Override
-			public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
-			}
-
-			@Override
-			public void onPlayerError(ExoPlaybackException error) {
-
-			}
-
-			@Override
-			public void onPositionDiscontinuity(int reason) {
-
-			}
-
-			@Override
-			public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-			}
-
-			@Override
-			public void onSeekProcessed() {
-
 			}
 		};
 	}

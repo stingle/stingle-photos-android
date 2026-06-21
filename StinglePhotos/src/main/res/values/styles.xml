@@ -1,45 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Material 3 color palette shared by all app themes. Colors auto-switch
+         light/dark via the md_* tokens defined in values/ and values-night/. -->
+    <style name="AppColorsM3">
+        <item name="colorPrimary">@color/md_primary</item>
+        <item name="colorOnPrimary">@color/md_on_primary</item>
+        <item name="colorPrimaryContainer">@color/md_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/md_on_primary_container</item>
+        <item name="colorSecondary">@color/md_secondary</item>
+        <item name="colorOnSecondary">@color/md_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/md_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/md_on_secondary_container</item>
+        <item name="colorTertiary">@color/md_tertiary</item>
+        <item name="colorOnTertiary">@color/md_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/md_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/md_on_tertiary_container</item>
+        <item name="android:colorBackground">@color/md_background</item>
+        <item name="colorOnBackground">@color/md_on_background</item>
+        <item name="colorSurface">@color/md_surface</item>
+        <item name="colorOnSurface">@color/md_on_surface</item>
+        <item name="colorSurfaceVariant">@color/md_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/md_on_surface_variant</item>
+        <item name="colorOutline">@color/md_outline</item>
+        <item name="colorOutlineVariant">@color/md_outline_variant</item>
+        <item name="colorError">@color/md_error</item>
+        <item name="colorOnError">@color/md_on_error</item>
+        <item name="colorErrorContainer">@color/md_error_container</item>
+        <item name="colorOnErrorContainer">@color/md_on_error_container</item>
+        <item name="colorAccent">@color/md_primary</item>
+    </style>
+
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">?attr/colorBackgroundFloating</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/md_primary</item>
+        <item name="colorOnPrimary">@color/md_on_primary</item>
+        <item name="colorPrimaryContainer">@color/md_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/md_on_primary_container</item>
+        <item name="colorSecondary">@color/md_secondary</item>
+        <item name="colorOnSecondary">@color/md_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/md_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/md_on_secondary_container</item>
+        <item name="colorTertiary">@color/md_tertiary</item>
+        <item name="colorOnTertiary">@color/md_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/md_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/md_on_tertiary_container</item>
+        <item name="android:colorBackground">@color/md_background</item>
+        <item name="colorOnBackground">@color/md_on_background</item>
+        <item name="colorSurface">@color/md_surface</item>
+        <item name="colorOnSurface">@color/md_on_surface</item>
+        <item name="colorSurfaceVariant">@color/md_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/md_on_surface_variant</item>
+        <item name="colorOutline">@color/md_outline</item>
+        <item name="colorOutlineVariant">@color/md_outline_variant</item>
+        <item name="colorError">@color/md_error</item>
+        <item name="colorOnError">@color/md_on_error</item>
+        <item name="colorErrorContainer">@color/md_error_container</item>
+        <item name="colorOnErrorContainer">@color/md_on_error_container</item>
+        <item name="colorAccent">@color/md_primary</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="materialButtonStyle">@style/ButtonStyle</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <!-- Edge-to-edge: dark bar icons in light mode, light icons in dark mode. -->
+        <item name="android:windowLightStatusBar">@bool/light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/light_system_bars</item>
     </style>
 
-    <style name="AppThemeCompatWithActionBar" parent="Theme.MaterialComponents.DayNight">
-        <item name="android:colorPrimary">@color/primaryColor</item>
-        <item name="android:colorPrimaryDark">?attr/colorBackgroundFloating</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
-        <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="AppThemeCompatWithActionBar" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">@color/md_primary</item>
+        <item name="colorOnPrimary">@color/md_on_primary</item>
+        <item name="colorPrimaryContainer">@color/md_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/md_on_primary_container</item>
+        <item name="colorSecondary">@color/md_secondary</item>
+        <item name="colorOnSecondary">@color/md_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/md_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/md_on_secondary_container</item>
+        <item name="colorTertiary">@color/md_tertiary</item>
+        <item name="colorOnTertiary">@color/md_on_tertiary</item>
+        <item name="android:colorBackground">@color/md_background</item>
+        <item name="colorOnBackground">@color/md_on_background</item>
+        <item name="colorSurface">@color/md_surface</item>
+        <item name="colorOnSurface">@color/md_on_surface</item>
+        <item name="colorSurfaceVariant">@color/md_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/md_on_surface_variant</item>
+        <item name="colorOutline">@color/md_outline</item>
+        <item name="colorError">@color/md_error</item>
+        <item name="colorOnError">@color/md_on_error</item>
+        <item name="colorAccent">@color/md_primary</item>
         <item name="toolbarStyle">@style/ToolbarStyle</item>
         <item name="materialButtonStyle">@style/ButtonStyle</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <!-- Edge-to-edge: dark bar icons in light mode, light icons in dark mode. -->
+        <item name="android:windowLightStatusBar">@bool/light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/light_system_bars</item>
     </style>
 
-    <style name="AppThemeDark" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="colorPrimary">@color/lightAccent</item>
-        <item name="colorPrimaryDark">@color/lightAccent</item>
-        <item name="colorAccent">@color/lightAccent</item>
+    <style name="AppThemeDark" parent="Theme.Material3.Dark.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
         <item name="android:windowActionBarOverlay">true</item>
     </style>
 
-    <style name="ToolbarStyle" parent="Widget.MaterialComponents.Toolbar">
+    <style name="ToolbarStyle" parent="Widget.Material3.Toolbar">
         <item name="android:background">?colorSurface</item>
     </style>
-    <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
+    <style name="ButtonStyle" parent="Widget.Material3.Button">
         <item name="android:textColor">@color/buttonTextColor</item>
     </style>
 
@@ -71,8 +138,22 @@
         <item name="android:windowExitAnimation">@anim/slide_down</item>
     </style>
 
+    <!-- Rounded corners for gallery grid thumbnails (ShapeableImageView). -->
+    <style name="RoundedThumb">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
     <style name="RoundCheckbox" parent="@style/Widget.AppCompat.CompoundButton.CheckBox">
         <item name="android:button">@drawable/checkbox_selector</item>
         <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!-- Modern splash screen (androidx.core:core-splashscreen). Shown by the launcher
+         activity, then it swaps to AppTheme via installSplashScreen(). -->
+    <style name="Theme.Stingle.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_stingle_photos_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_stingle_photos_foreground</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
     </style>
 </resources>

@@ -3,9 +3,12 @@ package org.stingle.photos.Video;
 import android.content.Context;
 import android.net.Uri;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
+import androidx.annotation.OptIn;
+import androidx.media3.common.C;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.TransferListener;
 import com.goterl.lazysodium.SodiumAndroid;
 import com.goterl.lazysodium.interfaces.AEAD;
 
@@ -18,6 +21,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.Arrays;
 
+@OptIn(markerClass = UnstableApi.class)
 public class StingleDataSource implements DataSource {
 
 	private Uri uri;
@@ -39,13 +43,18 @@ public class StingleDataSource implements DataSource {
 		this.header = header;
 	}
 
+	@Override
+	public void addTransferListener(TransferListener transferListener) {
+		upstream.addTransferListener(transferListener);
+	}
+
 	private void getHeader(DataSpec dataSpec) throws IOException {
-		DataSpec specUp = new DataSpec(dataSpec.uri, 0, C.LENGTH_UNSET, null, 0);
+		DataSpec specUp = new DataSpec.Builder().setUri(dataSpec.uri).setPosition(0).setLength(C.LENGTH_UNSET).build();
 		upstream.open(specUp);
 
 		int headerLen = Crypto.FILE_HEADER_BEGINNING_LEN;
 		byte[] buf = new byte[headerLen];
-		int bytesRead = upstream.read(buf, 0, headerLen);
+		int bytesRead = readFully(buf, 0, headerLen);
 		if(bytesRead != headerLen){
 			throw new IOException("Invalid header length");
 		}
@@ -57,7 +66,7 @@ public class StingleDataSource implements DataSource {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		bytes.write(buf);
 		buf = new byte[encHeaderSize];
-		bytesRead = upstream.read(buf, 0, encHeaderSize);
+		bytesRead = readFully(buf, 0, encHeaderSize);
 		if(bytesRead != encHeaderSize){
 			throw new IOException("Invalid header length");
 		}
@@ -80,18 +89,18 @@ public class StingleDataSource implements DataSource {
 			}
 
 			long chunkOffset = header.overallHeaderSize;
-			if(dataSpec.absoluteStreamPosition > 0){
-				currentChunkNumber = (int) Math.floor(dataSpec.absoluteStreamPosition / header.chunkSize) + 1;
+			if(dataSpec.position > 0){
+				currentChunkNumber = (int) Math.floor(dataSpec.position / header.chunkSize) + 1;
 				chunkOffset = header.overallHeaderSize +  (long)(currentChunkNumber - 1) * (AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES + header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES);
 
-				positionInChunk = (int)(dataSpec.absoluteStreamPosition - ((currentChunkNumber-1) * header.chunkSize));
+				positionInChunk = (int)(dataSpec.position - ((currentChunkNumber-1) * header.chunkSize));
 			}
 			else {
 				positionInChunk = 0;
 				currentChunk = null;
 				currentChunkNumber = 1;
 			}
-			DataSpec specUp = new DataSpec(dataSpec.uri, chunkOffset, C.LENGTH_UNSET, null, 0);
+			DataSpec specUp = new DataSpec.Builder().setUri(dataSpec.uri).setPosition(chunkOffset).setLength(C.LENGTH_UNSET).build();
 			upstream.open(specUp);
 
 			bytesRemaining = dataSpec.length == C.LENGTH_UNSET ? header.dataSize - dataSpec.position : dataSpec.length;
@@ -169,12 +178,14 @@ public class StingleDataSource implements DataSource {
 		byte[] encChunkBytes = new byte[header.chunkSize + AEAD.XCHACHA20POLY1305_IETF_ABYTES];
 
 		int numRead;
-		numRead = upstream.read(chunkNonce, 0, chunkNonce.length);
+		numRead = readFully(chunkNonce, 0, chunkNonce.length);
 		if(numRead != AEAD.XCHACHA20POLY1305_IETF_NPUBBYTES){
 			throw new CryptoException("Invalid nonce length");
 		}
 
-		numRead = upstream.read(encChunkBytes, 0, encChunkBytes.length);
+		// Media3 DataSource.read() only guarantees "up to" length bytes per call, so
+		// loop until the full encrypted chunk is read (the final chunk may be shorter).
+		numRead = readFully(encChunkBytes, 0, encChunkBytes.length);
 
 		so.crypto_kdf_derive_from_key(chunkKey, chunkKey.length, currentChunkNumber, contextBytes, header.symmetricKey);
 
@@ -186,6 +197,26 @@ public class StingleDataSource implements DataSource {
 
 		return Arrays.copyOfRange(decBytes, 0, (int)decSize[0]);
 
+	}
+
+	/**
+	 * Reads from the upstream source until {@code length} bytes have been read into
+	 * {@code buffer} at {@code offset}, or the upstream reaches end of input. A single
+	 * {@link DataSource#read} is only guaranteed to return "up to" the requested length,
+	 * so callers that need an exact amount (the per-chunk nonce + ciphertext) must loop.
+	 *
+	 * @return the number of bytes actually read (less than {@code length} only at EOF).
+	 */
+	private int readFully(byte[] buffer, int offset, int length) throws IOException {
+		int total = 0;
+		while (total < length) {
+			int read = upstream.read(buffer, offset + total, length - total);
+			if (read == C.RESULT_END_OF_INPUT) {
+				break;
+			}
+			total += read;
+		}
+		return total;
 	}
 
 	@Override

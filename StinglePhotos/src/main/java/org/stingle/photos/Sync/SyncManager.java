@@ -13,7 +13,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.OutOfQuotaPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -815,6 +818,29 @@ public class SyncManager {
 	}
 	public static String getImportFrom(Context context){
 		return PreferenceManager.getDefaultSharedPreferences(context).getString(SyncManager.PREF_IMPORT_FROM, "camera_folder");
+	}
+
+	// Enqueue a one-off sync/upload through WorkManager. Used right after the camera
+	// encrypts new media: WorkManager runs the (synchronous) SyncWorker reliably in the
+	// background and persists/retries it across process death, instead of relying on an
+	// app-managed foreground service that Android 15 cuts shortly after backgrounding.
+	public static void startOneTimeSync(Context context){
+		Constraints constraints = new Constraints.Builder()
+				.setRequiredNetworkType(NetworkType.CONNECTED)
+				.build();
+
+		OneTimeWorkRequest oneTimeSyncWork =
+				new OneTimeWorkRequest.Builder(SyncWorker.class)
+						.addTag("sync")
+						.setConstraints(constraints)
+						.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+						.build();
+
+		WorkManager.getInstance(context).enqueueUniqueWork(
+				"SPSyncOnce",
+				ExistingWorkPolicy.REPLACE,
+				oneTimeSyncWork
+		);
 	}
 
 	public static void startPeriodicWork(Context context){

@@ -7,6 +7,8 @@ import android.os.Bundle;
 
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.color.DynamicColors;
+
 import org.stingle.photos.AsyncTasks.Sync.DownloadThumbsAsyncTask;
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Sync.SyncAsyncTask;
@@ -80,6 +82,13 @@ public class StinglePhotosApplication extends Application{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		Helpers.applyTheme(prefs.getString("theme", "auto"));
 		Helpers.setLocale(getApplicationContext());
+
+		// Material You: optionally tint the app with the user's wallpaper-derived
+		// palette on Android 12+. Off by default to preserve the Stingle brand red
+		// consistently across all screens; users can opt in.
+		if (prefs.getBoolean("dynamic_colors", false)) {
+			DynamicColors.applyToActivitiesIfAvailable(this);
+		}
 
 		Helpers.storePreference(this, PREF_APP_START_COUNT, Helpers.getPreference(this, PREF_APP_START_COUNT, 0)+1);
     }
