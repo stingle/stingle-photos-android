@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sync_status_action"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:clickable="true"
+    android:focusable="true"
+    android:contentDescription="@string/backup_complete">
+
+    <ImageView
+        android:id="@+id/sync_status_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        app:tint="?attr/colorControlNormal"
+        android:src="@drawable/ic_cloud_done" />
+
+    <!-- Indeterminate spinner for phases without a file count (refreshing / importing). -->
+    <ProgressBar
+        android:id="@+id/sync_status_spinner"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:indeterminate="true" />
+
+    <!-- Determinate ring showing overall file-count progress while transferring. -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/sync_status_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:max="100"
+        app:indicatorSize="28dp"
+        app:trackThickness="3dp"
+        app:trackCornerRadius="2dp"
+        app:indicatorColor="?attr/colorPrimary"
+        app:trackColor="?attr/colorSurfaceVariant" />
+
+</FrameLayout>

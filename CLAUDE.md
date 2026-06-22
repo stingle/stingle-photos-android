@@ -69,9 +69,9 @@ Raw SQLite (no Room). `StingleDb` + `StingleDbContract` define schema; `Db/Query
 - `FSSync` — reconcile local filesystem with DB
 - `ImportMedia` — import device gallery media into the encrypted store
 - `SyncCloudToLocalDb` — pull server changes into local DB
-- `UploadToCloud` — encrypt + upload pending local files
+- `UploadToCloud` — encrypt + upload pending local files. Uploads run **concurrently** on a fixed pool (`UPLOAD_THREAD_COUNT = 3`); work rows are read off the DB cursor into value objects **before** dispatch (a `Cursor` is not thread-safe), and the per-file space gate + success-path DB/pref writes are guarded by `DB_LOCK`, the shared `Notification.Builder` by `NOTIF_LOCK`. `HttpsClient.multipartUpload(...)` has a progress-callback overload that reports per-file byte percent.
 
-Sync status (`STATUS_IDLE/REFRESHING/UPLOADING/...`) is broadcast via `LocalBroadcastManager` and mirrored on `StinglePhotosApplication`.
+Sync status (`STATUS_IDLE/REFRESHING/UPLOADING/...`) is broadcast via `LocalBroadcastManager` and mirrored on `StinglePhotosApplication`. Live per-file transfer progress — **both uploads and user-triggered downloads** (`AsyncTasks/Gallery/DownloadAsyncTask`) — lives in the thread-safe singleton `Sync/TransferProgressTracker` (one entry per in-flight file with a `Direction`, plus per-direction completed/total counts). The `SYNC_STATUS` broadcast is just a "re-read me" ping that the UI uses to refresh from the tracker; downloads run independently of the sync engine and ping via `SyncManager.notifyStatusChanged()` (which does **not** mutate `syncStatus`).
 
 ### Async pattern
 The codebase predates coroutines and uses Android's deprecated `AsyncTask` extensively — see the ~40 tasks in `AsyncTasks/` (`AsyncTasks/Gallery`, `AsyncTasks/Sync`). New background work should follow the existing `AsyncTask` + `OnAsyncTaskFinish` callback convention to stay consistent unless deliberately modernizing.
@@ -81,6 +81,8 @@ Each album has its **own X25519 keypair**. Files in an album are encrypted to th
 
 ### UI
 Activity-based (`GalleryActivity` is the main screen after login; `ViewItemActivity` for full-screen viewing; `CameraXActivity` for in-app encrypted capture via CameraX). Fragments under `Gallery/`, `Sharing/`, `Billing/`. `viewBinding` is enabled. Theme and locale are applied in `Application.onCreate` via `Util/Helpers`.
+
+**Sync status UI:** backup/sync state is surfaced by an interactive cloud icon in the gallery toolbar (menu item `action_sync_status` with `actionLayout` `view_sync_status_icon`, gallery menu only). The actionView holds three overlapping states driven by `Gallery/Gallery/SyncStatusHandler.updateIcon()`: a static cloud (`ic_cloud_done` idle / `ic_cloud_off` for disabled/no-wifi/low-battery/no-space), an indeterminate `ProgressBar` spinner for count-less phases (refreshing/importing), and a determinate `CircularProgressIndicator` that fills by **file count** (`completed*100/total` across all in-flight transfers — not per-file bytes) while transferring. On tap it opens a `PopupWindow` (anchored to the icon, `SyncStatusPopupAnimation`) listing all in-flight transfers — each row a rounded thumbnail (`ShowEncThumbInImageView.setCircle(false)`), filename, per-file byte progress bar, and an up/down `ic_cloud_upload`/`ic_cloud_download` direction icon (`SyncQueueAdapter`, fed by `TransferProgressTracker`) — or "Backup and sync complete" when idle. This replaced the old scroll-anchored sync bar (`SyncBarHandler`, removed).
 
 **Material 3 + edge-to-edge:** themes are `Theme.Material3.DayNight`; the brand red is `md_primary` (light) / `#F44336` (night — M3's default dark tint is pink, so it's overridden). Activities run edge-to-edge; system-bar/cutout insets are applied as padding/margin via the `Helpers.applyTopInsetPadding/applyBottomInsetPadding/...` helpers rather than `fitsSystemWindows`. Video playback uses **Media3** (`ViewItemAsyncTask` builds the player; `Video/StingleDataSource[Factory]` decrypt chunks on the fly — Media3's `read()` returns partial reads, so the loop in `StingleDataSource.readFully()` is required).
 

@@ -16,7 +16,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -37,20 +36,38 @@ import org.stingle.photos.Net.StingleResponse;
 import org.stingle.photos.R;
 import org.stingle.photos.StinglePhotosApplication;
 import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Sync.TransferProgressTracker;
 import org.stingle.photos.Util.Helpers;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class UploadToCloud {
+
+	// Number of files uploaded concurrently. Uploads are network-bound, so a small
+	// fixed pool keeps the pipe full between files without hammering the server or
+	// burning memory (each in-flight upload buffers ~1 MB).
+	private static final int UPLOAD_THREAD_COUNT = 3;
+
+	// Guards the per-file space gate + suspend-pref writes and the success-path DB/pref
+	// writes. Held only around those short critical sections, never across the network call.
+	private static final Object DB_LOCK = new Object();
+	// Notification.Builder is not thread-safe; serialize all mutations + notify() calls.
+	private static final Object NOTIF_LOCK = new Object();
 
 	private Context context;
 	private File dir;
 	private File thumbDir;
 	private AsyncTask<?,?,?> task;
-	private int uploadedFilesCount = 0;
 	private int totalFilesCount = 0;
+
+	private final Map<Integer, FilesDb> dbForSet = new HashMap<>();
 
 	public static NotificationManager mNotifyManager;
 	public static Notification.Builder notificationBuilder;
@@ -71,11 +88,41 @@ public class UploadToCloud {
 		showNotification();
 		totalFilesCount = getFilesCountToUpload(SyncManager.GALLERY) + getFilesCountToUpload(SyncManager.TRASH) + getFilesCountToUpload(SyncManager.ALBUM);
 
+		TransferProgressTracker.getInstance().resetUploads(totalFilesCount);
 		SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING);
 
-		uploadSet(SyncManager.GALLERY);
-		uploadSet(SyncManager.TRASH);
-		uploadSet(SyncManager.ALBUM);
+		dbForSet.put(SyncManager.GALLERY, new GalleryTrashDb(context, SyncManager.GALLERY));
+		dbForSet.put(SyncManager.TRASH, new GalleryTrashDb(context, SyncManager.TRASH));
+		dbForSet.put(SyncManager.ALBUM, new AlbumFilesDb(context));
+
+		// Collect all work off the cursors before any threading (Cursor is not thread-safe).
+		List<UploadItem> items = new ArrayList<>();
+		items.addAll(collectItems(SyncManager.GALLERY));
+		items.addAll(collectItems(SyncManager.TRASH));
+		items.addAll(collectItems(SyncManager.ALBUM));
+
+		if(!items.isEmpty()) {
+			ExecutorService executor = Executors.newFixedThreadPool(UPLOAD_THREAD_COUNT);
+			for (UploadItem item : items) {
+				if (task != null && task.isCancelled()) {
+					break;
+				}
+				executor.execute(() -> uploadItem(item));
+			}
+			executor.shutdown();
+			try {
+				executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				executor.shutdownNow();
+			}
+		}
+
+		for (FilesDb db : dbForSet.values()) {
+			db.close();
+		}
+		dbForSet.clear();
+
+		TransferProgressTracker.getInstance().clearUploads();
 		SyncManager.setSyncStatus(context, SyncManager.STATUS_IDLE);
 		isNotificationActive = false;
 		removeNotification();
@@ -191,16 +238,11 @@ public class UploadToCloud {
 		}
 	}
 
-	protected void uploadSet(int set){
-		FilesDb db;
-		if(set == SyncManager.GALLERY || set == SyncManager.TRASH){
-			db = new GalleryTrashDb(context, set);
-		}
-		else if (set == SyncManager.ALBUM){
-			db = new AlbumFilesDb(context);
-		}
-		else{
-			return;
+	private List<UploadItem> collectItems(int set){
+		List<UploadItem> items = new ArrayList<>();
+		FilesDb db = dbForSet.get(set);
+		if(db == null){
+			return items;
 		}
 
 		try(
@@ -208,62 +250,66 @@ public class UploadToCloud {
 			AutoCloseableCursor reuploadResultAutoCloseableCursor = db.getReuploadFilesList()
 		) {
 			Cursor result = resultAutoCloseableCursor.getCursor();
-			Cursor reuploadResult = reuploadResultAutoCloseableCursor.getCursor();
 			while (result.moveToNext()) {
-				if (task != null && task.isCancelled()) {
-					break;
-				}
-				if (!isUploadAllowed()) {
-					break;
-				}
-				uploadedFilesCount++;
-				uploadFile(set, db, result, false);
+				items.add(itemFromCursor(result, set, false));
 			}
-			result.close();
 
-
+			Cursor reuploadResult = reuploadResultAutoCloseableCursor.getCursor();
 			while (reuploadResult.moveToNext()) {
-				if (task != null && task.isCancelled()) {
-					break;
-				}
-				if (!isUploadAllowed()) {
-					break;
-				}
-				uploadedFilesCount++;
-				uploadFile(set, db, reuploadResult, true);
+				items.add(itemFromCursor(reuploadResult, set, true));
 			}
-			reuploadResult.close();
 		}
-		finally {
-			db.close();
-		}
+
+		return items;
 	}
 
-	protected void uploadFile(int set, FilesDb db, Cursor result, boolean isReupload){
-		String filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
-		String version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_VERSION));
-		String dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
-		String dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
-		String headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
-		String albumId = "";
+	private UploadItem itemFromCursor(Cursor result, int set, boolean isReupload){
+		UploadItem item = new UploadItem();
+		item.set = set;
+		item.isReupload = isReupload;
+		item.filename = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_FILENAME));
+		item.version = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_VERSION));
+		item.dateCreated = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_CREATED));
+		item.dateModified = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_DATE_MODIFIED));
+		item.headers = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_HEADERS));
+		item.albumId = "";
 		try {
-			albumId = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
+			item.albumId = result.getString(result.getColumnIndexOrThrow(StingleDbContract.Columns.COLUMN_NAME_ALBUM_ID));
 		}
 		catch (IllegalArgumentException ignored) {}
+		return item;
+	}
 
-		notifyGalleryAboutProgress(filename, headers, set, albumId);
-
-		Log.d("uploadingFile", filename);
-		File file = new File(dir.getPath() + "/" + filename);
-		File thumb = new File(thumbDir.getPath() + "/" + filename);
-
-		int overallSize = Helpers.bytesToMb(file.length() + thumb.length());
-		if(!Helpers.isUploadSpaceAvailable(context, overallSize)){
-			Helpers.storePreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE, Helpers.getAvailableUploadSpace(context));
-			Helpers.storePreference(context, SyncManager.PREF_SUSPEND_UPLOAD, true);
-			Log.d("not_uploading", "space is over, not uploading file " + file.getName());
+	private void uploadItem(UploadItem item){
+		if((task != null && task.isCancelled()) || !isUploadAllowed()){
 			return;
 		}
+
+		FilesDb db = dbForSet.get(item.set);
+		if(db == null){
+			return;
+		}
+
+		File file = new File(dir.getPath() + "/" + item.filename);
+		File thumb = new File(thumbDir.getPath() + "/" + item.filename);
+
+		synchronized (DB_LOCK) {
+			if(Helpers.getPreference(context, SyncManager.PREF_SUSPEND_UPLOAD, false)){
+				return;
+			}
+			int overallSize = Helpers.bytesToMb(file.length() + thumb.length());
+			if(!Helpers.isUploadSpaceAvailable(context, overallSize)){
+				Helpers.storePreference(context, SyncManager.PREF_LAST_AVAILABLE_SPACE, Helpers.getAvailableUploadSpace(context));
+				Helpers.storePreference(context, SyncManager.PREF_SUSPEND_UPLOAD, true);
+				Log.d("not_uploading", "space is over, not uploading file " + file.getName());
+				return;
+			}
+		}
+
+		TransferProgressTracker.getInstance().startUpload(item.filename, item.headers, item.set, item.albumId);
+		notifyProgress();
+
+		Log.d("uploadingFile", item.filename);
 
 		HttpsClient.FileToUpload fileToUpload = new HttpsClient.FileToUpload("file", file.getPath(), SyncManager.SP_FILE_MIME_TYPE);
 		HttpsClient.FileToUpload thumbToUpload = new HttpsClient.FileToUpload("thumb", thumb.getPath(), SyncManager.SP_FILE_MIME_TYPE);
@@ -275,58 +321,67 @@ public class UploadToCloud {
 		HashMap<String, String> postParams = new HashMap<>();
 
 		postParams.put("token", KeyManagement.getApiToken(context));
-		postParams.put("set", String.valueOf(set));
-		postParams.put("albumId", albumId);
-		postParams.put("version", version);
-		postParams.put("dateCreated", dateCreated);
-		postParams.put("dateModified", dateModified);
-		postParams.put("headers", headers);
+		postParams.put("set", String.valueOf(item.set));
+		postParams.put("albumId", item.albumId);
+		postParams.put("version", item.version);
+		postParams.put("dateCreated", item.dateCreated);
+		postParams.put("dateModified", item.dateModified);
+		postParams.put("headers", item.headers);
 
 		JSONObject resp = HttpsClient.multipartUpload(
 				StinglePhotosApplication.getApiUrl() + context.getString(R.string.upload_file_path),
 				postParams,
-				filesToUpload
+				filesToUpload,
+				new HttpsClient.OnUpdateProgress() {
+					@Override
+					public void onUpdate(int progress) {
+						TransferProgressTracker.getInstance().updateUploadPercent(item.filename, progress);
+						SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING);
+					}
+				}
 		);
 		StingleResponse response = new StingleResponse(this.context, resp, false);
 		if(response.isStatusOk()){
-			db.markFileAsRemote(filename);
+			synchronized (DB_LOCK) {
+				db.markFileAsRemote(item.filename);
 
-			String spaceUsedStr = response.get("spaceUsed");
-			String spaceQuotaStr = response.get("spaceQuota");
+				String spaceUsedStr = response.get("spaceUsed");
+				String spaceQuotaStr = response.get("spaceQuota");
 
-			if(spaceUsedStr != null && spaceUsedStr.length() > 0){
-				int spaceUsed = Integer.parseInt(spaceUsedStr);
-				if(spaceUsed >= 0){
-					Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_USED, spaceUsed);
+				if(spaceUsedStr != null && spaceUsedStr.length() > 0){
+					int spaceUsed = Integer.parseInt(spaceUsedStr);
+					if(spaceUsed >= 0){
+						Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_USED, spaceUsed);
+					}
+				}
+
+				if(spaceQuotaStr != null && spaceQuotaStr.length() > 0){
+					int spaceQuota = Integer.parseInt(spaceQuotaStr);
+					if(spaceQuota >= 0){
+						Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_QUOTA, spaceQuota);
+					}
 				}
 			}
 
-			if(spaceQuotaStr != null && spaceQuotaStr.length() > 0){
-				int spaceQuota = Integer.parseInt(spaceQuotaStr);
-				if(spaceQuota >= 0){
-					Helpers.storePreference(context, SyncManager.PREF_LAST_SPACE_QUOTA, spaceQuota);
-				}
+			GalleryActions.refreshGalleryItem(context, item.filename, item.set, item.albumId);
+		}
+
+		if(item.isReupload){
+			synchronized (DB_LOCK) {
+				db.markFileAsReuploaded(item.filename);
 			}
-
-			GalleryActions.refreshGalleryItem(context, filename, set, albumId);
 		}
 
-		if(isReupload){
-			db.markFileAsReuploaded(filename);
-		}
+		TransferProgressTracker.getInstance().finishUpload(item.filename);
+		notifyProgress();
 	}
 
-	private void notifyGalleryAboutProgress(String filename, String headers, int set, String albumId){
-		Bundle params = new Bundle();
-		params.putInt("totalFilesCount", totalFilesCount);
-		params.putInt("uploadedFilesCount", uploadedFilesCount);
-		params.putString("filename", filename);
-		params.putString("headers", headers);
-		params.putInt("set", set);
-		params.putString("albumId", albumId);
-
-		SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING, params);
-		updateNotification(totalFilesCount, uploadedFilesCount);
+	private void notifyProgress(){
+		TransferProgressTracker.Snapshot snap = TransferProgressTracker.getInstance().snapshot();
+		SyncManager.setSyncStatus(context, SyncManager.STATUS_UPLOADING);
+		synchronized (NOTIF_LOCK) {
+			updateNotification(snap.uploadTotal, snap.uploadCompleted);
+		}
 	}
 
 	private void showNotification() {
@@ -371,6 +426,17 @@ public class UploadToCloud {
 
 	private void removeNotification(){
 		mNotifyManager.cancel(R.string.sync_service_started);
+	}
+
+	private static class UploadItem {
+		String filename;
+		String version;
+		String dateCreated;
+		String dateModified;
+		String headers;
+		String albumId;
+		int set;
+		boolean isReupload;
 	}
 
 }

@@ -31,6 +31,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 	private String albumId = null;
 	private String headers = null;
 	private boolean isRemote = false;
+	private boolean circle = true;
 	private OnAsyncTaskFinish onFinish;
 
 	public ShowEncThumbInImageView(Context context, String filename, ImageView imageView){
@@ -58,6 +59,12 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 
 	public ShowEncThumbInImageView setIsRemote(boolean isRemote){
 		this.isRemote = isRemote;
+		return this;
+	}
+
+	/** When false, the decrypted thumbnail is shown as-is (square) instead of circle-cropped. */
+	public ShowEncThumbInImageView setCircle(boolean circle){
+		this.circle = circle;
 		return this;
 	}
 
@@ -108,7 +115,7 @@ public class ShowEncThumbInImageView extends AsyncTask<Void, Void, Bitmap> {
 		super.onPostExecute(bitmap);
 
 		if(bitmap != null){
-			imageView.setImageBitmap(getCroppedBitmap(bitmap));
+			imageView.setImageBitmap(circle ? getCroppedBitmap(bitmap) : bitmap);
 			if(onFinish != null){
 				onFinish.onFinish();
 			}

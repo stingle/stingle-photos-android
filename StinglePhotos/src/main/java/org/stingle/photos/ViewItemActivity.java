@@ -147,6 +147,9 @@ public class ViewItemActivity extends AppCompatActivity {
 				}
 				adapter = new ViewPagerAdapter(ViewItemActivity.this, set, albumId, onSingleClickListener, gestureTouchListener);
 				viewPager.setAdapter(adapter);
+				// Seed the current position so the very first page autoplays its video even when
+				// itemPosition is 0 (ViewPager doesn't fire onPageSelected for an unchanged index).
+				adapter.setCurrentPosition(itemPosition);
 				viewPager.setCurrentItem(itemPosition);
 
 				if(set == SyncManager.ALBUM) {
@@ -236,7 +239,7 @@ public class ViewItemActivity extends AppCompatActivity {
 				if(adapter != null){
 					adapter.setCurrentPosition(position);
 					adapter.pauseAllPlayers();
-					//adapter.startPlaying(position);
+					adapter.startPlaying(position);
 					Log.d("Play", String.valueOf(position));
 				}
 			}

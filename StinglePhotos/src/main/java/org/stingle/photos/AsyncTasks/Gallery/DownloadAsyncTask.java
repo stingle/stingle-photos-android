@@ -17,6 +17,7 @@ import org.stingle.photos.GalleryActivity;
 import org.stingle.photos.Net.HttpsClient;
 import org.stingle.photos.R;
 import org.stingle.photos.Sync.SyncManager;
+import org.stingle.photos.Sync.TransferProgressTracker;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -69,19 +70,32 @@ public class DownloadAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		String homeDir = FileManager.getHomeDir(myContext);
 
+		int totalToDownload = 0;
+		for(StingleDbFile file : files){
+			if(!file.isLocal){
+				totalToDownload++;
+			}
+		}
+		TransferProgressTracker.getInstance().resetDownloads(totalToDownload);
+		SyncManager.notifyStatusChanged(myContext);
+
 		int count = 1;
 		for(StingleDbFile file : files) {
 			if(file.isLocal){
 				continue;
 			}
 			final int itemNumber = count;
+			TransferProgressTracker.getInstance().startDownload(file.filename, file.headers, set, file.albumId);
+			SyncManager.notifyStatusChanged(myContext);
 			try {
 				String path = homeDir + "/" + file.filename;
 				SyncManager.downloadFile(myContext, file.filename, path, false, set, new HttpsClient.OnUpdateProgress() {
 					@Override
 					public void onUpdate(int progress) {
+						TransferProgressTracker.getInstance().updateDownloadPercent(file.filename, progress);
 						if(progress % 5 == 0) {
 							updateNotification(files.size(), itemNumber, progress);
+							SyncManager.notifyStatusChanged(myContext);
 						}
 					}
 				});
@@ -99,9 +113,15 @@ public class DownloadAsyncTask extends AsyncTask<Void, Void, Void> {
 			catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
 				e.printStackTrace();
 			}
+			finally {
+				TransferProgressTracker.getInstance().finishDownload(file.filename);
+				SyncManager.notifyStatusChanged(myContext);
+			}
 			count++;
 		}
 
+		TransferProgressTracker.getInstance().clearDownloads();
+		SyncManager.notifyStatusChanged(myContext);
 		removeNotification();
 
 		galleryDb.close();

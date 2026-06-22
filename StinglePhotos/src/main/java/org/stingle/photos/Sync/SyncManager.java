@@ -117,6 +117,16 @@ public class SyncManager {
 	public static void setSyncStatus(Context context, int status){
 		setSyncStatus(context, status, null);
 	}
+
+	/**
+	 * Pings SYNC_STATUS listeners to re-read their state WITHOUT changing the overall
+	 * sync status. Used by transfers that run independently of the sync engine (e.g.
+	 * user-triggered downloads) so the toolbar status icon/popup refresh from
+	 * {@link TransferProgressTracker}.
+	 */
+	public static void notifyStatusChanged(Context context){
+		LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("SYNC_STATUS"));
+	}
 	public static void setSyncStatus(Context context, int status, Bundle params){
 		StinglePhotosApplication.syncStatus = status;
 		StinglePhotosApplication.syncStatusParams = params;

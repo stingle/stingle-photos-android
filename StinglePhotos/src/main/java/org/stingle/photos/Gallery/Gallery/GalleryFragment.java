@@ -52,6 +52,10 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 	private View scrollBarWithTooltip;
 	private boolean isScrollBarDragging = false;
 	private int lastScrollbarTargetPosition = -1;
+	// Drag tracking for the scrollbar thumb: we move the thumb by the exact finger delta from
+	// where it was grabbed, so the grabbed point stays under the finger (no jump-to-center).
+	private float dragStartRawY = 0;
+	private float dragStartThumbTop = 0;
 	private ImageView scrollbarThumb;
 	final Handler handler = new Handler();
 
@@ -179,11 +183,7 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		setScrollbarThumbPosition();
 
 		if (recyclerView != null) {
-			if (!parentActivity.isSyncBarDisabled()) {
-				recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_with_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
-			} else {
-				recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
-			}
+			recyclerView.setPadding(recyclerView.getPaddingLeft(), (int) getResources().getDimension(R.dimen.gallery_top_padding_without_syncbar), recyclerView.getPaddingRight(), recyclerView.getPaddingBottom());
 		}
 
 	}
@@ -371,7 +371,8 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		float statusBarHeight = getStatusBarHeight(getContext());
 		float toolbarHeight = getToolbarHeight(getContext());
 		int bottomNavHeight = getResources().getDimensionPixelSize(R.dimen.bottom_nav_height);
-		int topOffset = getResources().getDimensionPixelSize(R.dimen.gallery_top_padding_with_syncbar);
+		int topOffset = getResources().getDimensionPixelSize(R.dimen.gallery_top_padding_without_syncbar);
+		final int scrollbarBottomClearance = getScrollbarBottomClearance();
 
 		/*Log.e("statusBarHeight", "statusBarHeight - " + statusBarHeight + "");
 		Log.e("toolbarHeight", "toolbarHeight - " + toolbarHeight + "");
@@ -387,6 +388,10 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 					dateTooltip.setVisibility(View.VISIBLE);
 					((GalleryActivity) parentActivity).disablePullToRefresh();
 					isScrollBarDragging = true;
+					// Remember where the finger grabbed the thumb so we can move it by the exact
+					// finger delta and keep that point under the finger.
+					dragStartRawY = event.getRawY();
+					dragStartThumbTop = scrollbarThumb.getY();
 					if (adapter != null) {
 						adapter.setSkipImageLoad(true);
 					}
@@ -394,46 +399,37 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 
 				case MotionEvent.ACTION_MOVE:
 					isScrollBarDragging = true;
-					float y = event.getRawY();
-					float recyclerViewHeight = recyclerView.getHeight();
 					int scrollBarHeight = scrollbarThumb.getHeight();
-					int halfScrollBarHeight = (scrollBarHeight/2);
+					int halfScrollBarHeight = (scrollBarHeight / 2);
+					float recyclerViewHeight = recyclerView.getHeight();
 
-					/*Log.e("scrollbarWithTooltip", "scrollbarWithTooltip - " + scrollBarWithTooltip.getHeight() + "");
-					Log.e("recyclerView.getHeight()", "recyclerViewHeight - " + recyclerViewHeight + "");
-					Log.e("topOffset", "topOffset - " + topOffset + "");
-					Log.e("bottomOffset", "bottomOffset - " + bottomNavHeight + "");
-					Log.e("scrollbarThumb.getHeight()", "scrollbarThumb.getHeight() - " + scrollbarThumb.getHeight() + "");
-					Log.e("scrollbarThumb.getHeight()", "scrollbarThumb.getHeight()/2 - " + (scrollbarThumb.getHeight()/2) + "");
-					Log.e("y", "y - " + y);*/
+					// Move the thumb by the finger's delta from the grab point — keeps the grabbed
+					// point under the finger instead of snapping the thumb's centre to it.
+					float thumbTop = dragStartThumbTop + (event.getRawY() - dragStartRawY);
 
-					if(y > recyclerViewHeight - halfScrollBarHeight){
-						y = recyclerViewHeight  - halfScrollBarHeight;
+					// Usable track for the thumb's top. Reserve clearance at the bottom so the thumb
+					// floats above the FAB (+ button) rather than disappearing behind it.
+					float maxTop = recyclerViewHeight - scrollBarHeight - scrollbarBottomClearance;
+					if (maxTop < 0) {
+						maxTop = 0;
 					}
-					else if(y < topOffset + halfScrollBarHeight){
-						y = topOffset + halfScrollBarHeight;
-					}
-					//Log.e("y2", "y2 - " + y);
-					// Calculate the thumbTop value considering status bar height and parent view position
-					float thumbTop = y - topOffset - halfScrollBarHeight-20;
-					if(thumbTop < 0){
+					if (thumbTop < 0) {
 						thumbTop = 0;
 					}
-					//Log.e("thumbTop", "thumbTop - " + thumbTop + "");
+					if (thumbTop > maxTop) {
+						thumbTop = maxTop;
+					}
 
-					// Get the total number of items in the adapter
 					int totalItemCount = recyclerView.getAdapter().getItemCount();
-					//Log.e("totalItemCount", "totalItemCount - " + totalItemCount + "");
-
-					// Calculate the scroll position based on the scrollbar thumb position
-//					float factor = thumbTop * 100 / totalItemCount;
-//					float scrollbarThumbPosition = thumbTop * factor / recyclerViewHeight;
-//					Log.e("scrollbarThumbPosition", "scrollbarThumbPosition - " + scrollbarThumbPosition + "");
-
-					// Calculate the target scroll position
-					int targetScrollPosition = (int) (((y - topOffset - halfScrollBarHeight) * totalItemCount) / (recyclerViewHeight - topOffset - scrollBarHeight));
-					//Log.e("targetScrollPosition", "targetScrollPosition - " + targetScrollPosition + "");
-					//Log.e("delim", "----------------------------------------------------");
+					// Map the thumb's position along the track to a scroll position.
+					float fraction = (maxTop > 0) ? (thumbTop / maxTop) : 0f;
+					int targetScrollPosition = Math.round(fraction * (totalItemCount - 1));
+					if (targetScrollPosition < 0) {
+						targetScrollPosition = 0;
+					}
+					if (targetScrollPosition >= totalItemCount) {
+						targetScrollPosition = totalItemCount - 1;
+					}
 
 					// Update the RecyclerView's scroll position only when the target actually
 					// changes, so we don't thrash the list on every touch-move event.
@@ -444,13 +440,9 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 						layoutManager.setUpdateSpanCount(true);
 					}
 
-					// Update the date tooltip based on the new scroll position
-					String date = getDateForScrollPosition(targetScrollPosition); // Implement this method to fetch the date based on the current scroll position
-					dateTooltip.setText(date);
-
-					// Update the scrollbar thumb and date tooltip positions
+					dateTooltip.setText(getDateForScrollPosition(targetScrollPosition));
 					scrollbarThumb.setY(thumbTop);
-					dateTooltip.setY(thumbTop + halfScrollBarHeight - (dateTooltip.getHeight() / 2));
+					dateTooltip.setY(thumbTop + halfScrollBarHeight - (dateTooltip.getHeight() / 2f));
 
 					break;
 
@@ -479,27 +471,36 @@ public class GalleryFragment extends Fragment implements GalleryAdapterPisasso.L
 		});
 	}
 
+	// Reserve room at the bottom of the scrollbar track so the thumb floats above the floating
+	// + button (FAB) instead of disappearing behind it (the FAB is a sibling drawn on top of the
+	// fragment, so elevation can't lift the thumb above it — we keep the thumb out of its area).
+	private int getScrollbarBottomClearance() {
+		return getResources().getDimensionPixelSize(R.dimen.fab_margin) * 2
+				+ Helpers.convertDpToPixels(getContext(), 56);
+	}
+
 	private void updateScrollTabPosition() {
 		if (recyclerView != null && recyclerView.getAdapter() != null && recyclerView.getLayoutManager() != null) {
 			int totalItemCount = recyclerView.getAdapter().getItemCount();
 			int firstVisibleItemPosition = ((AutoFitGridLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-			int topOffset = getResources().getDimensionPixelSize(R.dimen.gallery_top_padding_with_syncbar);
 			int scrollBarHeight = scrollbarThumb.getHeight();
-			int halfScrollBarHeight = (scrollBarHeight/2);
 
-
-			float scrollbarThumbPosition = (float) firstVisibleItemPosition / totalItemCount;
 			float recyclerViewHeight = recyclerView.getHeight();
-			float thumbTop = scrollbarThumbPosition * (recyclerViewHeight - topOffset - scrollBarHeight);
-
-
-			// Calculate the thumbTop value considering status bar height and parent view position
-			thumbTop -= 20;
-			if(thumbTop < 0){
+			// Same usable track as the drag handler (reserves FAB clearance at the bottom) so the
+			// thumb position is consistent whether the list is scrolled normally or dragged.
+			float maxTop = recyclerViewHeight - scrollBarHeight - getScrollbarBottomClearance();
+			if (maxTop < 0) {
+				maxTop = 0;
+			}
+			float scrollbarThumbPosition = (totalItemCount > 1) ? (float) firstVisibleItemPosition / (totalItemCount - 1) : 0f;
+			float thumbTop = scrollbarThumbPosition * maxTop;
+			if (thumbTop < 0) {
 				thumbTop = 0;
 			}
+			if (thumbTop > maxTop) {
+				thumbTop = maxTop;
+			}
 
-			//Log.e("updateScrollTabPosition", "ThumbTop - " + thumbTop);
 			if (scrollbarThumb != null) {
 				scrollbarThumb.setY(thumbTop);
 			}

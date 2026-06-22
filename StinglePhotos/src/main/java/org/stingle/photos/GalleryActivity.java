@@ -70,7 +70,7 @@ import org.stingle.photos.Gallery.Gallery.AutoImportSetup;
 import org.stingle.photos.Gallery.Gallery.GalleryActions;
 import org.stingle.photos.Gallery.Gallery.GalleryFragment;
 import org.stingle.photos.Gallery.Gallery.GalleryFragmentParent;
-import org.stingle.photos.Gallery.Gallery.SyncBarHandler;
+import org.stingle.photos.Gallery.Gallery.SyncStatusHandler;
 import org.stingle.photos.Gallery.Helpers.GalleryHelpers;
 import org.stingle.photos.Sync.JobScheduler.ImportJobSchedulerService;
 import org.stingle.photos.Sync.SyncManager;
@@ -184,10 +184,9 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	};
 	private boolean isImporting = false;
-	private boolean isSyncBarDisabled = false;
 	private SharedPreferences sharedPreferences;
 	private boolean isSyncEnabled;
-	private SyncBarHandler syncBarHandler;
+	private SyncStatusHandler syncStatusHandler;
 	private FloatingActionButton fab;
 	private BottomNavigationView bottomNavigationView;
 	private ActionBarDrawerToggle toggle;
@@ -219,9 +218,10 @@ public class GalleryActivity extends AppCompatActivity
 
 		// Edge-to-edge: keep chrome clear of the transparent system bars.
 		Helpers.applyTopInsetPadding(findViewById(R.id.appbar));
-		// Bottom nav is wrap_content (M3 self-sizes its bar height); just add the
-		// navigation-bar inset as bottom padding so it clears the system nav bar.
-		Helpers.applyBottomInsetPadding(bottomNavigationView);
+		// Bottom nav has a fixed (compact) content height; grow it by the navigation-bar
+		// inset and pad the bottom by the same amount so content height is preserved and
+		// the extra space sits over the transparent system nav bar.
+		Helpers.applyBottomInsetPaddingAndHeight(bottomNavigationView);
 		Helpers.applyBottomInsetMargin(fab);
 
 		drawer = findViewById(R.id.drawer_layout);
@@ -248,8 +248,7 @@ public class GalleryActivity extends AppCompatActivity
 		setupBottomNavigationView();
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-		syncBarHandler = new SyncBarHandler(this);
-		syncBarHandler.updateSyncBar();
+		syncStatusHandler = new SyncStatusHandler(this);
 
 		if(savedInstanceState != null){
 			if(savedInstanceState.containsKey("set")) {
@@ -263,9 +262,6 @@ public class GalleryActivity extends AppCompatActivity
 			}
 			if(savedInstanceState.containsKey("fragment")) {
 				currentFragment = savedInstanceState.getInt("fragment");
-			}
-			if(savedInstanceState.containsKey("isSyncBarDisabled")) {
-				isSyncBarDisabled = savedInstanceState.getBoolean("isSyncBarDisabled");
 			}
 			if(savedInstanceState.containsKey("albumsLastScrollPos")) {
 				albumsLastScrollPos = savedInstanceState.getInt("albumsLastScrollPos");
@@ -313,6 +309,9 @@ public class GalleryActivity extends AppCompatActivity
 		super.onDestroy();
 		FileManager.deleteTempFiles(this);
 		lbm.unregisterReceiver(onLogout);
+		if(syncStatusHandler != null) {
+			syncStatusHandler.destroy();
+		}
 	}
 
 	private static MigrateFilesAsyncTask migrateTask;
@@ -343,10 +342,8 @@ public class GalleryActivity extends AppCompatActivity
 
 	private void executeOnResume(){
 		isSyncEnabled = SyncManager.isBackupEnabled(this);
-		if (!isSyncEnabled) {
-			disableSyncBar();
-		} else if (isSyncBarDisabled() && currentSet == SyncManager.GALLERY) {
-			enableSyncBar();
+		if(syncStatusHandler != null) {
+			syncStatusHandler.updateIcon();
 		}
 
 		if (!isImporting) {
@@ -376,7 +373,6 @@ public class GalleryActivity extends AppCompatActivity
 		outState.putInt("view", currentAlbumsView);
 		outState.putInt("fragment", currentFragment);
 		outState.putString("albumId", currentAlbumId);
-		outState.putBoolean("isSyncBarDisabled", isSyncBarDisabled);
 		outState.putInt("albumsLastScrollPos", albumsLastScrollPos);
 		outState.putInt("sharingLastScrollPos", sharingLastScrollPos);
 	}
@@ -513,13 +509,11 @@ public class GalleryActivity extends AppCompatActivity
 
 		if(currentSet == SyncManager.GALLERY){
 			toolbar.setTitle(getString(R.string.title_gallery_for_app));
-			enableSyncBar();
 			fab.setVisibility(View.VISIBLE);
 			showBurgerMenu();
 		}
 		if(currentSet == SyncManager.TRASH){
 			toolbar.setTitle(getString(R.string.title_trash));
-			disableSyncBar();
 			fab.setVisibility(View.GONE);
 			showBurgerMenu();
 		}
@@ -549,7 +543,6 @@ public class GalleryActivity extends AppCompatActivity
 				toolbar.setTitle(getString(R.string.album));
 				currentAlbumName = "";
 			}
-			disableSyncBar();
 		}
 	}
 
@@ -585,7 +578,6 @@ public class GalleryActivity extends AppCompatActivity
 			toolbar.setTitle(getString(R.string.sharing));
 			bottomNavigationView.getMenu().getItem(2).setChecked(true);
 		}
-		disableSyncBar();
 	}
 
 	private void showBurgerMenu(){
@@ -763,25 +755,6 @@ public class GalleryActivity extends AppCompatActivity
 		}
 	}
 
-	public boolean isSyncBarDisabled(){
-		return isSyncBarDisabled;
-	}
-
-	public void disableSyncBar(){
-		isSyncBarDisabled = true;
-		syncBarHandler.hideSyncBar();
-	}
-	public void enableSyncBar(){
-		if(isSyncEnabled) {
-			isSyncBarDisabled = false;
-			if(galleryFragment == null || (galleryFragment != null && galleryFragment.getFirstVisibleItemNumber() == 0)) {
-				syncBarHandler.showSyncBar();
-				syncBarHandler.showSyncBarAnimated();
-			}
-			syncBarHandler.updateSyncBar();
-		}
-	}
-
 	private void handleIncomingIntent(Intent intent) {
 		String action = intent.getAction();
 		String type = intent.getType();
@@ -878,10 +851,21 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		// The cloud status icon lives only in the gallery menu; clear any stale actionView
+		// reference when a different menu (trash/album) is inflated.
+		if(syncStatusHandler != null) {
+			syncStatusHandler.setActionView(null);
+		}
 		if(!sendBackDecryptedFile) {
 			switch (currentSet) {
 				case SyncManager.GALLERY:
 					getMenuInflater().inflate(R.menu.gallery, menu);
+					if(syncStatusHandler != null) {
+						MenuItem syncStatusItem = menu.findItem(R.id.action_sync_status);
+						if(syncStatusItem != null) {
+							syncStatusHandler.setActionView(syncStatusItem.getActionView());
+						}
+					}
 					break;
 				case SyncManager.TRASH:
 					getMenuInflater().inflate(R.menu.gallery_trash, menu);
@@ -1107,16 +1091,10 @@ public class GalleryActivity extends AppCompatActivity
 
 	@Override
 	public void scrolledDown() {
-		if(!isSyncBarDisabled) {
-			syncBarHandler.hideSyncBarAnimated();
-		}
 	}
 
 	@Override
 	public void scrolledUp() {
-		if(!isSyncBarDisabled) {
-			syncBarHandler.showSyncBarAnimated();
-		}
 	}
 
 

@@ -396,14 +396,10 @@ public class ViewItemAsyncTask extends AsyncTask<Void, Integer, ViewItemAsyncTas
 			}
 
 			if (mediaSource != null) {
-				player.setPlayWhenReady(false);
-
-				/*if(adapter.getCurrentPosition() == position) {
-					player.setPlayWhenReady(true);
-				}
-				else{
-					player.setPlayWhenReady(false);
-				}*/
+				// Autoplay only the video on the currently-visible page. This covers both the
+				// initial launch (player is built async, after the page is already selected) and
+				// swiping to a video before its player exists; off-screen pages stay paused.
+				player.setPlayWhenReady(adapter.getCurrentPosition() == position);
 				playerView.setShowShuffleButton(false);
 				playerView.setControllerHideOnTouch(false);
 				if(context instanceof ViewItemActivity) {

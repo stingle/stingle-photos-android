@@ -34,63 +34,6 @@
             android:id="@+id/contentHolder"
             android:visibility="invisible">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:id="@+id/syncBar"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@drawable/layout_border"
-                android:elevation="1dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    android:id="@+id/syncText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:layout_margin="10dp"
-                    android:layout_centerVertical="true" />
-
-                <ImageView
-                    android:id="@+id/syncPhoto"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_margin="5dp"
-                    android:layout_alignParentEnd="true"
-                    android:visibility="gone"
-                    android:contentDescription="@string/upload_current_image" />
-                <ImageView
-                    android:id="@+id/backupComplete"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_margin="16dp"
-                    android:visibility="gone"
-                    android:src="@drawable/ic_cloud_done"
-                    android:contentDescription="@string/backup_complete" />
-                <ProgressBar
-                    android:id="@+id/refreshCProgress"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_margin="12dp"
-                    android:visibility="gone" />
-                <ProgressBar
-                    android:id="@+id/syncProgress"
-                    android:layout_width="match_parent"
-                    android:layout_height="16dp"
-                    android:layout_alignParentBottom="true"
-                    android:paddingTop="12dp"
-                    android:visibility="gone"
-                    style="@android:style/Widget.Material.ProgressBar.Horizontal" />
-            </RelativeLayout>
-
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/pullToRefresh"
                 android:layout_width="match_parent"
@@ -119,12 +62,13 @@
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/bottom_nav_height"
             android:layout_gravity="bottom"
             android:background="?attr/colorBackgroundFloating"
             android:visibility="invisible"
             app:itemIconTint="@color/bottom_nav_colors"
             app:itemTextColor="@color/bottom_nav_colors"
+            app:labelVisibilityMode="labeled"
             app:layout_insetEdge="bottom"
             app:menu="@menu/bottom_nav_menu" />
 

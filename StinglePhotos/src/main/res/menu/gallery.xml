@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_sync_status"
+        android:orderInCategory="90"
+        android:title="@string/backup_complete"
+        app:actionLayout="@layout/view_sync_status_icon"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_camera"
         android:orderInCategory="100"
         android:title="@string/camera"

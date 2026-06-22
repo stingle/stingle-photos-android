@@ -138,6 +138,12 @@
         <item name="android:windowExitAnimation">@anim/slide_down</item>
     </style>
 
+    <!-- Slide/scale animation for the sync-status popup so it emanates from the toolbar icon (top-right pivot). -->
+    <style name="SyncStatusPopupAnimation">
+        <item name="android:windowEnterAnimation">@anim/sync_popup_in</item>
+        <item name="android:windowExitAnimation">@anim/sync_popup_out</item>
+    </style>
+
     <!-- Rounded corners for gallery grid thumbnails (ShapeableImageView). -->
     <style name="RoundedThumb">
         <item name="cornerFamily">rounded</item>

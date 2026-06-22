@@ -13,6 +13,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -334,6 +335,10 @@ public class HttpsClient {
 	}
 
 	public static JSONObject multipartUpload(String urlTo, HashMap<String, String> params, ArrayList<FileToUpload> files)  {
+		return multipartUpload(urlTo, params, files, null);
+	}
+
+	public static JSONObject multipartUpload(String urlTo, HashMap<String, String> params, ArrayList<FileToUpload> files, OnUpdateProgress progress)  {
 		HttpsURLConnection connection = null;
 		DataOutputStream outputStream = null;
 		InputStream inputStream = null;
@@ -402,6 +407,18 @@ public class HttpsClient {
 				}
 			}
 
+			long totalBytes = 0;
+			if(progress != null) {
+				for (FileToUpload file : files) {
+					totalBytes += new File(file.filePath).length();
+				}
+				if (totalBytes <= 0) {
+					totalBytes = 1;
+				}
+			}
+			long writtenBytes = 0;
+			int lastReportedPercent = -1;
+
 			for(FileToUpload file : files) {
 				String[] q = file.filePath.split("/");
 				int idx = q.length - 1;
@@ -421,6 +438,14 @@ public class HttpsClient {
 				bytesRead = fileInputStream.read(buffer, 0, maxBufferSize);
 				while (bytesRead > 0) {
 					outputStream.write(buffer, 0, bytesRead);
+					if(progress != null) {
+						writtenBytes += bytesRead;
+						int percent = (int) (writtenBytes * 100 / totalBytes);
+						if (percent > lastReportedPercent) {
+							lastReportedPercent = percent;
+							progress.onUpdate(percent);
+						}
+					}
 					bytesRead = fileInputStream.read(buffer, 0, maxBufferSize);
 				}
 

@@ -134,7 +134,7 @@
     <string name="create_account">Create an account</string>
     <string name="uploading_file">"Uploading file %1$s out of %2$s"</string>
     <string name="refreshing">Refreshing…</string>
-    <string name="backup_complete">Backup/Sync complete</string>
+    <string name="backup_complete">Backup and sync complete</string>
     <string name="logging_out">Logging out…</string>
     <string name="confirm_logout">Are you sure you want to log out?</string>
     <string name="lock">Lock</string>
