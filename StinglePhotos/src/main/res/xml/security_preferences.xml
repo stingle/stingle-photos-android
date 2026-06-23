@@ -33,7 +33,7 @@
     <PreferenceCategory android:title="@string/other">
         <SwitchPreference
             app:icon="@drawable/ic_screen_lock_red"
-            app:defaultValue="false"
+            app:defaultValue="true"
             app:key="block_screenshots"
             app:title="@string/block_screenshots" />
     </PreferenceCategory>

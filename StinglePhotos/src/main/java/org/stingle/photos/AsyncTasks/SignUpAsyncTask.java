@@ -46,10 +46,10 @@ public class SignUpAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected Boolean doInBackground(Void... params) {
 
-		HashMap<String, String> loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password);
-
 		HashMap<String, String> postParams = new HashMap<String, String>();
 		try {
+			HashMap<String, String> loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password);
+
 			StinglePhotosApplication.getCrypto().generateMainKeypair(password);
 
 			postParams.put("email", email);

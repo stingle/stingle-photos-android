@@ -320,6 +320,10 @@ public class GalleryActivity extends AppCompatActivity
 	protected void onResume() {
 		super.onResume();
 		Log.d("GalleryActivity", "onResume");
+
+		// Wipe any decrypted plaintext copies left in the share cache. Done on resume (i.e. after the user
+		// returns from the share target) rather than onStop, so an in-flight share can still read the file.
+		FileManager.deleteTempFiles(this);
 		((TextView)headerView.findViewById(R.id.userEmail)).setText(Helpers.getPreference(this, StinglePhotosApplication.USER_EMAIL, ""));
 
 		File oldHomeDir = new File(FileManager.getOldHomeDir(this));

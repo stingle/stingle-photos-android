@@ -519,7 +519,7 @@ public class Helpers {
 	}
 
 	public static void blockScreenshotsIfEnabled(Activity activity){
-		boolean blockScreenshots = PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(StinglePhotosApplication.BLOCK_SCREENSHOTS, false);
+		boolean blockScreenshots = PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(StinglePhotosApplication.BLOCK_SCREENSHOTS, true);
 		if(blockScreenshots) {
 			activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 		}

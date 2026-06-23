@@ -618,7 +618,6 @@ public class SyncManager {
 			StingleResponse response = new StingleResponse(context, json, false);
 
 			if (response.isStatusOk()) {
-				Log.d("contact", response.get("contact"));
 				return new StingleContact(new JSONObject(response.get("contact")));
 			}
 			return null;

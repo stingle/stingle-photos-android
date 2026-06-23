@@ -252,7 +252,6 @@ public class SyncCloudToLocalDb {
 				JSONObject contact = contacts.optJSONObject(i);
 				if (contact != null) {
 					StingleContact dbContact = new StingleContact(contact);
-					Log.d("receivedContact", dbContact.email);
 					processContact(dbContact);
 					result = true;
 				}
@@ -500,7 +499,7 @@ public class SyncCloudToLocalDb {
 		intent.putExtra("set", SyncManager.ALBUM);
 		intent.putExtra("view", AlbumsFragment.VIEW_SHARES);
 		intent.putExtra("albumId", album.albumId);
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
 		String albumName = GalleryHelpers.getAlbumName(album);
 		String message = context.getString(R.string.new_shared_album, albumName);

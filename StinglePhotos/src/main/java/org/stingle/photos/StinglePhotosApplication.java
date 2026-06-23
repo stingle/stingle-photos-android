@@ -116,6 +116,11 @@ public class StinglePhotosApplication extends Application{
 	}
 	
 	public static void setKey(byte[] pKey){
+		// Wipe the previous master key from memory rather than leaving the buffer for the GC.
+		// This shrinks the window in which the key is recoverable from a heap/RAM dump after lock/logout.
+		if(key != null && key != pKey){
+			java.util.Arrays.fill(key, (byte) 0);
+		}
 		key = pKey;
 	}
 

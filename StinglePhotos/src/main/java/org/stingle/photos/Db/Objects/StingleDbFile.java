@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.stingle.photos.Db.Query.GalleryTrashDb;
 import org.stingle.photos.Db.StingleDbContract;
+import org.stingle.photos.Files.FileManager;
 
 public class StingleDbFile {
 	public long id;
@@ -39,6 +40,10 @@ public class StingleDbFile {
 	public StingleDbFile(JSONObject json) throws JSONException {
 		this.albumId = json.optString("albumId");
 		this.filename = json.getString("file");
+		// The server is untrusted: reject filenames that could escape the storage directory (path traversal).
+		if(!FileManager.isValidStorageFilename(this.filename)){
+			throw new JSONException("Invalid file name received from server: " + this.filename);
+		}
 		this.isLocal = null;
 		this.isRemote = null;
 		if(json.has("version")) {

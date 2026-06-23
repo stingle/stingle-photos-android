@@ -88,8 +88,13 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			String salt = response.get("salt");
 			if (salt != null) {
 
-				final String loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password, salt);
-				Log.d("loginhash", loginHash);
+				final String loginHash;
+				try {
+					loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password, salt);
+				} catch (CryptoException e) {
+					e.printStackTrace();
+					return false;
+				}
 				HashMap<String, String> postParams2 = new HashMap<String, String>();
 
 				postParams2.put("email", email);

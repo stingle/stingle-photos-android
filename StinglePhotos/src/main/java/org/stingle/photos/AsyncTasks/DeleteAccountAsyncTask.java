@@ -67,12 +67,12 @@ public class DeleteAccountAsyncTask extends AsyncTask<Void, Void, Boolean> {
 			String salt = response.get("salt");
 			if (salt != null) {
 
-				final String loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password, salt);
-
-				HashMap<String, String> postParams2 = new HashMap<>();
-				postParams2.put("password", loginHash);
-
 				try {
+					final String loginHash = StinglePhotosApplication.getCrypto().getPasswordHashForStorage(password, salt);
+
+					HashMap<String, String> postParams2 = new HashMap<>();
+					postParams2.put("password", loginHash);
+
 					HashMap<String, String> postParamsEnc2 = new HashMap<>();
 					postParamsEnc2.put("token", KeyManagement.getApiToken(myActivity));
 					postParamsEnc2.put("params", CryptoHelpers.encryptParamsForServer(postParams2));

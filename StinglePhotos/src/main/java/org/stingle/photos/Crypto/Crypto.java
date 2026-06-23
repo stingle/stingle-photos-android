@@ -268,6 +268,9 @@ public class Crypto {
     }
 
     public byte[] decryptSeal(byte[] enc, byte[] publicKey, byte[] privateKey) throws CryptoException {
+        if(enc == null || enc.length < Box.SEALBYTES){
+            throw new CryptoException("Invalid sealed message length");
+        }
         byte[] msg = new byte[enc.length - Box.SEALBYTES];
         if(so.crypto_box_seal_open(msg, enc, enc.length, publicKey, privateKey) != 0){
             throw new CryptoException("Unable to decrypt sealed message");
@@ -332,12 +335,15 @@ public class Crypto {
                 break;
         }
 
-        so.crypto_pwhash(key, key.length, passwordBytes, passwordBytes.length, salt, opsLimit, memlimit, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue());
+        if(so.crypto_pwhash(key, key.length, passwordBytes, passwordBytes.length, salt, opsLimit, memlimit, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue()) != 0){
+            // Argon2 can fail to allocate its memory under pressure; never return the all-zero key buffer.
+            throw new CryptoException("Unable to derive key from password");
+        }
 
         return key;
     }
 
-    public HashMap<String, String> getPasswordHashForStorage(String password){
+    public HashMap<String, String> getPasswordHashForStorage(String password) throws CryptoException{
         byte[] salt = new byte[PwHash.ARGON2ID_SALTBYTES];
         so.randombytes_buf(salt, salt.length);
 
@@ -351,15 +357,18 @@ public class Crypto {
         return result;
     }
 
-    public String getPasswordHashForStorage(String password, String salt){
+    public String getPasswordHashForStorage(String password, String salt) throws CryptoException{
         return getPasswordHashForStorage(password, hex2byte(salt));
     }
 
-    public String getPasswordHashForStorage(String password, byte[] salt){
+    public String getPasswordHashForStorage(String password, byte[] salt) throws CryptoException{
         byte[] passwordBytes = ls.bytes(password);
         byte[] hashedPassword = new byte[PWHASH_LEN];
 
-        so.crypto_pwhash(hashedPassword, hashedPassword.length, passwordBytes, passwordBytes.length, salt, PwHash.OPSLIMIT_MODERATE, PwHash.MEMLIMIT_MODERATE, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue());
+        if(so.crypto_pwhash(hashedPassword, hashedPassword.length, passwordBytes, passwordBytes.length, salt, PwHash.OPSLIMIT_MODERATE, PwHash.MEMLIMIT_MODERATE, PwHash.Alg.PWHASH_ALG_ARGON2ID13.getValue()) != 0){
+            // Fail loudly rather than returning an all-zero hash that would be sent to the server as the auth token.
+            throw new CryptoException("Unable to hash password for storage");
+        }
 
         return byte2hex(hashedPassword);
     }
@@ -541,7 +550,7 @@ public class Crypto {
         in.read(headerSizeBytes);
         int headerSize = byteArrayToInt(headerSizeBytes);
 
-        if(headerSize < 1 || headerSize > MAX_BUFFER_LENGTH){
+        if(headerSize <= Box.SEALBYTES || headerSize > MAX_BUFFER_LENGTH){
             throw new CryptoException("Invalid header size");
         }
         header.headerSize = headerSize;
@@ -599,6 +608,10 @@ public class Crypto {
         byte[] filenameSizeBytes = new byte[4];
         headerStream.read(filenameSizeBytes);
         int filenameSize = byteArrayToInt(filenameSizeBytes);
+
+        if(filenameSize < 0 || filenameSize > MAX_BUFFER_LENGTH){
+            throw new CryptoException("Invalid filename size");
+        }
 
         if(filenameSize > 0) {
             // Read filename
@@ -1122,6 +1135,9 @@ public class Crypto {
             throw new CryptoException("Failed to get private key from memory");
         }
 
+        if(encAlbumSK.length < Box.SEALBYTES){
+            throw new CryptoException("Invalid albumSK length");
+        }
         byte[] albumSK = new byte[encAlbumSK.length - Box.SEALBYTES];
 
         if(so.crypto_box_seal_open(albumSK, encAlbumSK, encAlbumSK.length, publicKey, privateKey) != 0){
@@ -1142,6 +1158,9 @@ public class Crypto {
     public AlbumMetadata parseAlbumMetadata(String metadataStr, byte[] albumSK, byte[] albumPK) throws CryptoException, IOException {
         byte[] encMetadata = base64ToByteArray(metadataStr);
 
+        if(encMetadata.length < Box.SEALBYTES){
+            throw new CryptoException("Invalid album metadata length");
+        }
         byte[] metadataBytes = new byte[encMetadata.length - Box.SEALBYTES];
 
         if(so.crypto_box_seal_open(metadataBytes, encMetadata, encMetadata.length, albumPK, albumSK) != 0){
@@ -1162,7 +1181,11 @@ public class Crypto {
         in.read(albumNameSizeBytes);
         int albumNameSize = byteArrayToInt(albumNameSizeBytes);
 
-        if(albumNameSize > 0 || albumNameSize > MAX_BUFFER_LENGTH) {
+        if(albumNameSize < 0 || albumNameSize > MAX_BUFFER_LENGTH){
+            throw new CryptoException("Invalid album name size");
+        }
+
+        if(albumNameSize > 0) {
             // Read filename
             byte[] albumNameBytes = new byte[albumNameSize];
             in.read(albumNameBytes);
@@ -1232,7 +1255,8 @@ public class Crypto {
                     "Header Version - " + String.valueOf(headerVersion) + "\n" +
                     "Chunk Size - " + String.valueOf(chunkSize) + "\n" +
                     "Data Size - " + String.valueOf(dataSize) + "\n" +
-                    "Symmetric Key - " + byteArrayToBase64UrlSafe(symmetricKey) + "\n" +
+                    // Never expose the per-file master key in a string/log — redact it.
+                    "Symmetric Key - [REDACTED]\n" +
                     "File Type - " + String.valueOf(fileType) + "\n" +
                     "Filename - " + filename + "\n\n" +
                     "Video Duration - " + String.valueOf(videoDuration) + "\n\n" +

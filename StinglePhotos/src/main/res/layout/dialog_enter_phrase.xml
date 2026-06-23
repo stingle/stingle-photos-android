@@ -24,7 +24,7 @@
         android:paddingTop="20dp"
         android:layout_margin="10dp"
         android:hint="@string/backup_phrase_enter_desc"
-        android:inputType="textMultiLine"
+        android:inputType="textMultiLine|textNoSuggestions"
         android:digits="abcdefghijklmnopqrstuvwxyz "/>
 
     <LinearLayout

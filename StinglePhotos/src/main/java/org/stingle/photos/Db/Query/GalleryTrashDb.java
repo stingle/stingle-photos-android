@@ -273,9 +273,9 @@ public class GalleryTrashDb implements FilesDb {
 
 	public int getFilePositionByFilename(String filename, String albumId, int sort) {
 		String sign = (sort == StingleDb.SORT_DESC ? "<=" : ">=");
-		String query = "SELECT (SELECT COUNT(*) FROM `" + tableName + "` b WHERE a.date_created " + sign + " b.date_created) AS `position` FROM `" + tableName + "` a WHERE filename='" + filename + "'";
-		Log.d("query-gallery", query);
-		try(AutoCloseableCursor autoCursor = new AutoCloseableCursor(db.getDb().rawQuery(query, null))) {
+		String query = "SELECT (SELECT COUNT(*) FROM `" + tableName + "` b WHERE a.date_created " + sign + " b.date_created) AS `position` FROM `" + tableName + "` a WHERE filename=?";
+		String[] args = new String[]{filename};
+		try(AutoCloseableCursor autoCursor = new AutoCloseableCursor(db.getDb().rawQuery(query, args))) {
 			Cursor cursor = autoCursor.getCursor();
 			if (cursor.getCount() == 1) {
 				cursor.moveToNext();

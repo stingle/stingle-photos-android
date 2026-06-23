@@ -1,7 +1,6 @@
 package org.stingle.photos.Auth;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import org.stingle.photos.Crypto.Crypto;
 import org.stingle.photos.Crypto.CryptoException;
@@ -13,18 +12,16 @@ import java.util.HashMap;
 public class KeyManagement {
 
 	public static String getApiToken(Context context){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS, context.MODE_PRIVATE);
-		return preferences.getString(StinglePhotosApplication.API_TOKEN, null);
+		// Token is encrypted at rest with an AndroidKeyStore key. See TokenStore.
+		return TokenStore.getApiToken(context);
 	}
 
 	public static void setApiToken(Context context, String token){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS,context. MODE_PRIVATE);
-		preferences.edit().putString(StinglePhotosApplication.API_TOKEN, token).apply();
+		TokenStore.setApiToken(context, token);
 	}
 
 	public static void removeApiToken(Context context){
-		SharedPreferences preferences = context.getSharedPreferences(StinglePhotosApplication.DEFAULT_PREFS,context. MODE_PRIVATE);
-		preferences.edit().remove(StinglePhotosApplication.API_TOKEN).apply();
+		TokenStore.removeApiToken(context);
 	}
 
 	public static HashMap<String, String> getUploadKeyBundlePostParams(String password, boolean includePrivateKey){

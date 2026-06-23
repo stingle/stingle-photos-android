@@ -194,7 +194,6 @@ public class ImportMedia {
 					} else {
 						dateAddedMillis = dateAdded * 1000;
 					}
-					Log.i("uri", name + " - " + dateAddedMillis + " - " + type + " - " + contentUri.toString());
 
 					if (ImportFile.importFile(context, contentUri, SyncManager.GALLERY, null, dateAddedMillis, null) != null) {
 						isSomethingImported = true;

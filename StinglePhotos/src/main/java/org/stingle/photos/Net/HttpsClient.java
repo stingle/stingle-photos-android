@@ -66,9 +66,11 @@ public class HttpsClient {
 	public static JSONObject postFunc(String urlStr, HashMap<String, String> params) {
 		JSONObject json = null;
 		try {
-			Log.d("url", urlStr);
 			URL url = new URL(urlStr);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+			// Don't auto-follow redirects: the token is in the body, but a malicious server could 30x to
+			// another host. We only ever talk to our own API, so reject redirects rather than follow them.
+			conn.setInstanceFollowRedirects(false);
 
 
 			// Create the SSL connection
@@ -104,8 +106,7 @@ public class HttpsClient {
 			for (String key : params.keySet()) {
 				String value = params.get(key);
 				if(value != null) {
-					Log.d("param", key + " = " + params.get(key));
-					data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8") + "&";
+						data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8") + "&";
 				}
 			}
 
@@ -130,7 +131,6 @@ public class HttpsClient {
 				// Append server response in string
 				sb.append(line + "\n");
 			}
-			Log.d("resultStr", sb.toString());
 			json = new JSONObject(sb.toString());
 
 			reader.close();
@@ -148,9 +148,9 @@ public class HttpsClient {
 	}
 
 	public static void downloadFile(String urlStr, HashMap<String, String> params, String outputPath, OnUpdateProgress onProgress) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-		Log.i("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+		conn.setInstanceFollowRedirects(false);
 
 		// Create the SSL connection
 		SSLContext sc;
@@ -184,7 +184,6 @@ public class HttpsClient {
 		// Add any data you wish to post here
 		String data = "";
 		for (String key : params.keySet()) {
-			Log.d("param", key + " = " + params.get(key));
 			data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 		}
 
@@ -247,9 +246,9 @@ public class HttpsClient {
 	}
 
 	public static void getFileAsByteArray(String urlStr, HashMap<String, String> params, OutputStream output, boolean isPost) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-		Log.i("url", urlStr);
 		URL url = new URL(urlStr);
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+		conn.setInstanceFollowRedirects(false);
 
 		// Create the SSL connection
 		SSLContext sc;
@@ -291,7 +290,6 @@ public class HttpsClient {
 		// Add any data you wish to post here
 		String data = "";
 		for (String key : params.keySet()) {
-			Log.d("param" , key + " - " + params.get(key));
 			data += URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(params.get(key), "UTF-8") + "&";
 		}
 
@@ -360,6 +358,7 @@ public class HttpsClient {
 		try {
 			URL url = new URL(urlTo);
 			connection = (HttpsURLConnection) url.openConnection();
+			connection.setInstanceFollowRedirects(false);
 
 			// Create the SSL connection
 			SSLContext sc;
@@ -395,7 +394,6 @@ public class HttpsClient {
 			while (keys.hasNext()) {
 				String key = keys.next();
 				String value = params.get(key);
-				Log.d("param", key + " = " + value);
 
 				if(value != null) {
 					outputStream.writeBytes(twoHyphens + boundary + lineEnd);
@@ -468,7 +466,6 @@ public class HttpsClient {
 			inputStream.close();
 			outputStream.flush();
 			outputStream.close();
-			Log.d("resultStr", result);
 			json = new JSONObject(result);
 
 		} catch (IOException | NoSuchAlgorithmException | KeyManagementException | JSONException e) {

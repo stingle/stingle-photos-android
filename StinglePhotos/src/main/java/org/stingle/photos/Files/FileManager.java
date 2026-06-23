@@ -211,6 +211,45 @@ public class FileManager {
 		return ensureLastSlash(filePath) + fileName;
 	}
 
+	/**
+	 * Validates that a server/DB-supplied storage filename is a safe, single path component.
+	 * Legitimate names are base64url-safe random strings + extension (see {@link Helpers#getNewEncFilename()}),
+	 * so they never contain path separators, NUL bytes or "..". The server is untrusted, so any value used
+	 * to build a local filesystem path must pass this check before concatenation to prevent path traversal
+	 * (writing/overwriting/deleting files outside the intended directory).
+	 */
+	public static boolean isValidStorageFilename(String name){
+		if(name == null || name.isEmpty() || name.equals(".") || name.equals("..")){
+			return false;
+		}
+		if(name.indexOf('/') >= 0 || name.indexOf('\\') >= 0 || name.indexOf('\0') >= 0){
+			return false;
+		}
+		return !name.contains("..");
+	}
+
+	/**
+	 * Reduces an arbitrary (potentially attacker-controlled) filename to its base name, stripping any
+	 * directory components, so it can be safely appended to a destination directory. Used for the
+	 * user-visible filename that comes out of a decrypted file header on export/share-out, where the
+	 * value can be any string and a crafted "../" must not escape the target folder.
+	 */
+	public static String sanitizeToBaseName(String name){
+		if(name == null || name.isEmpty()){
+			return "unnamed";
+		}
+		String base = name.replace('\\', '/');
+		int lastSlash = base.lastIndexOf('/');
+		if(lastSlash >= 0){
+			base = base.substring(lastSlash + 1);
+		}
+		base = base.replace("\0", "");
+		if(base.isEmpty() || base.equals(".") || base.equals("..")){
+			return "unnamed";
+		}
+		return base;
+	}
+
 	public static void rescanDeletedFile(Context context, File file){
 		// Set up the projection (we only need the ID)
 		String[] projection = { MediaStore.Images.Media._ID };
@@ -402,14 +441,22 @@ public class FileManager {
 
 	public static void deleteTempFiles(Context context){
 		File file = new File(context.getCacheDir().getPath() + "/"+FileManager.SHARE_CACHE_DIR);
-		if (file.isDirectory()) {
-			File[] files = file.listFiles();
-			if (files != null) {
-				for (File f : files) {
-					if (!f.isDirectory()) {
-						f.delete();
-					}
+		deleteDirContents(file);
+	}
+
+	// Recursively deletes the contents of a directory (the decrypted plaintext copies created for sharing
+	// can be nested), so no plaintext lingers in the cache. The directory itself is kept.
+	private static void deleteDirContents(File dir){
+		if (dir == null || !dir.isDirectory()) {
+			return;
+		}
+		File[] files = dir.listFiles();
+		if (files != null) {
+			for (File f : files) {
+				if (f.isDirectory()) {
+					deleteDirContents(f);
 				}
+				f.delete();
 			}
 		}
 	}

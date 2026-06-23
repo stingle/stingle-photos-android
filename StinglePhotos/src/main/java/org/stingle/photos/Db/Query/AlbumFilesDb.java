@@ -186,9 +186,9 @@ public class AlbumFilesDb implements FilesDb {
 	public int getFilePositionByFilename(String filename, String albumId, int sort){
 		String sign = (sort == StingleDb.SORT_DESC ? "<=" : ">=");
 
-		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created "+sign+" b.date_created AND album_id='"+albumId+"') AS `position` FROM `"+tableName+"` a WHERE filename='"+filename+"' AND album_id='"+albumId+"'";
-		Log.d("query-albumf", query);
-		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().rawQuery(query, null))) {
+		String query = "SELECT (SELECT COUNT(*) FROM `"+tableName+"` b WHERE a.date_created "+sign+" b.date_created AND album_id=?) AS `position` FROM `"+tableName+"` a WHERE filename=? AND album_id=?";
+		String[] args = new String[]{albumId, filename, albumId};
+		try(AutoCloseableCursor autoCloseableCursor = new AutoCloseableCursor(db.getDb().rawQuery(query, args))) {
 			Cursor cursor = autoCloseableCursor.getCursor();
 			if (cursor.getCount() == 1) {
 				cursor.moveToNext();

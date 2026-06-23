@@ -151,6 +151,10 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 					Crypto.Header headers = CryptoHelpers.decryptFileHeaders(context, set, albumId, dbFile.headers, false);
 					FileInputStream inputStream = new FileInputStream(file);
 
+					// The filename comes from inside the (possibly attacker-crafted, e.g. shared) file header.
+					// Strip any directory components so a crafted "../" name can't escape the destination folder.
+					String safeFilename = FileManager.sanitizeToBaseName(headers.filename);
+
 					OutputStream outputStream;
 					String finalWritePath = null;
 
@@ -159,8 +163,8 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 
 						ContentValues values = new ContentValues();
 
-						values.put(MediaStore.MediaColumns.TITLE, headers.filename);
-						values.put(MediaStore.MediaColumns.DISPLAY_NAME, headers.filename);
+						values.put(MediaStore.MediaColumns.TITLE, safeFilename);
+						values.put(MediaStore.MediaColumns.DISPLAY_NAME, safeFilename);
 						values.put(MediaStore.MediaColumns.DATE_ADDED, System.currentTimeMillis());
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 							values.put(MediaStore.MediaColumns.DATE_TAKEN, System.currentTimeMillis());
@@ -188,7 +192,7 @@ public class DecryptFilesAsyncTask extends AsyncTask<List<StingleDbFile>, Intege
 						}
 					}
 					else {
-						finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), headers.filename);
+						finalWritePath = FileManager.findNewFileNameIfNeeded(context, destinationFolder.getPath(), safeFilename);
 						outputStream = new FileOutputStream(new File(finalWritePath));
 					}
 

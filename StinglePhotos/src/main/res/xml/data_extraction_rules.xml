@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
+    <!--
+        The private-key material must never leave the device via Android backup or device-to-device
+        transfer. "private_plain" is the (opt-in) plaintext private key; "private"/"pwdSalt"/"skNonce"
+        are the password-wrapped private key and its KDF salt/nonce. Excludes override the broader
+        domain includes. allowBackup is also "false", so cloud-backup is doubly disabled.
+    -->
     <cloud-backup>
         <exclude domain="root" />
+        <exclude domain="file" path="private" />
+        <exclude domain="file" path="private_plain" />
+        <exclude domain="file" path="pwdSalt" />
+        <exclude domain="file" path="skNonce" />
         <include domain="file" />
         <include domain="database" />
         <include domain="sharedpref" />
         <include domain="external" />
     </cloud-backup>
     <device-transfer>
-        <include domain="root" />
+        <exclude domain="root" />
+        <exclude domain="file" path="private" />
+        <exclude domain="file" path="private_plain" />
+        <exclude domain="file" path="pwdSalt" />
+        <exclude domain="file" path="skNonce" />
         <include domain="file" />
         <include domain="database" />
         <include domain="sharedpref" />
