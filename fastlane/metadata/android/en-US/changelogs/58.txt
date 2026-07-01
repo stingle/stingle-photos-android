@@ -1,0 +1,5 @@
+* New backup status icon in the gallery shows live upload and download progress at a glance. Tap it to see exactly which files are transferring.
+* Faster backups with parallel uploads.
+* Modernized for the latest Android versions with a fresh edge-to-edge design and updated video playback.
+* Smoother, more stable gallery scrolling on large libraries.
+* Security hardening and many smaller bugfixes.
