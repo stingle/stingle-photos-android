@@ -494,48 +494,42 @@ public class FileManager {
 
 	public static boolean moveFile(String inputPath, String inputFile, String outputPath) {
 
-		InputStream in = null;
-		OutputStream out = null;
-		try {
+                try {
 
-			//create output directory if it doesn't exist
-			File dir = new File (outputPath);
-			if (!dir.exists()){
-				dir.mkdirs();
-			}
+                        //create output directory if it doesn't exist
+                        File dir = new File (outputPath);
+                        if (!dir.exists()){
+                                dir.mkdirs();
+                        }
 
-			File inFile = new File(inputPath + "/" + inputFile);
+                        File inFile = new File(inputPath + "/" + inputFile);
 
-			if(!inFile.exists()){
-				return true;
-			}
+                        if(!inFile.exists()){
+                                return true;
+                        }
 
-			in = new FileInputStream(inFile);
-			out = new FileOutputStream(outputPath + "/"  + inputFile);
+                        try (InputStream in = new FileInputStream(inFile);
+                             OutputStream out = new FileOutputStream(outputPath + "/"  + inputFile)) {
 
-			byte[] buffer = new byte[1024];
-			int read;
-			while ((read = in.read(buffer)) != -1) {
-				out.write(buffer, 0, read);
-			}
-			in.close();
-			in = null;
+                                byte[] buffer = new byte[1024];
+                                int read;
+                                while ((read = in.read(buffer)) != -1) {
+                                        out.write(buffer, 0, read);
+                                }
+                                // write the output file
+                                out.flush();
+                        }
 
-			// write the output file
-			out.flush();
-			out.close();
-			out = null;
-
-			// delete the original file
-			if((new File(inputPath + "/" + inputFile)).delete()){
-				return true;
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
+                        // delete the original file
+                        if((new File(inputPath + "/" + inputFile)).delete()){
+                                return true;
+                        }
+                }
+                catch (Exception e) {
+                        e.printStackTrace();
+                }
+                return false;
+        }
 
 	public static boolean deleteRecursive(File fileOrDirectory) {
 		if(fileOrDirectory == null){
