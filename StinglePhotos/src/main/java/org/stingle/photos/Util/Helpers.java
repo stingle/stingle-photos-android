@@ -668,7 +668,7 @@ public class Helpers {
 		return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(new Date());
 	}
 
-	public static String impode(String glue, ArrayList<String> items){
+        public static String implode(String glue, ArrayList<String> items){
 		if(items.size() == 0){
 			return "";
 		}

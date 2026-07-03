@@ -92,9 +92,9 @@ public class StingleDbAlbum {
 		this.members = members;
 	}
 
-	public String getMembersAsString(){
-		return Helpers.impode(MEMBERS_SEPARATOR, members);
-	}
+        public String getMembersAsString(){
+                return Helpers.implode(MEMBERS_SEPARATOR, members);
+        }
 
 	private void initPermissionsObj(){
 		if(permissions != null && permissions.length() == SharingPermissions.PERMISSIONS_LENGTH){
